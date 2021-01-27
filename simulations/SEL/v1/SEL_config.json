@@ -1,0 +1,8 @@
+{
+	"server_root": "../../../",
+	"route_finder_parallel_tasks": 4,
+	"create_edge_map": false, 
+	"create_route_maps": false,
+	"api_authorization_user": "cradle",
+	"api_authorization_password": "msp2050"
+}

@@ -1,0 +1,323 @@
+
+body {
+	font-family: 'robotoregular';
+	font-size: 14px;
+	margin: 0;
+	padding: 0;
+	background-image: url('../images/Main_HEADER_003.jpg');
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: cover;
+}
+
+#logo_header {
+	float: left;
+	padding: 10px;
+	/* height: 50px; */
+}
+
+nav a.title {
+	background-size: 28px 28px;
+	background-repeat: no-repeat;
+	background-position: left;
+	display: inline-block;
+	padding-left: 40px;
+	text-decoration: none;
+	vertical-align: middle;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	word-spacing: 2px;
+	height: 100%;
+	min-height: 28px;
+	font-size: 23px;
+	color: #e3e3e3;
+	margin-top: 3px;
+  
+}
+  
+
+.navbar-header h3 {
+	color: white;
+	margin-top: 0.5em;
+	white-space: nowrap;
+	text-transform: uppercase;
+	font-size: 23px;
+	letter-spacing: 1px;
+	word-spacing: 2px;
+	color: #e3e3e3;
+}
+
+.tab-content {
+	border: solid thin #ddd;
+	padding: 1.0em;
+}
+
+.navbar-new {
+	background-color: #555555;
+	height: auto;
+	border-bottom: 1px solid #aaa;
+}
+
+#navbar {
+	display: block;
+	float: right;
+	padding-top: 8px;
+}
+
+.navbar {
+    /* display: block !important; */
+    margin: auto;
+    max-width: 1100px;
+    padding: .5em;
+    background-color: #555555;
+    height: auto;
+}
+
+ 
+.navbar-nav .dropdown-menu {
+    position: absolute;
+}
+
+.navbar-nav {
+	display: block;
+	margin: 0;
+	padding: 0;
+	white-space: nowrap;
+	margin-left: auto !important;
+	list-style: none;
+}
+
+.navbar-nav > li {
+	padding-left: .5rem !important;
+	padding-right: .5rem !important;
+	padding-top: .5rem !important;
+	float: left;
+	position: relative;
+	color: #e3e3e3;
+}
+
+.navbar-nav a {
+	color: #e3e3e3;
+	padding: 0 !important; 
+}
+
+
+nav a, nav a:visited, a.btn, a.btn:visited {
+    color: #e3e3e3;
+ }
+
+ #navbarsExample03 {
+    display: inline-block;
+    vertical-align: middle;
+    float: right;
+  }
+
+#page-wrapper {
+	padding: 0;
+	background: none;
+}
+
+
+
+#page-wrapper .container {
+	background: rgba(255,255,255,0.3);
+	padding: 5px;
+	padding-top: 15px;
+}
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:focus, .nav-tabs > li.active > a:hover {
+	background-color: #f5f5f5;
+}
+
+.tablesorter-default {
+	background-color: inherit !important;
+}
+
+.grayed_out {
+	color: lightgray;
+}
+
+a.hoverinfo {
+	text-decoration: underline dashed blue;
+}
+
+.state_fastforward {
+	color: darkorchid;
+	font-weight: bold;
+}
+
+.state_play {
+	color: green;
+	font-weight: bold;
+}
+.state_pause {
+	color: orange;
+	font-weight: bold;
+}
+.state_end {
+	color: navy;
+	font-weight: bold;
+}
+.state_archived {
+	color: grey;
+	font-weight: bold;
+}
+.state_healthy {
+	color: green;
+	font-weight: bold;
+}
+.state_failed {
+	color: red;
+	font-weight: bold;
+}
+.state_simulation {
+	color: deepskyblue;
+	font-weight: bold;
+}
+.state_request {
+	color: orchid;
+	font-weight: bold;
+}
+.state_initializing {
+	color: darkseagreen;
+	font-weight: bold;
+}
+
+.state_setup {
+	color: steelblue;
+	font-weight: bold;
+}
+
+.info_icon {
+	color: steelblue;
+	font-weight: bold;
+}
+
+.hidden_icon {
+	visibility: hidden;
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+.collapsed.foldout_icon:before {
+	/* color: green; */
+	font-family: "FontAwesome";
+    content: "\f056";
+}
+
+.foldout_icon:before {
+	/* color: red; */
+	font-family: "FontAwesome";
+    content: "\f055";
+}
+
+#sessionsTable td, #configVersionsTable td {
+	min-width: 75px;
+	max-width: 320px;
+}
+
+#sessionsListtbody .fa {
+	padding: 0 5px;
+}
+
+#radioFilterSessionsList,
+#radioFilterConfigVersionsList {
+	border: solid thin darkgrey;
+    background: white;
+    border-radius: 5px;
+    padding: 5px 10px;
+	/* margin: 0 3.0em 0 0.5em; */
+	
+}
+
+#sessionInfoList p,
+#configVersionsInfoList p {
+	font-size: smaller;
+	margin: 0;
+}
+
+#sessionInfoList li.list-group-item,
+#configVersionsInfoList li.list-group-item {
+	padding: 5px 10px;
+}
+
+.sessionInfoName,
+.configVersionInfoName {
+	background-color: aqua;
+	font-weight: bold;
+	text-align: center;
+}
+
+.sessionInfoKey,
+.configVersionInfoKey {
+	font-weight: bold;
+}
+
+.sessionInfoValue,
+.configVersionInfoValue {
+	text-align: right;
+}
+
+.sessionInfoButtons,
+.configVersionInfoButtons {
+	background: lightgrey;
+	text-align: end;
+}
+
+
+.modal-wide {
+    max-width: 900px;
+}
+
+
+.table-border-left th {
+	border-left: 1px solid #dee2e6;
+}
+
+.table-border-left td {
+	border-right: 1px solid #dee2e6;
+}
+
+.tablesorter-default {
+	font: 14px/18px Arial, Sans-serif;
+}
+
+
+
+.well {
+	margin-top: 20px;
+}
+
+
+.flex-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.flex-right {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+@media only screen and (max-width: 600px) {
+  
+  nav a.title {
+	font-size: 11px;
+	width: 155px;
+  }
+  .navbar-nav > li, .navbar-nav a, .navbar-nav {
+	margin: 0;
+	padding: 0;
+  }
+  #navbarsExample03 {
+	  width:170px;
+	  font-size:10px; 
+  }
+
+  #page-wrapper {
+    margin-top: 25px;
+  }
+}
+

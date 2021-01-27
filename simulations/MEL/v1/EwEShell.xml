@@ -1,0 +1,1790 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+EwEShell
+</name>
+</assembly>
+<members>
+<member name="T:EwEShell.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.DRIVER_EFFORT_NAME">
+<summary>
+  Looks up a localized string similar to Multiplier Effort &apos;{0}&apos;.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.DRIVER_ENV_NAME">
+<summary>
+  Looks up a localized string similar to Map of Env. driver &apos;{0}&apos;.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.DRIVER_HAB_NAME">
+<summary>
+  Looks up a localized string similar to Map of Habitat &apos;{0}&apos;.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.DRIVER_MPA_NAME">
+<summary>
+  Looks up a localized string similar to Map of MPA &apos;{0}&apos;.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.GAME_SUMMARY">
+<summary>
+  Looks up a localized string similar to {0} (Ecosim: {1}, Ecospace: {2}).
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.LABEL_ERROR">
+<summary>
+  Looks up a localized string similar to ERROR.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.OUTPUT_SUMMARY">
+<summary>
+  Looks up a localized string similar to {1}: {0}, {2}/{3}.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.UNITS_EFFORT">
+<summary>
+  Looks up a localized string similar to Proportion fished.
+</summary>
+</member>
+<member name="P:EwEShell.My.Resources.Resources.UNITS_RATIO">
+<summary>
+  Looks up a localized string similar to Ratio.
+</summary>
+</member>
+<member name="T:EwEShell.cEwEShell">
+ <summary>
+ MEL contact point for interacting with Ecospace.
+ </summary>
+</member>
+<member name="M:EwEShell.cEwEShell.#ctor">
+ -----------------------------------------------------------------------
+ <summary>
+ Stand-alone constructor when used in an EwE console environment.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.#ctor(EwECore.cCore)">
+ -----------------------------------------------------------------------
+ <summary>
+ Nested constructor when used in an EwE plug-in.
+ </summary>
+ <param name="core">The core, obtained from the master plug-in, to initailize 
+ EwE shell against</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.ConfigurationFromFile(System.String,System.Collections.Generic.List{EwEShell.cScalar})">
+ -----------------------------------------------------------------------
+ <summary>
+ Load the game configuration from a JSON file.
+ </summary>
+ <param name="strFile">The path/URI to the JSON file to (down)load.</param>
+ <param name="effortstartvalues"><see cref="T:EwEShell.cScalar"/> values with effort intensity start values in EwE</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.Configuration(System.String,System.Collections.Generic.List{EwEShell.cScalar})">
+ -----------------------------------------------------------------------
+ <summary>
+ Load a new game and validate its configuration against the expectations of MEL.
+ </summary>
+ <param name="strJSON">Actual JSON game contract text (not the file!)</param>
+ <param name="effortstartvalues"><see cref="T:EwEShell.cScalar"/> values with effort intensity start values in EwE</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.Configuration(System.String,System.String,System.Int32,System.Double,System.Double,System.Double,System.Int32,System.Int32,System.Collections.Generic.ICollection{EwEShell.cPressure},System.Collections.Generic.ICollection{EwEShell.cGrid},System.Collections.Generic.List{EwEShell.cScalar},System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Load a new game and validate its configuration against the expectations of MEL.
+ </summary>
+ <param name="strEwEModelFile">The path or URI to the EwE model to (down)load.</param>
+ <param name="mode">The name of the game to load. Leaving the name empty will load the first available game.</param>
+ <param name="timestep">Check: the number of time steps per year.</param>
+ <param name="longitude">Check: the model longitude origin to validate. Ignored for now because of slight numerical precision differences between MSP, MEL and EwE.</param>
+ <param name="latitude">Check: the model latitude origin to validate. Ignored for now because of slight numerical precision differences between MSP, MEL and EwE.</param>
+ <param name="size">Check: the model cell size. Ignored for now because of slight numerical precision differences between MSP, MEL and EwE.</param>
+ <param name="ncolumns">Check: the number of columns in the model.</param>
+ <param name="nrows">Check: the number of rows in the model.</param>
+ <param name="pressures">Check: the pressures that the model should support.</param>
+ <param name="outcomelayers">Check: the outcomes that the model should support.</param>
+ <param name="outcomerange">Biomass / catch fluctuations for outcomes to display</param>
+ <param name="effortstartvalues"><see cref="T:EwEShell.cScalar"/> values with effort intensity start values in EwE</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.Startup">
+ -----------------------------------------------------------------------
+ <summary>
+ MEL API call to start a game.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.Tick(System.Collections.Generic.List{EwEShell.cPressure},System.Collections.Generic.List{EwEShell.cGrid})">
+ -----------------------------------------------------------------------
+ <summary>
+ Run a single time step.
+ </summary>
+ <param name="pressures"></param>
+ <param name="outcomelayers"></param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.Terminate">
+ -----------------------------------------------------------------------
+ <summary>
+ Stop a game.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEwEShell.SaveOutcomes">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set whether outcomes should be saved to disk.
+ </summary>
+ <seealso cref="P:EwEShell.cEwEShell.SaveOutcomeLocation"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEwEShell.SaveOutcomeLocation">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the directory where outcomes should be saved.
+ </summary>
+ <seealso cref="P:EwEShell.cEwEShell.SaveOutcomes"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="F:EwEShell.cEwEShell.cAuxKey">
+ -----------------------------------------------------------------------
+ <summary>
+ Unique key for accessing <see cref="T:EwECore.Auxiliary.cAuxiliaryData"/> that contains the game XML data
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEwEShell.Core">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the EwE <see cref="T:EwECore.cCore">core</see> to operate onto.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEwEShell.Data">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the <see cref="T:EwEShell.cShellData">EwE shell data</see> to use.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEwEShell.Controller">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the <see cref="T:EwEShell.cEcospaceController">Ecospace controller</see> to use.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEwEShell.CurrentGame">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the currently active <see cref="T:EwEShell.cGame">game</see>, if any.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.LoadConfiguration">
+ -----------------------------------------------------------------------
+ <summary>
+ Load game configurations embedded within a EwE model.
+ </summary>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.LoadConfiguration(System.String,System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Save the game configuration from a XML file.
+ </summary>
+ <param name="strFile">The game configuration XML file.</param>
+ <param name="strMode">the game mode to use.</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.SaveConfiguration(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Save the game configuration to a XML file.
+ </summary>
+ <param name="strFile">The game configuration XML file.</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.OnChanged">
+ -----------------------------------------------------------------------
+ <summary>
+ Update the current configuration in the core, ready for saving. This
+ will <see cref="M:EwECore.cCore.HasChanges">dirty the core</see> for saving.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEwEShell.RaiseException(System.String,System.Boolean)">
+ <summary>
+ Aargh! Aarghaargh!
+ </summary>
+</member>
+<member name="T:EwEShell.IO.cEcospaceImportExportBitmap">
+ -----------------------------------------------------------------------
+ <summary>
+ Ecospace import/export class for accessing bitmap files. MEL uses TIF files
+ for caching computed pressure layers, which can be read via this class.
+ </summary>
+ <seealso cref="T:EwEUtils.Core.IEcospaceImportExport" />
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.IO.cEcospaceImportExportBitmap.eBands">
+ <summary>Enumerated type, defining the colour bands contained in bitmap data.</summary>
+ <remarks>Aplha channel access is not supported.</remarks>
+</member>
+<member name="F:EwEShell.IO.cEcospaceImportExportBitmap.eBands.Red">
+ <summary>Red pixel value</summary>
+</member>
+<member name="F:EwEShell.IO.cEcospaceImportExportBitmap.eBands.Green">
+ <summary>Green pixel value</summary>
+</member>
+<member name="F:EwEShell.IO.cEcospaceImportExportBitmap.eBands.Blue">
+ <summary>Blue pixel value</summary>
+</member>
+<member name="M:EwEShell.IO.cEcospaceImportExportBitmap.#ctor(EwECore.cCore)">
+ -------------------------------------------------------------------
+ <summary>
+ Create a new instance.
+ </summary>
+ <param name="core">The EwE core to operate onto.</param>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.IO.cEcospaceImportExportBitmap.Load(System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Import the specified file with default options: the <see cref="F:EwEShell.IO.cEcospaceImportExportBitmap.eBands.Red"/>
+ band is used, and bands are presumed to have 256 colour values.
+ </summary>
+ <seealso cref="M:EwEShell.IO.cEcospaceImportExportBitmap.Load(System.String,EwEShell.IO.cEcospaceImportExportBitmap.eBands,System.Single)"/>
+ <param name="strFile">The file to import.</param>
+ <returns>
+ True if successful.
+ </returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.IO.cEcospaceImportExportBitmap.Load(System.String,EwEShell.IO.cEcospaceImportExportBitmap.eBands,System.Single)">
+ -------------------------------------------------------------------
+ <summary>
+ Load the map from a bitmap file.
+ </summary>
+ <param name="strFile">The file to import.</param>
+ <param name="band">The <see cref="T:EwEShell.IO.cEcospaceImportExportBitmap.eBands">band</see> to read.</param>
+ <param name="sScale">The conversion factor to convert pixel band colours 
+ to data values.</param>
+ <returns>True if successful.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.IO.cEcospaceImportExportBitmap.Save(System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Save the map to a bitmap file.
+ </summary>
+ <param name="strFile">The file to import.</param>
+ <returns>True if successful.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IO.cEcospaceImportExportBitmap.Value(System.Int32,System.Int32,System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Get/set a grid value.
+ </summary>
+ <param name="iRow">One-based row index to access a value for.</param>
+ <param name="iCol">One-based column index to access a value for.</param>
+ <param name="strField">Optional field to access a value for.</param>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IO.cEcospaceImportExportBitmap.CellSize">
+ -------------------------------------------------------------------
+ <summary>
+ Get the size of a cell in the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IO.cEcospaceImportExportBitmap.InCol">
+ -------------------------------------------------------------------
+ <summary>
+ Get the number of columns in the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IO.cEcospaceImportExportBitmap.InRow">
+ -------------------------------------------------------------------
+ <summary>
+ Get the number of rows in the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IO.cEcospaceImportExportBitmap.NoDataValue">
+ -------------------------------------------------------------------
+ <summary>
+ Get the NoData value to use.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IO.cEcospaceImportExportBitmap.PosTopLeft">
+ -------------------------------------------------------------------
+ <summary>
+ Get the top-left (lon, lat) location of the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IO.cEcospaceImportExportBitmap.ProjectionString">
+ -------------------------------------------------------------------
+ <summary>
+ Get the WKT projection string of the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.IO.cEcospaceImportExportBitmap.ToRaster(System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Convert the buffered data to a <see cref="T:EwEUtils.SpatialData.ISpatialRaster"/> for use
+ by EwE.
+ </summary>
+ <param name="strField">Ignored.</param>
+ <returns>A populated raster.</returns>
+ <seealso cref="T:EwEUtils.SpatialData.ISpatialRaster"/>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IO.cEcospaceImportExportBitmap.Basemap">
+ -------------------------------------------------------------------
+ <summary>
+ Get the Ecospace basemap to operate onto.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cJSONGameConfig">
+ -----------------------------------------------------------------------
+ <summary>
+ JSON file serialization class that reads a game configuration.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cJSONGameConfig.cGameDef">
+ -----------------------------------------------------------------------
+ <summary>
+ JSON serialization helper.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cJSONGameConfig.cGameDef.#ctor">
+ <summary>
+ Initializes a new instance of the <see cref="T:EwEShell.cJSONGameConfig.cGameDef"/> class.
+ </summary>
+</member>
+<member name="M:EwEShell.cJSONGameConfig.#ctor">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a new <see cref="T:EwEShell.cJSONGameConfig"/>.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cJSONGameConfig.Load(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Extracts game configuration from the specified JSON text.
+ </summary>
+ <param name="strJSON">The text to extract game information from.</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cJSONGameConfig.LoadFile(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Loads a JSON file and extracts game configuration.
+ </summary>
+ <param name="strJSONfile">The JSON file to read and extract game information from.</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.EwEModelFile">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the EwE model file provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.Mode">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the EwE game mode provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.Timestep">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the number of time steps per year provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.Longitude">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the game area longitude (western edge) provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.Latitude">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the game area latitude (northern edge) provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.CellSize">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the game area cell size provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.NumColumns">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the game area number of colums provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.NumRows">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the game area number of rows provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.OutcomeRange">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the game outcome range in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.Pressures">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the pressure definitions provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cJSONGameConfig.Outcomes">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the outcome definitions provided in the JSON text.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cGame">
+ ---------------------------------------------------------------------------
+ <summary>
+ Container for a single game (model + its configuration) in the MSP software.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.#ctor(EwECore.cCore)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a new <see cref="T:EwEShell.cGame"/>.
+ </summary>
+ <param name="core">The core to operate onto.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the unique name for the game.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Pressures">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the list of pressures definitions in the game.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Pressure(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Return a single pressure definitions by name.
+ </summary>
+ <param name="strName">The name of the pressure to retrieve.</param>
+ <remarks>The name search is not case sensitive.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.Add(EwEShell.cPressure)">
+ -----------------------------------------------------------------------
+ <summary>
+ Add a <see cref="T:EwEShell.cPressure"/> to the game.
+ </summary>
+ <param name="pressure">The <see cref="T:EwEShell.cPressure"/> to add.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.Remove(EwEShell.cPressure)">
+ -----------------------------------------------------------------------
+ <summary>
+ Remove a <see cref="T:EwEShell.cPressure"/> from the game.
+ </summary>
+ <param name="pressure">The <see cref="T:EwEShell.cPressure"/> to remove.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Outputs">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the list of output configurations defined in the game.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.Add(EwEShell.cOutcome)">
+ -----------------------------------------------------------------------
+ <summary>
+ Add a <see cref="T:EwEShell.cOutcome"/> to the game.
+ </summary>
+ <param name="output">The <see cref="T:EwEShell.cOutcome"/> to add.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.Remove(EwEShell.cOutcome)">
+ -----------------------------------------------------------------------
+ <summary>
+ Remove a <see cref="T:EwEShell.cOutcome"/> from the game.
+ </summary>
+ <param name="output">The <see cref="T:EwEShell.cOutcome"/> to remove.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Drivers(EwEShell.cPressure.eDataTypes)">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the list of drivers available in the Ecospace scenario for 
+ receiving pressures.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Author">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the game author information.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Contact">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the game contact information.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Version">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the game version.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Description">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the game description.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.EcosimID">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the <see cref="P:EwECore.cCoreInputOutputBase.DBID"/> of the Ecosim scenario 
+ to load for the game.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.EcospaceID">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the <see cref="P:EwECore.cCoreInputOutputBase.DBID"/> of Ecospace scenario 
+ to load for the game.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.SpinupYears">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the number of spin-up years for initializing Ecospace.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.CalculateIndicators">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set whether Ecospace must execute expensive trophic level and 
+ biodiversity indicator calculations.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.RunYears">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the number of years to run Ecospace for in the MSP game. This
+ should be long enough to allow a full MSP run to complete, but otherwise
+ will not cause major memory constraints.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.OutcomeRange">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the max scale of outcome content to MEL. By default this value
+ is 10, or one order of magnitude.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.MPACellClosureRatio">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set how much of a cell needs to be covered by protection to close the
+ cell for fishing. This value is expressed as a cell area ratio [0, 1].
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Driver(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the driver connected to a specific pressure.
+ </summary>
+ <param name="pressure">The name of the pressure to find the driver for.</param>
+ <returns></returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Multiplier(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the driver multiplier for to a specific pressure.
+ </summary>
+ <param name="pressure">The name of the pressure to find the multiplier for.</param>
+ <returns></returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGame.Output(EwEShell.cGrid)">
+ -----------------------------------------------------------------------
+ <summary>
+ Find the output that describes how a specific outcome grid should be populated.
+ </summary>
+ <param name="grid">The grid to find the output for.</param>
+ <returns>An output if configured, or nothing if the output could not be found.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.ToString">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns an informative string summarizing the game configuration.
+ </summary>
+ <returns>Minime</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.EcosimScenario">
+ -----------------------------------------------------------------------
+ <summary>
+ Helper method, returns the actual <see cref="T:EwECore.cEcoSimScenario"/> for the currently
+ configured <see cref="P:EwEShell.cGame.EcosimID"/> 
+ </summary>
+ <returns>A scenario, or nothing if this could not be found. </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.EcospaceScenario">
+ -----------------------------------------------------------------------
+ <summary>
+ Helper method, returns the actual <see cref="T:EwECore.cEcospaceScenario"/> for the currently
+ configured <see cref="P:EwEShell.cGame.EcospaceID"/> 
+ </summary>
+ <returns>A scenario, or nothing if this could not be found. </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.Validate(System.Int32,System.Double,System.Double,System.Double,System.Int32,System.Int32,System.Collections.Generic.ICollection{EwEShell.cPressure},System.Collections.Generic.ICollection{EwEShell.cGrid})">
+ -----------------------------------------------------------------------
+ <summary>
+ MEL API call, validate the game configuration against expected parameters.
+ </summary>
+ <param name="timestep">Check: the number of time steps per year.</param>
+ <param name="longitude">Check: the model longitude origin to validate. Ignored for now because of slight numerical precision differences between MSP, MEL and EwE.</param>
+ <param name="latitude">Check: the model latitude origin to validate. Ignored for now because of slight numerical precision differences between MSP, MEL and EwE.</param>
+ <param name="size">Check: the model cell size. Ignored for now because of slight numerical precision differences between MSP, MEL and EwE.</param>
+ <param name="ncolumns">Check: the number of columns in the model.</param>
+ <param name="nrows">Check: the number of rows in the model.</param>
+ <param name="pressures">Check: the pressures that the model should support.</param>
+ <param name="outcomelayers">Check: the outcomes that the model should support.</param>
+ <returns>True if the game validated.</returns>
+ <exception cref="T:EwEShell.cMELException">A MEL exception will be thrown if something went wrong.</exception>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.EffortStartValues">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the effort start values configured in the game.
+ </summary>
+ <returns>A collection of Scalars (fleet name, value).</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.ApplyPressures(EwEShell.cPressure[],EwECore.cEcospaceDataStructures)">
+ -----------------------------------------------------------------------
+ <summary>
+ Apply pressure layers to the running Ecospace scenario.
+ </summary>
+ <param name="pressurelayers">The pressures to apply.</param>
+ <param name="spaceDS">Optional Ecospace datastructures to directly apply pressurs to.</param>
+ <returns>True if successful.</returns>
+ <exception cref="T:EwEShell.cMELException">A MEL exception will be thrown if something went wrong.</exception>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.LoadOutcomes(EwEShell.cGrid[],EwECore.cEcospaceTimestep)">
+ -----------------------------------------------------------------------
+ <summary>
+ Load all outcomes from the current time step results.
+ </summary>
+ <param name="outcomelayers">The outcome layers to populate.</param>
+ <param name="results">Ecospace time step data to populate the outcomes from.</param>
+ <returns>True if successful.</returns>
+ <exception cref="T:EwEShell.cMELException">A MEL exception will be thrown if something went wrong.</exception>
+ <see cref="T:EwECore.cEcospaceTimestep"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.Load">
+ -----------------------------------------------------------------------
+ <summary>
+ Prepare the game. Load sim and space, run space spin-up.
+ </summary>
+ <remarks>True if successful.</remarks>
+ <exception cref="T:EwEShell.cMELException">A MEL exception will be thrown if something went wrong.</exception>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.AddDefaultPressures">
+ -----------------------------------------------------------------------
+ <summary>
+ Create default pressures and outputs.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.NumConnectedDrivers">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the number of drivers that are configured to receive pressure data.
+ </summary>
+ <returns>The number of drivers that are configured to receive pressure data.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.ToXML(System.Xml.XmlDocument)">
+ -----------------------------------------------------------------------
+ <summary>
+ Serialize to XML.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGame.FromXML(System.Xml.XmlNode)">
+ -----------------------------------------------------------------------
+ <summary>
+ De-serialize from XML.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cGrid">
+ ---------------------------------------------------------------------------
+ <summary>
+ Data for a single map in MSP.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGrid.#ctor(System.String,System.Int32,System.Int32,System.Double[0:,0:])">
+ -----------------------------------------------------------------------
+ <summary>
+ Creates a new <see cref="T:EwEShell.cGrid"/>.
+ </summary>
+ <param name="name">The name for the grid.</param>
+ <param name="iWidth">The width or number of columns in the grid.</param>
+ <param name="iHeight">The height or number of rows in the grid.</param>
+ <param name="data">Data for the grid, if any.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the name of the map.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.Width">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the width or number of columns in the grid.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.Height">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the height or number of rows in the grid.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.Min">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the lowest value in the output grid.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.Max">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the highest value in the output grid.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.Mean">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the mean value in the output grid.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.Units">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the units in which grid values are expressed.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.NumValueCells">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the number of non-zero value cells in the output.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.Cell">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the zero-base indexed data for the grid, dimensioned as (width x height)
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cGrid.IsValid">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set whether the content of the grid is valid.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGrid.Clear">
+ -----------------------------------------------------------------------
+ <summary>
+ Erase the content of the grid.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGrid.Load(System.String,EwECore.cCore)">
+ -----------------------------------------------------------------------
+ <summary>
+ Loads the map from file.
+ </summary>
+ <param name="strFile">The file name to load from. File names with 
+ the .asc extension, as well as non-compressed image files, are supported</param>
+ <param name="core">The core that provides spatial contextual information.</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cGrid.Save(System.String,EwECore.cCore)">
+ -----------------------------------------------------------------------
+ <summary>
+ Saves the map to file.
+ </summary>
+ <param name="strFile">The file name to save to. Only file names with 
+ the .asc extension are supported</param>
+ <param name="core">The core that provides spatial contextual information.</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.IMELItem">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for defining data items in the MEL - EwE complex.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.IMELItem.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the name of the item.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cScalar">
+ ---------------------------------------------------------------------------
+ <summary>
+ Data for a single value in MSP.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cScalar.#ctor(System.String,System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Creates a new <see cref="T:EwEShell.cScalar"/>.
+ </summary>
+ <param name="name">The name for the scalar.</param>
+ <param name="value">The value to assign to the scalar.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cScalar.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the name of the scalar.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cScalar.Value">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the value of the scalar.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cPressure">
+ ---------------------------------------------------------------------------
+ <summary>
+ Pressure data derived from MSP game play actions to impact the Ecospace model.
+ </summary>
+ <remarks>
+ In a <see cref="T:EwEShell.cGame">MSP game</see>, player actions translate to pressures.
+ This pressure data is received in cPressure classes, and are passed on to mapped 
+ <see cref="T:EwEShell.cDriver">Ecospace drivers</see> to impact the Ecospace model.
+ </remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="F:EwEShell.cPressure.m_scalar">
+ <summary>The scalar data wrapped by the pressure.</summary>
+</member>
+<member name="F:EwEShell.cPressure.m_grid">
+ <summary>The grid data wrapped by the pressure.</summary>
+</member>
+<member name="M:EwEShell.cPressure.#ctor(System.String,EwEShell.cPressure.eDataTypes)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create an instance of a pressure definition. Pressure definitions cannot 
+ accept actual pressure data; they just serve to define game dynamics.
+ </summary>
+ <param name="name">The name of the pressure to define.</param>
+ <param name="datatype">The <see cref="T:EwEShell.cPressure.eDataTypes">type of data</see>
+ that the defined pressure will support.</param>
+ <seealso cref="P:EwEShell.cPressure.DataType"/>
+ <seealso cref="T:EwEShell.cPressure.eDataTypes"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cPressure.#ctor(System.String,System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a <see cref="F:EwEShell.cPressure.eDataTypes.Scalar">scalar</see> pressure.
+ </summary>
+ <param name="name">The name of the pressure to define.</param>
+ <param name="scalar">The initial data for the pressure.</param>
+ <seealso cref="P:EwEShell.cPressure.DataType"/>
+ <seealso cref="T:EwEShell.cPressure.eDataTypes"/>
+ <seealso cref="P:EwEShell.cPressure.Scalar"/>
+ <see cref="P:EwEShell.cPressure.IsScalar"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cPressure.#ctor(System.String,System.Int32,System.Int32,System.Double[0:,0:])">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a <see cref="F:EwEShell.cPressure.eDataTypes.Grid">grid</see> pressure.
+ </summary>
+ <param name="name">The name of the pressure to define.</param>
+ <param name="iNumRows">The number of rows in the pressure grid.</param>
+ <param name="iNumColumns">The number of columns in the pressure grid.</param>
+ <param name="data">Optional initial data for the pressure.</param>
+ <seealso cref="P:EwEShell.cPressure.DataType"/>
+ <seealso cref="T:EwEShell.cPressure.eDataTypes"/>
+ <seealso cref="P:EwEShell.cPressure.Grid"/>
+ <see cref="P:EwEShell.cPressure.IsGrid"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cPressure.eDataTypes">
+ -----------------------------------------------------------------------
+ <summary>
+ Enumerated type, defining the types of data that a pressure supports.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="F:EwEShell.cPressure.eDataTypes.NotSet">
+ <summary>Data type has not been set yet.</summary>
+</member>
+<member name="F:EwEShell.cPressure.eDataTypes.Scalar">
+ <summary>Pressure contains a single value.</summary>
+</member>
+<member name="F:EwEShell.cPressure.eDataTypes.Grid">
+ <summary>Pressure contains an map of values.</summary>
+</member>
+<member name="P:EwEShell.cPressure.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the name of the pressure.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cPressure.DataType">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the <see cref="T:EwEShell.cPressure.eDataTypes">type of data</see> that a pressure supports.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cPressure.Grid">
+ -----------------------------------------------------------------------
+ <summary>
+ Get a reference to the <see cref="T:EwEShell.cGrid"/> wrapped by the pressure, if 
+ this is a <see cref="F:EwEShell.cPressure.eDataTypes.Grid"/> pressure.
+ </summary>
+ <returns>The grid, or null if the pressure does not accept grid data.</returns>
+ <seealso cref="P:EwEShell.cPressure.IsGrid"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cPressure.Scalar">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the scalar value wrapped by the pressure, if this is a
+ <see cref="F:EwEShell.cPressure.eDataTypes.Scalar"/> pressure.
+ </summary>
+ <returns>The scalar value, or 0 if the pressure does not accept scalar 
+ data.</returns>
+ <seealso cref="P:EwEShell.cPressure.IsScalar"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cPressure.IsGrid">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns if this pressure accepts grid driver data. 
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cPressure.IsScalar">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns if this pressure accepts scalar driver data. 
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cDriver">
+ ---------------------------------------------------------------------------
+ <summary>
+ Base driver class for inserting MSP pressure data into Ecospace input variables.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="F:EwEShell.cDriver.m_core">
+ <summary>The <see cref="T:EwECore.cCore"/> to connect to.</summary>
+</member>
+<member name="F:EwEShell.cDriver.m_game">
+ <summary>The <see cref="T:EwEShell.cGame"/> to connect to.</summary>
+</member>
+<member name="M:EwEShell.cDriver.#ctor(EwECore.cCore,EwEShell.cGame,System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Creates a new <see cref="T:EwEShell.cDriver">driver</see>.
+ </summary>
+ <param name="core">The <see cref="T:EwECore.cCore"/> to connect to.</param>
+ <param name="game">The <see cref="T:EwEShell.cGame"/> to connect to.</param>
+ <param name="strName">Name of the new driver.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cDriver.Apply(EwEShell.cPressure,EwECore.cEcospaceDataStructures,System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Apply a MSP driver value to Ecospace
+ </summary>
+ <param name="pressure">The MEL-derived pressure value to apply to the driver.</param>
+ <param name="data">Optional Ecospace data structures to apply the driver
+ to. If not provided, the driver data must be applied through <see cref="T:EwECore.ICoreInputOutput"/>
+ interfaces instead.</param>
+ <param name="multiplier"></param>
+ <remarks>When used in the EwE user interface and MEL Emulator, data will be 
+ applied to <see cref="T:EwECore.cCoreInputOutputBase">core I/O classes</see> to provide 
+ user feedback to test data changes. The MSP game will operate directly on 
+ the <see cref="T:EwECore.cEcospaceDataStructures"/> for speed reasons, where no UI 
+ synchronizing is needed.</remarks>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cDriver.ValueID">
+ -----------------------------------------------------------------------
+ <summary>
+ Driver identifier; override to provide the unique EwE <see cref="M:EwECore.cCoreInputOutputBase.GetID">object identifier</see> 
+ for the driver. This ID is needed for persistent pressure - driver mapping
+ storage.
+ </summary>
+ <returns>The unique ID.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cDriver.DataType">
+ -----------------------------------------------------------------------
+ <summary>
+ Data support identifier; override to state which <see cref="T:EwEShell.cPressure.eDataTypes">
+ pressure data type</see> this driver can be connected to.
+ </summary>
+ <returns>The pressure type.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cDriver.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the name of the driver.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cDriver.ToString">
+ -----------------------------------------------------------------------
+ <summary>
+ String represting this driver.
+ </summary>
+ <returns>
+ A <see cref="T:System.String" /> that represents this driver.
+ </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cDriverFactory">
+ -----------------------------------------------------------------------
+ <summary>
+ Factory to access available Ecospace drivers.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cDriverFactory.GetDrivers(EwECore.cCore,EwEShell.cGame,EwEShell.cPressure.eDataTypes)">
+ -----------------------------------------------------------------------
+ <summary>
+ Obtain all drivers available in a given Ecospace scenario.
+ </summary>
+ <param name="core"></param>
+ <returns></returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cDriverFactory.GetDrivers(EwECore.cCore,EwEShell.cGame,EwEUtils.Core.eVarNameFlags,EwEShell.cPressure.eDataTypes)">
+ -----------------------------------------------------------------------
+ <summary>
+ Obtain all drivers for a <see cref="M:EwEShell.cDriverFactory.SupportedVariables">supported variable</see>.
+ </summary>
+ <param name="core"></param>
+ <returns></returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cDriverFactory.SupportedVariables">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the list of variables that can be used to drive Ecospace through
+ MSP pressures.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cOutcome">
+ ---------------------------------------------------------------------------
+ <summary>
+ Descriptor of the content of a single ecological outcome layer in the MSP game. 
+ This class describes which Ecospace output layers need to be grouped 
+ together into a single MSP outcome layer.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cOutcome.#ctor(EwECore.cCore,System.String,EwEShell.cOutcome.eLayerType)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Constructor.
+ </summary>
+ <param name="core">The core to draw information from.</param>
+ <param name="strName">The name of the outcome layer.</param>
+ <param name="type">The <see cref="T:EwEShell.cOutcome.eLayerType">category</see> of the layer.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cOutcome.eMSPDIversityIndex">
+ <summary>
+ Initially a mirror of <see cref="T:EwECore.eDiversityIndexType"/>, this list can
+ include diversity indices not natively computed by EwE.
+ </summary>
+</member>
+<member name="F:EwEShell.cOutcome.eMSPDIversityIndex.Shannon">
+ <summary>Shannon diversity indicator.</summary>
+</member>
+<member name="F:EwEShell.cOutcome.eMSPDIversityIndex.KemptonsQ">
+ <summary>Kempton's Q indicator.</summary>
+</member>
+<member name="P:EwEShell.cOutcome.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the name of the output.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cOutcome.eLayerType">
+ -----------------------------------------------------------------------
+ <summary>
+ Outcome layers categories.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="F:EwEShell.cOutcome.eLayerType.Biomass">
+ <summary>Outcome contains an Ecospace biomass distribution summary.</summary>
+</member>
+<member name="F:EwEShell.cOutcome.eLayerType.Catch">
+ <summary>Outcome contains an Ecospace catch distribution summary.</summary>
+</member>
+<member name="F:EwEShell.cOutcome.eLayerType.Effort">
+ <summary>Outcome contains an Ecospace fishing effort distribution summary.</summary>
+</member>
+<member name="F:EwEShell.cOutcome.eLayerType.Indicator">
+ <summary>Outcome contains an spatially explicit <see cref="T:EwEShell.cOutcome.eMSPDIversityIndex">ecological indicator</see>.</summary>
+</member>
+<member name="P:EwEShell.cOutcome.LayerType">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the <see cref="T:EwEShell.cOutcome.eLayerType">categry</see> of the layer.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cOutcome.Numerator(System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the numerator weight for ecospace results for a specific item (group or fleet) 
+ for composing the outcome layer.
+ </summary>
+ <param name="iIndex">The one-based index of the item to configure, which 
+ ranges from 1 to <see cref="M:EwEShell.cOutcome.NumItems">the total number of items</see>.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cOutcome.Denominator(System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the denominator weight for ecospace results for a specific item (group or fleet) 
+ for composing the outcome layer.
+ </summary>
+ <param name="iIndex">The one-based index of the item to configure, which 
+ ranges from 1 to <see cref="M:EwEShell.cOutcome.NumItems">the total number of items</see>.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cOutcome.IsConfigured">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns if this output is configured to receive data.
+ </summary>
+ <returns>
+ True if this instance is configured.
+ </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cOutcome.NumItems">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the total number of items that can be aggregated in the outcome layer. 
+ </summary>
+ <returns>The total number of items that can be aggregated in the outcome layer. </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cOutcome.NumUsed">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the number of items that will be aggregated in the outcome layer.
+ </summary>
+ <returns>The total number of items that will be aggregated in the outcome layer. </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cOutcome.ToString">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns an informative string for the outcome layer configuration.
+ </summary>
+ <returns>Oooooh!</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cOutcome.Populate(EwEShell.cGrid,EwECore.cEcospaceTimestep,System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Populate the actual outcome layer.
+ </summary>
+ <param name="grid">The grid to populate.</param>
+ <param name="timestepdata">The Ecospace time step data that contains
+ the Ecospace estimates for the current time step.</param>
+ <param name="outcomerange">Outcome range, specifying the magnitude of variation
+ in Ecospace predictions reported in the outcome map.</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cOutcome.Calibrate(EwECore.cEcospaceTimestep)">
+ -----------------------------------------------------------------------
+ <summary>
+ Calibrates the output by calculating the scaling factor to use for the 
+ remainder of the run.
+ </summary>
+ <param name="timestepdata">The data with Ecospace time step data.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cHabitatDriver">
+ ---------------------------------------------------------------------------
+ <summary>
+ Driver for inserting MSP pressure data into the <see cref="T:EwECore.cEcospaceLayerHabitat">map</see>
+ of a single Ecospace <see cref="T:EwECore.cEcospaceHabitat">Ecospace habitat</see>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cHabitatDriver.#ctor(EwECore.cCore,EwEShell.cGame,EwECore.cEcospaceHabitat)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a new <see cref="T:EwEShell.cHabitatDriver"/> to drive the <see cref="T:EwECore.cEcospaceLayerHabitat">
+ habitat map</see> of a given <see cref="T:EwECore.cEcospaceHabitat">Ecospace habitat</see>.
+ </summary>
+ <param name="core">The <see cref="T:EwECore.cCore"/> to connect to.</param>
+ <param name="game">The <see cref="T:EwEShell.cGame"/> to connect to.</param>
+ <param name="hab">The <see cref="T:EwECore.cEcospaceHabitat">habitat</see> this driver is connected to.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cHabitatDriver.Apply(EwEShell.cPressure,EwECore.cEcospaceDataStructures,System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Insert pressure data into the <see cref="T:EwECore.cEcospaceLayerHabitat">habitat map</see>.
+ </summary>
+ <param name="pressure">The MEL-derived habitat map value to apply to the driver.</param>
+ <param name="data">Optional Ecospace data structures to apply pressures to.</param>
+ <param name="multiplier">Ignored.</param>
+ <returns>True if applied correctly, False if an error occurred.</returns>
+ <exception cref="T:EwEShell.cMELException">A MEL exception will be thrown if something went wrong.</exception>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cHabitatDriver.ValueID">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the unique ID for the Ecospace <see cref="T:EwECore.cEcospaceHabitat">habitat</see>.
+ </summary>
+ <returns>The unique ID for the Ecospace <see cref="T:EwECore.cEcospaceHabitat">habitat</see>.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cHabitatDriver.DataType">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns that this driver can only be driven by gridded map data.
+ </summary>
+ <returns>The supported <see cref="T:EwEShell.cPressure.eDataTypes">pressure type</see>.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cEnvironmentalDriver">
+ ---------------------------------------------------------------------------
+ <summary>
+ Driver for inserting MSP pressure data into a single 
+ <see cref="T:EwECore.cEcospaceLayerDriver">Ecospace environmental driver</see> map.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEnvironmentalDriver.#ctor(EwECore.cCore,EwEShell.cGame,EwECore.cEcospaceLayerDriver)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a new <see cref="T:EwEShell.cMPADriver"/> to drive the <see cref="T:EwECore.cEcospaceLayerMPA">
+ Marine Protected Area map</see> of a given <see cref="T:EwECore.cEcospaceMPA">Ecospace MPA</see>.
+ </summary>
+ <param name="core">The <see cref="T:EwECore.cCore"/> to connect to.</param>
+ <param name="game">The <see cref="T:EwEShell.cGame"/> to connect to.</param>
+ <param name="layer">The <see cref="T:EwECore.cEcospaceLayerDriver">environmental driver
+ layer</see> this driver is connected to.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEnvironmentalDriver.Apply(EwEShell.cPressure,EwECore.cEcospaceDataStructures,System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Insert pressure data into the <see cref="T:EwECore.cEcospaceLayerDriver">environmental driver
+ layer map</see>.
+ </summary>
+ <param name="pressure">The MEL-derived protection map value to apply to the driver.</param>
+ <param name="data">Optional Ecospace data structures to apply pressures to.</param>
+ <param name="multiplier">Ignored.</param>
+ <returns>True if applied correctly, False if an error occurred.</returns>
+ <exception cref="T:EwEShell.cMELException">A MEL exception will be thrown if something went wrong.</exception>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEnvironmentalDriver.ValueID">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the unique ID for the <see cref="T:EwECore.cEcospaceMPA">environmental driver layer</see>.
+ </summary>
+ <returns>The unique ID for the <see cref="T:EwECore.cEcospaceMPA">environmental driver layer</see>.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEnvironmentalDriver.DataType">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns that this driver can only be driven by gridded map data.
+ </summary>
+ <returns>The supported <see cref="T:EwEShell.cPressure.eDataTypes">pressure type</see>.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cEffortDriver">
+ ---------------------------------------------------------------------------
+ <summary>
+ Driver for inserting MSP pressure data into the <see cref="P:EwECore.cEcospaceFleetInput.TotalEffMultiplier">effort multiplier</see>
+ of a single <see cref="T:EwECore.cEcospaceFleet">Ecospace fleet</see>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEffortDriver.#ctor(EwECore.cCore,EwEShell.cGame,EwECore.cEcopathFleetInput)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a new <see cref="T:EwEShell.cEffortDriver"/> to drive the <see cref="P:EwECore.cEcospaceFleetInput.TotalEffMultiplier">
+ Ecospace effort multiplier</see> of a single fleet.
+ </summary>
+ <param name="core">The <see cref="T:EwECore.cCore"/> to connect to.</param>
+ <param name="game">The <see cref="T:EwEShell.cGame"/> to connect to.</param>
+ <param name="fleet">The <see cref="T:EwECore.cEcospaceFleet">fleet</see> this driver is connected to.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEffortDriver.Apply(EwEShell.cPressure,EwECore.cEcospaceDataStructures,System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Applies the specified fishing effort multiplier.
+ </summary>
+ <param name="pressure">The MEL-derived fishing effort multiplier value to apply to the driver.</param>
+ <param name="data">Optional Ecospace data structures to apply pressures to.</param>
+ <param name="multiplier">The effort multiplier which translate a MEL fishing effort pressure value (0 to 1) to an Ecospace
+ effort multiplier (0 to inf).</param>
+ <returns>Always true. Happy.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEffortDriver.StartValue">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the effort multiplier configured in the base Ecospace model.
+ </summary>
+ <returns>The effort multiplier configured in the base Ecospace model.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEffortDriver.ValueID">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the unique ID for the Ecospace <see cref="T:EwECore.cEcospaceFleetInput">fleet</see>.
+ </summary>
+ <returns>The unique ID for the Ecospace <see cref="T:EwECore.cEcospaceFleetInput">fleet</see>.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEffortDriver.DataType">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns that this driver can only be driven by scalar data.
+ </summary>
+ <returns>The supported <see cref="T:EwEShell.cPressure.eDataTypes">pressure type</see>.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cMPADriver">
+ ---------------------------------------------------------------------------
+ <summary>
+ Driver for inserting MSP pressure data into the <see cref="T:EwECore.cEcospaceLayerMPA">map</see>
+ of a single Ecospace <see cref="T:EwECore.cEcospaceMPA">Marine Protected Area</see>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cMPADriver.#ctor(EwECore.cCore,EwEShell.cGame,EwECore.cEcospaceMPA)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a new <see cref="T:EwEShell.cMPADriver"/> to drive the <see cref="T:EwECore.cEcospaceLayerMPA">
+ Marine Protected Area map</see> of a given <see cref="T:EwECore.cEcospaceMPA">Ecospace MPA</see>.
+ </summary>
+ <param name="core">The <see cref="T:EwECore.cCore"/> to connect to.</param>
+ <param name="game">The <see cref="T:EwEShell.cGame"/> to connect to.</param>
+ <param name="MPA">The <see cref="T:EwECore.cEcospaceMPA">MPA</see> this driver is connected to.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cMPADriver.Apply(EwEShell.cPressure,EwECore.cEcospaceDataStructures,System.Double)">
+ -----------------------------------------------------------------------
+ <summary>
+ Insert pressure data into the <see cref="T:EwECore.cEcospaceLayerMPA">MPA map</see>.
+ </summary>
+ <param name="pressure">The MEL-derived protection map value to apply to the driver.</param>
+ <param name="data">Optional Ecospace data structures to apply pressures to.</param>
+ <param name="multiplier">Ignored.</param>
+ <returns>True if applied correctly, False if an error occurred.</returns>
+ <exception cref="T:EwEShell.cMELException">A MEL exception will be thrown if something went wrong.</exception>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cMPADriver.ValueID">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the unique ID for the Ecospace <see cref="T:EwECore.cEcospaceMPA">MPA</see>.
+ </summary>
+ <returns>The unique ID for the Ecospace <see cref="T:EwECore.cEcospaceMPA">MPA</see>.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cMPADriver.DataType">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns that this driver can only be driven by gridded map data.
+ </summary>
+ <returns>The supported <see cref="T:EwEShell.cPressure.eDataTypes">pressure type</see>.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cEcospaceController">
+ ---------------------------------------------------------------------------
+ <summary>
+ Single-threaded Ecospace execution controller for MSP game connectivity. 
+ All control functions are blocking for the purpose of MEL, waiting for the
+ threaded Ecospace model to complete a requested operation.
+ </summary>
+ <remarks>
+ This class is implemented as a plug-in to obtain access to the <see cref="T:EwECore.cEcospaceDataStructures">
+ Ecospace datastructures</see>. 
+ </remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="F:EwEShell.cEcospaceController.s_pausewait">
+ <summary>The eevnt wait handle to synchronize Ecospace threading.</summary>
+</member>
+<member name="M:EwEShell.cEcospaceController.#ctor">
+ -----------------------------------------------------------------------
+ <summary>
+ Initializes a new instance of the <see cref="T:EwEShell.cEcospaceController"/> class.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.Start(EwEShell.cGame)">
+ -----------------------------------------------------------------------
+ <summary>
+ Start an Ecospace run.
+ </summary>
+ <param name="game">The <see cref="T:EwEShell.cGame"/> to launch Ecospace for.</param>
+ <remarks>Note that this only prepares the threads needed to run. Ecospace
+ will only start executing when Continue is called."/>
+ </remarks>
+ <seealso cref="M:EwEShell.cEcospaceController.Continue(EwEShell.cPressure[],EwEShell.cGrid[])"/>
+ <seealso cref="M:EwEShell.cEcospaceController.Stop"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.Continue(EwEShell.cPressure[],EwEShell.cGrid[])">
+ -----------------------------------------------------------------------
+ <summary>
+ Perform a single Ecospace time step.
+ </summary>
+ <param name="pressures">The pressures to apply to the time step.</param>
+ <param name="outcomes">The outcomes to fill during the time step.</param>
+ <seealso cref="!:Start(cPressure(), cGrid())"/>
+ <seealso cref="M:EwEShell.cEcospaceController.Stop"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.Stop">
+ -----------------------------------------------------------------------
+ <summary>
+ Terminate an Ecospace run.
+ </summary>
+ <seealso cref="M:EwEShell.cEcospaceController.Continue(EwEShell.cPressure[],EwEShell.cGrid[])"/>
+ <seealso cref="M:EwEShell.cEcospaceController.Start(EwEShell.cGame)"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.IsRunning">
+ -----------------------------------------------------------------------
+ <summary>
+ State flag, returns whether Ecospace is running.
+ </summary>
+ <returns>True if running.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.IsStopping">
+ -----------------------------------------------------------------------
+ <summary>
+ State flag, returns whether Ecospace is stopping.
+ </summary>
+ <returns>True if stopped.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEcospaceController.IsSaveOutput">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set whether outcome grids need to be saved to file.
+ </summary>
+ <returns>True if outputs need saving to file.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEcospaceController.OutputPath">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the output location for <see cref="P:EwEShell.cEcospaceController.IsSaveOutput">saved outputs</see>.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.Initialize(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Initialize the plugin.
+ </summary>
+ <param name="core">The core this plugin is initialized for.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.EcospaceInitialized(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecospace has loaded a new scenario, is
+ initialized, and is ready to be used. Implemented to receive the <see cref="T:EwECore.cEcospaceDataStructures">
+ Ecospace data structures</see>.
+ </summary>
+ <param name="EcospaceDatastructures">The ecospace datastructures that
+ just received new scenario data.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEcospaceController.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the unique name for this plug-in point.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEcospaceController.Description">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the description of this plug-in point.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEcospaceController.Author">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the author of this plug-in point.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cEcospaceController.Contact">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the contact information of this plug-in point.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.OnCoreMessage(EwECore.cMessage@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Core message handler to respond to Ecospace run events.
+ </summary>
+ <param name="msg">The core message that may be the one we're waiting for.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.RunModel">
+ -----------------------------------------------------------------------
+ <summary>
+ Launch Ecospace.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.EcoSpaceCallback(EwECore.cEcospaceTimestep@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Ecospace time step callback.
+ </summary>
+ <param name="results">The results.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cEcospaceController.SaveOutcomesToDisk(System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Saves the outcomes to disk if <see cref="P:EwEShell.cEcospaceController.IsSaveOutput"/> is enabled.
+ </summary>
+ <param name="iTime">The time step to write the outputs for.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cMELException">
+ ---------------------------------------------------------------------------
+ <summary>
+ Boink.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cMELException.#ctor(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a new <see cref="T:EwEShell.cMELException"/>.
+ </summary>
+ <param name="strDetails">The exception details.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEShell.cShellData">
+ ---------------------------------------------------------------------------
+ <summary>
+ Data container for a list of games.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="F:EwEShell.cShellData.m_core">
+ <summary>The core to operate onto.</summary>
+</member>
+<member name="F:EwEShell.cShellData.m_games">
+ <summary>All available games.</summary>
+</member>
+<member name="M:EwEShell.cShellData.#ctor(EwECore.cCore)">
+ -----------------------------------------------------------------------
+ <summary>
+ Constructor.
+ </summary>
+ <param name="core">The core to operate onto.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEShell.cShellData.Games">
+ -----------------------------------------------------------------------
+ <summary>
+ Get all available games.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cShellData.Game(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Obtain a <see cref="T:EwEShell.cGame"/> by name.
+ </summary>
+ <param name="strGame">The name of the game. It is.</param>
+ <returns>The game with a given name, or Nothing if the game could not be found.</returns>
+ <remarks>To obtain the first game pass in an empty name</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cShellData.Add(EwEShell.cGame)">
+ -----------------------------------------------------------------------
+ <summary>
+ Add a <see cref="T:EwEShell.cGame">game</see>.
+ </summary>
+ <param name="g">The g.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cShellData.Remove(EwEShell.cGame)">
+ -----------------------------------------------------------------------
+ <summary>
+ Remove a <see cref="T:EwEShell.cGame">game</see>.
+ </summary>
+ <param name="g">The g.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cShellData.FromXML(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Serialize the games list from XML.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEShell.cShellData.ToXML">
+ -----------------------------------------------------------------------
+ <summary>
+ Serialize the games list to XML.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+</members>
+</doc>
