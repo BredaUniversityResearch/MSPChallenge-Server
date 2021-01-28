@@ -38,7 +38,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 		<div id="infobox"></div>
 		<ul class="nav nav-tabs" id="myTab" role="tablist">
 			<li class="nav-item">
-				<a href="#tabSessionsList" class="nav-link active" role="tab" data-toggle="tab" aria-controls="tabSessionsList" aria-selected="true"><i class="fa fa-list-alt"></i> Servers</a>
+				<a href="#tabSessionsList" class="nav-link active" role="tab" data-toggle="tab" aria-controls="tabSessionsList" aria-selected="true"><i class="fa fa-list-alt"></i> Sessions</a>
 			</li>
 			<li class="nav-item">
 				<a href="#tabSavesList" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabSavesList" aria-selected="false"><i class="fa fa-save"></i> Saves</a>
