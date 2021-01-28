@@ -99,12 +99,21 @@
 								CURLOPT_SSL_VERIFYPEER => false,
 								CURLOPT_HEADER => false);
 
-			$result = $this->CallBack($this->baseurl . $url, 
+			try 
+			{
+				$result = $this->CallBack($this->baseurl . $url, 
 										array(), 				// no content to send
 										array(),				// no headers to send
 										false,					// sync request, so wait for it
 										false,					// no content, so no json encoding of it required either
 										$customopt);			// see above additional curl opts for this request
+				return $result;
+			}
+			catch (Throwable $e)
+			{
+				print("Geoserver request failed to url ".$url.". Exception: ".$e->getMessage().PHP_EOL);
+				return null;
+			}
 			/*$info = curl_getinfo($ch);
 
 			curl_close($ch);
@@ -115,7 +124,6 @@
 			else{
 				return $result;
 			}*/
-			return $result;
 		}
 
 		public function HasLengthError($data, $minreq){

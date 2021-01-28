@@ -2,7 +2,7 @@
 
 class APIHelper
 {
-	public const ApiLatestVersion = "v2";
+	public const ApiLatestVersion = "v1";
 	private const InvalidSessionId = -1;
 
 	public static function SetupApiLoader()

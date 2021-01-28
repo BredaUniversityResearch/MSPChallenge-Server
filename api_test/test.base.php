@@ -2,7 +2,7 @@
 
 class TestBase
 {
-	const TARGET_SERVER_BASE_URL = "http://localhost/dev/1/";
+	const TARGET_SERVER_BASE_URL = "http://localhost/1/";
 	private string $m_securityToken;
 
 	public function __construct($securityToken)

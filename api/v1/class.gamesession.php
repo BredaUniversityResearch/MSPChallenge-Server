@@ -14,7 +14,7 @@ class GameSession extends Base
 
 	const INVALID_SESSION_ID = -1;
 	const ARCHIVE_DIRECTORY = "session_archive/";
-	const CONFIG_DIRECTORY = "config/";
+	const CONFIG_DIRECTORY = "running_session_config/";
 	const SECONDS_PER_MINUTE = 60;
 	const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE * 60;
 
@@ -33,7 +33,7 @@ class GameSession extends Base
 	}
 
 	//returns the base API endpoint. e.g. http://localhost/dev/
-	public function GetRequestApiRoot()
+	public static function GetRequestApiRoot()
 	{
 		if (isset($GLOBALS['RequestApiRoot'])) return $GLOBALS['RequestApiRoot'];
 		
@@ -91,15 +91,6 @@ class GameSession extends Base
 	 */
 	public function CreateGameSession(int $game_id, string $config_file_content, string $password_admin, string $password_player, string $watchdog_address, string $response_address, string $jwt, bool $allow_recreate = false)
 	{
-		if (empty($game_id) ||
-			empty($config_file_content) || 
-			empty($watchdog_address) ||
-			empty($response_address) ||
-			empty($jwt))
-		{
-			throw new Exception("One or more parameters missing.");
-		}
-
 		$sessionId = intval($game_id);
 		
 		if ($this->DoesSessionExist($sessionId)) 
@@ -125,11 +116,10 @@ class GameSession extends Base
 
 		$configFilePath = self::GetConfigFilePathForSession($game_id);
 
-		if (file_exists(self::CONFIG_DIRECTORY.$configFilePath))
+		if (!is_dir(self::CONFIG_DIRECTORY))
 		{
-			unlink(self::CONFIG_DIRECTORY.$configFilePath);
+			mkdir(self::CONFIG_DIRECTORY);
 		}
-
 		file_put_contents(self::CONFIG_DIRECTORY.$configFilePath, $config_file_content);
 
 		$geoserver_credentials = $this->GetGeoserverCredentials($config_file_content);
@@ -215,6 +205,10 @@ class GameSession extends Base
 	{
 		$update = new Update();
 		$result = $update->ReimportAdvanced($config_file_path, $geoserver_url, $geoserver_username, $geoserver_password);
+		if (!$result)
+		{
+			throw new Exception("Recreate failed");
+		}
 
 		$this->query("INSERT INTO game_session (game_session_watchdog_address, game_session_watchdog_token, game_session_password_admin, game_session_password_player) VALUES (?, UUID_SHORT(), ?, ?)",
 				array($watchdog_address, $password_admin, $password_player)); 
@@ -224,7 +218,7 @@ class GameSession extends Base
 		$game = new Game();
 		$watchdogSuccess = $game->ChangeWatchdogState("SETUP");
 
-		if (isset($response_address)) 
+		if (!empty($response_address)) 
 		{
 			$security = new Security();
 
@@ -238,6 +232,7 @@ class GameSession extends Base
 			$result = $this->CallBack($response_address, $postValues);
 			return $result;
 		}
+		return;
 	}
 
 	public function ResetWatchdogAddress(string $watchdog_address) {
@@ -450,11 +445,11 @@ class GameSession extends Base
 	{
 		if (self::GetGameSessionIdForCurrentRequest() != self::INVALID_SESSION_ID) 
 		{
-			$baseUrl = str_replace(self::GetGameSessionIdForCurrentRequest(), $sessionId, $this->GetRequestApiRoot());
+			$baseUrl = str_replace(self::GetGameSessionIdForCurrentRequest(), $sessionId, self::GetRequestApiRoot());
 		}
 		else 
 		{
-			$baseUrl = $this->GetRequestApiRoot().$sessionId."/";
+			$baseUrl = self::GetRequestApiRoot().$sessionId."/";
 		}
 		
 		$requestHeader = apache_request_headers();

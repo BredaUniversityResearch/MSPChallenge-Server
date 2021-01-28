@@ -105,10 +105,10 @@
 			if($filename == ""){	//if there's no file given, use the one in the database
 				$data = $this->query("SELECT game_configfile FROM game");
 
-				$path = "config/" . $data[0]['game_configfile'];
+				$path = GameSession::CONFIG_DIRECTORY . $data[0]['game_configfile'];
 			}
 			else{
-				$path = "config/" . $filename;
+				$path = GameSession::CONFIG_DIRECTORY . $filename;
 			}
 
 			return file_get_contents($path);
@@ -132,7 +132,7 @@
 
 		public function WriteToConfig($filename, $data){
 			$data = json_encode($data, JSON_FORCE_OBJECT);
-			$file = fopen("config/" . $filename, "w");
+			$file = fopen(GameSession::CONFIG_DIRECTORY . $filename, "w");
 
 			fwrite($file, $data);
 
@@ -146,9 +146,7 @@
 		 * @apiSuccess {string} json string
 		 */
 		public function LoadConfig(){
-			session_start();
-			$this->SetupFilename(self::$configFilename);
-			$data = $this->GetGameConfigValues(self::$configFilename);
+			$data = $this->GetGameConfigValues();
 
 			$this->SetupGametime($data);
 			$this->SetupCountries($data);
@@ -577,12 +575,11 @@
 		}
 
 		private function TestWatchdogAlive() {
-			//return false;
-			//$ch = curl_init($this->GetWatchdogAddress(true));
-			//curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
-			//curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$success = $this->CallBack($this->GetWatchdogAddress(true), array(), array()); //curl_exec($ch);
-			//curl_close($ch);
+			$ch = curl_init($this->GetWatchdogAddress(true));
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			$success = curl_exec($ch);
+			curl_close($ch);
 			if (!is_string($success) || !strlen($success)) {
 			    return false;
 			} else {

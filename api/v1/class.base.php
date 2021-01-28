@@ -10,8 +10,6 @@
 		
 		public $isvalid = false;
 
-		public static $configFilename = null;
-		
 		public function __construct($called)
 		{
 			parent::__construct();
@@ -19,11 +17,6 @@
 			if($called !== "")
 			{
 				$this->isvalid = $this->Validate($this->allowed, $called);
-			}
-			
-			if (self::$configFilename == null)
-			{
-				self::$configFilename = (isset($_COOKIE['filename'])) ? $_COOKIE['filename'] : $this->GetFirstConfigFile();
 			}
 		}
 				
@@ -82,7 +75,7 @@
 		}
 
 		public static function ErrorString($errorexception) {
-			return $errorexception->getMessage() . PHP_EOL . "On line ".$errorexception->getLine() . PHP_EOL . "Of file ".$errorexception->getFile();
+			return $errorexception->getMessage() . PHP_EOL . "Of file ".$errorexception->getFile()." On line ".$errorexception->getLine() .PHP_EOL."Stack trace: ".$errorexception->getTraceAsString();
 		}
 		
 		public static function JSON($data)
@@ -253,27 +246,6 @@
 			return rtrim($abs_app_root.$url_app_root, "/");
 		}
 
-		public static function PrintException($message, $severity, $filename, $lineno)
-		{
-			$arr = explode("\\", $filename);
-			//echo "<pre>";
-				echo "<span style='color:red;'>FATAL ERROR</span><br/>";
-				echo $message . " in " . $arr[sizeof($arr)-1] . " : " . $lineno . "<br/><br/>";
-			//echo "</pre>";
-		}
-
-		private function GetFirstConfigFile()
-		{
-			$configFile = "NO_CONFIG_FILES_FOUND";
-			foreach(scandir("config") as $dir){
-				if ($dir != "." && $dir != "..") {
-					$configFile = $dir;
-					break;
-				}
-			}
-			return $configFile;
-		}
-
 		public function PHPCanProxy() 
 		{
 			if (!empty(ini_get('open_basedir')) || ini_get('safe_mode')) {
@@ -303,8 +275,7 @@
 				curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
 			}
 
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, !$async);
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			if (!empty($headers)) {
 				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			}
@@ -323,6 +294,11 @@
 
 			$return = curl_exec($ch);
 			$info = curl_getinfo($ch);
+			
+			if ($async == false && ($return === false || $info === false || $info["http_code"] == 401))
+			{
+				throw new Exception("Request failed to url ".$url.PHP_EOL."CURL Error: ".curl_error($ch).PHP_EOL."Response Http code: ".($info["http_code"] ?? "Unknown").PHP_EOL."Response Page output: ".($return??"Nothing"));
+			}
 			curl_close($ch);
 			
 			return $return;
