@@ -38,7 +38,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 		<div id="infobox"></div>
 		<ul class="nav nav-tabs" id="myTab" role="tablist">
 			<li class="nav-item">
-				<a href="#tabSessionsList" class="nav-link active" role="tab" data-toggle="tab" aria-controls="tabSessionsList" aria-selected="true"><i class="fa fa-list-alt"></i> Servers</a>
+				<a href="#tabSessionsList" class="nav-link active" role="tab" data-toggle="tab" aria-controls="tabSessionsList" aria-selected="true"><i class="fa fa-list-alt"></i> Sessions</a>
 			</li>
 			<li class="nav-item">
 				<a href="#tabSavesList" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabSavesList" aria-selected="false"><i class="fa fa-save"></i> Saves</a>
@@ -52,7 +52,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			<div class="tab-pane fade show active" id="tabSessionsList" role="tabpanel" aria-labelledby="tabSessionsList-tab">
 				<div class="row">
 					<div class="col-md-12 flex-row">
-						<button type="button" id="btnCreateServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSession"><i class="fa fa-plus-circle" title="Create new session"></i> New Server</button>
+						<button type="button" id="btnCreateServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSession"><i class="fa fa-plus-circle" title="Create new session"></i> New Session</button>
 						<button id="buttonRefreshSessionsList" class="btn btn-primary"><i class="fa fa-refresh" title="Refresh" id="buttonRefreshSessionsListIcon"></i> Refresh</button>
 					</div>
 					<div class="col-md-12 flex-right" id="sessionsList">

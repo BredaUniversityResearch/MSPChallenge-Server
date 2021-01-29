@@ -4,13 +4,13 @@
 //register_shutdown_function('shutdown');
 set_error_handler('exceptions_error_handler');
 
-function shutdown() {
-  if(!is_null($e = error_get_last()))
-  {
-    http_response_code(200);
-    echo Base::WrappedReturn(array("message" => Base::ErrorString(new ErrorException($e["message"], 0, $e["type"], $e["file"], $e["line"]))));
-  }
-}
+// function shutdown() {
+//   if(!is_null($e = error_get_last()))
+//   {
+//     http_response_code(500);
+//     echo Base::WrappedReturn(array("message" => Base::ErrorString(new ErrorException($e["message"], 0, $e["type"], $e["file"], $e["line"]))));
+//   }
+// }
 
 function exceptions_error_handler($severity, $message, $filename, $lineno) {
   //if (error_reporting() == 0) {

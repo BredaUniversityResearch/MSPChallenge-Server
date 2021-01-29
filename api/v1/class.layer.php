@@ -212,14 +212,14 @@
 		 * @apiParam {int} **************************************
 		 * @apiSuccess {string} *********************************
 		 */
-		public function ImportMeta($geoserver_url, $geoserver_username, $geoserver_password)
+		public function ImportMeta(string $configFilename, $geoserver_url, $geoserver_username, $geoserver_password)
 		{
 			$game = new Game();
 			$geoserver = new GeoServer($geoserver_url, $geoserver_username, $geoserver_password);
 
 			$struct = $geoserver->GetRemoteDirStruct();
 
-			$data = $game->GetGameConfigValues(self::$configFilename);
+			$data = $game->GetGameConfigValues($configFilename);
 			$data = $data['meta'];
 
 			foreach($data as $arr){

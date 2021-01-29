@@ -1,5 +1,5 @@
 <?php 
-	$fdirectory = realpath("Temp/");
+	$fdirectory = getcwd()."\\Temp\\";
 	$fname = $fdirectory."/".getmypid()."_".microtime(true);
 	$has_errored = false;
 	if (!is_dir($fdirectory))
@@ -39,15 +39,23 @@
 
 	ob_start();
 
+	$outputData = ["success" => false, "message"=> ""];
 	if(!empty($_GET['query'])){
-		$data = Router::RouteApiCall($_GET['query'], $_POST);
-		echo json_encode($data);
+		$outputData = Router::RouteApiCall($_GET['query'], $_POST);
 	}
 	else{
 		http_response_code(404);
 	}
 
-	ob_end_flush();
+	$outputData["request_url"] = $_SERVER["REQUEST_URI"];
+	$pageOutput = ob_get_flush();
+	if(!empty($pageOutput))
+	{
+		$outputData["message"].= PHP_EOL."Additional Debug Information: ".$pageOutput;
+		$outputData["success"] = false;
+	}
+
+	echo json_encode($outputData);
 
 	if (!$has_errored)
 	{

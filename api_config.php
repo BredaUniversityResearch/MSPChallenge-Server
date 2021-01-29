@@ -1,5 +1,5 @@
 <?php
-$codeBranch = '/dev';
+$codeBranch = '/';
 
 $auth_url = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/"; 
 $GLOBALS['api_config'] = array(

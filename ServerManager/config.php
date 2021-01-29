@@ -11,7 +11,7 @@ for($i = 1; $i < $self_path_length; $i++){
 }
 // the two variables $url_app_root and $abs_app_root have now been set properly and will be used throughout the system
 
-$codeBranch = '/dev';//str_ireplace("/ServerManager/", "", $url_app_root);
+$codeBranch = '/';//str_ireplace("/ServerManager/", "", $url_app_root);
 
 // Endpoints
 $stable_msp_auth_url_prefix = 'https://auth.mspchallenge.info';

@@ -11,20 +11,12 @@
 			"TickDone", 
 			"GetFishing", 
 			"GeometryExportName", 
-			"InitialFishing",
-
-			["TestReimport", Security::ACCESS_LEVEL_FLAG_NONE]
+			"InitialFishing"
 		);
 
 		
 		public function __construct($method = ""){
 			parent::__construct($method);
-		}
-
-		public function TestReimport()
-		{
-			$config = $this->Config();
-			$this->OnReimport($config);
 		}
 
 		public function Config(){
@@ -87,7 +79,7 @@
 			}
 		}
 
-		private function SetupMELLayer(string $melLayerName, string $config) 
+		private function SetupMELLayer(string $melLayerName, array $config) 
 		{
 			$layername = "mel_" . str_replace(" ", "_", $melLayerName);			
 			$data = $this->query("SELECT layer_id, layer_raster FROM layer WHERE layer_name=?", array($layername));
@@ -106,7 +98,7 @@
 			else {
 				$layerId = $data[0]['layer_id'];
 				$existingRasterProperties = json_decode($data[0]['layer_raster'], true);
-				$rasterProperties = array_merge($existingRasterProperties, $rasterProperties);
+				$rasterProperties = array_merge($existingRasterProperties ?? array(), $rasterProperties);
 				$rasterformat = json_encode($rasterProperties);
 				$this->query("UPDATE layer SET layer_raster=? WHERE layer_id = ?", array($rasterformat, $layerId));
 			}
