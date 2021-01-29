@@ -54,16 +54,16 @@
 		 */
 		public function Post(int $country, string $name, int $time, array $layers = [], string $type, bool $alters_energy_distribution = false)
 		{
-			$id = $this->query("INSERT INTO plan (plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_alters_energy_distribution) VALUES (?, ?, ?, ?, ?, ?)", array($country, $name, $time, microtime(true), $type, $alters_energy_distribution), true);
+			$id = Database::GetInstance()->query("INSERT INTO plan (plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_alters_energy_distribution) VALUES (?, ?, ?, ?, ?, ?)", array($country, $name, $time, microtime(true), $type, $alters_energy_distribution), true);
 			foreach($layers as $layer){
 				if(is_numeric($layer)){
-					$lid = $this->query("INSERT INTO layer
+					$lid = Database::GetInstance()->query("INSERT INTO layer
 							(layer_original_id)
 							VALUES (?)",
 						array($layer), true
 					);
 
-					$this->query("INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)", array($id, $lid));
+					Database::GetInstance()->query("INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)", array($id, $lid));
 				}
 			}
 			$this->UpdatePlanConstructionTime($id);
@@ -79,9 +79,9 @@
 		 */
 		public function Get(int $id)
 		{
-			$data = $this->query("SELECT * FROM plan WHERE plan_id=?", array($id));
-			$data[0]["layers"] = $this->query("SELECT plan_layer_layer_id FROM plan_layer WHERE plan_layer_plan_id=?", array($id));
-			$data[0]["comments"] = $this->query("SELECT * FROM comment WHERE comment_plan_id=?", array($id));
+			$data = Database::GetInstance()->query("SELECT * FROM plan WHERE plan_id=?", array($id));
+			$data[0]["layers"] = Database::GetInstance()->query("SELECT plan_layer_layer_id FROM plan_layer WHERE plan_layer_plan_id=?", array($id));
+			$data[0]["comments"] = Database::GetInstance()->query("SELECT * FROM comment WHERE comment_plan_id=?", array($id));
 			return $data;
 		}
 
@@ -92,13 +92,13 @@
 		 * @apiSuccess {string} JSON object of all plan metadata + comments
 		 */
 		public function All(){
-			$data = $this->query("SELECT * FROM plan WHERE plan_active=?", array(1));
+			$data = Database::GetInstance()->query("SELECT * FROM plan WHERE plan_active=?", array(1));
 
 			Base::Debug($data);
 
 			foreach($data as &$d){
-				$d["layers"] = $this->query("SELECT plan_layer_layer_id FROM plan_layer WHERE plan_layer_plan_id=?", array($d["plan_id"]));
-				$data["comments"] = $this->query("SELECT * FROM comment WHERE comment_plan_id=?", array($d['plan_id']));
+				$d["layers"] = Database::GetInstance()->query("SELECT plan_layer_layer_id FROM plan_layer WHERE plan_layer_plan_id=?", array($d["plan_id"]));
+				$data["comments"] = Database::GetInstance()->query("SELECT * FROM comment WHERE comment_plan_id=?", array($d['plan_id']));
 			}
 
 			return $data;
@@ -111,7 +111,7 @@
 		 * @apiParam {int} id of the plan to delete
 		 */
 		public function Delete(int $id){
-			$this->query("UPDATE plan SET plan_active=?, plan_lastupdate=? WHERE plan_id=?", array(0, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE plan SET plan_active=?, plan_lastupdate=? WHERE plan_id=?", array(0, microtime(true), $id));
 		}
 
 		/**
@@ -123,12 +123,12 @@
 		public function DeleteEnergy(int $plan){
 			// Put an energy error in depent plans, similar to "api/plan/SetEnergyError" with "check_dependent_plans" set to 1. 
 			// This should ofc be done before energy elements are removed from the plan.
-			$planData = $this->query("SELECT plan_name FROM plan WHERE plan_id = ?", array($plan));
+			$planData = Database::GetInstance()->query("SELECT plan_name FROM plan WHERE plan_id = ?", array($plan));
 			$this->SetAllDependentEnergyPlansToError($plan, $planData[0]["plan_name"]);
 
-			$this->query("DELETE FROM grid WHERE grid_plan_id=?", array($plan));
+			Database::GetInstance()->query("DELETE FROM grid WHERE grid_plan_id=?", array($plan));
 			// Set the target plans energy error to 0
-			$this->query("UPDATE plan SET plan_lastupdate = ?, plan_energy_error = 0 WHERE plan_id = ?", array(microtime(true), $plan));
+			Database::GetInstance()->query("UPDATE plan SET plan_lastupdate = ?, plan_energy_error = 0 WHERE plan_id = ?", array(microtime(true), $plan));
 		}
 
 		/**
@@ -139,11 +139,11 @@
 		 * @apiParam {int} layerid id of the original layer
 		 */
 		public function Layer(int $id, int $layerid){
-			$lid = $this->query("INSERT INTO layer (layer_original_id) VALUES (?)",
+			$lid = Database::GetInstance()->query("INSERT INTO layer (layer_original_id) VALUES (?)",
 				array($layerid), true
 			);
 
-			$this->query("INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)", array($id, $lid));
+			Database::GetInstance()->query("INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)", array($id, $lid));
 
 			$this->UpdatePlanConstructionTime($id);
 
@@ -157,7 +157,7 @@
 		{
 			$highest = 0;
 
-			$planlayers = $this->query("SELECT l2.layer_states FROM plan_layer
+			$planlayers = Database::GetInstance()->query("SELECT l2.layer_states FROM plan_layer
 				LEFT JOIN layer l1 ON l1.layer_id=plan_layer.plan_layer_layer_id
 				LEFT JOIN layer l2 ON l1.layer_original_id=l2.layer_id
 				WHERE plan_layer_plan_id=?", array($planId));
@@ -173,7 +173,7 @@
 				}
 			}
 
-			$this->query("UPDATE plan SET plan_lastupdate=?, plan_constructionstart=plan_gametime-? WHERE plan_id=?", array(microtime(true), $highest, $planId));
+			Database::GetInstance()->query("UPDATE plan SET plan_lastupdate=?, plan_constructionstart=plan_gametime-? WHERE plan_id=?", array(microtime(true), $highest, $planId));
 		}
 
 		/**
@@ -184,15 +184,15 @@
 		 */
 		public function DeleteLayer(int $id)
 		{
-			$planid = $this->query("SELECT plan_layer_plan_id as id FROM plan_layer WHERE plan_layer_layer_id=?", array($id));
+			$planid = Database::GetInstance()->query("SELECT plan_layer_plan_id as id FROM plan_layer WHERE plan_layer_layer_id=?", array($id));
 
 			//Try to nuke the energy data on all layers.
 			$energy = new Energy();
 			$energy->DeleteEnergyInformationFromLayer($id);
 
-			$this->query("DELETE FROM geometry WHERE geometry_layer_id=?", array($id));
-			$this->query("DELETE FROM plan_layer WHERE plan_layer_layer_id=?", array($id));
-			$this->query("DELETE FROM plan_delete WHERE plan_delete_geometry_persistent IN (
+			Database::GetInstance()->query("DELETE FROM geometry WHERE geometry_layer_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM plan_layer WHERE plan_layer_layer_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM plan_delete WHERE plan_delete_geometry_persistent IN (
 					SELECT geometry_persistent FROM geometry
 					LEFT JOIN layer ON geometry_layer_id=layer_original_id
 					WHERE layer_id=?
@@ -206,7 +206,7 @@
 
 			//TODO also delete everything to do with energy connected to this
 
-			$this->query("UPDATE plan SET plan_lastupdate=? WHERE plan_id=?", array(microtime(true), $planid[0]['id']));
+			Database::GetInstance()->query("UPDATE plan SET plan_lastupdate=? WHERE plan_id=?", array(microtime(true), $planid[0]['id']));
 		}
 
 		/**
@@ -217,7 +217,7 @@
 		 * @apiParam {string} state state to set the plan to (DESIGN, CONSULTATION, APPROVAL, APPROVED, DELETED)
 		 */
 		public function SetState(int $id, string $state, int $user) {
-			$currentPlanData = $this->query("SELECT plan_state, plan_name, plan_type FROM plan WHERE plan_id = ? AND plan_lock_user_id = ?", array($id, $user));
+			$currentPlanData = Database::GetInstance()->query("SELECT plan_state, plan_name, plan_type FROM plan WHERE plan_id = ? AND plan_lock_user_id = ?", array($id, $user));
 			if (count($currentPlanData) == 0) {
 				throw new Exception("Trying to set plan state of plan ".$id." without user ".$user." having it locked");
 			}
@@ -242,9 +242,9 @@
 			}
 
 			//We explicitly don't set the plan_updatetime here to prevent issues with half-updates. plan_updatettime is set when the plan is unlocked again.
-			$this->query("UPDATE plan SET plan_previousstate=plan_state, plan_state=? WHERE plan_id=?", array($state, $id));
+			Database::GetInstance()->query("UPDATE plan SET plan_previousstate=plan_state, plan_state=? WHERE plan_id=?", array($state, $id));
 			if ($previousState == "APPROVAL") {
-				$this->query("UPDATE approval SET approval_vote = -1 WHERE approval_plan_id = ?", array($id));
+				Database::GetInstance()->query("UPDATE approval SET approval_vote = -1 WHERE approval_plan_id = ?", array($id));
 			}
 
 			if ($isEnergyPlan)
@@ -260,7 +260,7 @@
 				}
 
 				foreach($erroringEnergyPlans as $planId) {
-					$this->query("UPDATE plan SET plan_previousstate = plan_state, plan_state = ?, plan_lastupdate = ?, plan_energy_error = 1
+					Database::GetInstance()->query("UPDATE plan SET plan_previousstate = plan_state, plan_state = ?, plan_lastupdate = ?, plan_energy_error = 1
 						WHERE plan_id = ? AND plan_state <> \"DELETED\"",
 						array("DESIGN", microtime(true), $planId));
 					$this->Message($planId, 1, "SYSTEM", "Plan was moved back to design. An energy conflict was found when plan \"".$currentPlanData[0]["plan_name"]."\" was moved to a different state.");
@@ -275,7 +275,7 @@
 		{
 			//Now finally clean up all plans that are still locked by a user which hasn't been seen for an amount of time
 			$timeoutInSeconds = 60;
-			$this->query("UPDATE plan
+			Database::GetInstance()->query("UPDATE plan
 				INNER JOIN user ON plan.plan_lock_user_id = user.user_id
 			SET plan.plan_lock_user_id = NULL, plan.plan_lastupdate = ?
 			WHERE (user.user_lastupdate + (?)) < ?", array(microtime(true), $timeoutInSeconds, microtime(true)));
@@ -287,7 +287,7 @@
 
 			$this->UpdateAllPlanLayerStates($current_gametime);
 
-			$plansToUpdate = $this->query("SELECT plan.plan_id, plan.plan_name, plan.plan_gametime, plan.plan_constructionstart, plan.plan_state FROM plan WHERE plan_constructionstart <=? AND plan_state <> \"IMPLEMENTED\" AND plan_state <> \"DELETED\"", array($current_gametime));
+			$plansToUpdate = Database::GetInstance()->query("SELECT plan.plan_id, plan.plan_name, plan.plan_gametime, plan.plan_constructionstart, plan.plan_state FROM plan WHERE plan_constructionstart <=? AND plan_state <> \"IMPLEMENTED\" AND plan_state <> \"DELETED\"", array($current_gametime));
 			foreach($plansToUpdate as $plan) {
 				if ($this->UpdatePlanState($current_gametime, $plan)) {
 					array_push($hasupdated, $plan['plan_id']);
@@ -298,7 +298,7 @@
 		private function ArchivePlan($planId, $planName, $planGameTime, $message) {
 			$this->Message($planId, 1, "SYSTEM", $message);
 			//set all plans to deleted when it has not been approved or implemented yet and the start construction date has already passed
-			$this->query("UPDATE plan SET plan_lastupdate = ?, plan_state = ? WHERE plan_id = ?", array(microtime(true), "DELETED", $planId));
+			Database::GetInstance()->query("UPDATE plan SET plan_lastupdate = ?, plan_state = ? WHERE plan_id = ?", array(microtime(true), "DELETED", $planId));
 
 			$this->SetAllDependentEnergyPlansToError($planId, $planName);
 		}
@@ -313,7 +313,7 @@
 			// ... is wrapped in a transaction that can be rolled back in case of any kind of exception
 			//$this->DBStartTransaction();
 			foreach($dependentPlans as $erroredPlanId) {
-				$this->query("UPDATE plan SET plan_energy_error = 1, plan_previousstate = plan_state, plan_state = ?, plan_lastupdate = ? WHERE plan_id = ?", array("DESIGN", microtime(true), $erroredPlanId));
+				Database::GetInstance()->query("UPDATE plan SET plan_energy_error = 1, plan_previousstate = plan_state, plan_state = ?, plan_lastupdate = ? WHERE plan_id = ?", array("DESIGN", microtime(true), $erroredPlanId));
 				$this->Message($erroredPlanId, 1, "SYSTEM", "Plan was moved back to design after plan \"".$planName."\" was archived due to conflicts in the energy system.");
 			}
 			//$this->DBCommitTransaction();
@@ -332,7 +332,7 @@
 				if ($planObject['plan_state'] == "APPROVED") {
 					if (!$this->PlanHasErrors($planObject['plan_id'])) {
 						//plan is implemented, set plan to IMPLEMENTED and handle energy grid
-						$this->query("UPDATE plan SET plan_lastupdate=?, plan_state=? WHERE plan_id=?", array(microtime(true), "IMPLEMENTED", $planObject['plan_id']));
+						Database::GetInstance()->query("UPDATE plan SET plan_lastupdate=?, plan_state=? WHERE plan_id=?", array(microtime(true), "IMPLEMENTED", $planObject['plan_id']));
 
 						// //Disable all geometry that we reference in previous plans.
 						$this->DisableReferencedGeometryFromPreviousPlans($planObject['plan_id']);
@@ -340,7 +340,7 @@
 
 						$this->Message($planObject['plan_id'], 1, "SYSTEM", "Plan was implemented.");
 						//Update energy trid states, disable all grids that have been deleted and have been reimplemented in this plan.
-						$this->query("UPDATE grid
+						Database::GetInstance()->query("UPDATE grid
 								INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
 								SET grid_active = 0
 								WHERE (grid_persistent IN (
@@ -363,7 +363,7 @@
 		}
 
 		private function UpdateAllPlanLayerStates( $current_gametime) {
-			$planLayers = $this->query("SELECT plan_layer_id, oldlayer.layer_states, plan_gametime, plan_layer_state, plan_id, oldlayer.layer_id as oldid, newlayer.layer_id as newid
+			$planLayers = Database::GetInstance()->query("SELECT plan_layer_id, oldlayer.layer_states, plan_gametime, plan_layer_state, plan_id, oldlayer.layer_id as oldid, newlayer.layer_id as newid
 				FROM plan
 				LEFT JOIN plan_layer ON plan_id=plan_layer_plan_id
 				LEFT JOIN layer as newlayer ON plan_layer_layer_id=newlayer.layer_id
@@ -401,16 +401,16 @@
 				}
 
 				//Base::Debug("setting state of layer to " . $state);
-				$this->query("UPDATE plan_layer SET plan_layer_state=? WHERE plan_layer_id=?", array($state, $planLayer['plan_layer_id']));
+				Database::GetInstance()->query("UPDATE plan_layer SET plan_layer_state=? WHERE plan_layer_id=?", array($state, $planLayer['plan_layer_id']));
 
 				switch($state){
 				case "ASSEMBLY":
 					//if the state of the layer is set to assembly, notify MEL that the assembly has started
-					$this->query("UPDATE layer SET layer_melupdate=? WHERE layer_id=?", array(1, $planLayer['oldid']));
+					Database::GetInstance()->query("UPDATE layer SET layer_melupdate=? WHERE layer_id=?", array(1, $planLayer['oldid']));
 
 					break;
 				case "ACTIVE":
-					$this->query("UPDATE
+					Database::GetInstance()->query("UPDATE
 						geometry g, plan_delete p
 						SET g.geometry_active=0
 						WHERE (g.geometry_persistent=p.plan_delete_geometry_persistent OR g.geometry_subtractive = p.plan_delete_geometry_persistent) AND p.plan_delete_plan_id=?",
@@ -418,7 +418,7 @@
 					);
 
 					// we don't have to do anything here except make sure the parent layer is set to be updated in MEL, the merging of geometry is done while getting the layer data in Layer->GeometryExportName()
-					$this->query("UPDATE layer SET layer_melupdate=? WHERE layer_id=?", array(1, $planLayer['oldid']));
+					Database::GetInstance()->query("UPDATE layer SET layer_melupdate=? WHERE layer_id=?", array(1, $planLayer['oldid']));
 
 					break;
 				}
@@ -427,9 +427,9 @@
 
 		//Returns true if there are errors in the current plan, false if no errors or only warnings.
 		private function PlanHasErrors($currentPlanId) {
-			$energyError = $this->query("SELECT plan_energy_error FROM plan WHERE plan.plan_id = ?", array($currentPlanId));
+			$energyError = Database::GetInstance()->query("SELECT plan_energy_error FROM plan WHERE plan.plan_id = ?", array($currentPlanId));
 
-			$errors = $this->query("SELECT COUNT(warning_id) as error_count
+			$errors = Database::GetInstance()->query("SELECT COUNT(warning_id) as error_count
 				FROM warning
 				INNER JOIN plan_layer ON warning.warning_layer_id = plan_layer.plan_layer_layer_id
 				INNER JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
@@ -439,7 +439,7 @@
 
 		private function DisableReferencedGeometryFromPreviousPlans($currentPlanId)
 		{
-			$idsToDisable = $this->query("SELECT geometry_id
+			$idsToDisable = Database::GetInstance()->query("SELECT geometry_id
 				FROM geometry
 				LEFT JOIN plan_layer on geometry.geometry_layer_id = plan_layer.plan_layer_layer_id
 				LEFT JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
@@ -449,18 +449,18 @@
 					INNER JOIN geometry ON plan_layer.plan_layer_layer_id = geometry.geometry_layer_id
 					WHERE plan.plan_id = ?)", array($currentPlanId, $currentPlanId));
 			foreach($idsToDisable as $obsoleteId) {
-				$this->query("UPDATE geometry SET geometry_active = 0 WHERE geometry_id = ? OR geometry_subtractive = ?", array($obsoleteId['geometry_id'], $obsoleteId['geometry_id']));
+				Database::GetInstance()->query("UPDATE geometry SET geometry_active = 0 WHERE geometry_id = ? OR geometry_subtractive = ?", array($obsoleteId['geometry_id'], $obsoleteId['geometry_id']));
 			}
 		}
 
 		private function UpdateFishing($planid){
-			$fishing = $this->query("SELECT * FROM fishing WHERE fishing_plan_id=?", array($planid));
+			$fishing = Database::GetInstance()->query("SELECT * FROM fishing WHERE fishing_plan_id=?", array($planid));
 
 			foreach($fishing as $fish){
-				$this->query("UPDATE fishing SET fishing_active=? WHERE fishing_type=? AND fishing_country_id=?", array(0, $fish['fishing_type'], $fish['fishing_country_id']));
+				Database::GetInstance()->query("UPDATE fishing SET fishing_active=? WHERE fishing_type=? AND fishing_country_id=?", array(0, $fish['fishing_type'], $fish['fishing_country_id']));
 			}
 
-			$this->query("UPDATE fishing SET fishing_active=? WHERE fishing_plan_id=?", array(1, $planid));
+			Database::GetInstance()->query("UPDATE fishing SET fishing_active=? WHERE fishing_plan_id=?", array(1, $planid));
 		}
 
 		/**
@@ -473,7 +473,7 @@
 		public function AddApproval(int $id, array $countries = []){
 			$this->DeleteApproval($id);
 			foreach($countries as $country){
-				$this->query("INSERT INTO approval (approval_plan_id, approval_country_id) VALUES (?, ?)", array($id, $country));
+				Database::GetInstance()->query("INSERT INTO approval (approval_plan_id, approval_country_id) VALUES (?, ?)", array($id, $country));
 			}
 		}
 
@@ -486,8 +486,8 @@
 		 * @apiParam {int} vote (-1 = undecided/abstain, 0 = no, 1 = yes)
 		 */
 		public function Vote(int $country, int $plan, int $vote){
-			$this->query("UPDATE approval SET approval_vote=? WHERE approval_country_id=? AND approval_plan_id=?", array($vote, $country, $plan));
-			$this->query("UPDATE plan SET plan_lastupdate=? WHERE plan_id=?", array(microtime(true), $plan));
+			Database::GetInstance()->query("UPDATE approval SET approval_vote=? WHERE approval_country_id=? AND approval_plan_id=?", array($vote, $country, $plan));
+			Database::GetInstance()->query("UPDATE plan SET plan_lastupdate=? WHERE plan_id=?", array(microtime(true), $plan));
 		}
 
 		/**
@@ -497,14 +497,14 @@
 		 * @apiParam {int} id id of the plan
 		 */
 		public function DeleteApproval(int $id){
-			$this->query("DELETE FROM approval WHERE approval_plan_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM approval WHERE approval_plan_id=?", array($id));
 		}
 
 		//initially, ask for all from time 0 to load in all user created data
 		public function Latest(int $lastupdate){
 
 			//get all plans that have changed
-			$plans = $this->query("SELECT
+			$plans = Database::GetInstance()->query("SELECT
 			plan_id as id,
 			plan_country_id as country,
 			plan_name as name,
@@ -526,11 +526,11 @@
 
 			foreach($plans as &$d){
 				//all layers, this is needed to merge them with geometry later
-				$d["layers"] = $this->query("SELECT plan_layer_layer_id as layerid, layer.layer_original_id as original, plan_layer_state as state FROM plan_layer
+				$d["layers"] = Database::GetInstance()->query("SELECT plan_layer_layer_id as layerid, layer.layer_original_id as original, plan_layer_state as state FROM plan_layer
 				LEFT JOIN layer ON plan_layer_layer_id=layer.layer_id WHERE plan_layer_plan_id=?", array($d["id"]));
 
 				//energy grids
-				$d['grids'] = $this->query("SELECT
+				$d['grids'] = Database::GetInstance()->query("SELECT
 						grid_id as id,
 						grid_name as name,
 						grid_active as active,
@@ -542,7 +542,7 @@
 				);
 
 				foreach($d['grids'] as &$g){
-					$g['energy'] = $this->query("SELECT
+					$g['energy'] = Database::GetInstance()->query("SELECT
 						grid_energy_country_id as country_id,
 						grid_energy_expected as expected
 						FROM grid_energy
@@ -550,14 +550,14 @@
 						array($g['id'])
 					);
 
-					$g['sources'] = $this->query("SELECT
+					$g['sources'] = Database::GetInstance()->query("SELECT
 						grid_source_geometry_id as geometry_id
 						FROM grid_source
 						WHERE grid_source_grid_id=?",
 						array($g['id'])
 					);
 
-					$g['sockets'] = $this->query("SELECT
+					$g['sockets'] = Database::GetInstance()->query("SELECT
 						grid_socket_geometry_id as geometry_id
 						FROM grid_socket
 						WHERE grid_socket_grid_id=?",
@@ -566,7 +566,7 @@
 				}
 
 				//load deleted grid ids here TODO
-				$deleted = $this->query("SELECT grid_removed_grid_persistent as grid_persistent FROM grid_removed WHERE grid_removed_plan_id=?", array($d['id']));
+				$deleted = Database::GetInstance()->query("SELECT grid_removed_grid_persistent as grid_persistent FROM grid_removed WHERE grid_removed_plan_id=?", array($d['id']));
 
 				$d['deleted_grids'] = array();
 
@@ -575,7 +575,7 @@
 				}
 
 				//fishing - Return NULL in the 'fishing' values when there's no values available.
-				$fishingValues = $this->query("SELECT
+				$fishingValues = Database::GetInstance()->query("SELECT
 						fishing_country_id as country_id,
 						fishing_type as type,
 						fishing_amount as amount
@@ -587,10 +587,10 @@
 					$d['fishing'] = $fishingValues;
 				}
 
-				$d['votes'] = $this->query("SELECT approval_country_id as country, approval_vote as vote FROM approval WHERE approval_plan_id=?", array($d['id']));
+				$d['votes'] = Database::GetInstance()->query("SELECT approval_country_id as country, approval_vote as vote FROM approval WHERE approval_plan_id=?", array($d['id']));
 
 				//Restriction area settings that have changed in this plan.
-				$d['restriction_settings'] = $this->query("SELECT plan_restriction_area_layer_id as layer_id,
+				$d['restriction_settings'] = Database::GetInstance()->query("SELECT plan_restriction_area_layer_id as layer_id,
 				 	plan_restriction_area_country_id as team_id,
 					plan_restriction_area_entity_type as entity_type_id,
 					plan_restriction_area_size as restriction_size
@@ -609,9 +609,9 @@
 
 			$baseInfo["geometry_id"] = $geometryId;
 
-			$baseInfoQuery = $this->query("SELECT geometry_id, geometry_persistent, geometry_mspid FROM geometry WHERE geometry_id = ?", array($geometryId));
+			$baseInfoQuery = Database::GetInstance()->query("SELECT geometry_id, geometry_persistent, geometry_mspid FROM geometry WHERE geometry_id = ?", array($geometryId));
 			$persistentId = $baseInfoQuery[0]["geometry_persistent"];
-			$mspIdQuery = $this->query("SELECT geometry_mspid FROM geometry WHERE geometry_persistent = ? AND geometry_mspid IS NOT NULL", array($persistentId));
+			$mspIdQuery = Database::GetInstance()->query("SELECT geometry_mspid FROM geometry WHERE geometry_persistent = ? AND geometry_mspid IS NOT NULL", array($persistentId));
 			if (count($mspIdQuery) > 0)
 			{
 				$baseInfo["geometry_mspid"] = $mspIdQuery[0]["geometry_mspid"];
@@ -651,7 +651,7 @@
 		//export the plans for the config file
 		public function Export(&$result, &$errors = null){
 			//Make sure we don't export plans with NULL name as these are auto generated fishing plans.
-			$plans = $this->query("SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type FROM plan WHERE plan_active=? AND plan_state<>? AND plan_name IS NOT NULL", array(1, "DELETED"));
+			$plans = Database::GetInstance()->query("SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type FROM plan WHERE plan_active=? AND plan_state<>? AND plan_name IS NOT NULL", array(1, "DELETED"));
 
 			//Key value pair of persistent IDs have been remapped (key) to the new value (value).
 			$remappedPersistentGeometryIds = array();
@@ -659,18 +659,18 @@
 			$remappedGeometryIds = array();
 
 			foreach($plans as &$d){
-				$d["layers"] = $this->query("SELECT plan_layer_layer_id as layer_id, l2.layer_name as name, l2.layer_editing_type FROM plan_layer
+				$d["layers"] = Database::GetInstance()->query("SELECT plan_layer_layer_id as layer_id, l2.layer_name as name, l2.layer_editing_type FROM plan_layer
 				LEFT JOIN layer l1 ON plan_layer_layer_id=l1.layer_id
 				LEFT JOIN layer l2 ON l1.layer_original_id=l2.layer_id
 				WHERE plan_layer_plan_id=?", array($d["plan_id"]));
 
-				$d['grids'] = $this->query("SELECT grid_id, grid_name as name, grid_active as active, grid_persistent FROM grid WHERE grid_plan_id=?", array($d['plan_id']));
+				$d['grids'] = Database::GetInstance()->query("SELECT grid_id, grid_name as name, grid_active as active, grid_persistent FROM grid WHERE grid_plan_id=?", array($d['plan_id']));
 			}
 
 			foreach($plans as &$d){
-				$d['fishing'] = $this->query("SELECT * FROM fishing WHERE fishing_plan_id=?", array($d['plan_id']));
+				$d['fishing'] = Database::GetInstance()->query("SELECT * FROM fishing WHERE fishing_plan_id=?", array($d['plan_id']));
 
-				$d['messages'] = $this->query("SELECT
+				$d['messages'] = Database::GetInstance()->query("SELECT
 					plan_message_country_id as country_id,
 					plan_message_user_name as user_name,
 					plan_message_text as text,
@@ -687,7 +687,7 @@
 				foreach($d['layers'] as &$l) {
 					$l['warnings'] = $this->ExportWarningsForLayer($l['layer_id']);
 
-					$l['deleted'] = $this->query("SELECT
+					$l['deleted'] = Database::GetInstance()->query("SELECT
 						geometry_id
 						FROM plan_delete
 						LEFT JOIN geometry ON geometry.geometry_id=plan_delete.plan_delete_geometry_persistent
@@ -701,7 +701,7 @@
 						if (empty($geom['data'])) $geom['data'] = null; // MSP-2942 & MSP-2972
 
 						//get the cable data for this geometry, if it exists
-						$cableData = $this->query("SELECT
+						$cableData = Database::GetInstance()->query("SELECT
 							energy_connection_start_id as start,
 							energy_connection_end_id as end,
 							energy_connection_start_coordinates as coordinates
@@ -717,7 +717,7 @@
 							$errors[] = "Got geometry ID ".$geom['geometry_id']." which is on a cable layer, but has no active cable connections";
 						}
 
-						$energyOutput = $this->query("SELECT
+						$energyOutput = Database::GetInstance()->query("SELECT
 							energy_output_maxcapacity as maxcapacity,
 							energy_output_active as active
 						FROM energy_output WHERE energy_output_geometry_id = ?", array($geom['geometry_id']));
@@ -731,20 +731,20 @@
 				}
 
 				foreach($d['grids'] as &$grid) {
-					$grid['energy'] = $this->query("SELECT
+					$grid['energy'] = Database::GetInstance()->query("SELECT
 							grid_energy_country_id as country,
 							grid_energy_expected as expected
 						FROM grid_energy WHERE grid_energy_grid_id = ?", array($grid['grid_id']));
 
-					$grid['removed'] = $this->query("SELECT grid_removed_grid_persistent as grid_persistent FROM grid_removed WHERE grid_removed_plan_id = ?", array($grid['grid_id']));
+					$grid['removed'] = Database::GetInstance()->query("SELECT grid_removed_grid_persistent as grid_persistent FROM grid_removed WHERE grid_removed_plan_id = ?", array($grid['grid_id']));
 
-					$sockets = $this->query("SELECT grid_socket_geometry_id as geometry_id FROM grid_socket WHERE grid_socket_grid_id = ?", array($grid['grid_id']));
+					$sockets = Database::GetInstance()->query("SELECT grid_socket_geometry_id as geometry_id FROM grid_socket WHERE grid_socket_grid_id = ?", array($grid['grid_id']));
 					foreach($sockets as $socket) {
 						$socketData["geometry"] = $this->GetBaseGeometryInformation($socket["geometry_id"], $remappedGeometryIds, $remappedPersistentGeometryIds);
 						$grid['sockets'][] = $socketData;
 					}
 
-					$sources = $this->query("SELECT grid_source_geometry_id as geometry_id FROM grid_source WHERE grid_source_grid_id = ?", array($grid['grid_id']));
+					$sources = Database::GetInstance()->query("SELECT grid_source_geometry_id as geometry_id FROM grid_source WHERE grid_source_grid_id = ?", array($grid['grid_id']));
 					foreach($sources as $source) {
 						$sourceData["geometry"] = $this->GetBaseGeometryInformation($source["geometry_id"], $remappedGeometryIds, $remappedPersistentGeometryIds);
 						$grid['sources'][] = $sourceData;
@@ -779,20 +779,20 @@
 				// Base::Debug($plan);
 
 				//create a new plan and get the new ID
-				$planid = $this->query("INSERT INTO plan (plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_state) VALUES (?, ?, ?, ?, ?, ?)",
+				$planid = Database::GetInstance()->query("INSERT INTO plan (plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_state) VALUES (?, ?, ?, ?, ?, ?)",
 					array($plan['plan_country_id'], $plan['plan_name'], $plan['plan_gametime'], 0, $plan['plan_type'], "APPROVED"), true);
 				$importedPlanId[$plan['plan_id']] = $planid;
 
 				if(isset($plan['fishing'])){
 					foreach($plan['fishing'] as $fish){
-						$this->query("INSERT INTO fishing (fishing_country_id, fishing_plan_id, fishing_type, fishing_amount) VALUES (?, ?, ?, ?)", array($fish['fishing_country_id'], $planid, $fish['fishing_type'], $fish['fishing_amount']));
+						Database::GetInstance()->query("INSERT INTO fishing (fishing_country_id, fishing_plan_id, fishing_type, fishing_amount) VALUES (?, ?, ?, ?)", array($fish['fishing_country_id'], $planid, $fish['fishing_type'], $fish['fishing_amount']));
 					}
 				}
 
 				//Import messages for plan
 				if (isset($plan['messages'])) {
 					foreach($plan['messages'] as $message) {
-						$this->query("INSERT INTO plan_message (plan_message_plan_id, plan_message_country_id, plan_message_user_name, plan_message_text, plan_message_time) VALUES (?, ?, ?, ?, ?)",
+						Database::GetInstance()->query("INSERT INTO plan_message (plan_message_plan_id, plan_message_country_id, plan_message_user_name, plan_message_text, plan_message_time) VALUES (?, ?, ?, ?, ?)",
 							array($planid, $message["country_id"], $message["user_name"], $message["text"], $message["time"]));
 					}
 				}
@@ -807,7 +807,7 @@
 
 				foreach($plan['layers'] as $layer){
 					//find the original layer ID from the current local database
-					$original = $this->query("SELECT layer_id FROM layer WHERE layer_name=?", array($layer['name']));
+					$original = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($layer['name']));
 
 					if(!empty($original)){
 						$original = $original[0]['layer_id'];
@@ -815,7 +815,7 @@
 						// Base::Debug("Original layer id: " . $original);
 
 						//create a new layer for the new geometry
-						$lid = $this->query("INSERT INTO layer
+						$lid = Database::GetInstance()->query("INSERT INTO layer
 								(layer_original_id)
 								VALUES (?)",
 							array($original), true
@@ -825,7 +825,7 @@
 						// Base::Debug("New layer id: " . $lid);
 
 						//add the new layer to the database
-						$this->query("INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)", array($planid, $lid));
+						Database::GetInstance()->query("INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)", array($planid, $lid));
 
 						foreach($layer['geometry'] as $geometry){
 							//add the geometry to the database
@@ -833,13 +833,13 @@
 							if (isset($geometry['data'])) {
 								$geometryData = json_encode($geometry['data']);
 							}
-							$newGeometryId = $this->query("INSERT INTO geometry (geometry_layer_id, geometry_FID, geometry_geometry, geometry_data, geometry_country_id, geometry_type) VALUES (?, ?, ?, ?, ?, ?)",
+							$newGeometryId = Database::GetInstance()->query("INSERT INTO geometry (geometry_layer_id, geometry_FID, geometry_geometry, geometry_data, geometry_country_id, geometry_type) VALUES (?, ?, ?, ?, ?, ?)",
 								array($lid, $geometry['FID'], $geometry['geometry'], $geometryData, $geometry['country'], $geometry['type']), true);
 							$importedGeometryId[$geometry['geometry_id']] = $newGeometryId;
 
 							$baseGeometryId = $this->FixupPersistentGeometryID($geometry['base_geometry_info'], $importedGeometryId);
 
-							$this->query("UPDATE geometry SET geometry_persistent = ? WHERE geometry_id = ?", array($baseGeometryId, $newGeometryId));
+							Database::GetInstance()->query("UPDATE geometry SET geometry_persistent = ? WHERE geometry_id = ?", array($baseGeometryId, $newGeometryId));
 						}
 
 						//Import deleted geometry
@@ -847,7 +847,7 @@
 							$deletedGeometryId = $this->FixupPersistentGeometryID($deletedGeometry['base_geometry_info'], $importedGeometryId);
 							if ($deletedGeometryId != -1)
 							{
-								$this->query("INSERT INTO plan_delete (plan_delete_plan_id, plan_delete_geometry_persistent, plan_delete_layer_id) VALUES (?, ?, ?)",
+								Database::GetInstance()->query("INSERT INTO plan_delete (plan_delete_plan_id, plan_delete_geometry_persistent, plan_delete_layer_id) VALUES (?, ?, ?)",
 									array($planid, $deletedGeometryId, $lid));
 							}
 						}
@@ -857,7 +857,7 @@
 					}
 				}
 				//update the persistent IDs or the client starts complaining
-				$this->query("UPDATE geometry SET geometry_persistent=geometry_id WHERE geometry_persistent IS NULL");
+				Database::GetInstance()->query("UPDATE geometry SET geometry_persistent=geometry_id WHERE geometry_persistent IS NULL");
 
 				//Import energy connections and output now we now all geometry is known by the importer.
 				foreach($plan['layers'] as $layer){
@@ -870,7 +870,7 @@
 							$startId = $this->FixupGeometryID($geometry['cable']['start'], $importedGeometryId);
 							$endId = $this->FixupGeometryID($geometry['cable']['end'], $importedGeometryId);
 							if ($startId != -1 && $endId != -1) {
-								$this->query("INSERT INTO energy_connection (energy_connection_start_id, energy_connection_end_id, energy_connection_cable_id, energy_connection_start_coordinates, energy_connection_lastupdate) VALUES (?, ?, ?, ?, 100)",
+								Database::GetInstance()->query("INSERT INTO energy_connection (energy_connection_start_id, energy_connection_end_id, energy_connection_cable_id, energy_connection_start_coordinates, energy_connection_lastupdate) VALUES (?, ?, ?, ?, 100)",
 									array($startId, $endId, $newGeometryId, $geometry['cable']['coordinates']));
 							}
 						}
@@ -880,7 +880,7 @@
 						if (!empty($geometry['energy_output'])) {
 							//Base::Debug("Importing energy output connection");
 							foreach($geometry['energy_output'] as $output) {
-								$this->query("INSERT INTO energy_output (energy_output_geometry_id, energy_output_maxcapacity, energy_output_active) VALUES(?, ?, ?)", array($newGeometryId, $output['maxcapacity'], $output['active']));
+								Database::GetInstance()->query("INSERT INTO energy_output (energy_output_geometry_id, energy_output_maxcapacity, energy_output_active) VALUES(?, ?, ?)", array($newGeometryId, $output['maxcapacity'], $output['active']));
 							}
 						}
 					}
@@ -890,7 +890,7 @@
 				if (!empty($plan['grids'])) {
 					//Base::Debug("Importing energy grid data");
 					foreach($plan['grids'] as $grid) {
-						$gridId = $this->query("INSERT INTO grid (grid_name, grid_lastupdate, grid_active, grid_plan_id) VALUES(?, 100, ?, ?)", array($grid['name'], $grid['active'], $planid), true);
+						$gridId = Database::GetInstance()->query("INSERT INTO grid (grid_name, grid_lastupdate, grid_active, grid_plan_id) VALUES(?, 100, ?, ?)", array($grid['name'], $grid['active'], $planid), true);
 						$gridPersistent = $gridId;
 						if ($grid['grid_persistent'] == $grid['grid_id']) {
 							$importedGridIds[$grid['grid_persistent']] = $gridId;
@@ -903,16 +903,16 @@
 								Base::Debug("Found reference persistent Grid ID (". $grid['grid_persistent'].") which has not been imported by the plans importer (yet).");
 							}
 						}
-						$this->query("UPDATE grid SET grid_persistent = ? WHERE grid_id = ?", array($gridPersistent, $gridId));
+						Database::GetInstance()->query("UPDATE grid SET grid_persistent = ? WHERE grid_id = ?", array($gridPersistent, $gridId));
 
 
 						foreach($grid['energy'] as $energy) {
-							$this->query("INSERT INTO grid_energy (grid_energy_grid_id, grid_energy_country_id, grid_energy_expected) VALUES(?, ?, ?)", array($gridId, $energy['country'], $energy['expected']));
+							Database::GetInstance()->query("INSERT INTO grid_energy (grid_energy_grid_id, grid_energy_country_id, grid_energy_expected) VALUES(?, ?, ?)", array($gridId, $energy['country'], $energy['expected']));
 						}
 
 						foreach($grid['removed'] as $removed) {
 							if (!empty($importedGridIds[$removed['grid_persistent']])) {
-								$this->query("INSERT INTO grid_removed (grid_removed_plan_id, grid_removed_grid_persistent) VALUES(?, ?)", array($planid, $importedGridIds[$removed['grid_persistent']]));
+								Database::GetInstance()->query("INSERT INTO grid_removed (grid_removed_plan_id, grid_removed_grid_persistent) VALUES(?, ?)", array($planid, $importedGridIds[$removed['grid_persistent']]));
 							}
 							else {
 								Base::Debug("Found deleted Grid ID (". $removed['grid_persistent'].") which has not been imported by the plans importer (yet).");
@@ -923,7 +923,7 @@
 							foreach($grid['sockets'] as $socket) {
 								$geometryId = $this->FixupGeometryID($socket['geometry'], $importedGeometryId);
 								if ($geometryId != -1) {
-									$this->query("INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES(?, ?)", array($gridId, $geometryId));
+									Database::GetInstance()->query("INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES(?, ?)", array($gridId, $geometryId));
 								}
 							}
 						}
@@ -932,7 +932,7 @@
 							foreach($grid['sources'] as $source) {
 								$geometryId = $this->FixupGeometryID($source['geometry'], $importedGeometryId);
 								if ($geometryId != -1) {
-									$this->query("INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES(?, ?)", array($gridId, $geometryId));
+									Database::GetInstance()->query("INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES(?, ?)", array($gridId, $geometryId));
 								}
 							}
 						}
@@ -947,7 +947,7 @@
 
 		private function ExportGeometryForLayer($layerId, &$remappedGeometryIds, &$remappedPersistentGeometryIds)
 		{
-			$geometryData = $this->query("SELECT
+			$geometryData = Database::GetInstance()->query("SELECT
 				geometry.geometry_id,
 				geometry.geometry_FID as FID,
                 geometry.geometry_persistent,
@@ -1012,7 +1012,7 @@
 
 		public function ExportWarningsForLayer($layerId)
 		{
-			$result = $this->query("SELECT
+			$result = Database::GetInstance()->query("SELECT
 				warning_issue_type as issue_type,
 				warning_x as x,
 				warning_y as y,
@@ -1073,7 +1073,7 @@
 
 		private function GetGeometryIdByMspId($mspId)
 		{
-			$result = $this->query("SELECT geometry_id FROM geometry WHERE geometry_mspid = ?", array($mspId));
+			$result = Database::GetInstance()->query("SELECT geometry_id FROM geometry WHERE geometry_mspid = ?", array($mspId));
 			if (count($result) > 0)
 			{
 				return $result[0]["geometry_id"];
@@ -1087,7 +1087,7 @@
 
 		public function GetMessages($time)
 		{
-			return $this->query("SELECT
+			return Database::GetInstance()->query("SELECT
 				plan_message_id as message_id,
 				plan_message_text as message,
 				plan_message_plan_id as plan_id,
@@ -1114,14 +1114,14 @@
 					$newLayerId = $layerTranslationTable[$layer['layer_id']];
 
 					foreach($layer['warnings'] as &$warning) {
-						$restrictionId = $this->query("SELECT restriction_id FROM restriction WHERE restriction_message = ?", array($warning['restriction_message']));
+						$restrictionId = Database::GetInstance()->query("SELECT restriction_id FROM restriction WHERE restriction_message = ?", array($warning['restriction_message']));
 						if (count($restrictionId) == 0) {
 							Base::Debug("Could not find restriction id for message \"".$warning['restriction_message']."\"");
 							continue;
 						}
 						$warningSourcePlan = $planTranslationTable[$warning['source_plan_id']];
 
-						$this->query("INSERT INTO warning (warning_active, warning_last_update, warning_layer_id, warning_issue_type, warning_x, warning_y, warning_source_plan_id, warning_restriction_id) VALUES(1, 100, ?, ?, ?, ?, ?, ?)",
+						Database::GetInstance()->query("INSERT INTO warning (warning_active, warning_last_update, warning_layer_id, warning_issue_type, warning_x, warning_y, warning_source_plan_id, warning_restriction_id) VALUES(1, 100, ?, ?, ?, ?, ?, ?)",
 							array($newLayerId, $warning['issue_type'], $warning['x'], $warning['y'], $warningSourcePlan, $restrictionId[0]['restriction_id']));
 					}
 				}
@@ -1130,7 +1130,7 @@
 
 		private function ExportRestrictionSettingsForPlan($planId) 
 		{
-			$result = $this->query("SELECT plan_restriction_area_country_id as country_id,
+			$result = Database::GetInstance()->query("SELECT plan_restriction_area_country_id as country_id,
 				plan_restriction_area_entity_type as entity_type_id,
 				plan_restriction_area_size as size,
 				layer.layer_name
@@ -1143,13 +1143,13 @@
 		private function ImportRestrictionSettingsForPlan($restrictionSettings, $planId) 
 		{
 			foreach($restrictionSettings as &$setting){
-				$layerId = $this->query("SELECT layer_id FROM layer WHERE layer_name =?", array($setting['layer_name']));
+				$layerId = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name =?", array($setting['layer_name']));
 				if (count($layerId) == 0) {
 					Base::Debug("Could not find layer with name ".$restriction['layer_name']." when importing restriction settings. Settings referencing this layer will be dropped.");
 					continue;
 				}
 
-				$this->query("INSERT INTO plan_restriction_area (plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id, plan_restriction_area_entity_type, plan_restriction_area_size) VALUES(?, ?, ?, ?, ?)",
+				Database::GetInstance()->query("INSERT INTO plan_restriction_area (plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id, plan_restriction_area_entity_type, plan_restriction_area_size) VALUES(?, ?, ?, ?, ?)",
 				array($planId, $layerId[0]['layer_id'], $setting['country_id'], $setting['entity_type_id'], $setting['size']));
 			}
 		}
@@ -1165,7 +1165,7 @@
 		 */
 		public function Message(int $plan, int $team_id, string $user_name, string $text) 
 		{
-			$this->query("INSERT INTO plan_message (plan_message_plan_id, plan_message_country_id, plan_message_user_name, plan_message_text, plan_message_time) VALUES (?, ?, ?, ?, ?)",
+			Database::GetInstance()->query("INSERT INTO plan_message (plan_message_plan_id, plan_message_country_id, plan_message_user_name, plan_message_text, plan_message_time) VALUES (?, ?, ?, ?, ?)",
 				array($plan, $team_id, $user_name, $text, microtime(true)));
 		}
 
@@ -1179,7 +1179,7 @@
 		 */
 		public function Lock(int $id, int $user)
 		{
-			$changedRows = $this->queryReturnAffectedRowCount("UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=? AND plan_lock_user_id IS NULL", array($user, microtime(true), $id));
+			$changedRows = Database::GetInstance()->queryReturnAffectedRowCount("UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=? AND plan_lock_user_id IS NULL", array($user, microtime(true), $id));
 			if ($changedRows != 1) throw new Exception("Lock of plan ".$id." for user ".$user." failed. Perhaps it was already or still locked?");
 		}
 
@@ -1192,7 +1192,7 @@
 		 */
 		public function Name(int $id, string $name)
 		{
-			$this->query("UPDATE plan SET plan_name=?, plan_lastupdate=? WHERE plan_id=?", array($name, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE plan SET plan_name=?, plan_lastupdate=? WHERE plan_id=?", array($name, microtime(true), $id));
 		}
 
 		/**
@@ -1204,7 +1204,7 @@
 		 */
 		public function Date(int $id, int $date)
 		{
-			$this->query("UPDATE plan SET plan_gametime=?, plan_lastupdate=? WHERE plan_id=?", array($date, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE plan SET plan_gametime=?, plan_lastupdate=? WHERE plan_id=?", array($date, microtime(true), $id));
 			$this->UpdatePlanConstructionTime($id);
 		}
 
@@ -1217,7 +1217,7 @@
 		 */
 		public function Description(int $id, string $description = "")
 		{
-			$this->query("UPDATE plan SET plan_description=?, plan_lastupdate=? WHERE plan_id=?", array($description, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE plan SET plan_description=?, plan_lastupdate=? WHERE plan_id=?", array($description, microtime(true), $id));
 		}
 
 		/**
@@ -1229,7 +1229,7 @@
 		 */
 		public function Type(int $id, string $type)
 		{
-			$this->query("UPDATE plan SET plan_type=?, plan_lastupdate=? WHERE plan_id=?", array($type, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE plan SET plan_type=?, plan_lastupdate=? WHERE plan_id=?", array($type, microtime(true), $id));
 		}
 
 		/**
@@ -1243,12 +1243,12 @@
 		{
 			foreach($settings as $setting)
 			{
-				$this->query("INSERT INTO plan_restriction_area (plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id, plan_restriction_area_entity_type, plan_restriction_area_size)
+				Database::GetInstance()->query("INSERT INTO plan_restriction_area (plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id, plan_restriction_area_entity_type, plan_restriction_area_size)
 					VALUES(?, ?, ?, ?, ?)
 					ON DUPLICATE KEY UPDATE plan_restriction_area_size = ?",
 					array($plan_id, $setting["layer_id"], $setting["team_id"], $setting["entity_type_id"], $setting["restriction_size"], $setting["restriction_size"]));
 			}
-			$this->query("UPDATE plan SET plan_lastupdate = ? WHERE plan_id = ?", array(microtime(true), $plan_id));
+			Database::GetInstance()->query("UPDATE plan SET plan_lastupdate = ? WHERE plan_id = ?", array(microtime(true), $plan_id));
 		}
 
 		/**
@@ -1262,11 +1262,11 @@
 		{
 			if ($force_unlock == 1)
 			{
-				$this->query("UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=?", array(NULL, microtime(true), $id));
+				Database::GetInstance()->query("UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=?", array(NULL, microtime(true), $id));
 			}
 			else
 			{
-				$this->query("UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=? AND plan_lock_user_id = ?", array(NULL, microtime(true), $id, $user));
+				Database::GetInstance()->query("UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=? AND plan_lock_user_id = ?", array(NULL, microtime(true), $id, $user));
 			}
 		}
 
@@ -1282,7 +1282,7 @@
 
 			$result = array();
 			$result['restriction_point_size'] = (isset($gameConfig["restriction_point_size"]))? $gameConfig["restriction_point_size"] : 5.0;
-			$result['restrictions'] = $this->query("SELECT
+			$result['restrictions'] = Database::GetInstance()->query("SELECT
 				restriction_id as id,
 				restriction_start_layer_id as start_layer,
 				restriction_start_layer_type as start_type,
@@ -1306,13 +1306,13 @@
 		{
 			//Well this is going to be an amazing ride.
 			//So we need to select the values associated with a default fishing plan which is the newest one generated because there can be multiple.
-			$sourcePlanId = $this->query("SELECT plan.plan_id FROM plan WHERE plan.plan_country_id = 1 AND plan.plan_gametime = -1 AND (plan.plan_state = \"APPROVED\" OR plan.plan_state = \"IMPLEMENTED\") ORDER BY plan.plan_id DESC");
+			$sourcePlanId = Database::GetInstance()->query("SELECT plan.plan_id FROM plan WHERE plan.plan_country_id = 1 AND plan.plan_gametime = -1 AND (plan.plan_state = \"APPROVED\" OR plan.plan_state = \"IMPLEMENTED\") ORDER BY plan.plan_id DESC");
 
 			$initialData = array();
 			if (count ($sourcePlanId) > 0)
 			{
 				//Then we select the data
-				$initialData = $this->query("SELECT
+				$initialData = Database::GetInstance()->query("SELECT
 					fishing.fishing_type as type,
 					fishing.fishing_country_id as country_id,
 					fishing.fishing_amount as amount
@@ -1337,11 +1337,11 @@
 
 			$values = json_decode($fishing_values, true);
 			foreach($values as $fishingValues) {
-				$this->query("INSERT INTO fishing (fishing_country_id, fishing_type, fishing_amount, fishing_plan_id) VALUES (?, ?, ?, ?)",
+				Database::GetInstance()->query("INSERT INTO fishing (fishing_country_id, fishing_type, fishing_amount, fishing_plan_id) VALUES (?, ?, ?, ?)",
 					array($fishingValues['country_id'], $fishingValues['type'], $fishingValues['amount'], $plan));
 			}
 
-			$this->query("UPDATE plan SET plan_lastupdate=? WHERE plan_id=?", array(microtime(true), $plan));
+			Database::GetInstance()->query("UPDATE plan SET plan_lastupdate=? WHERE plan_id=?", array(microtime(true), $plan));
 		}
 
 		/**
@@ -1352,7 +1352,7 @@
 		 */
 		public function DeleteFishing(int $plan)
 		{
-			$this->query("DELETE FROM fishing WHERE fishing_plan_id=?", array($plan));
+			Database::GetInstance()->query("DELETE FROM fishing WHERE fishing_plan_id=?", array($plan));
 		}
 
 		/**
@@ -1364,9 +1364,9 @@
 		 * @apiDescription set the energy error flag of a single plan
 		 */
 		public function SetEnergyError(int $id, int $error, int $check_dependent_plans = 0) {
-			$planData = $this->query("SELECT plan_name FROM plan WHERE plan_id = ?", array($id));
+			$planData = Database::GetInstance()->query("SELECT plan_name FROM plan WHERE plan_id = ?", array($id));
 
-			$this->query("UPDATE plan SET plan_energy_error=?, plan_lastupdate=? WHERE plan_id=?", array($error, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE plan SET plan_energy_error=?, plan_lastupdate=? WHERE plan_id=?", array($error, microtime(true), $id));
 			if ($error == 1 && $check_dependent_plans == 1) {
 				$this->SetAllDependentEnergyPlansToError($id, $planData[0]["plan_name"]);
 			}
@@ -1381,7 +1381,7 @@
 		 */
 		public function SetEnergyDistribution(int $id, bool $alters_energy_distribution)
 		{
-			$this->query("UPDATE plan SET plan_alters_energy_distribution=? WHERE plan_id=?", array($alters_energy_distribution, $id));
+			Database::GetInstance()->query("UPDATE plan SET plan_alters_energy_distribution=? WHERE plan_id=?", array($alters_energy_distribution, $id));
 		}
 
 		public function ImportRestrictions()
@@ -1398,7 +1398,7 @@
 
 			foreach($config as $restrictionobj){
 				foreach($restrictionobj as $restriction){
-					$layerstart = $this->query("SELECT layer_id FROM layer WHERE layer_name=?", array($restriction['startlayer']));
+					$layerstart = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($restriction['startlayer']));
 
 					if(empty($layerstart)){
 						Base::Warning("<strong>" . $restriction['startlayer'] . "</strong> does not exist in this config file. Is it added in the layer meta?");
@@ -1407,7 +1407,7 @@
 					else{
 						$startid = $layerstart[0]['layer_id'];
 
-						$layerend = $this->query("SELECT layer_id FROM layer WHERE layer_name=?", array($restriction['endlayer']));
+						$layerend = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($restriction['endlayer']));
 
 						if(empty($layerend)){
 							Base::Warning("<strong>" . $restriction['endlayer'] . "</strong> does not exist in this config file. Is it added in the layer meta?");
@@ -1415,7 +1415,7 @@
 						}
 						else{
 							$endid = $layerend[0]['layer_id'];
-							$this->query("INSERT INTO restriction
+							Database::GetInstance()->query("INSERT INTO restriction
 									(restriction_start_layer_id,
 									restriction_start_layer_type,
 									restriction_sort,
@@ -1444,7 +1444,7 @@
 			foreach($fullConfig["meta"] as $layerId => $layerMeta) {
 				foreach($layerMeta["layer_type"] as $typeId => $typeMeta) {
 					if (isset($typeMeta["availability"]) && (int)$typeMeta["availability"] > 0) {
-						$this->query("INSERT INTO restriction
+						Database::GetInstance()->query("INSERT INTO restriction
 									(restriction_start_layer_id,
 									restriction_start_layer_type,
 									restriction_sort,

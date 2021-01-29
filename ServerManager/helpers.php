@@ -186,6 +186,7 @@ function CallAPI($method, $url, $data2send = false, $headers = array(), $asjson 
     curl_setopt($curl, CURLOPT_USERAGENT, "MSP Challenge Server Manager API");
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 10);
     $result = curl_exec($curl);
     curl_close($curl);
     return $result;

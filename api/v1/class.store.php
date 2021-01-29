@@ -152,7 +152,7 @@
 			// should be ok, because in the new setup, the individual endpoint that is called, 
 			// ... or the execution of a single batch of endpoints that is called, 
 			// ... is wrapped in a transaction that can be rolled back in case of any kind of exception
-			//$this->query("START TRANSACTION");
+			//Database::GetInstance()->query("START TRANSACTION");
 
 			$filename = $layerMetaData['layer_name'];
 
@@ -170,7 +170,7 @@
 				}
 				else {
 					//Create the metadata for the raster layer, but don't fill in the layer_raster field. This must be done by something else later.
-					$this->query("INSERT INTO layer (layer_name, layer_geotype, layer_group, layer_editable) VALUES (?, ?, ?, ?)", array($filename, "raster", $region, 0));
+					Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_geotype, layer_group, layer_editable) VALUES (?, ?, ?, ?)", array($filename, "raster", $region, 0));
 				}
 			}
 			else{
@@ -183,21 +183,21 @@
 				}
 				else {
 					//Create the metadata for the vector layer, but don't fill the geometry table. This will be up to the players.
-					$this->query("INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)", array($filename, $layerMetaData['layer_geotype'], $region));
+					Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)", array($filename, $layerMetaData['layer_geotype'], $region));
 				}
 			}
 
-			$this->query("UPDATE geometry SET geometry_persistent=geometry_id WHERE geometry_persistent IS NULL");
-			//$this->query("COMMIT");
+			Database::GetInstance()->query("UPDATE geometry SET geometry_persistent=geometry_id WHERE geometry_persistent IS NULL");
+			//Database::GetInstance()->query("COMMIT");
 
 			$this->CheckForDuplicateMspIds();
 		}
 
 		private function CheckForDuplicateMspIds() 
 		{
-			$result = $this->query("SELECT COUNT(*) as mspIdCount, geometry_mspid FROM geometry WHERE geometry_mspid IS NOT NULL GROUP BY geometry_mspid HAVING mspIdCount > 1");
+			$result = Database::GetInstance()->query("SELECT COUNT(*) as mspIdCount, geometry_mspid FROM geometry WHERE geometry_mspid IS NOT NULL GROUP BY geometry_mspid HAVING mspIdCount > 1");
 			foreach($result as $duplicateId) {
-				$duplicatedLayerNames = $this->query("SELECT DISTINCT(layer.layer_name) FROM layer 
+				$duplicatedLayerNames = Database::GetInstance()->query("SELECT DISTINCT(layer.layer_name) FROM layer 
 					INNER JOIN geometry ON geometry.geometry_layer_id = layer.layer_id
 				WHERE geometry.geometry_mspid = ?", array($duplicateId['geometry_mspid']));
 				$layerNames = implode(", ", array_map(function($data) { return $data['layer_name']; }, $duplicatedLayerNames));
@@ -219,7 +219,7 @@
 
 				$rasterMeta = array("url" => $filename . ".png", "boundingbox" => array(array($bb->minx, $bb->miny), array($bb->maxx, $bb->maxy)));
 
-				$q = $this->query("INSERT INTO layer (layer_name, layer_raster, layer_geotype, layer_group, layer_editable) VALUES (?, ?, ?, ?, ?)", array($filename, json_encode($rasterMeta), "raster", $workspace, 0));
+				$q = Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_raster, layer_geotype, layer_group, layer_editable) VALUES (?, ?, ?, ?, ?)", array($filename, json_encode($rasterMeta), "raster", $workspace, 0));
 
 				return $rasterMeta;
 			}
@@ -273,7 +273,7 @@
 				return;
 			}
 
-			$layer_id = $this->query("INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)", array($filename, $type, $datastore), true);
+			$layer_id = Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)", array($filename, $type, $datastore), true);
 
 			//used for 
 			$lastid = 0;
@@ -385,12 +385,12 @@
 		private function InsertGeometry($FID, $layerid, $geometry, $data, $countryId, $type, $mspid, $subtractive=null)
 		{
 			if($subtractive == null){
-				$persistentid = $this->query("INSERT INTO geometry (geometry_FID, geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_mspid) 
+				$persistentid = Database::GetInstance()->query("INSERT INTO geometry (geometry_FID, geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_mspid) 
 									VALUES (?, ?, ?, ?, ?, ?, ?)", 
 									array($FID, $layerid, $geometry, $data, $countryId, $type, $mspid), true);
 			}
 			else{
-				$persistentid = $this->query("INSERT INTO geometry (geometry_FID, geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_subtractive) 
+				$persistentid = Database::GetInstance()->query("INSERT INTO geometry (geometry_FID, geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_subtractive) 
 									VALUES (?, ?, ?, ?, ?, ?, ?)", 
 									array($FID, $layerid, $geometry, $data, $countryId, $type, $subtractive), true);
 			}

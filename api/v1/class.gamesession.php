@@ -43,8 +43,7 @@ class GameSession extends Base
 		$protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
 	
 		$dbConfig = Config::GetInstance()->DatabaseConfig();
-		$dbase = new Database;
-		$temporaryConnection = $dbase->CreateTemporaryDBConnection($dbConfig["host"], $dbConfig["user"], $dbConfig["password"], $dbConfig["database"]);
+		$temporaryConnection = Database::CreateTemporaryDBConnection($dbConfig["host"], $dbConfig["user"], $dbConfig["password"], $dbConfig["database"]);
 		foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1;") as $row) {
 			$server_name = $row["address"];
 			//if ($server_name == "localhost") $server_name = getHostByName(getHostName());
@@ -68,7 +67,7 @@ class GameSession extends Base
 
 		$result = [];
 
-		$databaseList = $this->query("SHOW DATABASES LIKE '".$sessionDatabasePattern."'");
+		$databaseList = Database::GetInstance()->query("SHOW DATABASES LIKE '".$sessionDatabasePattern."'");
 		foreach($databaseList as $r)
 		{
 			$databaseName = reset($r); //Get the first entry from the array.
@@ -88,6 +87,7 @@ class GameSession extends Base
 	 * @apiParam {string} watchdog_address URL at which the watchdog resides for this session.
 	 * @apiParam {string] response_address URL which we call when the setup is done.
 	 * @apiParam {int} allow_recreate (0|1) Allow overwriting of an existing session?
+	 * @ForceNoTransaction
 	 */
 	public function CreateGameSession(int $game_id, string $config_file_content, string $password_admin, string $password_player, string $watchdog_address, string $response_address, string $jwt, bool $allow_recreate = false)
 	{
@@ -102,14 +102,14 @@ class GameSession extends Base
 			else 
 			{
 				$security = new Security();
-				$this->SwitchToSessionDatabase($sessionId);
+				Database::GetInstance()->SwitchToSessionDatabase($sessionId);
 				if (!$security->CheckAccess(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER))
 				{
 					throw new Exception("Access denied for provided token");
 				}
 				else 
 				{
-					$this->DropSessionDatabase($this->GetDatabaseName());
+					Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
 				}
 			}
 		}
@@ -200,6 +200,7 @@ class GameSession extends Base
 	 * @apiParam {string} password_player Player password for this session
 	 * @apiParam {string} watchdog_address API Address to direct all Watchdog calls to.
 	 * @apiParam {string} response_address URL which we call when the setup is done.
+	 * @ForceNoTransaction
 	 */
 	public function CreateGameSessionAndSignal(string $config_file_path, string $geoserver_url, string $geoserver_username, string $geoserver_password, string $password_admin, string $password_player, string $watchdog_address, string $response_address, string $jwt)
 	{
@@ -210,7 +211,7 @@ class GameSession extends Base
 			throw new Exception("Recreate failed");
 		}
 
-		$this->query("INSERT INTO game_session (game_session_watchdog_address, game_session_watchdog_token, game_session_password_admin, game_session_password_player) VALUES (?, UUID_SHORT(), ?, ?)",
+		Database::GetInstance()->query("INSERT INTO game_session (game_session_watchdog_address, game_session_watchdog_token, game_session_password_admin, game_session_password_player) VALUES (?, UUID_SHORT(), ?, ?)",
 				array($watchdog_address, $password_admin, $password_player)); 
 
 		//Notify the simulation that the game has been setup so we start the simulations. 
@@ -237,7 +238,7 @@ class GameSession extends Base
 
 	public function ResetWatchdogAddress(string $watchdog_address) {
 		if (!empty($watchdog_address)) {
-			$this->query("UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT() 
+			Database::GetInstance()->query("UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT() 
 							WHERE game_session_watchdog_address = (SELECT game_session_watchdog_address FROM game_session);", array($_POST['watchdog_address']));
 		}
 		else throw new Exception("Empty watchdog address not allowed.");
@@ -272,10 +273,10 @@ class GameSession extends Base
 
 			$zipname = $createzipreturn['zipname'];
 
-			$this->DropSessionDatabase($this->GetDatabaseName());
+			Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
 			
 			$configFilePath = null;
-			$gameData = $this->query("SELECT game_configfile FROM game");
+			$gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
 			if (count($gameData) > 0)
 			{
 				$configFilePath = self::CONFIG_DIRECTORY.$gameData[0]['game_configfile'];
@@ -319,7 +320,7 @@ class GameSession extends Base
 		$this->CreateMspDatabaseDump($sqlDumpPath, true);
 	
 		$configFilePath = null;
-		$gameData = $this->query("SELECT game_configfile FROM game");
+		$gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
 		if (count($gameData) > 0)
 		{
 			$configFilePath = self::CONFIG_DIRECTORY.$gameData[0]['game_configfile'];

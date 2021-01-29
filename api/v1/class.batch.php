@@ -23,7 +23,7 @@ class Batch extends Base
 	 */
 	public function StartBatch()
 	{
-		return $this->query("INSERT INTO api_batch() VALUES ()", array(), true);
+		return Database::GetInstance()->query("INSERT INTO api_batch() VALUES ()", array(), true);
 		//return array("batch_id" => $batch_id);
 	}
 
@@ -44,7 +44,7 @@ class Batch extends Base
 	{
 		$endpoint = preg_replace("/\A[\/]?api\//", "", $endpoint);
 		
-		$this->query("INSERT INTO api_batch_task (
+		Database::GetInstance()->query("INSERT INTO api_batch_task (
 			api_batch_task_batch_id, 
 			api_batch_task_group, 
 			api_batch_task_reference_identifier, 
@@ -75,7 +75,7 @@ class Batch extends Base
 		$batchResult = array("results" => array());
 		$cachedResults = array(); //Results by call-id indexed;
 
-		$data = $this->query("SELECT api_batch_task_id, 
+		$data = Database::GetInstance()->query("SELECT api_batch_task_id, 
 				api_batch_task_reference_identifier, 
 				api_batch_task_api_endpoint, 
 				api_batch_task_api_endpoint_data 

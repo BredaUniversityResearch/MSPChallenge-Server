@@ -27,16 +27,16 @@
 		 */
 		public function Post(string $FID = "", int $persistent = null, string $data = "", int $country = null, int $plan = -1, int $layer, string $geometry)
 		{
-			$newid = $this->query("INSERT INTO geometry (geometry_layer_id, geometry_geometry, geometry_FID, geometry_persistent, geometry_data, geometry_country_id) 
+			$newid = Database::GetInstance()->query("INSERT INTO geometry (geometry_layer_id, geometry_geometry, geometry_FID, geometry_persistent, geometry_data, geometry_country_id) 
 									VALUES (?, ?, ?, ?, ?, ?)", array($layer, $geometry, $FID, $persistent, $data, $country), true);
 
 			if($plan != -1){
-				$this->query("UPDATE plan SET plan_lastupdate=? WHERE plan_id=?", array(microtime(true), $plan));
+				Database::GetInstance()->query("UPDATE plan SET plan_lastupdate=? WHERE plan_id=?", array(microtime(true), $plan));
 			}
 
 			//set the persistent id if it's new geometry
 			if(is_null($persistent)){
-				$this->query("UPDATE geometry SET geometry_persistent=? WHERE geometry_id=?", array($newid, $newid));
+				Database::GetInstance()->query("UPDATE geometry SET geometry_persistent=? WHERE geometry_id=?", array($newid, $newid));
 			}
 
 			return $newid;
@@ -54,14 +54,14 @@
 		 */
 		public function PostSubtractive(int $persistent = null, string $FID = "", int $layer, string $geometry, int $subtractive)
 		{
-			$data = $this->query("INSERT INTO geometry 
+			$data = Database::GetInstance()->query("INSERT INTO geometry 
 				(geometry_layer_id, geometry_geometry, geometry_FID, geometry_persistent, geometry_subtractive) 
 				VALUES (?, ?, ?, ?, ?)", 
 				array($layer, $geometry, $FID, $persistent, $subtractive), true);
 
 			//set the persistent id if it's new geometry
 			if(is_null($persistent)){
-				$this->query("UPDATE geometry SET geometry_persistent=? WHERE geometry_id=?", array($data, $data));
+				Database::GetInstance()->query("UPDATE geometry SET geometry_persistent=? WHERE geometry_id=?", array($data, $data));
 			}
 		}
 		
@@ -75,7 +75,7 @@
 		 */
 		public function Update(int $id, int $country, string $geometry)
 		{
-			$this->query("UPDATE geometry SET geometry_geometry = ?, geometry_country_id = ? WHERE geometry_id = ?",
+			Database::GetInstance()->query("UPDATE geometry SET geometry_geometry = ?, geometry_country_id = ? WHERE geometry_id = ?",
 									array($geometry, $country, $id));
 			return $id;
 		}
@@ -90,7 +90,7 @@
 		 */
 		public function Data(string $data, string $type, int $id)
 		{
-			$this->query("UPDATE geometry SET geometry_data=?, geometry_type=? WHERE geometry_id=?", array($data, $type, $id));
+			Database::GetInstance()->query("UPDATE geometry SET geometry_data=?, geometry_type=? WHERE geometry_id=?", array($data, $type, $id));
 		}
 
 		/**
@@ -101,7 +101,7 @@
 		 */
 		public function Delete(int $id)
 		{
-			$this->query("UPDATE geometry SET geometry_active = 0, geometry_deleted = 1 WHERE (geometry_id=? OR geometry_subtractive=?)", array($id, $id));
+			Database::GetInstance()->query("UPDATE geometry SET geometry_active = 0, geometry_deleted = 1 WHERE (geometry_id=? OR geometry_subtractive=?)", array($id, $id));
 		}
 
 		/**
@@ -114,7 +114,7 @@
 		 */
 		public function MarkForDelete(int $plan, int $id, int $layer)
 		{
-			$this->query("INSERT INTO plan_delete (plan_delete_plan_id, plan_delete_geometry_persistent, plan_delete_layer_id) VALUES (?, ?, ?)", 
+			Database::GetInstance()->query("INSERT INTO plan_delete (plan_delete_plan_id, plan_delete_geometry_persistent, plan_delete_layer_id) VALUES (?, ?, ?)", 
 				array($plan, $id, $layer)
 			);
 		}
@@ -128,7 +128,7 @@
 		 */
 		public function UnmarkForDelete(int $plan, int $id)
 		{
-			$this->query("DELETE FROM plan_delete WHERE plan_delete_plan_id=? AND plan_delete_geometry_persistent=?", 
+			Database::GetInstance()->query("DELETE FROM plan_delete WHERE plan_delete_plan_id=? AND plan_delete_geometry_persistent=?", 
 				array($plan, $id)
 			);
 		}

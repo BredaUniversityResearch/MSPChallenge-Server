@@ -85,18 +85,18 @@ class Security extends Base
 	//Returns array of [token => TokenValue, valid_until => UnixTimestamp]
 	public function GenerateToken($accessLevel = self::ACCESS_LEVEL_FLAG_FULL, $lifetimeSeconds = self::DEFAULT_TOKEN_LIFETIME_SECONDS)
 	{
-		$this->query("DELETE FROM api_token WHERE api_token_valid_until != 0 AND api_token_valid_until < DATE_ADD(NOW(), INTERVAL -? SECOND)", array(self::TOKEN_DELETE_AFTER_TIME));
+		Database::GetInstance()->query("DELETE FROM api_token WHERE api_token_valid_until != 0 AND api_token_valid_until < DATE_ADD(NOW(), INTERVAL -? SECOND)", array(self::TOKEN_DELETE_AFTER_TIME));
 		
 		$token = random_int(0, PHP_INT_MAX);
 		if ($lifetimeSeconds == self::TOKEN_LIFETIME_INFINITE)
 		{
-			$id = $this->query("INSERT INTO api_token (api_token_token, api_token_scope, api_token_valid_until) VALUES(?, ?, 0)", array($token, $accessLevel), true); 
+			$id = Database::GetInstance()->query("INSERT INTO api_token (api_token_token, api_token_scope, api_token_valid_until) VALUES(?, ?, 0)", array($token, $accessLevel), true); 
 		}
 		else
 		{
-			$id = $this->query("INSERT INTO api_token (api_token_token, api_token_scope, api_token_valid_until) VALUES(?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))", array($token, $accessLevel, $lifetimeSeconds), true); 
+			$id = Database::GetInstance()->query("INSERT INTO api_token (api_token_token, api_token_scope, api_token_valid_until) VALUES(?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))", array($token, $accessLevel, $lifetimeSeconds), true); 
 		}
-		$result = $this->query("SELECT api_token_token, api_token_valid_until FROM api_token WHERE api_token_id = ?", array($id));
+		$result = Database::GetInstance()->query("SELECT api_token_token, api_token_valid_until FROM api_token WHERE api_token_id = ?", array($id));
 		return array("token" => $result[0]["api_token_token"], "valid_until" => $result[0]["api_token_valid_until"]);
 	}
 
@@ -116,7 +116,7 @@ class Security extends Base
 	{
 		if ($accessLevel == self::ACCESS_LEVEL_FLAG_REQUEST_TOKEN || $accessLevel == self::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
 		{
-			$tokenInfo = $this->query("SELECT api_token_token FROM api_token WHERE api_token_valid_until = 0 AND api_token_scope = ?", array($accessLevel));
+			$tokenInfo = Database::GetInstance()->query("SELECT api_token_token FROM api_token WHERE api_token_valid_until = 0 AND api_token_scope = ?", array($accessLevel));
 			$token = "";
 			if (count($tokenInfo) > 0)
 			{
@@ -139,7 +139,7 @@ class Security extends Base
 
 	private function GetTokenDetails($tokenValue)
 	{
-		$details = $this->query("SELECT api_token_scope, UNIX_TIMESTAMP(api_token_valid_until) as expiry_time, UNIX_TIMESTAMP(api_token_valid_until) - UNIX_TIMESTAMP(NOW()) as valid_time_remaining FROM api_token WHERE api_token_token = ?", array($tokenValue));
+		$details = Database::GetInstance()->query("SELECT api_token_scope, UNIX_TIMESTAMP(api_token_valid_until) as expiry_time, UNIX_TIMESTAMP(api_token_valid_until) - UNIX_TIMESTAMP(NOW()) as valid_time_remaining FROM api_token WHERE api_token_token = ?", array($tokenValue));
 		if (count($details) > 0)
 		{
 			return $details[0];

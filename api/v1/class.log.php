@@ -28,7 +28,7 @@
 
 		public function PostEvent($source, $severity, $message, $stackTrace) 
 		{
-			$this->query("INSERT INTO event_log (event_log_source, event_log_severity, event_log_message, event_log_stack_trace) VALUES (?, ?, ?, ?)", array($source, $severity, $message, $stackTrace));
+			Database::GetInstance()->query("INSERT INTO event_log (event_log_source, event_log_severity, event_log_message, event_log_stack_trace) VALUES (?, ?, ?, ?)", array($source, $severity, $message, $stackTrace));
 		}
 
 		public static function ServerEvent($source, $severity, $message) 

@@ -64,18 +64,32 @@
 				$message = Base::ErrorString(new Exception("Access denied (Security)."));
 			}
 			elseif(method_exists($class, $method)) {
+				$classData = new ReflectionClass($class);
+				$methodData = $classData->getMethod($method);
+
 				// everything ok, try to actually call the class method - wrapped in a transaction - and catch any exceptions thrown
-				$arguments = self::ResolveArguments($class, $method, $data);
+				$arguments = self::ResolveArguments($classData, $methodData, $data);
+				$transactionOptOut = self::CheckMethodAttributes($methodData);
 				try {				
+					if (!$transactionOptOut && $startDatabaseTransaction)
+					{
+						Database::GetInstance()->DBStartTransaction();
+					}
+					
 					$payload = $class->$method(...$arguments);
+
+					if (!$transactionOptOut && $startDatabaseTransaction)
+					{
+						Database::GetInstance()->DBCommitTransaction();
+					}
 				} catch (\Throwable $e) { 
 					// execution failed, perhaps because of database connection failure or PHP warning, or because endpoint threw exception
 					// PHP code parsing errors are caught in the shutdown function as defined in helpers.php
 					$success = false;
 
-					if ($startDatabaseTransaction)
+					if (!$transactionOptOut && $startDatabaseTransaction)
 					{
-						$class->DBRollbackTransaction();
+						Database::GetInstance()->DBRollbackTransaction();
 					}
 
 					$message = Base::ErrorString($e);
@@ -92,11 +106,9 @@
 			return self::FormatResponse($success, $message, $payload, $className, $method, $data);
 		}
 
-		private static function ResolveArguments(object $classInstance, string $methodName, array $argumentsArray)
+		private static function ResolveArguments(ReflectionClass $classData, ReflectionMethod $methodData, array $argumentsArray)
 		{
-			$classData = new ReflectionClass($classInstance);
 			$className = $classData->getName();
-			$methodData = $classData->getMethod($methodName);
 			$parametersData = $methodData->getParameters();
 
 			$result = [];
@@ -200,6 +212,12 @@
 		private static function AllowedClass($class)
 		{
 			return in_array(strtolower($class), self::ALLOWED_CLASSES);
+		}
+
+		private static function CheckMethodAttributes(ReflectionMethod $methodData)
+		{
+			$comment = $methodData->getDocComment();
+			return stristr($comment, "@ForceNoTransaction") !== false;
 		}
 	}
 ?>

@@ -39,7 +39,7 @@
 				}
 			}
 
-			$passwords = $this->query("SELECT game_session_password_admin, game_session_password_player FROM game_session");
+			$passwords = Database::GetInstance()->query("SELECT game_session_password_admin, game_session_password_player FROM game_session");
 			$hasCorrectPassword = true;
 			if (count($passwords) > 0)
 			{
@@ -49,7 +49,7 @@
 
 			if ($hasCorrectPassword)
 			{
-				$response["session_id"] = $this->query("INSERT INTO user(user_lastupdate, user_country_id) VALUES (0, ?)", array($country_id), true);
+				$response["session_id"] = Database::GetInstance()->query("INSERT INTO user(user_lastupdate, user_country_id) VALUES (0, ?)", array($country_id), true);
 				$security = new Security();
 				$response["api_access_token"] = $security->GenerateToken()["token"];
 				$response["api_access_recovery_token"] = $security->GetRecoveryToken()["token"];

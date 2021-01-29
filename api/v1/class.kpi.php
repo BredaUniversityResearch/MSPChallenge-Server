@@ -40,7 +40,7 @@
 		private function PostKPI(string $kpiName, int $kpiMonth, int $kpiValue, string $kpiType, string $kpiUnit, int $kpiCountry = -1)
 		{
 			$value = floatval(str_replace(",", ".", $kpiValue));
-			return $this->query("INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 
+			return Database::GetInstance()->query("INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 
 					VALUES (?, ?, ?, ?, ?, ?, ?)
 					ON DUPLICATE KEY UPDATE kpi_value = ?, kpi_lastupdate = ?", 
 				array($kpiName, $value, $kpiMonth, $kpiType, microtime(true), $kpiUnit, $kpiCountry, $value, microtime(true)), true
@@ -52,7 +52,7 @@
 			$data = array();
 
 			//should probably be renamed to be something other than ecology
-			$data['ecology'] = $this->query("SELECT 
+			$data['ecology'] = Database::GetInstance()->query("SELECT 
 				kpi_name as name,
 				kpi_value as value,
 				kpi_month as month,
@@ -61,7 +61,7 @@
 				kpi_country_id as country
 			FROM kpi WHERE kpi_lastupdate>? AND (kpi_country_id=? OR kpi_country_id = -1) AND kpi_type=\"ECOLOGY\"", array($time, $country));
 
-			$data['shipping'] = $this->query("SELECT 
+			$data['shipping'] = Database::GetInstance()->query("SELECT 
 				kpi_name as name,
 				kpi_value as value,
 				kpi_month as month,
@@ -71,7 +71,7 @@
 			FROM kpi WHERE kpi_lastupdate>? AND (kpi_country_id=? OR kpi_country_id = -1) AND kpi_type=\"SHIPPING\"", array($time, $country));
 
 
-			$data['energy'] = $this->query("SELECT 
+			$data['energy'] = Database::GetInstance()->query("SELECT 
 				energy_kpi_grid_id as grid,
 				energy_kpi_month as month,
 				energy_kpi_country_id as country,

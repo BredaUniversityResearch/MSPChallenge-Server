@@ -171,7 +171,7 @@
 		public function EmptyDatabase()
 		{
 			Update::printLog("EmptyDatabase -> Starting empty database...");
-			$this->DropSessionDatabase($this->GetDatabaseName());
+			Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
 			
 			Update::printLog("EmptyDatabase -> Deleted database.");
 		}
@@ -192,17 +192,18 @@
 			$defaultDatabaseName = "msp";
 
 			//Ensure database exists
-			$this->CreateDatabaseAndSelect();
+			$db = Database::GetInstance();
+			$db->CreateDatabaseAndSelect();
 
 			$query = file_get_contents(APIHelper::GetCurrentSessionServerApiFolder()."mysql_structure.sql");	//import the db structure
-			$query = str_replace("`".$defaultDatabaseName."`", "`".$this->GetDatabaseName()."`", $query); //Replace the default database name with the desired one required for the session.
-			$this->query($query);
+			$query = str_replace("`".$defaultDatabaseName."`", "`".$db->GetDatabaseName()."`", $query); //Replace the default database name with the desired one required for the session.
+			$db->query($query);
 			//file_put_contents(APIHelper::GetCurrentSessionServerApiFolder()."mysql_structure_edit.sql", $query);
 
 			$query = file_get_contents(APIHelper::GetCurrentSessionServerApiFolder()."mysql_inserts.sql");	//run the inserts
-			$query = str_replace("`".$defaultDatabaseName."`", "`".$this->GetDatabaseName()."`", $query);
-			$this->query($query);
-			$this->query("INSERT INTO game_session_api_version (game_session_api_version_server) VALUES (?)", array(APIHelper::GetCurrentSessionServerApiVersion()));
+			$query = str_replace("`".$defaultDatabaseName."`", "`".$db->GetDatabaseName()."`", $query);
+			$db->query($query);
+			$db->query("INSERT INTO game_session_api_version (game_session_api_version_server) VALUES (?)", array(APIHelper::GetCurrentSessionServerApiVersion()));
 
 			$game = new Game();
 			$game->SetupFilename($filename);
@@ -213,28 +214,28 @@
 
 		private function ApplyGameConfig()
 		{
-			$this->query("UPDATE game SET game_autosave_month_interval = ?", array(Config::GetInstance()->GetGameAutosaveInterval()));
+			Database::GetInstance()->query("UPDATE game SET game_autosave_month_interval = ?", array(Config::GetInstance()->GetGameAutosaveInterval()));
 		}
 
 		public function ClearPlans()
 		{
 			Update::printLog("ClearPlans -> Cleaning plans ...");
 
-			$this->query("SET FOREIGN_KEY_CHECKS=0");
-			$todelete = $this->query("SELECT geometry_id FROM plan_layer
+			Database::GetInstance()->query("SET FOREIGN_KEY_CHECKS=0");
+			$todelete = Database::GetInstance()->query("SELECT geometry_id FROM plan_layer
 				LEFT JOIN geometry ON geometry.geometry_layer_id=plan_layer.plan_layer_layer_id");
 
 			foreach($todelete as $del){
-				$this->query("DELETE FROM geometry WHERE geometry_id=?", array($del['geometry_id']));
+				Database::GetInstance()->query("DELETE FROM geometry WHERE geometry_id=?", array($del['geometry_id']));
 			}
 
-			$this->query("TRUNCATE plan_delete");
-			$this->query("TRUNCATE plan_message");
-			$this->query("TRUNCATE plan_layer");
-			$this->query("DELETE FROM layer WHERE layer_original_id IS NOT NULL");
-			$this->query("TRUNCATE plan");
+			Database::GetInstance()->query("TRUNCATE plan_delete");
+			Database::GetInstance()->query("TRUNCATE plan_message");
+			Database::GetInstance()->query("TRUNCATE plan_layer");
+			Database::GetInstance()->query("DELETE FROM layer WHERE layer_original_id IS NOT NULL");
+			Database::GetInstance()->query("TRUNCATE plan");
 
-			$this->query("SET FOREIGN_KEY_CHECKS=1");
+			Database::GetInstance()->query("SET FOREIGN_KEY_CHECKS=1");
 
 			Update::printLog("ClearPlans -> All plans have been deleted.");
 		}

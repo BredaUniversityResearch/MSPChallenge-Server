@@ -26,7 +26,7 @@
 		 */
 		public function GetConnections(){
 
-			$data = $this->query("SELECT 
+			$data = Database::GetInstance()->query("SELECT 
 					energy_connection_start_id as fromNodeID,
 					energy_connection_end_id as toNodeID,
 					energy_connection_cable_id as cableID,
@@ -70,12 +70,12 @@
 		 * @apiDescription Should Cel update this month?
 		 */
 		public function ShouldUpdate() {
-			$time = $this->query('SELECT game_currentmonth FROM game')[0];
+			$time = Database::GetInstance()->query('SELECT game_currentmonth FROM game')[0];
 			if ($time['game_currentmonth'] == 0) { //Yay starting plans.
 				return true;
 			}
 
-			$implementedPlans = $this->query("SELECT plan_type FROM plan WHERE plan_gametime = ? AND plan_state = \"IMPLEMENTED\" AND plan_type LIKE \"1,_,_\"", array($time['game_currentmonth']));
+			$implementedPlans = Database::GetInstance()->query("SELECT plan_type FROM plan WHERE plan_gametime = ? AND plan_state = \"IMPLEMENTED\" AND plan_type LIKE \"1,_,_\"", array($time['game_currentmonth']));
 			return (count($implementedPlans) > 0);
 		}
 
@@ -86,7 +86,7 @@
 		 * @apiDescription Notify that Cel has finished updating a month
 		 */
 		public function UpdateFinished(int $month) {
-			$this->query("UPDATE game SET game_cel_lastmonth = ?", array($month));
+			Database::GetInstance()->query("UPDATE game SET game_cel_lastmonth = ?", array($month));
 		}
 
 		/**
@@ -95,7 +95,7 @@
 		 * @apiDescription Get all nodes that have an output associated with them
 		 */
 		public function GetNodes(){
-			$data = $this->query("SELECT 
+			$data = Database::GetInstance()->query("SELECT 
 				energy_output_geometry_id as geometry_id, 
 				energy_output_maxcapacity as maxcapacity
 				FROM energy_output
@@ -116,7 +116,7 @@
 		 * @apiDescription Returns a list of all active sources
 		 */
 		public function GetSources(){
-			$data = $this->query("SELECT grid_source.grid_source_geometry_id FROM grid
+			$data = Database::GetInstance()->query("SELECT grid_source.grid_source_geometry_id FROM grid
 				INNER JOIN grid_source ON grid_source.grid_source_grid_id = grid.grid_id
 				LEFT JOIN plan ON grid.grid_plan_id = plan.plan_id
 				LEFT JOIN geometry on grid_source.grid_source_geometry_id = geometry.geometry_id
@@ -138,7 +138,7 @@
 		 * @apiDescription Get all grids and their associated sockets, sorted per country
 		 */
 		public function GetGrids(){
-			$data = $this->query("SELECT grid.grid_id, grid_energy.grid_energy_country_id, grid_energy.grid_energy_expected, geometry.geometry_id FROM grid_socket 
+			$data = Database::GetInstance()->query("SELECT grid.grid_id, grid_energy.grid_energy_country_id, grid_energy.grid_energy_expected, geometry.geometry_id FROM grid_socket 
 					LEFT JOIN grid ON grid_socket_grid_id=grid_id
 					LEFT JOIN geometry on grid_socket_geometry_id = geometry_id
 					LEFT JOIN grid_energy ON grid_energy_country_id = geometry.geometry_country_id
@@ -187,7 +187,7 @@
 			$values = json_decode($geomCapacityValues, true);
 			foreach($values as $value)
 			{
-				$this->query("UPDATE energy_output SET energy_output_capacity=?, energy_output_lastupdate=? WHERE energy_output_geometry_id=?", array($value['capacity'], microtime(true), $value['id']));
+				Database::GetInstance()->query("UPDATE energy_output SET energy_output_capacity=?, energy_output_lastupdate=? WHERE energy_output_geometry_id=?", array($value['capacity'], microtime(true), $value['id']));
 			}
 		}
 
@@ -200,14 +200,14 @@
 
 		public function SetGridCapacity(string $kpiValues){
 
-			$gameMonth = $this->query("SELECT game_currentmonth FROM game WHERE game_id = 1")[0]["game_currentmonth"];
+			$gameMonth = Database::GetInstance()->query("SELECT game_currentmonth FROM game WHERE game_id = 1")[0]["game_currentmonth"];
 
 			$timestamp = microtime(true);
 
 			$values = json_decode($kpiValues, true);
 			foreach($values as $value)
 			{
-				$this->query("INSERT INTO energy_kpi (energy_kpi_grid_id, energy_kpi_month, energy_kpi_country_id, energy_kpi_actual, energy_kpi_lastupdate) 
+				Database::GetInstance()->query("INSERT INTO energy_kpi (energy_kpi_grid_id, energy_kpi_month, energy_kpi_country_id, energy_kpi_actual, energy_kpi_lastupdate) 
 						VALUES (?, ?, ?, ?, ?)
 					ON DUPLICATE KEY UPDATE energy_kpi_actual = ?, energy_kpi_lastupdate = ?", 
 				array($value['grid'], $gameMonth, $value['country'], $value['actual'], $timestamp, $value['actual'], $timestamp));

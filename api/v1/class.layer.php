@@ -33,7 +33,7 @@
 		 */
 		public function Delete(int $layer_id)
 		{
-			$this->query("UPDATE layer SET layer_active=? WHERE layer_id=?", array(0, $layer_id));
+			Database::GetInstance()->query("UPDATE layer SET layer_active=? WHERE layer_id=?", array(0, $layer_id));
 		}
 		
 		/**
@@ -45,19 +45,19 @@
 		 */
 		public function Export(int $layer_id) 
 		{
-			$layer = $this->query("SELECT * FROM layer WHERE layer_id=?", array($layer_id));
+			$layer = Database::GetInstance()->query("SELECT * FROM layer WHERE layer_id=?", array($layer_id));
 			if(empty($layer)){
 				throw new Exception("Layer not found.");
 			}
 			$layer = $layer[0];
 
-			$geometry = $this->query("SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data, geometry_mspid
+			$geometry = Database::GetInstance()->query("SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data, geometry_mspid
 				FROM layer LEFT JOIN geometry ON geometry_layer_id=layer.layer_id 
 				WHERE geometry.geometry_active=? AND (layer_id=? OR layer_original_id=?) AND geometry_subtractive=?", 
 				array(1, $layer_id, $layer_id, 0)
 			);
 
-			$subtractivearr = $this->query("SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data, geometry_subtractive FROM geometry WHERE geometry_layer_id=? AND geometry_subtractive<>? AND geometry_active=?", array($layer_id, 0, 1));
+			$subtractivearr = Database::GetInstance()->query("SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data, geometry_subtractive FROM geometry WHERE geometry_layer_id=? AND geometry_subtractive<>? AND geometry_active=?", array($layer_id, 0, 1));
 			$all = array();
 			
 			foreach($geometry as $shape){
@@ -139,12 +139,12 @@
 		 */
 		public function Get(int $layer_id)
 		{
-			$vectorcheck = $this->query("SELECT layer_geotype FROM layer WHERE layer_id = ?", array($layer_id));
+			$vectorcheck = Database::GetInstance()->query("SELECT layer_geotype FROM layer WHERE layer_id = ?", array($layer_id));
 			if (empty($vectorcheck[0]["layer_geotype"]) || $vectorcheck[0]["layer_geotype"] == "raster") {
 				throw new Exception("Not a vector layer.");
 			}
 			
-			$data = $this->query("SELECT 
+			$data = Database::GetInstance()->query("SELECT 
 					geometry_id as id, 
 					geometry_geometry as geometry, 
 					geometry_country_id as country,
@@ -171,7 +171,7 @@
 		 */
 		public function GetRaster(int $month = -1, string $layer_name)
 		{
-			$layerData = $this->query("SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?", array($layer_name));
+			$layerData = Database::GetInstance()->query("SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?", array($layer_name));
 			if (count($layerData) != 1)
 			{
 				throw new Exception("Could not find layer with name " . $layer_name . " to request the raster image for");
@@ -224,7 +224,7 @@
 
 			foreach($data as $arr){
 				//check if the layer exists
-				$d = $this->query("SELECT layer_id FROM layer WHERE layer_name=?", array($arr['layer_name']));
+				$d = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($arr['layer_name']));
 
 				if(empty($d)){
 					Base::Warning("<strong>" . $arr['layer_name'] . "</strong> was not found. Has this layer been renamed or removed?");
@@ -285,12 +285,12 @@
 
 					array_push($insertarr, $arr['layer_name']);
 
-					$this->query("UPDATE layer SET " . $inserts . " WHERE layer_name=?", $insertarr);
+					Database::GetInstance()->query("UPDATE layer SET " . $inserts . " WHERE layer_name=?", $insertarr);
 
 					//Import raster specific information. 
 					if ($arr["layer_geotype"] == "raster")
 					{
-						$sqlRasterInfo = $this->query("SELECT layer_raster FROM layer WHERE layer_name=?", array($arr["layer_name"]));
+						$sqlRasterInfo = Database::GetInstance()->query("SELECT layer_raster FROM layer WHERE layer_name=?", array($arr["layer_name"]));
 						$existingRasterInfo = json_decode($sqlRasterInfo[0]["layer_raster"], true);
 
 						if (isset($arr["layer_raster_material"])) {
@@ -309,10 +309,10 @@
 							$existingRasterInfo["layer_raster_filter_mode"] = $arr["layer_raster_filter_mode"];
 						}
 						
-						$this->query("UPDATE layer SET layer_raster = ? WHERE layer_name = ?", array(Base::JSON($existingRasterInfo), $arr["layer_name"]));
+						Database::GetInstance()->query("UPDATE layer SET layer_raster = ? WHERE layer_name = ?", array(Base::JSON($existingRasterInfo), $arr["layer_name"]));
 					}
 
-					$alltypes = $this->query("SELECT geometry_type FROM geometry WHERE geometry_layer_id=? GROUP BY geometry_type", array($d[0]['layer_id']));
+					$alltypes = Database::GetInstance()->query("SELECT geometry_type FROM geometry WHERE geometry_layer_id=? GROUP BY geometry_type", array($d[0]['layer_id']));
 					$jsontype = $arr['layer_type'];
 					$errortypes = array();
 
@@ -330,7 +330,7 @@
 						}
 					}
 
-					$this->query("UPDATE layer SET layer_type=? WHERE layer_name=?", array(json_encode($jsontype, JSON_FORCE_OBJECT), $arr['layer_name']));
+					Database::GetInstance()->query("UPDATE layer SET layer_type=? WHERE layer_name=?", array(json_encode($jsontype, JSON_FORCE_OBJECT), $arr['layer_name']));
 				}
 			}
 		}
@@ -342,7 +342,7 @@
 		 */
 		public function List() 
 		{
-			$data = $this->query("SELECT 
+			$data = Database::GetInstance()->query("SELECT 
 									layer.layer_id,
 									layer.layer_name,
 									layer.layer_geotype
@@ -376,7 +376,7 @@
 		public function MetaByName(string $name)
 		{
 			$result = array(); //"[]";
-			$layerID = $this->query("SELECT layer_id FROM layer where layer_name=?", array($name));
+			$layerID = Database::GetInstance()->query("SELECT layer_id FROM layer where layer_name=?", array($name));
 			if (count($layerID) > 0)
 			{
 				$result = $this->GetMetaForLayerById($layerID[0]["layer_id"])[0]; //Base::JSON($this->GetMetaForLayerById($layerID[0]["layer_id"])[0]);
@@ -398,7 +398,7 @@
 		 */
 		public function Post(string $name, string $geotype)
 		{
-			$id = $this->query("INSERT INTO layer (layer_name, layer_geotype) VALUES (?, ?)", array($name, $geotype), true);
+			$id = Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_geotype) VALUES (?, ?)", array($name, $geotype), true);
 			return $id;
 		}
 
@@ -416,7 +416,7 @@
 		 */
 		public function UpdateMeta(string $short, string $category, string $subcategory, string $type, int $depth, int $id)
 		{
-			$this->query("UPDATE layer SET layer_short=?, layer_category=?, layer_subcategory=?, layer_type=?, layer_depth=? WHERE layer_id=?", 
+			Database::GetInstance()->query("UPDATE layer SET layer_short=?, layer_category=?, layer_subcategory=?, layer_type=?, layer_depth=? WHERE layer_id=?", 
 				array($short, $category, $subcategory, $type, $depth, $id));
 		}
 
@@ -430,7 +430,7 @@
 		*/
 		public function UpdateRaster(string $layer_name, array $raster_bounds = null, string $image_data)
 		{
-			$layerData = $this->query("SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?", array($layer_name));
+			$layerData = Database::GetInstance()->query("SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?", array($layer_name));
 			if (count($layerData) != 1)
 			{
 				throw new Exception("Could not find layer with name " . $layer_name . " to update the raster image");
@@ -442,7 +442,7 @@
 			{
 				if (file_exists(Store::GetRasterStoreFolder().$rasterData['url'])) 
 				{
-					$gameData = $this->query("SELECT game_currentmonth FROM game")[0];
+					$gameData = Database::GetInstance()->query("SELECT game_currentmonth FROM game")[0];
 					Store::EnsureFolderExists(Store::GetRasterArchiveFolder());
 
 					$layerPathInfo = pathinfo($rasterData['url']);
@@ -465,11 +465,11 @@
 
 				if ($rasterDataUpdated)
 				{
-					$this->query("UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1, layer_raster = ? WHERE layer_id = ?", array(microtime(true), json_encode($rasterData), $layerData[0]['layer_id']));
+					Database::GetInstance()->query("UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1, layer_raster = ? WHERE layer_id = ?", array(microtime(true), json_encode($rasterData), $layerData[0]['layer_id']));
 				}
 				else 
 				{
-					$this->query("UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1 WHERE layer_id = ?", array(microtime(true), $layerData[0]['layer_id']));
+					Database::GetInstance()->query("UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1 WHERE layer_id = ?", array(microtime(true), $layerData[0]['layer_id']));
 				}
 			}
 			else
@@ -486,7 +486,7 @@
 		{
 			//get all the geometry of a plan, excluding the geometry that has been deleted in the current plan, or has been replaced by a newer generation (so highest geometry_id of any persistent ID)
 			foreach($layers as $key=>$layer){
-				$layers[$key]['geometry'] = $this->query("SELECT
+				$layers[$key]['geometry'] = Database::GetInstance()->query("SELECT
 						geometry_id as id, 
 						geometry_geometry as geometry, 
 						geometry_country_id as country,
@@ -507,7 +507,7 @@
 				$layers[$key]['geometry'] = Base::MergeGeometry($layers[$key]['geometry'], false);
 			}
 
-			$deleted = $this->query("SELECT plan_delete_geometry_persistent as geometry, plan_delete_layer_id as layerid, layer_original_id as original
+			$deleted = Database::GetInstance()->query("SELECT plan_delete_geometry_persistent as geometry, plan_delete_layer_id as layerid, layer_original_id as original
 				FROM plan_delete
 				LEFT JOIN layer ON plan_delete.plan_delete_layer_id=layer.layer_id
 				WHERE plan_delete_plan_id=? ORDER BY layerid ASC", array($planid));
@@ -542,7 +542,7 @@
 
 		public function LatestRaster($time)
 		{
-			return $this->query("SELECT layer_raster as raster, layer_id as id FROM layer WHERE layer_geotype=? AND layer_lastupdate>?", array("raster", $time));
+			return Database::GetInstance()->query("SELECT layer_raster as raster, layer_id as id FROM layer WHERE layer_geotype=? AND layer_lastupdate>?", array("raster", $time));
 		}
 
 		public function HandleWKTParse($geometry)
@@ -629,7 +629,7 @@
 		{
 			if (empty($layer_id)) throw new Exception("Empty layer_id.");
 
-			$layerData = $this->query("SELECT layer_id, layer_raster FROM layer WHERE layer_id = ?", array($layer_id));
+			$layerData = Database::GetInstance()->query("SELECT layer_id, layer_raster FROM layer WHERE layer_id = ?", array($layer_id));
 			if (count($layerData) != 1) throw new Exception("Could not find layer with id " . $layer_id . " to request the raster image for");
 
 			$rasterData = json_decode($layerData[0]['layer_raster'], true);
@@ -643,7 +643,7 @@
 
 		private function GetMetaForLayerById($layerId)
 		{
-			$data = $this->query("SELECT * FROM layer WHERE layer_id=?", array($layerId));
+			$data = Database::GetInstance()->query("SELECT * FROM layer WHERE layer_id=?", array($layerId));
 			Layer::FixupLayerMetaData($data[0]);
 			return $data;
 		}

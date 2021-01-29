@@ -1,5 +1,6 @@
 <?php
-	class Base extends Database {
+	class Base
+	{
 		public static $debug = false;
 		
 		public static $more = false;
@@ -12,8 +13,6 @@
 
 		public function __construct($called)
 		{
-			parent::__construct();
-
 			if($called !== "")
 			{
 				$this->isvalid = $this->Validate($this->allowed, $called);

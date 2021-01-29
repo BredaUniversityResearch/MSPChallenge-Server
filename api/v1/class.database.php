@@ -8,9 +8,11 @@ class Database {
 	private $db_pass;
 	public $db_name;
 	
-	private static $conn;
-	private static bool $isTransactionRunning = false;
+	private $conn;
+	private bool $isTransactionRunning = false;
 	
+	private static $instance = null;
+
 	protected $salt = 'c02b7d24a066adb747fdeb12deb21bfa';
 
 	private static array $PDOArgs = array(
@@ -21,17 +23,33 @@ class Database {
 	
 	function __construct()
 	{
+		if (self::$instance != null)
+		{
+			throw new Exception("Creation of multiple database instances."); 
+		}
+		self::$instance = $this;
 		$this->status = 'dev';
 		$this->SetupConfiguration();
 	}
 
 	function __destruct()
 	{
-		if (self::$isTransactionRunning)
+		if ($this->isTransactionRunning)
 		{
-			$this->DBCommitTransaction();
+			$this->DBRollbackTransaction();
+			throw new Exception("DB destructed when transaction was still running. Rolling back");
 		}
 		$conn = null;
+		self::$instance = null;
+	}
+
+	public static function GetInstance()
+	{
+		if (self::$instance == null)
+		{
+			new Database();
+		}
+		return self::$instance;
 	}
 	
 	private function SetupConfiguration($overrideSessionId = GameSession::INVALID_SESSION_ID)
@@ -61,13 +79,13 @@ class Database {
 
 	private function connectToDatabase() 
 	{
-		if (self::$conn == null) {
+		if ($this->conn == null) {
 
 			try {
 				$this->SetupConfiguration();
-				self::$conn = new PDO('mysql:host='.$this->db_host.';dbname='.$this->db_name, $this->db_user, $this->db_pass, self::$PDOArgs);
+				$this->conn = new PDO('mysql:host='.$this->db_host.';dbname='.$this->db_name, $this->db_user, $this->db_pass, self::$PDOArgs);
 			} catch(PDOException $e){
-				self::$conn = null;
+				$this->conn = null;
 			}
 		}
 	}
@@ -78,7 +96,7 @@ class Database {
 		return $connection;
 	}
 
-	public function CreateTemporaryDBConnection($dbHost, $user, $password, $dbName) 
+	public static function CreateTemporaryDBConnection($dbHost, $user, $password, $dbName) 
 	{
 		$connection = new PDO("mysql:host=".$dbHost, $user, $password, self::$PDOArgs);
 		$connection->query("USE ".$dbName);
@@ -87,7 +105,7 @@ class Database {
 
 	private function isConnectedToDatabase() 
 	{
-		return self::$conn != null;
+		return $this->conn != null;
 	}
 
 	public function query($statement, $vars = null, $getid=false)
@@ -96,11 +114,6 @@ class Database {
 		if (!$this->isConnectedToDatabase()) {
 			return [];
 		}
-		if (!self::$isTransactionRunning)
-		{
-			$this->DBStartTransaction();
-		}
-
 		$result = array();
 		
 		try {
@@ -110,7 +123,7 @@ class Database {
 		}
 
 		if($getid == true)
-			return self::$conn->lastInsertID();
+			return $this->conn->lastInsertID();
 		
 		//Just making sure we aren't calling fetchAll on an empty result set (update/insert queries) which will result in a SQLSTATE[HY000] exception.
 		if ($query != null && $query->columnCount() > 0)
@@ -147,7 +160,7 @@ class Database {
 	public function prepareQuery($statement) 
 	{
 		$this->connectToDatabase();
-		return self::$conn->prepare($statement);
+		return $this->conn->prepare($statement);
 	}
 
 	public function executePreparedQuery($query, $vars)
@@ -164,7 +177,7 @@ class Database {
 	{
 		//Simple wrapper for PDO::Quote since that needs an instance of the connection...
 		$this->connectToDatabase();
-		return self::$conn->quote($string);
+		return $this->conn->quote($string);
 	}
 
 	public function GetDatabaseName()
@@ -181,7 +194,7 @@ class Database {
 
 	public function SwitchDatabase($databaseName)
 	{
-		$this->query("USE ".$databaseName);
+		Database::GetInstance()->query("USE ".$databaseName);
 		$this->db_name = $databaseName;
 	}
 
@@ -216,13 +229,13 @@ class Database {
 		$this->connectToDatabase();
 		if ($this->isConnectedToDatabase()) 
 		{
-			if (self::$isTransactionRunning)
+			if ($this->isTransactionRunning)
 			{
 				throw new Exception("Running multiple transactions");
 			}
 			
-			self::$conn->beginTransaction();
-			self::$isTransactionRunning = true;
+			$this->conn->beginTransaction();
+			$this->isTransactionRunning = true;
 		}
 	}
 
@@ -230,21 +243,25 @@ class Database {
 	{ 
 		if ($this->isConnectedToDatabase()) 
 		{
-			self::$conn->commit();
-			self::$isTransactionRunning = false;
+			if (!$this->isTransactionRunning)
+			{
+				throw new Exception("Commiting transaction when no transaction is running");
+			}
+			$this->conn->commit();
+			$this->isTransactionRunning = false;
 		}
 	}
 
 	public function DBRollbackTransaction() 
 	{ 
-		if (!self::$isTransactionRunning)
+		if (!$this->isTransactionRunning)
 		{
 			return;
 		}
 		if ($this->isConnectedToDatabase()) 
 		{
-			self::$conn->rollBack();
-			self::$isTransactionRunning = false;
+			$this->conn->rollBack();
+			$this->isTransactionRunning = false;
 		}
 	}
 
@@ -265,7 +282,7 @@ class Database {
 	
 	private function GetMysqlExecutableDirectory()
 	{
-		$mysqlDir = $this->query("SELECT @@basedir as mysql_home");
+		$mysqlDir = Database::GetInstance()->query("SELECT @@basedir as mysql_home");
 		return $mysqlDir[0]["mysql_home"];
 	}
 

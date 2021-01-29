@@ -52,14 +52,7 @@ class RemoteSessionCreationHandler
 
 			$api_url = Config::get('msp_server_protocol').$remoteGameServerAddress.Config::get('code_branch')."/api/GameSession/CreateGameSession";
 			
-			//$response['message'] = $pathToApi;
-			/*$curl_handler = curl_init();
-			curl_setopt($curl_handler, CURLOPT_URL, $api_url);
-			curl_setopt($curl_handler, CURLOPT_POSTFIELDS, http_build_query($request_array));
-			curl_setopt($curl_handler, CURLOPT_HTTPHEADER, $additionalHeaders);
-			// Receive server response ...
-			curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);*/
-			$server_output = CallAPI("POST", $api_url, $request_array, $additionalHeaders, false); //curl_exec($curl_handler);
+			$server_output = CallAPI("POST", $api_url, $request_array, $additionalHeaders, false);
 			$decoded_output = json_decode($server_output, true);
 			//curl_close ($curl_handler);
 

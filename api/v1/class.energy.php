@@ -57,10 +57,10 @@
 		 */
 		public function UpdateGridSockets(int $id, array $sockets)
 		{
-			$this->query("DELETE FROM grid_socket WHERE grid_socket_grid_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM grid_socket WHERE grid_socket_grid_id=?", array($id));
 
 			foreach($sockets as $str){
-				$this->query("INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES (?, ?)", array($id, $str));
+				Database::GetInstance()->query("INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES (?, ?)", array($id, $str));
 			}
 		}
 
@@ -75,10 +75,10 @@
 		 */
 		public function UpdateGridSources(int $id, array $sources = array())
 		{
-			$this->query("DELETE FROM grid_source WHERE grid_source_grid_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM grid_source WHERE grid_source_grid_id=?", array($id));
 			//throw new Exception("Sources looks like this now: ".var_export($sources, true));
 			foreach($sources as $str){
-				$this->query("INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES (?, ?)", array($id, $str));
+				Database::GetInstance()->query("INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES (?, ?)", array($id, $str));
 			}
 		}
 
@@ -91,10 +91,10 @@
 		 */
 		public function UpdateGridEnergy(int $id, array $expected)
 		{
-			$this->query("DELETE FROM grid_energy WHERE grid_energy_grid_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM grid_energy WHERE grid_energy_grid_id=?", array($id));
 
 			foreach($expected as $country){
-				$this->query("INSERT INTO grid_energy (grid_energy_grid_id, grid_energy_country_id, grid_energy_expected) VALUES (?, ?, ?)", array($id, $country["country_id"], $country["energy_expected"]));
+				Database::GetInstance()->query("INSERT INTO grid_energy (grid_energy_grid_id, grid_energy_country_id, grid_energy_expected) VALUES (?, ?, ?)", array($id, $country["country_id"], $country["energy_expected"]));
 			}
 		}
 
@@ -109,7 +109,7 @@
 		 */
 		public function UpdateMaxCapacity(int $id, int $maxcapacity)
 		{
-			$this->query("UPDATE energy_output SET energy_output_maxcapacity=?, energy_output_lastupdate=? WHERE energy_output_geometry_id=?", array($maxcapacity, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE energy_output SET energy_output_maxcapacity=?, energy_output_lastupdate=? WHERE energy_output_geometry_id=?", array($maxcapacity, microtime(true), $id));
 		}
 
 		/**
@@ -120,7 +120,7 @@
 		 */
 		public function GetUsedCapacity(int $id)
 		{
-			$this->query("SELECT energy_output_capacity as capacity FROM energy_output WHERE energy_output_geometry_id=?", array($id));
+			Database::GetInstance()->query("SELECT energy_output_capacity as capacity FROM energy_output WHERE energy_output_geometry_id=?", array($id));
 		}
 
 		/**
@@ -131,7 +131,7 @@
 		 */
 		public function DeleteOutput(int $id)
 		{
-			$this->query("UPDATE energy_output SET energy_output_active=?, energy_output_lastupdate=? WHERE energy_output_geometry_id=?", array(0, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE energy_output SET energy_output_active=?, energy_output_lastupdate=? WHERE energy_output_geometry_id=?", array(0, microtime(true), $id));
 		}
 
 		/**
@@ -143,7 +143,7 @@
 		 */
 		public function AddOutput(int $id, int $maxcapacity)
 		{
-			$this->query("INSERT INTO energy_output (energy_output_geometry_id, energy_output_maxcapacity, energy_output_lastupdate) VALUES (?, ?, ?)", array($id, $maxcapacity, microtime(true)));
+			Database::GetInstance()->query("INSERT INTO energy_output (energy_output_geometry_id, energy_output_maxcapacity, energy_output_lastupdate) VALUES (?, ?, ?)", array($id, $maxcapacity, microtime(true)));
 		}
 
 
@@ -156,7 +156,7 @@
 		 */
 		public function UpdateGridName(int $id, string $name)
 		{
-			$this->query("UPDATE grid SET grid_name=?, grid_lastupdate=? WHERE grid_id=?", array($name, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE grid SET grid_name=?, grid_lastupdate=? WHERE grid_id=?", array($name, microtime(true), $id));
 		}
 
 		/**
@@ -168,12 +168,12 @@
 		public function DeleteGrid(int $id)
 		{
 			
-			$this->query("DELETE FROM grid_socket WHERE grid_socket_grid_id=?", array($id));
-			$this->query("DELETE FROM grid_source WHERE grid_source_grid_id=?", array($id));
-			$this->query("DELETE FROM grid_energy WHERE grid_energy_grid_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM grid_socket WHERE grid_socket_grid_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM grid_source WHERE grid_source_grid_id=?", array($id));
+			Database::GetInstance()->query("DELETE FROM grid_energy WHERE grid_energy_grid_id=?", array($id));
 			
-			$this->query("UPDATE plan INNER JOIN grid ON grid.grid_plan_id = plan.plan_id SET plan.plan_lastupdate = ? WHERE grid.grid_id = ?", array(microtime(true), $id));			
-			$this->query("DELETE FROM grid WHERE grid_id=?", array($id));
+			Database::GetInstance()->query("UPDATE plan INNER JOIN grid ON grid.grid_plan_id = plan.plan_id SET plan.plan_lastupdate = ? WHERE grid.grid_id = ?", array(microtime(true), $id));			
+			Database::GetInstance()->query("DELETE FROM grid WHERE grid_id=?", array($id));
 		}
 
 		/**
@@ -188,8 +188,8 @@
 		 */
 		public function AddGrid(string $name, int $plan, bool $distribution_only, int $persistent = -1)
 		{
-			$id = $this->query("INSERT INTO grid (grid_name, grid_lastupdate, grid_plan_id, grid_distribution_only) VALUES (?, ?, ?, ?)", array($name, microtime(true), $plan, $distribution_only), true);
-			$this->query("UPDATE grid SET grid_persistent=? WHERE grid_id=?", array(($persistent == -1) ? $persistent : $id, $id));
+			$id = Database::GetInstance()->query("INSERT INTO grid (grid_name, grid_lastupdate, grid_plan_id, grid_distribution_only) VALUES (?, ?, ?, ?)", array($name, microtime(true), $plan, $distribution_only), true);
+			Database::GetInstance()->query("UPDATE grid SET grid_persistent=? WHERE grid_id=?", array(($persistent == -1) ? $persistent : $id, $id));
 
 			return $id;
 		}
@@ -204,10 +204,10 @@
 		public function SetDeleted(int $plan, array $delete = array())
 		{
 
-			$this->query("DELETE FROM grid_removed WHERE grid_removed_plan_id=?", array($plan));
+			Database::GetInstance()->query("DELETE FROM grid_removed WHERE grid_removed_plan_id=?", array($plan));
 
 			foreach($delete as $remove){
-				$this->query("INSERT INTO grid_removed (grid_removed_plan_id, grid_removed_grid_persistent) VALUES (?, ?)", array($plan, $remove));
+				Database::GetInstance()->query("INSERT INTO grid_removed (grid_removed_plan_id, grid_removed_grid_persistent) VALUES (?, ?)", array($plan, $remove));
 			}
 		}
 
@@ -220,7 +220,7 @@
 		 */
 		public function AddSocket(int $grid, int $geometry)
 		{
-			$this->query("INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES (?, ?)", array($grid, $geometry));
+			Database::GetInstance()->query("INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES (?, ?)", array($grid, $geometry));
 		}
 		
 		/**
@@ -231,7 +231,7 @@
 		 */
 		public function DeleteSocket(int $geometry)
 		{
-			$this->query("DELETE FROM grid_socket WHERE grid_socket_geometry_id=?", array($geometry));
+			Database::GetInstance()->query("DELETE FROM grid_socket WHERE grid_socket_geometry_id=?", array($geometry));
 		}
 
 		/**
@@ -243,7 +243,7 @@
 		 */
 		public function AddSource(int $grid, int $geometry)
 		{
-			$this->query("INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES (?, ?)", array($grid, $geometry));
+			Database::GetInstance()->query("INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES (?, ?)", array($grid, $geometry));
 		}
 		
 		/**
@@ -254,7 +254,7 @@
 		 */
 		public function DeleteSource(int $geometry)
 		{
-			$this->query("DELETE FROM grid_source WHERE grid_source_geometry_id=?", array($geometry));
+			Database::GetInstance()->query("DELETE FROM grid_source WHERE grid_source_geometry_id=?", array($geometry));
 		}
 
 
@@ -269,7 +269,7 @@
 		 */
 		public function CreateConnection(int $start, int $end, int $cable, string $coords)
 		{
-			$this->query("INSERT INTO energy_connection (energy_connection_start_id, energy_connection_end_id, energy_connection_cable_id, energy_connection_start_coordinates, energy_connection_lastupdate) VALUES (?, ?, ?, ?, ?)", 
+			Database::GetInstance()->query("INSERT INTO energy_connection (energy_connection_start_id, energy_connection_end_id, energy_connection_cable_id, energy_connection_start_coordinates, energy_connection_lastupdate) VALUES (?, ?, ?, ?, ?)", 
 				array($start, $end, $cable, $coords, microtime(true))
 			);
 		}
@@ -282,12 +282,12 @@
 		 */
 		public function DeleteConnection(int $cable)
 		{
-			$this->query("UPDATE energy_connection SET energy_connection_lastupdate=?, energy_connection_active=? WHERE energy_connection_cable_id=? AND energy_connection_active=?", array(microtime(true), 0, $cable, 1));
+			Database::GetInstance()->query("UPDATE energy_connection SET energy_connection_lastupdate=?, energy_connection_active=? WHERE energy_connection_cable_id=? AND energy_connection_active=?", array(microtime(true), 0, $cable, 1));
 		}
 
 		public function GetOutput($geometryid)
 		{
-			return $this->query("SELECT 
+			return Database::GetInstance()->query("SELECT 
 				energy_connection_start_id as start,
 				energy_connection_end_id as end,
 				energy_connection_cable_id as cable,
@@ -297,11 +297,11 @@
 
 		public function DeleteEnergyInformationFromLayer($layerId) 
 		{
-			$geometryToDelete = $this->query("SELECT geometry_id FROM geometry WHERE geometry_layer_id = ?", array($layerId));
+			$geometryToDelete = Database::GetInstance()->query("SELECT geometry_id FROM geometry WHERE geometry_layer_id = ?", array($layerId));
 			foreach($geometryToDelete as $geometry)
 			{
-				$this->query("DELETE FROM energy_connection WHERE energy_connection_start_id = :geometryId OR energy_connection_end_id = :geometryId OR energy_connection_cable_id = :geometryId", array("geometryId" => $geometry['geometry_id']));
-				$this->query("DELETE FROM energy_output WHERE energy_output_geometry_id = ?", array($geometry['geometry_id']));
+				Database::GetInstance()->query("DELETE FROM energy_connection WHERE energy_connection_start_id = :geometryId OR energy_connection_end_id = :geometryId OR energy_connection_cable_id = :geometryId", array("geometryId" => $geometry['geometry_id']));
+				Database::GetInstance()->query("DELETE FROM energy_output WHERE energy_output_geometry_id = ?", array($geometry['geometry_id']));
 			}
 		}
 
@@ -316,17 +316,17 @@
 		 */
 		public function SetOutput(int $id, float $capacity, float $maxcapacity, int $country )
 		{
-			$data = $this->query("SELECT energy_output_id FROM energy_output WHERE energy_output_geometry_id=?", array($id));
+			$data = Database::GetInstance()->query("SELECT energy_output_id FROM energy_output WHERE energy_output_geometry_id=?", array($id));
 
 			if(empty($data)){
-				$this->query("INSERT INTO 
+				Database::GetInstance()->query("INSERT INTO 
 					energy_output (energy_output_geometry_id, energy_output_capacity, energy_output_maxcapacity, energy_output_country_id, energy_output_lastupdate) 
 					VALUES (?, ?, ?, ?, ?)", 
 					array($id, $capacity, $maxcapacity, $country, microtime(true))
 				);
 			}
 			else{
-				$this->query("UPDATE energy_output SET 
+				Database::GetInstance()->query("UPDATE energy_output SET 
 					energy_output_capacity=?,
 					energy_output_maxcapacity=?,
 					energy_output_country=?, 
@@ -340,7 +340,7 @@
 
 		public function GridEnergy()
 		{
-			$data = $this->query("SELECT grid_energy_id FROM grid_energy WHERE grid_energy_country_id=? AND grid_energy_grid_id=?", array($country, $id));
+			$data = Database::GetInstance()->query("SELECT grid_energy_id FROM grid_energy WHERE grid_energy_country_id=? AND grid_energy_grid_id=?", array($country, $id));
 		}
 
 		/**
@@ -351,7 +351,7 @@
 		public function GetConnections()
 		{
 			//TODO: This is part of CEL
-			return $this->query("SELECT 
+			return Database::GetInstance()->query("SELECT 
 					energy_connection_start_id as start,
 					energy_connection_end_id as end,
 					energy_connection_cable_id as cable,
@@ -365,13 +365,13 @@
 		//internal
 		public function Clear($params="")
 		{
-			$this->query("TRUNCATE TABLE energy_connection");
+			Database::GetInstance()->query("TRUNCATE TABLE energy_connection");
 		}
 
 		public function Latest($time)
 		{
 			$data = array();
-			$data['connections'] = $this->query("SELECT 
+			$data['connections'] = Database::GetInstance()->query("SELECT 
 				energy_connection_start_id as start,
 				energy_connection_end_id as end,
 				energy_connection_cable_id as cable,
@@ -379,7 +379,7 @@
 				energy_connection_active as active
 			FROM energy_connection WHERE energy_connection_lastupdate > ?", array($time));
 
-			$data["output"] = $this->query("SELECT 
+			$data["output"] = Database::GetInstance()->query("SELECT 
 				energy_output_geometry_id as id, 
 				energy_output_capacity as capacity,
 				energy_output_maxcapacity as maxcapacity, 
@@ -400,7 +400,7 @@
 		private function ExportShapefile()
 		{
 			$layer = new Layer("");
-			$layers = $this->query("SELECT * FROM layer WHERE layer_editing_type IS NOT NULL");
+			$layers = Database::GetInstance()->query("SELECT * FROM layer WHERE layer_editing_type IS NOT NULL");
 			$layerstring = "";
 			foreach($layers as $l){
 				$layerstring .= $l['layer_name'] . ",";
@@ -431,10 +431,10 @@
 		{
 			$planIdsDependentOnThisPlan = array();
 
-			$referencePlanData = $this->query("SELECT plan_gametime FROM plan WHERE plan_id = ? ", array($planId))[0];
+			$referencePlanData = Database::GetInstance()->query("SELECT plan_gametime FROM plan WHERE plan_id = ? ", array($planId))[0];
 			
 			//Plans that are referencing the same persisten grid ids.
-			$planChangingReferencedGrids = $this->query("SELECT plan.plan_id 
+			$planChangingReferencedGrids = Database::GetInstance()->query("SELECT plan.plan_id 
 				FROM plan
 				INNER JOIN grid ON plan.plan_id = grid.grid_plan_id
 				WHERE (plan.plan_gametime > :planGameTime OR (plan.plan_gametime = :planGameTime AND plan.plan_id > :planId)) AND grid.grid_persistent IN (SELECT grid.grid_persistent FROM grid WHERE grid.grid_plan_id = :planId)", 
@@ -446,7 +446,7 @@
 			}
 
 			//Plans that are deleting the persistent Id 
-			$plansReferencingDeletedGrids = $this->query("SELECT plan.plan_id 
+			$plansReferencingDeletedGrids = Database::GetInstance()->query("SELECT plan.plan_id 
 				FROM plan
 				INNER JOIN grid_removed ON plan.plan_id = grid_removed.grid_removed_plan_id
 				WHERE (plan.plan_gametime > :planGameTime OR (plan.plan_gametime = :planGameTime AND plan.plan_id > :planId)) AND 
@@ -460,7 +460,7 @@
 			}
 
 			//Plans that have connections to any geometry in the current plan.
-			$plansWithCablesReferencingGeometry = $this->query("SELECT plan_connection.plan_id
+			$plansWithCablesReferencingGeometry = Database::GetInstance()->query("SELECT plan_connection.plan_id
 			FROM energy_connection 
 				INNER JOIN geometry geometry_start ON energy_connection.energy_connection_start_id = geometry_start.geometry_id
 				INNER JOIN plan_layer plan_layer_start ON geometry_start.geometry_layer_id = plan_layer_start.plan_layer_layer_id
@@ -503,13 +503,13 @@
 		//Check future plans for any references to grids that we delete in the current plan. 
 		public function FindOverlappingEnergyPlans($planId, &$result) 
 		{
-			$removedGridIds = $this->query("SELECT grid_removed.grid_removed_grid_persistent as grid_persistent, plan.plan_gametime 
+			$removedGridIds = Database::GetInstance()->query("SELECT grid_removed.grid_removed_grid_persistent as grid_persistent, plan.plan_gametime 
 				FROM grid_removed 
 					INNER JOIN plan ON grid_removed.grid_removed_plan_id = plan.plan_id
 				WHERE grid_removed_plan_id = ?", array($planId));
 			
 			foreach($removedGridIds as $removedGridId) {
-				$futureReferencedGrids = $this->query("SELECT grid_plan_id as plan_id 
+				$futureReferencedGrids = Database::GetInstance()->query("SELECT grid_plan_id as plan_id 
 					FROM grid 
 						INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
 					WHERE grid_persistent = :gridPersistent AND (plan.plan_gametime > :gameTime OR (plan.plan_gametime = :gameTime AND plan.plan_id > :planId))", 
@@ -519,7 +519,7 @@
 					$result[] = $futureGrid['plan_id'];
 				}
 
-				$futureDeletedGrids = $this->query("SELECT grid_removed_plan_id as plan_id 
+				$futureDeletedGrids = Database::GetInstance()->query("SELECT grid_removed_plan_id as plan_id 
 					FROM grid_removed
 						INNER JOIN plan on grid_removed.grid_removed_plan_id = plan.plan_id
 					WHERE grid_removed_grid_persistent = :gridPersistent AND (plan.plan_gametime > :gameTime OR (plan.plan_gametime = :gameTime AND plan.plan_id > :planId))", 
@@ -549,9 +549,9 @@
 		//Check past plans in influencing states for grids in the current plan that are deleted.
 		public function FindPreviousOverlappingPlans($planId) 
 		{
-			$planData = $this->query("SELECT plan_gametime FROM plan WHERE plan_id = ?", array($planId));
+			$planData = Database::GetInstance()->query("SELECT plan_gametime FROM plan WHERE plan_id = ?", array($planId));
 			//TODO: Does not actually check if plans are in influencing state
-			$result = $this->query("SELECT grid_removed_grid_persistent 
+			$result = Database::GetInstance()->query("SELECT grid_removed_grid_persistent 
 			FROM grid_removed 
 				INNER JOIN plan ON grid_removed_plan_id = plan.plan_id
 			WHERE plan.plan_gametime < :planGameTime AND (plan.plan_state = \"APPROVED\" OR plan.plan_state = \"IMPLEMENTED\")
@@ -575,7 +575,7 @@
 			$geoIds = array_map('intval', $geoIds);
 			$whereClause = implode("','",$geoIds);
 			
-			$result = $this->query("SELECT energy_output_geometry_id FROM energy_output WHERE energy_output_geometry_id IN (".$whereClause.") GROUP BY energy_output_geometry_id;");
+			$result = Database::GetInstance()->query("SELECT energy_output_geometry_id FROM energy_output WHERE energy_output_geometry_id IN (".$whereClause.") GROUP BY energy_output_geometry_id;");
 			
 			if (count($result) == 0) return null;
 			foreach ($result as $returnedgeoIds) {
@@ -608,7 +608,7 @@
 			$clientMissingSocketIDs = array();
 			$clientExtraSocketIDs = array();
 
-			$grid_sources = $this->query("SELECT * FROM grid_source WHERE grid_source_grid_id = ?", array($grid_id));
+			$grid_sources = Database::GetInstance()->query("SELECT * FROM grid_source WHERE grid_source_grid_id = ?", array($grid_id));
 			foreach ($grid_sources as $grid_source) {
 				if (!in_array($grid_source["grid_source_geometry_id"], $source_ids)) {
 					$clientMissingSourceIDs[] = $grid_source["grid_source_geometry_id"];
@@ -620,7 +620,7 @@
 			}
 			$clientExtraSourceIDs = $source_ids;
 
-			$grid_sockets = $this->query("SELECT * FROM grid_socket WHERE grid_socket_grid_id = ?", array($grid_id));
+			$grid_sockets = Database::GetInstance()->query("SELECT * FROM grid_socket WHERE grid_socket_grid_id = ?", array($grid_id));
 			foreach ($grid_sockets as $grid_socket) {
 				if (!in_array($grid_socket["grid_socket_geometry_id"], $socket_ids)) {
 					$clientMissingSocketIDs[] = $grid_socket["grid_socket_geometry_id"];

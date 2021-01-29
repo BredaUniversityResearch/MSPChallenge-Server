@@ -33,7 +33,7 @@
 				array_push($countries, $country);
 			}
 			else{
-				$data = $this->query("SELECT country_id FROM country WHERE country_is_manager = 0");
+				$data = Database::GetInstance()->query("SELECT country_id FROM country WHERE country_is_manager = 0");
 
 				foreach($data as $d){
 					array_push($countries, $d['country_id']);
@@ -41,7 +41,7 @@
 			}
 
 			foreach($countries as $country){
-				$id = $this->query("INSERT INTO objective (objective_country_id, objective_title, objective_description, objective_deadline, objective_lastupdate) VALUES (?, ?, ?, ?, ?)", array($country, $title, $description, $deadline, microtime(true)), true);
+				$id = Database::GetInstance()->query("INSERT INTO objective (objective_country_id, objective_title, objective_description, objective_deadline, objective_lastupdate) VALUES (?, ?, ?, ?, ?)", array($country, $title, $description, $deadline, microtime(true)), true);
 
 				foreach($obj as $task){
 					if (array_key_exists("sectorname", $task)) {
@@ -51,7 +51,7 @@
 						$sectorName = null;
 					}
 
-					$this->query("INSERT INTO task (task_objective_id, task_sectorname, task_category, task_subcategory, task_function, task_value, task_description) 
+					Database::GetInstance()->query("INSERT INTO task (task_objective_id, task_sectorname, task_category, task_subcategory, task_function, task_value, task_description) 
 						VALUES (?, ?, ?, ?, ?, ?, ?)", 
 						array($id, $sectorName, $task['category'], $task['subcategory'], $task['function'], $task['value'], $task['description']));
 				}
@@ -66,12 +66,12 @@
 		 */
 		public function Delete(int $id)
 		{
-			$this->query("UPDATE objective SET objective_active=?, objective_lastupdate=? WHERE objective_id=?", array(0, microtime(true), $id));
+			Database::GetInstance()->query("UPDATE objective SET objective_active=?, objective_lastupdate=? WHERE objective_id=?", array(0, microtime(true), $id));
 		}
 
 		public function Latest($time)
 		{
-			$data = $this->query("SELECT 
+			$data = Database::GetInstance()->query("SELECT 
 				objective_id, 
 				objective_country_id as country_id,
 				objective_title as title, 
@@ -94,14 +94,14 @@
 		 */
 		public function SetCompleted(int $objective_id, int $completed) 
 		{
-			$this->query("UPDATE objective SET objective_complete = ?, objective_lastupdate = ? WHERE objective_id = ?", 
+			Database::GetInstance()->query("UPDATE objective SET objective_complete = ?, objective_lastupdate = ? WHERE objective_id = ?", 
 				array($completed, microtime(true), $objective_id));
 		}
 
 		public function Export(&$configObject)
 		{
 			// move to deprecate - was used in the old tools class only as far as I know (Harald)
-			$objectives = $this->query("SELECT objective_id, 
+			$objectives = Database::GetInstance()->query("SELECT objective_id, 
 					objective_country_id as country_id, 
 					objective_title as title, 
 					objective_description as description, 
@@ -121,7 +121,7 @@
 			}
 
 			foreach($config['objectives'] as $objective) {
-				$objectiveId = $this->query("INSERT INTO objective (objective_country_id, objective_title, objective_description, objective_deadline, objective_lastupdate) VALUES (?, ?, ?, ?, 100)", 
+				$objectiveId = Database::GetInstance()->query("INSERT INTO objective (objective_country_id, objective_title, objective_description, objective_deadline, objective_lastupdate) VALUES (?, ?, ?, ?, 100)", 
 					array($objective['country_id'], $objective['title'], $objective['description'], $objective['deadline']), true);
 			}
 		}

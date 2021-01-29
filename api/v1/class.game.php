@@ -81,7 +81,7 @@
 			$data['configured_simulations'] = $configuredSimulations;
 			$data['wiki_base_url'] = Config::GetInstance()->WikiConfig()['game_base_url'];
 
-			$passwordData = $this->query("SELECT game_session_password_admin, game_session_password_player FROM game_session");
+			$passwordData = Database::GetInstance()->query("SELECT game_session_password_admin, game_session_password_player FROM game_session");
 			if (count($passwordData) > 0)
 			{
 				$data["user_admin_has_password"] = !empty($passwordData[0]["game_session_password_admin"]);
@@ -98,12 +98,12 @@
 		 * @apiSuccess **************************************
 		 */
 		public function NextMonth(){
-			$this->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
+			Database::GetInstance()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
 		}
 
 		public function LoadConfigFile($filename=""){
 			if($filename == ""){	//if there's no file given, use the one in the database
-				$data = $this->query("SELECT game_configfile FROM game");
+				$data = Database::GetInstance()->query("SELECT game_configfile FROM game");
 
 				$path = GameSession::CONFIG_DIRECTORY . $data[0]['game_configfile'];
 			}
@@ -176,7 +176,7 @@
 		}
 
 		public function GetCurrentMonthAsId() {
-			$currentMonth = $this->query("SELECT game_currentmonth, game_state FROM game")[0];
+			$currentMonth = Database::GetInstance()->query("SELECT game_currentmonth, game_state FROM game")[0];
 			if ($currentMonth["game_state"] == "SETUP") {
 				$currentMonth["game_currentmonth"] = -1;
 			}
@@ -184,7 +184,7 @@
 		}
 
 		public function Setupfilename($configFilename){
-			$this->query("UPDATE game SET game_configfile=?", array($configFilename));
+			Database::GetInstance()->query("UPDATE game SET game_configfile=?", array($configFilename));
 		}
 
 		public function SetupCountries($configData) {
@@ -200,9 +200,9 @@
 			}
 
 			//Admin country.
-			$this->query("INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)", array(1, $adminColor, 1));
+			Database::GetInstance()->query("INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)", array(1, $adminColor, 1));
 			//Region manager country.
-			$this->query("INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)", array(2, $regionManagerColor, 1));
+			Database::GetInstance()->query("INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)", array(2, $regionManagerColor, 1));
 
 			foreach($configData['meta'] as $layerMeta) 
 			{
@@ -211,12 +211,12 @@
 					foreach($layerMeta['layer_type'] as $country)
 					{
 						$countryId = $country['value'];
-						$this->query("INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)", array($countryId, $country['polygonColor'], 0 ));
+						Database::GetInstance()->query("INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)", array($countryId, $country['polygonColor'], 0 ));
 					}
 				}
 			}
 			//Setup Admin Test User so we have a default session we can use for testing.
-			$this->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
+			Database::GetInstance()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
 		}
 
 		public function SetupGametime($data){
@@ -238,7 +238,7 @@
 
 			$str = substr($str, 0, -1);
 
-			$this->query("UPDATE game SET game_planning_era_realtime=?, game_eratime=?", array($str, $data['era_total_months']));
+			Database::GetInstance()->query("UPDATE game SET game_planning_era_realtime=?, game_eratime=?", array($str, $data['era_total_months']));
 		}
 
 		/**
@@ -259,7 +259,7 @@
 		 * @apiSuccess {string} JSON object
 		 */
 		public function Meta(bool $sort = false, bool $onlyActiveLayers = false, int $user){
-			$this->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
+			Database::GetInstance()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
 
 			$activeQueryPart = "";
 			if ($onlyActiveLayers) {
@@ -267,10 +267,10 @@
 			}
 
 			if($sort){
-				$data = $this->query("SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart." ORDER BY layer_name ASC", array());
+				$data = Database::GetInstance()->query("SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart." ORDER BY layer_name ASC", array());
 			}
 			else{
-				$data = $this->query("SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart."", array());
+				$data = Database::GetInstance()->query("SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart."", array());
 			}
 
 			for($i = 0; $i < sizeof($data); $i++){
@@ -296,7 +296,7 @@
 			$plan->Tick();
 
 			//Update server time and month
-			$tick = $this->query("SELECT game_lastupdate as lastupdate,
+			$tick = Database::GetInstance()->query("SELECT game_lastupdate as lastupdate,
 				game_currentmonth as month,
 				game_planning_gametime as era_gametime,
 				game_planning_realtime as era_realtime,
@@ -348,7 +348,7 @@
 
 		private function CalculateUpdatedTime($showdebug = false){
 
-			$tick = $this->query("SELECT
+			$tick = Database::GetInstance()->query("SELECT
 				game_state as state,
 				game_lastupdate as lastupdate,
 				game_currentmonth as month,
@@ -374,7 +374,7 @@
 
 				//if the last update was at time 0, this is the very first tick happening for this game
 				if($lastupdate == 0){
-					$this->query("UPDATE game SET game_lastupdate=?", array(microtime(true)) );
+					Database::GetInstance()->query("UPDATE game SET game_lastupdate=?", array(microtime(true)) );
 					$lastupdate = microtime(true);
 					$currenttime = $lastupdate;
 				}
@@ -421,7 +421,7 @@
 				}
 			}
 
-			$result = $this->queryReturnAffectedRowCount("UPDATE game SET game_is_running_update = 1, game_lastupdate = ? WHERE game_is_running_update = 0 AND game_lastupdate = ?", array(microtime(true), $tickData["lastupdate"]));
+			$result = Database::GetInstance()->queryReturnAffectedRowCount("UPDATE game SET game_is_running_update = 1, game_lastupdate = ? WHERE game_is_running_update = 0 AND game_lastupdate = ?", array(microtime(true), $tickData["lastupdate"]));
 			if ($result == 1) {
 				//Spawn thread eventually.
 				if ($showDebug) {
@@ -437,7 +437,7 @@
 		private function ServerTickInternal()
 		{
 			//Updates time to the next month.
-			$tick = $this->query("SELECT
+			$tick = Database::GetInstance()->query("SELECT
 				game_state as state,
 				game_currentmonth as month,
 				game_planning_gametime as era_gametime,
@@ -459,30 +459,30 @@
 
 			if($currentmonth >= ($tick['era_time'] * 4)){ //Hardcoded to 4 eras as designed.
 				//Entire game is done.
-				$this->query("UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?", array(microtime(true), $currentmonth, $monthsdone, "END"));
+				Database::GetInstance()->query("UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?", array(microtime(true), $currentmonth, $monthsdone, "END"));
 				$this->OnGameStateUpdated("END");
 			}
 			else if(($state == "PLAY" || $state == "FASTFORWARD") && $monthsdone >= $tick['era_gametime'] && $tick['era_gametime'] < $tick['era_time']){
 				//planning phase is complete, move to the simulation phase
-				$this->query("UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?", array(microtime(true), $currentmonth, 0, "SIMULATION"));
+				Database::GetInstance()->query("UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?", array(microtime(true), $currentmonth, 0, "SIMULATION"));
 				$this->OnGameStateUpdated("SIMULATION");
 			}
 			else if(($state == "SIMULATION" && $monthsdone >= $tick['era_time'] - $tick['era_gametime']) || $monthsdone >= $tick['era_time']){
 				//simulation is done, reset everything to start a new play phase
 				$era = floor($currentmonth / $tick['era_time']);
 				$era_realtime = explode(",", $tick['planning_era_realtime']);
-				$this->query("UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?, game_planning_realtime=?", array(microtime(true), $currentmonth, 0, "PLAY", $era_realtime[$era]));
+				Database::GetInstance()->query("UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?, game_planning_realtime=?", array(microtime(true), $currentmonth, 0, "PLAY", $era_realtime[$era]));
 				$this->OnGameStateUpdated("PLAY");
 			}
 			else{
-				$this->query("UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?", array(microtime(true), $currentmonth, $monthsdone));
+				Database::GetInstance()->query("UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?", array(microtime(true), $currentmonth, $monthsdone));
 			}
 
 			if (($tick['month'] % $tick['autosave_interval_months']) == 0) {
 				$this->AutoSaveDatabase();
 			}
 
-			$this->query("UPDATE game SET game_is_running_update = 0");
+			Database::GetInstance()->query("UPDATE game SET game_is_running_update = 0");
 		}
 
 		/**
@@ -492,7 +492,7 @@
 		 * @apiDescription set the amount of months the planning phase takes, should not be done during the simulation phase
 		 */
 		public function Planning(int $months){
-			$this->query("UPDATE game SET game_planning_gametime=?", array($months));
+			Database::GetInstance()->query("UPDATE game SET game_planning_gametime=?", array($months));
 		}
 
 		/**
@@ -502,11 +502,11 @@
 		 * @apiDescription Set the duration of the planning phase in seconds
 		 */
 		public function Realtime(int $realtime){
-			$this->query("UPDATE game SET game_planning_realtime=?", array($realtime));
+			Database::GetInstance()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
 		}
 
 		private function SetStartDate(int $a_startYear){
-			$this->query("UPDATE game SET game_start=?", array($a_startYear));
+			Database::GetInstance()->query("UPDATE game SET game_start=?", array($a_startYear));
 		}
 
 		/**
@@ -516,7 +516,7 @@
 		 * @apiDescription Set the duration of future eras
 		 */
 		public function FutureRealtime(int $realtime){
-			$this->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
+			Database::GetInstance()->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
 		}
 
 		/**
@@ -528,7 +528,7 @@
 		public function State(string $state){
 			//$result = array("success" => 0);
 
-			$currentState = $this->query("SELECT game_state FROM game")[0];
+			$currentState = Database::GetInstance()->query("SELECT game_state FROM game")[0];
 			if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
 				throw new Exception("Invalid current state of ".$currentState["game_state"]); 
 			}
@@ -539,7 +539,7 @@
 				$plan->UpdateLayerState(0);
 			}
 
-			$this->query("UPDATE game SET game_lastupdate = ?, game_state=?", array(microtime(true), $state));
+			Database::GetInstance()->query("UPDATE game SET game_lastupdate = ?, game_state=?", array(microtime(true), $state));
 			$this->OnGameStateUpdated($state);
 			/*$result["success"] = 1;
 			return json_encode($result);*/
@@ -555,7 +555,7 @@
 				else return $this->watchdog_address;
 			}
 			else {
-				$result = $this->query("SELECT game_session_watchdog_address FROM game_session LIMIT 0,1");
+				$result = Database::GetInstance()->query("SELECT game_session_watchdog_address FROM game_session LIMIT 0,1");
 				if (count($result) > 0)
 				{
 					$this->watchdog_address = 'http://'.$result[0]['game_session_watchdog_address'];
@@ -567,7 +567,7 @@
 		}
 
 		private function GetWatchdogSessionUniqueToken() {
-			$result = $this->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
+			$result = Database::GetInstance()->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
 			if (count($result) > 0) {
 				return $result[0]["game_session_watchdog_token"];
 			}
@@ -659,11 +659,11 @@
 		}
 
 		public function GetAdminData(){
-			return $this->query("SELECT * FROM game")[0];
+			return Database::GetInstance()->query("SELECT * FROM game")[0];
 		}
 
 		protected function GetUpdateTime($id){
-			return $this->query("SELECT user_lastupdate FROM user WHERE user_id=?", array($id))[0]['user_lastupdate'];
+			return Database::GetInstance()->query("SELECT user_lastupdate FROM user WHERE user_id=?", array($id))[0]['user_lastupdate'];
 		}
 
 		/**
@@ -741,7 +741,7 @@
 				return "";
 			}
 			else{
-				$this->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(
+				Database::GetInstance()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(
 						$newtime, $user));
 			}
 			return $data;
@@ -757,7 +757,7 @@
 		{
 			$result = array("year" => -1, "month_of_year" => -1);
 			$simulatedMonth = intval($simulated_month);
-			$startYear = $this->query("SELECT game_start FROM game LIMIT 0,1");
+			$startYear = Database::GetInstance()->query("SELECT game_start FROM game LIMIT 0,1");
 				
 			if (count($startYear) == 1)
 			{
@@ -771,7 +771,7 @@
 
 		public function GetGameDetails()
 		{
-			$databaseState = $this->query("SELECT g.game_start, g.game_eratime, g.game_currentmonth, g.game_state, g.game_planning_realtime, COUNT(u.user_id) total,
+			$databaseState = Database::GetInstance()->query("SELECT g.game_start, g.game_eratime, g.game_currentmonth, g.game_state, g.game_planning_realtime, COUNT(u.user_id) total,
 													sum(case when u.user_lastupdate > 3600 then 1 else 0 end) active_last_hour,
 													sum(case when u.user_lastupdate > 60 then 1 else 0 end) active_last_minute FROM game g, user u;");
 			$result = array();

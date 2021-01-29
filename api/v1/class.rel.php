@@ -20,7 +20,7 @@ class REL extends Base
 	public function GetRestrictionGeometry()
 	{
 		//TODO: Check with Marin what  we should send here... Just windfarms or all of the geometry that SEL uses...
-		$result = $this->query("SELECT geometry_id as geometry_id,
+		$result = Database::GetInstance()->query("SELECT geometry_id as geometry_id,
 			geometry_geometry as geometry, 
 			geometry_type as geometry_type
 			FROM geometry
@@ -79,7 +79,7 @@ class REL extends Base
 		$rasterLayerData = [];
 		$rasterLayerData["layer_name"] = $rasterLayerName;
 
-		$existingLayer = $this->query("SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?", array($rasterLayerData["layer_name"]));
+		$existingLayer = Database::GetInstance()->query("SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?", array($rasterLayerData["layer_name"]));
 		if (count($existingLayer) > 0)
 		{
 			$rasterData = json_decode($existingLayer[0]["layer_raster"], true);
@@ -96,7 +96,7 @@ class REL extends Base
 
 		if (count($existingLayer) > 0)
 		{
-			$this->query("UPDATE layer SET layer_raster = ? WHERE layer_id = ?", array($jsonRasterData, $existingLayer[0]["layer_id"]));
+			Database::GetInstance()->query("UPDATE layer SET layer_raster = ? WHERE layer_id = ?", array($jsonRasterData, $existingLayer[0]["layer_id"]));
 		}
 		else
 		{
@@ -117,7 +117,7 @@ class REL extends Base
 			}";
 
 			Base::Debug("REL Adding in raster layer " . $rasterData["layer_name"] . " with default values. Defining this layer in the config file will allow you to modify the values.");				
-			$this->query("INSERT INTO layer (layer_name, layer_short, layer_geotype, layer_category, layer_subcategory, layer_raster, layer_type) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+			Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_short, layer_geotype, layer_category, layer_subcategory, layer_raster, layer_type) VALUES (?, ?, ?, ?, ?, ?, ?)", 
 				array($rasterData["layer_name"], $rasterData["layer_name"], "raster", "Activities", "Shipping", $jsonRasterData, $defaultEntityTypes)); 
 		}
 	}

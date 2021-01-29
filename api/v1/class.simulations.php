@@ -71,7 +71,7 @@ class Simulations extends Base
 	{
 		try
 		{
-			$result = $this->query("SELECT watchdog_simulation_desired_state FROM watchdog");
+			$result = Database::GetInstance()->query("SELECT watchdog_simulation_desired_state FROM watchdog");
 			if (count($result) > 0)
 			{
 				return $result[0]["watchdog_simulation_desired_state"];
@@ -89,7 +89,7 @@ class Simulations extends Base
 
 	private function SetSimulationRequestedState($state)
 	{
-		$this->query("UPDATE watchdog SET watchdog_simulation_desired_state = ?", array($state));
+		Database::GetInstance()->query("UPDATE watchdog SET watchdog_simulation_desired_state = ?", array($state));
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Simulations extends Base
 	public function GetWatchdogTokenForServer()
 	{
 		$token = null;
-		$data = $this->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
+		$data = Database::GetInstance()->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
 		if (count($data) > 0)
 		{
 			$token = $data[0]["game_session_watchdog_token"];
