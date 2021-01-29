@@ -116,7 +116,7 @@
 		{
 			set_time_limit(300); //5 minute time-out for rebuilding.
 
-			$success =  true; //$this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
+			$success =  $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
 
 			return $success;
 		}
