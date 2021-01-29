@@ -1,5 +1,3 @@
 {
-   "api_root": "http://localhost/dev/",
-   "api_authorization_user": "cradle",
-   "api_authorization_password": "msp2050"
+   "api_root": "http://localhost/1/"
 }
