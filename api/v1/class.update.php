@@ -114,7 +114,7 @@
 
 		public function ReimportAdvanced(string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password) 
 		{
-			set_time_limit(300); //5 minute time-out for rebuilding.
+			set_time_limit(Config::GetInstance()->GetHighTimeout());
 
 			$success =  $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
 
