@@ -270,9 +270,9 @@ class Database {
 		return hash_hmac('sha512', $string, $this->salt);
 	}
 
-	protected static function execInBackground($cmd) 
+	public static function execInBackground($cmd) 
 	{ 
-		if (substr(php_uname(), 0, 7) == "Windows"){ 
+		if (substr(php_uname(), 0, 7) == "Windows") {
 			pclose(popen("start /B ". $cmd, "r"));  
 		} 
 		else { 
