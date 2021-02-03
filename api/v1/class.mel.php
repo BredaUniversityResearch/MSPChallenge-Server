@@ -121,7 +121,7 @@
 				array(1, -1, "IMPLEMENTED", "0,1,0"), true
 			);
 
-			$config = json_decode($this->Config(), true);
+			$config = $this->Config();
 			$weightsByFleet = array();
 			if (isset($config["fishing"])) {
 				$fishingFleets = $config["fishing"];
