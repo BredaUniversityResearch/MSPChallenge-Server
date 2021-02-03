@@ -126,12 +126,12 @@
 						{
 							if (gettype($parameterValue) !== $parameterType->getName() && !self::TrySafeCast($parameterValue, $parameterType->getName()))
 							{
-								throw new Exception($className."::".$methodName." expects argument with name \"".$parameter->getName()."\" to be of type \"".$parameterType."\", input value \"".var_export($parameterValue, true)."\" could not be converted.");
+								throw new Exception($className."::".$methodData->getName()." expects argument with name \"".$parameter->getName()."\" to be of type \"".$parameterType."\", input value \"".var_export($parameterValue, true)."\" could not be converted.");
 							}
 						}
 						catch(Throwable $e)
 						{
-							throw new Exception($className."::".$methodName." encountered error when resolving argument \"".$parameter->getName()."\" of type \"".$parameterType."\", input value \"".var_export($parameterValue, true)."\" raised an exception in conversion: ".$e);
+							throw new Exception($className."::".$methodData->getName()." encountered error when resolving argument \"".$parameter->getName()."\" of type \"".$parameterType."\", input value \"".var_export($parameterValue, true)."\" raised an exception in conversion: ".$e);
 						}
 					}
 
@@ -144,13 +144,13 @@
 				}
 				else
 				{
-					throw new Exception($className."::".$methodName." expects argument with name \"".$parameter->getName()."\". Got ".var_export($argumentsArray, true));
+					throw new Exception($className."::".$methodData->getName()." expects argument with name \"".$parameter->getName()."\". Got ".var_export($argumentsArray, true));
 				}
 			}
 
 			if (count($inValues) > 0)
 			{
-				throw new Exception("Call to ".$className."::".$methodName." was provided the following parameters that were not taken by any argument matching this name: \"".implode(", ", array_keys($inValues))."\"");
+				throw new Exception("Call to ".$className."::".$methodData->getName()." was provided the following parameters that were not taken by any argument matching this name: \"".implode(", ", array_keys($inValues))."\"");
 			}
 
 			return $result;
