@@ -12,13 +12,13 @@
 		 * @api {GET} /kpi/post Post
 		 * @apiParam {string} name name of the KPI
 		 * @apiParam {int} month Month that this KPI applies to.
-		 * @apiParam {int} value the value of this months kpi
+		 * @apiParam {float} value the value of this months kpi
 		 * @apiParam {string} type the type of KPI (ECOLOGY, ENERGY, SHIPPING)
 		 * @apiParam {string} unit the measurement unit of this KPI
 		 * @apiParam {int} country (OPTIONAL) id of the country that this belongs to. Not filling this in will default it to all countries
 		 * @apiDescription Add a new kpi value to the database
 		 */
-		public function Post(string $name, int $month, int $value, string $type, string $unit, int $country = -1)
+		public function Post(string $name, int $month, float $value, string $type, string $unit, int $country = -1)
 		{
 			return $this->PostKPI($name, $month, $value, $type, $unit, $country);
 		}
@@ -26,7 +26,7 @@
 		/**
 		 * @apiGroup KPI
 		 * @api {GET} /kpi/BatchPost BatchPost
-		 * @apiParam {array} kpiValues Input format should be [{"name":(string kpiName),"month": (int month), "value":(int kpiValue),"type":(string kpiType),"unit":(string kpiUnit),"country":(int countryId or null)}] 
+		 * @apiParam {array} kpiValues Input format should be [{"name":(string kpiName),"month": (int month), "value":(float kpiValue),"type":(string kpiType),"unit":(string kpiUnit),"country":(int countryId or null)}] 
 		 * @apiDescription Add a new kpi value to the database
 		 */
 		public function BatchPost(array $kpiValues)
@@ -37,7 +37,7 @@
 			}
 		}
 
-		private function PostKPI(string $kpiName, int $kpiMonth, int $kpiValue, string $kpiType, string $kpiUnit, int $kpiCountry = -1)
+		private function PostKPI(string $kpiName, int $kpiMonth, float $kpiValue, string $kpiType, string $kpiUnit, int $kpiCountry = -1)
 		{
 			$value = floatval(str_replace(",", ".", $kpiValue));
 			return Database::GetInstance()->query("INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 

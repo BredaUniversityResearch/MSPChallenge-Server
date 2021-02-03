@@ -205,7 +205,7 @@
 				}
 				
 			}
-			throw new Exception("Unkonwn target type for TrySafeCast. Target: \"$targetType\"");
+			throw new Exception("Unknown target type for TrySafeCast. Target: \"$targetType\"");
 			return false;
 		}
 
