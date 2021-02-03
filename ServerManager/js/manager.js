@@ -365,7 +365,7 @@ function updateSessionsTable(visibility) {
 		'data': {
 			format: 'json',
 			visibility: visibility,
-			client_version: 'ServerManager'
+			client_timestamp: 'ServerManager'
 		},
 
 		'error': function() {

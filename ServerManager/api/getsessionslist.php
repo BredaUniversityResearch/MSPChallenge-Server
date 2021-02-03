@@ -80,7 +80,7 @@ if (isset($_POST['demo_servers']) && $_POST['demo_servers'] == 1)
 if ($db->query($query_string, $where_array)) {
 	$results = $db->results(true);
 	$results = TransformGameList($results);
-	if (!isset($_POST['client_version'])) $results = YouShouldUpdate();
+	if (!isset($_POST['client_timestamp'])) $results = YouShouldUpdate();
 	$response_array['status'] = 'success';
 	$response_array['message'] = $visibility;
 	$response_array['count'] = $db->count();
