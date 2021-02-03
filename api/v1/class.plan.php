@@ -1260,6 +1260,10 @@
 		 */
 		public function Unlock(int $id, int $force_unlock = 0, int $user)
 		{
+			
+			$result = Database::GetInstance()->query("SELECT plan_lock_user_id FROM plan WHERE plan_id = ?", array($id));
+			if (empty($result) || empty($result[0]["plan_lock_user_id"])) throw new Exception("Plan was not found or already unlocked.");
+						
 			if ($force_unlock == 1)
 			{
 				Database::GetInstance()->query("UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=?", array(NULL, microtime(true), $id));
@@ -1328,15 +1332,14 @@
 		 * @apiGroup Plan
 		 * @api {POST} /plan/fishing Fishing
 		 * @apiParam {int} plan plan id
-		 * @apiParam {string} fishing_values JSON encoded key value pair array of fishing values
+		 * @apiParam {array} fishing_values JSON encoded key value pair array of fishing values
 		 * @apiDescription Sets the fishing values for a plan to the fishing_values included in the call. Will delete all fishing values that existed before this plan.
 		 */
-		public function Fishing(int $plan, string $fishing_values) 
+		public function Fishing(int $plan, array $fishing_values) 
 		{
-			$this->DeleteFishing();
+			$this->DeleteFishing($plan);
 
-			$values = json_decode($fishing_values, true);
-			foreach($values as $fishingValues) {
+			foreach($fishing_values as $fishingValues) {
 				Database::GetInstance()->query("INSERT INTO fishing (fishing_country_id, fishing_type, fishing_amount, fishing_plan_id) VALUES (?, ?, ?, ?)",
 					array($fishingValues['country_id'], $fishingValues['type'], $fishingValues['amount'], $plan));
 			}

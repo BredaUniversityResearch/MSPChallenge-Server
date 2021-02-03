@@ -49,7 +49,7 @@
 			}
 
 			$outputFile = $outputDirectory."AutoDump_".date("Y-m-d_H-i").".sql";
-			$this->CreateMspDatabaseDump($outputFile, false);
+			Database::GetInstance()->CreateMspDatabaseDump($outputFile, false);
 		}
 		
 		/**
@@ -515,7 +515,7 @@
 		 * @apiParam {string} realtime comma separated string of all the era times
 		 * @apiDescription Set the duration of future eras
 		 */
-		public function FutureRealtime(int $realtime){
+		public function FutureRealtime(string $realtime){
 			Database::GetInstance()->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
 		}
 

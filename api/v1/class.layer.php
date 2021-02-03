@@ -178,9 +178,10 @@
 			}
 
 			$rasterData = json_decode($layerData[0]['layer_raster'], true);
+			$rasterDataOriginal = $rasterData;
 			$filePath = Store::GetRasterStoreFolder().$rasterData['url'];
 
-			if (is_int($month) && $month >= 0) 
+			if ($month >= 0) 
 			{
 				$path_parts = pathinfo($rasterData['url']);
 				$fileext = $path_parts['extension'];
@@ -196,7 +197,16 @@
 			
 			if (!file_exists($filePath))
 			{
-				throw new Exception("Could not find raster file for layer with name " . $layer_name . " at path " . $filePath);
+				// final try.... if $month = 0 and you couldn't find the file so far, just return the very original
+				if ($month == 0) 
+				{
+					$filePath = Store::GetRasterStoreFolder().$rasterDataOriginal['url'];
+					if (!file_exists($filePath)) throw new Exception("Could not find raster file for layer with name " . $layer_name . " at path " . $filePath);
+				}
+				else 
+				{
+					throw new Exception("Could not find raster file for layer with name " . $layer_name . " at path " . $filePath);
+				}
 			}
 			$imageData = file_get_contents($filePath);
 

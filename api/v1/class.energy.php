@@ -189,7 +189,7 @@
 		public function AddGrid(string $name, int $plan, bool $distribution_only, int $persistent = -1)
 		{
 			$id = Database::GetInstance()->query("INSERT INTO grid (grid_name, grid_lastupdate, grid_plan_id, grid_distribution_only) VALUES (?, ?, ?, ?)", array($name, microtime(true), $plan, $distribution_only), true);
-			Database::GetInstance()->query("UPDATE grid SET grid_persistent=? WHERE grid_id=?", array(($persistent == -1) ? $persistent : $id, $id));
+			Database::GetInstance()->query("UPDATE grid SET grid_persistent=? WHERE grid_id=?", array(($persistent == -1) ? $id : $persistent, $id));
 
 			return $id;
 		}
@@ -503,10 +503,11 @@
 		//Check future plans for any references to grids that we delete in the current plan. 
 		public function FindOverlappingEnergyPlans($planId, &$result) 
 		{
-			$removedGridIds = Database::GetInstance()->query("SELECT grid_removed.grid_removed_grid_persistent as grid_persistent, plan.plan_gametime 
-				FROM grid_removed 
-					INNER JOIN plan ON grid_removed.grid_removed_plan_id = plan.plan_id
-				WHERE grid_removed_plan_id = ?", array($planId));
+			$removedGridIds = Database::GetInstance()->query("SELECT COALESCE(grid_removed.grid_removed_grid_persistent, grid.grid_persistent) AS grid_persistent, plan.plan_gametime 
+				FROM plan
+					LEFT OUTER JOIN grid_removed ON grid_removed.grid_removed_plan_id = plan.plan_id
+					LEFT OUTER JOIN grid ON grid.grid_plan_id = plan.plan_id
+				WHERE grid_removed.grid_removed_plan_id = ? OR grid.grid_plan_id = ?", array($planId, $planId));
 			
 			foreach($removedGridIds as $removedGridId) {
 				$futureReferencedGrids = Database::GetInstance()->query("SELECT grid_plan_id as plan_id 
