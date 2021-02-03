@@ -126,12 +126,12 @@
 						{
 							if (gettype($parameterValue) !== $parameterType->getName() && !self::TrySafeCast($parameterValue, $parameterType->getName()))
 							{
-								throw new Exception($className."::".$methodData->getName()." expects argument with name \"".$parameter->getName()."\" to be of type \"".$parameterType."\", input value \"".var_export($parameterValue, true)."\" could not be converted.");
+								throw new Exception($className."::".$methodData->getName()." expects argument with name \"".$parameter->getName()."\" to be of type \"".$parameterType->getName()."\", input value \"".var_export($parameterValue, true)."\" could not be converted.");
 							}
 						}
 						catch(Throwable $e)
 						{
-							throw new Exception($className."::".$methodData->getName()." encountered error when resolving argument \"".$parameter->getName()."\" of type \"".$parameterType."\", input value \"".var_export($parameterValue, true)."\" raised an exception in conversion: ".$e);
+							throw new Exception($className."::".$methodData->getName()." encountered error when resolving argument \"".$parameter->getName()."\" of type \"".$parameterType->getName()."\", input value \"".var_export($parameterValue, true)."\" raised an exception in conversion: ".$e);
 						}
 					}
 
