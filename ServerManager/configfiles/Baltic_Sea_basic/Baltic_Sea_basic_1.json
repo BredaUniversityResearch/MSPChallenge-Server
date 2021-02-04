@@ -21432,7 +21432,7 @@
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
         "layer_selectable": 1,
-        "layer_editable": 1,
+        "layer_editable": 0,
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
