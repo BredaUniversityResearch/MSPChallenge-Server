@@ -672,8 +672,20 @@ class SEL extends Base
 			
 			if (isset($heatmap["output_for_mel"]) && $heatmap["output_for_mel"] === true)
 			{
-				$melConfig = &$globalConfig["MEL"];
-				$rasterData["boundingbox"] = array(array($melConfig['x_min'], $melConfig['y_min']), array($melConfig['x_max'], $melConfig['y_max']));
+				if (empty($globalConfig["MEL"]))
+				{
+					throw new Exception("SEL has a layer \"".$heatmap["layer_name"]."\" that is marked for use by MEL. However the MEL configuration is not found, in the current config file.");
+				}
+				else 
+				{
+					$melConfig = &$globalConfig["MEL"];
+					if (!array_key_exists("x_min", $melConfig) || !array_key_exists("y_min", $melConfig) ||
+						!array_key_exists("x_max", $melConfig) || !array_key_exists("y_max", $melConfig))
+					{
+						throw new Exception("SEL has a layer \"".$heatmap["layer_name"]."\" that is marked for use by MEL. However the bounding box configuration in the MEL section is incomplete.");
+					}
+					$rasterData["boundingbox"] = array(array($melConfig['x_min'], $melConfig['y_min']), array($melConfig['x_max'], $melConfig['y_max']));
+				}
 			}
 			else 
 			{
@@ -693,19 +705,6 @@ class SEL extends Base
 					array($heatmap["layer_name"], $heatmap["layer_name"], "raster", $region, "Activities", "Shipping", $jsonRasterData, $defaultEntityTypes)); 
 			}
 		}
-	}
-
-	/**
-	 * @apiGroup SEL
-	 * @api {GET} /sel/StartExe StartExe
-	 * @apiDescription This is a horrible idea...
-	 */
-	public function StartExe(){
-		$this->StartSimulationExe($this->GetStartExeCommand());
-	}
-
-	public function GetStartExeCommand() {
-		return array("exe" => "SEL.exe", "working_directory" => "simulations/SEL/");
 	}
 
 	public function GetKPIDefinition()
