@@ -222,6 +222,7 @@ a.hoverinfo {
 }
 
 #radioFilterSessionsList,
+#radioFilterSavesList,
 #radioFilterConfigVersionsList {
 	border: solid thin darkgrey;
     background: white;

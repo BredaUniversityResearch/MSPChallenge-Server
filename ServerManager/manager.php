@@ -466,7 +466,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 	var currentToken = '<?php echo Session::get("currentToken"); ?>';
 	regularupdateToken = setInterval(function() {
 		updatecurrentToken();
-	}, 60000);
+	}, 30000);
 	
 	$(document).ready(function() {
 		updateSessionsTable('public');
