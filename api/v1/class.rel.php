@@ -89,7 +89,7 @@ class REL extends Base
 			$rasterData = $rasterLayerData;
 		}
 
-		$rasterData['download_from_geoserver'] = false;
+		$rasterData['layer_download_from_geoserver'] = false;
 		$rasterData["url"] = $rasterLayerName.".png";
 
 		$jsonRasterData = json_encode($rasterData);

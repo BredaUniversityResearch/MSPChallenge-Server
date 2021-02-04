@@ -5127,7 +5127,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Councils",
@@ -5214,7 +5214,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Populated_places",
@@ -5721,7 +5721,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Planning_Regions",
@@ -5930,7 +5930,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Harbours_area",
@@ -6155,7 +6155,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_topography",
@@ -6335,7 +6335,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Water_Quality",
@@ -6614,7 +6614,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Bathymetry",
@@ -6848,7 +6848,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Cables",
@@ -7061,7 +7061,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Disposal_Sites",
@@ -7286,7 +7286,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Dredging_Locations",
@@ -7373,7 +7373,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Marinas",
@@ -7558,7 +7558,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Yachting_Clubs",
@@ -7700,7 +7700,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Scuba_Diving",
@@ -7882,7 +7882,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Canoeing",
@@ -8064,7 +8064,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Rowing",
@@ -8246,7 +8246,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Wind_Surfing",
@@ -8428,7 +8428,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Walking",
@@ -8610,7 +8610,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Birds_Watching",
@@ -8792,7 +8792,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Sea_Angling_From_Shore",
@@ -8974,7 +8974,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Sea_Angling_From_Boats",
@@ -9170,7 +9170,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_General_Boating_Areas",
@@ -9285,7 +9285,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Recreational_Boats_Intensity_raster",
@@ -9357,7 +9357,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Anchorages",
@@ -9566,7 +9566,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_No_Shipping_Zones",
@@ -9734,7 +9734,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Ports",
@@ -9863,7 +9863,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Shipping_Routes",
@@ -10129,7 +10129,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Shipping_Connection_Points",
@@ -10230,7 +10230,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Shipping_Routes_Invisible",
@@ -10331,7 +10331,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Gates",
@@ -10446,7 +10446,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Shipping_Intensity_Cargo_raster",
@@ -10653,7 +10653,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "CR_Shipping_Intensity_Tanker_raster",
@@ -10860,7 +10860,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "CR_Shipping_Intensity_Passenger_raster",
@@ -11067,7 +11067,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "CR_Shipping_Intensity_maintenance",
@@ -11328,7 +11328,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "CR_Shipping_Intensity_Recreational_raster",
@@ -11535,7 +11535,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "CR_Shipping_Intensity_raster",
@@ -11742,7 +11742,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "CR_Shipping_Risk_raster",
@@ -11949,7 +11949,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "CR_Wreckages",
@@ -12064,7 +12064,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Shellfish_Farms",
@@ -12207,7 +12207,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Fish_Farms",
@@ -12336,7 +12336,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Natura_2000",
@@ -12710,7 +12710,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Marine_Protected_Areas",
@@ -13016,7 +13016,7 @@
         "default_value": null
       }
     ],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "mel_Artificial_habitat",
@@ -13223,7 +13223,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Surface_disturbance",
@@ -13430,7 +13430,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Bottom_disturbance",
@@ -13637,7 +13637,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Noise",
@@ -13844,7 +13844,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Demersal_Trawl_Catch",
@@ -14051,7 +14051,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Seine_Catch",
@@ -14258,7 +14258,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Nephrops_Trawl_Catch",
@@ -14465,7 +14465,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Scallop_Fleet_Catch",
@@ -14672,7 +14672,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Cetaceans_Biomass",
@@ -14879,7 +14879,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Birds_Biomass",
@@ -15086,7 +15086,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Cod_Biomass",
@@ -15293,7 +15293,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Flatfish_Biomass",
@@ -15500,7 +15500,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Herring_Biomass",
@@ -15707,7 +15707,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Mackerel_Biomass",
@@ -15914,7 +15914,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Rays_and_Skates_Biomass",
@@ -16121,7 +16121,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Seals_Biomass",
@@ -16328,7 +16328,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Sharks_Biomass",
@@ -16535,7 +16535,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Sandeel_Biomass",
@@ -16742,7 +16742,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Whiting_Biomass",
@@ -16949,7 +16949,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Benthic_Biomass",
@@ -17156,7 +17156,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Large_Fish_Indicator",
@@ -17363,7 +17363,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Shannon_Diversity_Indicator",
@@ -17570,7 +17570,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Protection_Seine",
@@ -17777,7 +17777,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Protection_Demersal_trawl",
@@ -17984,7 +17984,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Protection_Nephrops_fleet",
@@ -18191,7 +18191,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Protection_Scallop_fleet",
@@ -18398,7 +18398,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "mel_Protection_Pots_and_creels",
@@ -18605,7 +18605,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 0
+    "layer_download_from_geoserver": 0
   },
   {
     "layer_name": "CR_Cables_edit",
@@ -18689,7 +18689,7 @@
       }
     },
     "layer_info_properties": [],
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Wind_Farms",
@@ -18773,7 +18773,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Sockets",
@@ -18857,7 +18857,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   },
   {
     "layer_name": "CR_Transformers",
@@ -18941,7 +18941,7 @@
       }
     },
     "layer_info_properties": null,
-    "download_from_geoserver": 1
+    "layer_download_from_geoserver": 1
   }
 ],
     "expertise_definitions": [],
