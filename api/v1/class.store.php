@@ -159,7 +159,7 @@
 			//raster layers are loaded differently
 			if($layerMetaData['layer_geotype'] == "raster"){
 				//Check if we should download the raster layer from geoserver. Default behaviour says we do, and just don't do it when it is specified.
-				if (!array_key_exists("download_from_geoserver", $layerMetaData) || $layerMetaData["download_from_geoserver"] == true) {
+				if (!array_key_exists("layer_download_from_geoserver", $layerMetaData) || $layerMetaData["layer_download_from_geoserver"] == true) {
 					//download the image to the /raster folder from GeoServer
 					$rasterMeta = $this->CreateRasterMeta($region, $filename);
 					
@@ -175,7 +175,7 @@
 			}
 			else{
 				//Check if we should download the vector layer from geoserver. Default behaviour says we do, and just don't do it when it is specified.
-				if (!array_key_exists("download_from_geoserver", $layerMetaData) || $layerMetaData["download_from_geoserver"] == true) {
+				if (!array_key_exists("layer_download_from_geoserver", $layerMetaData) || $layerMetaData["layer_download_from_geoserver"] == true) {
 					//download the geometry as a csv file from GeoServer
 					$csv = $layer->GetExport($region, $filename, "CSV", "", null);
 					$data = array_map("str_getcsv", preg_split('/\r*\n+|\r+/', $csv));

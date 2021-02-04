@@ -668,7 +668,7 @@ class SEL extends Base
 			}
 
 			$rasterData["url"] = $heatmap["layer_name"].".png";
-			$rasterData["download_from_geoserver"] = false;
+			$rasterData["layer_download_from_geoserver"] = false;
 			
 			if (isset($heatmap["output_for_mel"]) && $heatmap["output_for_mel"] === true)
 			{

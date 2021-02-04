@@ -274,7 +274,7 @@
 							$key == "layer_raster_color_interpolation" ||
 							$key == "layer_raster_filter_mode" ||
 							$key == "approval" || 
-							$key == "download_from_geoserver" ) {
+							$key == "layer_download_from_geoserver" ) {
 							continue;
 						}
 						else{
