@@ -75,6 +75,7 @@ class SEL extends Base
 		$data = Database::GetInstance()->query("SELECT geometry.geometry_geometry as geometry FROM geometry
 			LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
 			WHERE layer.layer_name LIKE \"_PLAYAREA%\"");
+		if (empty($data)) throw new Exception("_PLAYAREA layer geometry not (yet) found, so its bounds could not be calculated at this time.");
 		$bounds = $this->CalculateBoundsFromGeometry(json_decode($data[0]["geometry"]));
 
 		if (isset($config["MEL"]))
