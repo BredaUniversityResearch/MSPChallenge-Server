@@ -333,7 +333,7 @@ class SEL extends Base
 	/**
 	* @apiGroup SEL
 	* @api {POST} /sel/GetShippingPortGeometry GetShippingPortGeometry
-	* @apiDescription Returns all geometry associated with shipping ports for the current game. Returns the values in a comma separated list
+	* @apiDescription Returns all geometry associated with shipping ports for the current game.
 	*/
 	public function GetShippingPortGeometry()
 	{
@@ -345,16 +345,24 @@ class SEL extends Base
 		{
 			//As soon as we have plans that can specify ports this query needs to change to include those plans.
 			$layerId = Database::GetInstance()->query("SELECT layer_id, layer_states FROM layer
-			WHERE layer.layer_name = ?", array($portLayer['layer_name']))[0];
+			WHERE layer.layer_name = ?", array($portLayer['layer_name']));
+			if (count($layerId) == 0)
+			{
+				throw new Exception("SEL specifies a port layer with name ".$portLayer["layer_name"]." but this layer is not found in the database. Is this a misconfiguration?");
+			}
+			$layerStateData = json_decode($layerId[0]['layer_states'], true);
+			if ($layerStateData == null)
+			{
+				throw new Exception("Failure deserializing layer_states data for layer ".$portLayer["layer_name"]." last error: ".json_last_error_msg());
+			}
 		
 			$data = Database::GetInstance()->query("SELECT geometry.geometry_id, geometry.geometry_persistent, geometry.geometry_geometry, geometry.geometry_data, geometry.geometry_mspid, plan.plan_gametime FROM geometry
 				LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
 				LEFT JOIN plan_layer ON layer.layer_id = plan_layer.plan_layer_layer_id
 				LEFT JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
 			WHERE (layer.layer_id = ? OR layer.layer_original_id = ?) AND (plan.plan_state = \"IMPLEMENTED\" OR plan.plan_state = \"APPROVED\" OR plan.plan_state IS NULL) AND geometry.geometry_active = 1", 
-			array($layerId['layer_id'], $layerId['layer_id']));
+			array($layerId[0]['layer_id'], $layerId[0]['layer_id']));
 
-			$layerStateData = json_decode($layerId['layer_states'], true);
 			$constructionTime = 0;
 
 			foreach($layerStateData as $layerState)
