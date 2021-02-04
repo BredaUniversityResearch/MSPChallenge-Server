@@ -280,15 +280,12 @@
 			return $data;
 		}
 
-		public function Test(){
-			$this->Tick(true);
-		}
-
 		/**
 		 * @apiGroup Game
 		 * @api {GET} /game/tick Tick
 		 * @apiDescription Tick the game server, updating the plans if required
 		 * @apiSuccess {string} JSON object
+		 * @ForceNoTransaction
 		 */
 		public function Tick($showDebug=false) {
 
