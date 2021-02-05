@@ -166,6 +166,10 @@ class Database {
 	public function executePreparedQuery($query, $vars)
 	{
 		if ($vars != null) {
+			if (!is_array($vars))
+			{
+				throw new Exception("Failed to execute prepared statement. Vars is not an array. Value: ".var_export($vars, true)." Query: ".$query);
+			}
 			$query->execute($vars);
 		}
 		else {

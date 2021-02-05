@@ -232,117 +232,136 @@
 			$data = $game->GetGameConfigValues($configFilename);
 			$data = $data['meta'];
 
-			foreach($data as $arr){
-				//check if the layer exists
-				$d = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($arr['layer_name']));
-
-				if(empty($d)){
-					Base::Warning("<strong>" . $arr['layer_name'] . "</strong> was not found. Has this layer been renamed or removed?");
-
-
-					$found = false;
-					foreach($struct as $dir){
-						foreach($dir as $subdir){
-							foreach($subdir as $file){
-								if($file == $arr['layer_name']){
-									Base::Error($arr['layer_name'] . " exists on geoserver but not in your database. Try recreating the database.");
-									$found = true;
-									break;
-								}
-							}
-						}
-					}
-
-					if(!$found){
-						Base::Error($arr['layer_name'] . " has not been found on geoserver. Are you sure this file exists?");
-					}
-				}
-				else{
-					$inserts = "";
-					$insertarr = array();
-					foreach($arr as $key => $val){
-						//these keys are to be ignored in the importer
-						if($key == "layer_id" || 
-							$key == "layer_name" || 
-							$key == "layer_original_id" || 
-							$key == "layer_raster" || 
-							$key == "layer_width" || 
-							$key == "layer_height" || 
-							$key == "layer_raster_material" || 
-							$key == "layer_raster_pattern" ||
-							$key == "layer_raster_minimum_value_cutoff" ||
-							$key == "layer_raster_color_interpolation" ||
-							$key == "layer_raster_filter_mode" ||
-							$key == "approval" || 
-							$key == "layer_download_from_geoserver" ) {
-							continue;
-						}
-						else{
-							$inserts .= $key . "=?, ";
-							if(is_array($val)){
-								array_push($insertarr, json_encode($val));
-							}
-							else{
-								if($val != null)
-									array_push($insertarr, $val);
-								else
-									array_push($insertarr, "");
-							}
-						}
-					}
-
-					$inserts = substr($inserts, 0, -2);
-
-					array_push($insertarr, $arr['layer_name']);
-
-					Database::GetInstance()->query("UPDATE layer SET " . $inserts . " WHERE layer_name=?", $insertarr);
-
-					//Import raster specific information. 
-					if ($arr["layer_geotype"] == "raster")
-					{
-						$sqlRasterInfo = Database::GetInstance()->query("SELECT layer_raster FROM layer WHERE layer_name=?", array($arr["layer_name"]));
-						$existingRasterInfo = json_decode($sqlRasterInfo[0]["layer_raster"], true);
-
-						if (isset($arr["layer_raster_material"])) {
-							$existingRasterInfo["layer_raster_material"] = $arr["layer_raster_material"];
-						}
-						if (isset($arr["layer_raster_pattern"])) {
-							$existingRasterInfo["layer_raster_pattern"] = $arr["layer_raster_pattern"];
-						}
-						if (isset($arr["layer_raster_minimum_value_cutoff"])) {
-							$existingRasterInfo["layer_raster_minimum_value_cutoff"] = $arr["layer_raster_minimum_value_cutoff"];
-						}
-						if (isset($arr["layer_raster_color_interpolation"])) {
-							$existingRasterInfo["layer_raster_color_interpolation"] = $arr["layer_raster_color_interpolation"];
-						}
-						if (isset($arr["layer_raster_filter_mode"])) {
-							$existingRasterInfo["layer_raster_filter_mode"] = $arr["layer_raster_filter_mode"];
-						}
-						
-						Database::GetInstance()->query("UPDATE layer SET layer_raster = ? WHERE layer_name = ?", array(Base::JSON($existingRasterInfo), $arr["layer_name"]));
-					}
-
-					$alltypes = Database::GetInstance()->query("SELECT geometry_type FROM geometry WHERE geometry_layer_id=? GROUP BY geometry_type", array($d[0]['layer_id']));
-					$jsontype = $arr['layer_type'];
-					$errortypes = array();
-
-					foreach($alltypes as $t){
-						$typelist = explode(",", $t['geometry_type']);
-						foreach($typelist as $singletype){
-							//set a default type if one wasn't found
-							if(!isset($jsontype[$singletype]) && !in_array($singletype, $errortypes) ) {
-								Base::Error($arr['layer_name'] . " Type " . $singletype . " was set in the geometry but was not found in the config file");
-								array_push($errortypes, $singletype);
-
-								//update the json array with the new type if it's not set, just to avoid errors on the client
-								$jsontype[$singletype] = json_decode("{\"displayName\" : \"default\",\"displayPolygon\":true,\"polygonColor\":\"#6CFF1C80\",\"polygonPatternName\":5,\"displayLines\":true,\"lineColor\":\"#7AC943FF\",\"displayPoints\":false,\"pointColor\":\"#7AC943FF\",\"pointSize\":1.0}", true);
-							}
-						}
-					}
-
-					Database::GetInstance()->query("UPDATE layer SET layer_type=? WHERE layer_name=?", array(json_encode($jsontype, JSON_FORCE_OBJECT), $arr['layer_name']));
+			foreach($data as $layerMetaData)
+			{
+				$dbLayerId = $this->VerifyLayerExists($layerMetaData["layer_name"], $struct);
+				if ($dbLayerId != -1)
+				{
+					$this->ImportMetaForLayer($layerMetaData, $dbLayerId);
+					$this->VerifyLayerTypesForLayer($layerMetaData, $dbLayerId);
 				}
 			}
+		}
+
+		private function VerifyLayerTypesForLayer(array $layerData, int $layerId)
+		{
+			$alltypes = Database::GetInstance()->query("SELECT geometry_type FROM geometry WHERE geometry_layer_id=? GROUP BY geometry_type", array($layerId));
+			$jsontype = $layerData['layer_type'];
+			$errortypes = array();
+
+			foreach($alltypes as $t){
+				$typelist = explode(",", $t['geometry_type']);
+				foreach($typelist as $singletype){
+					//set a default type if one wasn't found
+					if(!isset($jsontype[$singletype]) && !in_array($singletype, $errortypes) ) {
+						Base::Error($layerData['layer_name'] . " Type " . $singletype . " was set in the geometry but was not found in the config file");
+						array_push($errortypes, $singletype);
+
+						//update the json array with the new type if it's not set, just to avoid errors on the client
+						$jsontype[$singletype] = json_decode("{\"displayName\" : \"default\",\"displayPolygon\":true,\"polygonColor\":\"#6CFF1C80\",\"polygonPatternName\":5,\"displayLines\":true,\"lineColor\":\"#7AC943FF\",\"displayPoints\":false,\"pointColor\":\"#7AC943FF\",\"pointSize\":1.0}", true);
+					}
+				}
+			}
+		}
+
+		private function VerifyLayerExists(string $layerName, array $struct): int
+		{
+			//check if the layer exists
+			$d = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($layerName));
+
+			if(empty($d))
+			{
+				Base::Warning("<strong>" . $layerName . "</strong> was not found. Has this layer been renamed or removed?");
+				$found = false;
+				foreach($struct as $dir){
+					foreach($dir as $subdir){
+						foreach($subdir as $file){
+							if($file == $layerName){
+								Base::Error($layerName . " exists on geoserver but not in your database. Try recreating the database.");
+								$found = true;
+								break;
+							}
+						}
+					}
+				}
+				if(!$found)
+				{
+					Base::Error($layerName . " has not been found on geoserver. Are you sure this file exists?");
+				}
+				return -1;
+			}
+			else 
+			{
+				return $d[0]["layer_id"];
+			}
+		}
+
+		private function ImportMetaForLayer(array $layerData, int $dbLayerId)
+		{
+			$inserts = "";
+			$insertarr = array();
+			foreach($layerData as $key => $val){
+				//these keys are to be ignored in the importer
+				if($key == "layer_id" || 
+					$key == "layer_name" || 
+					$key == "layer_original_id" || 
+					$key == "layer_raster" || 
+					$key == "layer_width" || 
+					$key == "layer_height" || 
+					$key == "layer_raster_material" || 
+					$key == "layer_raster_pattern" ||
+					$key == "layer_raster_minimum_value_cutoff" ||
+					$key == "layer_raster_color_interpolation" ||
+					$key == "layer_raster_filter_mode" ||
+					$key == "approval" || 
+					$key == "layer_download_from_geoserver" ) {
+					continue;
+				}
+				else{
+					$inserts .= $key . "=?, ";
+					if(is_array($val)){
+						array_push($insertarr, json_encode($val));
+					}
+					else{
+						if($val != null)
+							array_push($insertarr, $val);
+						else
+							array_push($insertarr, "");
+					}
+				}
+			}
+
+			$inserts = substr($inserts, 0, -2);
+			
+			array_push($insertarr, $dbLayerId);
+			Database::GetInstance()->query("UPDATE layer SET " . $inserts . " WHERE layer_id=?", $insertarr);
+
+			//Import raster specific information. 
+			if ($layerData["layer_geotype"] == "raster")
+			{
+				$sqlRasterInfo = Database::GetInstance()->query("SELECT layer_raster FROM layer WHERE layer_id=?", array($dbLayerId));
+				$existingRasterInfo = json_decode($sqlRasterInfo[0]["layer_raster"], true);
+
+				if (isset($layerMetaData["layer_raster_material"])) {
+					$existingRasterInfo["layer_raster_material"] = $layerMetaData["layer_raster_material"];
+				}
+				if (isset($layerMetaData["layer_raster_pattern"])) {
+					$existingRasterInfo["layer_raster_pattern"] = $layerMetaData["layer_raster_pattern"];
+				}
+				if (isset($layerMetaData["layer_raster_minimum_value_cutoff"])) {
+					$existingRasterInfo["layer_raster_minimum_value_cutoff"] = $layerMetaData["layer_raster_minimum_value_cutoff"];
+				}
+				if (isset($layerMetaData["layer_raster_color_interpolation"])) {
+					$existingRasterInfo["layer_raster_color_interpolation"] = $layerMetaData["layer_raster_color_interpolation"];
+				}
+				if (isset($layerMetaData["layer_raster_filter_mode"])) {
+					$existingRasterInfo["layer_raster_filter_mode"] = $layerMetaData["layer_raster_filter_mode"];
+				}
+				
+				Database::GetInstance()->query("UPDATE layer SET layer_raster = ? WHERE layer_id = ?", array(json_encode($existingRasterInfo), $dbLayerId));
+			}
+
+			Database::GetInstance()->query("UPDATE layer SET layer_type=? WHERE layer_id=?", array(json_encode($layerData['layer_type'], JSON_FORCE_OBJECT), $dbLayerId));
 		}
 
 		/**

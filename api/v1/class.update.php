@@ -10,7 +10,7 @@
 			"Clear",
 			"ImportRestrictions",
 			"EmptyDatabase",
-			"ImportGeometry",
+			"ImportLayerMeta",
 			"RebuildDatabase",
 			"ClearRasterStorage",
 			"ClearEnergy",
@@ -19,24 +19,29 @@
 			"ImportScenario",
 			"ManualExportDatabase"
 		);
+		public const LOG_ERROR = (1 << 0);
+		public const LOG_WARNING = (1 << 1);
+		public const LOG_INFO = (1 << 2);
+		public const LOG_DEBUG = (1 << 3);
+
+		private static $logFilter = ~0;
 
 		public function __construct($str="")
 		{
 			parent::__construct($str);
 		}
 
-		public function ImportGeometry(bool $full=false, string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password)
+		public function ImportLayerMeta(string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password)
 		{
-			//imports export/meta_export.csv and overrides the current 'layer' table with its contents
-			Update::printLog("ImportGeometry -> Starting import Geometry ...");
+			Update::LogInfo("ImportLayerMeta -> Starting import meta for all layers...");
 			$layer = new Layer("");
 			$layer->ImportMeta($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
-			Update::printLog("ImportGeometry -> Imported Geometry.");
+			Update::LogInfo("ImportLayerMeta -> Done.");
 		}
 
 		public function SetupSimulations(string $configFileName)
 		{
-			Update::printLog("SetupSimulations -> Starting Setup Simulations ...");
+			Update::LogInfo("SetupSimulations -> Starting Setup Simulations ...");
 
 			$update = new Update();
 			$game = new Game();
@@ -46,27 +51,27 @@
 			$sims = new Simulations();
 			$configuredSimulations = $sims->GetConfiguredSimulationTypes();
 			if(array_key_exists("MEL", $configuredSimulations)){
-				Update::printLog("SetupSimulations -> Setting up MEL tables...");
+				Update::LogInfo("SetupSimulations -> Setting up MEL tables...");
 				$mel = new MEL();
 				$mel->OnReimport($data['MEL']);
-				Update::printLog("SetupSimulations -> Done setting up MEL...");
+				Update::LogInfo("SetupSimulations -> Done setting up MEL...");
 			}
 
 			if(array_key_exists("CEL", $configuredSimulations)){
 			}
 
 			if(array_key_exists("SEL", $configuredSimulations)){
-				Update::printLog("SetupSimulations -> Setting up SEL tables...");
+				Update::LogInfo("SetupSimulations -> Setting up SEL tables...");
 				$sel = new SEL();
 				$sel->ReimportShippingLayers();
 			}
 		
 			if(array_key_exists("REL", $configuredSimulations)){
-				Update::printLog("SetupSimulations -> Setting up REL tables...");
+				Update::LogInfo("SetupSimulations -> Setting up REL tables...");
 				$rel = new REL();
 				$rel->OnReimport();
 			}
-			Update::printLog("SetupSimulations -> Simulation(s) ".implode(" ", array_keys($configuredSimulations))." & test data is set up");
+			Update::LogInfo("SetupSimulations -> Simulation(s) ".implode(" ", array_keys($configuredSimulations))." & test data is set up");
 		}
 
 		/**
@@ -80,31 +85,31 @@
 			
 			ob_start("Update::RecreateLoggingHandler", 16);
 			ob_implicit_flush(1);
-			Update::printLog("Reimport -> Starting game session creation process...");
+			Update::LogInfo("Reimport -> Starting game session creation process...");
 
 			try {
 				$this->EmptyDatabase();
 				$this->ClearRasterStorage();
 				$this->RebuildDatabase($configFilename);
-				$this->ImportLayerMeta($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
+				$this->ImportLayerGeometry($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
 				$this->ClearEnergy();
-				$this->ImportGeometry(true, $configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
+				$this->ImportLayerMeta($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
 				$this->ImportRestrictions();
-				$this->SetupSimulations($configFilename);
+				$this->SetupSimulations($configFilename);	
 				$this->ImportScenario();
 				$this->SetupSecurityTokens();
 
-				Update::printLog("Reimport -> Created session.");
+				Update::LogInfo("Reimport -> Created session.");
 			} catch (Throwable $e) {
-				Update::printLog("Reimport -> Something went wrong.", true);
-				Update::printLog($e->getMessage()." on line ".$e->getLine()." of file ".$e->getFile(), true);
+				Update::LogError("Reimport -> Something went wrong.");
+				Update::LogError($e->getMessage()." on line ".$e->getLine()." of file ".$e->getFile());
 				throw $e;
 			}
 			finally
 			{
 				$phpOutput = ob_get_flush();
 				if (!empty($phpOutput)) {
-					Update::printLog("Additionally the page generated the following output: ".$phpOutput);
+					Update::LogInfo("Additionally the page generated the following output: ".$phpOutput);
 					return false;
 				}
 			}
@@ -114,16 +119,16 @@
 
 		public function ReimportAdvanced(string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password) 
 		{
-			set_time_limit(Config::GetInstance()->GetHighTimeout());
+			set_time_limit(Config::GetInstance()->GetLongRequestTimeout());
 
 			$success =  $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
 
 			return $success;
 		}
 
-		public function ImportLayerMeta(string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password)
+		public function ImportLayerGeometry(string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password)
 		{
-			Update::printLog("ImportLayerMeta -> Starting Import Layer Meta...");
+			Update::LogInfo("ImportLayerGeometry -> Starting Import Layer Meta...");
 
 			$store = new Store();
 			$store->geoserver->baseurl = $geoserver_url;
@@ -136,31 +141,33 @@
 
 			foreach($config['meta'] as $layerMeta)
 			{
+				$startTime = microtime(true);
 				$store->CreateLayer($layerMeta, $config['region']);
+				Update::LogDebug("Imported layer geometry for ".$layerMeta["layer_name"]." in ".(microtime(true) - $startTime)." seconds");
 			}
 
-			Update::printLog("ImportGeometry -> Imported geometry.");
+			Update::LogInfo("ImportLayerGeometry -> Imported geometry.");
 		}
 
 		public function ClearEnergy()
 		{
-			Update::printLog("ClearEnergy -> Starting Clear Energy ...");
+			Update::LogInfo("ClearEnergy -> Starting Clear Energy ...");
 
 			$energy = new Energy("");
 			$energy->Clear();
 
-			Update::printLog("ClearEnergy -> Energy data cleared.");
+			Update::LogInfo("ClearEnergy -> Energy data cleared.");
 		}
 
 		public function ImportRestrictions() 
 		{
-			Update::printLog("ImportRestrictions -> Starting Import Restrictions ...");
+			Update::LogInfo("ImportRestrictions -> Starting Import Restrictions ...");
 
 			$plan = new Plan("");
 
 			$plan->ImportRestrictions();
 
-			Update::printLog("ImportRestrictions -> Restrictions imported.");
+			Update::LogInfo("ImportRestrictions -> Restrictions imported.");
 		}
 
 		public function Clear()
@@ -170,24 +177,24 @@
 
 		public function EmptyDatabase()
 		{
-			Update::printLog("EmptyDatabase -> Starting empty database...");
+			Update::LogInfo("EmptyDatabase -> Starting empty database...");
 			Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
 			
-			Update::printLog("EmptyDatabase -> Deleted database.");
+			Update::LogInfo("EmptyDatabase -> Deleted database.");
 		}
 
 		public function ClearRasterStorage() 
 		{
-			Update::printLog("ClearRasterStorage -> Starting clear raster storage...");
+			Update::LogInfo("ClearRasterStorage -> Starting clear raster storage...");
 
 			Store::ClearRasterStoreFolder();
 
-			Update::printLog("ClearRasterStorage -> Cleared raster storage.");
+			Update::LogInfo("ClearRasterStorage -> Cleared raster storage.");
 		}
 
 		public function RebuildDatabase(string $filename, bool $silent = false)
 		{
-			Update::printLog("RebuildDatabase -> Starting Rebuild Database ...");
+			Update::LogInfo("RebuildDatabase -> Starting Rebuild Database ...");
 
 			$defaultDatabaseName = "msp";
 
@@ -209,7 +216,7 @@
 			$game->SetupFilename($filename);
 			$this->ApplyGameConfig();
 
-			Update::printLog("RebuildDatabase -> Database rebuilt.");
+			Update::LogInfo("RebuildDatabase -> Database rebuilt.");
 		}
 
 		private function ApplyGameConfig()
@@ -219,7 +226,7 @@
 
 		public function ClearPlans()
 		{
-			Update::printLog("ClearPlans -> Cleaning plans ...");
+			Update::LogInfo("ClearPlans -> Cleaning plans ...");
 
 			Database::GetInstance()->query("SET FOREIGN_KEY_CHECKS=0");
 			$todelete = Database::GetInstance()->query("SELECT geometry_id FROM plan_layer
@@ -237,28 +244,28 @@
 
 			Database::GetInstance()->query("SET FOREIGN_KEY_CHECKS=1");
 
-			Update::printLog("ClearPlans -> All plans have been deleted.");
+			Update::LogInfo("ClearPlans -> All plans have been deleted.");
 		}
 
 		public function ImportScenario()
 		{
-			Update::printLog("ImportScenario -> Starting Import Scenario ...");
+			Update::LogInfo("ImportScenario -> Starting Import Scenario ...");
 			$plan = new Plan();
 			$plan->Import();
 
 			$objective = new Objective();
 			$objective->Import();
 
-			Update::printLog("ImportScenario -> Imported Scenario.");
+			Update::LogInfo("ImportScenario -> Imported Scenario.");
 		}
 
 		public function SetupSecurityTokens()
 		{
-			Update::printLog("SetupSecurityToken -> Generating new access tokens");
+			Update::LogInfo("SetupSecurityToken -> Generating new access tokens");
 			$security = new Security();
 			$security->GenerateToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN, Security::TOKEN_LIFETIME_INFINITE);
 			$security->GenerateToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER, Security::TOKEN_LIFETIME_INFINITE);
-			Update::printLog("SetupSecurityToken -> Done");
+			Update::LogInfo("SetupSecurityToken -> Done");
 		}
 
 		private static function getRecreateLogPath()
@@ -281,12 +288,57 @@
 			file_put_contents(Update::getRecreateLogPath(), "");
 		}
 
-		private static function printLog(string $message, bool $isError = false) 
+		private static function LogError(string $message)
 		{
-			$dateNow = '[' . date("Y-m-d H:i:s") . ']';
-			$logLevel = $isError ? ' [ERROR] ' : ' [INFO]' ;
+			self::PrintToRecreateLog($message, self::LOG_ERROR);
+		}
+		
+		private static function LogWarning(string $message)
+		{
+			self::PrintToRecreateLog($message, self::LOG_WARNING);
+		}
+		
+		private static function LogInfo(string $message)
+		{
+			self::PrintToRecreateLog($message, self::LOG_INFO);
+		}
 
-			print($dateNow . $logLevel . ' - ' . $message);
+		private static function LogDebug(string $message)
+		{
+			self::PrintToRecreateLog($message, self::LOG_DEBUG);
+		}
+
+		private static function PrintToRecreateLog(string $message, int $logLevel) 
+		{
+			if ((self::$logFilter & $logLevel) == 0)
+			{
+				return;
+			}
+
+			$dateNow = '[' . date("Y-m-d H:i:s") . ']';
+			$logCategory = "";
+			if (($logLevel & self::LOG_ERROR) == self::LOG_ERROR)
+			{
+				$logCategory = "ERROR";
+			}
+			else if (($logLevel & self::LOG_WARNING) == self::LOG_WARNING)
+			{
+				$logCategory = "WARN";
+			}
+			else if (($logLevel & self::LOG_INFO) == self::LOG_INFO)
+			{
+				$logCategory = "INFO";
+			}
+			else if (($logLevel & self::LOG_DEBUG) == self::LOG_DEBUG)
+			{
+				$logCategory = "DEBUG";
+			}
+			else 
+			{
+				$logCategory = "UNKNOWN";
+			}
+
+			print($dateNow . " [ ". $logCategory . ' ] - ' . $message);
 		}
 
 		private static function RecreateLoggingHandler(string $message, int $phase)

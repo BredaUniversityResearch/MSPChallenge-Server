@@ -68,9 +68,9 @@ class Config
 		return $this->configRoot["game_autosave_interval"];
 	}
 
-	public function GetHighTimeout()
+	public function GetLongRequestTimeout()
 	{
-		return $this->configRoot["high_timeout"];
+		return $this->configRoot["long_request_timeout"];
 	}
 
 	public function ShouldWaitForSimulationsInDev()

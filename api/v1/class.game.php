@@ -618,7 +618,7 @@
 				$apiRoot = GameSession::GetRequestApiRoot();
 
 				$simulationsHelper = new Simulations();
-				$simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes());
+				$simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
 				$security = new Security();
 				$newAccessToken = json_encode($security->GenerateToken());
 				$recoveryToken = json_encode($security->GetRecoveryToken());

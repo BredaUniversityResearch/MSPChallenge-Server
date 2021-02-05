@@ -1145,7 +1145,7 @@
 			foreach($restrictionSettings as &$setting){
 				$layerId = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name =?", array($setting['layer_name']));
 				if (count($layerId) == 0) {
-					Base::Debug("Could not find layer with name ".$restriction['layer_name']." when importing restriction settings. Settings referencing this layer will be dropped.");
+					Base::Debug("Could not find layer with name ".$setting['layer_name']." when importing restriction settings. Settings referencing this layer will be dropped.");
 					continue;
 				}
 
