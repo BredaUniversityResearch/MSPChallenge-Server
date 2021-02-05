@@ -30,7 +30,7 @@ class Simulations extends Base
 		$config = $game->GetGameConfigValues();			
 		foreach(self::POSSIBLE_SIMULATIONS as $possibleSim)
 		{
-			if (array_key_exists($possibleSim, $config)) {
+			if (array_key_exists($possibleSim, $config) && is_array($config[$possibleSim])) {
 				$versionString = "Latest";
 				if (array_key_exists("force_version", $config[$possibleSim]))
 				{
