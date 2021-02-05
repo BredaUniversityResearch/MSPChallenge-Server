@@ -555,42 +555,6 @@
 			return Database::GetInstance()->query("SELECT layer_raster as raster, layer_id as id FROM layer WHERE layer_geotype=? AND layer_lastupdate>?", array("raster", $time));
 		}
 
-		public function HandleWKTParse($geometry)
-		{
-			$geostring = "MULTIPOLYGON (";
-
-			foreach($geometry as $geo){
-				$geom = json_decode($geo['geometry_geometry'], true, 512, JSON_BIGINT_AS_STRING);
-				$geostring .= "((";
-				foreach($geom as $g){
-					$geostring .= $g[0] . " " . $g[1] . ", ";
-				}
-				$geostring = substr($geostring, 0, -2);
-
-				if(empty($subtractive)){
-					$geostring .= ")),";
-				}
-				else{
-					$geostring .= ")";
-
-					foreach($subtractive as $sub){
-						$geostring .= ",(";
-
-						$geom = json_decode($sub['geometry_geometry'], true, 512, JSON_BIGINT_AS_STRING);
-						foreach($geom as $g){
-							$geostring .= $g[0] . " " . $g[1] . ", ";
-						}
-						$geostring = substr($geostring, 0, -2);
-						$geostring .= ")";
-					}
-
-					$geostring .= "))";
-				}
-			}
-
-			return substr($geostring, 0, -1) . ")";
-		}
-
 		public function GetExport($workspace, $layer, $format = "GML", $layerdata="", $rasterMeta = null)
 		{
 			//this downloads the data from GeoServer through their REST API
@@ -608,6 +572,10 @@
 				return $response;
 			}
 			else if($format == "PNG"){
+				if ($rasterMeta === null)
+				{
+					throw new Exception("Tried to export ".$layer." from geoserver in format ".$format." but rasterMeta was not specified");
+				}
 				$deltaSizeX = $rasterMeta["boundingbox"][1][0] - $rasterMeta["boundingbox"][0][0];
 				$deltaSizeY = $rasterMeta["boundingbox"][1][1] - $rasterMeta["boundingbox"][0][1];
 				$widthRatioMultiplier = $deltaSizeX / $deltaSizeY;

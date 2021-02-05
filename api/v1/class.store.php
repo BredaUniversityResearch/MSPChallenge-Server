@@ -225,7 +225,7 @@
 			}
 			catch(Exception $e){
 				//if this triggers something went horribly wrong. Probably means that Geoserver is down or broken in some way
-				Base::Debug("Something went wrong downloading " . $filename . ". Is the file on GeoServer? Should download be attempted at all?");
+				throw new Exception("Something went wrong downloading " . $filename . ". Is the file on GeoServer? Should download be attempted at all?. Exception message: ".$e->getMessage());
 				//Base::Debug($e->getMessage()." - on line ".$e->getLine()." of file ".$e->getFile());
 			}
 		}
