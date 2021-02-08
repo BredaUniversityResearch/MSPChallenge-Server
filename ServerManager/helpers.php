@@ -1,15 +1,9 @@
 <?php
 //functions that help things along. by definition functions that are so common or fundamental, require limited and diverse arguments, it makes no sense to turn them into classes
 
-/*function apiCheckDBUserSession() {
-  // replace this with a call to Authoriser's checkjwt.php 
-  if (!isset($_REQUEST['Token']) || empty(Session::get('currentToken')) || empty(Session::get(Config::get('session/session_name')))) forbidden();
-  //$checked = json_decode(CallAPI("POST", Config::get('msp_auth/api_endpoint').'checkjwt.php', array("jwt" => $_REQUEST['Token'], "audience" => GetBareHost())));
-  if ($_REQUEST['Token'] == Session::get('currentToken')) { //($checked->success) {
-    return Session::get(Config::get('session/session_name'));
-  }
-  else forbidden();
-}*/
+function ThisServerVersion() {
+  return "4.0 beta-7";
+}
 
 function GetGameSessionAPIAuthenticationHeader($sessionId) {
 	$db = DB::getInstance();
@@ -23,37 +17,6 @@ function GetGameSessionAPIAuthenticationHeader($sessionId) {
 	}
 	return $header;
 }
-
-/*function GetServerURLBySessionId($sessionId=0) {
-  $url = Config::get('msp_server_protocol').GetTranslatedServerURL().Config::get('code_branch')."/";
-  if (!empty($sessionId)) $url .= $sessionId;
-  return $url;
-}*/
-
-/*function GetFullSelfAddress() {
-  global $url_app_root;
-  return GetBareHost().$url_app_root;
-}*/
-
-/*function GetBareHost() {
-  return Config::get('msp_servermanager_protocol').GetTranslatedServerURL();
-}*/
-
-/*function GetTranslatedServerURL() {
-  $server_address = GetServerURL();
-  if (!empty($_SERVER['SERVER_NAME'])) {
-    if ($_SERVER['SERVER_NAME'] != $server_address) {
-      return $_SERVER['SERVER_NAME'];
-    }
-  }  
-  return $server_address;
-}*/
-
-/*function GetServerURL() {
-	$db = DB::getInstance();
-	$address = $db->cell('game_servers.address', array("id", "=", 1));
-	return $address;
-}*/
 
 function GetReadableTimeFormat() {
 	return "Y-m-d H:i";
@@ -70,52 +33,6 @@ function GetConfigBaseDirectory()	{
 function GetSessionArchiveBaseDirectory()	{
 		return "../session_archive/";
 }
-
-/*function forbidden() {
-	http_response_code(404);
-	die();
-}*/
-
-/*function save_server_id()  {
-  $checksid = server_id();
-  if (!isset($_SESSION['server_id']) && !empty($checksid)) {
-    $_SESSION['server_id'] = $checksid;
-  }
-  elseif (!isset($_SESSION['server_id'])) {
-    $_SESSION['server_id'] = uniqid('', true);
-  }
-  return $_SESSION['server_id'];
-}*/
-
-/*function freshinstall() {
-  $db = DB::getInstance();
-  $query = $db->query("SELECT value FROM settings WHERE name = 'server_id' LIMIT 1;");
-  $count=$query->count();
-  if ($count > 0) {
-    return false;
-  }
-  return true;
-}*/
-
-/*function server_id() {
-  $db = DB::getInstance();
-  $query = $db->query("SELECT value FROM settings WHERE name = 'server_id' LIMIT 1;");
-  $count=$query->count();
-  if ($count > 0) {
-    return $query->first()->value;
-  }
-  return '';
-}*/
-
-/*function server_name() {
-  $db = DB::getInstance();
-  $query = $db->query("SELECT value FROM settings WHERE name = 'server_name' LIMIT 1;");
-  $count=$query->count();
-  if ($count > 0) {
-    return $query->first()->value;
-  }
-  return '';
-}*/
 
 
 
@@ -258,20 +175,6 @@ function abrev_date($date,$tz){
 
 function money($ugly){
 	return '$'.number_format($ugly,2,'.',',');
-}
-
-function name_from_id($id){
-	//shouldn't need this
-
-	/*$db = DB::getInstance();
-	$query = $db->query("SELECT username FROM users WHERE id = ? LIMIT 1",array($id));
-	$count=$query->count();
-	if ($count > 0) {
-		$results=$query->first();
-		return ucfirst($results->username);
-	} else {
-		return "-";
-	}*/
 }
 
 function display_errors($errors = array()){

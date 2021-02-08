@@ -1,40 +1,38 @@
 
 <div id="header-wrapper" >
     <nav class="navbar">
-
       <a class="title" href="<?php echo $url_app_root;?>index.php" style="background-image: url('<?=$url_app_root?>images/logo.png');"> MSP Challenge Server Manager</a>
-      <div id="navbarsExample03">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">Current address: &nbsp; 
-            <?php 
-            $servermanager = ServerManager::getInstance();
-            echo $servermanager->GetTranslatedServerURL();
-            ?>
+      <div id="header-menu-wrapper">
+        <ul id="header-menu">
+          
+          
+          <li id="main-menu-item">
+            <div id="main-menu-icon"></div> </a>
+            <ul id="main-menu">
+              <li><a href="https://www.mspchallenge.info" title="www.mspchallenge.info">Main MSP Challenge website</a></li>
+              <li><a href="https://community.mspchallenge.info/" title="community.mspchallenge.info">MSP Challenge Community Wiki</a></li>
+              <li><a href="https://knowledge.mspchallenge.info/" title="knowledge.mspchallenge.info">MSP Knowledge Base</a></li>
+              
+            </ul>
           </li>
           <?php if($user->isLoggedIn()){ //anyone is logged in ?>
-          <li class="nav-item"><a href="<?=$url_app_root?>"><span class="fa fa-fw fa-home"></span> Home</a></li>
-          <li class="nav-item"><a href="<?=$url_app_root?>server_manager.php"><span class="fa fa-fw fa-wrench"></span> Settings</a> </li>
-
-          <li class="dropdown nav-item">
-            <a class="dropdown-toggle nav-links" href="" data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false"><span class="fa fa-fw fa-cogs"></span> </a>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" href="https://auth.mspchallenge.info/users/account.php"><span class="fa fa-fw fa-user"></span> Account</a>
-              <a class="dropdown-item" href="https://community.mspchallenge.info/"><span class="fa fa-fw fa-wrench"></span> Support</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="<?=$url_app_root?>logout.php"><span class="fa fa-fw fa-sign-out"></span> Logout</a>
-            </div>
+          <li id="user-menu-item">
+            <div id="user-menu-icon"></div> </a>
+            <ul id="user-menu">
+              <li><a href="https://auth.mspchallenge.info/users/account.php">My user details</a></li>
+              <li><a href="https://community.mspchallenge.info/wiki/Special:Preferences">Community Wiki preferences</a></li>
+              <li><a href="<?=$url_app_root?>logout.php">Logout</a></li>
+            </ul>
           </li>
           <?php } else { ?>
-            <li class="nav-item"><a href="<?=$url_app_root?>login.php"><span class="fa fa-fw fa-sign-in"></span> Log In</a></li>
-            <li class="nav-item"><a href="https://auth.mspchallenge.info/users/join.php"><span class="fa fa-fw fa-plus-square"></span> Register</a></li>
-
-            <li class="dropdown nav-item">
-              <a class="dropdown-toggle nav-links" href="" data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false"><span class="fa fa-fw fa-life-ring"></span> Help </a>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" href="https://auth.mspchallenge.info/users/forgot_password.php"><span class="fa fa-fw fa-wrench"></span> Forgot Password</a>
-                <a class="dropdown-item" href="https://community.mspchallenge.info/"><span class="fa fa-fw fa-wrench"></span> Support</a>
-              </div>
-            </li>
+          <li id="user-menu-item">
+            <div id="user-menu-icon"></div> </a>
+            <ul id="user-menu">
+              <li><a href="<?=$url_app_root?>login.php">Log in</a></li>
+              <li><a href="https://auth.mspchallenge.info/users/forgot_password.php">Reset password</a></li>
+              <li><a href="https://auth.mspchallenge.info/users/join.php">Create an account</a></li>
+            </ul>
+          </li>
           <?php } ?>
         </ul>
       </div>

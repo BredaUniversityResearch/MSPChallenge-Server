@@ -40,7 +40,7 @@ function showToast(type, message) {
 
 			shortMessage = message
 			if(message.length > 100){
-				shortMessage =  'An error occurred with the MSP Challenge server. '
+				shortMessage =  'An error occurred with the MSP Challenge session. '
 				shortMessage += '<button type="button" id="btnErrorDetail" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#errorDetail">Click here</button> to see more details';
 			}
 
@@ -217,7 +217,7 @@ function newSessionChoice() {
 }
 
 function archiveSession(sessionId) {
-	if (confirm('This will permanently archive the server. It will subsequently no longer be usable by end users. You will be able to download an archive file purely as a backup. Are you sure?')) {
+	if (confirm('This will permanently archive the session. It will subsequently no longer be usable by end users. You will be able to download an archive file purely as a backup. Are you sure?')) {
 		$.ajax({
 			'url': 'api/archivesession.php',
 			'data': {
@@ -272,7 +272,7 @@ function toggleDemoSession(sessionId) {
 function updateDemoSessionStatus(){
 	$('#demo-session-status').empty();
 	wasEnabled = $('#demo-session-status').attr("data-value") == "1"  ? true : false;
-	btnText = wasEnabled ?  '<i class="fa fa-bookmark" title="toggle"></i> Enable Demo Server' : '<i class="fa fa-bookmark" title="toggle"></i> Disable Demo Server';
+	btnText = wasEnabled ?  '<i class="fa fa-bookmark" title="toggle"></i> Enable Demo Session' : '<i class="fa fa-bookmark" title="toggle"></i> Disable Demo Session';
 	$('#toggleDemoSessionButton').empty();
 	$('#toggleDemoSessionButton').append(btnText)
 
@@ -322,7 +322,7 @@ function downloadArchive(sessionId) {
 }
 
 function RecreateSession(sessionId) {
-	if (confirm('This will delete and recreate the server. All existing data will be lost. Are you sure?')) {
+	if (confirm('This will delete and recreate the session. All existing data will be lost. Are you sure?')) {
 		showToast(MessageType.INFO, 'Please wait...');
 		$.ajax({
 		'url': 'api/recreatesession.php',
@@ -382,7 +382,7 @@ function updateSessionsTable(visibility) {
 
 function sessionsListToTable(sessionsList) {
 	$('#sessionsListtbody').empty();
-	if(sessionsList == '') { $('<tr><td colspan="8">No servers yet. Create your first one through the New Server button above.</td></tr>').appendTo('#sessionsListtbody') }
+	if(sessionsList == '') { $('<tr><td colspan="8">No sessions yet. Create your first one through the New Session button above.</td></tr>').appendTo('#sessionsListtbody') }
 	$.each(sessionsList, function(i, v) {
 		visibility = '';
 		show_state = v.game_state;
@@ -391,15 +391,15 @@ function sessionsListToTable(sessionsList) {
 			show_state = v.session_state;
 		}
 		if(v.game_state == 'play' || v.game_state == 'fastforward') {
-			save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Server"></i></button>';
+			save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Session"></i></button>';
 			running_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-play" title="Start Simulation"></i></button>';
 			paused_icon = '<button class="btn btn-secondary btn-sm" onClick="pauseSession('+v.id+')"><i class="fa fa-pause" title="Pause Simulation" ></i></button>';
 		} else if(v.session_state != 'archived' && v.session_state != 'request'  && (v.game_state == 'pause' || v.game_state == "setup")){
-			save_icon = '<button class="btn btn-secondary btn-sm" onClick="saveSession('+v.id+')"><i class="fa fa-save" title="Save Server"></i></button>';
+			save_icon = '<button class="btn btn-secondary btn-sm" onClick="saveSession('+v.id+')"><i class="fa fa-save" title="Save Session"></i></button>';
 			running_icon = '<button class="btn btn-secondary btn-sm" onClick="startSession('+v.id+')"><i class="fa fa-play" title="Start Simulation" ></i></button>';
 			paused_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pause" title="Pause Simulation"></i></button>';
 		} else {
-			save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Server"></i></button>';
+			save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Session"></i></button>';
 			running_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-play" title="Start Simulation"></i></button>';
 			paused_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pause" title="Pause Simulation"></i></button>';
 		}
@@ -425,7 +425,7 @@ function updateSessionInfoList(sessionInfo) {
 	//console.log('Session Log:' , sessionInfo.log);
 	$('#sessionInfoList').empty();
 	if(sessionInfo == null) {
-		$('<li class="list-group-item list-group-item-warning">No server selected...</li>').appendTo("#sessionInfoList");
+		$('<li class="list-group-item list-group-item-warning">No session selected...</li>').appendTo("#sessionInfoList");
 	} else {
 		var buttonStartPause = '';
 		var buttonArchiveDownload = '';
@@ -434,8 +434,8 @@ function updateSessionInfoList(sessionInfo) {
 		if(sessionInfo.session_state == 'archived') {
 			buttonArchiveDownload = ShowArchiveFile(sessionInfo.id);
 		} else if (sessionInfo.session_state == 'healthy') {
-			buttonArchiveDownload = '<button id="buttonArchiveDownload" class="btn btn-warning btn-sm" onClick="archiveSession('+sessionInfo.id+')"><i class="fa fa-archive" title="Archive Server"></i> Archive Server</button>';
-			buttonSaveDownload = '<button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+')"><i class="fa fa-save" title="Save Server"></i> Save Server as file</button>';
+			buttonArchiveDownload = '<button id="buttonArchiveDownload" class="btn btn-warning btn-sm" onClick="archiveSession('+sessionInfo.id+')"><i class="fa fa-archive" title="Archive Session"></i> Archive Session</button>';
+			buttonSaveDownload = '<button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+')"><i class="fa fa-save" title="Save Session"></i> Save Session as File</button>';
 			buttonSaveDownload += ' <button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+', \'layers\')"><i class="fa fa-save" title="Save All Layers"></i> Save All Layers</button>';
 			if(sessionInfo.game_state == 'play') {
 				buttonStartPause = '<button id="buttonStartPause" class="btn btn-secondary btn-sm pull-left" onclick="pauseSession('+sessionInfo.id+')"><i class="fa fa-pause" title="Pause Simulation"></i> Pause Simulation</button>';
@@ -445,7 +445,7 @@ function updateSessionInfoList(sessionInfo) {
 			}
 		}
 
-		var demoSessionDescription = (sessionInfo.demo_session == 0)? " Enable Demo Server" : " Disable Demo Server";
+		var demoSessionDescription = (sessionInfo.demo_session == 0)? " Enable Demo Session" : " Disable Demo Session";
 
 		var toggleDemoSessionButton = '<button id="toggleDemoSessionButton" class="btn btn-info btn-sm" onClick="toggleDemoSession('+sessionInfo.id+')"><i class="fa fa-bookmark" title="'+demoSessionDescription+'"></i>'+demoSessionDescription+'</button>';
 		var buttonExportCurrentPath = '<button id="exportPlansButton" class="btn btn-secondary btn-sm" onClick="downloadExportedPlansWithConfig('+sessionInfo.id+')"><i class="fa fa-file-code-o" title="Export Configuration with Current Plans"></i> Export Configuration with Current Plans</button>';
@@ -456,13 +456,13 @@ function updateSessionInfoList(sessionInfo) {
 		}
 
 		if(sessionInfo.session_state == 'archived') {
-			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" disabled><i class="fa fa-repeat" title="Recreate Server"></i> Recreate Server</button>';
+			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" disabled><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>';
 		}
 		else if (sessionInfo.save_id > 0) {
-			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateLoadSave('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Server"></i> Recreate Server (from save)</button>';
+			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateLoadSave('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session (from save)</button>';
 		}
 		else {
-			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateSession('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Server"></i> Recreate Server</button>';
+			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateSession('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>';
 		}
 
 		$('#sessionInfoTable').empty();
@@ -491,7 +491,7 @@ function getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownloa
 	html +=		'<tr>'
 	html += 		'<th scope="col">Simulation state</th>'
 	html += 		'<td class="text-right" id="game-state"><h5><span class="badge badge-warning"><i class="fa fa-info" aria-hidden="true"></i> ' + sessionInfo.game_state + '</span></h5></td>'
-	html += 		'<th scope="col">Server state</th>'
+	html += 		'<th scope="col">Session state</th>'
 	if(sessionInfo.session_state.toLowerCase() == 'healthy'){
 		html += '<td class="text-right"><h5><span class="badge badge-success"><i class="fa fa-heartbeat" aria-hidden="true"></i> ' + sessionInfo.session_state + '</span></h5></td></tr>'
 	} else {
@@ -523,7 +523,7 @@ function getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownloa
 	html +=		'<tr>'
 	html +=			'<th scop="col">Active Players</th>'
 	html +=			'<td class="text-right">'+sessionInfo.players_active+'</td>'
-	html +=			'<th scope="col">Demo Server?</th>'
+	html +=			'<th scope="col">Demo Session?</th>'
 	html +=			'<td class="text-right" id="demo-session-status" data-value="'+sessionInfo.demo_session+'">'
 	if(sessionInfo.demo_session == 1){
 		html +=			'<h5><span class="badge badge-success"><i class="fa fa-plug" aria-hidden="true"></i> ON </span></h5>'
@@ -556,7 +556,7 @@ function getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownloa
 	if(sessionInfo.log && sessionInfo.log.length > 15){
 		html += 	'<tr class="table-info">'
 		html +=			'<td colspan="4" class="text-left">'
-		html +=				'<button id="buttonServerLog" onclick="toggleLogInfo()" class="btn btn-secondary btn-sm"><i class="fa fa-bars" aria-hidden="true"></i></i> Show/Hide Server Creation Log</button>'
+		html +=				'<button id="buttonServerLog" onclick="toggleLogInfo()" class="btn btn-secondary btn-sm"><i class="fa fa-bars" aria-hidden="true"></i></i> Show/Hide Session Creation Log</button>'
 		html +=			'</td>'
 		html +=		'</tr>'
 
@@ -1418,5 +1418,116 @@ function onUploadConfigFileOriginalSelected(selectedValue) {
 			'type': 'POST'
 		});
 	}
-
 }
+
+function WatchdogServerList() {
+	$('#watchdogServerBody').empty();
+	$.ajax({
+		'url': 'api/getwatchdoglist.php',
+		'data': {
+			Token: currentToken,
+			format: 'json'
+			},
+		'error': function() {
+			$('#watchdogServerBody').html('An error occurred.');
+			},
+		'dataType': 'json',
+		'success': function(data) {
+			$('bla').appendTo('#watchdogServerBody');
+				$.each(data.watchdoglist, function(i, v) {
+					$('<tr><td>' + v.name + '</td><td>' + v.address + '</td><td></td></tr>').appendTo('#watchdogServerBody');
+				});
+			},
+		'type': 'POST'
+	});
+}
+
+function GetServerAddr() {
+	$.ajax({
+		'url': 'api/getserveraddr.php',
+		'data': {
+			Token: currentToken,
+			format: 'json'
+			},
+		'error': function() {
+			$('#ServerAddress').val('An error occurred.');
+			},
+		'dataType': 'json',
+		'success': function(data) {
+				$('#ServerAddress').val(data.serveraddr);
+			},
+		'type': 'POST'
+	});
+}
+
+function submitNewServer() {
+	var name = $('#ServerName').val();
+	var address = $('#ServerAddress').val();
+	var serverid = $('#ServerID').val();
+	if ([name, address, serverid].every(Boolean)) {
+		$.ajax({
+			url: 'api/addgameserver.php',
+			data:  {
+				Token: currentToken,
+				format: 'json',
+				name: name,
+				address: address,
+				serverid: serverid,
+			},
+			'error': function() {
+				updateInfobox('danger', 'addgameserver: Error in AJAX call.');
+			},
+			'dataType': 'json',
+			'success': function(data) {
+				if (data.status == 'error') {
+					updateInfobox('danger', 'addgameserver (API): '+data.message);
+				} else {
+					updateInfobox('success', data.message);
+					WatchdogServerList();
+					GetServerAddr();
+				}
+			},
+			'async': false,
+			'type': 'POST'
+		});
+	}
+	else {
+		updateInfobox('danger', 'Please fill in all the required fields');
+	}
+}
+
+function submitNewWatchdogServer() {
+	var name = $('#newWatchdogServerName').val();
+	var address = $('#newWatchdogServerAddress').val();
+
+	if ([name, address].every(Boolean)) {
+		$.ajax({
+			url: 'api/addwatchdogserver.php',
+			data:  {
+				Token: currentToken,
+				format: 'json',
+				name: name,
+				address: address,
+				},
+			'error': function() {
+				updateInfobox('danger', 'addwatchdogserver: Error in AJAX call.');
+				},
+			'dataType': 'json',
+			'success': function(data) {
+				if (data.status == 'error') {
+					updateInfobox('danger', 'addwatchdogserver (API): '+data.message);
+				} else {
+					updateInfobox('success', data.message);
+					WatchdogServerList();
+					GetServerAddr();
+				}
+				},
+			'type': 'POST'
+		});
+		$('#sessionsTable').trigger('update', true);
+	}
+	else {
+		updateInfobox('danger', 'Please fill in all the required fields');
+	}
+}
+

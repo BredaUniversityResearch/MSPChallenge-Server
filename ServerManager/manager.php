@@ -46,6 +46,10 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			<li class="nav-item">
 				<a href="#tabConfigVersions" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabConfigVersions" aria-selected="false"><i class="fa fa-file-text"></i> Configurations</a>
 			</li>
+			<li class="nav-item">
+				<a href="#tabSettings" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabSettings" aria-selected="false"><i class="fa fa-wrench"></i> Settings</a>
+			</li>	
+
 		</ul>
 
 		<div class="tab-content" id="myTabContent">
@@ -76,14 +80,13 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					</div>
 
 					<div class="col-md-12">
-							Here you can create a new MSP Challenge server, and administer existing ones.
-						<br />
+						<p>Here you can create a new MSP Challenge session, and administer existing ones.</p>
 						<div class="table-responsive">
 							<table id="sessionsTable" class="table table-hover table-striped tablesorter-default">
 								<thead>
 									<tr>
 										<th>ID</th>
-										<th>Server Name</th>
+										<th>Session Name</th>
 										<th>Configuration</th>
 										<th>Players</th>
 										<th>State</th>
@@ -105,7 +108,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			<div class="tab-pane fade" id="tabSavesList" role="tabpanel" aria-labelledby="tabSavesList-tab">
 				<div class="row">
 					<div class="col-md-12 flex-row">
-						<button type="button" id="btnLoadSave" class="btn btn-primary pull-left" data-toggle="modal" data-target="#modalUploadSave"><i class="fa fa-plus-circle" title=""></i> Upload Server Save</button>
+						<button type="button" id="btnLoadSave" class="btn btn-primary pull-left" data-toggle="modal" data-target="#modalUploadSave"><i class="fa fa-plus-circle" title=""></i> Upload Session Save</button>
 						<button id="buttonRefreshSavesList" class="btn btn-primary"><i class="fa fa-refresh" title="Refresh" id="buttonRefreshSavesListIcon"></i> Refresh</button>
 					</div>
 					<div class="col-md-12 flex-right" id="savesList">
@@ -125,14 +128,13 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					</div>
 
 					<div class="col-md-12">
-							Here you can review and reuse saves of MSP Challenge servers.
-						<br />
+						<p>Here you can review and reuse saves of MSP Challenge sessions.</p>
 						<div class="table-responsive">
 							<table id="savesTable" class="table table-hover table-striped tablesorter-default">
 								<thead>
 									<tr>
 										<th>Created</th>
-										<th>Server Name</th>
+										<th>Session Name</th>
 										<th>Month / Year</th>
 										<th>Configuration</th>
 										<th>Type</th>
@@ -174,8 +176,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					</div>
 				</div>
 				<div class="col-md-12">
-						Here you can upload a new MSP Challenge server configuration file, and administer existing ones.
-						<br />
+						<p>Here you can upload a new MSP Challenge session configuration file, and administer existing ones.</p>
 						<div class="table-responsive">
 							<table id="configVersionsTable" class="table table-hover tablesorter-default">
 								<thead>
@@ -199,6 +200,68 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					</div>
 				</div> <!-- /tabConfigVersions -->
 			</div>
+			<div class="tab-pane fade" id="tabSettings" role="tabpanel" aria-labelledby="tabSettings-tab">
+			<p>Here you can change various settings of this MSP Challenge server.</p>
+				<div class="card-deck">	
+					<div class="card">
+						<div class="card-header">
+							Server Address
+						</div>
+						<div class="card-body">
+							<p class="card-text">The address of this MSP Challenge server. Only change this if you are experiencing connection problems and expect setting an IP address or fully-qualified domain name here would help.<?php //The address of this MSP Challenge server, its name, and its description text users see when they connect to it using the MSP Challenge client.?></p>
+						</div>
+						<div class="card-footer">
+							<button type="button" id="btnServerDetails" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalServerDetails">Change</button>
+						</div>
+					</div>
+					<?php /*
+					<div class="card">
+						<div class="card-header">
+							News feed
+						</div>
+						<div class="card-body">
+							<p class="card-text">The link to an Atom encoded news feed users see when they connect to this MSP Challenge server using the MSP Challenge client and click on News.</p>
+						</div>
+						<div class="card-footer">
+							<a href="#" class="btn btn-primary">Change</a>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-header">
+							Introduction Videos
+						</div>
+						<div class="card-body">
+							<p class="card-text">The list of links of online videos that users should be able to see when they connect to this MSP Challenge server using the MSP Challenge client and click on Introduction.</p>
+						</div>
+						<div class="card-footer">
+							<a href="#" class="btn btn-primary">Change</a>
+						</div>
+					</div>
+					*/ ?>
+					<div class="card">
+						<div class="card-header">
+							User Access
+						</div>
+						<div class="card-body">
+							<p class="card-text">The other users that should have access to this MSP Challenge server. Note that only this server's administrator(s) can change this.</p>
+						</div>
+						<div class="card-footer">
+							<a href="https://auth.mspchallenge.info/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-header">
+							Simulation Servers
+						</div>
+						<div class="card-body">
+							<p class="card-text">Any simulation servers additional to this one, if you would rather have the background simulations run on a different computer than this one.</p>
+						</div>
+						<div class="card-footer">
+							<button type="button" id="btnSimServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSimServers">Change</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<!-- Modal Session info -->
@@ -207,7 +270,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			<div class="modal-dialog modal-wide" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="sessionModalCenterTitle">Server Details</h5>
+						<h5 class="modal-title" id="sessionModalCenterTitle">Session Details</h5>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -230,7 +293,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			<div class="modal-dialog modal-wide" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title" id="newSessionModalLabel">Create New Server</h4>
+						<h4 class="modal-title" id="newSessionModalLabel">Create New Session</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -242,14 +305,14 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 								<a class="nav-link active" id="NewSessionModalDefault-tab" data-toggle="tab" href="#NewSessionModalDefault" role="tab" aria-controls="NewSessionModalDefault" aria-selected="true">By Selecting a Configuration File</a>
 							</li>
 							<li class="nav-item" role="presentation">
-								<a class="nav-link" id="NewSessionModalLoadSave-tab" data-toggle="tab" href="#NewSessionModalLoadSave" role="tab" aria-controls="NewSessionModalLoadSave" aria-selected="false">Or By Loading a Saved Server</a>
+								<a class="nav-link" id="NewSessionModalLoadSave-tab" data-toggle="tab" href="#NewSessionModalLoadSave" role="tab" aria-controls="NewSessionModalLoadSave" aria-selected="false">Or By Loading a Saved Session</a>
 							</li>
 						</ul>
 						<div class="tab-content" id="myNewSessionModalTabContent">
 							<div class="tab-pane fade show active" id="NewSessionModalDefault" role="tabpanel" aria-labelledby="NewSessionModalDefault-tab">
 							<form class="form-horizontal" role="form" data-toggle="validator" id="formNewSession" enctype="multipart/form-data">
 								<div class="form-group">
-									<label for="newSessionName">Server Name</label>
+									<label for="newSessionName">Session Name</label>
 									<input type="text" class="form-control" id="newSessionName" name="session name" required="true">
 								</div>
 								<div class="form-group">
@@ -292,7 +355,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 							<div class="tab-pane fade show" id="NewSessionModalLoadSave" role="tabpanel" aria-labelledby="NewSessionModalLoadSave-tab">
 							<form class="form-horizontal" role="form" data-toggle="validator" id="formLoadSave" enctype="multipart/form-data">
 								<div class="form-group">
-									<label for="newSessionName2">Server Name</label>
+									<label for="newSessionName2">Session Name</label>
 									<input type="text" class="form-control" id="newServerName" name="session name" required="true">
 								</div>
 								<div class="form-group">
@@ -301,7 +364,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 									</select>
 								</div>
 								<div class="form-group">
-									<label for="SaveFileSelector">Select the Server Save you wish to load</label>
+									<label for="SaveFileSelector">Select the Session Save you wish to load</label>
 									<select class="form-control" id="SaveFileSelector" required="required">		
 									</select>
 								</div>
@@ -311,7 +374,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" onClick="newSessionChoice();">Create server</button>
+						<button type="button" class="btn btn-primary" onClick="newSessionChoice();">Create session</button>
 					</div>
 				</div>
 			</div>
@@ -346,7 +409,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title" id="uploadsaveModalLabel">Upload a Server Save File</h4>
+						<h4 class="modal-title" id="uploadsaveModalLabel">Upload a Session Save File</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -434,6 +497,83 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 				</div>
 			</div>
 		</div>
+
+		<!-- Modal: Server Address, Name, Description -->
+		<div class="modal fade" id="modalServerDetails" tabindex="-1" role="dialog" aria-labelledby="ServerDetailsModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title" id="ServerDetailsModalLabel">Server Address, Name & Description</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>The default value is 'localhost'. This value makes MSP Challenge determine your current IP address automatically. In some cases that automatically determined IP address listed above ('Server Address') turns out to be erroneous or inaccessible, causing connection problems for MSP Challenge clients and any externally hosted background simulations. In those cases you can specify the public IP address or fully-qualified domain name of this machine below. Note that local IP addresses tend to change, so as soon as that happens you will have to specify the new exact IP address here again. If everything works well, then leave this setting alone.</p>
+						<form class="form-horizontal" role="form" data-toggle="validator" id="formNewWatchdogServer" enctype="multipart/form-data">
+							<div class="row">
+								<div class="col">
+									<label for="GameServerAddress">MSP Challenge Server machine's address</label>
+									<input type="text" class="form-control" id="ServerAddress" required="required"/>
+									<input type="hidden" id="ServerID" value="1"/>
+									<input type="hidden" id="ServerName" value="Default: the server machine"/>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary" onClick="submitNewServer();">Update</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Modal: New Simulation Servers -->
+		<div class="modal fade" id="modalNewSimServers" tabindex="-1" role="dialog" aria-labelledby="NewSimServersModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title" id="NewSimServersModalLabel">Add Additional Simulation Servers</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>
+							<table id="watchdogServerTable" class="table table-sm table-hover">
+								<thead>
+									<tr>
+										<th>Simulation Server Name</th>
+										<th>IP Address</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody id="watchdogServerBody">
+								</tbody>
+							</table>
+						</p>
+						<form class="form-horizontal" role="form" data-toggle="validator" id="formNewWatchdogServer" enctype="multipart/form-data">
+							<div class="row">
+								<div class="col">
+									<label for="newWatchdogServerName">Simulation Server Name</label>
+									<input type="text" class="form-control" id="newWatchdogServerName" required="required" placeholder="required">
+								</div>
+								<div class="col">
+									<label for="newWatchdogServerAddress">IP Address</label>
+									<input type="text" class="form-control" id="newWatchdogServerAddress" required="required" placeholder="required">
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary" onClick="submitNewWatchdogServer();">Add</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
 	</div>
 
 	<!-- Modal Error Details -->
@@ -505,12 +645,15 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 		$("#SaveFileSelector").change(function() {
 			setNewServerName(this.value);
 		});
+
+		WatchdogServerList();
+		GetServerAddr();
 	});
 
-	regularupdateTablesManager = setInterval(function() {
+	/*regularupdateTablesManager = setInterval(function() {
 		updateSessionsTable($('input[name=inlineRadioOptions]:checked').val());
 		updateSavesTable($('input[name=inlineRadioOptionSaves]:checked').val());
-	}, 20000);
+	}, 20000);*/
 	
 </script>
 <!-- footers -->

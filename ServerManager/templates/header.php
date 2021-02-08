@@ -10,7 +10,7 @@ require_once('header1_must_include.php'); ?>
 
 <?php /* ALL CSS FIRST! */ ?>
 
-<?php require_once $abs_app_root.$url_app_root.'css/glyphicons.php'; ?>
+<?php //require_once $abs_app_root.$url_app_root.'css/glyphicons.php'; ?>
 
 <!-- AKA Primary CSS -->
 <link href="<?=$url_app_root;?>css/color_schemes/bootstrap.min.css" rel="stylesheet">
@@ -25,7 +25,7 @@ require_once('header1_must_include.php'); ?>
 <link href="<?=$url_app_root;?>css/datatables.css" rel="stylesheet">
 
 <!-- Your Custom CSS Goes Here and will override everything above this!-->
-<!-- <link href="<?=$url_app_root;?>css/custom.css" rel="stylesheet"> -->
+<link href="<?=$url_app_root;?>css/custom.css" rel="stylesheet">
 
 <!-- Custom Fonts/Animation/Styling-->
 
@@ -63,8 +63,6 @@ if (typeof jQuery == 'undefined') {
 <script src="<?=$url_app_root;?>js/toasts/tata.js"></script>
 
 <script src="<?=$url_app_root;?>js/manager.js"></script>
-
-<script src="<?=$url_app_root?>js/server_manager.js"></script>
 
 <script src="<?=$url_app_root;?>js/jquery.tablesorter-2.31.1.min.js"></script>
 

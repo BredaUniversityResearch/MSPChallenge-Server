@@ -10,8 +10,19 @@ $(document).ready(function(){
 
 
 
-<footer>
-<p align="center">&copy; <?php echo date("Y"); ?> Breda University of Applied Sciences</p>
+<footer style="text-align: center; padding-top: 15px;">
+
+<div>
+  MSP Challenge Server version <?php echo ThisServerVersion(); ?>
+</div>
+<div>
+  Server Address: 
+  <?php 
+  $servermanager = ServerManager::getInstance();
+  echo $servermanager->GetTranslatedServerURL();
+  ?>
+</div>
+
 </footer>
 </body>
 </html>
