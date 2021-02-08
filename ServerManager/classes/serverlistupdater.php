@@ -39,71 +39,71 @@ class ServerListUpdater
 		Logging::Verbose("About to make the call to ".$targetServerUrl.self::$LIST_SESSION_DETAILS_ENDPOINT);
 		$decodedResult = json_decode(CallAPI("POST", $targetServerUrl.self::$LIST_SESSION_DETAILS_ENDPOINT), true);
 		Logging::Verbose("Got result ".var_export($decodedResult, true));
-		//die();
-		if ($decodedResult != null)
+		if ($decodedResult["success"])
 		{
 			Logging::Verbose("Updating server_manager game_list table accordingly.");
-			$serverData = $decodedResult;
-				if (isset($serverData["game_start_year"]) && 
-				isset($serverData["game_end_month"]) && 
-				isset($serverData["game_current_month"]) && 
-				isset($serverData["game_state"]) && 
-				isset($serverData["users_active_last_minute"]) && 
-				isset($serverData["users_active_last_hour"])) {
-					$args = array(
-						$serverData["game_start_year"],
-						$serverData["game_end_month"],
-						$serverData["game_current_month"],
-						$serverData["game_state"],
-						$serverData["users_active_last_minute"],
-						$serverData["users_active_last_hour"],
-						$gameId);
-					$this->database->Query("UPDATE game_list
-						SET game_start_year = ?,
-							game_end_month = ?,
-							game_current_month = ?,
-							game_state = ?,
-							players_active = ?,
-							players_past_hour = ?
-						WHERE id = ? AND session_state != \"failed\" AND session_state != \"archived\"",
-						$args
-					);
-					Logging::Verbose("Update done.");
-				}
+			$serverData = $decodedResult["payload"];
+			
+			if (isset($serverData["game_start_year"]) && 
+			isset($serverData["game_end_month"]) && 
+			isset($serverData["game_current_month"]) && 
+			isset($serverData["game_state"]) && 
+			isset($serverData["users_active_last_minute"]) && 
+			isset($serverData["users_active_last_hour"])) {
+				$args = array(
+					$serverData["game_start_year"],
+					$serverData["game_end_month"],
+					$serverData["game_current_month"],
+					$serverData["game_state"],
+					$serverData["users_active_last_minute"],
+					$serverData["users_active_last_hour"],
+					$gameId);
+				$this->database->Query("UPDATE game_list
+					SET game_start_year = ?,
+						game_end_month = ?,
+						game_current_month = ?,
+						game_state = ?,
+						players_active = ?,
+						players_past_hour = ?
+					WHERE id = ? AND session_state != \"failed\" AND session_state != \"archived\"",
+					$args
+				);
+				Logging::Verbose("Update done.");
+			}
 
-				if (isset($gameId) && $checkdemoservers) {
-					$demoSession = $this->database->cell("game_list.demo_session", array("id", "=", $gameId));
-					if ($demoSession == 1)
+			if (isset($gameId) && $checkdemoservers) {
+				$demoSession = $this->database->cell("game_list.demo_session", array("id", "=", $gameId));
+				if ($demoSession == 1)
+				{
+					// if it's a demo, then it should continue to tick and even restart at the end
+					Logging::Verbose("Treating session ID ".$gameId." as a demo server.");
+					Logging::Verbose("Currently in state ".$serverData["game_state"]."");
+					if (strcasecmp($serverData["game_state"], "end") == 0)
 					{
-						// if it's a demo, then it should continue to tick and even restart at the end
-						Logging::Verbose("Treating session ID ".$gameId." as a demo server.");
-						Logging::Verbose("Currently in state ".$serverData["game_state"]."");
-						if (strcasecmp($serverData["game_state"], "end") == 0)
-						{
-							Logging::Verbose("Restarting session ID ".$gameId." for demo server");
-							$this->RestartGameSession($gameId);
-						}
-						else if (strcasecmp($serverData["game_state"], "setup") == 0 || strcasecmp($serverData["game_state"], "pause") == 0)
-						{
-							Logging::Verbose("Force setting session ID ".$gameId." to state PLAY for demo server");
-							$result = GameSessionStateChanger::ChangeSessionState($gameId, GameSessionStateChanger::STATE_PLAY);
-							Logging::Verbose($result);
-						}
-						else
-						{
-							$this->TickGameSession($gameId);
-						}
+						Logging::Verbose("Restarting session ID ".$gameId." for demo server");
+						$this->RestartGameSession($gameId);
 					}
-					else 
+					else if (strcasecmp($serverData["game_state"], "setup") == 0 || strcasecmp($serverData["game_state"], "pause") == 0)
 					{
-						// it's not a demo, but still, if the state is play, then we should try to tick the simulation (if the time is right)
-						if (strcasecmp($serverData["game_state"], "play") == 0 || strcasecmp($serverData["game_state"], "fastforward") == 0)
-						{
-							Logging::Verbose("Session ID ".$gameId." is set to PLAY or FASTFORWARD, so going to attempt ticking the simulations.");
-							$this->TickGameSession($gameId);
-						}
-					}					
+						Logging::Verbose("Force setting session ID ".$gameId." to state PLAY for demo server");
+						$result = GameSessionStateChanger::ChangeSessionState($gameId, GameSessionStateChanger::STATE_PLAY);
+						Logging::Verbose($result);
+					}
+					else
+					{
+						$this->TickGameSession($gameId);
+					}
 				}
+				else 
+				{
+					// it's not a demo, but still, if the state is play, then we should try to tick the simulation (if the time is right)
+					if (strcasecmp($serverData["game_state"], "play") == 0 || strcasecmp($serverData["game_state"], "fastforward") == 0)
+					{
+						Logging::Verbose("Session ID ".$gameId." is set to PLAY or FASTFORWARD, so going to attempt ticking the simulations.");
+						$this->TickGameSession($gameId);
+					}
+				}					
+			}
 			
 		}
 		return true;
