@@ -8,7 +8,9 @@ class GameSession extends Base
 		["ArchiveGameSession", Security::ACCESS_LEVEL_FLAG_NONE],
 		["ArchiveGameSessionInternal", Security::ACCESS_LEVEL_FLAG_NONE],
 		["CreateGameSessionZip", Security::ACCESS_LEVEL_FLAG_NONE],
+		["CreateGameSessionZipInternal", Security::ACCESS_LEVEL_FLAG_NONE],
 		["CreateGameSessionLayersZip", Security::ACCESS_LEVEL_FLAG_NONE],
+		["CreateGameSessionLayersZipInternal", Security::ACCESS_LEVEL_FLAG_NONE],
 		["ResetWatchdogAddress", Security::ACCESS_LEVEL_FLAG_NONE]
 	);
 
@@ -302,13 +304,10 @@ class GameSession extends Base
 		}
 	}
 	
-	public function CreateGameSessionZip(string $response_url, bool $nooverwrite = false, string $jwt = null, string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "session_archive_") 
+	public function CreateGameSessionZip(string $response_url, bool $nooverwrite = false, string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "session_archive_") 
 	{
-		$return_array = array();
-		
 		$sessionId = self::GetGameSessionIdForCurrentRequest();		
 		$zipname = $preferredfolder.$preferredname.$sessionId.".zip";
-		$sqlDumpPath = Base::Dir()."/export/db_export_".$sessionId.".sql"; 
 		$zippath = Base::Dir()."/".$zipname;
 		
 		if ($nooverwrite) {
@@ -318,7 +317,16 @@ class GameSession extends Base
 		}
 
 		Store::EnsureFolderExists($preferredfolder);
+
+		$this->LocalApiRequest("api/GameSession/CreateGameSessionZipInternal", $sessionId, array("response_url" => $response_url, "zippath" => $zippath, "zipname" => $zipname), true);		
+	}
+
+	public function CreateGameSessionZipInternal(string $response_url, string $zippath, string $zipname) 
+	{
+		$return_array = array();
+		$sessionId = self::GetGameSessionIdForCurrentRequest();		
 		
+		$sqlDumpPath = Base::Dir()."/export/db_export_".$sessionId.".sql"; 
 		Database::GetInstance()->CreateMspDatabaseDump($sqlDumpPath, true);
 	
 		$configFilePath = null;
@@ -336,11 +344,9 @@ class GameSession extends Base
 			}
 		}
 
-		
 		$zip = new ZipArchive();
 		$result = $zip->open($zippath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 		if ($result === true) {
-			$return_array['zipname'] = $zipname;
 			foreach($sessionFiles as $layerFile) {
 				if (is_readable($layerFile)) {
 					$zipFolder = "";
@@ -357,7 +363,7 @@ class GameSession extends Base
 					$zip->addFile($layerFile, $zipFolder.$fileName);
 				}
 				else {
-					$return_array['message'] .= "Skipped file: ".$layerFile." can't be read. ";
+					$return_array[] .= "Skipped file: ".$layerFile." can't be read. ";
 				}
 			}
 			$zip->close();
@@ -365,17 +371,15 @@ class GameSession extends Base
 			// callback if requested
 			if (!empty($response_url))
 			{
-				$postValues = array("session_id" => $sessionId, "zipname" => $zipname, "type" => "full", "Token" => $jwt);
+				$postValues = array("session_id" => $sessionId, "zipname" => $zipname, "type" => "full");
 				$this->CallBack($response_url, $postValues);
 			}
 		}
 		return $return_array;
 	}
 
-	public function CreateGameSessionLayersZip(string $response_url, bool $nooverwrite = false, string $jwt = null, string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "temp_layers_") 
+	public function CreateGameSessionLayersZip(string $response_url, bool $nooverwrite = false, string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "temp_layers_") 
 	{
-		$return_array = array();
-
 		$sessionId = self::GetGameSessionIdForCurrentRequest();		
 		$zipname = $preferredfolder.$preferredname.$sessionId.".zip";
 		$zippath = Base::Dir()."/".$zipname;
@@ -391,36 +395,43 @@ class GameSession extends Base
 		if (empty($alllayers)) {
 			throw new Exception("No layers, so cannot continue.");
 		}
-		else {
-			$zip = new ZipArchive();
-			$result = $zip->open($zippath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-			if ($result === true) {
-				$return_array['zipname'] = $zipname;
-				// for each layer in the session, get the .json file with all its currently active geometry
-				// and store it in the appropriate place
-				foreach ($alllayers as $thislayer) {
-					if ($thislayer["layer_geotype"] != "raster") {
-						$layer_json = Base::JSON($layer->Export($thislayer["layer_id"]));
-						$layer_filename = $thislayer["layer_name"].'.json';
-						$zip->addFromString($layer_filename, $layer_json);
-					}
-					else {
-						$layer_binary = $layer->ReturnRasterById($thislayer["layer_id"]);
-						$layer_filename = $thislayer["layer_name"].'.tiff';
-						$zip->addFromString($layer_filename, $layer_binary); // addFromString is binary-safe
-					}
-				}
-				$zip->close();
+		
+		$this->LocalApiRequest("api/GameSession/CreateGameSessionLayersZipInternal", $sessionId, array("response_url" => $response_url, "zippath" => $zippath, "zipname" => $zipname), true);
+	}
 
-				// callback if requested
-				if (!empty($response_url))
-				{
-					$postValues = array("session_id" => $sessionId, "zipname" => $zipname, "type" => "layers", "Token" => $jwt);
-					$this->CallBack($response_url, $postValues);
+	public function CreateGameSessionLayersZipInternal(string $response_url, string $zippath, string $zipname) 
+	{
+		$sessionId = self::GetGameSessionIdForCurrentRequest();		
+		
+		$layer = new Layer();
+		$alllayers = $layer->List();
+
+		$zip = new ZipArchive();
+		$result = $zip->open($zippath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+		if ($result === true) {
+			// for each layer in the session, get the .json file with all its currently active geometry
+			// and store it in the appropriate place
+			foreach ($alllayers as $thislayer) {
+				if ($thislayer["layer_geotype"] != "raster") {
+					$layer_json = Base::JSON($layer->Export($thislayer["layer_id"]));
+					$layer_filename = $thislayer["layer_name"].'.json';
+					$zip->addFromString($layer_filename, $layer_json);
+				}
+				else {
+					$layer_binary = $layer->ReturnRasterById($thislayer["layer_id"]);
+					$layer_filename = $thislayer["layer_name"].'.tiff';
+					$zip->addFromString($layer_filename, $layer_binary); // addFromString is binary-safe
 				}
 			}
+			$zip->close();
+
+			// callback if requested
+			if (!empty($response_url))
+			{
+				$postValues = array("session_id" => $sessionId, "zipname" => $zipname, "type" => "layers");
+				$this->CallBack($response_url, $postValues);
+			}
 		}
-		return $return_array;
 	}
 
 	private static function RemoveDirectory($dir)

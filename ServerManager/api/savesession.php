@@ -1,13 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 $user->hastobeLoggedIn();
 
@@ -45,7 +37,7 @@ header('Content-type: application/json');
 $response_array['status'] = 'error';
 $response_array['message'] = 'No server ID given.';
 
-if(!empty($session_id) && !empty($_POST['Token'])){
+if(!empty($session_id)){
 	$db = DB::getInstance();
 	$db->query("SELECT game_state, session_state, game_current_month FROM game_list WHERE id = ?", array($session_id));
 	$sessionslist = $db->results(true);

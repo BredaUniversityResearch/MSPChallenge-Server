@@ -1,14 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-require_once '../vendor/autoload.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 $db = DB::getInstance();
 use Shapefile\Shapefile;

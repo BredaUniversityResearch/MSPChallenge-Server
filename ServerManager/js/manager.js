@@ -26,6 +26,7 @@ function updateInfobox(type, message) {
 	configListToOptions();
 	watchdogListToOptions();
 	updateSavesTable($('input[name=inlineRadioOptionSaves]:checked').val());
+	SavesListToOptions();
 }
 
 const MessageType = {
@@ -658,7 +659,7 @@ function isFormValid(currentForm) {
 /********/
 // Saves related functions
 
-function updateSavesTable(visibility, SaveId=0) {
+function updateSavesTable(visibility) {
 	$("#buttonRefreshSavesListIcon").addClass("fa-spin");
 	$.ajax({
 		'url': 'api/getsaveslist.php',
@@ -676,7 +677,26 @@ function updateSavesTable(visibility, SaveId=0) {
 		'success': function(data) {
 			$('#buttonRefreshSavesListIcon').removeClass('fa-spin');
 			savesListToTable(data.saveslist);
-			//updateSelectServerSaves(data.saveslist, SaveId);
+		},
+	});
+}
+
+function SavesListToOptions(SaveId=0) {
+	$.ajax({
+		'url': 'api/getsaveslist.php',
+		'dataType': 'json',
+		'type': 'POST',
+		'data': {
+			Token: currentToken,
+			format: 'json',
+			visibility: 'visibility'
+		},
+		'error': function() {
+			//just do nothing
+		},
+		'success': function(data) {
+			$('#buttonRefreshSavesListIcon').removeClass('fa-spin');
+			updateSelectServerSaves(data.saveslist, SaveId);
 		},
 	});
 }
@@ -798,7 +818,7 @@ function updateSaveInfoList(SaveInfo) {
 
 function showLoadSaveModal(SaveId) {
 	$('#btnCloseSaveInfo').click();
-	updateSavesTable("active", SaveId);
+	SavesListToOptions(SaveId);
 	setNewServerName(SaveId, " (reloaded)");
 	$('#btnCreateServer').click();
 	$('#NewSessionModalLoadSave-tab').click();

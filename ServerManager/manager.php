@@ -641,10 +641,10 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 		$('input[name=inlineRadioOptionSaves]').change(function() {
 			updateSavesTable(this.value);
 		});
-
 		$("#SaveFileSelector").change(function() {
 			setNewServerName(this.value);
 		});
+		SavesListToOptions();
 
 		WatchdogServerList();
 		GetServerAddr();
