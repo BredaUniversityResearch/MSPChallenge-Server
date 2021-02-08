@@ -523,8 +523,6 @@
 		 * @apiDescription Set the current game state
 		 */
 		public function State(string $state){
-			//$result = array("success" => 0);
-
 			$currentState = Database::GetInstance()->query("SELECT game_state FROM game")[0];
 			if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
 				throw new Exception("Invalid current state of ".$currentState["game_state"]); 
@@ -538,8 +536,6 @@
 
 			Database::GetInstance()->query("UPDATE game SET game_lastupdate = ?, game_state=?", array(microtime(true), $state));
 			$this->OnGameStateUpdated($state);
-			/*$result["success"] = 1;
-			return json_encode($result);*/
 		}
 
 		private function OnGameStateUpdated($newGameState) {
@@ -572,19 +568,18 @@
 		}
 
 		private function TestWatchdogAlive() {
-			$ch = curl_init($this->GetWatchdogAddress(true));
-			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$success = curl_exec($ch);
-			curl_close($ch);
-			if (!is_string($success) || !strlen($success)) {
-			    return false;
-			} else {
-			    return true;
+			try {
+				$this->CallBack($this->GetWatchdogAddress(true), array(), array(), false, false, array(CURLOPT_CONNECTTIMEOUT => 1));
+			}
+			catch (Exception $e) {
+				return false;
 			}
 			return true;
 		}
 
+		/**
+		 * @ForceNoTransaction
+		 */
 		public function StartWatchdog() {
 			self::StartSimulationExe(array("exe" => "MSW.exe", "working_directory" => "simulations/MSW/"));
 		}

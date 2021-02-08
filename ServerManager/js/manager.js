@@ -310,7 +310,7 @@ function ShowArchiveFile(sessionId) {
 		'type': 'POST'
 	});
 	if (archiveavailable) {
-		return '<button id="buttonArchiveDownload" class="btn btn-secondary btn-sm" onClick="downloadArchive('+sessionId+')"><i class="fa fa-download" title="Download archive"></i> Download</button>';
+		return '<button id="buttonArchiveDownload" class="btn btn-secondary btn-sm" onClick="downloadArchive('+sessionId+')"><i class="fa fa-download" title="Download archive"></i> Download archive</button>';
 	}
 	else {
 		return '<button id="buttonArchiveDownload" class="btn btn-secondary btn-sm" disabled><i class="fa fa-download" title="Archive being created"></i> Archive being created...</button>';
@@ -451,12 +451,12 @@ function updateSessionInfoList(sessionInfo) {
 		var buttonExportCurrentPath = '<button id="exportPlansButton" class="btn btn-secondary btn-sm" onClick="downloadExportedPlansWithConfig('+sessionInfo.id+')"><i class="fa fa-file-code-o" title="Export Configuration with Current Plans"></i> Export Configuration with Current Plans</button>';
 
 		if(sessionInfo.session_state == 'request' || sessionInfo.session_state == 'archived'){
-			buttonExportCurrentPath = '<button id="exportPlansButton" class="btn btn-secondary btn-sm" disabled onClick="downloadExportedPlansWithConfig('+sessionInfo.id+')"><i class="fa fa-save" title="Export Configuration with Current Plans"></i> Export Configuration with Current Plans</button>';
-			toggleDemoSessionButton = '<button id="toggleDemoSessionButton" class="btn btn-info btn-sm" disabled onClick="toggleDemoSession('+sessionInfo.id+')"><i class="fa fa-bookmark" title="'+demoSessionDescription+'"></i>'+demoSessionDescription+'</button>';
+			buttonExportCurrentPath = ''; // just don't show anything
+			toggleDemoSessionButton = ''; // just don't show anything
 		}
 
 		if(sessionInfo.session_state == 'archived') {
-			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" disabled><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>';
+			var buttonRecreateSession = ''; // just don't show anything
 		}
 		else if (sessionInfo.save_id > 0) {
 			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateLoadSave('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session (from save)</button>';
@@ -676,7 +676,7 @@ function updateSavesTable(visibility, SaveId=0) {
 		'success': function(data) {
 			$('#buttonRefreshSavesListIcon').removeClass('fa-spin');
 			savesListToTable(data.saveslist);
-			updateSelectServerSaves(data.saveslist, SaveId);
+			//updateSelectServerSaves(data.saveslist, SaveId);
 		},
 	});
 }

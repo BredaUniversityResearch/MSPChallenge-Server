@@ -67,14 +67,14 @@ if(!empty($session_id)){
 		case 'end':
 			$resultText = SendArchiveRequest($session_id);
 			$result = json_decode($resultText, true);
-			if ($result['success'] == 1) {
+			if ($result['success']) {
 				$db->query("UPDATE game_list SET session_state = \"archived\" WHERE id = ?", array($session_id));
 				$response_array['status'] = 'success';
 				$response_array['message'] = 'Archiving session with the following ID: '.$session_id.'. This process typically takes one or two minutes to fully complete.';
 			}
 			else {
 				$response_array['status'] = 'error';
-				$response_array['message'] = 'The external API returned failure for archiving of session "'.$session_id.'". External API returned: '.(isset($result['message'])?$result['message']:"").'.';
+				$response_array['message'] = 'The external API returned failure for archiving of session "'.$session_id.'". External API returned: '.$result['message'].'.';
 			}
 			break;
 		case 'simulation':

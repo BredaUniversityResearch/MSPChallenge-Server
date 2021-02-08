@@ -236,7 +236,8 @@ class GameSession extends Base
 		return;
 	}
 
-	public function ResetWatchdogAddress(string $watchdog_address) {
+	public function ResetWatchdogAddress(string $watchdog_address) 
+	{
 		if (!empty($watchdog_address)) {
 			Database::GetInstance()->query("UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT() 
 							WHERE game_session_watchdog_address = (SELECT game_session_watchdog_address FROM game_session);", array($_POST['watchdog_address']));
@@ -249,6 +250,7 @@ class GameSession extends Base
 	 * @apiDescription Archives a game session with a specified ID.
 	 * @api {POST} /GameSession/ArchiveGameSession Archives game session
 	 * @apiParam {string} response_url API call that we make with the zip encoded in the body upon completion.
+	 * @ForceNoTransaction
 	 */
 	public function ArchiveGameSession(string $response_url)
 	{
@@ -262,26 +264,31 @@ class GameSession extends Base
 		$this->LocalApiRequest("api/GameSession/ArchiveGameSessionInternal", $sessionId, array("response_url" => $response_url), true);
 	}
 
+	/**
+	 * @apiGroup GameSession
+	 * @apiDescription Internal method that actually archives a game session.
+ 	 * @api {POST} /GameSession/ArchiveGameSession Archives game session
+	 * @ForceNoTransaction
+	 */
 	public function ArchiveGameSessionInternal(string $response_url)
 	{
 		$game = new Game();
 		$game->ChangeWatchdogState('end');
 		
 		$createzipreturn = $this->CreateGameSessionZip($response_url);
-		
 		if (!empty($createzipreturn['zipname'])) {
 
 			$zipname = $createzipreturn['zipname'];
-
-			Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
 			
 			$configFilePath = null;
 			$gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
 			if (count($gameData) > 0)
 			{
 				$configFilePath = self::CONFIG_DIRECTORY.$gameData[0]['game_configfile'];
+				unlink($configFilePath);
 			}
-			unlink($configFilePath);
+
+			Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
 			
 			self::RemoveDirectory(Store::GetRasterStoreFolder());
 
@@ -298,16 +305,11 @@ class GameSession extends Base
 	public function CreateGameSessionZip(string $response_url, bool $nooverwrite = false, string $jwt = null, string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "session_archive_") 
 	{
 		$return_array = array();
-		//$nooverwrite = $_POST['nooverwrite'] ?? false;
-		//$response_url = $_POST['response_url'] ?? "";
-		//$jwt = $_POST['jwt'] ?? "";
-		//$preferredfolder = $_POST['preferredfolder'] ?? self::ARCHIVE_DIRECTORY;
-		//$preferredname = $_POST['preferredname'] ?? "session_archive_";
 		
 		$sessionId = self::GetGameSessionIdForCurrentRequest();		
 		$zipname = $preferredfolder.$preferredname.$sessionId.".zip";
 		$sqlDumpPath = Base::Dir()."/export/db_export_".$sessionId.".sql"; 
-		$zippath = Base::Dir().$zipname;
+		$zippath = Base::Dir()."/".$zipname;
 		
 		if ($nooverwrite) {
 			if (file_exists($zippath)) {
@@ -374,15 +376,9 @@ class GameSession extends Base
 	{
 		$return_array = array();
 
-		/*$nooverwrite = $_POST['nooverwrite'] ?? false;
-		$response_url = $_POST['response_url'] ?? "";
-		$jwt = $_POST['jwt'] ?? "";
-		$preferredfolder = $_POST['preferredfolder'] ?? self::ARCHIVE_DIRECTORY;
-		$preferredname = $_POST['preferredname'] ?? "temp_layers_";*/
-
 		$sessionId = self::GetGameSessionIdForCurrentRequest();		
 		$zipname = $preferredfolder.$preferredname.$sessionId.".zip";
-		$zippath = Base::Dir().$zipname;
+		$zippath = Base::Dir()."/".$zipname;
 		
 		if ($nooverwrite) {
 			if (file_exists($zippath)) {
