@@ -1251,7 +1251,7 @@ function configVersionsListToTable(configVersionsList, numversionslist = []) {
 		lastConfigName = v.config_file_name;
 
 		$('<tr class="'+childClass+'">' +
-			'<td '+parentDataTarget+'><i class="fa"></i></td>' +
+			'<td style="min-width: 25px;" '+parentDataTarget+'><i class="fa"></i></td>' +
 			'<td>'+v.config_file_name+'</td>'+
 			'<td>'+v.version+'</td>'+
 			'<td>'+v.upload_time+'</td>'+
