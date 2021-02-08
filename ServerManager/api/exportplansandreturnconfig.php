@@ -90,7 +90,7 @@ if(!empty($session_id)){
 
 	$resultText = SendRequestPlanExportRequest($session_id);
 	$result = json_decode($resultText, true);
-	
+
 	if ($result["success"] == 1)
 	{
 		$configFileName = "";
@@ -98,11 +98,11 @@ if(!empty($session_id)){
 
 		if (isset($configFileDecoded->datamodel))
 		{
-			$configFileDecoded->datamodel->plans = $result["data"];
+			$configFileDecoded->datamodel->plans = $result["payload"];
 		}
 		else
 		{
-			$configFileDecoded->plans = $result["data"];
+			$configFileDecoded->plans = $result["payload"];
 		}
 
 		$resultDownload = json_encode($configFileDecoded, JSON_PRETTY_PRINT);
