@@ -399,14 +399,14 @@ class GameSession extends Base
 				// for each layer in the session, get the .json file with all its currently active geometry
 				// and store it in the appropriate place
 				foreach ($alllayers as $thislayer) {
-					if ($thislayer->layer_geotype != "raster") {
-						$layer_json = $layer->Export($thislayer->layer_id);
-						$layer_filename = $thislayer->layer_name.'.json';
+					if ($thislayer["layer_geotype"] != "raster") {
+						$layer_json = Base::JSON($layer->Export($thislayer["layer_id"]));
+						$layer_filename = $thislayer["layer_name"].'.json';
 						$zip->addFromString($layer_filename, $layer_json);
 					}
 					else {
-						$layer_binary = $layer->ReturnRasterById($thislayer->layer_id);
-						$layer_filename = $thislayer->layer_name.'.tiff';
+						$layer_binary = $layer->ReturnRasterById($thislayer["layer_id"]);
+						$layer_filename = $thislayer["layer_name"].'.tiff';
 						$zip->addFromString($layer_filename, $layer_binary); // addFromString is binary-safe
 					}
 				}

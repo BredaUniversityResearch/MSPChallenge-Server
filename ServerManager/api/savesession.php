@@ -29,8 +29,7 @@ function SendSaveRequest($gameSessionId, $preferredname, $preferredfolder, $save
 	$postValues = array("preferredname" => $preferredname, 
 						"preferredfolder" => $preferredfolder, 
 						"nooverwrite" => true, 
-						"response_url" => $servermanager->GetFullSelfAddress()."api/savesessioncompleted.php", 
-						"jwt" => $_POST["Token"]);
+						"response_url" => $servermanager->GetFullSelfAddress()."api/savesessioncompleted.php");
 
 	$api_url = $servermanager->GetServerURLBySessionId($gameSessionId) . $remoteApiCallPath;
 	

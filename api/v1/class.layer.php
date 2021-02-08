@@ -119,9 +119,10 @@
 				$g["id"] = $shape["geometry_id"];				
 
 				$data = json_decode($shape['geometry_data'], true);
-
-				foreach($data as $key => $metadata){
-					$g['data'][$key] = $metadata;
+				if (!empty($data) && is_array($data)) {
+					foreach($data as $key => $metadata){
+						$g['data'][$key] = $metadata;
+					}
 				}
 
 				array_push($all, $g);
@@ -380,7 +381,7 @@
 								WHERE layer.layer_name <> ''
 								GROUP BY layer.layer_name");
 
-			return $data;//Base::JSON($data);
+			return $data;
 		}
 
 		/**
