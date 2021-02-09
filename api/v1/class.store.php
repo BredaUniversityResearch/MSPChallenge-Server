@@ -177,9 +177,17 @@
 				//Check if we should download the vector layer from geoserver. Default behaviour says we do, and just don't do it when it is specified.
 				if (!array_key_exists("layer_download_from_geoserver", $layerMetaData) || $layerMetaData["layer_download_from_geoserver"] == true) {
 					//download the geometry as a csv file from GeoServer
+					$startTime = microtime(true);
 					$csv = $layer->GetExport($region, $filename, "CSV", "", null);
+					Log::LogDebug(" -> Fetched layer export in ".(microtime(true) - $startTime)." seconds.");
+					
+					$startTime = microtime(true);
 					$data = array_map("str_getcsv", preg_split('/\r*\n+|\r+/', $csv));
+					Log::LogDebug(" -> Mapped layer export in ".(microtime(true) - $startTime)." seconds.");
+
+					$startTime = microtime(true);
 					$this->LoadCSV($data, true, $filename, $region);
+					Log::LogDebug(" -> Loaded CSV Layer export in ".(microtime(true) - $startTime)." seconds.");
 				}
 				else {
 					//Create the metadata for the vector layer, but don't fill the geometry table. This will be up to the players.
@@ -187,10 +195,14 @@
 				}
 			}
 
+			$startTime = microtime(true);
 			Database::GetInstance()->query("UPDATE geometry SET geometry_persistent=geometry_id WHERE geometry_persistent IS NULL");
+			Log::LogDebug(" -> Updated persistent geometry Ids in ".(microtime(true) - $startTime)." seconds.");
 			//Database::GetInstance()->query("COMMIT");
 
+			$startTime = microtime(true);
 			$this->CheckForDuplicateMspIds();
+			Log::LogDebug(" -> Checked layer MSP IDs in ".(microtime(true) - $startTime)." seconds.");
 		}
 
 		private function CheckForDuplicateMspIds() 
@@ -201,7 +213,7 @@
 					INNER JOIN geometry ON geometry.geometry_layer_id = layer.layer_id
 				WHERE geometry.geometry_mspid = ?", array($duplicateId['geometry_mspid']));
 				$layerNames = implode(", ", array_map(function($data) { return $data['layer_name']; }, $duplicatedLayerNames));
-				Base::Error("Found MSP ID ".$duplicateId['geometry_mspid']." which was duplicated ".$duplicateId['mspIdCount']." times in the following layers: ".$layerNames);
+				Log::LogError("Found MSP ID ".$duplicateId['geometry_mspid']." which was duplicated ".$duplicateId['mspIdCount']." times in the following layers: ".$layerNames);
 			}
 		}
 
