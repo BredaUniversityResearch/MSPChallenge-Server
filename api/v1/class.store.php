@@ -147,11 +147,7 @@ class Store extends Base
 		$layer->geoserver->username = $this->geoserver->username;
 		$layer->geoserver->password = $this->geoserver->password;
 
-		// Harald, Jan 2021: the START TRANSACTION and COMMIT use below now needs to be reconsidered
-		// should be ok, because in the new setup, the individual endpoint that is called, 
-		// ... or the execution of a single batch of endpoints that is called, 
-		// ... is wrapped in a transaction that can be rolled back in case of any kind of exception
-		//Database::GetInstance()->query("START TRANSACTION");
+		Database::GetInstance()->DBStartTransaction();
 
 		$filename = $layerMetaData['layer_name'];
 
@@ -203,7 +199,7 @@ class Store extends Base
 		$startTime = microtime(true);
 		Database::GetInstance()->query("UPDATE geometry SET geometry_persistent=geometry_id WHERE geometry_persistent IS NULL");
 		Log::LogDebug(" -> Updated persistent geometry Ids in " . (microtime(true) - $startTime) . " seconds.");
-		//Database::GetInstance()->query("COMMIT");
+		Database::GetInstance()->DBCommitTransaction();
 
 		$startTime = microtime(true);
 		$this->CheckForDuplicateMspIds();
