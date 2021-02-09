@@ -1,4 +1,9 @@
 <?php
+function IsExperimentalFeatureEnabled(string $featureName)
+{
+	return (isset($_GLOBALS['experimental_feature_flags'][$featureName]) && $_GLOBALS['experimental_feature_flags'][$featureName] == true);
+}
+
 	class Base
 	{
 		public static $debug = false;
@@ -303,4 +308,3 @@
 			return $return;
 		}
 	}
-?>

@@ -174,21 +174,25 @@ class Store extends Base
 			//Check if we should download the vector layer from geoserver. Default behaviour says we do, and just don't do it when it is specified.
 			if (!array_key_exists("layer_download_from_geoserver", $layerMetaData) || $layerMetaData["layer_download_from_geoserver"] == true) {
 				//download the geometry as a csv file from GeoServer
-				// $startTime = microtime(true);
-				// $csv = $layer->GetExport($region, $filename, "CSV", "", null);
-				// Log::LogDebug(" -> Fetched layer export in " . (microtime(true) - $startTime) . " seconds.");
+				if (!IsExperimentalFeatureEnabled("geoserver_json_importer"))
+				{
+					$startTime = microtime(true);
+					$csv = $layer->GetExport($region, $filename, "CSV", "", null);
+					Log::LogDebug(" -> Fetched layer export in " . (microtime(true) - $startTime) . " seconds.");
 
-				// $startTime = microtime(true);
-				// $data = array_map("str_getcsv", preg_split('/\r*\n+|\r+/', $csv));
-				// Log::LogDebug(" -> Mapped layer export in " . (microtime(true) - $startTime) . " seconds.");
+					$startTime = microtime(true);
+					$data = array_map("str_getcsv", preg_split('/\r*\n+|\r+/', $csv));
+					Log::LogDebug(" -> Mapped layer export in " . (microtime(true) - $startTime) . " seconds.");
 
-				// $startTime = microtime(true);
-				// $this->LoadCSV($data, $filename, $region);
-				// Log::LogDebug(" -> Loaded CSV Layer export in " . (microtime(true) - $startTime) . " seconds.");
-
-				$json = $layer->GetExport($region, $filename, "JSON", "", null);
-				$this->LoadJSON($json, $filename, $region);
-
+					$startTime = microtime(true);
+					$this->LoadCSV($data, $filename, $region);
+					Log::LogDebug(" -> Loaded CSV Layer export in " . (microtime(true) - $startTime) . " seconds.");
+				}
+				else
+				{
+					$json = $layer->GetExport($region, $filename, "JSON", "", null);
+					$this->LoadJSON($json, $filename, $region);
+				}
 
 			} else {
 				//Create the metadata for the vector layer, but don't fill the geometry table. This will be up to the players.
