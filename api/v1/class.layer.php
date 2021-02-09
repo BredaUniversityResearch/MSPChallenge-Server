@@ -241,6 +241,10 @@
 					$this->ImportMetaForLayer($layerMetaData, $dbLayerId);
 					$this->VerifyLayerTypesForLayer($layerMetaData, $dbLayerId);
 				}
+				else
+				{
+					Log::LogWarning("Could not find layer with name ".$layerMetaData["layer_name"]." in the database");
+				}
 			}
 		}
 
@@ -272,7 +276,7 @@
 
 			if(empty($d))
 			{
-				Base::Warning("<strong>" . $layerName . "</strong> was not found. Has this layer been renamed or removed?");
+				Log::LogWarning($layerName ." was not found. Has this layer been renamed or removed?");
 				$found = false;
 				foreach($struct as $dir){
 					foreach($dir as $subdir){
@@ -343,20 +347,20 @@
 				$sqlRasterInfo = Database::GetInstance()->query("SELECT layer_raster FROM layer WHERE layer_id=?", array($dbLayerId));
 				$existingRasterInfo = json_decode($sqlRasterInfo[0]["layer_raster"], true);
 
-				if (isset($layerMetaData["layer_raster_material"])) {
-					$existingRasterInfo["layer_raster_material"] = $layerMetaData["layer_raster_material"];
+				if (isset($layerData["layer_raster_material"])) {
+					$existingRasterInfo["layer_raster_material"] = $layerData["layer_raster_material"];
 				}
-				if (isset($layerMetaData["layer_raster_pattern"])) {
-					$existingRasterInfo["layer_raster_pattern"] = $layerMetaData["layer_raster_pattern"];
+				if (isset($layerData["layer_raster_pattern"])) {
+					$existingRasterInfo["layer_raster_pattern"] = $layerData["layer_raster_pattern"];
 				}
-				if (isset($layerMetaData["layer_raster_minimum_value_cutoff"])) {
-					$existingRasterInfo["layer_raster_minimum_value_cutoff"] = $layerMetaData["layer_raster_minimum_value_cutoff"];
+				if (isset($layerData["layer_raster_minimum_value_cutoff"])) {
+					$existingRasterInfo["layer_raster_minimum_value_cutoff"] = $layerData["layer_raster_minimum_value_cutoff"];
 				}
-				if (isset($layerMetaData["layer_raster_color_interpolation"])) {
-					$existingRasterInfo["layer_raster_color_interpolation"] = $layerMetaData["layer_raster_color_interpolation"];
+				if (isset($layerData["layer_raster_color_interpolation"])) {
+					$existingRasterInfo["layer_raster_color_interpolation"] = $layerData["layer_raster_color_interpolation"];
 				}
-				if (isset($layerMetaData["layer_raster_filter_mode"])) {
-					$existingRasterInfo["layer_raster_filter_mode"] = $layerMetaData["layer_raster_filter_mode"];
+				if (isset($layerData["layer_raster_filter_mode"])) {
+					$existingRasterInfo["layer_raster_filter_mode"] = $layerData["layer_raster_filter_mode"];
 				}
 				
 				Database::GetInstance()->query("UPDATE layer SET layer_raster = ? WHERE layer_id = ?", array(json_encode($existingRasterInfo), $dbLayerId));
