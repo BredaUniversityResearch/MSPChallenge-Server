@@ -12,7 +12,7 @@ class Security extends Base
 	const TOKEN_LIFETIME_INFINITE = -1;
 	const TOKEN_DELETE_AFTER_TIME = self::DEFAULT_TOKEN_LIFETIME_SECONDS + 30 * 60;
 
-	private const DISABLE_SECURITY_CHECK = false;
+	private const DISABLE_SECURITY_CHECK = true;
 	
 	protected $allowed = array(
 		["RequestToken", Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN], 

@@ -17,7 +17,6 @@
 			"UpdateMaxCapacity", 
 			"GetUsedCapacity", 
 			"DeleteOutput", 
-			"AddOutput", 
 			"UpdateGridName", 
 			"DeleteGrid", 
 			"AddGrid", 
@@ -133,19 +132,6 @@
 		{
 			Database::GetInstance()->query("UPDATE energy_output SET energy_output_active=?, energy_output_lastupdate=? WHERE energy_output_geometry_id=?", array(0, microtime(true), $id));
 		}
-
-		/**
-		 * @apiGroup Energy
-		 * @api {POST} /energy/AddOutput Add Output
-		 * @apiParam {int} id geometry id
-		 * @apiParam {int} maxcapacity maximum capacity
-		 * @apiDescription Add a new energy_output entry for a geometry object
-		 */
-		public function AddOutput(int $id, int $maxcapacity)
-		{
-			Database::GetInstance()->query("INSERT INTO energy_output (energy_output_geometry_id, energy_output_maxcapacity, energy_output_lastupdate) VALUES (?, ?, ?)", array($id, $maxcapacity, microtime(true)));
-		}
-
 
 		/**
 		 * @apiGroup Energy
@@ -311,41 +297,34 @@
 		 * @apiParam {int} id id of geometry
 		 * @apiParam {float} capacity current node capacity
 		 * @apiParam {float} maxcapacity maximum capacity of node
-		 * @apiParam {int} country id of the country
 		 * @apiDescription Creates or updates the output of an element
 		 */
-		public function SetOutput(int $id, float $capacity, float $maxcapacity, int $country )
+		public function SetOutput(int $id, float $capacity, float $maxcapacity)
 		{
 			$data = Database::GetInstance()->query("SELECT energy_output_id FROM energy_output WHERE energy_output_geometry_id=?", array($id));
 
 			if(empty($data)){
 				Database::GetInstance()->query("INSERT INTO 
-					energy_output (energy_output_geometry_id, energy_output_capacity, energy_output_maxcapacity, energy_output_country_id, energy_output_lastupdate) 
-					VALUES (?, ?, ?, ?, ?)", 
-					array($id, $capacity, $maxcapacity, $country, microtime(true))
+					energy_output (energy_output_geometry_id, energy_output_capacity, energy_output_maxcapacity, energy_output_lastupdate) 
+					VALUES (?, ?, ?, ?)", 
+					array($id, $capacity, $maxcapacity, microtime(true))
 				);
 			}
 			else{
 				Database::GetInstance()->query("UPDATE energy_output SET 
 					energy_output_capacity=?,
 					energy_output_maxcapacity=?,
-					energy_output_country=?, 
 					energy_output_active=?,
 					energy_output_lastupdate=?
 					WHERE energy_output_geometry_id=?", 
-					array($capacity, $maxcapacity, $country, 1, microtime(true), $id)
+					array($capacity, $maxcapacity, 1, microtime(true), $id)
 				);
 			}
 		}
 
-		public function GridEnergy()
-		{
-			$data = Database::GetInstance()->query("SELECT grid_energy_id FROM grid_energy WHERE grid_energy_country_id=? AND grid_energy_grid_id=?", array($country, $id));
-		}
-
 		/**
 		 * @apiGroup Cel
-		 * @api {POST} /cel/get Get
+		 * @api {POST} /cel/GetConnections GetConnections
 		 * @apiDescription Get all active energy connections
 		 */
 		public function GetConnections()

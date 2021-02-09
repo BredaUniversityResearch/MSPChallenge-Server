@@ -33,11 +33,11 @@
 					energy_output_maxcapacity as maxcapacity
 
 				FROM energy_connection 
-				LEFT JOIN geometry ON energy_connection.energy_connection_cable_id=geometry.geometry_id
-				LEFT JOIN layer ON geometry.geometry_layer_id=layer.layer_id
-				LEFT JOIN plan_layer ON layer.layer_id=plan_layer.plan_layer_layer_id
-				LEFT JOIN plan ON plan_layer.plan_layer_plan_id=plan.plan_id
-				LEFT JOIN energy_output ON energy_connection_cable_id=energy_output_geometry_id
+					LEFT JOIN geometry ON energy_connection.energy_connection_cable_id=geometry.geometry_id
+					LEFT JOIN layer ON geometry.geometry_layer_id=layer.layer_id
+					LEFT JOIN plan_layer ON layer.layer_id=plan_layer.plan_layer_layer_id
+					LEFT JOIN plan ON plan_layer.plan_layer_plan_id=plan.plan_id
+					LEFT JOIN energy_output ON energy_connection_cable_id=energy_output_geometry_id
 				WHERE energy_connection_active=? AND plan_state=? AND geometry_active=?", array(1, "IMPLEMENTED", 1));
 
 			return $data;	
