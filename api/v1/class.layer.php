@@ -588,11 +588,12 @@
 			if($format == "GML"){
 				return $this->geoserver->ows($workspace . "/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" . urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLfeatures);
 			}
-			else if($format == "KML"){
-				
-			}
 			else if($format == "CSV"){
 				$response = $this->geoserver->ows($workspace . "/ows?service=WFS&version=1.0.0&outputFormat=csv&request=GetFeature&typeName=" . urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLfeatures);
+				return $response;
+			}
+			else if ($format == "JSON") {
+				$response = $this->geoserver->ows($workspace . "/ows?service=WFS&version=1.0.0&outputFormat=json&request=GetFeature&typeName=" . urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLfeatures);
 				return $response;
 			}
 			else if($format == "PNG"){
@@ -613,7 +614,7 @@
 				return $this->geoserver->ows($workspace . "/wms/reflect?layers=" . urlencode($workspace) . ":" . urlencode($layer) . "&format=image/png&transparent=FALSE&width=" . round($width) . "&height=" . $height ."&bbox=".$bounds);
 			}
 			else{
-				throw new Exception("Incorrect format, use GML, CSV or PNG");
+				throw new Exception("Incorrect format, use GML, CSV, JSON or PNG");
 			}
 		}
 
