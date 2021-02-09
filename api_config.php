@@ -1,6 +1,9 @@
 <?php
 $codeBranch = '/';
 
+$GLOBALS['experimental_feature_flags'] = array(
+    "geoserver_json_importer" => true);
+
 $auth_url = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/"; 
 $GLOBALS['api_config'] = array(
     "code_branch" => $codeBranch,
