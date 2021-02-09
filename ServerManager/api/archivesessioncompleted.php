@@ -13,26 +13,23 @@ require_once '../helpers.php';*/
 
 $outputDirectory = GetSessionArchiveBaseDirectory();
 
-if(isset($_POST['session_id']) && isset($_FILES['archive']))
+if(isset($_POST['oldlocation']))
 {
-	$sessionId = intval($_POST['session_id']);
 
-	if (!is_dir($outputDirectory))
-	{
-		mkdir($outputDirectory, 0777);
-	}
+	if (is_file($_POST['oldlocation'])) {
 
-	$storeFilePath = $outputDirectory.basename($_FILES['archive']['name']);
+		$sessionId = intval($_POST['session_id']);
 
-	if (move_uploaded_file($_FILES['archive']['tmp_name'], $storeFilePath)) {
-		//move_uploaded_file only returns true if the file was valid and move was successful
-		//so in this case it's safe to delete the original on the server itself
-		$oldlocation = isset($_POST['oldlocation']) ? $_POST['oldlocation'] : '';
-		if (file_exists($oldlocation)) {
-			if (filesize($oldlocation) > 0) {
-				unlink($oldlocation);
-			}
+		if (!is_dir($outputDirectory))
+		{
+			mkdir($outputDirectory, 0777);
 		}
+
+		$storeFilePath = $outputDirectory.basename($_POST['oldlocation']);
+
+		rename($_POST['oldlocation'], $storeFilePath);
+	
 	}
+	
 }
 ?>

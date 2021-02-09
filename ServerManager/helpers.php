@@ -31,7 +31,8 @@ function GetConfigBaseDirectory()	{
 }
 
 function GetSessionArchiveBaseDirectory()	{
-		return "../session_archive/";
+    global $abs_app_root, $url_app_root;
+		return $abs_app_root.$url_app_root."session_archive/";
 }
 
 

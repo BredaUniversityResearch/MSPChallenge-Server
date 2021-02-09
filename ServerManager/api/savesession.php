@@ -5,25 +5,17 @@ $user->hastobeLoggedIn();
 
 function SendSaveRequest($gameSessionId, $preferredname, $preferredfolder, $save_type)
 {
-	global $us_url_root;
+	$remoteApiCallPath = '/api/gamesession/SaveSession';
 	$servermanager = ServerManager::getInstance();
+	$api_url = $servermanager->GetServerURLBySessionId($gameSessionId) . $remoteApiCallPath;
 	
-	if ($save_type == "full") {
-		$remoteApiCallPath = '/api/gamesession/CreateGameSessionZip';
-	}
-	elseif ($save_type == "layers") {
-		$remoteApiCallPath = '/api/gamesession/CreateGameSessionLayersZip';
-	}
-	else return false;
-
 	$additionalHeaders = array(GetGameSessionAPIAuthenticationHeader($gameSessionId));
 
-	$postValues = array("preferredname" => $preferredname, 
+	$postValues = array("type" => $save_type,
+						"preferredname" => $preferredname, 
 						"preferredfolder" => $preferredfolder, 
 						"nooverwrite" => true, 
 						"response_url" => $servermanager->GetFullSelfAddress()."api/savesessioncompleted.php");
-
-	$api_url = $servermanager->GetServerURLBySessionId($gameSessionId) . $remoteApiCallPath;
 	
 	$return_json = CallAPI("POST", $api_url, $postValues, $additionalHeaders, false); 
 	return true;
