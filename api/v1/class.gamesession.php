@@ -269,7 +269,7 @@ class GameSession extends Base
 	 * @apiGroup GameSession
 	 * @apiDescription Archives a game session with a specified ID.
 	 * @api {POST} /GameSession/ArchiveGameSessionInternal Archives game session, internal method
-	 * @apiParam {string} response_url API call that we make with the zip encoded in the body upon completion.
+	 * @apiParam {string} response_url API call that we make with the zip path upon completion.
 	 * @ForceNoTransaction
 	 */
 	public function ArchiveGameSessionInternal(string $response_url)
@@ -277,7 +277,7 @@ class GameSession extends Base
 		$game = new Game();
 		$game->ChangeWatchdogState('end');
 		
-		$zippath = $this->CreateGameSessionZip($response_url);
+		$zippath = $this->CreateGameSessionZip();
 		
 		if (!empty($zippath)) {
 
@@ -322,7 +322,7 @@ class GameSession extends Base
 		else throw new Exception("Type ".$type." is not recognised.");
 	}
 	
-	public function CreateGameSessionZip(string $response_url, string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "session_archive_") 
+	public function CreateGameSessionZip(string $response_url = "", string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "session_archive_") 
 	{		
 		$sessionId = self::GetGameSessionIdForCurrentRequest();		
 		$zipname = $preferredfolder.$preferredname.$sessionId.".zip";

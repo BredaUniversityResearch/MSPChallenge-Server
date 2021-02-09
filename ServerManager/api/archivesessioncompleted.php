@@ -11,14 +11,13 @@ require_once '../helpers.php';*/
 
 //$user->hastobeLoggedIn();
 
-$outputDirectory = GetSessionArchiveBaseDirectory();
 
 if(isset($_POST['oldlocation']))
 {
+	if (is_file($_POST['oldlocation'])) 
+	{
 
-	if (is_file($_POST['oldlocation'])) {
-
-		$sessionId = intval($_POST['session_id']);
+		$outputDirectory = GetSessionArchiveBaseDirectory();
 
 		if (!is_dir($outputDirectory))
 		{
