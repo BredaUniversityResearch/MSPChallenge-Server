@@ -4,16 +4,11 @@
 		protected $allowed = array(
 			"Start", 
 			"CreateConnection", 
+			"UpdateConnection", 
 			"DeleteConnection", 
 			"GetConnections", 
 			"Clear", 
-			"DeleteName", 
 			"SetOutput", 
-			"DeleteOutput", 
-			"GetGrids",
-			"GetNodes", 
-			"SetGeomCapacity", 
-			"SetGridCapacity",
 			"UpdateMaxCapacity", 
 			"GetUsedCapacity", 
 			"DeleteOutput", 
@@ -22,7 +17,6 @@
 			"DeleteGrid", 
 			"AddGrid", 
 			"UpdateGridEnergy", 
-			"GetGridOutputs", 
 			"AddSocket", 
 			"DeleteSocket", 
 			"SetDeleted", 
@@ -271,6 +265,26 @@
 		{
 			Database::GetInstance()->query("INSERT INTO energy_connection (energy_connection_start_id, energy_connection_end_id, energy_connection_cable_id, energy_connection_start_coordinates, energy_connection_lastupdate) VALUES (?, ?, ?, ?, ?)", 
 				array($start, $end, $cable, $coords, microtime(true))
+			);
+		}
+
+		/**
+		 * @apiGroup Energy
+		 * @api {POST} /energy/UpdateConnection Update Connection
+		 * @apiParam {int} start ID of the start geometry
+		 * @apiParam {int} end ID of the end geometry
+		 * @apiParam {string} coords coordinates of the starting point, saved as: [123.456, 999.123]
+		 * @apiParam {int} cable ID of the cable geometry of which to update
+		 * @apiDescription Update cable connection between 2 points
+		 */
+		public function UpdateConnection(int $start, int $end, int $cable, string $coords)
+		{
+			Database::GetInstance()->query("UPDATE energy_connection SET energy_connection_start_id = ?, 
+																		 energy_connection_end_id = ?, 
+																		 energy_connection_start_coordinates = ?, 
+																		 energy_connection_lastupdate = ?
+																		WHERE energy_connection_cable_id = ?;", 
+				array($start, $end, $coords, microtime(true), $cable)
 			);
 		}
 
