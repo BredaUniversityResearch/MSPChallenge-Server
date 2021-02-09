@@ -11,7 +11,7 @@
 		 * @api {POST} /user/RequestSession Set State
 		 * @apiSuccess {json} Returns a json object describing the 'success' state, the 'session_id' generated for the user. And in case of a failure a 'message' that describes what went wrong.  
 		 */
-		public function RequestSession(string $build_timestamp, int $country_id, string $country_password)
+		public function RequestSession(string $build_timestamp, int $country_id, string $country_password = "")
 		{
 			$response = array();
 
