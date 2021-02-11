@@ -59,7 +59,7 @@ if (!empty($uploadedSaveFile)) {
             }
         }
         else {
-            $response_array['message'] = 'Could not find the game_list.json file in the ZIP file. This probably means that the ZIP file you selected is not an MSP Challenge Full Server Save ZIP file.';
+            $response_array['message'] = 'Could not find the game_list.json file in the ZIP file. This probably means that the ZIP file you selected is not an MSP Challenge Full Session Save ZIP file.';
         }
         $zip->close();
     }

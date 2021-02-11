@@ -653,7 +653,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 	regularupdateTablesManager = setInterval(function() {
 		updateSessionsTable($('input[name=inlineRadioOptions]:checked').val());
 		updateSavesTable($('input[name=inlineRadioOptionSaves]:checked').val());
-	}, 20000);
+	}, 10000);
 	
 </script>
 <!-- footers -->

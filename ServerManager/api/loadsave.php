@@ -9,7 +9,7 @@ require_once '../classes/class.autoloader.php';
 // all the helper functions
 require_once '../helpers.php';*/
 
-//$user->hastobeLoggedIn();
+$user->hastobeLoggedIn();
 
 $return_array = array();
 $db = DB::getInstance();

@@ -21,12 +21,16 @@ function resetToken(newtoken) {
 
 function updateInfobox(type, message) {
 	showToast(type, message);
-	updateSessionsTable($('input[name=inlineRadioOptions]:checked').val());
+	//updateSessionsTable($('input[name=inlineRadioOptions]:checked').val());
+	//updateSavesTable($('input[name=inlineRadioOptionSaves]:checked').val());
+	
+	// updating all info that might have changed, except the sessions and saves tables, because those update every X secs anyway
 	updateConfigVersionsTable($('input[name=radioOptionConfig]:checked').val());
 	configListToOptions();
 	watchdogListToOptions();
-	updateSavesTable($('input[name=inlineRadioOptionSaves]:checked').val());
 	SavesListToOptions();
+	WatchdogServerList();
+	GetServerAddr();
 }
 
 const MessageType = {
@@ -203,7 +207,6 @@ function saveSession(sessionId, saveType) {
 				$('#sessionInfo').modal('hide');
 			}
 		}, 
-		'async': false,
 		'type': 'POST'
 	});
 }
@@ -981,7 +984,6 @@ function callLoadSave(formData) {
 		dataType: 'json',
 		success: function(data) {
 			$.unblockUI();
-			$('#savesListtbody').empty();
 			if (data.status == 'error') {
 				updateInfobox(MessageType.ERROR, 'submitLoadSave (API): '+data.message);
 			} else {
@@ -1508,8 +1510,6 @@ function submitNewServer() {
 					updateInfobox('danger', 'addgameserver (API): '+data.message);
 				} else {
 					updateInfobox('success', data.message);
-					WatchdogServerList();
-					GetServerAddr();
 				}
 			},
 			'async': false,
