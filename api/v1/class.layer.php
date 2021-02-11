@@ -51,15 +51,26 @@
 			}
 			$layer = $layer[0];
 
-			$geometry = Database::GetInstance()->query("SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data, geometry_mspid
-				FROM layer LEFT JOIN geometry ON geometry_layer_id=layer.layer_id 
-				WHERE geometry.geometry_active=? AND (layer_id=? OR layer_original_id=?) AND geometry_subtractive=?", 
-				array(1, $layer_id, $layer_id, 0)
-			);
+			$geometry = Database::GetInstance()->query("SELECT 
+						geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data, geometry_mspid
+				FROM layer 
+				LEFT JOIN geometry ON geometry_layer_id=layer.layer_id 
+				LEFT JOIN plan_layer ON plan_layer_layer_id=layer.layer_id
+				LEFT JOIN plan ON plan_layer_plan_id=plan.plan_id
+				WHERE geometry.geometry_active=? AND (layer_id=? OR layer_original_id=?) AND geometry_subtractive=? AND (plan_state=? OR plan_state=? OR plan_state IS NULL)", 
+				array(1, $layer_id, $layer_id, 0, "APPROVED", "IMPLEMENTED")
+			); // getting all active geometry, except those within plans that are not APPROVED or not IMPLEMENTED
 
-			$subtractivearr = Database::GetInstance()->query("SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data, geometry_subtractive FROM geometry WHERE geometry_layer_id=? AND geometry_subtractive<>? AND geometry_active=?", array($layer_id, 0, 1));
+			$subtractivearr = Database::GetInstance()->query("SELECT 
+						geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data, geometry_subtractive 
+				FROM geometry 
+				WHERE geometry_layer_id=? AND geometry_subtractive<>? AND geometry_active=?", 
+				array($layer_id, 0, 1)
+			); // getting all active subtractive geometry for this layer, which only occurs in the original layer dataset because the client doesn't support adding/editing/deleting subtractive geometry ('holes')
+
 			$all = array();
 			
+			// this part actually subtracts the latter geometry from the former geometry
 			foreach($geometry as $shape){
 				$g = array();
 

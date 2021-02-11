@@ -35,6 +35,14 @@ function GetSessionArchiveBaseDirectory()	{
 		return $abs_app_root.$url_app_root."session_archive/";
 }
 
+function GetServerConfigBaseDirectory()	{
+  return "../../running_session_config/";
+}
+
+function GetServerRasterBaseDirectory() {
+  return "../../raster/";
+}
+
 
 
 function ensure_unique_name($name, $column, $table) {

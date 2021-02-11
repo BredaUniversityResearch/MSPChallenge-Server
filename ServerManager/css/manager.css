@@ -245,7 +245,7 @@ a.hoverinfo {
 }
 
 #sessionsTable td, #configVersionsTable td {
-	min-width: 75px;
+	min-width: 50px;
 	max-width: 320px;
 }
 

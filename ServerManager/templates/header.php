@@ -68,6 +68,8 @@ if (typeof jQuery == 'undefined') {
 
 <script src="<?=$url_app_root;?>js/jquery-ui.min.js"></script>
 
+<script src="<?=$url_app_root;?>js/jquery.blockUI.min.js"></script>
+
 <script src="<?=$url_app_root;?>js/validator-0.11.9.min.js"></script>
 
 <script src="<?=$url_app_root;?>js/timepicker.js"></script>

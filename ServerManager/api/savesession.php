@@ -27,7 +27,7 @@ if ($save_type != 'full' && $save_type != 'layers') $save_type = 'full';
 
 header('Content-type: application/json');
 $response_array['status'] = 'error';
-$response_array['message'] = 'No server ID given.';
+$response_array['message'] = 'No session ID given.';
 
 if(!empty($session_id)){
 	$db = DB::getInstance();
@@ -44,7 +44,7 @@ if(!empty($session_id)){
 
 	if ($sessionData['session_state'] == 'archived') {
 		$response_array['status'] = 'error';
-		$response_array['message'] = 'Cannot save server "'.$session_id.'" as it has already been archived.';
+		$response_array['message'] = 'Cannot save session "'.$session_id.'" as it has already been archived.';
 		echo json_encode($response_array);
 		return;
 	}
@@ -82,21 +82,21 @@ if(!empty($session_id)){
 			if ($result) {
 				// add record to database
 				$response_array['status'] = 'success';
-				$response_array['message'] = 'Saving server with the following ID: '.$session_id.'. This process typically takes a little while to fully complete. After that, your save will be available under the Saves tab. Please be patient.';
+				$response_array['message'] = 'Saving session with the following ID: '.$session_id.'. This process typically takes a little while to fully complete. After that, your save will be available under the Saves tab. Please be patient.';
 			}
 			else {
 				$response_array['status'] = 'error';
-				$response_array['message'] = 'The external API returned failure for saving of server "'.$session_id.'".';
+				$response_array['message'] = 'The external API returned failure for saving of session "'.$session_id.'".';
 			}
 
 			break;
 		case 'simulation':
 			$response_array['status'] = 'error';
-			$response_array['message'] = 'The server with the ID "'.$session_id.'" cannot be saved now because of its state ('.$sessionData['game_state'].')!';
+			$response_array['message'] = 'The session with the ID "'.$session_id.'" cannot be saved now because of its state ('.$sessionData['game_state'].')!';
 			break;
 		default:
 			$response_array['status'] = 'error';
-			$response_array['message'] = 'Unknown server status found ("'.htmlentities($sessionData['game_state'], ENT_QUOTES).'")!';
+			$response_array['message'] = 'Unknown session status found ("'.htmlentities($sessionData['game_state'], ENT_QUOTES).'")!';
 			break;
 	}
 }
