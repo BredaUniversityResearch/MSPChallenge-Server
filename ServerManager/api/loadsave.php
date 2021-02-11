@@ -55,11 +55,12 @@ else {
         $session_id = $db->lastId();
     }
     else {
-        //otherwise an existing server is going to be overwritten
+        //otherwise an existing server is going to be overwritten (recreated)
         $session_id = $ExistingOrNewServerId;
     }
 
-    
+    //get the correct token header for server API requests later on
+    $additionalHeaders = array(GetGameSessionAPIAuthenticationHeader($session_id));
     
     $getsavedetails = $db->get("game_saves", ["id", "=", $SaveFileSelector]);
     $savedetails = $getsavedetails->results();
@@ -126,12 +127,17 @@ else {
                     }
                 }
                 if ($configsuccess && $dbasesuccess && !in_array(false, $rastersuccess)) {
-                    // SetGameSessionValues to update the watchdog
-                    if (!empty($watchdogServer)) {
-                        $watchdog_address = $db->cell("game_watchdog_servers.address", ["id", "=", $watchdogServer]);
-                        $api_url = Config::get('msp_server_protocol').$db->cell("game_servers.address", ["id", "=", 1]).Config::get('code_branch')."/".$session_id."/api/GameSession/ResetWatchdogAddress";
-                        CallAPI("POST", $api_url, array("watchdog_address" => $watchdog_address));
+                    $server_address = $db->cell("game_servers.address", ["id", "=", 1]);
+                    $watchdog_address = $db->cell("game_watchdog_servers.address", ["id", "=", $watchdogServer]);
+                    if (!empty($watchdog_address)) {
+                        $api_url = Config::get('msp_server_protocol').$server_address.Config::get('code_branch')."/".$session_id."/api/GameSession/ResetWatchdogAddress";
+                        CallAPI("POST", $api_url, array("watchdog_address" => $watchdog_address), $additionalHeaders, false);
                     }
+                    if (!empty($newconfigfilename)) {
+                        $api_url2 = Config::get('msp_server_protocol').$server_address.Config::get('code_branch')."/".$session_id."/api/Game/Setupfilename";
+                        CallAPI("POST", $api_url2, array("configFilename" => $newconfigfilename), $additionalHeaders, false);
+                    }
+                    
                     $db->query("UPDATE game_list SET session_state = 'healthy' WHERE id = ?", array($session_id));
                     $response_array['message'] = 'Save successfully loaded as server ID '.$session_id.'. Now available for use.';
                     $response_array['status'] = 'success';

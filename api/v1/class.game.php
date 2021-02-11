@@ -19,6 +19,7 @@
 			"NextMonth", 
 			"Planning",
 			"Realtime", 
+			["Setupfilename", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], 
 			"Speed", 
 			["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], 
 			["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], 
@@ -156,7 +157,7 @@
 			return $currentMonth["game_currentmonth"];
 		}
 
-		public function Setupfilename($configFilename){
+		public function Setupfilename(string $configFilename){
 			Database::GetInstance()->query("UPDATE game SET game_configfile=?", array($configFilename));
 		}
 

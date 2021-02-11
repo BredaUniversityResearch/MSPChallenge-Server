@@ -10,7 +10,7 @@ class GameSession extends Base
 		["SaveSession", Security::ACCESS_LEVEL_FLAG_NONE],
 		["CreateGameSessionZip", Security::ACCESS_LEVEL_FLAG_NONE],
 		["CreateGameSessionLayersZip", Security::ACCESS_LEVEL_FLAG_NONE],
-		["ResetWatchdogAddress", Security::ACCESS_LEVEL_FLAG_NONE]
+		["ResetWatchdogAddress", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
 	);
 
 	const INVALID_SESSION_ID = -1;
