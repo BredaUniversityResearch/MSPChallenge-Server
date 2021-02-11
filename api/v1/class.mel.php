@@ -7,7 +7,6 @@
 			"UpdateLayer", 
 			"ShouldUpdate", 
 			"Update", 
-			"StartExe", 
 			"TickDone", 
 			"GetFishing", 
 			"GeometryExportName", 

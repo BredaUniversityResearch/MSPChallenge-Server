@@ -1,7 +1,7 @@
 <?php
 $codeBranch = '/';
 
-$GLOBALS['experimental_feature_flags'] = array(
+$GLOBALS['feature_flags'] = array(
     "geoserver_json_importer" => true);
 
 $auth_url = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/"; 
@@ -13,7 +13,10 @@ $GLOBALS['api_config'] = array(
     "msp_auth_with_proxy" => "",
     "game_autosave_interval" => 120,
     "long_request_timeout" => 420,
-    "wait_for_simulations_in_dev" => true,
+    "unit_test_logger" => array(
+        "enabled" => false,
+        "intermediate_folder" => "export/"
+    ),
     "database" => array(
         "host" => "127.0.0.1",
         "user" => "root",
