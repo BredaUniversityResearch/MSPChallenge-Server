@@ -2,8 +2,11 @@
 
 class TestBase
 {
-	const TARGET_SERVER_BASE_URL = "http://localhost/1/";
+	const TARGET_SERVER_BASE_URL = "http://localhost/";
+	public static int $ms_targetSession = 1;
 	private string $m_securityToken;
+
+	private int $m_subtaskFailCount = 0;
 
 	public function __construct($securityToken)
 	{
@@ -27,23 +30,46 @@ class TestBase
 			{
 				try
 				{
+					$this->m_subtaskFailCount = 0;
 					$method->invoke($this);
+
+					if ($this->m_subtaskFailCount > 0)
+					{
+						throw new Exception("One or more subtasks failed");
+					}
 					print("✅ ".$type->getName()."::".$method->getName()."".PHP_EOL);
 				}
 				catch (\Throwable $e)
 				{
 					print("❌ ". $type->getName()."::".$method->getName()." Failed. Exception thrown: ".$e->getMessage(). " in ".$e->getFile().":".$e->getLine().PHP_EOL);
 				}
+				ob_flush();
 			}
 		}
 	}
 
+	protected function RunSubTask(ReflectionMethod $function, string $subtaskIdentifier, array $arguments)
+	{
+		try
+		{
+			$function->invoke($this, ...$arguments);
+			print("\t✅ ".$function->getDeclaringClass()->getName()."::".$function->getName().": $subtaskIdentifier".PHP_EOL);
+		}
+		catch (\Throwable $e)
+		{
+			++$this->m_subtaskFailCount;
+			print("\t❌ ". $function->getDeclaringClass()->getName()."::".$function->getName().": $subtaskIdentifier Failed. Exception thrown: ".$e->getMessage(). " in ".$e->getFile().":".$e->getLine().PHP_EOL);
+		}
+		ob_flush();
+	}
+
 	protected function DoRequest(string $endpoint, array $postData)
 	{
-		$ch = curl_init(self::TARGET_SERVER_BASE_URL.$endpoint);
+		$ch = curl_init(self::TARGET_SERVER_BASE_URL."/".self::$ms_targetSession."/".$endpoint);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array("mspapitoken: ".$this->m_securityToken));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array("mspapitoken: ".$this->m_securityToken, 
+			"msp_force_no_call_log: true"));
 		$response = curl_exec($ch);
 		if ($response === false)
 		{

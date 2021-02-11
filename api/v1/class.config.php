@@ -21,7 +21,8 @@ class Config
 
 	private function LoadConfigFile()
 	{
-		require_once 'api_config.php';
+		
+		require_once(APIHelper::GetBaseFolder()."api_config.php");
 		$this->configRoot = $GLOBALS['api_config'];
 	}
 
@@ -98,20 +99,9 @@ class Config
 		return isset($this->configRoot["database"])? $this->configRoot["database"] : array();
 	}
 
-	public static function GetRequestRoot()
+	public function GetUnitTestLoggerConfig()
 	{
-		$requestDirectoryCount = substr_count($_SERVER['REQUEST_URI'], "/", strpos($_SERVER['REQUEST_URI'], "api"));
-		//Match the [game_session_id]/api/ case. In which case we need to go one folder up further
-		if (preg_match("/([0-9]+)\/api\//", $_SERVER["REQUEST_URI"]) == 1)
-		{
-			$requestDirectoryCount++;
-		}
-
-		$requestRoot = "";
-		for($i = 0; $i < $requestDirectoryCount; ++$i) {
-			$requestRoot .= "../";
-		}
-		return $requestRoot;
+		return isset($this->configRoot["unit_test_logger"])? $this->configRoot["unit_test_logger"] : array();
 	}
 }
 

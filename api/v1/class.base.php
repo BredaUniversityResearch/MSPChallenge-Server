@@ -1,8 +1,8 @@
 <?php
 
-function IsExperimentalFeatureEnabled(string $featureName)
+function IsFeatureFlagEnabled(string $featureName)
 {
-	return (isset($GLOBALS['experimental_feature_flags'][$featureName]) && $GLOBALS['experimental_feature_flags'][$featureName] == true);
+	return (isset($GLOBALS['feature_flags'][$featureName]) && $GLOBALS['feature_flags'][$featureName] == true);
 }
 
 class Base
