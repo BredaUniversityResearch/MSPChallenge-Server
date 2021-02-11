@@ -51,7 +51,7 @@ CREATE TABLE `game_list` (
   `password_admin` varchar(45) NOT NULL,
   `password_player` varchar(45) NOT NULL,
   `session_state` enum('request','initializing','healthy','failed','archived') NOT NULL,
-  `game_state` enum('setup','simulation','play','pause','end') NOT NULL,
+  `game_state` enum('setup','simulation','play','pause','end', 'fastforward') NOT NULL,
   `game_visibility` enum('public','private') NOT NULL,
   `players_active` int(10) unsigned DEFAULT NULL,
   `players_past_hour` int(10) unsigned DEFAULT NULL,
