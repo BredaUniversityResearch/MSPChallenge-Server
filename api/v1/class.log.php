@@ -28,9 +28,9 @@ class Log extends Base {
 	 * @apiParam {string} message Debugging information associated with this event
 	 * @apiParam {string} stack_trace Debug stacktrace where the error occured. Optional.
 	 */
-	public function Event()
+	public function Event(string $source, string $severity, string $message,  string $stack_trace = "")
 	{
-		$this->PostEvent($_POST['source'], $_POST['severity'], $_POST['message'], isset($_POST['stack_trace'])? $_POST['stack_trace'] : "");
+		$this->PostEvent($source, $severity, $message, $stack_trace);
 	}
 
 	public function PostEvent($source, $severity, $message, $stackTrace) 
