@@ -295,7 +295,7 @@ class GameSession extends Base
 
 			if (!empty($response_url))
 			{
-				$postValues = array("oldlocation" => $zippath);
+				$postValues = array("zippath" => $zippath);
 				$this->CallBack($response_url, $postValues);
 			}
 		}
@@ -321,7 +321,7 @@ class GameSession extends Base
 		}
 		else throw new Exception("Type ".$type." is not recognised.");
 	}
-	
+
 	public function CreateGameSessionZip(string $response_url = "", string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "session_archive_") 
 	{		
 		$sessionId = self::GetGameSessionIdForCurrentRequest();		
@@ -341,30 +341,21 @@ class GameSession extends Base
 		}
 
 		$sessionFiles = array($sqlDumpPath, $configFilePath);
-		$dirIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Store::GetRasterStoreFolder()));
-		foreach($dirIterator as $file) {
-			if ($file->getFilename() != "." && $file->getFilename() != "..") { 
-				$sessionFiles[] = $file->getPathName();
-			}
-		}
 
 		$zip = new ZipArchive();
 		$result = $zip->open($zippath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 		if ($result === true) {
 			foreach($sessionFiles as $layerFile) {
 				if (is_readable($layerFile)) {
-					$zipFolder = "";
-					$pathName = pathinfo($layerFile, PATHINFO_DIRNAME);
-					if (stripos($pathName, "raster") !== false) {
-						if (stripos($pathName, "archive") !== false) {
-							$zipFolder = "raster/archive/";
-						}
-						else {
-							$zipFolder = "raster/";
-						}
-					}
-					$fileName = pathinfo($layerFile, PATHINFO_BASENAME);
-					$zip->addFile($layerFile, $zipFolder.$fileName);
+					$zip->addFile($layerFile, pathinfo($layerFile, PATHINFO_BASENAME));
+				}
+			}
+			foreach (Store::GetRasterStoreFolderContents() as $rasterfile) {
+				if (is_readable($rasterfile)) {
+					$pathName = pathinfo($rasterfile, PATHINFO_DIRNAME);
+					if (stripos($pathName, "archive") !== false) $zipFolder = "raster/archive/";
+					else $zipFolder = "raster/";
+					$zip->addFile($rasterfile, $zipFolder.pathinfo($rasterfile, PATHINFO_BASENAME));
 				}
 			}
 			$zip->close();

@@ -12,9 +12,9 @@ require_once '../helpers.php';*/
 //$user->hastobeLoggedIn();
 
 
-if(isset($_POST['oldlocation']))
+if(isset($_POST['zippath']))
 {
-	if (is_file($_POST['oldlocation'])) 
+	if (is_file($_POST['zippath'])) 
 	{
 
 		$outputDirectory = GetSessionArchiveBaseDirectory();
@@ -24,9 +24,9 @@ if(isset($_POST['oldlocation']))
 			mkdir($outputDirectory, 0777);
 		}
 
-		$storeFilePath = $outputDirectory.basename($_POST['oldlocation']);
+		$storeFilePath = $outputDirectory.basename($_POST['zippath']);
 
-		rename($_POST['oldlocation'], $storeFilePath);
+		rename($_POST['zippath'], $storeFilePath);
 	
 	}
 	

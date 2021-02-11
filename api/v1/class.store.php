@@ -126,6 +126,17 @@ class Store extends Base
 		return $storeFolder;
 	}
 
+	public static function GetRasterStoreFolderContents()
+	{
+		// this is a generator function - notice the use of yield to save up on memory use
+		$dirIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Store::GetRasterStoreFolder()));
+		foreach($dirIterator as $file) {
+			if ($file->getFilename() != "." && $file->getFilename() != "..") { 
+				yield $file->getPathName();
+			}
+		}
+	}
+
 	public static function GetRasterArchiveFolder()
 	{
 		$folder = self::GetRasterStoreFolder();

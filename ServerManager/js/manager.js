@@ -981,6 +981,7 @@ function callLoadSave(formData) {
 		dataType: 'json',
 		success: function(data) {
 			$.unblockUI();
+			$('#savesListtbody').empty();
 			if (data.status == 'error') {
 				updateInfobox(MessageType.ERROR, 'submitLoadSave (API): '+data.message);
 			} else {
