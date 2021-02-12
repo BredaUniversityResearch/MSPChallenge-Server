@@ -15,7 +15,14 @@ $GLOBALS['api_config'] = array(
     "long_request_timeout" => 420,
     "unit_test_logger" => array(
         "enabled" => false,
-        "intermediate_folder" => "export/"
+        "intermediate_folder" => "export/",
+        "request_filter" => array (
+            "ignore" => array(
+                "game::getcurrentmonth",
+                "mel::shouldupdate",
+                "security::checkaccess"
+            )
+        )
     ),
     "database" => array(
         "host" => "127.0.0.1",

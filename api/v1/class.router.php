@@ -33,7 +33,7 @@ class Router
 		$endpointData = self::ParseEndpointString($apiCallUrl);
 		$result = self::ExecuteCall($endpointData["class"], $endpointData["method"], $data, true);
 
-		if (IsFeatureFlagEnabled("log_api_calls_for_unit_tests"))
+		if (UnitTestSupport::ShouldLogApiCalls())
 		{
 			$unitTestSupport = new UnitTestSupport();
 			$unitTestSupport->RecordApiCall($endpointData["class"], $endpointData["method"], $data, $result);
