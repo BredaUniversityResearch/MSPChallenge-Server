@@ -35,6 +35,11 @@ class TestLoggedCalls extends TestBase
 			throw new Exception("Failed to decode file payload of ".$targetFilePath.". Error: ".json_last_error_msg());
 		}
 
+		if (!isset($data["call_class"]) || !isset($data["call_method"]) || !isset($data["call_data"]))
+		{
+			return;
+		}
+		
 		try
 		{
 			$this->DoApiRequest("/api/".$data["call_class"]."/".$data["call_method"], $data["call_data"]);
