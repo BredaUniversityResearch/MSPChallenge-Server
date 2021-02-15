@@ -18,8 +18,11 @@ $(document).ready(function(){
 <div>
   Server Address: 
   <?php 
-  $servermanager = ServerManager::getInstance();
-  echo $servermanager->GetTranslatedServerURL();
+  $address = ServerManager::getInstance()->GetTranslatedServerURL();
+  if ($address == "localhost") {
+    $address .= "<br/>Translated automatically to ".gethostbyname(gethostname());
+  }
+  echo $address;
   ?>
 </div>
 
