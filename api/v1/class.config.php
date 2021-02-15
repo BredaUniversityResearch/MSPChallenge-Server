@@ -21,7 +21,6 @@ class Config
 
 	private function LoadConfigFile()
 	{
-		
 		require_once(APIHelper::GetBaseFolder()."api_config.php");
 		$this->configRoot = $GLOBALS['api_config'];
 	}

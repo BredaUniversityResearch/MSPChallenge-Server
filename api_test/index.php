@@ -14,8 +14,8 @@ APIHelper::SetupApiLoader("../");
 header("Content-type: text/plain");
 
 /* Ensure we have a backdoor through security */
-TestBase::$ms_targetSession = 4;
-$_GET["session"] = 4;
+TestBase::$ms_targetSession = 1;
+$_GET["session"] = TestBase::$ms_targetSession;
 
 ob_implicit_flush(true);
 ob_start(null, 32);
