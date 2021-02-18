@@ -102,7 +102,7 @@ function YouShouldUpdate() {
 						'session_state' => 'archived',
 						'region' => 'none');
 	$return[1] = array('id'=> 0,
-						'name' => 'Please download and install version 4.0-beta6 or newer from www.mspchallenge.info.',
+						'name' => 'Please download and install version 4.0-beta7 from www.mspchallenge.info.',
 						'session_state' => 'archived',
 						'region' => 'none');
 	return $return;

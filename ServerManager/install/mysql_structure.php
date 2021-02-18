@@ -338,7 +338,9 @@ ALTER TABLE `game_watchdog_servers`
   ('migration_20200917.php', 'Never'),
   ('migration_20200930.php', 'Never'),
   ('migration_20201002.php', 'Never'),
-  ('migration_20201104.php', 'Never');
+  ('migration_20201104.php', 'Never'),
+  ('migration_20201130.php', 'Never'),
+  ('migration_20210211.php', 'Never');
 
 ";
 ?>
