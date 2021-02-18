@@ -24,7 +24,7 @@
           "message": "",
           "value": 0.0,
           "type": "WARNING",
-          "startlayer": "",
+          "startlayer": "CR_Ports",
           "starttype": "",
           "endlayer": "CR_Councils",
           "endtype": "",
@@ -6196,7 +6196,7 @@
     ],
     "layer_editing_type": "",
     "layer_special_entity_type": "Default",
-    "layer_depth": 0,
+    "layer_depth": 2,
     "layer_type": {
       "0": {
         "displayName": "0 m",
