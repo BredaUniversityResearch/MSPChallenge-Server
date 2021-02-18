@@ -69,7 +69,7 @@
 
 		/**
 		 * @apiGroup Update
-		 * @api {GET} /update/Reimport Reimport
+		 * @api {POST} /update/Reimport Reimport
 		 * @apiDescription Performs a full reimport of the database with the set filename in $configFilename.
 		 */
 		public function Reimport(string $configFilename, string $geoserver_url="", string $geoserver_username="", string $geoserver_password)

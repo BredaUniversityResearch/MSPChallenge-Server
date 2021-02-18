@@ -16,7 +16,7 @@ class Warning extends Base {
 	 * @apiGroup Warning
 	 * @api {POST} /warning/post Post
 	 * @apiParam {added} Json array of IssueObjects that are added.
-	 * @apiParams {removed} Json array of IssueObjects that are removed.
+	 * @apiParam {removed} Json array of IssueObjects that are removed.
 	 * @apiDescription Add or update a warning message on the server
 	 */
 	public function Post(array $added, array $removed)

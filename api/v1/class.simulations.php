@@ -19,9 +19,9 @@ class Simulations extends Base
 
 	/**
 	 * @apiGroup Simulations
-	 * @api {GET} /Simulations/GetConfiguredSimulationTypes Get Configured Simulation Types (e.g. ["MEL", "SEL", "CEL"])
-	 * @apiDescription Returns the type name of the simulations present in the current configuration.
-	 * @apiSuccess {string} JSON object
+	 * @api {POST} /Simulations/GetConfiguredSimulationTypes Get Configured Simulation Types
+	 * @apiDescription Get Configured Simulation Types (e.g. ["MEL", "SEL", "CEL"]) 
+	 * @apiSuccess {array} Returns the type name of the simulations present in the current configuration.
 	 */
 	public function GetConfiguredSimulationTypes() 
 	{
@@ -42,30 +42,11 @@ class Simulations extends Base
 		return $result;
 	}
 
-	/*public function GetConfiguredSimulationTypesAsArray() // since GetConfiguredSimulationTypes() now simply returns the array rather than json
-	{
-		$result = array();
-		$game = new Game();
-		$config = $game->GetGameConfigValues();			
-		foreach(self::POSSIBLE_SIMULATIONS as $possibleSim)
-		{
-			if (array_key_exists($possibleSim, $config)) {
-				$versionString = "Latest";
-				if (array_key_exists("force_version", $config[$possibleSim]))
-				{
-					$versionString = $config[$possibleSim]["force_version"];	
-				}
-				$result[$possibleSim] = $versionString;
-			}
-		}
-		return $result;
-	}*/
-
 	/**
 	 * @apiGroup Simulations
-	 * @api {GET} /Simulations/GetSimulationRequestedState Get requested running state of the simulation.
-	 * @apiDescription Returns whether or not the simulation should be running.
-	 * @apiSuccess {string} Currently requested state for simulations. [Started, Stopped]
+	 * @api {POST} /Simulations/GetSimulationRequestedState Get Simulation Requested State
+	 * @apiDescription Get requested running state of the simulation.
+	 * @apiSuccess {string} Currently requested state for simulations. [Started, Stopped] 
 	 */
 	public function GetSimulationRequestedState() 
 	{
@@ -94,7 +75,7 @@ class Simulations extends Base
 
 	/**
 	 * @apiGroup Simulations
-	 * @api {GET} /Simulations/WatchdogStartSimulations Set the requested simulation state for watchdog.
+	 * @api {POST} /Simulations/WatchdogStartSimulations Watchdog Start Simulations 
 	 * @apiDescription Set the state so the watchdog will keep simulations running.
 	 */
 	public function WatchdogStartSimulations()
@@ -104,8 +85,8 @@ class Simulations extends Base
 
 	/**
 	 * @apiGroup Simulations
-	 * @api {GET} /Simulations/WatchdogStopSimulations Watchdog stop simulations.
-	 * @apiDescription Stop all simulations maintained by watchdog..
+	 * @api {POST} /Simulations/WatchdogStopSimulations Watchdog Stop Simulations
+	 * @apiDescription Stop all simulations maintained by watchdog.
 	 */
 	public function WatchdogStopSimulations()
 	{
@@ -114,8 +95,9 @@ class Simulations extends Base
 
 	/**
 	 * @apiGroup Simulations
-	 * @api {GET} /Simulations/GetWatchdogTokenForServer Watchdog stop simulations.
-	 * @apiDescription Returns json object containing the watchdog token for the current server. Used for setting up debug bridge in simulations.
+	 * @api {POST} /Simulations/GetWatchdogTokenForServer Get Watchdog Token ForServer
+	 * @apiDescription Get the watchdog token for the current server. Used for setting up debug bridge in simulations.
+	 * @apiSuccess {array} with watchdog_token key and value
 	 */
 	public function GetWatchdogTokenForServer()
 	{

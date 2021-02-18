@@ -73,7 +73,7 @@
 		/**
 		 * @apiGroup Plan
 		 * @apiDescription Get a specific plan
-		 * @api {GET} /post/get Get
+		 * @api {POST} /post/get Get
 		 * @apiParam {int} id of plan to return
 		 * @apiSuccess {string} JSON object containing all plan metadata + comments
 		 */
@@ -88,7 +88,7 @@
 		/**
 		 * @apiGroup Plan
 		 * @apiDescription Get all plans
-		 * @api {GET} /plan/all All
+		 * @api {POST} /plan/all All
 		 * @apiSuccess {string} JSON object of all plan metadata + comments
 		 */
 		public function All(){
@@ -632,7 +632,7 @@
 		/**
 		 * @apiGroup Plan
 		 * @apiDescription Returns a json-encoded object which represents the exported plan data for the current game session. Returns an empty string on failure.
-		 * @api {GET} /plan/DeleteLayer Delete Layer
+		 * @api {POST} /plan/DeleteLayer Delete Layer
 		 * @apiSuccess {string} JSON encoded object with fields "success" (0|1) Successful operation?, "message" (string) Error messages that might have occured, "data" (object) Exported object that represents the exported plan data.
 		 */
 		public function ExportPlansToJson(int $session = 0) {
@@ -1303,7 +1303,7 @@
 
 		/**
 		 * @apiGroup Plan
-		 * @api {GET} /plan/GetInitialFishingValues GetInitialFishingValues
+		 * @api {POST} /plan/GetInitialFishingValues GetInitialFishingValues
 		 * @apiDescription Returns the initial fishing values submitted by MEL. The values are in a 0..1 range for each fishing fleet and country. Fishing fleet values summed together should be in the range of 0..1
 		 */
 		public function GetInitialFishingValues() 

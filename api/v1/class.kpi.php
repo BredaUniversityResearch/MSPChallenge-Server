@@ -9,7 +9,7 @@
 
 		/**
 		 * @apiGroup KPI
-		 * @api {GET} /kpi/post Post
+		 * @api {POST} /kpi/post Post
 		 * @apiParam {string} name name of the KPI
 		 * @apiParam {int} month Month that this KPI applies to.
 		 * @apiParam {float} value the value of this months kpi
@@ -25,7 +25,7 @@
 
 		/**
 		 * @apiGroup KPI
-		 * @api {GET} /kpi/BatchPost BatchPost
+		 * @api {POST} /kpi/BatchPost BatchPost
 		 * @apiParam {array} kpiValues Input format should be [{"name":(string kpiName),"month": (int month), "value":(float kpiValue),"type":(string kpiType),"unit":(string kpiUnit),"country":(int countryId or null)}] 
 		 * @apiDescription Add a new kpi value to the database
 		 */

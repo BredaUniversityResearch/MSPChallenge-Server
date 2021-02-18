@@ -14,7 +14,7 @@ class REL extends Base
 
 	/**
 	* @apiGroup REL
-	* @api {GET} /rel/GetRestrictionGeometry GetRestrictionGeometry
+	* @api {POST} /rel/GetRestrictionGeometry GetRestrictionGeometry
 	* @apiDescription Returns all restriction geometry that appears on a configured restriction layer. Geometry_type is translated into geometry type that corresponds to the type configured and communicated to Marin API.
 	*/
 	public function GetRestrictionGeometry()
@@ -36,7 +36,7 @@ class REL extends Base
 
 	/**
 	* @apiGroup REL
-	* @api {GET} /rel/GetConfiguration GetConfiguration
+	* @api {POST} /rel/GetConfiguration GetConfiguration
 	* @apiDescription Returns object containing configuration values for REL.
 	*/
 	public function GetConfiguration()

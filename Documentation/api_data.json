@@ -1,36 +1,160 @@
 [
   {
-    "group": "Cel",
-    "type": "GET",
-    "url": "/cel/GetCELConfig",
-    "title": "Get Config",
-    "description": "<p>Returns the Json encoded config string</p>",
+    "group": "Batch",
+    "type": "POST",
+    "url": "/batch/addtobatch",
+    "title": "AddToBatch",
+    "description": "<p>Starts a new batch</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "batch_id",
+            "description": "<p>Batch ID to add to</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "batch_group",
+            "description": "<p>Batch execution group</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "call_id",
+            "description": "<p>Client defined identfier that is unique within the current batch_id.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "endpoint",
+            "description": "<p>Endpoint for this batch call to make. E.g. &quot;api/geometry/post&quot;</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "endpoint_data",
+            "description": "<p>Json data that should be send to the endpoint when called.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "int",
+            "optional": false,
+            "field": "execution_task_id",
+            "description": "<p>Unique task identifier used to identify this execution task.</p>"
+          }
+        ]
+      }
+    },
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
-    "groupTitle": "Cel",
-    "name": "GetCelGetcelconfig"
+    "filename": "api/v1/class.batch.php",
+    "groupTitle": "Batch",
+    "name": "PostBatchAddtobatch",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/batch/addtobatch"
+      }
+    ]
   },
   {
-    "group": "Cel",
-    "type": "GET",
-    "url": "/cel/ShouldUpdate",
-    "title": "Should Update",
-    "description": "<p>Should Cel update this month?</p>",
+    "group": "Batch",
+    "type": "POST",
+    "url": "/batch/addtobatch",
+    "title": "AddToBatch",
+    "description": "<p>Starts a new batch</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "batch_id",
+            "description": "<p>Batch ID to execute.</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "object",
+            "optional": false,
+            "field": "results",
+            "description": "<p>Results of the executed batch. JSON object containing client-specified call_id (if non-empty) and payload which is the result of the call. When failed this object contains failed_task_id which references the execution_task_id returned in the AddToBatch.</p>"
+          }
+        ]
+      }
+    },
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
-    "groupTitle": "Cel",
-    "name": "GetCelShouldupdate"
+    "filename": "api/v1/class.batch.php",
+    "groupTitle": "Batch",
+    "name": "PostBatchAddtobatch",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/batch/addtobatch"
+      }
+    ]
+  },
+  {
+    "group": "Batch",
+    "type": "POST",
+    "url": "/batch/startbatch",
+    "title": "StartBatch",
+    "description": "<p>Starts a new batch</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "int",
+            "optional": false,
+            "field": "batch_id",
+            "description": "<p>Batch ID used to identify this batch.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.batch.php",
+    "groupTitle": "Batch",
+    "name": "PostBatchStartbatch",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/batch/startbatch"
+      }
+    ]
   },
   {
     "group": "Cel",
     "type": "POST",
-    "url": "/cel/get",
-    "title": "Get",
-    "description": "<p>Get all active energy connections</p>",
+    "url": "/cel/GetCELConfig",
+    "title": "Get Config",
+    "description": "<p>Returns the Json encoded config string</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.cel.php",
     "groupTitle": "Cel",
-    "name": "PostCelGet"
+    "name": "PostCelGetcelconfig",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/GetCELConfig"
+      }
+    ]
   },
   {
     "group": "Cel",
@@ -39,9 +163,30 @@
     "title": "GetConnections",
     "description": "<p>Get all active energy connections</p>",
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
+    "filename": "api/v1/class.cel.php",
     "groupTitle": "Cel",
-    "name": "PostCelGetconnections"
+    "name": "PostCelGetconnections",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/GetConnections"
+      }
+    ]
+  },
+  {
+    "group": "Cel",
+    "type": "POST",
+    "url": "/cel/GetConnections",
+    "title": "GetConnections",
+    "description": "<p>Get all active energy connections</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.energy.php",
+    "groupTitle": "Cel",
+    "name": "PostCelGetconnections",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/GetConnections"
+      }
+    ]
   },
   {
     "group": "Cel",
@@ -50,9 +195,14 @@
     "title": "Get Grids",
     "description": "<p>Get all grids and their associated sockets, sorted per country</p>",
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
+    "filename": "api/v1/class.cel.php",
     "groupTitle": "Cel",
-    "name": "PostCelGetgrids"
+    "name": "PostCelGetgrids",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/GetGrids"
+      }
+    ]
   },
   {
     "group": "Cel",
@@ -61,9 +211,14 @@
     "title": "Get Nodes",
     "description": "<p>Get all nodes that have an output associated with them</p>",
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
+    "filename": "api/v1/class.cel.php",
     "groupTitle": "Cel",
-    "name": "PostCelGetnodes"
+    "name": "PostCelGetnodes",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/GetNodes"
+      }
+    ]
   },
   {
     "group": "Cel",
@@ -72,9 +227,14 @@
     "title": "Get Sources",
     "description": "<p>Returns a list of all active sources</p>",
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
+    "filename": "api/v1/class.cel.php",
     "groupTitle": "Cel",
-    "name": "PostCelGetsources"
+    "name": "PostCelGetsources",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/GetSources"
+      }
+    ]
   },
   {
     "group": "Cel",
@@ -103,9 +263,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
+    "filename": "api/v1/class.cel.php",
     "groupTitle": "Cel",
-    "name": "PostCelSetgeomcapacity"
+    "name": "PostCelSetgeomcapacity",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/SetGeomCapacity"
+      }
+    ]
   },
   {
     "group": "Cel",
@@ -127,9 +292,30 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
+    "filename": "api/v1/class.cel.php",
     "groupTitle": "Cel",
-    "name": "PostCelSetgridcapacity"
+    "name": "PostCelSetgridcapacity",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/SetGridCapacity"
+      }
+    ]
+  },
+  {
+    "group": "Cel",
+    "type": "POST",
+    "url": "/cel/ShouldUpdate",
+    "title": "Should Update",
+    "description": "<p>Should Cel update this month?</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.cel.php",
+    "groupTitle": "Cel",
+    "name": "PostCelShouldupdate",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/ShouldUpdate"
+      }
+    ]
   },
   {
     "group": "Cel",
@@ -141,6 +327,7 @@
         "Parameter": [
           {
             "group": "Parameter",
+            "type": "int",
             "optional": false,
             "field": "month",
             "description": "<p>The month Cel just finished an update for.</p>"
@@ -150,57 +337,14 @@
     },
     "description": "<p>Notify that Cel has finished updating a month</p>",
     "version": "0.0.0",
-    "filename": "../class/class.cel.php",
+    "filename": "api/v1/class.cel.php",
     "groupTitle": "Cel",
-    "name": "PostCelUpdatefinished"
-  },
-  {
-    "group": "Energy",
-    "type": "GET",
-    "url": "/energy/GetDependentEnergyPlans",
-    "title": "Get Dependent Energy Plans.",
-    "description": "<p>Get all the plan ids that are dependent on this plan</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "plan_id",
-            "description": "<p>Id of the plan that you want to find the dependent energy plans of.</p>"
-          }
-        ]
+    "name": "PostCelUpdatefinished",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/cel/UpdateFinished"
       }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.energy.php",
-    "groupTitle": "Energy",
-    "name": "GetEnergyGetdependentenergyplans"
-  },
-  {
-    "group": "Energy",
-    "type": "GET",
-    "url": "/energy/GetOverlappingEnergyPlans",
-    "title": "Get Overlapping Energy Plans.",
-    "description": "<p>Get all the plan ids that are overlapping with this plan. Meaning they are referencing deleted grids in the current plan.</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "plan_id",
-            "description": "<p>Id of the plan that you want to find the overlapping energy plans of.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.energy.php",
-    "groupTitle": "Energy",
-    "name": "GetEnergyGetoverlappingenergyplans"
+    ]
   },
   {
     "group": "Energy",
@@ -228,6 +372,13 @@
             "group": "Parameter",
             "type": "int",
             "optional": false,
+            "field": "distribution_only",
+            "description": "<p>...</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
             "field": "persistent",
             "description": "<p>(optional) persistent id, defaults to the newly created id</p>"
           }
@@ -249,40 +400,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyAddgrid"
-  },
-  {
-    "group": "Energy",
-    "type": "POST",
-    "url": "/energy/AddOutput",
-    "title": "Add Output",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>geometry id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "maxcapacity",
-            "description": "<p>maximum capacity</p>"
-          }
-        ]
+    "name": "PostEnergyAddgrid",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/AddGrid"
       }
-    },
-    "description": "<p>Add a new energy_output entry for a geometry object</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.energy.php",
-    "groupTitle": "Energy",
-    "name": "PostEnergyAddoutput"
+    ]
   },
   {
     "group": "Energy",
@@ -311,9 +436,14 @@
     },
     "description": "<p>Add a new socket for a single country for a certain grid</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyAddsocket"
+    "name": "PostEnergyAddsocket",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/AddSocket"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -336,46 +466,20 @@
             "optional": false,
             "field": "geometry",
             "description": "<p>geometry id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "country",
-            "description": "<p>country id</p>"
           }
         ]
       }
     },
     "description": "<p>Add a new socket for a single country for a certain grid</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyAddsource"
-  },
-  {
-    "group": "Energy",
-    "type": "POST",
-    "url": "/energy/BatchCreateConnection",
-    "title": "Batch Create Connection",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "data",
-            "description": "<p>Json encoded array containing start ID, end ID, cable ID and coords. Ex: [{&quot;start&quot;: startID(int), &quot;end&quot;: endID(int), &quot;cable&quot;: cableID(int), &quot;coords&quot;: coordinates(string)}]</p>"
-          }
-        ]
+    "name": "PostEnergyAddsource",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/AddSource"
       }
-    },
-    "description": "<p>Batch process of creating new connections</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.energy.php",
-    "groupTitle": "Energy",
-    "name": "PostEnergyBatchcreateconnection"
+    ]
   },
   {
     "group": "Energy",
@@ -418,9 +522,14 @@
     },
     "description": "<p>Create a new connection between 2 points</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyCreateconnection"
+    "name": "PostEnergyCreateconnection",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/CreateConnection"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -442,9 +551,14 @@
     },
     "description": "<p>Deletes a connection</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyDeleteconnection"
+    "name": "PostEnergyDeleteconnection",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/DeleteConnection"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -466,33 +580,14 @@
     },
     "description": "<p>Delete a grid and its sockets, sources and energy by the grid id</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyDeletegrid"
-  },
-  {
-    "group": "Energy",
-    "type": "POST",
-    "url": "/energy/DeleteName",
-    "title": "Delete Name",
-    "description": "<p>Delete the name of a grid</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>of the geometry that the name is linked to (as used when inserting or updating the name)</p>"
-          }
-        ]
+    "name": "PostEnergyDeletegrid",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/DeleteGrid"
       }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.energy.php",
-    "groupTitle": "Energy",
-    "name": "PostEnergyDeletename"
+    ]
   },
   {
     "group": "Energy",
@@ -514,9 +609,14 @@
     },
     "description": "<p>Delete the energy_output of a geometry object</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyDeleteoutput"
+    "name": "PostEnergyDeleteoutput",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/DeleteOutput"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -538,9 +638,14 @@
     },
     "description": "<p>Delete the sockets of a geometry object</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyDeletesocket"
+    "name": "PostEnergyDeletesocket",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/DeleteSocket"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -562,33 +667,101 @@
     },
     "description": "<p>Delete the sources of a geometry object</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyDeletesource"
+    "name": "PostEnergyDeletesource",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/DeleteSource"
+      }
+    ]
   },
   {
     "group": "Energy",
     "type": "POST",
-    "url": "/energy/GetGridOutput",
-    "title": "Get Grid Output",
-    "description": "<p>gets all energy actual from the energy grid</p>",
-    "success": {
+    "url": "/energy/GetDependentEnergyPlans",
+    "title": "Get Dependent Energy Plans",
+    "description": "<p>Get all the plan ids that are dependent on this plan</p>",
+    "parameter": {
       "fields": {
-        "Success 200": [
+        "Parameter": [
           {
-            "group": "Success 200",
+            "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "success",
-            "description": "<p>List of objects (grid_id, country)</p>"
+            "field": "plan_id",
+            "description": "<p>Id of the plan that you want to find the dependent energy plans of.</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyGetgridoutput"
+    "name": "PostEnergyGetdependentenergyplans",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/GetDependentEnergyPlans"
+      }
+    ]
+  },
+  {
+    "group": "Energy",
+    "type": "POST",
+    "url": "/energy/GetOverlappingEnergyPlans",
+    "title": "Get Overlapping Energy Plans",
+    "description": "<p>Get all the plan ids that are overlapping with this plan. Meaning they are referencing deleted grids in the current plan.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "plan_id",
+            "description": "<p>Id of the plan that you want to find the overlapping energy plans of.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.energy.php",
+    "groupTitle": "Energy",
+    "name": "PostEnergyGetoverlappingenergyplans",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/GetOverlappingEnergyPlans"
+      }
+    ]
+  },
+  {
+    "group": "Energy",
+    "type": "POST",
+    "url": "/energy/GetPreviousOverlappingPlans",
+    "title": "Get Previous Overlapping Energy Plans",
+    "description": "<p>Returns whether or not there are overlapping plans in the past that delete grids for the plan that we are querying.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "plan_id",
+            "description": "<p>Id of the plan that you want to find the overlapping energy plans of.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.energy.php",
+    "groupTitle": "Energy",
+    "name": "PostEnergyGetpreviousoverlappingplans",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/GetPreviousOverlappingPlans"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -610,71 +783,14 @@
     },
     "description": "<p>Get the used capacity of a geometry object in energy_output</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyGetusedcapacity"
-  },
-  {
-    "group": "Energy",
-    "type": "POST",
-    "url": "/energy/GridActual",
-    "title": "Grid Actual",
-    "description": "<p>Add or update the grid actual</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "energyid",
-            "description": "<p>grid_energy_id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "country",
-            "description": "<p>country id</p>"
-          }
-        ]
+    "name": "PostEnergyGetusedcapacity",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/GetUsedCapacity"
       }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.energy.php",
-    "groupTitle": "Energy",
-    "name": "PostEnergyGridactual"
-  },
-  {
-    "group": "Energy",
-    "type": "POST",
-    "url": "/energy/name",
-    "title": "Name",
-    "description": "<p>add or change the name of an energy grid</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>of any geometry inside the grid</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "name",
-            "description": "<p>name of the grid</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.energy.php",
-    "groupTitle": "Energy",
-    "name": "PostEnergyName"
+    ]
   },
   {
     "group": "Energy",
@@ -693,19 +809,24 @@
           },
           {
             "group": "Parameter",
-            "type": "string",
+            "type": "array",
             "optional": false,
             "field": "delete",
-            "description": "<p>list of comma separated persistent ids of grids to be removed (id,id,...)</p>"
+            "description": "<p>Json array of persistent ids of grids to be removed</p>"
           }
         ]
       }
     },
     "description": "<p>Set the grids to be deleted in this plan. Will first remove the previously deleted grids for the plan and then add the new ones. Note that there is no verification if the added values are actually correct.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergySetdeleted"
+    "name": "PostEnergySetdeleted",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/SetDeleted"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -735,22 +856,70 @@
             "optional": false,
             "field": "maxcapacity",
             "description": "<p>maximum capacity of node</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "country",
-            "description": "<p>id of the country</p>"
           }
         ]
       }
     },
     "description": "<p>Creates or updates the output of an element</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergySetoutput"
+    "name": "PostEnergySetoutput",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/SetOutput"
+      }
+    ]
+  },
+  {
+    "group": "Energy",
+    "type": "POST",
+    "url": "/energy/UpdateConnection",
+    "title": "Update Connection",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "start",
+            "description": "<p>ID of the start geometry</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "end",
+            "description": "<p>ID of the end geometry</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "coords",
+            "description": "<p>coordinates of the starting point, saved as: [123.456, 999.123]</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "cable",
+            "description": "<p>ID of the cable geometry of which to update</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Update cable connection between 2 points</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.energy.php",
+    "groupTitle": "Energy",
+    "name": "PostEnergyUpdateconnection",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/UpdateConnection"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -769,19 +938,24 @@
           },
           {
             "group": "Parameter",
-            "type": "string",
+            "type": "array(Object)",
             "optional": false,
             "field": "expected",
-            "description": "<p>list of values (country:expected,country:expected,...)</p>"
+            "description": "<p>Objects contain country_id and energy_expected values. E.g. [{&quot;country_id&quot;: 3, &quot;energy_expected&quot;: 1300}]</p>"
           }
         ]
       }
     },
     "description": "<p>Adds new entries to grid_energy and deleted all old grid_energy entries for the given grid</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyUpdategridenergy"
+    "name": "PostEnergyUpdategridenergy",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/UpdateGridEnergy"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -810,9 +984,14 @@
     },
     "description": "<p>Change the name of a grid</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyUpdategridname"
+    "name": "PostEnergyUpdategridname",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/UpdateGridName"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -831,19 +1010,24 @@
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "array(int)",
             "optional": false,
             "field": "sockets",
-            "description": "<p>a string in the format (geomID,geomID,etc.). Example: 1,2,3,4</p>"
+            "description": "<p>Array of geometry ids for new sockest.</p>"
           }
         ]
       }
     },
     "description": "<p>When called, does the following:\t\t <br/>1. Removes all grid_socket entries with the given grid_socket_grid_id. <br/>2. Adds new entries for all geomID combinations in &quot;grid_socket&quot;, with grid_socket_grid_id set to the given value.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyUpdategridsockets"
+    "name": "PostEnergyUpdategridsockets",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/UpdateGridSockets"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -865,16 +1049,21 @@
             "type": "int",
             "optional": false,
             "field": "sources",
-            "description": "<p>a string in the format (geomID,geomID,etc.). Example: 1,2,3,4</p>"
+            "description": "<p>a json array of geometry IDs Example: [1,2,3,4]</p>"
           }
         ]
       }
     },
     "description": "<p>When called, does the following:\t\t <br/>1. Removes all grid_source entries with the given grid_source_grid_id. <br/>2. Adds new entries for all country:geomID combinations in &quot;grid_source&quot;, with grid_source_grid_id set to the given value.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyUpdategridsources"
+    "name": "PostEnergyUpdategridsources",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/UpdateGridSources"
+      }
+    ]
   },
   {
     "group": "Energy",
@@ -903,72 +1092,167 @@
     },
     "description": "<p>Update the maximum capacity of a geometry object in energy_output</p>",
     "version": "0.0.0",
-    "filename": "../class/class.energy.php",
+    "filename": "api/v1/class.energy.php",
     "groupTitle": "Energy",
-    "name": "PostEnergyUpdatemaxcapacity"
+    "name": "PostEnergyUpdatemaxcapacity",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/UpdateMaxCapacity"
+      }
+    ]
+  },
+  {
+    "group": "Energy",
+    "type": "POST",
+    "url": "/energy/VerifyEnergyCapacity",
+    "title": "Verify Energy Capacity",
+    "description": "<p>Returns as an array of the supplied geometry ids were <em>not</em> found in the energy_output database table.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "ids",
+            "description": "<p>JSON array of integers defining geometry ids to check (e.g. [9554,9562,9563]).</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.energy.php",
+    "groupTitle": "Energy",
+    "name": "PostEnergyVerifyenergycapacity",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/VerifyEnergyCapacity"
+      }
+    ]
+  },
+  {
+    "group": "Energy",
+    "type": "POST",
+    "url": "/energy/VerifyEnergyGrid",
+    "title": "Verify Energy Grid",
+    "description": "<p>Returns a array with client_missing_source_ids, client_extra_source_ids, client_missing_socket_ids, client_extra_socket_ids, each a comma-separated list of ids</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "grid_id",
+            "description": "<p>grid id of the grid to verify</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "source_ids",
+            "description": "<p>Json array of the grid's source geometry ids on the client</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "socket_ids",
+            "description": "<p>Json array of the grid's sockets geometry ids on the client</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.energy.php",
+    "groupTitle": "Energy",
+    "name": "PostEnergyVerifyenergygrid",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/energy/VerifyEnergyGrid"
+      }
+    ]
   },
   {
     "group": "Game",
-    "type": "GET",
+    "type": "POST",
+    "url": "/game/AutoSaveDatabase",
+    "title": "AutoSaveDatabase",
+    "description": "<p>Creates a session database dump with the naming convention AutoDump_YYY-mm-dd_hh-mm.sql</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.game.php",
+    "groupTitle": "Game",
+    "name": "PostGameAutosavedatabase",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/AutoSaveDatabase"
+      }
+    ]
+  },
+  {
+    "group": "Game",
+    "type": "POST",
     "url": "/game/Config",
     "title": "Config",
-    "description": "<p>returns a json string with the &quot;Global Data&quot; of the config file</p>",
-    "success": {
+    "description": "<p>Obtains the sessions' game configuration</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.game.php",
+    "groupTitle": "Game",
+    "name": "PostGameConfig",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/Config"
+      }
+    ]
+  },
+  {
+    "group": "Game",
+    "type": "POST",
+    "url": "/game/GetActualDateForSimulatedMonth",
+    "title": "Set Start",
+    "parameter": {
       "fields": {
-        "Success 200": [
+        "Parameter": [
           {
-            "group": "Success 200",
-            "type": "string",
+            "group": "Parameter",
+            "type": "int",
             "optional": false,
-            "field": "json",
-            "description": "<p>string</p>"
+            "field": "simulated_month",
+            "description": "<p>simulated month ranging from 0..game_end_month</p>"
           }
         ]
       }
     },
+    "description": "<p>Returns year and month ([1..12]) of the current requested simulated month identifier. Or -1 on both fields for error.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "GetGameConfig"
-  },
-  {
-    "group": "Game",
-    "type": "GET",
-    "url": "/game/GetConfiguredSimulations",
-    "title": "Get Configured Simulation Launch Parameters",
-    "description": "<p>Returns the start configuration of the various simulations that are configured in the current configuration file.</p>",
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "string",
-            "optional": false,
-            "field": "JSON",
-            "description": "<p>object</p>"
-          }
-        ]
+    "name": "PostGameGetactualdateforsimulatedmonth",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/GetActualDateForSimulatedMonth"
       }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.game.php",
-    "groupTitle": "Game",
-    "name": "GetGameGetconfiguredsimulations"
+    ]
   },
   {
     "group": "Game",
-    "type": "GET",
+    "type": "POST",
     "url": "/game/GetCurrentMonth",
     "title": "GetCurrentMonth",
     "description": "<p>Gets the current month of the active game.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "GetGameGetcurrentmonth"
+    "name": "PostGameGetcurrentmonth",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/GetCurrentMonth"
+      }
+    ]
   },
   {
     "group": "Game",
-    "type": "GET",
+    "type": "POST",
     "url": "/game/IsOnline",
     "title": "Is Online",
     "description": "<p>Check if the server is online</p>",
@@ -986,13 +1270,58 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "GetGameIsonline"
+    "name": "PostGameIsonline",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/IsOnline"
+      }
+    ]
   },
   {
     "group": "Game",
-    "type": "GET",
+    "type": "POST",
+    "url": "/game/latest",
+    "title": "Latest game data",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "optional": false,
+            "field": "team_id",
+            "description": "<p>The team_id (country_id) that we want to get the latest data for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "optional": false,
+            "field": "last_update_time",
+            "description": "<p>The last time the client has received an update tick.</p>"
+          },
+          {
+            "group": "Parameter",
+            "optional": false,
+            "field": "user",
+            "description": "<p>The id of the user logged on to the client requesting the update.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Gets the latest plans &amp; messages from the server</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.game.php",
+    "groupTitle": "Game",
+    "name": "PostGameLatest",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/latest"
+      }
+    ]
+  },
+  {
+    "group": "Game",
+    "type": "POST",
     "url": "/game/meta",
     "title": "Meta",
     "description": "<p>Get all layer meta data required for a game</p>",
@@ -1010,92 +1339,30 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "GetGameMeta"
-  },
-  {
-    "group": "Game",
-    "type": "GET",
-    "url": "/game/StartConfiguredSimulations",
-    "title": "Start Configured Simulations",
-    "description": "<p>Starts all the configured simulation applications.</p>",
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "string",
-            "optional": false,
-            "field": "JSON",
-            "description": "<p>object</p>"
-          }
-        ]
+    "name": "PostGameMeta",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/meta"
       }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.game.php",
-    "groupTitle": "Game",
-    "name": "GetGameStartconfiguredsimulations"
-  },
-  {
-    "group": "Game",
-    "type": "GET",
-    "url": "/game/tick",
-    "title": "Tick",
-    "description": "<p>Tick the game server, updating the plans if required</p>",
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "string",
-            "optional": false,
-            "field": "JSON",
-            "description": "<p>object</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.game.php",
-    "groupTitle": "Game",
-    "name": "GetGameTick"
+    ]
   },
   {
     "group": "Game",
     "type": "POST",
-    "url": "/game/latest/:debug/:debug_update_time/:debug_perf_timings",
-    "title": "Latest",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "optional": false,
-            "field": "teamID",
-            "description": "<p>The team_id (country_id) that we want to get the latest data for.</p>"
-          },
-          {
-            "group": "Parameter",
-            "optional": false,
-            "field": "last_update_time",
-            "description": "<p>The last time the client has received an update tick.</p>"
-          },
-          {
-            "group": "Parameter",
-            "optional": false,
-            "field": "setupdate",
-            "description": "<p>(optional) set this parameter if you do not want to update the user_lastupdate</p>"
-          }
-        ]
-      }
-    },
-    "description": "<p>Gets the latest plans &amp; messages from the server</p>",
+    "url": "/game/NextMonth",
+    "title": "NextMonth",
+    "description": "<p>Updates session database to indicate start of next simulated month</p>",
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "PostGameLatestDebugDebug_update_timeDebug_perf_timings"
+    "name": "PostGameNextmonth",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/NextMonth"
+      }
+    ]
   },
   {
     "group": "Game",
@@ -1117,9 +1384,14 @@
     },
     "description": "<p>set the amount of months the planning phase takes, should not be done during the simulation phase</p>",
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "PostGamePlanning"
+    "name": "PostGamePlanning",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/planning"
+      }
+    ]
   },
   {
     "group": "Game",
@@ -1141,9 +1413,14 @@
     },
     "description": "<p>Set the duration of the planning phase in seconds</p>",
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "PostGameRealtime"
+    "name": "PostGameRealtime",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/realtime"
+      }
+    ]
   },
   {
     "group": "Game",
@@ -1165,40 +1442,14 @@
     },
     "description": "<p>Set the duration of future eras</p>",
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "PostGameRealtime"
-  },
-  {
-    "group": "Game",
-    "type": "POST",
-    "url": "/game/SetStartEndDate",
-    "title": "Set Start & End",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "start",
-            "description": "<p>year in which to start</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "end",
-            "description": "<p>year in which the game ends</p>"
-          }
-        ]
+    "name": "PostGameRealtime",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/realtime"
       }
-    },
-    "description": "<p>Set the current game state</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.game.php",
-    "groupTitle": "Game",
-    "name": "PostGameSetstartenddate"
+    ]
   },
   {
     "group": "Game",
@@ -1220,15 +1471,108 @@
     },
     "description": "<p>Set the current game state</p>",
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
+    "filename": "api/v1/class.game.php",
     "groupTitle": "Game",
-    "name": "PostGameState"
+    "name": "PostGameState",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/state"
+      }
+    ]
   },
   {
     "group": "Game",
     "type": "POST",
-    "url": "/game/timeleft",
-    "title": "Timeleft",
+    "url": "/game/tick",
+    "title": "Tick",
+    "description": "<p>Tick the game server, updating the plans if required</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "JSON",
+            "description": "<p>object</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.game.php",
+    "groupTitle": "Game",
+    "name": "PostGameTick",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/game/tick"
+      }
+    ]
+  },
+  {
+    "group": "GameSession",
+    "description": "<p>Archives a game session with a specified ID.</p>",
+    "type": "POST",
+    "url": "/GameSession/ArchiveGameSession",
+    "title": "Archives game session",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "response_url",
+            "description": "<p>API call that we make with the zip encoded in the body upon completion.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.gamesession.php",
+    "groupTitle": "GameSession",
+    "name": "PostGamesessionArchivegamesession",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/GameSession/ArchiveGameSession"
+      }
+    ]
+  },
+  {
+    "group": "GameSession",
+    "description": "<p>Archives a game session with a specified ID.</p>",
+    "type": "POST",
+    "url": "/GameSession/ArchiveGameSessionInternal",
+    "title": "Archives game session, internal method",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "response_url",
+            "description": "<p>API call that we make with the zip path upon completion.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.gamesession.php",
+    "groupTitle": "GameSession",
+    "name": "PostGamesessionArchivegamesessioninternal",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/GameSession/ArchiveGameSessionInternal"
+      }
+    ]
+  },
+  {
+    "group": "GameSession",
+    "description": "<p>Sets up a new game session with the supplied information.</p>",
+    "type": "POST",
+    "url": "/GameSession/CreateGameSession",
+    "title": "Creates new game session",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -1236,21 +1580,127 @@
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "time",
-            "description": "<p>the amount of seconds left in the current planning phase</p>"
+            "field": "game_id",
+            "description": "<p>Session identifier for this game.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "config_file_content",
+            "description": "<p>JSON Object of the config file.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "password_admin",
+            "description": "<p>Plain-text admin password.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "password_player",
+            "description": "<p>Plain-text player password.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "watchdog_address",
+            "description": "<p>URL at which the watchdog resides for this session.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "response_address",
+            "description": "<p>URL which we call when the setup is done.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "allow_recreate",
+            "description": "<p>(0|1) Allow overwriting of an existing session?</p>"
           }
         ]
       }
     },
-    "description": "<p>set the amount of seconds left in the current planning phase. You can use this to extend the current planning phase if the players need more time</p>",
     "version": "0.0.0",
-    "filename": "../class/class.game.php",
-    "groupTitle": "Game",
-    "name": "PostGameTimeleft"
+    "filename": "api/v1/class.gamesession.php",
+    "groupTitle": "GameSession",
+    "name": "PostGamesessionCreategamesession",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/GameSession/CreateGameSession"
+      }
+    ]
+  },
+  {
+    "group": "GameSession",
+    "description": "<p>For internal use: creates a new game session with the given config file path.</p>",
+    "type": "POST",
+    "url": "/GameSession/CreateGameSession",
+    "title": "Creates new game session",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "config_file_path",
+            "description": "<p>Local path to the config file.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "password_admin",
+            "description": "<p>Admin password for this session</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "password_player",
+            "description": "<p>Player password for this session</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "watchdog_address",
+            "description": "<p>API Address to direct all Watchdog calls to.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "response_address",
+            "description": "<p>URL which we call when the setup is done.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.gamesession.php",
+    "groupTitle": "GameSession",
+    "name": "PostGamesessionCreategamesession",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/GameSession/CreateGameSession"
+      }
+    ]
   },
   {
     "group": "Geometry",
-    "description": "<p>Create a new subtractive polygon on an existing polygon</p>",
+    "type": "POST",
+    "url": "/geometry/Data",
+    "title": "Data",
+    "description": "<p>Adjust geometry metadata and type</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -1263,97 +1713,36 @@
           },
           {
             "group": "Parameter",
-            "type": "int",
+            "type": "string",
             "optional": false,
-            "field": "layer",
-            "description": "<p>id of layer to post in</p>"
+            "field": "data",
+            "description": "<p>metadata of the geometry to set</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "optional": false,
-            "field": "geometry",
-            "description": "<p>string of geometry to post</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "subtractive",
-            "description": "<p>id of the polygon the newly created polygon is subtractive to</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "FID",
-            "description": "<p>(optional) FID of geometry</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>of the newly created geometry</p>"
-          }
-        ]
-      }
-    },
-    "type": "",
-    "url": "",
-    "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
-    "groupTitle": "Geometry",
-    "name": ""
-  },
-  {
-    "group": "Geometry",
-    "type": "GET",
-    "url": "/geometry/get/:id",
-    "title": "Get",
-    "description": "<p>Get a single piece of geometry</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>id of the geometry to return</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "string",
-            "optional": false,
-            "field": "JSON",
-            "description": "<p>object of the geometry</p>"
+            "field": "type",
+            "description": "<p>type value, either single integer or comma-separated multiple integers</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
+    "filename": "api/v1/class.geometry.php",
     "groupTitle": "Geometry",
-    "name": "GetGeometryGetId"
+    "name": "PostGeometryData",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/geometry/Data"
+      }
+    ]
   },
   {
     "group": "Geometry",
     "type": "POST",
-    "url": "/geometry/AdminDelete",
-    "title": "Admin Delete",
+    "url": "/geometry/Delete",
+    "title": "Delete",
     "description": "<p>Delete geometry without using a plan</p>",
     "parameter": {
       "fields": {
@@ -1369,156 +1758,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
+    "filename": "api/v1/class.geometry.php",
     "groupTitle": "Geometry",
-    "name": "PostGeometryAdmindelete"
-  },
-  {
-    "group": "Geometry",
-    "type": "POST",
-    "url": "/geometry/AdminSubtractive",
-    "title": "Admin Subtractive",
-    "description": "<p>Create a new subtractive polygon on an existing polygon</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "layer",
-            "description": "<p>id of layer to post in</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "geometry",
-            "description": "<p>string of geometry to post</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "subtractive",
-            "description": "<p>id of the polygon the newly created polygon is subtractive to</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "FID",
-            "description": "<p>(optional) FID of geometry</p>"
-          }
-        ]
+    "name": "PostGeometryDelete",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/geometry/Delete"
       }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
-    "groupTitle": "Geometry",
-    "name": "PostGeometryAdminsubtractive"
-  },
-  {
-    "group": "Geometry",
-    "type": "POST",
-    "url": "/geometry/AdminUpdate",
-    "title": "Admin Update",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>geometry id to update</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "layer",
-            "description": "<p>id of layer to post in</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "geometry",
-            "description": "<p>string of geometry to post</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "FID",
-            "description": "<p>(optional) FID of geometry</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "country",
-            "description": "<p>(optional) The owning country id. NULL or -1 if no country is set.</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>of the newly created geometry</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
-    "groupTitle": "Geometry",
-    "name": "PostGeometryAdminupdate"
-  },
-  {
-    "group": "Geometry",
-    "type": "POST",
-    "url": "/geometry/data",
-    "title": "Data",
-    "description": "<p>Update the data &amp; type fields of a geometry entry</p>",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>id of geometry to update</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "data",
-            "description": "<p>JSON object of data</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "type",
-            "description": "<p>JSON object of type</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
-    "groupTitle": "Geometry",
-    "name": "PostGeometryData"
+    ]
   },
   {
     "group": "Geometry",
@@ -1554,9 +1801,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
+    "filename": "api/v1/class.geometry.php",
     "groupTitle": "Geometry",
-    "name": "PostGeometryMarkfordelete"
+    "name": "PostGeometryMarkfordelete",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/geometry/MarkForDelete"
+      }
+    ]
   },
   {
     "group": "Geometry",
@@ -1633,15 +1885,20 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
+    "filename": "api/v1/class.geometry.php",
     "groupTitle": "Geometry",
-    "name": "PostGeometryPost"
+    "name": "PostGeometryPost",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/geometry/post"
+      }
+    ]
   },
   {
     "group": "Geometry",
     "type": "POST",
-    "url": "/geometry/subtractive",
-    "title": "Subtractive",
+    "url": "/geometry/PostSubtractive",
+    "title": "Post Subtractive",
     "description": "<p>Create a new subtractive polygon on an existing polygon</p>",
     "parameter": {
       "fields": {
@@ -1673,34 +1930,33 @@
             "optional": false,
             "field": "FID",
             "description": "<p>(optional) FID of geometry</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
+          },
           {
-            "group": "Success 200",
-            "type": "int",
+            "group": "Parameter",
+            "type": "string",
             "optional": false,
-            "field": "id",
-            "description": "<p>of the newly created geometry</p>"
+            "field": "persistent",
+            "description": "<p>(optional) persistent ID of geometry</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
+    "filename": "api/v1/class.geometry.php",
     "groupTitle": "Geometry",
-    "name": "PostGeometrySubtractive"
+    "name": "PostGeometryPostsubtractive",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/geometry/PostSubtractive"
+      }
+    ]
   },
   {
     "group": "Geometry",
     "type": "POST",
     "url": "/geometry/UnmarkForDelete",
     "title": "UnmarkForDelete",
-    "description": "<p>Remove the deletion of a geometry</p>",
+    "description": "<p>Remove the deletion of a geometry put in the plan</p>",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -1722,9 +1978,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
+    "filename": "api/v1/class.geometry.php",
     "groupTitle": "Geometry",
-    "name": "PostGeometryUnmarkfordelete"
+    "name": "PostGeometryUnmarkfordelete",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/geometry/UnmarkForDelete"
+      }
+    ]
   },
   {
     "group": "Geometry",
@@ -1743,24 +2004,17 @@
           },
           {
             "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "layer",
-            "description": "<p>id of layer to post in</p>"
-          },
-          {
-            "group": "Parameter",
             "type": "string",
             "optional": false,
             "field": "geometry",
-            "description": "<p>string of geometry to post</p>"
+            "description": "<p>string of geometry json to post</p>"
           },
           {
             "group": "Parameter",
-            "type": "string",
+            "type": "int",
             "optional": false,
-            "field": "FID",
-            "description": "<p>(optional) FID of geometry</p>"
+            "field": "country",
+            "description": "<p>country id to set as geometry's owner</p>"
           }
         ]
       }
@@ -1773,19 +2027,53 @@
             "type": "int",
             "optional": false,
             "field": "id",
-            "description": "<p>of the newly created geometry</p>"
+            "description": "<p>same geometry id</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.geometry.php",
+    "filename": "api/v1/class.geometry.php",
     "groupTitle": "Geometry",
-    "name": "PostGeometryUpdate"
+    "name": "PostGeometryUpdate",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/geometry/update"
+      }
+    ]
   },
   {
     "group": "KPI",
-    "type": "GET",
+    "type": "POST",
+    "url": "/kpi/BatchPost",
+    "title": "BatchPost",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "array",
+            "optional": false,
+            "field": "kpiValues",
+            "description": "<p>Input format should be [{&quot;name&quot;:(string kpiName),&quot;month&quot;: (int month), &quot;value&quot;:(float kpiValue),&quot;type&quot;:(string kpiType),&quot;unit&quot;:(string kpiUnit),&quot;country&quot;:(int countryId or null)}]</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Add a new kpi value to the database</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.kpi.php",
+    "groupTitle": "KPI",
+    "name": "PostKpiBatchpost",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/kpi/BatchPost"
+      }
+    ]
+  },
+  {
+    "group": "KPI",
+    "type": "POST",
     "url": "/kpi/post",
     "title": "Post",
     "parameter": {
@@ -1801,6 +2089,13 @@
           {
             "group": "Parameter",
             "type": "int",
+            "optional": false,
+            "field": "month",
+            "description": "<p>Month that this KPI applies to.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "float",
             "optional": false,
             "field": "value",
             "description": "<p>the value of this months kpi</p>"
@@ -1831,39 +2126,91 @@
     },
     "description": "<p>Add a new kpi value to the database</p>",
     "version": "0.0.0",
-    "filename": "../class/class.kpi.php",
+    "filename": "api/v1/class.kpi.php",
     "groupTitle": "KPI",
-    "name": "GetKpiPost"
+    "name": "PostKpiPost",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/kpi/post"
+      }
+    ]
   },
   {
-    "group": "KPI",
-    "type": "GET",
-    "url": "/kpi/post",
-    "title": "Post",
+    "group": "Layer",
+    "description": "<p>Set a layer as inactive, without actually deleting it completely from the session database</p>",
+    "type": "POST",
+    "url": "/layer/Delete/",
+    "title": "",
     "parameter": {
       "fields": {
         "Parameter": [
           {
             "group": "Parameter",
-            "type": "string[]",
+            "type": "int",
             "optional": false,
-            "field": "kpiValues",
-            "description": "<p>Json encoded string of the kpi values that we need to insert on the database. Input format should be [{&quot;name&quot;:(string kpiName),&quot;value&quot;:(int kpiValue),&quot;type&quot;:(string kpiType),&quot;unit&quot;:(string kpiUnit),&quot;country&quot;:(int countryId or null)}]</p>"
+            "field": "layer_id",
+            "description": "<p>Target layer id</p>"
           }
         ]
       }
     },
-    "description": "<p>Add a new kpi value to the database</p>",
     "version": "0.0.0",
-    "filename": "../class/class.kpi.php",
-    "groupTitle": "KPI",
-    "name": "GetKpiPost"
+    "filename": "api/v1/class.layer.php",
+    "groupTitle": "Layer",
+    "name": "PostLayerDelete",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/Delete/"
+      }
+    ]
+  },
+  {
+    "group": "Layer",
+    "description": "<p>Export a layer to .json</p>",
+    "type": "POST",
+    "url": "/layer/Export/",
+    "title": "Export",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "layer_id",
+            "description": "<p>id of the layer to export</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "json",
+            "description": "<p>formatted layer export with all geometry and their attributes</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.layer.php",
+    "groupTitle": "Layer",
+    "name": "PostLayerExport",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/Export/"
+      }
+    ]
   },
   {
     "group": "Layer",
     "description": "<p>Get all geometry in a single layer</p>",
-    "type": "GET",
-    "url": "/layer/get/:id",
+    "type": "POST",
+    "url": "/layer/get/",
     "title": "Get",
     "parameter": {
       "fields": {
@@ -1872,7 +2219,7 @@
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "id",
+            "field": "layer_id",
             "description": "<p>id of the layer to return</p>"
           }
         ]
@@ -1892,96 +2239,138 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.layer.php",
+    "filename": "api/v1/class.layer.php",
     "groupTitle": "Layer",
-    "name": "GetLayerGetId"
-  },
-  {
-    "group": "Layer",
-    "type": "GET",
-    "url": "/layer/GetEntityPropertiesForLayer/:layerName",
-    "title": "GetEntityPropertiesForLayer",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "optional": false,
-            "field": "layerName",
-            "description": "<p>The name of the layer you want to list all the properties for.</p>"
-          }
-        ]
+    "name": "PostLayerGet",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/get/"
       }
-    },
-    "description": "<p>Returns a list of all distinct properties defined by the entities on the requested layer.</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.layer.php",
-    "groupTitle": "Layer",
-    "name": "GetLayerGetentitypropertiesforlayerLayername"
+    ]
   },
   {
     "group": "Layer",
-    "description": "<p>Updates shapefile on the geoserver with new MSP ids base on the current database</p>",
-    "type": "GET",
-    "url": "/layer/GetShapefile/:layer_id/:layer_geotype/:layer_name/:force_reexport/:reexport_clear_mspcount",
-    "title": "GetShapefile",
+    "type": "POST",
+    "url": "/layer/GetRaster",
+    "title": "GetRaster",
     "parameter": {
       "fields": {
         "Parameter": [
           {
             "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "layer_id",
-            "description": "<p>layer id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "layer_geotype",
-            "description": "<p>geotype of the layer</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "int",
             "optional": false,
             "field": "layer_name",
-            "description": "<p>Filename of the layer</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "bool",
-            "optional": false,
-            "field": "force_reexport",
-            "description": "<p>Blap all existing MSP IDs and re-set them.</p>"
+            "description": "<p>Name of the layer corresponding to the image data.</p>"
           }
         ]
       }
     },
+    "description": "<p>Retrieves image data for raster.</p>",
     "success": {
       "fields": {
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "int",
             "optional": false,
-            "field": "id",
-            "description": "<p>id of the new layer</p>"
+            "field": "Returns",
+            "description": "<p>array of displayed_bounds and image_data strings to payload, whereby image_data is base64 encoded file</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.layer.php",
+    "filename": "api/v1/class.layer.php",
     "groupTitle": "Layer",
-    "name": "GetLayerGetshapefileLayer_idLayer_geotypeLayer_nameForce_reexportReexport_clear_mspcount"
+    "name": "PostLayerGetraster",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/GetRaster"
+      }
+    ]
+  },
+  {
+    "group": "Layer",
+    "description": "<p>Import metadata for a set of layers as defined under 'meta' in the session's config file</p>",
+    "type": "POST",
+    "url": "/layer/ImportMeta",
+    "title": "",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "configFilename",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "geoserver_url",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "geoserver_username",
+            "description": ""
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "geoserver_password",
+            "description": ""
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.layer.php",
+    "groupTitle": "Layer",
+    "name": "PostLayerImportmeta",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/ImportMeta"
+      }
+    ]
+  },
+  {
+    "group": "Layer",
+    "type": "POST",
+    "url": "/layer/List",
+    "title": "",
+    "description": "<p>List Provides a list of raster layers and vector layers that have active geometry.</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "Returns",
+            "description": "<p>an array of layers, with layer_id, layer_name and layer_geotype objects defined per layer.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.layer.php",
+    "groupTitle": "Layer",
+    "name": "PostLayerList",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/List"
+      }
+    ]
   },
   {
     "group": "Layer",
     "description": "<p>Get all the meta data of a single layer</p>",
     "type": "POST",
-    "url": "/layer/meta/:id",
+    "url": "/layer/meta/",
     "title": "Meta",
     "parameter": {
       "fields": {
@@ -1990,7 +2379,7 @@
             "group": "Parameter",
             "type": "int",
             "optional": false,
-            "field": "id",
+            "field": "layer_id",
             "description": "<p>layer id to return</p>"
           }
         ]
@@ -2010,16 +2399,21 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.layer.php",
+    "filename": "api/v1/class.layer.php",
     "groupTitle": "Layer",
-    "name": "PostLayerMetaId"
+    "name": "PostLayerMeta",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/meta/"
+      }
+    ]
   },
   {
     "group": "Layer",
     "description": "<p>Gets a single layer meta data by name.</p>",
     "type": "POST",
     "url": "/layer/MetaByName",
-    "title": "Meta By Name",
+    "title": "MetaByName",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -2047,9 +2441,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.layer.php",
+    "filename": "api/v1/class.layer.php",
     "groupTitle": "Layer",
-    "name": "PostLayerMetabyname"
+    "name": "PostLayerMetabyname",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/MetaByName"
+      }
+    ]
   },
   {
     "group": "Layer",
@@ -2091,16 +2490,21 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.layer.php",
+    "filename": "api/v1/class.layer.php",
     "groupTitle": "Layer",
-    "name": "PostLayerPostId"
+    "name": "PostLayerPostId",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/post/:id"
+      }
+    ]
   },
   {
     "group": "Layer",
     "description": "<p>Update the meta data of a layer</p>",
     "type": "POST",
     "url": "/layer/UpdateMeta",
-    "title": "Update Meta",
+    "title": "UpdateMeta",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -2163,16 +2567,20 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.layer.php",
+    "filename": "api/v1/class.layer.php",
     "groupTitle": "Layer",
-    "name": "PostLayerUpdatemeta"
+    "name": "PostLayerUpdatemeta",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/UpdateMeta"
+      }
+    ]
   },
   {
-    "group": "Log",
-    "description": "<p>Update the meta data of a layer</p>",
+    "group": "Layer",
     "type": "POST",
-    "url": "/layer/UpdateMeta",
-    "title": "Update Meta",
+    "url": "/layer/UpdateRaster",
+    "title": "",
     "parameter": {
       "fields": {
         "Parameter": [
@@ -2180,30 +2588,86 @@
             "group": "Parameter",
             "type": "string",
             "optional": false,
-            "field": "logstring",
-            "description": "<p>of the error</p>"
+            "field": "layer_name",
+            "description": "<p>Name of the layer the raster image is for.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "array",
+            "optional": false,
+            "field": "raster_bounds",
+            "description": "<p>2x2 array of doubles specifying [[min X, min Y], [max X, max Y]]</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "optional": false,
-            "field": "stacktrace",
-            "description": "<p>stacktrace of the errror</p>"
+            "field": "image_data",
+            "description": "<p>Base64 encoded string of image data.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>UpdateRaster updates raster image</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.layer.php",
+    "groupTitle": "Layer",
+    "name": "PostLayerUpdateraster",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/layer/UpdateRaster"
+      }
+    ]
+  },
+  {
+    "group": "Log",
+    "description": "<p>Posts an 'error' event in the server log.</p>",
+    "type": "POST",
+    "url": "/Log/Event",
+    "title": "Event",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "source",
+            "description": "<p>Source component of the error. Examples: Server, MEL, CEL, SEL etc.</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "optional": false,
-            "field": "type",
-            "description": "<p>error type (normal, warning, error)</p>"
+            "field": "severity",
+            "description": "<p>Severity of the errror [&quot;Warning&quot;|&quot;Error&quot;|&quot;Fatal&quot;]</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "message",
+            "description": "<p>Debugging information associated with this event</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "stack_trace",
+            "description": "<p>Debug stacktrace where the error occured. Optional.</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.log.php",
+    "filename": "api/v1/class.log.php",
     "groupTitle": "Log",
-    "name": "PostLayerUpdatemeta"
+    "name": "PostLogEvent",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/Log/Event"
+      }
+    ]
   },
   {
     "group": "MEL",
@@ -2220,6 +2684,20 @@
             "optional": false,
             "field": "layer",
             "description": "<p>name to return the geometry data for</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "layer_type",
+            "description": "<p>type within the layer to return. -1 for all types.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "bool",
+            "optional": false,
+            "field": "construction_only",
+            "description": "<p>whether or not to return data only if it's being constructed.</p>"
           }
         ]
       }
@@ -2238,84 +2716,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.mel.php",
+    "filename": "api/v1/class.mel.php",
     "groupTitle": "MEL",
-    "name": "PostMelGeometryexportname"
-  },
-  {
-    "group": "Message",
-    "description": "<p>Create a new message inside a group</p>",
-    "type": "POST",
-    "url": "/message/post",
-    "title": "Post",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "group",
-            "description": "<p>group id</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "text",
-            "description": "<p>message contents</p>"
-          }
-        ]
+    "name": "PostMelGeometryexportname",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/mel/GeometryExportName"
       }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.message.php",
-    "groupTitle": "Message",
-    "name": "PostMessagePost"
-  },
-  {
-    "group": "Message",
-    "description": "<p>Create a new message group</p>",
-    "type": "POST",
-    "url": "/message/PostGroup",
-    "title": "Post Group",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "users",
-            "description": "<p>comma separated list of user ids to add to the group</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "string",
-            "optional": false,
-            "field": "text",
-            "description": "<p>message contents</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>id of the message group</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.message.php",
-    "groupTitle": "Message",
-    "name": "PostMessagePostgroup"
+    ]
   },
   {
     "group": "Objective",
@@ -2337,9 +2745,14 @@
     },
     "description": "<p>Set an objective to be inactive</p>",
     "version": "0.0.0",
-    "filename": "../class/class.objective.php",
+    "filename": "api/v1/class.objective.php",
     "groupTitle": "Objective",
-    "name": "PostObjectiveDelete"
+    "name": "PostObjectiveDelete",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/objective/delete"
+      }
+    ]
   },
   {
     "group": "Objective",
@@ -2389,9 +2802,14 @@
     },
     "description": "<p>Add a new objective with tasks to a country (or all countries at once)</p>",
     "version": "0.0.0",
-    "filename": "../class/class.objective.php",
+    "filename": "api/v1/class.objective.php",
     "groupTitle": "Objective",
-    "name": "PostObjectivePost"
+    "name": "PostObjectivePost",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/objective/post"
+      }
+    ]
   },
   {
     "group": "Objective",
@@ -2420,92 +2838,14 @@
     },
     "description": "<p>Changes the completed state of an objective.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.objective.php",
+    "filename": "api/v1/class.objective.php",
     "groupTitle": "Objective",
-    "name": "PostObjectiveSetcompleted"
-  },
-  {
-    "group": "OceanView",
-    "type": "GET",
-    "url": "/OceanView/GetConfiguration",
-    "title": "GetConfiguration",
-    "description": "<p>Returns the current configuration for oceanview.</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.oceanview.php",
-    "groupTitle": "OceanView",
-    "name": "GetOceanviewGetconfiguration"
-  },
-  {
-    "group": "Plan",
-    "description": "<p>Get all plans</p>",
-    "type": "GET",
-    "url": "/plan/all",
-    "title": "All",
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "string",
-            "optional": false,
-            "field": "JSON",
-            "description": "<p>object of all plan metadata + comments</p>"
-          }
-        ]
+    "name": "PostObjectiveSetcompleted",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/objective/SetCompleted"
       }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.plan.php",
-    "groupTitle": "Plan",
-    "name": "GetPlanAll"
-  },
-  {
-    "group": "Plan",
-    "type": "GET",
-    "url": "/plan/GetInitialFishingValues",
-    "title": "GetInitialFishingValues",
-    "description": "<p>Returns the initial fishing values submitted by MEL. The values are in a 0..1 range for each fishing fleet and country. Fishing fleet values summed together should be in the range of 0..1</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.plan.php",
-    "groupTitle": "Plan",
-    "name": "GetPlanGetinitialfishingvalues"
-  },
-  {
-    "group": "Plan",
-    "description": "<p>Get a specific plan</p>",
-    "type": "GET",
-    "url": "/post/get/:id",
-    "title": "Get",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "int",
-            "optional": false,
-            "field": "id",
-            "description": "<p>of plan to return</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "string",
-            "optional": false,
-            "field": "JSON",
-            "description": "<p>object containing all plan metadata + comments</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "../class/class.plan.php",
-    "groupTitle": "Plan",
-    "name": "GetPostGetId"
+    ]
   },
   {
     "group": "Plan",
@@ -2525,18 +2865,52 @@
           },
           {
             "group": "Parameter",
-            "type": "string",
+            "type": "array",
             "optional": false,
             "field": "countries",
-            "description": "<p>comma separated list of country ids</p>"
+            "description": "<p>json array of country ids</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanAddapproval"
+    "name": "PostPlanAddapproval",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/AddApproval"
+      }
+    ]
+  },
+  {
+    "group": "Plan",
+    "description": "<p>Get all plans</p>",
+    "type": "POST",
+    "url": "/plan/all",
+    "title": "All",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "JSON",
+            "description": "<p>object of all plan metadata + comments</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.plan.php",
+    "groupTitle": "Plan",
+    "name": "PostPlanAll",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/all"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2565,9 +2939,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanDate"
+    "name": "PostPlanDate",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/date"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2589,9 +2968,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanDelete"
+    "name": "PostPlanDelete",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/delete"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2613,9 +2997,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanDeleteapproval"
+    "name": "PostPlanDeleteapproval",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/DeleteApproval"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2637,9 +3026,14 @@
     },
     "description": "<p>delete all grids &amp; associated grid data based on a plan id</p>",
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanDeleteenergy"
+    "name": "PostPlanDeleteenergy",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/DeleteEnergy"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2661,9 +3055,14 @@
     },
     "description": "<p>delete all the fishing settings associated with a plan</p>",
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanDeletefishing"
+    "name": "PostPlanDeletefishing",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/DeleteFishing"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2685,9 +3084,43 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanDeletelayer"
+    "name": "PostPlanDeletelayer",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/DeleteLayer"
+      }
+    ]
+  },
+  {
+    "group": "Plan",
+    "description": "<p>Returns a json-encoded object which represents the exported plan data for the current game session. Returns an empty string on failure.</p>",
+    "type": "POST",
+    "url": "/plan/DeleteLayer",
+    "title": "Delete Layer",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "JSON",
+            "description": "<p>encoded object with fields &quot;success&quot; (0|1) Successful operation?, &quot;message&quot; (string) Error messages that might have occured, &quot;data&quot; (object) Exported object that represents the exported plan data.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.plan.php",
+    "groupTitle": "Plan",
+    "name": "PostPlanDeletelayer",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/DeleteLayer"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2716,9 +3149,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanDescription"
+    "name": "PostPlanDescription",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/description"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2737,7 +3175,7 @@
           },
           {
             "group": "Parameter",
-            "type": "string",
+            "type": "array",
             "optional": false,
             "field": "fishing_values",
             "description": "<p>JSON encoded key value pair array of fishing values</p>"
@@ -2747,9 +3185,30 @@
     },
     "description": "<p>Sets the fishing values for a plan to the fishing_values included in the call. Will delete all fishing values that existed before this plan.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanFishing"
+    "name": "PostPlanFishing",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/fishing"
+      }
+    ]
+  },
+  {
+    "group": "Plan",
+    "type": "POST",
+    "url": "/plan/GetInitialFishingValues",
+    "title": "GetInitialFishingValues",
+    "description": "<p>Returns the initial fishing values submitted by MEL. The values are in a 0..1 range for each fishing fleet and country. Fishing fleet values summed together should be in the range of 0..1</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.plan.php",
+    "groupTitle": "Plan",
+    "name": "PostPlanGetinitialfishingvalues",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/GetInitialFishingValues"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2778,9 +3237,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanLayer"
+    "name": "PostPlanLayer",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/layer"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2822,9 +3286,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanLock"
+    "name": "PostPlanLock",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/lock"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2867,9 +3336,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanMessage"
+    "name": "PostPlanMessage",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/message"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2898,9 +3372,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanName"
+    "name": "PostPlanName",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/name"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2934,17 +3413,24 @@
           },
           {
             "group": "Parameter",
-            "type": "string",
+            "type": "array",
             "optional": false,
             "field": "layers",
-            "description": "<p>comma separated string of layer ids (e.g. &quot;1,4,82&quot;)</p>"
+            "description": "<p>json array of layer ids (e.g. [1,4,82])</p>"
           },
           {
             "group": "Parameter",
             "type": "string",
             "optional": false,
             "field": "type",
-            "description": "<p>comma separated string of the plan types, values can be &quot;ecology&quot;, &quot;shipping&quot; or &quot;energy&quot; (e.g. &quot;ecology,energy&quot;). Empty if none apply</p>"
+            "description": "<p>Comma separated string representing the plan type in the format of &quot;[isEnergy], [isEcology], [isShipping]&quot;, e.g. &quot;0, 1, 1&quot;.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "boolean",
+            "optional": false,
+            "field": "alters_energy_distribution",
+            "description": "<p>, in format 0/1, following energy distribution checkbox in Plan Wizard Step 2b</p>"
           }
         ]
       }
@@ -2963,9 +3449,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanPost"
+    "name": "PostPlanPost",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/post"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -2974,9 +3465,50 @@
     "url": "/plan/restrictions",
     "title": "Restrictions",
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanRestrictions"
+    "name": "PostPlanRestrictions",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/restrictions"
+      }
+    ]
+  },
+  {
+    "group": "Plan",
+    "type": "POST",
+    "url": "/plan/SetEnergyDistribution",
+    "title": "Set Energy Distribution",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "id",
+            "description": "<p>plan id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "alters_energy_distribution",
+            "description": "<p>boolean [0|1]</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>set the energy distribution flag of a single plan</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.plan.php",
+    "groupTitle": "Plan",
+    "name": "PostPlanSetenergydistribution",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/SetEnergyDistribution"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -3012,9 +3544,14 @@
     },
     "description": "<p>set the energy error flag of a single plan</p>",
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanSetenergyerror"
+    "name": "PostPlanSetenergyerror",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/SetEnergyError"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -3034,18 +3571,23 @@
           },
           {
             "group": "Parameter",
-            "type": "object[]",
+            "type": "array",
             "optional": false,
             "field": "settings",
-            "description": "<p>Restriction area settings</p>"
+            "description": "<p>Json array restriction area settings</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanSetrestrictionareas"
+    "name": "PostPlanSetrestrictionareas",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/SetRestrictionAreas"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -3074,9 +3616,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanSetstate"
+    "name": "PostPlanSetstate",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/SetState"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -3105,9 +3652,14 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanType"
+    "name": "PostPlanType",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/type"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -3124,14 +3676,26 @@
             "optional": false,
             "field": "plan",
             "description": "<p>plan id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "force_unlock",
+            "description": "<p>(0|1) Force unlock a plan. Don't check for the correct user, just do it.</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanUnlock"
+    "name": "PostPlanUnlock",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/unlock"
+      }
+    ]
   },
   {
     "group": "Plan",
@@ -3167,152 +3731,184 @@
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.plan.php",
+    "filename": "api/v1/class.plan.php",
     "groupTitle": "Plan",
-    "name": "PostPlanVote"
+    "name": "PostPlanVote",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/plan/Vote"
+      }
+    ]
+  },
+  {
+    "group": "Plan",
+    "description": "<p>Get a specific plan</p>",
+    "type": "POST",
+    "url": "/post/get",
+    "title": "Get",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "id",
+            "description": "<p>of plan to return</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "JSON",
+            "description": "<p>object containing all plan metadata + comments</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.plan.php",
+    "groupTitle": "Plan",
+    "name": "PostPostGet",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/post/get"
+      }
+    ]
+  },
+  {
+    "group": "REL",
+    "type": "POST",
+    "url": "/rel/GetConfiguration",
+    "title": "GetConfiguration",
+    "description": "<p>Returns object containing configuration values for REL.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.rel.php",
+    "groupTitle": "REL",
+    "name": "PostRelGetconfiguration",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/rel/GetConfiguration"
+      }
+    ]
+  },
+  {
+    "group": "REL",
+    "type": "POST",
+    "url": "/rel/GetRestrictionGeometry",
+    "title": "GetRestrictionGeometry",
+    "description": "<p>Returns all restriction geometry that appears on a configured restriction layer. Geometry_type is translated into geometry type that corresponds to the type configured and communicated to Marin API.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.rel.php",
+    "groupTitle": "REL",
+    "name": "PostRelGetrestrictiongeometry",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/rel/GetRestrictionGeometry"
+      }
+    ]
   },
   {
     "group": "SEL",
-    "type": "GET",
+    "type": "POST",
     "url": "/sel/GetConfiguredRouteIntensities",
     "title": "GetConfiguredRouteIntensities",
     "description": "<p>Returns the configured routes setup in the config file as an JSON encoded array.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "GetSelGetconfiguredrouteintensities"
+    "name": "PostSelGetconfiguredrouteintensities",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetConfiguredRouteIntensities"
+      }
+    ]
   },
   {
     "group": "SEL",
-    "type": "GET",
+    "type": "POST",
     "url": "/sel/GetCountryBorderGeometry",
     "title": "GetCountryBorderGeometry",
     "description": "<p>Returns all geometry which defines the areas of each country. For instance in the NorthSea this will be the EEZ layer</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "GetSelGetcountrybordergeometry"
+    "name": "PostSelGetcountrybordergeometry",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetCountryBorderGeometry"
+      }
+    ]
   },
   {
     "group": "SEL",
-    "type": "GET",
+    "type": "POST",
     "url": "/sel/GetHeatmapOutputSettings",
     "title": "GetHeatmapOutputSettings",
     "description": "<p>Gets heatmap settings as defined in the config file. These settings include the output size, internal layer name, raster output location, raster bounds and intensity mappings.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "GetSelGetheatmapoutputsettings"
+    "name": "PostSelGetheatmapoutputsettings",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetHeatmapOutputSettings"
+      }
+    ]
   },
   {
     "group": "SEL",
-    "type": "GET",
+    "type": "POST",
     "url": "/sel/GetHeatmapSettings",
     "title": "GetHeatmapSettings",
     "description": "<p>Gets the persistent riskmap settings.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "GetSelGetheatmapsettings"
+    "name": "PostSelGetheatmapsettings",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetHeatmapSettings"
+      }
+    ]
   },
   {
     "group": "SEL",
-    "type": "GET",
+    "type": "POST",
     "url": "/sel/GetPlayableAreaGeometry",
     "title": "GetPlayableAreaGeometry",
     "description": "<p>Gets the geometry associated with the playable area layer</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "GetSelGetplayableareageometry"
+    "name": "PostSelGetplayableareageometry",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetPlayableAreaGeometry"
+      }
+    ]
   },
   {
     "group": "SEL",
-    "type": "GET",
+    "type": "POST",
     "url": "/sel/GetPortIntensities",
     "title": "GetPortIntensities",
     "description": "<p>Returns all the configured intensities for the shipping ports indexed by port geometry id.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "GetSelGetportintensities"
-  },
-  {
-    "group": "SEL",
-    "type": "GET",
-    "url": "/sel/GetSELConfig",
-    "title": "GetSELConfig",
-    "description": "<p>Returns a collection of region-specific SEL config values.</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.sel.php",
-    "groupTitle": "SEL",
-    "name": "GetSelGetselconfig"
-  },
-  {
-    "group": "SEL",
-    "type": "GET",
-    "url": "/sel/GetShipRestrictionGroupExceptions",
-    "title": "GetShipRestrictionGroupExceptions",
-    "description": "<p>Returns all restriction group exceptions configured in the configuration file. Returns the data in the format of { &quot;layer_id&quot;: [int layerId], &quot;layer_type&quot;: [string layerType], &quot;allowed_restriction_groups&quot;: [int[] shipRestrictionGroups] }</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.sel.php",
-    "groupTitle": "SEL",
-    "name": "GetSelGetshiprestrictiongroupexceptions"
-  },
-  {
-    "group": "SEL",
-    "type": "GET",
-    "url": "/sel/GetShipTypes",
-    "title": "GetShipTypes",
-    "description": "<p>Returns all configured ship types for the current session</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.sel.php",
-    "groupTitle": "SEL",
-    "name": "GetSelGetshiptypes"
-  },
-  {
-    "group": "SEL",
-    "type": "GET",
-    "url": "/sel/GetUpdatePackage",
-    "title": "Get update package",
-    "description": "<p>Get an update package which describes whan needs to be updated in the SEL program.</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.sel.php",
-    "groupTitle": "SEL",
-    "name": "GetSelGetupdatepackage"
-  },
-  {
-    "group": "SEL",
-    "type": "GET",
-    "url": "/sel/NotifyUpdateFinished",
-    "title": "Notify Update Finished",
-    "description": "<p>Notifies the server that SEL has finished the update for this month.</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.sel.php",
-    "groupTitle": "SEL",
-    "name": "GetSelNotifyupdatefinished"
-  },
-  {
-    "group": "SEL",
-    "type": "GET",
-    "url": "/sel/ReimportShippingLayers",
-    "title": "ReimportShippingLayers",
-    "description": "<p>Creates the raster layers required for shipping.</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.sel.php",
-    "groupTitle": "SEL",
-    "name": "GetSelReimportshippinglayers"
-  },
-  {
-    "group": "SEL",
-    "type": "GET",
-    "url": "/sel/StartExe",
-    "title": "StartExe",
-    "description": "<p>This is a horrible idea...</p>",
-    "version": "0.0.0",
-    "filename": "../class/class.sel.php",
-    "groupTitle": "SEL",
-    "name": "GetSelStartexe"
+    "name": "PostSelGetportintensities",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetPortIntensities"
+      }
+    ]
   },
   {
     "group": "SEL",
@@ -3321,9 +3917,46 @@
     "title": "GetRestrictionGeometry",
     "description": "<p>Gets all of the restriction geometry that the ships aren't allowed to cross</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "PostSelGetrestrictiongeometry"
+    "name": "PostSelGetrestrictiongeometry",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetRestrictionGeometry"
+      }
+    ]
+  },
+  {
+    "group": "SEL",
+    "type": "POST",
+    "url": "/sel/GetSELConfig",
+    "title": "GetSELConfig",
+    "description": "<p>Returns a collection of region-specific SEL config values.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.sel.php",
+    "groupTitle": "SEL",
+    "name": "PostSelGetselconfig",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetSELConfig"
+      }
+    ]
+  },
+  {
+    "group": "SEL",
+    "type": "POST",
+    "url": "/sel/GetSELGameClientConfig",
+    "title": "Get Game Client Config",
+    "description": "<p>Returns a json object of game-client specific settings related to shipping.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.sel.php",
+    "groupTitle": "SEL",
+    "name": "PostSelGetselgameclientconfig",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetSELGameClientConfig"
+      }
+    ]
   },
   {
     "group": "SEL",
@@ -3332,20 +3965,122 @@
     "title": "GetShippingLaneGeometry",
     "description": "<p>Returns all the geometry associated with shipping lanes.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "PostSelGetshippinglanegeometry"
+    "name": "PostSelGetshippinglanegeometry",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetShippingLaneGeometry"
+      }
+    ]
   },
   {
     "group": "SEL",
     "type": "POST",
     "url": "/sel/GetShippingPortGeometry",
     "title": "GetShippingPortGeometry",
-    "description": "<p>Returns all geometry associated with shipping ports for the current game. Returns the values in a comma separated list</p>",
+    "description": "<p>Returns all geometry associated with shipping ports for the current game.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "PostSelGetshippingportgeometry"
+    "name": "PostSelGetshippingportgeometry",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetShippingPortGeometry"
+      }
+    ]
+  },
+  {
+    "group": "SEL",
+    "type": "POST",
+    "url": "/sel/GetShipRestrictionGroupExceptions",
+    "title": "GetShipRestrictionGroupExceptions",
+    "description": "<p>Returns all restriction group exceptions configured in the configuration file. Returns the data in the format of { &quot;layer_id&quot;: [int layerId], &quot;layer_type&quot;: [string layerType], &quot;allowed_restriction_groups&quot;: [int[] shipRestrictionGroups] }</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.sel.php",
+    "groupTitle": "SEL",
+    "name": "PostSelGetshiprestrictiongroupexceptions",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetShipRestrictionGroupExceptions"
+      }
+    ]
+  },
+  {
+    "group": "SEL",
+    "type": "POST",
+    "url": "/sel/GetShipTypes",
+    "title": "GetShipTypes",
+    "description": "<p>Returns all configured ship types for the current session</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.sel.php",
+    "groupTitle": "SEL",
+    "name": "PostSelGetshiptypes",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetShipTypes"
+      }
+    ]
+  },
+  {
+    "group": "SEL",
+    "type": "POST",
+    "url": "/sel/GetUpdatePackage",
+    "title": "Get update package",
+    "description": "<p>Get an update package which describes whan needs to be updated in the SEL program.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.sel.php",
+    "groupTitle": "SEL",
+    "name": "PostSelGetupdatepackage",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/GetUpdatePackage"
+      }
+    ]
+  },
+  {
+    "group": "SEL",
+    "type": "POST",
+    "url": "/sel/NotifyUpdateFinished",
+    "title": "Notify Update Finished",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "optional": false,
+            "field": "month",
+            "description": "<p>The month this update was completed for.</p>"
+          }
+        ]
+      }
+    },
+    "description": "<p>Notifies the server that SEL has finished the update for this month.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.sel.php",
+    "groupTitle": "SEL",
+    "name": "PostSelNotifyupdatefinished",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/NotifyUpdateFinished"
+      }
+    ]
+  },
+  {
+    "group": "SEL",
+    "type": "POST",
+    "url": "/sel/ReimportShippingLayers",
+    "title": "ReimportShippingLayers",
+    "description": "<p>Creates the raster layers required for shipping.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.sel.php",
+    "groupTitle": "SEL",
+    "name": "PostSelReimportshippinglayers",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/ReimportShippingLayers"
+      }
+    ]
   },
   {
     "group": "SEL",
@@ -3367,9 +4102,14 @@
     },
     "description": "<p>Notifies the running game that all the configured rasters have been updated to a more recent version so the game will reload them.</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "PostSelSetrastersupdatedLayer_names"
+    "name": "PostSelSetrastersupdatedLayer_names",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/SetRastersUpdated/:layer_names"
+      }
+    ]
   },
   {
     "group": "SEL",
@@ -3391,39 +4131,118 @@
     },
     "description": "<p>Sets the &quot;Shipping_Intensity&quot; data field to the supplied value for all submitted IDs</p>",
     "version": "0.0.0",
-    "filename": "../class/class.sel.php",
+    "filename": "api/v1/class.sel.php",
     "groupTitle": "SEL",
-    "name": "PostSelSetshippingintensityvalues"
+    "name": "PostSelSetshippingintensityvalues",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/sel/SetShippingIntensityValues"
+      }
+    ]
   },
   {
-    "group": "Update",
-    "type": "GET",
-    "url": "/update/Reimport",
-    "title": "Reimport",
-    "description": "<p>Performs a full reimport of the database with the set filename in $_COOKIE['filename'].</p>",
+    "group": "Security",
+    "type": "POST",
+    "url": "/security/CheckAccess",
+    "title": "CheckAccess",
+    "description": "<p>Checks if the the current access token is valid to access a certain level. Currently only checks for full access tokens.</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "Returns",
+            "description": "<p>json object indicating status of the current token. { &quot;status&quot;: [&quot;Valid&quot;|&quot;UpForRenewal&quot;|&quot;Expired&quot;] }</p>"
+          }
+        ]
+      }
+    },
     "version": "0.0.0",
-    "filename": "../class/class.update.php",
-    "groupTitle": "Update",
-    "name": "GetUpdateReimport"
+    "filename": "api/v1/class.security.php",
+    "groupTitle": "Security",
+    "name": "PostSecurityCheckaccess",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/security/CheckAccess"
+      }
+    ]
   },
   {
-    "group": "Update",
-    "type": "GET",
-    "url": "/update/ReimportAndStartServices/:config_name",
-    "title": "Reimport and Start Services",
+    "group": "Security",
+    "type": "POST",
+    "url": "/security/RequestToken",
+    "title": "RequestToken",
+    "description": "<p>Requests a new access token for the API.</p>",
     "parameter": {
       "fields": {
         "Parameter": [
           {
             "group": "Parameter",
             "optional": false,
-            "field": "config_name",
-            "description": ""
+            "field": "expired_token",
+            "description": "<p>OPTIONAL A previously used access token that is now expired. Needs a valid REQUEST_ACCESS token to be sent with the request before it generates a new token with the same access as the expired token.</p>"
           }
         ]
       }
     },
-    "description": "<p>Rebuilds the database and sets up the config file specified by config_name. After the rebuild is done all simulations and required services are started.</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "Returns",
+            "description": "<p>json object indicating success and the token containing token identifier and unix timestap for until when it's valid. { &quot;success&quot;: [0|1], &quot;token&quot;: { &quot;token&quot;: [identifier], &quot;valid_until&quot;: [timestamp]&quot; }</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.security.php",
+    "groupTitle": "Security",
+    "name": "PostSecurityRequesttoken",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/security/RequestToken"
+      }
+    ]
+  },
+  {
+    "group": "Simulations",
+    "type": "POST",
+    "url": "/Simulations/GetConfiguredSimulationTypes",
+    "title": "Get Configured Simulation Types",
+    "description": "<p>Get Configured Simulation Types (e.g. [&quot;MEL&quot;, &quot;SEL&quot;, &quot;CEL&quot;])</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "array",
+            "optional": false,
+            "field": "Returns",
+            "description": "<p>the type name of the simulations present in the current configuration.</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.simulations.php",
+    "groupTitle": "Simulations",
+    "name": "PostSimulationsGetconfiguredsimulationtypes",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/Simulations/GetConfiguredSimulationTypes"
+      }
+    ]
+  },
+  {
+    "group": "Simulations",
+    "type": "POST",
+    "url": "/Simulations/GetSimulationRequestedState",
+    "title": "Get Simulation Requested State",
+    "description": "<p>Get requested running state of the simulation.</p>",
     "success": {
       "fields": {
         "Success 200": [
@@ -3431,16 +4250,98 @@
             "group": "Success 200",
             "type": "string",
             "optional": false,
-            "field": "Json",
-            "description": "<p>object containing a 'success' field denoting whether or not the reimport was successful, and 'error_messages' which contain all the error messages if there's errors reported</p>"
+            "field": "Currently",
+            "description": "<p>requested state for simulations. [Started, Stopped]</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.update.php",
+    "filename": "api/v1/class.simulations.php",
+    "groupTitle": "Simulations",
+    "name": "PostSimulationsGetsimulationrequestedstate",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/Simulations/GetSimulationRequestedState"
+      }
+    ]
+  },
+  {
+    "group": "Simulations",
+    "type": "POST",
+    "url": "/Simulations/GetWatchdogTokenForServer",
+    "title": "Get Watchdog Token ForServer",
+    "description": "<p>Get the watchdog token for the current server. Used for setting up debug bridge in simulations.</p>",
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "array",
+            "optional": false,
+            "field": "with",
+            "description": "<p>watchdog_token key and value</p>"
+          }
+        ]
+      }
+    },
+    "version": "0.0.0",
+    "filename": "api/v1/class.simulations.php",
+    "groupTitle": "Simulations",
+    "name": "PostSimulationsGetwatchdogtokenforserver",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/Simulations/GetWatchdogTokenForServer"
+      }
+    ]
+  },
+  {
+    "group": "Simulations",
+    "type": "POST",
+    "url": "/Simulations/WatchdogStartSimulations",
+    "title": "Watchdog Start Simulations",
+    "description": "<p>Set the state so the watchdog will keep simulations running.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.simulations.php",
+    "groupTitle": "Simulations",
+    "name": "PostSimulationsWatchdogstartsimulations",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/Simulations/WatchdogStartSimulations"
+      }
+    ]
+  },
+  {
+    "group": "Simulations",
+    "type": "POST",
+    "url": "/Simulations/WatchdogStopSimulations",
+    "title": "Watchdog Stop Simulations",
+    "description": "<p>Stop all simulations maintained by watchdog.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.simulations.php",
+    "groupTitle": "Simulations",
+    "name": "PostSimulationsWatchdogstopsimulations",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/Simulations/WatchdogStopSimulations"
+      }
+    ]
+  },
+  {
+    "group": "Update",
+    "type": "POST",
+    "url": "/update/Reimport",
+    "title": "Reimport",
+    "description": "<p>Performs a full reimport of the database with the set filename in $configFilename.</p>",
+    "version": "0.0.0",
+    "filename": "api/v1/class.update.php",
     "groupTitle": "Update",
-    "name": "GetUpdateReimportandstartservicesConfig_name"
+    "name": "PostUpdateReimport",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/update/Reimport"
+      }
+    ]
   },
   {
     "group": "User",
@@ -3453,18 +4354,23 @@
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "int",
+            "type": "json",
             "optional": false,
-            "field": "SessionID/UserId",
-            "description": "<p>of the newly created session. -1 for failure.</p>"
+            "field": "Returns",
+            "description": "<p>a json object describing the 'success' state, the 'session_id' generated for the user. And in case of a failure a 'message' that describes what went wrong.</p>"
           }
         ]
       }
     },
     "version": "0.0.0",
-    "filename": "../class/class.user.php",
+    "filename": "api/v1/class.user.php",
     "groupTitle": "User",
-    "name": "PostUserRequestsession"
+    "name": "PostUserRequestsession",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/user/RequestSession"
+      }
+    ]
   },
   {
     "group": "Warning",
@@ -3478,17 +4384,22 @@
             "group": "Parameter",
             "type": "added",
             "optional": false,
-            "field": "Serialized",
-            "description": "<p>Json string of IssueObjects that are added.</p>"
+            "field": "Json",
+            "description": "<p>array of IssueObjects that are added.</p>"
           }
         ]
       }
     },
     "description": "<p>Add or update a warning message on the server</p>",
     "version": "0.0.0",
-    "filename": "../class/class.warning.php",
+    "filename": "api/v1/class.warning.php",
     "groupTitle": "Warning",
-    "name": "PostWarningPost"
+    "name": "PostWarningPost",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/warning/post"
+      }
+    ]
   },
   {
     "group": "Warning",
@@ -3510,8 +4421,13 @@
     },
     "description": "<p>Clears out the old shipping issues and creates new shipping issues defined by issues</p>",
     "version": "0.0.0",
-    "filename": "../class/class.warning.php",
+    "filename": "api/v1/class.warning.php",
     "groupTitle": "Warning",
-    "name": "PostWarningSetshippingissues"
+    "name": "PostWarningSetshippingissues",
+    "sampleRequest": [
+      {
+        "url": "http://localhost/api/1/warning/SetShippingIssues"
+      }
+    ]
   }
 ]

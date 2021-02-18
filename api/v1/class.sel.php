@@ -33,7 +33,7 @@ class SEL extends Base
 	//SEL Input Queries
 	/**
 	* @apiGroup SEL
-	* @api {GET} /sel/GetPlayableAreaGeometry GetPlayableAreaGeometry
+	* @api {POST} /sel/GetPlayableAreaGeometry GetPlayableAreaGeometry
 	* @apiDescription Gets the geometry associated with the playable area layer
 	*/
 	public function GetAreaOutputConfiguration() 
@@ -130,7 +130,7 @@ class SEL extends Base
 
 	/**
 	* @apiGroup SEL
-	* @api {GET} /sel/GetConfiguredRouteIntensities GetConfiguredRouteIntensities
+	* @api {POST} /sel/GetConfiguredRouteIntensities GetConfiguredRouteIntensities
 	* @apiDescription Returns the configured routes setup in the config file as an JSON encoded array. 
 	*/
 	public function GetConfiguredRouteIntensities()
@@ -141,7 +141,7 @@ class SEL extends Base
 
 	/**
 	* @apiGroup SEL
-	* @api {GET} /sel/GetCountryBorderGeometry GetCountryBorderGeometry
+	* @api {POST} /sel/GetCountryBorderGeometry GetCountryBorderGeometry
 	* @apiDescription Returns all geometry which defines the areas of each country. For instance in the NorthSea this will be the EEZ layer
 	*/
 	public function GetCountryBorderGeometry()
@@ -183,7 +183,7 @@ class SEL extends Base
 
 	/**
 	* @apiGroup SEL
-	* @api {GET} /sel/GetRestrictionGeometry GetRestrictionGeometry
+	* @api {POST} /sel/GetRestrictionGeometry GetRestrictionGeometry
 	* @apiDescription Gets all of the restriction geometry that the ships aren't allowed to cross
 	*/
 	public function GetRestrictionGeometry()
@@ -411,7 +411,7 @@ class SEL extends Base
 
 	/**
 	* @apiGroup SEL
-	* @api {GET} /sel/GetPortIntensities GetPortIntensities
+	* @api {POST} /sel/GetPortIntensities GetPortIntensities
 	* @apiDescription Returns all the configured intensities for the shipping ports indexed by port geometry id.
 	*/
 	public function GetPortIntensities()
@@ -436,7 +436,7 @@ class SEL extends Base
 
 	/**
 	* @apiGroup SEL
-	* @api {GET} /sel/GetSELConfig GetSELConfig
+	* @api {POST} /sel/GetSELConfig GetSELConfig
 	* @apiDescription Returns a collection of region-specific SEL config values.
 	*/
 	public function GetSELConfig()
@@ -458,7 +458,7 @@ class SEL extends Base
 
 	/**
 	* @apiGroup SEL
-	* @api {GET} /sel/GetShipTypes GetShipTypes
+	* @api {POST} /sel/GetShipTypes GetShipTypes
 	* @apiDescription Returns all configured ship types for the current session
 	*/
 	public function GetShipTypes()
@@ -469,7 +469,7 @@ class SEL extends Base
 
 	/**
 	* @apiGroup SEL
-	* @api {GET} /sel/GetShipRestrictionGroupExceptions GetShipRestrictionGroupExceptions
+	* @api {POST} /sel/GetShipRestrictionGroupExceptions GetShipRestrictionGroupExceptions
 	* @apiDescription Returns all restriction group exceptions configured in the configuration file. Returns the data in the format of { "layer_id": [int layerId], "layer_type": [string layerType], "allowed_restriction_groups": [int[] shipRestrictionGroups] }
 	*/
 	public function GetShipRestrictionGroupExceptions()
@@ -533,7 +533,7 @@ class SEL extends Base
 
 	/** 
 	* @apiGroup SEL
-	* @api {GET} /sel/GetHeatmapOutputSettings GetHeatmapOutputSettings
+	* @api {POST} /sel/GetHeatmapOutputSettings GetHeatmapOutputSettings
 	* @apiDescription Gets heatmap settings as defined in the config file. These settings include the output size, internal layer name, 
 	* raster output location, raster bounds and intensity mappings.
 	*/
@@ -557,7 +557,7 @@ class SEL extends Base
 
 	/** 
 	* @apiGroup SEL
-	* @api {GET} /sel/GetHeatmapSettings GetHeatmapSettings
+	* @api {POST} /sel/GetHeatmapSettings GetHeatmapSettings
 	* @apiDescription Gets the persistent riskmap settings. 
 	*/
 	public function GetHeatmapSettings()
@@ -634,7 +634,7 @@ class SEL extends Base
 
 	/**
 	 * @apiGroup SEL
-	 * @api {GET} /sel/ReimportShippingLayers ReimportShippingLayers
+	 * @api {POST} /sel/ReimportShippingLayers ReimportShippingLayers
 	 * @apiDescription Creates the raster layers required for shipping. 
 	 */
 	public function ReimportShippingLayers()
@@ -831,8 +831,8 @@ class SEL extends Base
 
 	/**
 	 * @apiGroup SEL
-	 * @api {GET} /sel/NotifyUpdateFinished Notify Update Finished
-	 * @apiParams month The month this update was completed for.
+	 * @api {POST} /sel/NotifyUpdateFinished Notify Update Finished
+	 * @apiParam month The month this update was completed for.
 	 * @apiDescription Notifies the server that SEL has finished the update for this month. 
 	 */
 	public function NotifyUpdateFinished(int $month)
@@ -842,7 +842,7 @@ class SEL extends Base
 
 	/**
 	 * @apiGroup SEL 
-	 * @api {GET} /sel/GetUpdatePackage Get update package
+	 * @api {POST} /sel/GetUpdatePackage Get update package
 	 * @apiDescription Get an update package which describes whan needs to be updated in the SEL program.
 	 */
 	public function GetUpdatePackage()
@@ -898,7 +898,7 @@ class SEL extends Base
 
 	/**
 	 * @apiGroup SEL 
-	 * @api {GET} /sel/GetSELGameClientConfig Get Game Client Config
+	 * @api {POST} /sel/GetSELGameClientConfig Get Game Client Config
 	 * @apiDescription Returns a json object of game-client specific settings related to shipping.
 	 */
 	public function GetSELGameClientConfig()

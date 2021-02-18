@@ -26,9 +26,9 @@ class Security extends Base
 
 	/**
 	 * @apiGroup Security
-	 * @api {GET} /security/CheckAccess CheckAccess
+	 * @api {POST} /security/CheckAccess CheckAccess
 	 * @apiDescription Checks if the the current access token is valid to access a certain level. Currently only checks for full access tokens.
-	 * @apiResult Returns json object indicating status of the current token. { "status": ["Valid"|"UpForRenewal"|"Expired"] }
+	 * @apiSuccess Returns json object indicating status of the current token. { "status": ["Valid"|"UpForRenewal"|"Expired"] }
 	 */
 	public function CheckAccess()
 	{
@@ -49,7 +49,7 @@ class Security extends Base
 	* @api {POST} /security/RequestToken RequestToken
 	* @apiDescription Requests a new access token for the API.
 	* @apiParam expired_token OPTIONAL A previously used access token that is now expired. Needs a valid REQUEST_ACCESS token to be sent with the request before it generates a new token with the same access as the expired token.
-	* @apiResult Returns json object indicating success and the token containing token identifier and unix timestap for until when it's valid. { "success": [0|1], "token": { "token": [identifier], "valid_until": [timestamp]" }
+	* @apiSuccess Returns json object indicating success and the token containing token identifier and unix timestap for until when it's valid. { "success": [0|1], "token": { "token": [identifier], "valid_until": [timestamp]" }
 	*/
 	public function RequestToken(string $expired_token = "")
 	{

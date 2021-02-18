@@ -26,10 +26,9 @@
 
 		/**
 		 * @apiGroup Layer
-		 * @apiDescription **************************************
+		 * @apiDescription Set a layer as inactive, without actually deleting it completely from the session database
 		 * @api {POST} /layer/Delete/
 		 * @apiParam {int} layer_id Target layer id
-		 * @apiSuccess {string} *********************************
 		 */
 		public function Delete(int $layer_id)
 		{
@@ -177,9 +176,10 @@
 
 		/**
 		 * @apiGroup Layer
-		 * @api {POST} /layer/GetRaster GetRaster Retrieves image data for raster. 
+		 * @api {POST} /layer/GetRaster GetRaster  
 		 * @apiParam layer_name Name of the layer corresponding to the image data.
-		 * @apiDescription Returns the requested file as an dump
+		 * @apiDescription Retrieves image data for raster.
+		 * @apiSuccess Returns array of displayed_bounds and image_data strings to payload, whereby image_data is base64 encoded file
 		 */
 		public function GetRaster(int $month = -1, string $layer_name)
 		{
@@ -229,12 +229,14 @@
 
 		/**
 		 * @apiGroup Layer
-		 * @apiDescription **************************************
-		 * @api {GET} /layer/************************************
-		 * @apiParam {int} **************************************
-		 * @apiSuccess {string} *********************************
+		 * @apiDescription Import metadata for a set of layers as defined under 'meta' in the session's config file
+		 * @api {POST} /layer/ImportMeta 
+		 * @apiParam {string} configFilename
+		 * @apiParam {string} geoserver_url
+		 * @apiParam {string} geoserver_username
+		 * @apiParam {string} geoserver_password
 		 */
-		public function ImportMeta(string $configFilename, $geoserver_url, $geoserver_username, $geoserver_password)
+		public function ImportMeta(string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password)
 		{
 			$game = new Game();
 			$geoserver = new GeoServer($geoserver_url, $geoserver_username, $geoserver_password);
@@ -382,8 +384,9 @@
 
 		/**
 		 * @apiGroup Layer
-		 * @api {POST} /layer/List List Provides a list of raster layers and vector layers that have active geometry.
-		 * @apiDescription Returns a json formatted array of layers, with layer_id, layer_name and layer_geotype objects defined per layer.
+		 * @api {POST} /layer/List 
+		 * @apiDescription List Provides a list of raster layers and vector layers that have active geometry.
+		 * @apiSuccess Returns an array of layers, with layer_id, layer_name and layer_geotype objects defined per layer.
 		 */
 		public function List() 
 		{
@@ -414,7 +417,7 @@
 		/**
 		 * @apiGroup Layer
 		 * @apiDescription Gets a single layer meta data by name. 
-		 * @api {POST} /layer/MetaByName Meta By Name
+		 * @api {POST} /layer/MetaByName MetaByName
 		 * @apiParam {string} name name of the layer that we want the meta for
 		 * @apiSuccess {string} JSON JSON Object. 
 		 */
@@ -450,7 +453,7 @@
 		/**
 		 * @apiGroup Layer
 		 * @apiDescription Update the meta data of a layer
-		 * @api {POST} /layer/UpdateMeta Update Meta
+		 * @api {POST} /layer/UpdateMeta UpdateMeta
 		 * @apiParam {string} short Update the display name of a layer
 		 * @apiParam {string} category Update the category of a layer
 		 * @apiParam {string} subcategory Update the subcategory of a layer
@@ -467,11 +470,11 @@
 
 		/**
 		* @apiGroup Layer
-		* @api {POST} /layer/UpdateRaster UpdateRaster updates raster image
+		* @api {POST} /layer/UpdateRaster 
 		* @apiParam {string} layer_name Name of the layer the raster image is for.
 		* @apiParam {array} raster_bounds 2x2 array of doubles specifying [[min X, min Y], [max X, max Y]]
 		* @apiParam {string} image_data Base64 encoded string of image data.
-		* @apiDescription Returns nothing.
+		* @apiDescription UpdateRaster updates raster image
 		*/
 		public function UpdateRaster(string $layer_name, array $raster_bounds = null, string $image_data)
 		{

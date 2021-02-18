@@ -33,9 +33,8 @@
 
 		/**
 		 * @apiGroup Game
-		 * @api {GET} /game/AutoSaveDatabase AutoSaveDatabase
-		 * @apiDescription **********************************
-		 * @apiSuccess **************************************
+		 * @api {POST} /game/AutoSaveDatabase AutoSaveDatabase
+		 * @apiDescription Creates a session database dump with the naming convention AutoDump_YYY-mm-dd_hh-mm.sql
 		 */
 		public function AutoSaveDatabase()
 		{
@@ -54,9 +53,8 @@
 		
 		/**
 		 * @apiGroup Game
-		 * @api {GET} /game/Config Config
-		 * @apiDescription **********************************
-		 * @apiSuccess **************************************
+		 * @api {POST} /game/Config Config
+		 * @apiDescription Obtains the sessions' game configuration 
 		 */
 		public function Config(){
 			$data = $this->GetGameConfigValues();
@@ -88,14 +86,13 @@
 				$data["user_common_has_password"] = !empty($passwordData[0]["game_session_password_player"]);
 			}
 
-			return $data; //json_encode($data);
+			return $data;
 		}
 
 		/**
 		 * @apiGroup Game
-		 * @api {GET} /game/NextMonth NextMonth
-		 * @apiDescription **********************************
-		 * @apiSuccess **************************************
+		 * @api {POST} /game/NextMonth NextMonth
+		 * @apiDescription Updates session database to indicate start of next simulated month
 		 */
 		public function NextMonth(){
 			Database::GetInstance()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
@@ -141,7 +138,7 @@
 
 		/**
 		* @apiGroup Game
-		* @api {GET} /game/GetCurrentMonth GetCurrentMonth
+		* @api {POST} /game/GetCurrentMonth GetCurrentMonth
 		* @apiDescription Gets the current month of the active game.
 		*/
 		public function GetCurrentMonth() {
@@ -217,7 +214,7 @@
 
 		/**
 		 * @apiGroup Game
-		 * @api {GET} /game/IsOnline Is Online
+		 * @api {POST} /game/IsOnline Is Online
 		 * @apiDescription Check if the server is online
 		 * @apiSuccess {string} online
 		 */
@@ -228,7 +225,7 @@
 		//this should probably be moved to Layer instead
 		/**
 		 * @apiGroup Game
-		 * @api {GET} /game/meta Meta
+		 * @api {POST} /game/meta Meta
 		 * @apiDescription Get all layer meta data required for a game
 		 * @apiSuccess {string} JSON object
 		 */
@@ -256,7 +253,7 @@
 
 		/**
 		 * @apiGroup Game
-		 * @api {GET} /game/tick Tick
+		 * @api {POST} /game/tick Tick
 		 * @apiDescription Tick the game server, updating the plans if required
 		 * @apiSuccess {string} JSON object
 		 * @ForceNoTransaction

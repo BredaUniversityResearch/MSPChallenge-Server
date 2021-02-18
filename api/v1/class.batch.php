@@ -17,7 +17,7 @@ class Batch extends Base
 
 	/**
 	 * @apiGroup Batch
-	 * @api {GET} /batch/startbatch StartBatch
+	 * @api {POST} /batch/startbatch StartBatch
 	 * @apiDescription Starts a new batch
 	 * @apiSuccess {int} batch_id Batch ID used to identify this batch.
 	 */
@@ -29,7 +29,7 @@ class Batch extends Base
 
 	/**
 	 * @apiGroup Batch
-	 * @api {GET} /batch/addtobatch AddToBatch
+	 * @api {POST} /batch/addtobatch AddToBatch
 	 * @apiDescription Starts a new batch
 	 * 
 	 * @apiParam {int} batch_id Batch ID to add to 
@@ -62,7 +62,7 @@ class Batch extends Base
 
 	/**
 	 * @apiGroup Batch
-	 * @api {GET} /batch/addtobatch AddToBatch
+	 * @api {POST} /batch/addtobatch AddToBatch
 	 * @apiDescription Starts a new batch
 	 * 
 	 * @apiParam {int} batch_id Batch ID to execute. 

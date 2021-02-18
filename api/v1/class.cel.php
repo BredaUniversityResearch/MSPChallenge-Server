@@ -47,7 +47,7 @@
 
 		/**
 		 * @apiGroup Cel
-		 * @api {GET} /cel/GetCELConfig Get Config 
+		 * @api {POST} /cel/GetCELConfig Get Config 
 		 * @apiDescription Returns the Json encoded config string
 		 */
 		public function GetCELConfig() 
@@ -66,7 +66,7 @@
 
 		/**
 		 * @apiGroup Cel
-		 * @api {GET} /cel/ShouldUpdate Should Update
+		 * @api {POST} /cel/ShouldUpdate Should Update
 		 * @apiDescription Should Cel update this month?
 		 */
 		public function ShouldUpdate() {

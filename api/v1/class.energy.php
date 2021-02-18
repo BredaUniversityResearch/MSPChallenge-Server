@@ -407,7 +407,7 @@
 
 		/**
 		 * @apiGroup Energy
-		 * @api {GET} /energy/GetDependentEnergyPlans Get Dependent Energy Plans.
+		 * @api {POST} /energy/GetDependentEnergyPlans Get Dependent Energy Plans
 		 * @apiDescription Get all the plan ids that are dependent on this plan
 		 * @apiParam {int} plan_id Id of the plan that you want to find the dependent energy plans of.
 		 */
@@ -482,7 +482,7 @@
 
 		/**
 		 * @apiGroup Energy
-		 * @api {GET} /energy/GetOverlappingEnergyPlans Get Overlapping Energy Plans.
+		 * @api {POST} /energy/GetOverlappingEnergyPlans Get Overlapping Energy Plans
 		 * @apiDescription Get all the plan ids that are overlapping with this plan. Meaning they are referencing deleted grids in the current plan.
 		 * @apiParam {int} plan_id Id of the plan that you want to find the overlapping energy plans of.
 		 */
@@ -529,8 +529,8 @@
 
 		/**
 		 * @apiGroup Energy
-		 * @api {GET} /energy/GetPreviousOverlappingPlans Get Previous Overlapping Energy Plans.
-		 * @apiDescription Returns whether or not there are overlapping plans ([0|1]) in the past that delete grids for the plan that we are querying.
+		 * @api {POST} /energy/GetPreviousOverlappingPlans Get Previous Overlapping Energy Plans
+		 * @apiDescription Returns whether or not there are overlapping plans in the past that delete grids for the plan that we are querying.
 		 * @apiParam {int} plan_id Id of the plan that you want to find the overlapping energy plans of.
 		 */
 		public function GetPreviousOverlappingPlans(int $plan_id) 
@@ -557,8 +557,8 @@
 
 		/**
 		 * @apiGroup Energy
-		 * @api {GET} /energy/VerifyEnergyCapacity Verify Energy Capacity.
-		 * @apiDescription Returns as a json array of the supplied geometry ids were *not* found in the energy_output database table.
+		 * @api {POST} /energy/VerifyEnergyCapacity Verify Energy Capacity
+		 * @apiDescription Returns as an array of the supplied geometry ids were *not* found in the energy_output database table.
 		 * @apiParam {string} ids JSON array of integers defining geometry ids to check (e.g. [9554,9562,9563]).
 		 */
 		public function VerifyEnergyCapacity(string $ids) 
@@ -584,8 +584,8 @@
 
 		/**
 		 * @apiGroup Energy
-		 * @api {GET} /energy/VerifyEnergyGrid Verify Energy Grid.
-		 * @apiDescription Returns a Json object with client_missing_source_ids, client_extra_source_ids, client_missing_socket_ids, client_extra_socket_ids, each a comma-separated list of ids
+		 * @api {POST} /energy/VerifyEnergyGrid Verify Energy Grid
+		 * @apiDescription Returns a array with client_missing_source_ids, client_extra_source_ids, client_missing_socket_ids, client_extra_socket_ids, each a comma-separated list of ids
 		 * @apiParam {int} grid_id grid id of the grid to verify
 		 * @apiParam {string} source_ids Json array of the grid's source geometry ids on the client
 		 * @apiParam {string} socket_ids Json array of the grid's sockets geometry ids on the client

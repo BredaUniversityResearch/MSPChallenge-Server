@@ -80,13 +80,13 @@ class GameSession extends Base
 	/**
 	 * @apiGroup GameSession
 	 * @apiDescription Sets up a new game session with the supplied information.
-	 * @api {GET} /GameSession/CreateGameSession Creates new game session
+	 * @api {POST} /GameSession/CreateGameSession Creates new game session
 	 * @apiParam {int} game_id Session identifier for this game.
 	 * @apiParam {string} config_file_content JSON Object of the config file.
 	 * @apiParam {string} password_admin Plain-text admin password.
 	 * @apiParam {string} password_player Plain-text player password.
 	 * @apiParam {string} watchdog_address URL at which the watchdog resides for this session.
-	 * @apiParam {string] response_address URL which we call when the setup is done.
+	 * @apiParam {string} response_address URL which we call when the setup is done.
 	 * @apiParam {int} allow_recreate (0|1) Allow overwriting of an existing session?
 	 * @ForceNoTransaction
 	 */
@@ -195,7 +195,7 @@ class GameSession extends Base
 	/**
 	 * @apiGroup GameSession
 	 * @apiDescription For internal use: creates a new game session with the given config file path.
-	 * @api {GET} /GameSession/CreateGameSession Creates new game session
+	 * @api {POST} /GameSession/CreateGameSession Creates new game session
 	 * @apiParam {string} config_file_path Local path to the config file.
 	 * @apiParam {string} password_admin Admin password for this session
 	 * @apiParam {string} password_player Player password for this session

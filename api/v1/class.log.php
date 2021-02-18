@@ -22,7 +22,7 @@ class Log extends Base {
 	/**
 	 * @apiGroup Log
 	 * @apiDescription Posts an 'error' event in the server log.
-	 * @api {POST} /Log/Event Post a event log
+	 * @api {POST} /Log/Event Event
 	 * @apiParam {string} source Source component of the error. Examples: Server, MEL, CEL, SEL etc.
 	 * @apiParam {string} severity Severity of the errror ["Warning"|"Error"|"Fatal"]
 	 * @apiParam {string} message Debugging information associated with this event

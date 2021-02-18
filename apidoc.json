@@ -1,8 +1,0 @@
-{
-  "name": "MSP",
-  "version": "0.2.0",
-  "description": "MSP API Reference",
-  "title": "MSP API Reference",
-  "url" : "https://msp.guraas.com",
-  "groups" : ["Plan", "Geometry", "Game", "Layer", "Message"],
-}
