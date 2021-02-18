@@ -50,13 +50,15 @@ class User {
 			$params = array("jwt" => Session::get("currentToken"), "server_id" => $servermanager->GetServerID(), "audience" => $servermanager->GetBareHost());
 			$api_url = Config::get('msp_auth/api_endpoint').'authjwt.php';
 			$authorize = json_decode(CallAPI("POST", $api_url, $params));
-			if ($authorize->success) {
-					return true;
-			}
-			else {
-				if (isset($authorize->error)) {
-					if ($authorize->error == 503) {
-						die('MSP Challenge Authoriser cannot be reached. Are you sure you are connected to the internet?');
+			if (isset($authorize->success)) {
+				if ($authorize->success) {
+						return true;
+				}
+				else {
+					if (isset($authorize->error)) {
+						if ($authorize->error == 503) {
+							die('MSP Challenge Authoriser cannot be reached. Are you sure you are connected to the internet?');
+						}
 					}
 				}
 			}
