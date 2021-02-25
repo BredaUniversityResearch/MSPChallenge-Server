@@ -170,8 +170,10 @@
 				FROM layer 
 				LEFT JOIN geometry ON layer.layer_id=geometry.geometry_layer_id
 				WHERE layer.layer_id = ? ORDER BY geometry_FID ASC, geometry_subtractive ASC", array($layer_id));
-
-			return Base::MergeGeometry($data);
+			
+			if (!empty($data) && !empty($data[0]["geometry"])) {
+				return Base::MergeGeometry($data);
+			}
 		}
 
 		/**
