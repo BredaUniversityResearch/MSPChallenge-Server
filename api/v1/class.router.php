@@ -179,7 +179,11 @@ class Router
 			if (gettype($input) != "string") {
 				throw new Exception("Target type was array, but input type was not string as expected. Input type was " . gettype($input));
 			}
-			$input = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
+			$input = json_decode($input, true, 512);
+			if (json_last_error() != JSON_ERROR_NONE)
+			{
+				throw new Exception("Failed to decode json. Error: ".json_last_error_msg());
+			}
 			return true;
 		} else {
 			$filters = array(
