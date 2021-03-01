@@ -31,15 +31,22 @@ class Router
 	public static function RouteApiCall(string $apiCallUrl, array $data)
 	{
 		$endpointData = self::ParseEndpointString($apiCallUrl);
-		$result = self::ExecuteCall($endpointData["class"], $endpointData["method"], $data, true);
-
-		if (UnitTestSupport::ShouldLogApiCalls())
+		try 
 		{
-			$unitTestSupport = new UnitTestSupport();
-			$unitTestSupport->RecordApiCall($endpointData["class"], $endpointData["method"], $data, $result);
-		}
+			$result = self::ExecuteCall($endpointData["class"], $endpointData["method"], $data, true);
 
-		return $result;
+			if (UnitTestSupport::ShouldLogApiCalls())
+			{
+				$unitTestSupport = new UnitTestSupport();
+				$unitTestSupport->RecordApiCall($endpointData["class"], $endpointData["method"], $data, $result);
+			}
+
+			return $result;
+		}
+		catch (Exception $e)
+		{
+			return self::FormatResponse(false, $e->getMessage(), null, $endpointData["class"], $endpointData["method"], $data); 
+		}
 	}
 
 	public static function ParseEndpointString(string $apiCallUrl)
