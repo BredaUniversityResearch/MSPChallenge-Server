@@ -9,7 +9,7 @@ class Database {
 	public $db_name;
 	
 	private $conn;
-	private bool $isTransactionRunning = false;
+	private $isTransactionRunning = false;
 	
 	private static $instance = null;
 
