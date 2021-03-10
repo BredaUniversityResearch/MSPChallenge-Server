@@ -33991,6 +33991,6 @@
     "geoserver_username": null,
     "geoserver_password": null,
     "restriction_point_size": 1.0,
-    "windfarm_data_api_url": "https://test-northsea-2-dot-hydro-engine.ey.r.appspot.com/get_windfarm_data"
+    "windfarm_data_api_url": "https://hydro-engine.appspot.com/get_windfarm_data"
   }
 }
