@@ -125,12 +125,12 @@ nav a, nav a:visited, a.btn, a.btn:visited {
 	background: transparent;
 }
 
-.nav-tabs {
+#myTab {
 	border-bottom: 1px solid #b0abab;
 	margin: 0px 1.0em 0px 1.0em;
 }
 
-.nav-tabs .nav-link.active, .nav-tabs .nav-link.active:hover {
+#myTab .nav-link.active, #myTab .nav-link.active:hover {
 	background-color: #edf0f3;
 	border-top-color: #b0abab;
 	border-left-color:  #b0abab;
@@ -138,21 +138,21 @@ nav a, nav a:visited, a.btn, a.btn:visited {
 	border-bottom-color: transparent;
 }
 
-.nav-tabs .nav-link:hover {
+#myTab .nav-link:hover {
 	background-color: transparent;
 	border-top-color: #b0abab;
 	border-left-color:  #b0abab;
 	border-right-color:  #b0abab;
 }
 
-.nav-tabs .nav-link {
+#myTab .nav-link {
 	background-color: transparent;
 	border-top-color: #d3d0d0;
 	border-left-color:  #d3d0d0;
 	border-right-color:  #d3d0d0;
 }
 
-.nav-tabs > li.active > a, .nav-tabs > li.active > a:focus, .nav-tabs > li.active > a:hover {
+#myTab  > li.active > a, #myTab > li.active > a:focus, #myTab > li.active > a:hover {
 	background-color: #f5f5f5;
 }
 
@@ -244,6 +244,11 @@ a.hoverinfo {
     content: "\f055";
 }
 
+div#sessionsList, div#savesList, div#configVersionsList {
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+
 #sessionsTable td, #configVersionsTable td {
 	min-width: 50px;
 	max-width: 320px;
@@ -315,13 +320,6 @@ a.hoverinfo {
 	font: 14px/18px Arial, Sans-serif;
 }
 
-
-
-.well {
-	margin-top: 20px;
-}
-
-
 .flex-row {
     display: flex;
     justify-content: space-between;
@@ -343,9 +341,9 @@ a.hoverinfo {
 	margin: 0;
 	padding: 0;
   }
-  #navbarsExample03 {
-	  width:170px;
-	  font-size:10px; 
+  .tabSessionsListText, .tabSavesListText, .tabConfigVersionsText, .tabSettingsText {
+	  display: none;
   }
+
 }
 

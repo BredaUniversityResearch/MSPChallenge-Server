@@ -38,16 +38,24 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 		<div id="infobox"></div>
 		<ul class="nav nav-tabs" id="myTab" role="tablist">
 			<li class="nav-item">
-				<a href="#tabSessionsList" class="nav-link active" role="tab" data-toggle="tab" aria-controls="tabSessionsList" aria-selected="true"><i class="fa fa-list-alt"></i> Sessions</a>
+				<a href="#tabSessionsList" class="nav-link active" role="tab" data-toggle="tab" aria-controls="tabSessionsList" aria-selected="true">
+					<i class="fa fa-list-alt"></i> <span class="tabSessionsListText">Sessions</span>
+				</a>
 			</li>
 			<li class="nav-item">
-				<a href="#tabSavesList" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabSavesList" aria-selected="false"><i class="fa fa-save"></i> Saves</a>
+				<a href="#tabSavesList" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabSavesList" aria-selected="false">
+					<i class="fa fa-save"></i> <span class="tabSavesListText">Saves</span>
+				</a>
 			</li>
 			<li class="nav-item">
-				<a href="#tabConfigVersions" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabConfigVersions" aria-selected="false"><i class="fa fa-file-text"></i> Configurations</a>
+				<a href="#tabConfigVersions" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabConfigVersions" aria-selected="false">
+					<i class="fa fa-file-text"></i> <span class="tabConfigVersionsText">Configurations</span>
+				</a>
 			</li>
 			<li class="nav-item">
-				<a href="#tabSettings" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabSettings" aria-selected="false"><i class="fa fa-wrench"></i> Settings</a>
+				<a href="#tabSettings" class="nav-link" role="tab" data-toggle="tab" aria-controls="tabSettings" aria-selected="false">
+					<i class="fa fa-wrench"></i> <span class="tabSettingsText">Settings</span>
+				</a>
 			</li>	
 
 		</ul>
@@ -59,9 +67,11 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 						<button type="button" id="btnCreateServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSession"><i class="fa fa-plus-circle" title="Create new session"></i> New Session</button>
 						<button id="buttonRefreshSessionsList" class="btn btn-primary"><i class="fa fa-refresh" title="Refresh" id="buttonRefreshSessionsListIcon"></i> Refresh</button>
 					</div>
-					<div class="col-md-12 flex-right" id="sessionsList">
-						<div class="well well-sm" >
-							Filter:
+					<div class="col-md-12" id="sessionsList">
+						<div class="float-left">
+							Here you can create a new MSP Challenge session, and administer existing ones.
+						</div>
+						<div class="well well-sm float-right" >Filter:
 							<span id="radioFilterSessionsList">
 								<div class="form-check form-check-inline">
 									<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="public" checked>
@@ -80,7 +90,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					</div>
 
 					<div class="col-md-12">
-						<p>Here you can create a new MSP Challenge session, and administer existing ones.</p>
+						
 						<div class="table-responsive">
 							<table id="sessionsTable" class="table table-hover table-striped tablesorter-default">
 								<thead>
@@ -111,8 +121,11 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 						<button type="button" id="btnLoadSave" class="btn btn-primary pull-left" data-toggle="modal" data-target="#modalUploadSave"><i class="fa fa-plus-circle" title=""></i> Upload Session Save</button>
 						<button id="buttonRefreshSavesList" class="btn btn-primary"><i class="fa fa-refresh" title="Refresh" id="buttonRefreshSavesListIcon"></i> Refresh</button>
 					</div>
-					<div class="col-md-12 flex-right" id="savesList">
-						<div class="well well-sm" >
+					<div class="col-md-12" id="savesList">
+						<div class="float-left">
+							Here you can review and reuse saves of MSP Challenge sessions.
+						</div>
+						<div class="well well-sm float-right" >
 							Filter:
 							<span id="radioFilterSavesList">
 								<div class="form-check form-check-inline">
@@ -128,7 +141,6 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					</div>
 
 					<div class="col-md-12">
-						<p>Here you can review and reuse saves of MSP Challenge sessions.</p>
 						<div class="table-responsive">
 							<table id="savesTable" class="table table-hover table-striped tablesorter-default">
 								<thead>
@@ -157,9 +169,11 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					<button type="button" class="btn btn-primary pull-left" data-toggle="modal" data-target="#modalNewConfigFile"><i class="fa fa-plus-circle" title="Create a new Configuration"></i> New Configuration</button>
 					<button id="buttonRefreshConfigVersionsList" class="btn btn-primary"><i class="fa fa-refresh" title="Refresh" id="buttonRefreshConfigVersionsListIcon"></i> Refresh</button>
 				</div>
-				<div class="col-md-12 flex-right" id="configVersionsList">
-					<div class="well well-sm" style="text-align: end;">
-
+				<div class="col-md-12" id="configVersionsList">
+					<div class="float-left">
+						Here you can upload a new MSP Challenge session configuration file, and administer existing ones.
+					</div>
+					<div class="well well-sm float-right" style="text-align: end;">
 						Filter:
 						<span id="radioFilterConfigVersionsList">
 							<div class="form-check form-check-inline">
@@ -176,7 +190,6 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					</div>
 				</div>
 				<div class="col-md-12">
-						<p>Here you can upload a new MSP Challenge session configuration file, and administer existing ones.</p>
 						<div class="table-responsive">
 							<table id="configVersionsTable" class="table table-hover tablesorter-default">
 								<thead>
