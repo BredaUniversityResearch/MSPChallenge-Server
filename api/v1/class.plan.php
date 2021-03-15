@@ -385,7 +385,7 @@
 				//executive decision, we're out of time and this still hasn't been implemented client side and has no config done for it. I'm defaulting everything to only use the assembly time and leave it active forever. This code was implemented in the early months and has is a liability now.
 
 				if($state == "WAIT"){
-					$assemblyTime = $json[0]['time'];
+					$assemblyTime = (isset($json[0]['time'])) ?? 0;
 					if ($current_gametime >= $plan_starttime) {
 						$state = "ACTIVE";
 					}
