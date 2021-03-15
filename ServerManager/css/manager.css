@@ -254,10 +254,6 @@ div#sessionsList, div#savesList, div#configVersionsList {
 	max-width: 320px;
 }
 
-#sessionsListtbody .fa {
-	padding: 0 5px;
-}
-
 #radioFilterSessionsList,
 #radioFilterSavesList,
 #radioFilterConfigVersionsList {
@@ -317,7 +313,8 @@ div#sessionsList, div#savesList, div#configVersionsList {
 }
 
 .tablesorter-default {
-	font: 14px/18px Arial, Sans-serif;
+	font-family: 'robotoregular';
+	font-size: 14px;
 }
 
 .flex-row {
