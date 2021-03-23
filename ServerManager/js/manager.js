@@ -396,16 +396,17 @@ function sessionsListToTable(sessionsList) {
 		}
 		if(v.game_state == 'play' || v.game_state == 'fastforward') {
 			save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Session"></i></button>';
-			running_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-play" title="Start Simulation"></i></button>';
-			paused_icon = '<button class="btn btn-secondary btn-sm" onClick="pauseSession('+v.id+')"><i class="fa fa-pause" title="Pause Simulation" ></i></button>';
+			running_icon = '<button class="btn btn-secondary btn-sm" onClick="pauseSession('+v.id+')"><i class="fa fa-pause" title="Pause Simulation" ></i></button>';
+			/*'<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-play" title="Start Simulation"></i></button>';*/
+			/* paused_icon = */ 
 		} else if(v.session_state != 'archived' && v.session_state != 'request'  && (v.game_state == 'pause' || v.game_state == "setup")){
 			save_icon = '<button class="btn btn-secondary btn-sm" onClick="saveSession('+v.id+')"><i class="fa fa-save" title="Save Session"></i></button>';
 			running_icon = '<button class="btn btn-secondary btn-sm" onClick="startSession('+v.id+')"><i class="fa fa-play" title="Start Simulation" ></i></button>';
-			paused_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pause" title="Pause Simulation"></i></button>';
+			/*paused_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pause" title="Pause Simulation"></i></button>';*/
 		} else {
 			save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Session"></i></button>';
 			running_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-play" title="Start Simulation"></i></button>';
-			paused_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pause" title="Pause Simulation"></i></button>';
+			/*paused_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pause" title="Pause Simulation"></i></button>';*/
 		}
 		info_icon = '<button class="btn btn-secondary btn-sm" onClick="getSessionInfo('+v.id+')"><i class="fa fa-info-circle" title="Info" ></i></button>';
 		if (v.game_start_year == '0') { v.current_month_formatted = ''; }
@@ -418,7 +419,7 @@ function sessionsListToTable(sessionsList) {
 			'<td class="state_'+show_state+'">'+show_state+'</td>'+
 			'<td>'+v.current_month_formatted+'</td>'+
 			'<td>'+v.end_month_formatted+'</td>'+
-			'<td class="text-center">'+running_icon+' '+paused_icon+' '+save_icon+' '+info_icon+'</i></td>'+
+			'<td class="text-center">'+running_icon+' '+save_icon+' '+info_icon+'</i></td>'+
 		'</tr>';
 		$(tableHTML).appendTo('#sessionsListtbody')
 	})

@@ -249,9 +249,10 @@ div#sessionsList, div#savesList, div#configVersionsList {
 	padding-bottom: 15px;
 }
 
-#sessionsTable td, #configVersionsTable td {
+#sessionsTable td, #savesTable td, #configVersionsTable td {
 	min-width: 50px;
 	max-width: 320px;
+	padding: .5rem;
 }
 
 #radioFilterSessionsList,
