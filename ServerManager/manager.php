@@ -393,6 +393,75 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			</div>
 		</div>
 
+		<!-- Modal Session user management -->
+		<button type="button" id="btnSessionUsers" class="btn btn-primary" data-toggle="modal" data-target="#sessionUsers"></button>
+		<div class="modal fade" id="sessionUsers" tabindex="-1" role="dialog" aria-labelledby="sessionUsersCenterTitle" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="sessionUsersCenterTitle">Session User Management</h5>
+						<button type="button" id="btnCloseSessionUsers" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<form class="form-horizontal" role="form" data-toggle="validator" id="formSessionUsers">
+							<div class="form-group">
+								<label for="adminAccessSetting">Administrator access</label>
+								<select class="form-control" id="adminAccessSetting" required="required">
+									<option>Anyone with this password can log on as an admin:</option>
+									<option>Only the following users can log on as admins:</option>
+								</select>
+							</div>
+							<div class="form-row">
+								<div class="col-9">
+									<input type="text" class="form-control" id="adminAccessUsers" name="adminAccessUsers" required="true">
+								</div>
+								<div class="col">
+									<button class="btn btn-secondary mb-2">Find User</button>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="regionAccessSetting">Region Manager access</label>
+								<select class="form-control" id="regionAccessSetting" required="required">
+									<option>Anyone with this password can log on as a region manager:</option>
+									<option>Only the following users can log on as region managers:</option>
+								</select>
+							</div>
+							<div class="form-row">
+								<div class="col-9">
+									<input type="text" class="form-control" id="regionAccessUsers" name="regionAccessUsers" required="true">
+								</div>
+								<div class="col">
+									<button class="btn btn-secondary mb-2">Find User</button>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="regionAccessSetting">Team access</label>
+								<select class="form-control" id="regionAccessSetting" required="required">
+									<option>Anyone with this password can log on for any team:</option>
+									<option>Anyone with these passwords can log on for their respective teams:</option>
+									<option>Only the following users can log on for their respective teams:</option>
+								</select>
+							</div>
+							<div class="form-row">
+								<div class="col-9">
+									<input type="text" class="form-control" id="playerAccessUsers" name="regionAccessUsers" required="true">
+								</div>
+								<div class="col">
+									<button class="btn btn-secondary mb-2">Find User</button>
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary" onClick="">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Modal Save info -->
 		<button type="button" id="btnSaveInfo" class="btn btn-primary" data-toggle="modal" data-target="#saveInfo" style="display: none;"></button>
 		<div class="modal fade" id="saveInfo" tabindex="-1" role="dialog" aria-labelledby="saveModalCenterTitle" aria-hidden="true">
