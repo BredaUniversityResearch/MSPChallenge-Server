@@ -92,7 +92,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					<div class="col-md-12">
 						
 						<div class="table-responsive">
-							<table id="sessionsTable" class="table table-hover table-striped tablesorter-default">
+							<table id="sessionsTable" class="table table-hover table-striped">
 								<thead>
 									<tr>
 										<th>ID</th>
@@ -102,7 +102,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 										<th>State</th>
 										<th>Current Month</th>
 										<th>Ending Month</th>
-										<th class="text-center sorter-false">Quick Actions</th>
+										<th class="text-center">Quick Actions</th>
 									</tr>
 								</thead>
 								<tbody id="sessionsListtbody">
@@ -142,7 +142,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 
 					<div class="col-md-12">
 						<div class="table-responsive">
-							<table id="savesTable" class="table table-hover table-striped tablesorter-default">
+							<table id="savesTable" class="table table-hover table-striped">
 								<thead>
 									<tr>
 										<th>Created</th>
@@ -150,7 +150,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 										<th>Month / Year</th>
 										<th>Configuration</th>
 										<th>Type</th>
-										<th class="text-center sorter-false">Quick Actions</th>
+										<th class="text-center">Quick Actions</th>
 									</tr>
 								</thead>
 								<tbody id="savesListtbody">
@@ -191,7 +191,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 				</div>
 				<div class="col-md-12">
 						<div class="table-responsive">
-							<table id="configVersionsTable" class="table table-hover tablesorter-default">
+							<table id="configVersionsTable" class="table table-hover">
 								<thead>
 									<tr>
 										<th></th>
@@ -200,7 +200,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 										<th>Date uploaded</th>
 										<th>Uploaded by</th>
 										<th>Last used</th>
-										<th class="text-center sorter-false">Quick Actions</th>
+										<th class="text-center">Quick Actions</th>
 									</tr>
 								</thead>
 								<tbody id="configVersionsListtbody">
@@ -467,7 +467,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			</div>
 		</div>
 
-		<!-- Modal: New Config info -->
+		<!-- Modal: New Config -->
 		<div class="modal fade" id="modalNewConfigFile" tabindex="-1" role="dialog" aria-labelledby="newconfigfileModalLabel">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
@@ -623,7 +623,6 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 	
 	$(document).ready(function() {
 		updateSessionsTable('public');
-		$("#sessionsTable").tablesorter();
 		$("#buttonRefreshSessionsList").click(function() {
 			updateSessionsTable($('input[name=inlineRadioOptions]:checked').val());
 		});
