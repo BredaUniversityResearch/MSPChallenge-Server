@@ -651,7 +651,7 @@
 		//export the plans for the config file
 		public function Export(&$result, &$errors = null){
 			//Make sure we don't export plans with NULL name as these are auto generated fishing plans.
-			$plans = Database::GetInstance()->query("SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type FROM plan WHERE plan_active=? AND plan_state<>? AND plan_name IS NOT NULL", array(1, "DELETED"));
+			$plans = Database::GetInstance()->query("SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type, plan_alters_energy_distribution FROM plan WHERE plan_active=? AND plan_state<>? AND plan_name IS NOT NULL", array(1, "DELETED"));
 
 			//Key value pair of persistent IDs have been remapped (key) to the new value (value).
 			$remappedPersistentGeometryIds = array();
@@ -663,8 +663,8 @@
 				LEFT JOIN layer l1 ON plan_layer_layer_id=l1.layer_id
 				LEFT JOIN layer l2 ON l1.layer_original_id=l2.layer_id
 				WHERE plan_layer_plan_id=?", array($d["plan_id"]));
-
-				$d['grids'] = Database::GetInstance()->query("SELECT grid_id, grid_name as name, grid_active as active, grid_persistent FROM grid WHERE grid_plan_id=?", array($d['plan_id']));
+				// notice the "1 as active" in following line - all grids exported should be registered as active, they are put to inactive during simulation, when a new plan that includes a grid update is implemented
+				$d['grids'] = Database::GetInstance()->query("SELECT grid_id, grid_name as name, 1 as active, grid_persistent FROM grid WHERE grid_plan_id=?", array($d['plan_id']));
 			}
 
 			foreach($plans as &$d){
@@ -779,8 +779,9 @@
 				// Base::Debug($plan);
 
 				//create a new plan and get the new ID
-				$planid = Database::GetInstance()->query("INSERT INTO plan (plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_state) VALUES (?, ?, ?, ?, ?, ?)",
-					array($plan['plan_country_id'], $plan['plan_name'], $plan['plan_gametime'], 0, $plan['plan_type'], "APPROVED"), true);
+				if (!isset($plan['plan_alters_energy_distribution'])) $plan['plan_alters_energy_distribution'] = 0;
+				$planid = Database::GetInstance()->query("INSERT INTO plan (plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_alters_energy_distribution, plan_state) VALUES (?, ?, ?, ?, ?, ?, ?)",
+					array($plan['plan_country_id'], $plan['plan_name'], $plan['plan_gametime'], 0, $plan['plan_type'], $plan['plan_alters_energy_distribution'], "APPROVED"), true);
 				$importedPlanId[$plan['plan_id']] = $planid;
 
 				if(isset($plan['fishing'])){
