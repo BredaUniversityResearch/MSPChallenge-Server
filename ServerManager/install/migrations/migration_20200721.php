@@ -9,7 +9,7 @@ defined('APP_RAN') or die();
 $servermanager = ServerManager::getInstance();
 
 // dbase upgrade 21 July 2020 >> mysql_structure.php & install.php already updated accordingly so first-time installers won't need this
-$auth_getservername = Config::get('msp_auth/api_endpoint').'getservername.php';
+$auth_getservername = $servermanager->GetMSPAuthAPI().'getservername.php';
 $rawresponse = CallAPI("POST", $auth_getservername, array("server_id" => $servermanager->GetServerID()));
 $response = json_decode($rawresponse);
 $sql = 

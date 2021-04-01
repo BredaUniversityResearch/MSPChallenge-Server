@@ -42,7 +42,7 @@ if(!empty($_POST['zipname']) && !empty($_POST['session_id']) && !empty($_POST["t
 			// in this case we want to add one more file to the zip: game_list.json (which is the game_list record of the original session)
 			// first save into a .json file and add to the ZIP file that was already created
 			$zip = new ZipArchive();
-			$result = $zip->open($abs_app_root.$url_app_root.$zipname);
+			$result = $zip->open(ServerManager::getInstance()->GetServerManagerRoot().$zipname);
 			if ($result === TRUE) {
 				$zip->addFromString('game_list.json', json_encode($sessionslist[0]));
 				$zip->close();
@@ -53,11 +53,11 @@ if(!empty($_POST['zipname']) && !empty($_POST['session_id']) && !empty($_POST["t
 			$def_zipname = str_replace("temp_", "", $zipname);
 			$zip = new ZipArchive();
 			$def_zip = new ZipArchive();
-			$result = $zip->open($abs_app_root.$url_app_root.$zipname);
-			$def_result = $def_zip->open($abs_app_root.$url_app_root.$def_zipname, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+			$result = $zip->open(ServerManager::getInstance()->GetServerManagerRoot().$zipname);
+			$def_result = $def_zip->open(ServerManager::getInstance()->GetServerManagerRoot().$def_zipname, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 			do {
 				$random = rand(0, 1000);
-				$templocation = $abs_app_root.$url_app_root."saves/temp_".$random."/";
+				$templocation = ServerManager::getInstance()->GetServerManagerRoot()."saves/temp_".$random."/";
 			} while (is_dir($templocation));
 			mkdir($templocation);
 			// loop through the existing zip's contents to create the new zip
@@ -69,7 +69,7 @@ if(!empty($_POST['zipname']) && !empty($_POST['session_id']) && !empty($_POST["t
 					if (strstr($filename, ".json") !== false && isJson($filecontents)) {
 						// let's determine what geometry we're dealing with 
 						//echo $filename.PHP_EOL;
-						$rawcontents = file_get_contents("zip://".$abs_app_root.$url_app_root.$zipname."#".$filename);
+						$rawcontents = file_get_contents("zip://".ServerManager::getInstance()->GetServerManagerRoot().$zipname."#".$filename);
 						if (strpos($rawcontents, "MULTIPOLYGON") !== false) {
 							$shapetypetoset = Shapefile::SHAPE_TYPE_POLYGON;
 							$classtouse = "Shapefile\Geometry\MultiPolygon";
@@ -162,7 +162,7 @@ if(!empty($_POST['zipname']) && !empty($_POST['session_id']) && !empty($_POST["t
 				$zip->close();
 				$def_zip->close();
 				rrmdir($templocation);
-				unlink($abs_app_root.$url_app_root.$zipname);
+				unlink(ServerManager::getInstance()->GetServerManagerRoot().$zipname);
 				$zipname = $def_zipname;
 			}
 		}
@@ -185,7 +185,7 @@ if(!empty($_POST['zipname']) && !empty($_POST['session_id']) && !empty($_POST["t
 				// now, finally, make the filename unique and update game_saves table accordingly
 				$save_id = $db->lastid();
 				$newzipname = "saves/save_".$save_id.".zip";
-				rename($abs_app_root.$url_app_root.$zipname, $abs_app_root.$url_app_root.$newzipname);
+				rename(ServerManager::getInstance()->GetServerManagerRoot().$zipname, ServerManager::getInstance()->GetServerManagerRoot().$newzipname);
 				$db->query("UPDATE game_saves SET save_path = ? WHERE id = ?", array($newzipname, $save_id));
 				
 				echo json_encode(array("status" => "success"));

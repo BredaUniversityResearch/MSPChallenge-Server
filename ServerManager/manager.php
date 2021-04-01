@@ -24,14 +24,14 @@ require_once 'init.php';
 
 if (!$user->isAuthorised()) {
 	if ($user->isLoggedIn()) {
-		Redirect::to($url_app_root.'logout.php');
+		Redirect::to(ServerManager::getInstance()->GetServerManagerFolder().'logout.php');
 	}
 	else {
-		Redirect::to($url_app_root.'index.php');
+		Redirect::to(ServerManager::getInstance()->GetServerManagerFolder().'index.php');
 	}
 } 
 
-require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
+require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/header.php'; ?>
 
 <div id="page-wrapper">
 	<div role="main" class="container">
@@ -216,6 +216,42 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			<div class="tab-pane fade" id="tabSettings" role="tabpanel" aria-labelledby="tabSettings-tab">
 			<p>Here you can change various settings of this MSP Challenge server.</p>
 				<div class="card-deck">	
+					
+					<div class="card">
+						<div class="card-header">
+							User Access
+						</div>
+						<div class="card-body">
+							<p class="card-text">The other users that should have access to this MSP Challenge server. Note that only this server's administrator(s) can change this.</p>
+						</div>
+						<div class="card-footer">
+							<a href="https://auth.mspchallenge.info/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-header">
+							Simulation Servers
+						</div>
+						<div class="card-body">
+							<p class="card-text">Any simulation servers additional to this one, if you would rather have the background simulations run on a different computer than this one.</p>
+						</div>
+						<div class="card-footer">
+							<button type="button" id="btnSimServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSimServers">Change</button>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-header">
+							GeoServers
+						</div>
+						<div class="card-body">
+							<p class="card-text">Any GeoServers to which you have access, and which have been set up to work with the MSP Challenge Simulation Platform, in addition to the default public MSP Challenge GeoServer used by default.</p>
+						</div>
+						<div class="card-footer">
+							<button type="button" id="btnGeoServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewGeoServers">Change</button>
+						</div>
+					</div>
+				<?php /* </div>
+				<div class="card-deck">*/ ?>
 					<div class="card">
 						<div class="card-header">
 							Server Address
@@ -251,28 +287,6 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 						</div>
 					</div>
 					*/ ?>
-					<div class="card">
-						<div class="card-header">
-							User Access
-						</div>
-						<div class="card-body">
-							<p class="card-text">The other users that should have access to this MSP Challenge server. Note that only this server's administrator(s) can change this.</p>
-						</div>
-						<div class="card-footer">
-							<a href="https://auth.mspchallenge.info/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
-						</div>
-					</div>
-					<div class="card">
-						<div class="card-header">
-							Simulation Servers
-						</div>
-						<div class="card-body">
-							<p class="card-text">Any simulation servers additional to this one, if you would rather have the background simulations run on a different computer than this one.</p>
-						</div>
-						<div class="card-footer">
-							<button type="button" id="btnSimServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSimServers">Change</button>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -329,13 +343,18 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 									<input type="text" class="form-control" id="newSessionName" name="session name" required="true">
 								</div>
 								<div class="form-group">
-									<label for="newWatchdog">Simulation Server</label>
-									<select class="form-control" id="newWatchdog" required="required">
+									<label for="newConfigFile">Configuration File</label>
+									<select class="form-control" id="newConfigFile" required="required">
 									</select>
 								</div>
 								<div class="form-group">
-									<label for="newConfigFile">Configuration File</label>
-									<select class="form-control" id="newConfigFile" required="required">
+									<label for="newGeoServer">GeoServer</label>
+									<select class="form-control" id="newGeoServer" required="required">
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="newWatchdog">Simulation Server</label>
+									<select class="form-control" id="newWatchdog" required="required">
 									</select>
 								</div>
 								<div class="form-group">
@@ -491,7 +510,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 							</div>
 							<div class="form-group">
 								<label for="newConfigFileName" >New configuration file name</label>
-								<input type="text" class="form-control" id="newConfigFileName" disabled=true value="Change if uploading a completely new configuration file" required="required">
+								<input type="text" class="form-control" id="newConfigFileName" disabled=true placeholder="Change if uploading a completely new configuration file" required="required">
 							</div>
 							<div class="form-group">
 								<label for="newConfigDescription">Description</label>
@@ -547,26 +566,25 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title" id="NewSimServersModalLabel">Add Additional Simulation Servers</h4>
+						<h4 class="modal-title" id="NewSimServersModalLabel">Simulation Servers</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
 					</div>
 					<div class="modal-body">
-						<p>
-							<table id="watchdogServerTable" class="table table-sm table-hover">
-								<thead>
-									<tr>
-										<th>Simulation Server Name</th>
-										<th>IP Address</th>
-										<th></th>
-									</tr>
-								</thead>
-								<tbody id="watchdogServerBody">
-								</tbody>
-							</table>
-						</p>
+						<table id="watchdogServerTable" class="table table-sm table-hover">
+							<thead>
+								<tr>
+									<th>Simulation Server Name</th>
+									<th>IP Address</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody id="watchdogServerBody">
+							</tbody>
+						</table>
 						<form class="form-horizontal" role="form" data-toggle="validator" id="formNewWatchdogServer" enctype="multipart/form-data">
+							<h5>Add additional simulation server</h5>
 							<div class="row">
 								<div class="col">
 									<label for="newWatchdogServerName">Simulation Server Name</label>
@@ -582,6 +600,56 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
 						<button type="button" class="btn btn-primary" onClick="submitNewWatchdogServer();">Add</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal: New Geo Servers -->
+		<div class="modal fade" id="modalNewGeoServers" tabindex="-1" role="dialog" aria-labelledby="NewGeoServersModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title" id="NewGeoServersModalLabel">GeoServers</h4>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<table id="GeoServerTable" class="table table-sm table-hover">
+							<thead>
+								<tr>
+									<th>GeoServer Name</th>
+									<th>Fully-qualified URL</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody id="GeoServerBody">
+							</tbody>
+						</table>
+						<form class="form-horizontal" role="form" data-toggle="validator" id="formNewGeoServer">
+							<h5>Add a new GeoServer:</h5>
+							<div class="form-group">
+									<label for="newGeoServerName">GeoServer Name</label>
+									<input type="text" class="form-control" id="newGeoServerName" required="required" placeholder="required">
+							</div>
+							<div class="form-group">
+									<label for="newGeoServerAddress">Fully-qualified URL</label>
+									<input type="text" class="form-control" id="newGeoServerAddress" required="required" placeholder="required">
+							</div>
+							<div class="form-group">
+									<label for="newGeoServerUsername">Username</label>
+									<input type="text" class="form-control" id="newGeoServerUsername" required="required" placeholder="required">
+							</div>
+							<div class="form-group">
+									<label for="newGeoServerPassword">Password</label>
+									<input type="text" class="form-control" id="newGeoServerPassword" required="required" placeholder="required">
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary" onClick="submitNewGeoServer();">Add</button>
 					</div>
 				</div>
 			</div>
@@ -644,6 +712,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 			onUploadConfigFileOriginalSelected(this.value);
 		});
 		configListToOptions();
+		GeoServerListToOptions();
 		watchdogListToOptions();
 
 		updateSavesTable('active');
@@ -660,6 +729,7 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 
 		WatchdogServerList();
 		GetServerAddr();
+		GeoServerList();
 	});
 
 	regularupdateTablesManager = setInterval(function() {
@@ -669,5 +739,5 @@ require_once $abs_app_root . $url_app_root . 'templates/header.php'; ?>
 	
 </script>
 <!-- footers -->
-<?php require_once $abs_app_root . $url_app_root . 'templates/footer.php'; // the final html footer copyright row + the external js calls
+<?php require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/footer.php'; // the final html footer copyright row + the external js calls
 ?>

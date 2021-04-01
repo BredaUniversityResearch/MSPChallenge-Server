@@ -1,13 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 //$user->hastobeLoggedIn();
 
@@ -24,6 +16,10 @@ class NewSession
 	private $ConfigFilePathAndName;
 	private $GameServerID;
 	private $GameServerAddress;
+	private $GeoServerID;
+	private $GeoServerAddress;
+	private $GeoServerUsername;
+	private $GeoServerPassword;
 	private $WatchdogID;
 	private $WatchdogAddress;
 	private $AdminPassword;
@@ -32,18 +28,16 @@ class NewSession
 	private $Token;
 
     public function __construct() {
-
 		header('Content-type: application/json');
-
 		$this->post_ok = $this->getPostValues();
 		$this->now = time();
 		$this->response_array['status'] = 'error';
 		$this->response_array['message'] = 'Something went wrong.';
 
-		// some try...catch should be included here...
 		if($this->post_ok) {
 			$this->db = DB::getInstance();
 			$this->setGameServerAddressById();
+			$this->setGeoServerDetailsById();
 			$this->setWatchdogAddressById();
 			$this->setConfigFilePathAndName();
 		}
@@ -51,7 +45,7 @@ class NewSession
 
 	private function getPostValues () {
 		// Required field names
-		$required = array('name', 'configVersion', 'gameServer', 'watchdog', 'adminPassword', 'visibility', 'Token');
+		$required = array('name', 'configVersion', 'gameServer', 'GeoServer', 'watchdog', 'adminPassword', 'visibility', 'Token');
 
 		// Loop over field names, make sure each one exists and is not empty
 		$error = false;
@@ -69,6 +63,7 @@ class NewSession
 			$this->Name = $_POST['name'];
 			$this->ConfigVersionID = $_POST['configVersion'];
 			$this->GameServerID = $_POST['gameServer'];
+			$this->GeoServerID = $_POST['GeoServer'];
 			$this->WatchdogID = $_POST['watchdog'];
 			$this->AdminPassword = $_POST['adminPassword'];
 			$this->PlayerPassword = !empty($_POST['playerPassword']) ? $_POST['playerPassword'] : '';
@@ -92,6 +87,13 @@ class NewSession
 		$this->GameServerAddress = $this->db->results()[0]->address;
 	}
 
+	private function setGeoServerDetailsById() {
+		$this->db->get("game_geoservers", ["id","=",$this->GeoServerID]);
+		$this->GeoServerAddress = $this->db->results()[0]->address;
+		$this->GeoServerUsername = $this->db->results()[0]->username;
+		$this->GeoServerPassword = $this->db->results()[0]->password;
+	}
+
 	private function setWatchdogAddressById() {
 		// get the watchdog address
 		$this->db->get("game_watchdog_servers", ["id","=",$this->WatchdogID]);
@@ -101,7 +103,7 @@ class NewSession
 	private function setConfigFilePathAndName() {
 		if ($this->db->query("SELECT game_config_version.file_path FROM game_config_version WHERE game_config_version.id = ?", array($this->ConfigVersionID))) {
 			$configFilePath = $this->db->results()[0]->file_path;
-			$this->ConfigFilePathAndName = GetConfigBaseDirectory().$configFilePath;
+			$this->ConfigFilePathAndName = ServerManager::getInstance()->GetConfigBaseDirectory().$configFilePath;
 		} else {
 			$this->ConfigFilePathAndName = null;
 		}
@@ -110,15 +112,16 @@ class NewSession
 	public function createNewSessionLocalDB () {
 		$where_array = array();
 		$query_string = " INSERT INTO `game_list`" .
-						" (name, game_config_version_id, game_server_id, watchdog_server_id," .
+						" (name, game_config_version_id, game_server_id, game_geoserver_id, watchdog_server_id," .
 						"  game_creation_time, game_start_year, game_end_month, game_current_month, game_running_til_time," .
 						"  password_admin, password_player, session_state, game_state, game_visibility, players_active, players_past_hour)" .
-						" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+						" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		if(!empty($_POST)){
 			$where_array = [$this->Name,
 							$this->ConfigVersionID,
 							$this->GameServerID,
+							$this->GeoServerID,
 							$this->WatchdogID,
 							$this->now,
 							0,
@@ -139,8 +142,20 @@ class NewSession
 		}
 	}
 
-	public function buildAndSendRequest() {
-		$this->response_array = RemoteSessionCreationHandler::SendCreateSessionRequest($this->ConfigFilePathAndName, $this->ID, $this->AdminPassword, $this->PlayerPassword, $this->WatchdogAddress, $this->GameServerAddress, false, $this->Token);
+	public function buildAndSendRequest() {		
+		$this->response_array = RemoteSessionCreationHandler::SendCreateSessionRequest(
+			$this->ConfigFilePathAndName, 
+			$this->ID, 
+			$this->AdminPassword, 
+			$this->PlayerPassword, 
+			$this->GeoServerID, 
+			$this->GeoServerAddress, 
+			$this->GeoServerUsername, 
+			$this->GeoServerPassword, 
+			$this->WatchdogAddress, 
+			$this->GameServerAddress, 
+			false, //no recreate
+			$this->Token);
 	}
 
 	public function setLastPlayedTime() {

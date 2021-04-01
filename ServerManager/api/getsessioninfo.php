@@ -1,15 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';
-
-require_once './testdata.php'; */
 
 $user->hastobeLoggedIn();
 
@@ -41,7 +31,7 @@ $query_string = "SELECT games.*,
 				  WHERE games.`id` = ?";
 
 // Forms posted
-if(!empty($_POST['session_id'])){
+if(!empty($_POST['session_id'])) {
 	// session ID given, but stil unknown
 	$session_id = $_POST['session_id'];
 	$response_array['message'] = 'Unknown session ID given.';
@@ -53,7 +43,14 @@ if(!empty($_POST['session_id'])){
 		$sessionInfo["game_creation_time"] = UnixToReadableTime($sessionInfo["game_creation_time"]);
 		$sessionInfo["game_running_til_time"] = UnixToReadableTime($sessionInfo["game_running_til_time"]);
 		$sessionInfo["log"] = getSessionLog($session_id);
+		$sessionInfo["notice"] = '';
 		
+		if (empty($sessionInfo["password_admin"])) {
+			$sessionInfo["notice"] .= "You need to set up end-user access or no-one will be able to log on to this session.".PHP_EOL;
+		}
+		if (strpos($sessionInfo["log"], "[ INFO ] - Reimport -> Created session.") !== false && strpos($sessionInfo["log"], "[ ERROR ]") !== false) {
+			$sessionInfo["notice"] .= "The session was created successfully, but one or more errors were still reported. Please check the log.";
+		}
 		$response_array['sessioninfo'] = $sessionInfo;
 	}
 }
@@ -72,7 +69,6 @@ function getSessionLog($sessionId) {
 	} catch (Exception $e) {
 		return "Log not found.";
 	}
-
 }
 
 echo json_encode($response_array);

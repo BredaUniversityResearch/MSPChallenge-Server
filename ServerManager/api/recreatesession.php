@@ -1,13 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 $user->hastobeLoggedIn();
 
@@ -24,6 +16,10 @@ class ExistingSession
 	private $ConfigFilePathAndName;
 	private $GameServerID;
 	private $GameServerAddress;
+	private $GeoServerID;
+	private $GeoServerAddress;
+	private $GeoServerUsername;
+	private $GeoServerPassword;
 	private $WatchdogID;
 	private $WatchdogAddress;
 	private $AdminPassword;
@@ -36,7 +32,7 @@ class ExistingSession
 		$this->now = time();
 		$this->response_array['status'] = 'error';
 		$this->response_array['message'] = 'Something went wrong.';
-		// some try...catch should be included here...
+		
 		if(!empty($_POST['session_id']) && !empty($_POST['Token'])) {
 			$this->ID = (int) $_POST['session_id'];
 			$this->Token = $_POST['Token'];
@@ -48,14 +44,17 @@ class ExistingSession
 		$this->db = DB::getInstance();
 	}
 
-
-
-
-
 	private function setGameServerAddressById() {
 		// get the server ID
 		$this->db->get("game_servers", ["id","=",$this->GameServerID]);
 		$this->GameServerAddress = $this->db->results()[0]->address;
+	}
+
+	private function setGeoServerDetailsById() {
+		$this->db->get("game_geoservers", ["id","=",$this->GeoServerID]);
+		$this->GeoServerAddress = $this->db->results()[0]->address;
+		$this->GeoServerUsername = $this->db->results()[0]->username;
+		$this->GeoServerPassword = $this->db->results()[0]->password;
 	}
 
 	private function setWatchdogAddressById() {
@@ -67,7 +66,7 @@ class ExistingSession
 	private function setConfigFilePathAndName() {
 		if ($this->db->query("SELECT game_config_version.file_path FROM game_config_version WHERE game_config_version.id = ?", array($this->ConfigVersionID))) {
 			$configFilePath = $this->db->results()[0]->file_path;
-			$this->ConfigFilePathAndName = GetConfigBaseDirectory().$configFilePath;
+			$this->ConfigFilePathAndName = ServerManager::getInstance()->GetConfigBaseDirectory().$configFilePath;
 		} else {
 			$this->ConfigFilePathAndName = null;
 		}
@@ -80,10 +79,12 @@ class ExistingSession
 			$this->Name = $thissession[0]["name"];
 			$this->ConfigVersionID = $thissession[0]["game_config_version_id"];
 			$this->GameServerID = $thissession[0]["game_server_id"];
+			$this->GeoServerID = $thissession[0]["game_geoserver_id"];
 			$this->WatchdogID = $thissession[0]["watchdog_server_id"];
 			$this->AdminPassword = $thissession[0]["password_admin"];
 			$this->PlayerPassword = $thissession[0]["password_player"];
 			$this->setGameServerAddressById();
+			$this->setGeoServerDetailsById();
 			$this->setWatchdogAddressById();
 			$this->setConfigFilePathAndName();
 			$this->buildAndSendRequest();
@@ -94,7 +95,20 @@ class ExistingSession
 	}
 
 	public function buildAndSendRequest() {
-		$this->response_array = RemoteSessionCreationHandler::SendCreateSessionRequest($this->ConfigFilePathAndName, $this->ID, $this->AdminPassword, $this->PlayerPassword, $this->WatchdogAddress, $this->GameServerAddress, true, $this->Token);
+		$this->response_array = RemoteSessionCreationHandler::SendCreateSessionRequest(
+			$this->ConfigFilePathAndName, 
+			$this->ID, 
+			$this->AdminPassword, 
+			$this->PlayerPassword, 
+			$this->GeoServerID, 
+			$this->GeoServerAddress, 
+			$this->GeoServerUsername, 
+			$this->GeoServerPassword, 
+			$this->WatchdogAddress, 
+			$this->GameServerAddress,
+			true, // recreate
+			$this->Token
+		);
 	}
 }
 

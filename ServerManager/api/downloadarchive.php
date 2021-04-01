@@ -1,17 +1,8 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 $user->hastobeLoggedIn();
 
-// some try...catch should be included here...
 $db = DB::getInstance();
 $db->findAll("game_list");
 $sessionslist = $db->results(true);
@@ -34,7 +25,7 @@ if(!empty($_GET['session_id'])){
 					$response_array['status'] = 'success';
 					$response_array['message'] = 'Downloading the archived session with the following ID: '.$session_id;
 
-					$storeFilePath = GetSessionArchiveBaseDirectory()."session_archive_".$session_id.".zip";
+					$storeFilePath = ServerManager::getInstance()->GetSessionArchiveBaseDirectory()."session_archive_".$session_id.".zip";
 					header('Content-Type: application/x-download');
 					header("Content-Disposition: attachment; filename=".basename($storeFilePath).";");
 					header('Content-Length: ' . filesize($storeFilePath));

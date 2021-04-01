@@ -48,7 +48,7 @@ class User {
 		if ($this->exists()) {
 			$servermanager = ServerManager::getInstance();
 			$params = array("jwt" => Session::get("currentToken"), "server_id" => $servermanager->GetServerID(), "audience" => $servermanager->GetBareHost());
-			$api_url = Config::get('msp_auth/api_endpoint').'authjwt.php';
+			$api_url = $servermanager->GetMSPAuthAPI().'authjwt.php';
 			$authorize = json_decode(CallAPI("POST", $api_url, $params));
 			if (isset($authorize->success)) {
 				if ($authorize->success) {

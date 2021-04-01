@@ -1,13 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 $user->hastobeLoggedIn();
 
@@ -64,7 +56,7 @@ else {
     
     $getsavedetails = $db->get("game_saves", ["id", "=", $SaveFileSelector]);
     $savedetails = $getsavedetails->results();
-    $save_path = $abs_app_root.$url_app_root.$savedetails[0]->save_path;
+    $save_path = ServerManager::getInstance()->GetServerManagerRoot().$savedetails[0]->save_path;
     // now read and use the save ZIP
     if (file_exists($save_path) && mime_content_type($save_path) == "application/zip") {
         //it should be a ZIP and contain exactly 3 things: db_export_X.sql, session_config_X.json, and a raster folder
@@ -76,12 +68,12 @@ else {
             $response = GameSessionStateChanger::ChangeSessionState($session_id, GameSessionStateChanger::STATE_PAUSE); //don't check the return, this is just a precaution
             //empty the old raster folder if it exists, create the folders again (start from scratch)
             $alldone = false;
-            $dirtocheck = GetServerRasterBaseDirectory().$session_id."/";
+            $dirtocheck = ServerManager::getInstance()->GetServerRasterBaseDirectory().$session_id;
             if (is_dir($dirtocheck)) {
                 rrmdir($dirtocheck);
             }
             if (mkdir($dirtocheck)) {
-                $alldone = mkdir($dirtocheck."archive/");
+                $alldone = mkdir($dirtocheck."/archive");
             }
             if ($alldone) {
                 $configsuccess = false;
@@ -93,20 +85,20 @@ else {
                     //put the session_config_X.json
                     if (strstr($fileinZIP, "session_config_") !== false) {
                         $newconfigfilename = "session_config_".$session_id.".json";
-                        $destination = GetServerConfigBaseDirectory().$newconfigfilename;
+                        $destination = ServerManager::getInstance()->GetServerConfigBaseDirectory().$newconfigfilename;
                         $configsuccess = copy($source, $destination);
                     }
                     //put the raster folder and its files and dirs contents
                     elseif (strstr($fileinZIP, "raster/") !== false) {
                         $sourcedetails = $zip->statIndex($i);
                         if ($sourcedetails["size"] > 0) {   // this seems to be the most effective way of determining that we're dealing with an actual file
-                            $destination = GetServerRasterBaseDirectory().$session_id."/".str_replace("raster/", "", $fileinZIP);
+                            $destination = ServerManager::getInstance()->GetServerRasterBaseDirectory().$session_id."/".str_replace("raster/", "", $fileinZIP);
                             $rastersuccess[] = copy($source, $destination);
                         }
                     }
                     //import the database
                     elseif (strstr($fileinZIP, "db_export_") !== false) {
-                        $destination = $abs_app_root.$url_app_root."saves/".$fileinZIP;
+                        $destination = ServerManager::getInstance()->GetSessionSavesBaseDirectory().$fileinZIP;
                         if (copy($source, $destination)) {
                             $databaseHost = Config::get('mysql/host');
                             $databaseUser = Config::get('mysql/username');
@@ -116,10 +108,10 @@ else {
                             $db->query("SELECT @@basedir as mysql_home");
                             $mysqlDirQuery = $db->results(true);
                             $mysqlDir = $mysqlDirQuery[0]["mysql_home"];
-                            $dumpCommand = $mysqlDir."/bin/mysql --user=\"".$databaseUser."\" --password=\"".$dbPassword."\" --host=\"".$databaseHost."\" \"".$databaseName."\" < \"".$abs_app_root.$url_app_root."saves/".$fileinZIP."\"";
+                            $dumpCommand = $mysqlDir."/bin/mysql --user=\"".$databaseUser."\" --password=\"".$dbPassword."\" --host=\"".$databaseHost."\" \"".$databaseName."\" < \"".ServerManager::getInstance()->GetSessionSavesBaseDirectory().$fileinZIP."\"";
                             exec($dumpCommand);
                             $dbasesuccess = true;
-                            unlink($abs_app_root.$url_app_root."saves/".$fileinZIP);
+                            unlink(ServerManager::getInstance()->GetSessionSavesBaseDirectory().$fileinZIP);
                         }
                     }
                     else {
@@ -127,14 +119,14 @@ else {
                     }
                 }
                 if ($configsuccess && $dbasesuccess && !in_array(false, $rastersuccess)) {
-                    $server_address = $db->cell("game_servers.address", ["id", "=", 1]);
                     $watchdog_address = $db->cell("game_watchdog_servers.address", ["id", "=", $watchdogServer]);
                     if (!empty($watchdog_address)) {
-                        $api_url = Config::get('msp_server_protocol').$server_address.Config::get('code_branch')."/".$session_id."/api/GameSession/ResetWatchdogAddress";
+                        
+                        $api_url = ServerManager::getInstance()->GetServerURLBySessionId($session_id)."/api/GameSession/ResetWatchdogAddress";
                         CallAPI("POST", $api_url, array("watchdog_address" => $watchdog_address), $additionalHeaders, false);
                     }
                     if (!empty($newconfigfilename)) {
-                        $api_url2 = Config::get('msp_server_protocol').$server_address.Config::get('code_branch')."/".$session_id."/api/Game/Setupfilename";
+                        $api_url2 = ServerManager::getInstance()->GetServerURLBySessionId($session_id)."/api/Game/Setupfilename";
                         CallAPI("POST", $api_url2, array("configFilename" => $newconfigfilename), $additionalHeaders, false);
                     }
                     

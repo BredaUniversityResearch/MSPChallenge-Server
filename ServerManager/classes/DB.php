@@ -22,7 +22,6 @@ class DB {
 	private $_pdo, $_query, $_error = false, $_errorInfo, $_results=[], $_resultsArray=[], $_count = 0, $_lastId, $_queryCount=0;
 
 	private function __construct($config = []){
-		global $abs_app_root, $url_app_root;
 		set_error_handler(array(&$this, 'CallbackFunction')); // the & is important
 
 		if (!$opts = Config::get('mysql/options')) $opts = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''");
@@ -366,10 +365,8 @@ class DB {
 	}
 	
 	public function dbase_migrate() {
-		global $abs_app_root, $url_app_root;
 		// this function is only called after a successful login
-		// read $abs_app_root.$url_app_root."install/migrations" for files
-		$directory = $abs_app_root.$url_app_root."install/migrations";
+		$directory = ServerManager::getInstance()->GetServerManagerRoot()."install/migrations";
 		$files = array_diff(scandir($directory), array('..', '.'));
 		// for each file found, check if the filename is in the settings table
 		foreach ($files as $file) {
@@ -377,7 +374,7 @@ class DB {
 			$results = $this->results(true);
 			if (empty($results)) {
 				// if it isn't then require_once and add it to the database
-				require_once($abs_app_root.$url_app_root."install/migrations/".$file);
+				require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/migrations/".$file);
 				$sql = 
 				"START TRANSACTION;"
 				.$sql.
@@ -389,8 +386,7 @@ class DB {
 	}
 	
 	public function dbase_install($dbname) {
-		global $abs_app_root, $url_app_root;
-		require_once($abs_app_root.$url_app_root."install/mysql_structure.php");
+		require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/mysql_structure.php");
 		$queries = 
 		"START TRANSACTION;
 		CREATE DATABASE IF NOT EXISTS `".$dbname."` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci; 

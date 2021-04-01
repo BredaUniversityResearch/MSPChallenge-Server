@@ -1,16 +1,5 @@
 <?php
-require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';
-
-require_once './testdata.php';
-*/
+require_once '../init.php';
 
 $allowed_visibilities = array('public','archived');
 
@@ -85,6 +74,7 @@ if ($db->query($query_string, $where_array)) {
 	$response_array['message'] = $visibility;
 	$response_array['count'] = $db->count();
 	$response_array['sessionslist'] = $results;
+
 } else {
 	$response_array['status'] = 'error';
 	$response_array['message'] = $db->errorString();
@@ -102,7 +92,7 @@ function YouShouldUpdate() {
 						'session_state' => 'archived',
 						'region' => 'none');
 	$return[1] = array('id'=> 0,
-						'name' => 'Please download and install version 4.0-beta7 from www.mspchallenge.info.',
+						'name' => 'Please download and install '.ServerManager::getInstance()->GetCurrentVersion().' from www.mspchallenge.info.',
 						'session_state' => 'archived',
 						'region' => 'none');
 	return $return;

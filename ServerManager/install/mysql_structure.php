@@ -42,6 +42,7 @@ CREATE TABLE `game_list` (
   `name` varchar(128) NOT NULL,
   `game_config_version_id` int(11) NOT NULL,
   `game_server_id` int(11) NOT NULL,
+  `game_geoserver_id` INT(11) NOT NULL DEFAULT 1,
   `watchdog_server_id` int(11) NOT NULL,
   `game_creation_time` bigint(20) NOT NULL COMMENT 'Unix timestamp',
   `game_start_year` int(11) NOT NULL,
@@ -120,6 +121,14 @@ CREATE TABLE `game_watchdog_servers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
+
+CREATE TABLE `game_geoservers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Table structure for table `settings`
@@ -257,6 +266,12 @@ ALTER TABLE `game_watchdog_servers`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexen voor tabel `game_geoservers`
+--
+ALTER TABLE `game_geoservers`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `settings`
 --
 ALTER TABLE `settings`
@@ -308,6 +323,12 @@ ALTER TABLE `game_servers`
 ALTER TABLE `game_watchdog_servers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
+--
+-- AUTO_INCREMENT voor een tabel `game_geoservers`
+--
+ALTER TABLE `game_geoservers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
   --
   -- Dumping data for table `game_servers`
   --
@@ -330,9 +351,10 @@ ALTER TABLE `game_watchdog_servers`
   (3, 3, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'Clyde_marine_region_basic/Clyde_marine_region_basic_1.json', 'simcelt', 'Any'),
   (4, 4, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'North_Sea_Digitwin_basic/North_Sea_Digitwin_basic_1.json', 'northsee', 'Any');
 
+  INSERT INTO `game_geoservers` (`id`, `name`, `address`, `username`, `password`) VALUES ('1', 'Default: the public MSP Challenge GeoServer', 'automatically obtained', 'automatically obtained', 'automatically obtained'); 
+
   INSERT INTO `settings` (`name`, `value`) VALUES 
   ('migration_20200618.php', 'Never'),
-  ('migration_20200713.php', 'Never'),
   ('migration_20200721.php', 'Never'),
   ('migration_20200901.php', 'Never'),
   ('migration_20200917.php', 'Never'),
@@ -340,7 +362,9 @@ ALTER TABLE `game_watchdog_servers`
   ('migration_20201002.php', 'Never'),
   ('migration_20201104.php', 'Never'),
   ('migration_20201130.php', 'Never'),
-  ('migration_20210211.php', 'Never');
+  ('migration_20210211.php', 'Never'),
+  ('migration_20210325.php', 'Never');
+
 
 ";
 ?>

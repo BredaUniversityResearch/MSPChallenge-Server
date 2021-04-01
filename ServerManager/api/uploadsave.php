@@ -44,7 +44,7 @@ if (!empty($uploadedSaveFile)) {
                 // now, finally, make the filename unique and update game_saves table accordingly
                 $save_id = $db->lastid();
                 $newzipname = "saves/save_".$save_id.".zip";
-                if (move_uploaded_file($uploadedSaveFile, $abs_app_root.$url_app_root.$newzipname)) {
+                if (move_uploaded_file($uploadedSaveFile, ServerManager::getInstance()->GetServerManagerRoot().$newzipname)) {
                     if ($db->query("UPDATE game_saves SET save_path = ? WHERE id = ?", array($newzipname, $save_id))) {
                         $response_array["status"] = "success";
                         $response_array['message'] = "Your save file has been uploaded and is ready to be used.";

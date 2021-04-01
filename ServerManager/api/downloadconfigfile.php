@@ -1,13 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 $user->hastobeLoggedIn();
 
@@ -31,7 +23,7 @@ if(isset($_GET['version_id']))
 			$response_array['message'] = "Unknown config version id";
 			die(json_encode($response_array));
 		}
-		$storeFilePath = GetConfigBaseDirectory().$results[0]['file_path'];
+		$storeFilePath = ServerManager::getInstance()->GetConfigBaseDirectory().$results[0]['file_path'];
 
 		header('Content-Type: application/x-download');
 		header("Content-Disposition: attachment; filename=".basename($storeFilePath).";");

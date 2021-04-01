@@ -8,7 +8,7 @@ $errors = [];
 $successes = [];
 
 if (!empty($_GET['jwt'])) {
-  $url = Config::get('msp_auth/api_endpoint').'checkjwt.php';
+  $url = ServerManager::getInstance()->GetMSPAuthAPI().'checkjwt.php';
   $arraySend = array (
       "jwt" => $_GET['jwt'],
       "audience" => $servermanager->GetBareHost()
@@ -84,7 +84,7 @@ if (!empty($_GET['jwt'])) {
 }
 
 // if you have no errors to display, then immediately redirect to Authoriser's sso.php page with the proper redirect link
-if (empty($errors)) Redirect::to(Config::get('msp_auth/root').'/users/sso.php?redirect='.urlencode($servermanager->GetFullSelfAddress().'login.php'));
+if (empty($errors)) Redirect::to(ServerManager::getInstance()->GetMSPAuthURL().'/users/sso.php?redirect='.urlencode($servermanager->GetFullSelfAddress().'login.php'));
 
 require_once 'templates/header.php';
 ?>

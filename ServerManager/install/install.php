@@ -36,7 +36,7 @@ require_once '../templates/header.php';
 if ($servermanager->install($user)) {
   //send it to the authoriser to store with successfully logged in user_id
   $params = array("jwt" => Session::get("currentToken"), "server_id" => $servermanager->GetServerID(), "server_name" => $servermanager->GetServerName(), "audience" => $servermanager->GetBareHost());
-  $url_freshinstall = Config::get('msp_auth/api_endpoint').'freshinstalljwt.php';
+  $url_freshinstall = $servermanager->GetMSPAuthAPI().'freshinstalljwt.php';
   $response = CallAPI("POST", $url_freshinstall, $params);
   $freshinstall = json_decode($response);
   if ($freshinstall->success) {
@@ -49,8 +49,8 @@ if ($servermanager->install($user)) {
           <p>You, <strong><?=$user->data()->username;?></strong>, are now the primary user of this Server Manager. This means that you can not only use this application,
            but you can also add other users to it through the <a href="https://auth.mspchallenge.info">MSP Challenge Authoriser</a> application. You don't have to do this
            right now of course, or at all for that matter.</p>
-          <p>You can go ahead and <a href="<?php echo $url_app_root;?>manager.php">set up your first MSP Challenge server</a>.</p>
-          <p>We also recommend you enter your computer's proper IP address or full-qualified domain name <a href="<?php echo $url_app_root;?>server_manager.php">under Settings</a>.</p>
+          <p>You can go ahead and <a href="<?php echo ServerManager::getInstance()->GetServerManagerFolder();?>manager.php">set up your first MSP Challenge server</a>.</p>
+          <p>We also recommend you enter your computer's proper IP address or full-qualified domain name <a href="<?php echo ServerManager::getInstance()->GetServerManagerFolder();?>server_manager.php">under Settings</a>.</p>
         </div>
       </div>
       <?php
@@ -69,4 +69,4 @@ if ($servermanager->install($user)) {
 }
 ?>
 <!-- footers -->
-<?php require_once $abs_app_root.$url_app_root.'templates/footer.php'; // the final html footer copyright row + the external js calls ?>
+<?php require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/footer.php'; // the final html footer copyright row + the external js calls ?>

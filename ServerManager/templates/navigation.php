@@ -1,4 +1,8 @@
 
+<?php
+$url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
+?>
+
 <div id="header-wrapper" >
     <nav class="navbar">
       <a class="title" href="<?php echo $url_app_root;?>index.php" style="background-image: url('<?=$url_app_root?>images/logo.png');"> MSP Challenge Server Manager</a>

@@ -1,13 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 $user->hastobeLoggedIn();
 
@@ -78,7 +70,7 @@ if((isset($_POST['config_file_id']) || !empty($_POST["new_config_file_name"])) &
 	}
 
 	$relativePath = $configFileName."/".$configFileName."_".$newConfigVersionId.".json";
-	$storeFilePath = GetConfigBaseDirectory().$relativePath;
+	$storeFilePath = ServerManager::getInstance()->GetConfigBaseDirectory().$relativePath;
 
 	$outputDirectory = pathinfo($storeFilePath, PATHINFO_DIRNAME);
 	if (!is_dir($outputDirectory))

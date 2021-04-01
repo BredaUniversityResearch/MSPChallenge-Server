@@ -13,7 +13,7 @@ $(document).ready(function(){
 <footer style="text-align: center; padding-top: 15px;">
 
 <div>
-  MSP Challenge Server version <?php echo ThisServerVersion(); ?>
+  MSP Challenge Server version <?php echo ServerManager::getInstance()->GetCurrentVersion(); ?>
 </div>
 <div>
   Server Address: 

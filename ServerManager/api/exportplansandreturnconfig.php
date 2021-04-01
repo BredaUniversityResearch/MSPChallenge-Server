@@ -1,13 +1,5 @@
 <?php
 require_once '../init.php'; 
-/*// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';*/
 
 $user->hastobeLoggedIn();
 
@@ -48,7 +40,7 @@ function GetConfigFileContentsForSessionId($gameSessionId, &$configFileName)
 		$response_array['message'] = "Unknown config version id";
 		die(json_encode($response_array));
 	}
-	$storeFilePath = GetConfigBaseDirectory().$results[0]['file_path'];
+	$storeFilePath = ServerManager::getInstance()->GetConfigBaseDirectory().$results[0]['file_path'];
 
 	$configFileName = basename($results[0]['file_path'], ".json");
 

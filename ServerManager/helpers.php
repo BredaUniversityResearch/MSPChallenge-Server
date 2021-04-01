@@ -1,10 +1,6 @@
 <?php
 //functions that help things along. by definition functions that are so common or fundamental, require limited and diverse arguments, it makes no sense to turn them into classes
 
-function ThisServerVersion() {
-  return "4.0 beta-7";
-}
-
 function GetGameSessionAPIAuthenticationHeader($sessionId) {
 	$db = DB::getInstance();
 	$query = $db->query("SELECT game_list.api_access_token FROM game_list WHERE game_list.id = ?", array($sessionId));
@@ -25,25 +21,6 @@ function GetReadableTimeFormat() {
  function UnixToReadableTime($unixTimestamp) {
 	return date(GetReadableTimeFormat(), $unixTimestamp);
 }
-
-function GetConfigBaseDirectory()	{
-		return "../configfiles/";
-}
-
-function GetSessionArchiveBaseDirectory()	{
-    global $abs_app_root, $url_app_root;
-		return $abs_app_root.$url_app_root."session_archive/";
-}
-
-function GetServerConfigBaseDirectory()	{
-  return "../../running_session_config/";
-}
-
-function GetServerRasterBaseDirectory() {
-  return "../../raster/";
-}
-
-
 
 function ensure_unique_name($name, $column, $table) {
   // ensures that $name is a unique value in the database, given the $table and $column to check
@@ -104,7 +81,7 @@ function CallAPI($method, $url, $data2send = false, $headers = array(), $asjson 
 
     // any proxy required for the external calls to the MSP Authoriser? (which are the only kind of external calls done by ServerManager)
     $proxy = Config::get('msp_auth/with_proxy');
-    if (!empty($proxy) && strstr($url, Config::get('msp_auth/api_endpoint')) !== false && PHPCanProxy()) {
+    if (!empty($proxy) && strstr($url, ServerManager::getInstance()->GetMSPAuthAPI()) !== false && PHPCanProxy()) {
       curl_setopt($curl, CURLOPT_PROXY, $proxy);
       curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
       curl_setopt($curl, CURLOPT_MAXREDIRS, 1);
@@ -1222,7 +1199,6 @@ if(!function_exists('getUSPageFiles')) {
 
 function checklanguage() {
   $db = DB::getInstance();
-  global $user,$abs_app_root,$url_app_root,$currentPage,$token;
   $your_token = $_SERVER['REMOTE_ADDR'];
   if(!empty($_POST['language_selector'])){
 
@@ -1261,7 +1237,7 @@ function checklanguage() {
             if(!function_exists('languageSwitcher')) {
               function languageSwitcher() {
                 $db = DB::getInstance();
-                global $user,$url_app_root,$currentPage,$token;
+                global $user,$currentPage,$token;
                 $your_token = $_SERVER['REMOTE_ADDR'];
 
                 $_SESSION['your_token']=$your_token;
@@ -1276,7 +1252,7 @@ function checklanguage() {
                     foreach($languages as $k=>$v){
                       $languages[$k] = substr($v,0,-4);
                       if(file_exists("lang/flags/".$languages[$k].".png")){?>
-                        <input type="image" title="<?=$languages[$k]?>" alt="<?=$languages[$k]?>" name="<?=$languages[$k]?>" src="<?=$url_app_root."lang/flags/".$languages[$k].".png"?>" border="0" alt="Submit" style="width: 40px;" />
+                        <input type="image" title="<?=$languages[$k]?>" alt="<?=$languages[$k]?>" name="<?=$languages[$k]?>" src="<?=ServerManager::getInstance()->GetServerManagerFolder()."lang/flags/".$languages[$k].".png"?>" border="0" alt="Submit" style="width: 40px;" />
                       <?php }
                     } ?>
                   </p>

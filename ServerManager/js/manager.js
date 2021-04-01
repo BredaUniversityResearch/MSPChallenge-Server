@@ -27,10 +27,12 @@ function updateInfobox(type, message) {
 	// updating all info that might have changed, except the sessions and saves tables, because those update every X secs anyway
 	updateConfigVersionsTable($('input[name=radioOptionConfig]:checked').val());
 	configListToOptions();
+	GeoServerListToOptions();
 	watchdogListToOptions();
 	SavesListToOptions();
 	WatchdogServerList();
 	GetServerAddr();
+	GeoServerList();
 }
 
 const MessageType = {
@@ -42,7 +44,6 @@ const MessageType = {
 function showToast(type, message) {
 	switch(type) {
 		case MessageType.ERROR:
-
 			shortMessage = message
 			if(message.length > 100){
 				shortMessage =  'An error occurred with the MSP Challenge session. '
@@ -56,7 +57,6 @@ function showToast(type, message) {
 				position: 'mm',
 				duration: 10000
 			});
-
 			break;
 		case MessageType.SUCCESS:
 			tata.success('Success', message, {
@@ -113,10 +113,10 @@ function startSession(sessionId) {
 			Token: currentToken,
 			format: 'json',
 			session_id: sessionId
-			},
+		},
 		'error': function() {
 			updateInfobox(MessageType.ERROR, 'startSession: Error in AJAX call.');
-			},
+		},
 		'dataType': 'json',
 		'success': function(data) {
 			if (data.status == 'error') {
@@ -124,9 +124,10 @@ function startSession(sessionId) {
 				console.log('startSession' , data.message)
 			} else {
 				updateInfobox(MessageType.SUCCESS, data.message);
-				updatePlayPauseStatus('pause', sessionId);
+				$('#sessionInfo').modal('hide');
+				//updatePlayPauseStatus('pause', sessionId);
 			}
-			},
+		},
 		'type': 'POST'
 	});
 }
@@ -140,7 +141,7 @@ function pauseSession(sessionId) {
 			Token: currentToken,
 			format: 'json',
 			session_id: sessionId
-			},
+		},
 		'error': function() {
 			updateInfobox(MessageType.ERROR, 'pauseSession: Error in AJAX call.');
 			},
@@ -151,9 +152,10 @@ function pauseSession(sessionId) {
 				console.log('pauseSession', data.message);
 			} else {
 				updateInfobox(MessageType.SUCCESS, data.message);
-				updatePlayPauseStatus('play', sessionId);
+				$('#sessionInfo').modal('hide');
+				//updatePlayPauseStatus('play', sessionId);
 			}
-			},
+		},
 		'type': 'POST'
 	});
 }
@@ -228,10 +230,10 @@ function archiveSession(sessionId) {
 				Token: currentToken,
 				format: 'json',
 				session_id: sessionId
-				},
+			},
 			'error': function() {
 				updateInfobox(MessageType.ERROR, 'archiveSession: Error in AJAX call.');
-				},
+			},
 			'dataType': 'json',
 			'success': function(data) {
 				if (data.status == 'error') {
@@ -242,7 +244,7 @@ function archiveSession(sessionId) {
 					$('#sessionInfo').modal('hide');
 					//updateSessionsTable($('input[name=radioVisibility]:checked', '#radioFilterSessionsList').val());
 				}
-				},
+			},
 			'type': 'POST'
 		});
 	}
@@ -255,7 +257,7 @@ function toggleDemoSession(sessionId) {
 			Token: currentToken,
 			format: 'json',
 			session_id: sessionId
-			},
+		},
 		'error': function() {
 			updateInfobox(MessageType.ERROR, 'toggleDemoSession: Error in AJAX call.');
 			},
@@ -268,7 +270,7 @@ function toggleDemoSession(sessionId) {
 				updateInfobox(MessageType.SUCCESS, data.message);
 				updateDemoSessionStatus();
 			}
-			},
+		},
 		'type': 'POST'
 	});
 }
@@ -334,10 +336,10 @@ function RecreateSession(sessionId) {
 			Token: currentToken,
 			format: 'json',
 			session_id: sessionId
-			},
+		},
 		'error': function() {
 			updateInfobox(MessageType.ERROR, 'RecreateSession: Error in AJAX call.');
-			},
+		},
 		'dataType': 'json',
 		'success': function(data) {
 			if (data.status == 'error') {
@@ -345,13 +347,11 @@ function RecreateSession(sessionId) {
 				console.log('RecreateSession', data.message);
 			} else {
 				updateInfobox(MessageType.SUCCESS, data.message);
-				//updateSessionsTable($('input[name=radioVisibility]:checked', '#radioFilterSessionsList').val());
 			}
-			},
+		},
 		'type': 'POST'
 		});
 		$('#sessionInfo').modal('hide');
-		//$('#sessionsTable').trigger('update', true);
 	}
 }
 
@@ -361,7 +361,6 @@ function downloadExportedPlansWithConfig(sessionId) {
 
 function updateSessionsTable(visibility) {
 	$("#buttonRefreshSessionsListIcon").addClass("fa-spin");
-	//updateSessionInfoList(null);
 	$.ajax({
 		'url': 'api/getsessionslist.php',
 		'dataType': 'json',
@@ -389,10 +388,10 @@ function sessionsListToTable(sessionsList) {
 	if(sessionsList == '') { $('<tr><td colspan="8">No sessions yet. Create your first one through the New Session button above.</td></tr>').appendTo('#sessionsListtbody') }
 	$.each(sessionsList, function(i, v) {
 		visibility = '';
-		show_state = v.game_state;
+		v.show_state = v.game_state;
 		if(v.session_state != 'healthy') {
 			visibility = ' hidden_icon';
-			show_state = v.session_state;
+			v.show_state = v.session_state;
 		}
 		if(v.game_state == 'play' || v.game_state == 'fastforward') {
 			save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Session"></i></button>';
@@ -415,8 +414,8 @@ function sessionsListToTable(sessionsList) {
 		var tableHTML = '<tr><td>'+v.id+'</td><td>'+v.name+'</td>';
 		tableHTML += '<td>'+v.config_file_name+'</td>';
 		tableHTML +=
-			'<td>'+v.players_active+'</td>'+
-			'<td class="state_'+show_state+'">'+show_state+'</td>'+
+			'<td>'+v.players_past_hour+'</td>'+
+			'<td class="state_'+v.show_state+'">'+ShowState(v)+'</td>'+
 			'<td>'+v.current_month_formatted+'</td>'+
 			'<td>'+v.end_month_formatted+'</td>'+
 			'<td class="text-center">'+running_icon+' '+save_icon+' '+info_icon+'</i></td>'+
@@ -426,53 +425,80 @@ function sessionsListToTable(sessionsList) {
 	//$('#sessionsTable').trigger('update', true);
 }
 
+function ShowState(v) {
+	if (v.show_state == "request") {
+		return v.show_state+' <i class="fa fa-spinner fa-pulse" title="Your session is being created. Please wait..."></i>';	
+	}
+	else if (v.show_state == "setup") {
+		return v.show_state+' <i class="fa fa-user" onclick="getSessionInfo('+v.id+')" title="Be sure to set up end-user access or no-one will be able to log on to your session."></i>';
+	}
+	else {
+		return v.show_state;
+	}
+}
+
 function updateSessionInfoList(sessionInfo) {
 	//console.log('Session Log:' , sessionInfo.log);
 	$('#sessionInfoList').empty();
 	if(sessionInfo == null) {
 		$('<li class="list-group-item list-group-item-warning">No session selected...</li>').appendTo("#sessionInfoList");
 	} else {
+		var buttonUserAccess = '';
 		var buttonStartPause = '';
 		var buttonArchiveDownload = '';
+		var toggleDemoSessionButton = '';
+		var buttonExportCurrentPath = '';
+		var buttonRecreateSession = '';
 		var buttonSaveDownload = '';
-
-		if(sessionInfo.session_state == 'archived') {
-			buttonArchiveDownload = ShowArchiveFile(sessionInfo.id);
-		} else if (sessionInfo.session_state == 'healthy') {
-			buttonArchiveDownload = '<button id="buttonArchiveDownload" class="btn btn-warning btn-sm" onClick="archiveSession('+sessionInfo.id+')"><i class="fa fa-archive" title="Archive Session"></i> Archive Session</button>';
-			buttonSaveDownload = '<button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+')"><i class="fa fa-save" title="Save Session"></i> Save Session as File</button>';
-			buttonSaveDownload += ' <button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+', \'layers\')"><i class="fa fa-save" title="Save All Layers"></i> Save All Layers</button>';
-			if(sessionInfo.game_state == 'play') {
-				buttonStartPause = '<button id="buttonStartPause" class="btn btn-secondary btn-sm pull-left" onclick="pauseSession('+sessionInfo.id+')"><i class="fa fa-pause" title="Pause Simulation"></i> Pause Simulation</button>';
-			}
-			if(sessionInfo.game_state == 'pause' || sessionInfo.game_state == 'setup') {
-				buttonStartPause = '<button id="buttonStartPause" class="btn btn-success btn-sm pull-left" onclick="startSession('+sessionInfo.id+')"><i class="fa fa-play" title="Start Simulation"></i> Start Simulation</button>';
-			}
-		}
+		var buttonUpgrade = '';
 
 		var demoSessionDescription = (sessionInfo.demo_session == 0)? " Enable Demo Session" : " Disable Demo Session";
 
-		var toggleDemoSessionButton = '<button id="toggleDemoSessionButton" class="btn btn-info btn-sm" onClick="toggleDemoSession('+sessionInfo.id+')"><i class="fa fa-bookmark" title="'+demoSessionDescription+'"></i>'+demoSessionDescription+'</button>';
-		var buttonExportCurrentPath = '<button id="exportPlansButton" class="btn btn-secondary btn-sm" onClick="downloadExportedPlansWithConfig('+sessionInfo.id+')"><i class="fa fa-file-code-o" title="Export Configuration with Current Plans"></i> Export Configuration with Current Plans</button>';
-
-		if(sessionInfo.session_state == 'request' || sessionInfo.session_state == 'archived'){
-			buttonExportCurrentPath = ''; // just don't show anything
-			toggleDemoSessionButton = ''; // just don't show anything
+		if(sessionInfo.session_state == 'request') {
+			if (sessionInfo.save_id > 0) {
+				var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateLoadSave('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session (from save)</button>';
+			}
+			else {
+				var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateSession('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>';
+			}
 		}
-
-		if(sessionInfo.session_state == 'archived') {
-			var buttonRecreateSession = ''; // just don't show anything
+		else if (sessionInfo.session_state == 'healthy') {
+			buttonUserAccess = '<button id="userAccessButton" class="btn btn-secondary btn-sm" onClick="setupUserAccess('+sessionInfo.id+')"><i class="fa fa-user" title="Set User Access"></i> Set User Access</button>';
+			toggleDemoSessionButton = '<button id="toggleDemoSessionButton" class="btn btn-info btn-sm" onClick="toggleDemoSession('+sessionInfo.id+')"><i class="fa fa-bookmark" title="'+demoSessionDescription+'"></i>'+demoSessionDescription+'</button>';
+			buttonExportCurrentPath = '<button id="exportPlansButton" class="btn btn-secondary btn-sm" onClick="downloadExportedPlansWithConfig('+sessionInfo.id+')"><i class="fa fa-file-code-o" title="Export with Current Plans"></i> Export with Current Plans</button>';
+			if(sessionInfo.game_state == 'play') {
+				buttonStartPause = '<button id="buttonStartPause" class="btn btn-secondary btn-sm pull-left" onclick="pauseSession('+sessionInfo.id+')"><i class="fa fa-pause" title="Pause Simulation"></i> Pause Simulation</button>';
+			}
+			else if(sessionInfo.game_state == 'pause' || sessionInfo.game_state == 'setup') {
+				buttonArchiveDownload = '<button id="buttonArchiveDownload" class="btn btn-warning btn-sm" onClick="archiveSession('+sessionInfo.id+')"><i class="fa fa-archive" title="Archive Session"></i> Archive Session</button>';
+				buttonSaveDownload = '<button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+')"><i class="fa fa-save" title="Save Session"></i> Save Session as File</button>';
+				buttonSaveDownload += ' <button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+', \'layers\')"><i class="fa fa-save" title="Save All Layers"></i> Save All Layers</button>';
+				buttonStartPause = '<button id="buttonStartPause" class="btn btn-success btn-sm pull-left" onclick="startSession('+sessionInfo.id+')"><i class="fa fa-play" title="Start Simulation"></i> Start Simulation</button>';
+				buttonUpgrade = getSessionUpgrade(sessionInfo.id);
+				if (sessionInfo.save_id > 0) {
+					var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateLoadSave('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session (from save)</button>';
+				}
+				else {
+					var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateSession('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>';
+				}
+			}
 		}
-		else if (sessionInfo.save_id > 0) {
-			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateLoadSave('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session (from save)</button>';
+		else if(sessionInfo.session_state == 'failed') {
+			buttonArchiveDownload = '<button id="buttonArchiveDownload" class="btn btn-warning btn-sm" onClick="archiveSession('+sessionInfo.id+')"><i class="fa fa-archive" title="Archive Session"></i> Archive Session</button>';
+			if (sessionInfo.save_id > 0) {
+				var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateLoadSave('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session (from save)</button>';
+			}
+			else {
+				var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateSession('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>';
+			}
 		}
-		else {
-			var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateSession('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>';
+		else if(sessionInfo.session_state == 'archived') {
+			buttonArchiveDownload = ShowArchiveFile(sessionInfo.id);
 		}
 
 		$('#sessionInfoTable').empty();
 
-		$('#sessionInfoTable').append(getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownload, toggleDemoSessionButton, buttonExportCurrentPath, buttonRecreateSession, buttonSaveDownload));
+		$('#sessionInfoTable').append(getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownload, toggleDemoSessionButton, buttonExportCurrentPath, buttonRecreateSession, buttonSaveDownload, buttonUpgrade, buttonUserAccess));
 
 		if($('#logInfo')) {
 			$('#logInfo').hide();
@@ -483,7 +509,62 @@ function updateSessionInfoList(sessionInfo) {
 	}
 }
 
-function getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownload, toggleDemoSessionButton, buttonExportCurrentPath, buttonRecreateSession, buttonSaveDownload) {
+function getSessionUpgrade(sessionId) {
+	//api call
+	var upgradeavailable = false;
+	$.ajax({
+		'url': 'api/getsessionupgrades.php',
+		'data': {
+			Token: currentToken,
+			format: 'json',
+			session_id: sessionId
+		},
+		'error': function() {
+			updateInfobox(MessageType.ERROR, 'Cannot check upgrade status.');
+		},
+		'dataType': 'json',
+		'success': function(data) {
+			if (data.status == 'error') {
+				updateInfobox(MessageType.ERROR, data.message);
+				console.log('getSessionUpgrade', data.message);
+			}
+			upgradeavailable = data.upgrade;
+		}, 
+		'async': false,
+		'type': 'POST'
+	});
+	if (upgradeavailable !== false) {
+		return '<button id="buttonUpgrade" class="btn btn-warning btn-sm" onClick="callUpgrade('+sessionId+')"><i class="fa fa-wrench" title="Upgrade Session"></i> Upgrade Session</button>';
+	}
+	else return '';
+}
+
+function callUpgrade(sessionId) {
+	$.ajax({
+		'url': 'api/upgradesession.php',
+		'data': {
+			Token: currentToken,
+			format: 'json',
+			session_id: sessionId
+		},
+		'error': function() {
+			updateInfobox(MessageType.ERROR, 'Cannot upgrade session.');
+		},
+		'dataType': 'json',
+		'success': function(data) {
+			if (data.status == 'error') {
+				updateInfobox(MessageType.ERROR, data.message);
+				console.log('callUpgrade', data.message);
+			} else {
+				updateInfobox(MessageType.SUCCESS, data.message);
+				$('#sessionInfo').modal('hide');
+			}
+		}, 
+		'type': 'POST'
+	});
+}
+
+function getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownload, toggleDemoSessionButton, buttonExportCurrentPath, buttonRecreateSession, buttonSaveDownload, buttonUpgrade, buttonUserAccess) {
 	var html = 	'<tr class="bg-primary"><td class="text-center" colspan="4" style="color: #FFFFFF">'+sessionInfo.name+'</td></tr>';
 	html += 	'<tr><th scope="col">ID</th><td class="text-right">'+sessionInfo.id+'</td>'
 	html += 	'<th scope="col">Visibility</th>'
@@ -550,11 +631,11 @@ function getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownloa
 
 	html += 	'<tr class="table-info">'
 	html +=			'<td colspan="2">' + buttonStartPause + '&nbsp;' + toggleDemoSessionButton + ' ' + '</td>'
-	html +=			'<td colspan="2" class="text-right">' + buttonRecreateSession + ' ' + buttonArchiveDownload + ' ' + '</td>'
+	html +=			'<td colspan="2" class="text-right">' + buttonRecreateSession + ' ' + buttonArchiveDownload + ' ' + buttonUpgrade + '</td>'
 	html +=		'</tr>'
 	html += 	'<tr class="table-info">'
 	html +=			'<td colspan="2">' + buttonSaveDownload  + '</td>'
-	html +=			'<td colspan="2" class="text-right">' + buttonExportCurrentPath + ' ' + '</td>'
+	html +=			'<td colspan="2" class="text-right">' + buttonUserAccess + ' ' + buttonExportCurrentPath + ' ' + '</td>'
 	html +=		'</tr>'
 
 	//Logs
@@ -592,6 +673,7 @@ function submitNewSession() {
 	var adminPassword = $('#newAdminPassword').val();
 	var playerPassword = $('#newPlayerPassword').val();
 	var gameServer = $('#newGameServer').val();
+	var GeoServer = $('#newGeoServer').val();
 	var watchdog = $('#newWatchdog').val();
 	var visibility = $('#newVisibility').val();
 
@@ -608,12 +690,13 @@ function submitNewSession() {
 				adminPassword: adminPassword,
 				playerPassword: playerPassword,
 				gameServer: gameServer,
+				GeoServer: GeoServer,
 				watchdog: watchdog,
 				visibility: visibility
-				},
+			},
 			'error': function() {
 				updateInfobox(MessageType.ERROR, 'submitNewSession: Error in AJAX call.');
-				},
+			},
 			'dataType': 'json',
 			'success': function(data) {
 				if (data.status == 'error') {
@@ -624,13 +707,12 @@ function submitNewSession() {
 					}
 					updateInfobox(MessageType.SUCCESS, data.message);
 				}
-				},
+			},
 			'type': 'POST'
 		});
 
 		$('#modalNewSession').modal('hide');
 		$('#modalNewSession').find("form").trigger("reset");
-		//$('#sessionsTable').trigger('update', true);
 	}
 }
 
@@ -779,12 +861,12 @@ function getSaveInfo(saveId) {
 			save_id: saveId
 		},
 		'error': function() {
-			updateInfobox('danger', 'getSaveInfo: Error in AJAX call.');
+			updateInfobox(MessageType.ERROR, 'getSaveInfo: Error in AJAX call.');
 		},
 		'dataType': 'json',
 		'success': function(data) {
 			if (data.status == 'error') {
-				updateInfobox('danger', data.message);
+				updateInfobox(MessageType.ERROR, data.message);
 				console.log('getSaveInfo (API)', data.message);
 			} else {
 				updateSaveInfoList(data.saveinfo);
@@ -1345,6 +1427,26 @@ function watchdogListToOptions() {
 	});
 }
 
+function GeoServerListToOptions() {
+	$('#newGeoServer').empty();
+	$.ajax({
+		'url': 'api/getgeoserverlist.php',
+		'data': {
+			Token: currentToken,
+			format: 'json'
+		},
+		'error': function() {
+			$('#newGeoServer').html('<option>An error occurred.</option>');
+		},
+		'dataType': 'json',
+		'success': function(data) {
+				$.each(data.geoserver, function(i, v) {
+					$('<option value="'+v.id+'" title="'+v.address+'">'+v.name+'</option>').appendTo('#newGeoServer');
+				})
+			},
+		'type': 'POST'
+	});
+}
 
 
 /*
@@ -1460,12 +1562,32 @@ function WatchdogServerList() {
 			$('#watchdogServerBody').html('An error occurred.');
 			},
 		'dataType': 'json',
+		'success': function(data) {	
+			$.each(data.watchdoglist, function(i, v) {
+				$('<tr><td>' + v.name + '</td><td>' + v.address + '</td><td></td></tr>').appendTo('#watchdogServerBody');
+			});
+		},
+		'type': 'POST'
+	});
+}
+
+function GeoServerList() {
+	$('#GeoServerBody').empty();
+	$.ajax({
+		'url': 'api/getgeoserverlist.php',
+		'data': {
+			Token: currentToken,
+			format: 'json'
+		},
+		'error': function() {
+			$('#GeoServerBody').html('An error occurred.');
+		},
+		'dataType': 'json',
 		'success': function(data) {
-			$('bla').appendTo('#watchdogServerBody');
-				$.each(data.watchdoglist, function(i, v) {
-					$('<tr><td>' + v.name + '</td><td>' + v.address + '</td><td></td></tr>').appendTo('#watchdogServerBody');
-				});
-			},
+			$.each(data.geoserver, function(i, v) {
+				$('<tr><td>' + v.name + '</td><td>' + v.address + '</td><td></td></tr>').appendTo('#GeoServerBody');
+			});
+		},
 		'type': 'POST'
 	});
 }
@@ -1503,14 +1625,14 @@ function submitNewServer() {
 				serverid: serverid,
 			},
 			'error': function() {
-				updateInfobox('danger', 'addgameserver: Error in AJAX call.');
+				updateInfobox(MessageType.ERROR, 'addgameserver: Error in AJAX call.');
 			},
 			'dataType': 'json',
 			'success': function(data) {
 				if (data.status == 'error') {
-					updateInfobox('danger', 'addgameserver (API): '+data.message);
+					updateInfobox(MessageType.ERROR, 'addgameserver (API): '+data.message);
 				} else {
-					updateInfobox('success', data.message);
+					updateInfobox(MessageType.SUCCESS, data.message);
 				}
 			},
 			'async': false,
@@ -1518,8 +1640,10 @@ function submitNewServer() {
 		});
 	}
 	else {
-		updateInfobox('danger', 'Please fill in all the required fields');
+		updateInfobox(MessageType.ERROR, 'Please fill in all the required fields');
 	}
+	$('#modalServerDetails').modal('hide');
+	$('#modalServerDetails').find("form").trigger("reset");
 }
 
 function submitNewWatchdogServer() {
@@ -1534,26 +1658,63 @@ function submitNewWatchdogServer() {
 				format: 'json',
 				name: name,
 				address: address,
-				},
+			},
 			'error': function() {
-				updateInfobox('danger', 'addwatchdogserver: Error in AJAX call.');
-				},
+				updateInfobox(MessageType.ERROR, 'addwatchdogserver: Error in AJAX call.');
+			},
 			'dataType': 'json',
 			'success': function(data) {
 				if (data.status == 'error') {
-					updateInfobox('danger', 'addwatchdogserver (API): '+data.message);
+					updateInfobox(MessageType.ERROR, 'addwatchdogserver (API): '+data.message);
 				} else {
-					updateInfobox('success', data.message);
-					WatchdogServerList();
-					GetServerAddr();
+					updateInfobox(MessageType.SUCCESS, data.message);
 				}
-				},
+			},
 			'type': 'POST'
 		});
-		$('#sessionsTable').trigger('update', true);
 	}
 	else {
-		updateInfobox('danger', 'Please fill in all the required fields');
+		updateInfobox(MessageType.ERROR, 'Please fill in all the required fields');
 	}
+	$('#modalNewSimServers').modal('hide');
+	$('#modalNewSimServers').find("form").trigger("reset");
+}
+
+function submitNewGeoServer() {
+	var name = $('#newGeoServerName').val();
+	var address = $('#newGeoServerAddress').val();
+	var username = $('#newGeoServerUsername').val();
+	var password = $('#newGeoServerPassword').val();
+
+	if ([name, address, username, password].every(Boolean)) {
+		$.ajax({
+			url: 'api/addgeoserver.php',
+			data:  {
+				Token: currentToken,
+				format: 'json',
+				name: name,
+				address: address,
+				username: username,
+				password: password,
+			},
+			'error': function() {
+				updateInfobox(MessageType.ERROR, 'addwatchdogserver: Error in AJAX call.');
+			},
+			'dataType': 'json',
+			'success': function(data) {
+				if (data.status == 'error') {
+					updateInfobox(MessageType.ERROR, 'addwatchdogserver (API): '+data.message);
+				} else {
+					updateInfobox(MessageType.SUCCESS, data.message);	
+				}
+			},
+			'type': 'POST'
+		});
+	}
+	else {
+		updateInfobox(MessageType.ERROR, 'Please fill in all the required fields');
+	}
+	$('#modalNewGeoServers').modal('hide');
+	$('#modalNewGeoServers').find("form").trigger("reset");
 }
 

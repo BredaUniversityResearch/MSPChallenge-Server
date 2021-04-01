@@ -8,14 +8,14 @@ $db->dbase_migrate();
 
 if(isset($user) && $user->isLoggedIn()){
   if ($servermanager->freshinstall()) {
-    Redirect::to($url_app_root.'install/install.php');
+    Redirect::to($servermanager->GetServerManagerFolder().'install/install.php');
   }
   else {
-    Redirect::to($url_app_root.'manager.php');
+    Redirect::to($servermanager->GetServerManagerFolder().'manager.php');
   }
 }
 else{
-  Redirect::to($url_app_root.'login.php');
+  Redirect::to($servermanager->GetServerManagerFolder().'login.php');
 }
 die();
 ?>

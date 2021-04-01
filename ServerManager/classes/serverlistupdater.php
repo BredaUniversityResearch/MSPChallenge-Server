@@ -124,7 +124,7 @@ class ServerListUpdater
 			Logging::Verbose("Found existing data");
 			$existingData = $existingSessionData->first();
 			$configFilePath = $existingData->game_config_version_file_path; //$result->first()->file_path;
-			$fullConfigFilePath = GetConfigBaseDirectory().$configFilePath;
+			$fullConfigFilePath = ServerManager::getInstance()->GetConfigBaseDirectory().$configFilePath;
 			//Logging::Verbose("Here it is: ".var_export($existingData, true));
 			Logging::Verbose("Found game server ".$existingData->game_server_address." and watchdog address ".$existingData->game_watchdog_server_address." and config path ".$fullConfigFilePath.". Requesting restart.");
 			

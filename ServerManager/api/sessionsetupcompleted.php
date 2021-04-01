@@ -1,17 +1,7 @@
 <?php
-//require_once '../init.php'; 
-// all the configurable variables
-require_once '../config.php';
-
-// all the classes
-require_once '../classes/class.autoloader.php';
-
-// all the helper functions
-require_once '../helpers.php';
+require_once '../init.php'; 
 
 $db = DB::getInstance();
-
-//file_put_contents($abs_app_root . $url_app_root . "log/sessionsetupcompleted.txt", var_export($_POST, true));
 
 //header('Content-type: application/json');
 $response_array['status'] = 'error';

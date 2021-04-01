@@ -18,7 +18,7 @@ session_start();
 
 // language setting
 checklanguage();
-require $abs_app_root.$url_app_root.'lang/'.$_SESSION['us_lang'].".php";
+require ServerManager::getInstance()->GetServerManagerRoot().'lang/'.$_SESSION['us_lang'].".php";
 
 $user = new User();
 

@@ -1,13 +1,13 @@
 <style>
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('<?=$url_app_root?>css/fonts/glyphicons-halflings-regular.eot');
+  src: url('<?=ServerManager::getInstance()->GetServerManagerFolder()?>css/fonts/glyphicons-halflings-regular.eot');
   src:
-  url('<?=$url_app_root?>css/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'),
-  url('<?=$url_app_root?>css/fonts/glyphicons-halflings-regular.woff2') format('woff2'),
-  url('<?=$url_app_root?>css/fonts/glyphicons-halflings-regular.woff') format('woff'),
-  url('<?=$url_app_root?>css/fonts/glyphicons-halflings-regular.ttf') format('truetype'),
-  url('<?=$url_app_root?>css/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+  url('<?=ServerManager::getInstance()->GetServerManagerFolder()?>css/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'),
+  url('<?=ServerManager::getInstance()->GetServerManagerFolder()?>css/fonts/glyphicons-halflings-regular.woff2') format('woff2'),
+  url('<?=ServerManager::getInstance()->GetServerManagerFolder()?>css/fonts/glyphicons-halflings-regular.woff') format('woff'),
+  url('<?=ServerManager::getInstance()->GetServerManagerFolder()?>css/fonts/glyphicons-halflings-regular.ttf') format('truetype'),
+  url('<?=ServerManager::getInstance()->GetServerManagerFolder()?>css/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
 }
 .glyphicon {
   position: relative;
