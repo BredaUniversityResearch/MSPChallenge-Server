@@ -2,7 +2,10 @@
 	class User extends Base {
 
 		protected $allowed = array(
-			["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE]
+			["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE],
+			"CloseSession",
+			["getProviders", Security::ACCESS_LEVEL_FLAG_NONE], // << change to ServerManager when dev is done
+        	["checkExists", Security::ACCESS_LEVEL_FLAG_NONE] // << change to ServerManager when dev is done
 		); 
 
 		/**
@@ -11,7 +14,7 @@
 		 * @api {POST} /user/RequestSession Set State
 		 * @apiSuccess {json} Returns a json object describing the 'success' state, the 'session_id' generated for the user. And in case of a failure a 'message' that describes what went wrong.  
 		 */
-		public function RequestSession(string $build_timestamp, int $country_id, string $country_password = "")
+		public function RequestSession(string $build_timestamp, int $country_id, string $country_password = "", string $user_name = "")
 		{
 			$response = array();
 
@@ -61,7 +64,7 @@
 
 			if ($hasCorrectPassword)
 			{
-				$response["session_id"] = Database::GetInstance()->query("INSERT INTO user(user_lastupdate, user_country_id) VALUES (0, ?)", array($country_id), true);
+				$response["session_id"] = Database::GetInstance()->query("INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)", array($user_name, $country_id), true);
 				$security = new Security();
 				$response["api_access_token"] = $security->GenerateToken()["token"];
 				$response["api_access_recovery_token"] = $security->GetRecoveryToken()["token"];
@@ -72,6 +75,38 @@
 			}
 
 			return $response;
+		}
+
+		public function CloseSession(int $session_id)
+		{
+			Database::GetInstance()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
+		}
+
+		private function checkProviderExists($provider)
+		{
+			if (class_exists($provider) && is_subclass_of($provider, "Auths")) return true;
+			return false;
+		}
+	
+		public function getProviders()
+		{
+			$return = array();
+			Base::AutoloadAllClasses();
+			foreach (get_declared_classes() as $class) {
+				if ($this->checkProviderExists($class)) {
+					$return[] = $class;
+				}
+			}
+			return $return;
+		}
+	
+		public function checkExists(string $provider, string $username)
+		{
+			if ($this->checkProviderExists($provider)) {
+				$call_provider = new $provider;
+				return $call_provider->checkuser($username);
+			}
+			throw new Exception("Could not work with authentication provider '".$provider."'.");
 		}
 	}
 ?>

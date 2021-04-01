@@ -5,7 +5,8 @@
 
 class Router
 {
-	private const ALLOWED_CLASSES = array(
+	public const ALLOWED_CLASSES = array(
+		"authconn",
 		"batch",
 		"cel", 
 		"energy",  
@@ -28,12 +29,17 @@ class Router
 		"warning" 
 	);
 
+	private const TRANSACTIONS_TOGGLE = false; // should we be using transactions at all?
+	private const TRANSACTIONS_MODE = "OptIn"; // or OptOut 
+											   // >> OptIn means some calls will request transactions (so default is no transactions)
+											   // >> OptOut means some calls will request no transactions (so default is transactions)
+
 	public static function RouteApiCall(string $apiCallUrl, array $data)
 	{
 		$endpointData = self::ParseEndpointString($apiCallUrl);
 		try 
 		{
-			$result = self::ExecuteCall($endpointData["class"], $endpointData["method"], $data, true);
+			$result = self::ExecuteCall($endpointData["class"], $endpointData["method"], $data, self::TRANSACTIONS_TOGGLE);
 
 			if (UnitTestSupport::ShouldLogApiCalls())
 			{
@@ -84,15 +90,15 @@ class Router
 
 			// everything ok, try to actually call the class method - wrapped in a transaction - and catch any exceptions thrown
 			$arguments = self::ResolveArguments($classData, $methodData, $data);
-			$transactionOptOut = self::CheckMethodAttributes($methodData);
+			$CallWantsTransaction = self::CheckMethodAttributes($methodData);
 			try {
-				if (!$transactionOptOut && $startDatabaseTransaction) {
+				if ($CallWantsTransaction && $startDatabaseTransaction) {
 					Database::GetInstance()->DBStartTransaction();
 				}
 
 				$payload = $class->$method(...$arguments);
 
-				if (!$transactionOptOut && $startDatabaseTransaction) {
+				if ($CallWantsTransaction && $startDatabaseTransaction) {
 					Database::GetInstance()->DBCommitTransaction();
 				}
 			} catch (\Throwable $e) {
@@ -100,7 +106,7 @@ class Router
 				// PHP code parsing errors are caught in the shutdown function as defined in helpers.php
 				$success = false;
 
-				if (!$transactionOptOut && $startDatabaseTransaction) {
+				if ($CallWantsTransaction && $startDatabaseTransaction) {
 					Database::GetInstance()->DBRollbackTransaction();
 				}
 
@@ -212,7 +218,12 @@ class Router
 	private static function CheckMethodAttributes(ReflectionMethod $methodData)
 	{
 		$comment = $methodData->getDocComment();
-		return stristr($comment, "@ForceNoTransaction") !== false;
+		if (self::TRANSACTIONS_MODE == "OptOut") {
+			return stristr($comment, "@ForceNoTransaction") === false;
+		}
+		elseif (self::TRANSACTIONS_MODE == "OptIn") {
+			return stristr($comment, "@ForceTransaction") !== false;
+		}
 	}
 }
 

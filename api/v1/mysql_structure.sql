@@ -33,8 +33,10 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `msp`.`user` (
   `user_id` INT NOT NULL AUTO_INCREMENT,
+  `user_name` VARCHAR(45) NULL,
   `user_lastupdate` DOUBLE NOT NULL,
   `user_country_id` INT NOT NULL,
+  `user_loggedoff` TINYINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`user_id`),
   INDEX `fk_user_country1_idx` (`user_country_id` ASC),
   CONSTRAINT `fk_user_country1`
@@ -709,8 +711,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `msp`.`game_session` (
   `game_session_watchdog_address` VARCHAR(255) NOT NULL DEFAULT '',
   `game_session_watchdog_token` BIGINT UNSIGNED NOT NULL,
-  `game_session_password_admin` VARCHAR(45) NOT NULL,
-  `game_session_password_player` VARCHAR(45) NOT NULL)
+  `game_session_password_admin` TEXT NOT NULL,
+  `game_session_password_player` TEXT NOT NULL)
 ENGINE = InnoDB;
 
 

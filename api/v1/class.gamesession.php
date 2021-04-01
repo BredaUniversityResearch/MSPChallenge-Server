@@ -90,7 +90,7 @@ class GameSession extends Base
 	 * @apiParam {int} allow_recreate (0|1) Allow overwriting of an existing session?
 	 * @ForceNoTransaction
 	 */
-	public function CreateGameSession(int $game_id, string $config_file_content, string $password_admin, string $password_player, string $watchdog_address, string $response_address, string $jwt, bool $allow_recreate = false)
+	public function CreateGameSession(int $game_id, string $config_file_content, string $geoserver_url, string $geoserver_username, string $geoserver_password, string $password_admin, string $password_player, string $watchdog_address, string $response_address, bool $allow_recreate = false)
 	{
 		$sessionId = intval($game_id);
 		
@@ -123,55 +123,21 @@ class GameSession extends Base
 		}
 		file_put_contents(self::CONFIG_DIRECTORY.$configFilePath, $config_file_content);
 
-		$geoserver_credentials = $this->GetGeoserverCredentials($config_file_content);
-
 		$postValues = array(
 			"config_file_path" => $configFilePath,
-			"geoserver_url" => $geoserver_credentials["geoserver_url"],
-			"geoserver_username" => $geoserver_credentials["geoserver_username"],
-			"geoserver_password" => $geoserver_credentials["geoserver_password"],
+			"geoserver_url" => $geoserver_url, 
+			"geoserver_username" => base64_decode($geoserver_username), 
+			"geoserver_password" => base64_decode($geoserver_password), 
 			"password_admin" => $password_admin,
 			"password_player" => $password_player,
 			"watchdog_address" => $watchdog_address, 
-			"response_address" => $response_address,
-			"jwt" => $jwt
+			"response_address" => $response_address
 		);
 		self::SetGameSessionVersionInfo(json_decode($config_file_content, true), $postValues);
 
 		// don't wait or feed back the return of the following new request - if things went well so far, then we can just feed back success
 		// this is because any failures of the following new request are stored in the session log
 		$this->LocalApiRequest("api/GameSession/CreateGameSessionAndSignal", $game_id, $postValues, true);
-	}
-
-	private function GetGeoserverCredentials($config_json)
-	{
-		$return_array = array("geoserver_url" => "", "geoserver_username" => "", "geoserver_password" => "");
-
-		$config_contents = json_decode($config_json, true);
-
-		$_POST["jwt"] = $_POST["jwt"] ?? "";
-
-		if (empty($config_contents["datamodel"]["geoserver_url"])) {
-			// go get everything from the Authoriser
-			$endpoint =  Config::GetInstance()->GetGeoserverCredentialsEndpoint();
-			$parsedurl = parse_url($_POST['response_address']);
-			$postvars = array("jwt" => $_POST["jwt"],
-							  "audience" => $parsedurl["scheme"]."://".$parsedurl["host"]);
-			$json_response = $this->CallBack($endpoint, $postvars, array(), false, true);
-			$response = json_decode($json_response, true);
-			//die(var_dump($response));
-			if ($response["success"]) {
-				$return_array["geoserver_url"] = $response["credentials"]["baseurl"];
-				$return_array["geoserver_username"] = base64_decode($response["credentials"]["username"]);
-				$return_array["geoserver_password"] = base64_decode($response["credentials"]["password"]);	
-			}
-		}
-		else {
-			$return_array["geoserver_url"] = $config_contents["datamodel"]["geoserver_url"];
-			$return_array["geoserver_username"] = $config_contents["datamodel"]["geoserver_username"] ?? '';
-			$return_array["geoserver_password"] = $config_contents["datamodel"]["geoserver_password"] ?? '';
-		}
-		return $return_array;
 	}
 
 	private static function SetGameSessionVersionInfo($decodedJsonConfig, &$targetRequestValues)
@@ -203,17 +169,31 @@ class GameSession extends Base
 	 * @apiParam {string} response_address URL which we call when the setup is done.
 	 * @ForceNoTransaction
 	 */
-	public function CreateGameSessionAndSignal(string $config_file_path, string $geoserver_url, string $geoserver_username, string $geoserver_password, string $password_admin, string $password_player, string $watchdog_address, string $response_address, string $jwt)
+	public function CreateGameSessionAndSignal(string $config_file_path, string $geoserver_url, string $geoserver_username, string $geoserver_password, string $password_admin, string $password_player, string $watchdog_address, string $response_address)
 	{
+		// get the entire session database in order - bare minimum the database is created and config file is put on its designated spot
 		$update = new Update();
 		$result = $update->ReimportAdvanced($config_file_path, $geoserver_url, $geoserver_username, $geoserver_password);
-		if (!$result)
+
+		// get ready for an optional callback
+		$postValues = (new Game())->GetGameDetails(); 
+		$postValues["session_id"] = self::GetGameSessionIdForCurrentRequest();
+		$postValues["access_token"] = (new Security())->GetServerManagerToken()["token"];
+
+		if ($result !== true)
 		{
+			if (!empty($response_address)) 
+			{
+				$postValues["session_state"] = "Failed"; 
+				$this->CallBack($response_address, $postValues);
+			}
 			throw new Exception("Recreate failed");
 		}
 
+		// get the watchdog and end-user log-on in order
 		Database::GetInstance()->query("INSERT INTO game_session (game_session_watchdog_address, game_session_watchdog_token, game_session_password_admin, game_session_password_player) VALUES (?, UUID_SHORT(), ?, ?)",
 				array($watchdog_address, $password_admin, $password_player)); 
+				
 
 		//Notify the simulation that the game has been setup so we start the simulations. 
 		//This is needed because MEL needs to be run before the game to setup the initial fishing values.
@@ -222,17 +202,8 @@ class GameSession extends Base
 
 		if (!empty($response_address)) 
 		{
-			$security = new Security();
-
-			$sessionId = self::GetGameSessionIdForCurrentRequest();
-			$postValues = (new Game())->GetGameDetails(); 
-			$postValues["session_id"] = $sessionId;
 			$postValues["session_state"] = $watchdogSuccess == true ? "Healthy" : "Failed"; 
-			$postValues["access_token"] = $security->GetServerManagerToken()["token"];
-			$postValues["Token"] = $jwt;
-
-			$result = $this->CallBack($response_address, $postValues);
-			return $result;
+			$this->CallBack($response_address, $postValues);
 		}
 		return;
 	}
@@ -414,9 +385,13 @@ class GameSession extends Base
 
 	private static function RemoveDirectory($dir)
 	{
-		$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
-		$files = new RecursiveIteratorIterator($it,
-             RecursiveIteratorIterator::CHILD_FIRST);
+		try {
+			$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+			$files = new RecursiveIteratorIterator($it,
+            	 RecursiveIteratorIterator::CHILD_FIRST);
+		} catch (Exception $e) {
+			$files = array();
+		}
 		foreach($files as $file) {
     		if ($file->isDir()){
         		rmdir($file->getRealPath());

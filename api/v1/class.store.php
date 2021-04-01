@@ -129,7 +129,11 @@ class Store extends Base
 	public static function GetRasterStoreFolderContents()
 	{
 		// this is a generator function - notice the use of yield to save up on memory use
-		$dirIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Store::GetRasterStoreFolder()));
+		try {
+			$dirIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Store::GetRasterStoreFolder()));
+		} catch (Exception $e) {
+			$dirIterator = array();
+		}
 		foreach($dirIterator as $file) {
 			if ($file->getFilename() != "." && $file->getFilename() != "..") { 
 				yield $file->getPathName();

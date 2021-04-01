@@ -17,7 +17,8 @@
 			"ClearPlans",
 			"SetupSimulations",
 			"ImportScenario",
-			"ManualExportDatabase"
+			"ManualExportDatabase",
+			["From40beta7To40beta8", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
 		);
 
 		public function __construct($str="")
@@ -76,7 +77,7 @@
 		{
 			Log::SetupFileLogger(Log::GetRecreateLogPath());
 			Log::LogInfo("Reimport -> Starting game session creation process...");
-
+			$finalreturn = false;
 			try {
 				$this->EmptyDatabase();
 				$this->ClearRasterStorage();
@@ -90,6 +91,7 @@
 				$this->SetupSecurityTokens();
 
 				Log::LogInfo("Reimport -> Created session.");
+				$finalreturn = true;
 			} catch (Throwable $e) {
 				Log::LogError("Reimport -> Something went wrong.");
 				Log::LogError($e->getMessage()." on line ".$e->getLine()." of file ".$e->getFile());
@@ -100,11 +102,11 @@
 				$phpOutput = ob_get_flush();
 				if (!empty($phpOutput)) {
 					Log::LogInfo("Additionally the page generated the following output: ".$phpOutput);
-					return false;
 				}
 				Log::ClearFileLogger();
+				return $finalreturn;
 			}
-			return true;
+			return $finalreturn;
 		}
 
 
@@ -258,6 +260,17 @@
 			$security->GenerateToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN, Security::TOKEN_LIFETIME_INFINITE);
 			$security->GenerateToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER, Security::TOKEN_LIFETIME_INFINITE);
 			Log::LogInfo("SetupSecurityToken -> Done");
+		}
+
+		public function From40beta7To40beta8()
+		{
+			Database::GetInstance()->query("ALTER TABLE `user`
+				ADD `user_name` VARCHAR(45) NULL AFTER `user_id`,
+  				ADD `user_loggedoff` TINYINT NOT NULL DEFAULT 0 AFTER `user_country_id`;");	
+
+			Database::GetInstance()->query("ALTER TABLE `game_session` 
+				CHANGE `game_session_password_admin` `game_session_password_admin` TEXT NOT NULL,
+				CHANGE `game_session_password_player` `game_session_password_player` TEXT NOT NULL;");
 		}
 	}
 

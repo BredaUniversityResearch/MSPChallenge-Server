@@ -2,6 +2,8 @@
 
 class Config
 {
+	private $msp_auth = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/";
+		
 	private static $instance;
 	public static function GetInstance()
 	{
@@ -25,42 +27,35 @@ class Config
 		$this->configRoot = $GLOBALS['api_config'];
 	}
 
-	public function GetAuth() 
-	{
-		global $auth_url;
-		if (!empty($this->configRoot["msp_auth"])) return $this->configRoot["msp_auth"];
-		else return $auth_url;
-	}
-
-	public function GetAuthWithProxy()
-	{
-		if (!empty($this->configRoot["msp_auth_with_proxy"])) return $this->configRoot["msp_auth_with_proxy"];
-		else return false;
-	}
-	
 	public function GetCodeBranch()
 	{
 		return $this->configRoot["code_branch"];
 	}
 
-	public function GetGeoserverUrl()
+	public function GetAuth() 
 	{
-		return $this->configRoot["geoserver_url"];
+		return $this->msp_auth;
+	}
+
+	public function GetAuthJWTRetrieval() 
+	{
+		return $this->GetAuth()."getjwt.php";
+	}
+
+	public function GetAuthJWTUserCheck() 
+	{
+		return $this->GetAuth()."checkuserjwt.php";
 	}
 
 	public function GetGeoserverCredentialsEndpoint()
 	{
-		return $this->configRoot["geoserver_credentials_endpoint"];
+		return $this->GetAuth()."geocredjwt.php";
 	}
-
-	public function GetAuthApiKey()
+	
+	public function GetAuthWithProxy()
 	{
-		return $this->configRoot["api_key"];
-	}
-
-	public function GetAuthServerSessionLogEndpoint()
-	{
-		return $this->configRoot["authserver_log_session_info_endpoint"];
+		if (!empty($this->configRoot["msp_auth_with_proxy"])) return $this->configRoot["msp_auth_with_proxy"];
+		else return false;
 	}
 
 	public function GetGameAutosaveInterval()

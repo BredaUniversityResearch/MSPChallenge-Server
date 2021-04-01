@@ -569,6 +569,8 @@
 		}
 
 		public function ChangeWatchdogState($newWatchdogGameState) {
+			if (!empty($this->GetWatchdogAddress(true))) 
+			{
 				// we want to change the watchdog state, but first we check if it is running
 				if (!$this->TestWatchdogAlive()) {
 					// so the Watchdog is off, and now it should be switched on
@@ -619,6 +621,7 @@
 						return false;
 					}
 				}
+			}
 		}
 
 		protected function GetUpdateTime($id){
@@ -731,8 +734,9 @@
 		public function GetGameDetails()
 		{
 			$databaseState = Database::GetInstance()->query("SELECT g.game_start, g.game_eratime, g.game_currentmonth, g.game_state, g.game_planning_realtime, COUNT(u.user_id) total,
-													sum(case when u.user_lastupdate > 3600 then 1 else 0 end) active_last_hour,
-													sum(case when u.user_lastupdate > 60 then 1 else 0 end) active_last_minute FROM game g, user u;");
+													sum(case when (UNIX_TIMESTAMP() - u.user_lastupdate < 3600 and u.user_loggedoff = 0) then 1 else 0 end) active_last_hour,
+													sum(case when (UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0) then 1 else 0 end) active_last_minute FROM game g, user u;");
+			
 			$result = array();
 			if (count($databaseState) > 0)
 			{
@@ -746,7 +750,7 @@
 					"game_planning_realtime" => $state["game_planning_realtime"] * 4
 				];
 			}
-			return $result;//json_encode($result);
+			return $result;
 		}
 	}
 ?>

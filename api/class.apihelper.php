@@ -91,7 +91,9 @@ class APIHelper
 	{
 		return function ($className) use ($baseFolder, $apiVersion) {
 			$includeFileName = self::GetApiFolder($baseFolder, $apiVersion) . "class." . strtolower($className) . ".php";
-			include($includeFileName);
+			if (file_exists($includeFileName)) {
+				include($includeFileName);
+			}
 		};
 	}
 };

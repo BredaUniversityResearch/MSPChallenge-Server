@@ -69,6 +69,7 @@ class Batch extends Base
 	 * 
 	 * @apiSuccess {object} results Results of the executed batch. JSON object containing client-specified call_id (if non-empty) and payload which is the result of the call. 
 	 * When failed this object contains failed_task_id which references the execution_task_id returned in the AddToBatch.  
+	 * @ForceTransaction
 	 */
 	public function ExecuteBatch(int $batch_id)
 	{
