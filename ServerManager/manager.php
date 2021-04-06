@@ -412,6 +412,77 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 			</div>
 		</div>
 
+		<!-- Modal Session user management -->
+		<button type="button" id="btnSessionUsers" class="btn btn-primary" data-toggle="modal" data-target="#sessionUsers" style="display: none;"></button>
+		<div class="modal fade" id="sessionUsers" tabindex="-1" role="dialog" aria-labelledby="sessionUsersCenterTitle" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="sessionUsersCenterTitle">Session User Management</h5>
+						<button type="button" id="btnCloseSessionUsers" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<form class="form-horizontal" role="form" data-toggle="validator" id="formSessionUsers">
+							<div id="adminUserAccess">
+								<div class="form-check">
+									<input class="form-check-input" type="radio" name="provider_admin" value="local" onChange="limitUserAccessView('#adminPasswordFields');">
+									<label class="form-check-label" for="provider_admin">
+										Anyone with this password can log on as an administrator
+									</label>
+								</div>
+								<div id="adminPasswordFields">
+									<div class="input-group mb-3">
+										<input type="text" class="form-control" placeholder="Enter a password." id="password_admin" name="password_admin">
+									</div>	
+								</div>
+								<div id="adminProviders">
+								</div>
+								<div id="adminUserFields">
+								</div>							
+							</div>
+							<div id="regionUserAccess">
+								<div class="form-check">
+									<input class="form-check-input" type="radio" name="provider_region" id="provider_region" value="local" onChange="limitUserAccessView('#regionPasswordFields');">
+									<label class="form-check-label" for="provider_region">
+										Anyone with this password can log on as a region manager
+									</label>
+								</div>
+								<div id="regionPasswordFields">
+									<div class="input-group mb-3">
+										<input type="text" class="form-control" placeholder="Enter a password." id="password_region" name="password_region">
+									</div>
+								</div>
+								<div id="regionProviders">
+								</div>
+								<div id="regionUserFields">
+								</div>
+							</div>
+							<div id="playerUserAccess">
+								<div class="form-check">
+									<input class="form-check-input" type="radio" name="provider_player" id="provider_player" value="local" onChange="limitUserAccessView('#playerPasswordFields');">
+									<label class="form-check-label" for="provider_player">
+										Anyone with this password can log on as a player
+									</label>
+								</div>
+								<div id="playerPasswordFields">
+								</div>
+								<div id="playerProviders">
+								</div>
+								<div id="playerUserFields">
+								</div>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+						<button type="button" class="btn btn-primary" onClick="saveUserAccess();">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- Modal Save info -->
 		<button type="button" id="btnSaveInfo" class="btn btn-primary" data-toggle="modal" data-target="#saveInfo" style="display: none;"></button>
 		<div class="modal fade" id="saveInfo" tabindex="-1" role="dialog" aria-labelledby="saveModalCenterTitle" aria-hidden="true">
@@ -510,7 +581,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 							</div>
 							<div class="form-group">
 								<label for="newConfigFileName" >New configuration file name</label>
-								<input type="text" class="form-control" id="newConfigFileName" disabled=true placeholder="Change if uploading a completely new configuration file" required="required">
+								<input type="text" class="form-control" id="newConfigFileName" disabled=true placeholder="Change if uploading a completely new configuration file">
 							</div>
 							<div class="form-group">
 								<label for="newConfigDescription">Description</label>
@@ -730,6 +801,8 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 		WatchdogServerList();
 		GetServerAddr();
 		GeoServerList();
+
+		
 	});
 
 	regularupdateTablesManager = setInterval(function() {
