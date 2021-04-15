@@ -22,6 +22,9 @@ $sql = "CREATE TABLE `game_geoservers` (
     MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
   INSERT INTO `game_geoservers` (`id`, `name`, `address`, `username`, `password`) VALUES ('1', 'Default: the public MSP Challenge GeoServer', 'automatically obtained', 'automatically obtained', 'automatically obtained'); 
   ALTER TABLE `game_list`
-    ADD `game_geoserver_id` INT(11) NOT NULL DEFAULT 1 AFTER `game_server_id`;";
+    ADD `game_geoserver_id` INT(11) NOT NULL DEFAULT 1 AFTER `game_server_id`;
+  ALTER TABLE `game_list` 
+    CHANGE `password_admin` `password_admin` TEXT NOT NULL, 
+    CHANGE `password_player` `password_player` TEXT NOT NULL; ";
 
 ?>
