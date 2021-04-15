@@ -3,12 +3,11 @@
 class Base 
 {
     // needs a function to call server API
-    public function callServer($session_id, $api_access_token, $endpoint, $data2send)
+    public function callServer($endpoint, $data2send = false, $session_id="", $api_access_token="")
     {
-        $call_return = $this->callAPI("POST", ServerManager::getInstance()->GetServerURLBySessionId($session_id).$endpoint, $data2send, array($api_access_token), false);
-        $call_return_decoded = json_decode($call_return);
-        if ($call_return_decoded->success) return true;
-        else return $call_return_decoded->message;
+        $call_return = $this->callAPI("POST", ServerManager::getInstance()->GetServerURLBySessionId($session_id)."/api/".$endpoint, $data2send, array("MSPAPIToken: ".$api_access_token), false);
+        $call_return_decoded = json_decode($call_return, true);
+        return $call_return_decoded;
     }
 
     // needs a function to call Authoriser API

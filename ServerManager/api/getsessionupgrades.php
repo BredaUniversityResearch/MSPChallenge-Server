@@ -14,16 +14,14 @@ $response_array['upgrade'] = false;
 if(!empty($_POST['session_id'])) {
     $session_id = $_POST['session_id'];
     // then get upgrade info from ServerManager class
-    $game_creation_time = $db->cell("game_list.game_creation_time", ["id", "=", $session_id]);
-    if (!empty($game_creation_time)) {
-        // first rehash $game_creation_time into the int that ServerManager wants
-        $game_creation_time = (new DateTime("@".$game_creation_time))->format("Ymd");
+    $server_version = $db->cell("game_list.server_version", ["id", "=", $session_id]);
+    if (!empty($server_version)) {
         $response_array['status'] = 'success';
         $response_array['message'] = '';
-        $response_array['upgrade'] = ServerManager::getInstance()->CheckForUpgrade((int) $game_creation_time);
+        $response_array['upgrade'] = ServerManager::getInstance()->CheckForUpgrade($server_version);
     }
     else {
-        $response_array['message'] = 'Could not get creation time of session from database.';
+        $response_array['message'] = 'Could not get server version of session from database.';
     }
 }
 

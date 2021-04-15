@@ -10,7 +10,8 @@ class GameSession extends Base
 		["SaveSession", Security::ACCESS_LEVEL_FLAG_NONE],
 		["CreateGameSessionZip", Security::ACCESS_LEVEL_FLAG_NONE],
 		["CreateGameSessionLayersZip", Security::ACCESS_LEVEL_FLAG_NONE],
-		["ResetWatchdogAddress", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+		["ResetWatchdogAddress", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+		["SetUserAccess", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
 	);
 
 	const INVALID_SESSION_ID = -1;
@@ -18,6 +19,10 @@ class GameSession extends Base
 	const CONFIG_DIRECTORY = "running_session_config/";
 	const SECONDS_PER_MINUTE = 60;
 	const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE * 60;
+	
+	public function __construct($str=""){
+		parent::__construct($str);
+	}
 
 	public static function GetGameSessionIdForCurrentRequest()
 	{
@@ -210,11 +215,8 @@ class GameSession extends Base
 
 	public function ResetWatchdogAddress(string $watchdog_address) 
 	{
-		if (!empty($watchdog_address)) {
-			Database::GetInstance()->query("UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT() 
-							WHERE game_session_watchdog_address = (SELECT game_session_watchdog_address FROM game_session);", array($_POST['watchdog_address']));
-		}
-		else throw new Exception("Empty watchdog address not allowed.");
+		Database::GetInstance()->query("UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT() 
+							WHERE game_session_watchdog_address = (SELECT game_session_watchdog_address FROM game_session);", array($watchdog_address));
 	}
 
 	/**
@@ -381,6 +383,43 @@ class GameSession extends Base
 			}
 		}
 		return $zipname;
+	}
+
+	public function SetUserAccess(string $password_admin, string $password_player)
+	{
+		Database::GetInstance()->query("UPDATE game_session SET game_session_password_admin = ?, game_session_password_player = ? 
+							WHERE game_session_watchdog_address = (SELECT game_session_watchdog_address FROM game_session);", array($password_admin, $password_player));
+	}
+
+	public function CheckGameSessionPasswords()
+	{
+		$adminhaspassword = true;
+		$playerhaspassword = true;
+		$passwordData = Database::GetInstance()->query("SELECT game_session_password_admin, game_session_password_player FROM game_session");
+		if (count($passwordData) > 0)
+		{
+			if (!parent::isNewPasswordFormat($passwordData[0]["game_session_password_admin"]) || !parent::isNewPasswordFormat($passwordData[0]["game_session_password_player"])) {
+				$adminhaspassword = !empty($passwordData[0]["game_session_password_admin"]);
+				$playerhaspassword = !empty($passwordData[0]["game_session_password_player"]);
+			}
+			else {
+				$password_admin = json_decode(base64_decode($passwordData[0]["game_session_password_admin"]), true);
+				$password_player = json_decode(base64_decode($passwordData[0]["game_session_password_player"]), true);
+				if ($password_admin["admin"]["provider"] == "local") {
+					$adminhaspassword = !empty($password_admin["admin"]["password"]);
+				}
+				if ($password_player["provider"] == "local") {
+					foreach ($password_player as $team => $password) {
+						if (!empty($password)) {
+							$playerhaspassword = true;
+							break;
+						}
+						else $playerhaspassword = false;
+					}
+				}
+			}
+		}
+		return array("adminhaspassword" => $adminhaspassword, "playerhaspassword" => $playerhaspassword);
 	}
 
 	private static function RemoveDirectory($dir)

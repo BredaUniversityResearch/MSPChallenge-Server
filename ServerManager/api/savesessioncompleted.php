@@ -176,11 +176,11 @@ if(!empty($_POST['zipname']) && !empty($_POST['session_id']) && !empty($_POST["t
 		if ($db->query("INSERT INTO game_saves (name, game_config_version_id, game_config_files_filename, game_config_versions_region, game_server_id, watchdog_server_id, game_creation_time, 
 												game_start_year, game_end_month, game_current_month, game_running_til_time, password_admin,
 												password_player, session_state, game_state, game_visibility, players_active, players_past_hour,
-												demo_session, api_access_token, save_type, save_path, save_notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", 
+												demo_session, api_access_token, save_type, save_path, save_notes, server_version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", 
 			array(ensure_unique_name($sessionslist[0]['name'], "name", "game_saves"), $sessionslist[0]['game_config_version_id'], $sessionslist[0]['game_config_files_filename'], $sessionslist[0]['game_config_versions_region'], $sessionslist[0]['game_server_id'], $sessionslist[0]['watchdog_server_id'], $sessionslist[0]['game_creation_time'], 
 			$sessionslist[0]['game_start_year'], $sessionslist[0]['game_end_month'], $sessionslist[0]['game_current_month'], $sessionslist[0]['game_running_til_time'], $sessionslist[0]['password_admin'],
 			$sessionslist[0]['password_player'], $sessionslist[0]['session_state'], $sessionslist[0]['game_state'], $sessionslist[0]['game_visibility'], $sessionslist[0]['players_active'], $sessionslist[0]['players_past_hour'],
-			$sessionslist[0]['demo_session'], $sessionslist[0]['api_access_token'], $type, $zipname, $save_notes))) {
+			$sessionslist[0]['demo_session'], $sessionslist[0]['api_access_token'], $type, $zipname, $save_notes, $sessionslist[0]['server_version']))) {
 				
 				// now, finally, make the filename unique and update game_saves table accordingly
 				$save_id = $db->lastid();

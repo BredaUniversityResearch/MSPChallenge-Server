@@ -37,11 +37,11 @@ else {
         $db->query("INSERT INTO game_list (name, game_config_version_id, game_server_id, watchdog_server_id, game_creation_time, game_start_year,
                                             game_end_month, game_current_month, game_running_til_time, password_admin,
                                             password_player, session_state, game_state, game_visibility, players_active, players_past_hour, 
-                                            demo_session, api_access_token, save_id) 
+                                            demo_session, api_access_token, save_id, server_version) 
                                     SELECT ? AS name, 0 AS game_config_version_id, game_server_id, ? AS watchdog_server_id, game_creation_time, game_start_year,
                                             game_end_month, game_current_month, game_running_til_time, password_admin,
                                             password_player, 'request', game_state, game_visibility, players_active, players_past_hour, 
-                                            demo_session, api_access_token, id
+                                            demo_session, api_access_token, id, server_version
                                             FROM game_saves WHERE game_saves.id = ?;",
                                     array($newServerName, $watchdogServer, $SaveFileSelector));
         $session_id = $db->lastId();
@@ -49,6 +49,11 @@ else {
     else {
         //otherwise an existing server is going to be overwritten (recreated)
         $session_id = $ExistingOrNewServerId;
+        $db->query("UPDATE game_list SET password_admin = (SELECT password_admin FROM game_saves WHERE game_saves.id = ?), 
+                                        password_player = (SELECT password_player FROM game_saves WHERE game_saves.id = ?), 
+                                        server_version = (SELECT server_version FROM game_saves WHERE game_saves.id = ?)
+                                    WHERE game_list.id = ?;",
+                                    array($SaveFileSelector, $SaveFileSelector, $SaveFileSelector, $session_id));
     }
 
     //get the correct token header for server API requests later on

@@ -6,7 +6,6 @@
 class Router
 {
 	public const ALLOWED_CLASSES = array(
-		"authconn",
 		"batch",
 		"cel", 
 		"energy",  

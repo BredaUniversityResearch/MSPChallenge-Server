@@ -26,10 +26,16 @@ class GameSession extends Base
     public $demo_session;
     public $api_access_token;
     public $save_id;
+    public $server_version;
     
     public function __construct() 
     {
         $this->_db = DB::getInstance();
+    }
+
+    public function getId()
+    {
+        return $this->_id;
     }
 
     private function setList($list)
@@ -48,17 +54,59 @@ class GameSession extends Base
             {
                 foreach ($this->_db->first(true) as $varname => $varvalue)
                 {
+                    if ($varname == "password_player" || $varname == "password_admin") {
+                        $varvalue = $this->ConvertPasswordFormat($varname, $varvalue);
+                    }
                     if (property_exists($this, $varname)) $this->$varname = $varvalue;
                 }
                 return true;
-            } else
-            {
+            } else {
                 return $this->_db->errorString();
             }
         } catch (Exception $e)
         {
             return $e->getMessage();
         }
+    }
+
+    private function ConvertPasswordFormat($adminorplayer, $string)
+    {
+        // if base64 encoding check works, and the decoded version turns out to be json, then all is good, otherwise...
+        if (base64_encode(base64_decode($string, true)) === $string) {
+            if (isJson(base64_decode($string))) {
+                return base64_decode($string);
+            }
+        }
+            
+        if ($adminorplayer == "password_admin") {
+            $newarray["admin"]["provider"] = "local";
+            $newarray["admin"]["password"] = $string;
+            $newarray["region"]["provider"] = "local";
+            $newarray["region"]["password"] = $string;
+        } else {
+            $newarray["provider"] = "local";
+            $countries = $this->getCountries();
+            if ($countries !== false) {
+                foreach ($countries as $country_data) {
+                    $newarray["password"][$country_data["country_id"]] = $string;
+                }
+            }
+        }
+        return json_encode($newarray);
+    }
+
+    public function getCountries()
+    {
+        if (empty($this->_id)) return "Cannot obtain data without a valid id.";
+        $server_call = $this->callServer(
+            "game/getCountries",
+            false,
+            $this->_id
+        );
+        if ($server_call["success"]) {
+            return $server_call["payload"];
+        }
+        return false;
     }
 
     public function getSanitised($id)
@@ -73,13 +121,11 @@ class GameSession extends Base
 
     private function validateVars()
     {
-        $except = array();
         foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $var)
         {   
             $varname = $var->getName();
-            if (empty($this->$varname) && !in_array($varname, $except)) return "Missing value for ".$varname;
+            if (strlen($this->$varname) == 0) return "Missing value for ".$varname;
         }
-
         return true;
     }
 
@@ -111,6 +157,7 @@ class GameSession extends Base
                 $this->demo_session,
                 $this->api_access_token,
                 $this->save_id,
+                $this->server_version,
                 $this->_id);
             if ($this->_db->query("UPDATE game_list SET 
                     name = ?,
@@ -132,12 +179,12 @@ class GameSession extends Base
                     players_past_hour = ?,
                     demo_session = ?,
                     api_access_token = ?,
-                    save_id = ?
+                    save_id = ?,
+                    server_version = ?
                 WHERE id = ?", $args))
             {
                 return true;
-            } else 
-            {
+            } else {
                 return $this->_db->errorString();
             }
         } catch (Exception $e)
@@ -163,20 +210,19 @@ class GameSession extends Base
         if ($got !== true) return $got;
         if (is_array($admin) && is_array($player))
         {
-            if (!empty($admin["admin"]) && is_array($admin["admin"]) && !empty($admin["region"]) && is_array($admin["region"])
-                && !empty($player) && is_array($player))
+            if (!empty($admin["admin"]) && is_array($admin["admin"]) && !empty($admin["region"]) && is_array($admin["region"]))
             {
-                $this->password_admin = json_encode($admin);
-                $this->password_player = json_encode($player);
+                $this->password_admin = base64_encode(json_encode($admin));
+                $this->password_player = base64_encode(json_encode($player));
                 $updated = $this->update();
                 if ($updated !== true) return $updated;
-                /*$server_call = $this->callServer(
+                $server_call = $this->callServer(
+                    "gamesession/SetUserAccess", 
+                    array("password_admin" => $this->password_admin, "password_player" => $this->password_player),
                     $this->_id, 
-                    $this->api_access_token, 
-                    "gamesession/setUserAccess", 
-                    array("password_admin" => $this->password_admin, "password_player" => $this->password_player)
+                    $this->api_access_token
                 );
-                if ($server_call !== true) return $server_call;*/
+                if ($server_call["success"] !== true) return $server_call["message"];
                 return true;
             }
             return "Admin password variable incorrectly structured.";
@@ -196,9 +242,7 @@ class GameSession extends Base
             {
                 $this->setList($this->_db->results(true));
                 return $this->_list;
-            }
-            else 
-            {
+            } else {
                 return $this->_db->errorString();
             }
         } catch (Exception $e) 

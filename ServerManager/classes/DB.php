@@ -20,58 +20,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class DB {
 	private static $_instance = null;
 	private $_pdo, $_query, $_error = false, $_errorInfo, $_results=[], $_resultsArray=[], $_count = 0, $_lastId, $_queryCount=0;
+	private $_host, $_dbname, $_user, $_pass;
+
+	private static $PDOArgs = array(
+		PDO::MYSQL_ATTR_LOCAL_INFILE => true,
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, 
+		PDO::ATTR_TIMEOUT => 5
+	);
 
 	private function __construct($config = []){
 		set_error_handler(array(&$this, 'CallbackFunction')); // the & is important
 
-		if (!$opts = Config::get('mysql/options')) $opts = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET SESSION sql_mode = ''");
 		if($config == []) {
-			$host = Config::get('mysql/host');
-			$dbname = Config::get('mysql/db');
-			$user = Config::get('mysql/username');
-			$pass =	Config::get('mysql/password');
+			$this->_host = Config::get('mysql/host');
+			$this->_dbname = Config::get('mysql/db');
+			$this->_user = Config::get('mysql/username');
+			$this->_pass =	Config::get('mysql/password');
 		}
 		else {
 			if(is_array($config) && count($config) == 1) {
-				$host = Config::get($config[0].'/host');
-				$dbname = Config::get($config[0].'/db');
-				$user = Config::get($config[0].'/username');
-				$pass = Config::get($config[0].'/password');
+				$this->_host = Config::get($config[0].'/host');
+				$this->_dbname = Config::get($config[0].'/db');
+				$this->_user = Config::get($config[0].'/username');
+				$this->_pass = Config::get($config[0].'/password');
 			}
 			else {
-				$host = $config[0];
-				$dbname = $config[1];
-				$user = $config[2];
-				$pass = $config[3];
+				$this->_host = $config[0];
+				$this->_dbname = $config[1];
+				$this->_user = $config[2];
+				$this->_pass = $config[3];
 			}
 		}
-		$NUM_OF_ATTEMPTS = 2;
-		$attempts = 1;
-		do {
-  		try
-  		{
-				$this->_pdo = new PDO('mysql:host=' .
-						$host .';dbname='.
-						$dbname.';charset=utf8',
-						$user,
-						$pass,
-						$opts);
-	    } catch (Exception $e) { 
-				// assumes connection failed because the database doesn't exist yet, 
-				// so it'll try to create and fill it, and next time it fails it'll just stop
-					$this->_pdo = new PDO('mysql:host=' .
-							$host .';charset=utf8',
-							$user,
-							$pass,
-							$opts);
-					$this->dbase_install($dbname);
-	        $attempts++;
-	        sleep(1);
-	        continue;
-	    }
-	    break;
-		} while($attempts < $NUM_OF_ATTEMPTS);
-		$this->_pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		
+		try {
+			$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
+		} catch (Exception $e) { 
+			// assumes connection failed because the database doesn't exist yet, so attempt to create and fill it, thereby reattempting connection
+			$this->_pdo = new PDO('mysql:host='.$this->_host.';', $this->_user, $this->_pass, self::$PDOArgs);
+			$this->dbase_install();
+		}
+		
 	}
 
   static function CallbackFunction($errno, $errstr, $errfile, $errline) {
@@ -365,35 +353,30 @@ class DB {
 	}
 	
 	public function dbase_migrate() {
-		// this function is only called after a successful login
+		// this function is called in index.php
 		$directory = ServerManager::getInstance()->GetServerManagerRoot()."install/migrations";
 		$files = array_diff(scandir($directory), array('..', '.'));
 		// for each file found, check if the filename is in the settings table
 		foreach ($files as $file) {
-			$this->query("SELECT value FROM settings WHERE name = '".$file."'");
-			$results = $this->results(true);
-			if (empty($results)) {
+			$this->query("SELECT value FROM settings WHERE name = ?", array($file));
+			if (empty($this->results(true))) {
 				// if it isn't then require_once and add it to the database
 				require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/migrations/".$file);
 				$sql = 
 				"START TRANSACTION;"
 				.$sql.
-	      "INSERT INTO settings (name, value) VALUES ('".$file."', '".date("Y-m-d H:i:s")."');
+	      		"INSERT INTO settings (name, value) VALUES (?, ?);
 				COMMIT;";
-				$this->query($sql);
+				$this->query($sql, array($file, date("Y-m-d H:i:s")));
 			}
 		}		
 	}
 	
-	public function dbase_install($dbname) {
+	public function dbase_install() {
+		$this->_pdo->exec("CREATE DATABASE IF NOT EXISTS `".$this->_dbname."` DEFAULT CHARACTER SET utf8;");
+		$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
 		require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/mysql_structure.php");
-		$queries = 
-		"START TRANSACTION;
-		CREATE DATABASE IF NOT EXISTS `".$dbname."` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci; 
-		USE `".$dbname."`;
-		".$sqls." 
-		COMMIT;";
-		$this->query($queries);
+		$this->query($sqls);
 	}
 
 }

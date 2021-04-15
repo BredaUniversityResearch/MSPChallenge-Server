@@ -6,13 +6,9 @@ class ServerManager
     private $_db, $_server_id, $_server_name, $_server_address, $_server_versions, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
 
       public function __construct() {
-        $this->_db = DB::getInstance();
-        $this->_server_id = $this->_db->cell("settings.value", array("name", "=", "server_id"));
-        $this->_server_name = $this->_db->cell("settings.value", array("name", "=", "server_name"));
-        $this->_server_address = $this->_db->cell('game_servers.address', array("id", "=", 1));
         $this->_server_versions = array(
-          20210301 => "4.0-beta7",
-          20210328 => "4.0-beta8"
+          "4.0-beta7",
+          "4.0-beta8"
         );
         $this->_server_current_version = end($this->_server_versions);
         $this->_server_upgrades = array(
@@ -21,6 +17,13 @@ class ServerManager
         $this->SetRootVars();
         $this->_msp_auth_url = "https://auth.mspchallenge.info";
         $this->_msp_auth_api = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/";
+      }
+
+      private function CompletePropertiesFromDB() {
+        $this->_db = DB::getInstance();
+        $this->_server_id = $this->_db->cell("settings.value", array("name", "=", "server_id"));
+        $this->_server_name = $this->_db->cell("settings.value", array("name", "=", "server_name"));
+        $this->_server_address = $this->_db->cell('game_servers.address', array("id", "=", 1));
       }
 
       private function SetRootVars() {
@@ -44,14 +47,7 @@ class ServerManager
         return self::$_instance;
 	    }
 
-      public function CheckForUpgrade(int $builddate) {
-        // checks using $builddate of server session whether it can be upgraded to current version
-        // determine the version of server session using $builddate
-        $versiondetermined = "";
-        foreach ($this->_server_versions as $date => $version) {
-          if ($date <= $builddate) $versiondetermined = $version;
-          else break;
-        }
+      public function CheckForUpgrade($versiondetermined) {
         if (!empty($versiondetermined)) {
           // postulate the upgrade function name 
           $upgradefunction = preg_replace('/[^A-Za-z0-9]/', '', "From".$versiondetermined."To".$this->_server_current_version);
@@ -81,14 +77,17 @@ class ServerManager
       }
         
       public function GetServerID() {
+        if (empty($this->_server_id)) $this->CompletePropertiesFromDB();
         return $this->_server_id;
       }
 
       public function GetServerName() {
+        if (empty($this->_server_name)) $this->CompletePropertiesFromDB();
         return $this->_server_name;
       }
 
       public function freshinstall() {
+        if (empty($this->_server_id)) $this->CompletePropertiesFromDB();
         return (empty($this->_server_id));
       }
 
@@ -148,6 +147,7 @@ class ServerManager
       }
       
       public function GetTranslatedServerURL() {
+        if (empty($this->_server_address)) $this->CompletePropertiesFromDB();
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
           if ($_SERVER['SERVER_NAME'] != $this->_server_address) {

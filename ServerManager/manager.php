@@ -337,52 +337,54 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 						</ul>
 						<div class="tab-content" id="myNewSessionModalTabContent">
 							<div class="tab-pane fade show active" id="NewSessionModalDefault" role="tabpanel" aria-labelledby="NewSessionModalDefault-tab">
-							<form class="form-horizontal" role="form" data-toggle="validator" id="formNewSession" enctype="multipart/form-data">
-								<div class="form-group">
-									<label for="newSessionName">Session Name</label>
-									<input type="text" class="form-control" id="newSessionName" name="session name" required="true">
-								</div>
-								<div class="form-group">
-									<label for="newConfigFile">Configuration File</label>
-									<select class="form-control" id="newConfigFile" required="required">
-									</select>
-								</div>
-								<div class="form-group">
-									<label for="newGeoServer">GeoServer</label>
-									<select class="form-control" id="newGeoServer" required="required">
-									</select>
-								</div>
-								<div class="form-group">
-									<label for="newWatchdog">Simulation Server</label>
-									<select class="form-control" id="newWatchdog" required="required">
-									</select>
-								</div>
-								<div class="form-group">
-									<label for="newConfigVersion">Configuration Version</label>
-									<select class="form-control" id="newConfigVersion" required="required"></select>
-								</div>
-								<div class="form-group">
-									<label for="newAdminPassword">Admin Password</label>
-									<input type="text" class="form-control" id="newAdminPassword" required="required" title="This feature offers minimal security only. The set password will be retrievable here in the ServerManager for all its users. So do not enter one of your personal, commonly-used passwords.">
-								</div>
-								<div class="form-group">
-									<label for="newPlayerPassword">Player Password</label>
-									<input type="text" class="form-control" id="newPlayerPassword" title="This feature offers minimal security only. The set password will be retrievable here in the ServerManager for all its users. So do not enter one of your personal, commonly-used passwords.">
-								</div>
-								<div class="form-group">
-									<input type="hidden"  id="newGameServer" value="1" />
-								</div>
-								<div class="form-group">
-									<input type="hidden"  id="newVisibility" value="public" />
-									<?php /* 
-									<label for="newVisibility">Visibility</label>
-									<select class="form-control" id="newVisibility" required="required">
-										<option value="public" selected>public</option>
-										<option value="private">private</option>
-									</select>
-									*/?>
-								</div>
-							</form>
+								<form class="form-horizontal" role="form" data-toggle="validator" id="formNewSession" enctype="multipart/form-data">
+									<div class="form-group">
+										<label for="newSessionName">Session Name</label>
+										<input type="text" class="form-control" id="newSessionName" name="session name" required="true">
+									</div>
+									<div class="form-group">
+										<label for="newConfigFile">Configuration File</label>
+										<select class="form-control" id="newConfigFile" required="required">
+										</select>
+									</div>
+									<div class="form-group">
+										<label for="newConfigVersion">Configuration Version</label>
+										<select class="form-control" id="newConfigVersion" required="required"></select>
+									</div>
+									<div class="form-group">
+										<label for="newGeoServer">GeoServer</label>
+										<select class="form-control" id="newGeoServer" required="required">
+										</select>
+									</div>
+									<div class="form-group">
+										<label for="newWatchdog">Simulation Server</label>
+										<select class="form-control" id="newWatchdog" required="required">
+										</select>
+									</div>
+									<div class="form-group">
+										<label for="newAdminPassword">Admin Password</label>
+										<input type="text" class="form-control" id="newAdminPassword" required="required">
+										<small id="adminPasswordHelp" class="form-text text-muted">This and more sophisticated user access settings can always be changed after the session has been successfully created.</small>
+									</div>
+									<div class="form-group">
+										<label for="newPlayerPassword">Player Password</label>
+										<input type="text" class="form-control" id="newPlayerPassword" title="This feature offers minimal security only. The set password will be retrievable here in the ServerManager for all its users. So do not enter one of your personal, commonly-used passwords.">
+										<small id="userPasswordHelp" class="form-text text-muted">This and more sophisticated user access settings can always be changed after the session has been successfully created.</small>
+									</div>
+									<div class="form-group">
+										<input type="hidden"  id="newGameServer" value="1" />
+									</div>
+									<div class="form-group">
+										<input type="hidden"  id="newVisibility" value="public" />
+										<?php /* 
+										<label for="newVisibility">Visibility</label>
+										<select class="form-control" id="newVisibility" required="required">
+											<option value="public" selected>public</option>
+											<option value="private">private</option>
+										</select>
+										*/?>
+									</div>
+								</form>
 							</div>
 							<div class="tab-pane fade show" id="NewSessionModalLoadSave" role="tabpanel" aria-labelledby="NewSessionModalLoadSave-tab">
 							<form class="form-horizontal" role="form" data-toggle="validator" id="formLoadSave" enctype="multipart/form-data">
@@ -415,7 +417,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 		<!-- Modal Session user management -->
 		<button type="button" id="btnSessionUsers" class="btn btn-primary" data-toggle="modal" data-target="#sessionUsers" style="display: none;"></button>
 		<div class="modal fade" id="sessionUsers" tabindex="-1" role="dialog" aria-labelledby="sessionUsersCenterTitle" aria-hidden="true">
-			<div class="modal-dialog" role="document">
+			<div class="modal-dialog modal-wide" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title" id="sessionUsersCenterTitle">Session User Management</h5>
@@ -424,53 +426,124 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 						</button>
 					</div>
 					<div class="modal-body">
+						<p>When setting a password, anyone who has that password will be able to log on to your session as that user type. 
+						When setting specific users, those authentication provider's users will be able to log on to your session as that user type (assuming they entered the correct username and password). 
+						</p>
 						<form class="form-horizontal" role="form" data-toggle="validator" id="formSessionUsers">
-							<div id="adminUserAccess">
-								<div class="form-check">
-									<input class="form-check-input" type="radio" name="provider_admin" value="local" onChange="limitUserAccessView('#adminPasswordFields');">
-									<label class="form-check-label" for="provider_admin">
-										Anyone with this password can log on as an administrator
-									</label>
-								</div>
-								<div id="adminPasswordFields">
-									<div class="input-group mb-3">
-										<input type="text" class="form-control" placeholder="Enter a password." id="password_admin" name="password_admin">
-									</div>	
-								</div>
-								<div id="adminProviders">
-								</div>
-								<div id="adminUserFields">
-								</div>							
-							</div>
-							<div id="regionUserAccess">
-								<div class="form-check">
-									<input class="form-check-input" type="radio" name="provider_region" id="provider_region" value="local" onChange="limitUserAccessView('#regionPasswordFields');">
-									<label class="form-check-label" for="provider_region">
-										Anyone with this password can log on as a region manager
-									</label>
-								</div>
-								<div id="regionPasswordFields">
-									<div class="input-group mb-3">
-										<input type="text" class="form-control" placeholder="Enter a password." id="password_region" name="password_region">
+							<div class="row">
+								<div class="col">
+									<div id="adminUserAccess">
+										<h6>Administrators</h6>
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="provider_admin" value="local" onChange="limitUserAccessView('#adminPasswordFields');">
+											<label class="form-check-label" for="provider_admin">
+												Set a password
+											</label>
+										</div>
+										<div id="adminPasswordFields">
+											<div class="input-group mb-3">
+												<input type="text" class="form-control" placeholder="Enter a password. Administrators require a password." id="password_admin" name="password_admin">
+											</div>	
+										</div>
+										<div id="adminProviders">
+											<div class="form-check">
+									 			<input class="form-check-input" type="radio" name="provider_admin" value="external" onChange="limitUserAccessView('#adminUserFields');">
+												<label class="form-check-label" for="provider_admin">
+													Set users from
+												</label>
+												<select class="form-control-sm d-inline-block p-0 h-25" id="provider_admin_external"></select>
+											</div>
+										</div>
+										<div id="adminUserFields">
+											<div class="input-group mb-3">
+												<div contenteditable="true" class="form-control" style="height: auto !important;" id="users_admin"></div>
+												<div class="input-group-append">
+													<button class="btn btn-outline-secondary" type="button" id="button-find-users_admin" onclick="findUsersAtProvider('#users_admin', $('#provider_admin_external').val());">Find</button>
+												</div>
+											</div>
+										</div>							
 									</div>
 								</div>
-								<div id="regionProviders">
-								</div>
-								<div id="regionUserFields">
+								<div class="col">
+									<div id="regionUserAccess">
+										<h6>Region Managers</h6>
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="provider_region" id="provider_region" value="local" onChange="limitUserAccessView('#regionPasswordFields');">
+											<label class="form-check-label" for="provider_region">
+												Set a password
+											</label>
+										</div>
+										<div id="regionPasswordFields">
+											<div class="input-group mb-3">
+												<input type="text" class="form-control" placeholder="Enter a password. Region managers require a password." id="password_region" name="password_region">
+											</div>
+										</div>
+										<div id="regionProviders">
+											<div class="form-check">
+									 			<input class="form-check-input" type="radio" name="provider_region" value="external" onChange="limitUserAccessView('#regionUserFields');">
+												<label class="form-check-label" for="provider_region">
+													Set users from
+												</label>
+												<select class="form-control-sm d-inline-block p-0 h-25" id="provider_region_external"></select>
+											</div>
+										</div>
+										<div id="regionUserFields">
+											<div class="input-group mb-3">
+												<div contenteditable="true" class="form-control" style="height: auto !important;" id="users_region"></div>
+												<div class="input-group-append">
+													<button class="btn btn-outline-secondary" type="button" id="button-find-users_region" onclick="findUsersAtProvider('#users_region', $('#provider_region_external').val());">Find</button>
+												</div>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
-							<div id="playerUserAccess">
-								<div class="form-check">
-									<input class="form-check-input" type="radio" name="provider_player" id="provider_player" value="local" onChange="limitUserAccessView('#playerPasswordFields');">
-									<label class="form-check-label" for="provider_player">
-										Anyone with this password can log on as a player
-									</label>
-								</div>
-								<div id="playerPasswordFields">
-								</div>
-								<div id="playerProviders">
-								</div>
-								<div id="playerUserFields">
+							<div class="row">
+								<div class="col">
+									<div id="playerUserAccess" style="margin-top: 25px;">
+										<h6>Players</h6>
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="provider_player" id="provider_player" value="local" onChange="limitUserAccessView('#playerPasswordFields');">
+											<label class="form-check-label" for="provider_player">
+												Set a password
+											</label>
+										</div>
+										<div id="playerPasswordFields">
+											<div class="input-group mb-3">
+												<input type="text" class="form-control" placeholder="Leave empty for immediate access." id="password_playerall" name="password_playerall" oninput="toggleFields();">
+												<div class="input-group-append">
+													<span class="input-group-text">All countries</span>
+												</div>
+											</div>
+											<div id="playerPasswordExtraFields">
+											</div>
+										</div>
+										<div id="playerProviders">
+											<div class="form-check">
+									 			<input class="form-check-input" type="radio" name="provider_player" value="external" onChange="limitUserAccessView('#playerUserFields');">
+												<label class="form-check-label" for="provider_player">
+													Set users from 
+												</label>
+												<select class="form-control-sm d-inline-block p-0 h-25" id="provider_player_external"></select>
+											</div>
+										</div>
+										<div id="playerUserFields">
+											<div class="input-group mb-3">
+												<div contenteditable="true" class="form-control" style="height: auto !important;" id="users_playerall"></div>
+												<script language="javascript">$("#users_playerall").on("change keydown paste input", function() {
+													toggleDivs();
+												});</script>
+												<div class="input-group-append">
+													<span class="input-group-text">All countries</span>
+												</div>
+												<div class="input-group-append">
+													<button class="btn btn-outline-secondary" type="button" id="button-find-users_playerall" onclick="findUsersAtProvider('#users_playerall', $('#provider_player_external').val());">Find</button>
+												</div>
+											</div>
+											<div id="playerUserExtraFields">
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</form>

@@ -402,7 +402,11 @@ function sessionsListToTable(sessionsList) {
 			save_icon = '<button class="btn btn-secondary btn-sm" onClick="saveSession('+v.id+')"><i class="fa fa-save" title="Save Session"></i></button>';
 			running_icon = '<button class="btn btn-secondary btn-sm" onClick="startSession('+v.id+')"><i class="fa fa-play" title="Start Simulation" ></i></button>';
 			/*paused_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pause" title="Pause Simulation"></i></button>';*/
-		} else {
+		} else if(v.game_state == "end") {
+			save_icon = '<button class="btn btn-secondary btn-sm"><i class="fa fa-save" title="Save Session"></i></button>';
+			running_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-play" title="Start Simulation"></i></button>';
+		}
+		else {
 			save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Session"></i></button>';
 			running_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-play" title="Start Simulation"></i></button>';
 			/*paused_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-pause" title="Pause Simulation"></i></button>';*/
@@ -430,7 +434,7 @@ function ShowState(v) {
 		return v.show_state+' <i class="fa fa-spinner fa-pulse" title="Your session is being created. Please wait..."></i>';	
 	}
 	else if (v.show_state == "setup") {
-		return v.show_state+' <i class="fa fa-user" onclick="getSessionInfo('+v.id+')" title="Be sure to set up end-user access or no-one will be able to log on to your session."></i>';
+		return v.show_state+' <i class="fa fa-check" title="This session is ready."></i>';
 	}
 	else {
 		return v.show_state;
@@ -463,13 +467,13 @@ function updateSessionInfoList(sessionInfo) {
 			}
 		}
 		else if (sessionInfo.session_state == 'healthy') {
-			buttonUserAccess = '<button id="userAccessButton" class="btn btn-secondary btn-sm" onClick="setupUserAccess('+sessionInfo.id+')"><i class="fa fa-user" title="Set User Access"></i> Set User Access</button>';
+			if (!isUpgradeAvailable(sessionInfo.id)) buttonUserAccess = '<button id="userAccessButton" class="btn btn-secondary btn-sm" onClick="setUserAccess('+sessionInfo.id+')"><i class="fa fa-user" title="Set User Access"></i> Set User Access</button>';
 			toggleDemoSessionButton = '<button id="toggleDemoSessionButton" class="btn btn-info btn-sm" onClick="toggleDemoSession('+sessionInfo.id+')"><i class="fa fa-bookmark" title="'+demoSessionDescription+'"></i>'+demoSessionDescription+'</button>';
 			buttonExportCurrentPath = '<button id="exportPlansButton" class="btn btn-secondary btn-sm" onClick="downloadExportedPlansWithConfig('+sessionInfo.id+')"><i class="fa fa-file-code-o" title="Export with Current Plans"></i> Export with Current Plans</button>';
 			if(sessionInfo.game_state == 'play') {
 				buttonStartPause = '<button id="buttonStartPause" class="btn btn-secondary btn-sm pull-left" onclick="pauseSession('+sessionInfo.id+')"><i class="fa fa-pause" title="Pause Simulation"></i> Pause Simulation</button>';
 			}
-			else if(sessionInfo.game_state == 'pause' || sessionInfo.game_state == 'setup') {
+			else if(sessionInfo.game_state == 'pause' || sessionInfo.game_state == 'setup' || sessionInfo.game_state == 'end') {
 				buttonArchiveDownload = '<button id="buttonArchiveDownload" class="btn btn-warning btn-sm" onClick="archiveSession('+sessionInfo.id+')"><i class="fa fa-archive" title="Archive Session"></i> Archive Session</button>';
 				buttonSaveDownload = '<button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+')"><i class="fa fa-save" title="Save Session"></i> Save Session as File</button>';
 				buttonSaveDownload += ' <button id="" class="btn btn-secondary btn-sm" onClick="saveSession('+sessionInfo.id+', \'layers\')"><i class="fa fa-save" title="Save All Layers"></i> Save All Layers</button>';
@@ -481,6 +485,9 @@ function updateSessionInfoList(sessionInfo) {
 				else {
 					var buttonRecreateSession = '<button id="buttonRecreateSession" class="btn btn-warning btn-sm" onClick="RecreateSession('+sessionInfo.id+')"><i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>';
 				}
+			}
+			if (sessionInfo.game_state == 'end') {
+				buttonStartPause = '';
 			}
 		}
 		else if(sessionInfo.session_state == 'failed') {
@@ -510,7 +517,14 @@ function updateSessionInfoList(sessionInfo) {
 }
 
 function getSessionUpgrade(sessionId) {
-	//api call
+	upgradeavailable = isUpgradeAvailable(sessionId);	
+	if (upgradeavailable !== false) {
+		return '<button id="buttonUpgrade" class="btn btn-warning btn-sm" onClick="callUpgrade('+sessionId+')"><i class="fa fa-wrench" title="Upgrade Session"></i> Upgrade Session</button>';
+	}
+	else return '';
+}
+
+function isUpgradeAvailable(sessionId) {
 	var upgradeavailable = false;
 	$.ajax({
 		'url': 'api/getsessionupgrades.php',
@@ -533,10 +547,7 @@ function getSessionUpgrade(sessionId) {
 		'async': false,
 		'type': 'POST'
 	});
-	if (upgradeavailable !== false) {
-		return '<button id="buttonUpgrade" class="btn btn-warning btn-sm" onClick="callUpgrade('+sessionId+')"><i class="fa fa-wrench" title="Upgrade Session"></i> Upgrade Session</button>';
-	}
-	else return '';
+	return upgradeavailable;
 }
 
 function callUpgrade(sessionId) {
@@ -619,15 +630,7 @@ function getTableSessionInfo(sessionInfo, buttonStartPause, buttonArchiveDownloa
 	html +=			'</td>'
 	html +=		'</tr>'
 
-	html +=		'<tr>'
-	html +=			'<th scope="col">Admin Password</th>'
-	html += 		'<td class="text-right">'+sessionInfo.password_admin + ' <i class="fa fa-clipboard" aria-hidden="true" onClick="copyToClipboard(\''+sessionInfo.password_admin+'\')"></i></td>'
-	html +=			'<th scope="col" >Player Password</th>'
-	html +=			'<td class="text-right">'+sessionInfo.password_player + ' <i class="fa fa-clipboard" aria-hidden="true" onClick="copyToClipboard(\''+sessionInfo.password_player+'\')"></i></td>'
-	html +=		'</tr>'
-
 	//Buttons
-
 
 	html += 	'<tr class="table-info">'
 	html +=			'<td colspan="2">' + buttonStartPause + '&nbsp;' + toggleDemoSessionButton + ' ' + '</td>'
@@ -702,9 +705,6 @@ function submitNewSession() {
 				if (data.status == 'error') {
 					updateInfobox(MessageType.ERROR, 'submitNewSession (API): '+data.message);
 				} else {
-					if (watchdog == '1') {
-						data.message = data.message;
-					}
 					updateInfobox(MessageType.SUCCESS, data.message);
 				}
 			},
@@ -740,6 +740,361 @@ function isFormValid(currentForm) {
 	} else {
 		return true;
 	}
+}
+
+// User Access Management functions
+function saveUserAccess() {
+	var alldata = {
+		session_id: $('#UserAccessSessionID').val(),
+		countries: $('#countries').val(),
+		provider_admin: $('input[name=provider_admin]:checked').val(),
+		provider_region: $('input[name=provider_region]:checked').val(),
+		provider_player: $('input[name=provider_player]:checked').val(),
+		password_admin: $('#password_admin').val(),
+		password_region: $('#password_region').val(),
+		password_playerall: $('#password_playerall').val(),
+		users_admin: $('#users_admin').text(),
+		users_region: $('#users_region').text(),
+		users_playerall: $('#users_playerall').text(),
+		provider_admin_external: $('#provider_admin_external').val(),
+		provider_region_external: $('#provider_region_external').val(),
+		provider_player_external: $('#provider_player_external').val()
+	};
+	for (i = 0; i < 30; i++) {
+		vartocheck1 = '#users_player\\['+i+'\\]';
+		if ($(vartocheck1).text()) {
+			alldata["users_player["+i+"]"] = $(vartocheck1).text();
+		}
+		vartocheck2 = '#password_player\\['+i+'\\]';
+		if ($(vartocheck2).val()) {
+			alldata["password_player["+i+"]"] = $(vartocheck2).val();
+		}
+	}
+
+	$.ajax({
+		url: 'api/setuseraccess.php',
+		data:  alldata,
+		'error': function() {
+			updateInfobox(MessageType.ERROR, 'saveUserAccess: Error in AJAX call.');
+		},
+		'dataType': 'json',
+		'success': function(data) {
+			if (data.status == 'error') {
+				updateInfobox(MessageType.ERROR, 'saveUserAccess (API): '+data.message);
+			} else {
+				updateInfobox(MessageType.SUCCESS, data.message);
+			}
+		},
+		'type': 'POST'
+	});
+	$('#sessionUsers').modal('hide');
+	$('#sessionUsers').find("form").trigger("reset");
+}
+
+function setUserAccess(sessionId) {
+	$('#provider_admin_external').empty();
+	$('#users_admin').html('');
+	$('#provider_region_external').empty();
+	$('#users_region').html('');
+	$('#provider_player_external').empty();
+	$('#playerPasswordExtraFields').empty();
+	$('#playerUserExtraFields').empty();
+
+	var sessiondetails = getSessionUserAccess(sessionId);
+	$('#adminProviders').append('<input type="hidden" id="UserAccessSessionID" name="UserAccessSessionID" value="'+sessionId+'">');
+	var countrylist = "";
+	$.each(sessiondetails['countries'], function(count, country) {
+		countrylist += country["country_id"] + " ";
+		$('#playerPasswordExtraFields').append(addPasswordFields("player", country));
+	})
+	countrylist = countrylist.trim();
+	$('#adminProviders').append('<input type="hidden" id="countries" name="countries" value="'+countrylist+'">');
+	var providers = getServerAuthProviders(sessionId);
+	$.each(providers, function(count, provider) {
+		var newprovideroption = addAuthProvider(provider);
+		$('#provider_admin_external').append(newprovideroption);
+		$('#provider_region_external').append(newprovideroption);
+		$('#provider_player_external').append(newprovideroption);
+	}); 
+	$.each(sessiondetails['countries'], function(count2, country) {
+		$('#playerUserExtraFields').append(addUserFields("player", country));
+	});
+
+	setAllUserAccessFieldValues(sessiondetails);
+	
+	$('#btnSessionUsers').click(); 
+}
+
+function limitUserAccessView(divToShow) {
+	if (~divToShow.indexOf("PasswordFields")) {
+		divToHide1 = divToShow.replace("PasswordFields", "UserFields");
+	}
+	else {
+		divToHide1 = divToShow.replace("UserFields", "PasswordFields");
+	}
+	$(divToShow).show();
+	$(divToHide1).hide();
+}
+
+function getServerAuthProviders(sessionId) {
+	var providers;
+	$.ajax({
+		url: 'api/getauthproviders.php',
+		data: {
+			Token: currentToken,
+			format: 'json',
+			session_id: sessionId
+		},
+		error: function() {
+			// nothing necessary
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.status == 'error') {
+				console.log('getauthproviders', data.message);
+			}
+			providers = data.providers;
+		}, 
+		async: false,
+		type: 'POST'
+	});
+	return providers;
+}
+
+function getSessionUserAccess(sessionId) {
+	var useraccessdetails = [];
+	$.ajax({
+		url: 'api/getuseraccess.php',
+		data: {
+			Token: currentToken,
+			format: 'json',
+			session_id: sessionId
+		},
+		error: function() {
+			// nothing necessary
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.status == 'error') {
+				console.log('getuseraccess', data.message);
+			}
+			useraccessdetails['gamesession'] = data.gamesession;
+			useraccessdetails['countries'] = data.countries;
+		}, 
+		async: false,
+		type: 'POST'
+	});
+	return useraccessdetails;
+}
+
+function setAllUserAccessFieldValues(useraccessdetails) {
+	var password_admin = JSON.parse(useraccessdetails['gamesession'].password_admin);
+	var password_player = JSON.parse(useraccessdetails['gamesession'].password_player);
+
+	if (password_admin.admin.provider == "local") {
+		adminDivToShow = "#adminPasswordFields";
+		$("input[name=provider_admin][value=local]").prop('checked', true);
+	} else {
+		adminDivToShow = "#adminUserFields";
+		$("input[name=provider_admin][value=external]").prop('checked', true);
+		$('#provider_admin_external').val(password_admin.admin.provider);
+	}
+	limitUserAccessView(adminDivToShow);
+	
+	if (password_admin.region.provider == "local") {
+		regionDivToShow = "#regionPasswordFields";
+		$("input[name=provider_region][value=local]").prop('checked', true);
+	} else {
+		regionDivToShow = "#regionUserFields";
+		$("input[name=provider_region][value=external]").prop('checked', true);
+		$('#provider_region_external').val(password_admin.region.provider);
+	}
+	limitUserAccessView(regionDivToShow);
+	
+	if (password_player.provider == "local") {
+		playerDivToShow = "#playerPasswordFields";
+		$("input[name=provider_player][value=local]").prop('checked', true);
+	} else {
+		playerDivToShow = "#playerUserFields";
+		$("input[name=provider_player][value=external]").prop('checked', true);
+		$('#provider_player_external').val(password_player.provider);
+	}
+	limitUserAccessView(playerDivToShow);	
+	
+	if (password_admin.admin.password) {
+		$("#password_admin").val(password_admin.admin.password);
+	}
+	if (password_admin.region.password) {
+		$("#password_region").val(password_admin.region.password);
+	}
+	if (password_player.password) {
+		stored = false;
+		storage = '';
+		equalvalues = true;
+		$('input[name^="password_player"]').each(function() {
+			varname = $(this).attr('name');
+			temp = varname.replace("password_player[", "");
+			country_id = temp.replace("]", "");
+			value = password_player.password[parseInt(country_id)];
+			if (value) {
+				$(this).val(value);
+				if (stored) {
+					if (storage == value && equalvalues) equalvalues = true;
+					else equalvalues = false;
+				}
+				storage = value;
+				stored = true;
+			}
+		});
+		if (equalvalues) {
+			$('#password_playerall').val(storage);
+			$('input[name^="password_player"]').each(function() {
+				if ($(this).attr('name') !== "password_playerall") $(this).val('');
+			});
+			toggleFields();
+		}
+	}
+
+	if (password_admin.admin.users) {
+		var content = '';
+		password_admin.admin.users.forEach(element => content += element + ' ');
+		$('#users_admin').html(wrapWords(content));
+	}
+	if (password_admin.region.users) {
+		var content = '';
+		password_admin.region.users.forEach(element => content += element + ' ');
+		$('#users_region').html(wrapWords(content));
+	}
+	if (password_player.users) {
+		stored = false;
+		storage = '';
+		equalvalues = true;
+		$.each(password_player.users, function( team, password ) {
+			joinedpassword = password.join(" ");
+			$('#users_player\\['+team+'\\]').html(wrapWords(joinedpassword));
+			if (stored) {
+				if (storage == joinedpassword && equalvalues) equalvalues = true;
+				else equalvalues = false;
+			}
+			storage = joinedpassword;
+			stored = true;
+		});		
+		if (equalvalues) {
+			$('#users_playerall').html(wrapWords(storage));
+			$.each(password_player.users, function( team, password ) {
+				$('#users_player\\['+team+'\\]').html('');
+			});
+			toggleDivs();
+		}
+	}
+}
+
+function addAuthProvider(provider) {
+	return '<option value="'+provider['id']+'">'+provider['name']+'</option>';
+}
+
+function toggleFields() {
+	fieldId = '#password_playerall';
+	if ($(fieldId).val().length > 0) {
+		for (i = 0; i < 30; i++) {
+			vartocheck = fieldId.replace("all", "")+'\\['+i+'\\]';
+			if ($(vartocheck).length) {
+				$(vartocheck).prop("disabled", true);
+			}
+		}
+	}
+	else {
+		for (i = 0; i < 30; i++) {
+			vartocheck = fieldId.replace("all", "")+'\\['+i+'\\]';
+			if ($(vartocheck).length) {
+				$(vartocheck).prop("disabled", false);
+			}
+		}
+	}
+}
+
+function toggleDivs() {
+	if ($('#users_playerall').text().trim().length > 0) {
+		for (i = 0; i < 30; i++) {
+			$('#users_player\\['+i+'\\]').css("background-color", "#e9ecef");
+			$('#users_player\\['+i+'\\]').attr("contenteditable","false");
+		}
+	}
+	else {
+		for (i = 0; i < 30; i++) {
+			$('#users_player\\['+i+'\\]').css("background-color", "#ffffff");
+			$('#users_player\\['+i+'\\]').attr("contenteditable","true");
+		}
+	}
+}
+
+function addPasswordFields(type, country) {
+	id = 'password_'+type+'['+country['country_id']+']';
+	html = '<div class="input-group mb-3">';
+	html += '	<input type="text" class="form-control" placeholder="Leave empty for immediate access." id="'+id+'" name="'+id+'">';
+	html += '	<div class="input-group-append">';
+	html += '		<span class="input-group-text" style="-webkit-text-stroke: 0.1px white; color: black; font-weight: 1000; opacity: 0.7; background-color: '+country['country_colour']+';">'+country['country_name']+'</span>';
+	html += '	</div>';
+	html += '</div>';
+	return html;
+}
+
+function addUserFields(type, country) {
+	id = 'users_'+type+'['+country['country_id']+']';
+	jid = '#'+id;
+	html = '<div class="input-group mb-3">';
+	html += '	<div contenteditable="true" class="form-control" style="height: auto !important;" id="'+id+'"></div>';
+	html += '	<div class="input-group-append">';
+	html += '		<span class="input-group-text" style="-webkit-text-stroke: 0.1px white; color: black; font-weight: 1000; opacity: 0.7; background-color: '+country['country_colour']+';">'+country['country_name']+'</span>';
+	html += '	</div>';
+	html += '	<div class="input-group-append">';
+	html += '		<button class="btn btn-outline-secondary" type="button" id="button-find-'+id+'" onclick="findUsersAtProvider(\''+jid+'\', $(\'#provider_player_external\').val());">Find</button>';
+	html += '	</div>';
+	html += '</div>';
+	return html;
+}
+
+function findUsersAtProvider(div, provider) {
+	sessionId = $('#UserAccessSessionID').val();
+	div = div.replace("[", "\\[");
+	div = div.replace("]", "\\]");
+	$(div).html($(div).html().replaceAll('</div>', '</div> '));
+	userTextInput = $(div).text();
+	userTextInput = userTextInput.replace(/\s\s+/g, ' ');
+	userTextInput = userTextInput.trim();
+	// call the provider to check the users
+	var found, notfound;
+	$.ajax({
+		url: 'api/findusersatprovider.php',
+		data: {
+			Token: currentToken,
+			format: 'json',
+			provider: provider,
+			users: userTextInput,
+			session_id: sessionId
+		},
+		error: function() {
+			// nothing necessary
+		},
+		dataType: 'json',
+		success: function(data) {
+			if (data.status == 'error') {
+				console.log('findusersatprovider', data.message);
+			}
+			found = data.found;
+			notfound = data.notfound;
+			if (notfound) {
+				showToast(MessageType.ERROR, 'Could not find these users: '+notfound);
+			}
+			checkedUsersText = found;
+			$(div).html(wrapWords(checkedUsersText));
+		}, 
+		type: 'POST'
+	});
+}
+
+function wrapWords(str, tmpl) {
+	return str.replace(/\w+/g, tmpl || "<button type=\"button\" class=\"btn btn-primary\" style=\"margin: 5px;\" onClick=\"$(this).remove(); toggleDivs();\">$&<i style=\"padding-left: 7px;\" class=\"fa fa-times-circle\"></i></button> ");
 }
 
 /********/
@@ -1012,7 +1367,7 @@ function UploadSave() {
 }
 
 function RecreateLoadSave(ExistingServerId) {
-	if (confirm('This will reload the save from which this server was originally recreated. All existing data will be lost. Are you sure?')) {
+	if (confirm('This will recreate this session by reloading the originally saved session. All existing data will be lost. Are you sure?')) {
 		$('#sessionInfo').modal('hide');
 
 		var formData = new FormData();
@@ -1053,7 +1408,7 @@ function callLoadSave(formData) {
 			padding: '15px',
 			'text-align': 'left',
 			'border-radius': '5px' 
-			}
+		}
 	});
 	$.ajax({
 		url: "api/loadsave.php",
@@ -1717,4 +2072,3 @@ function submitNewGeoServer() {
 	$('#modalNewGeoServers').modal('hide');
 	$('#modalNewGeoServers').find("form").trigger("reset");
 }
-

@@ -114,8 +114,8 @@ class NewSession
 		$query_string = " INSERT INTO `game_list`" .
 						" (name, game_config_version_id, game_server_id, game_geoserver_id, watchdog_server_id," .
 						"  game_creation_time, game_start_year, game_end_month, game_current_month, game_running_til_time," .
-						"  password_admin, password_player, session_state, game_state, game_visibility, players_active, players_past_hour)" .
-						" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+						"  password_admin, password_player, session_state, game_state, game_visibility, players_active, players_past_hour, server_version)" .
+						" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		if(!empty($_POST)){
 			$where_array = [$this->Name,
@@ -134,7 +134,8 @@ class NewSession
 							'setup',
 							$this->Visibility,
 							0,
-							0];
+							0,
+							ServerManager::getInstance()->GetCurrentVersion()];
 			if ($this->db->query($query_string, $where_array)) {
 				$this->setNewlyCreatedSessionId();
 				$this->setLastPlayedTime();

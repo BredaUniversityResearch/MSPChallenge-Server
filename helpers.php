@@ -1,26 +1,17 @@
 <?php 
 
 /* This captures all PHP errors and warnings to ensure the standard return format */
-//register_shutdown_function('shutdown');
 set_error_handler('exceptions_error_handler');
 
-// function shutdown() {
-//   if(!is_null($e = error_get_last()))
-//   {
-//     http_response_code(500);
-//     echo Base::WrappedReturn(array("message" => Base::ErrorString(new ErrorException($e["message"], 0, $e["type"], $e["file"], $e["line"]))));
-//   }
-// }
-
 function exceptions_error_handler($severity, $message, $filename, $lineno) {
-  //if (error_reporting() == 0) {
-  //  return;
-  //}
-  //if (error_reporting() & $severity) {
     throw new ErrorException($message, 0, $severity, $filename, $lineno);
-  //}
 }
 /* End of PHP error and warning capturing code */
+
+function isJson($string) {
+    json_decode($string);
+    return (json_last_error() == JSON_ERROR_NONE);
+}
 
 if( !function_exists('apache_request_headers') ) {
     function apache_request_headers() {

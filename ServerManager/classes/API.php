@@ -7,7 +7,7 @@ class API
     public function __construct()
     {
         $this->setStatusFailure();
-        $this->setPayLoad(array());
+        $this->_payload = array();
         header('Content-type: application/json');
     }
 
@@ -44,7 +44,7 @@ class API
     {
         if (is_array($payload)) 
         {
-            $this->_payload = $payload;
+            $this->_payload[key($payload)] = current($payload);
             return true;
         }
         return false;
@@ -55,8 +55,9 @@ class API
         $this->_return = array(
             "status" => $this->_status,
             "message" => $this->_message,
-            "count" => (is_array(current($this->_payload))) ? count(current($this->_payload)) : 0
+            "count" => (is_array($this->_payload) && is_array(current($this->_payload))) ? count(current($this->_payload)) : 0
         );
+        
         $this->_return = array_merge($this->_return, $this->_payload);
     }
 

@@ -271,6 +271,22 @@
 			Database::GetInstance()->query("ALTER TABLE `game_session` 
 				CHANGE `game_session_password_admin` `game_session_password_admin` TEXT NOT NULL,
 				CHANGE `game_session_password_player` `game_session_password_player` TEXT NOT NULL;");
+
+			Database::GetInstance()->query("ALTER TABLE `country` 
+				ADD `country_name` VARCHAR(45) NULL AFTER `country_id`;");
+
+			$configData = (new Game)->GetGameConfigValues();
+			foreach($configData['meta'] as $layerMeta) 
+			{
+				if ($layerMeta['layer_name'] == $configData['countries'])
+				{
+					foreach($layerMeta['layer_type'] as $country)
+					{
+						$countryId = $country['value'];
+						Database::GetInstance()->query("UPDATE country SET country_name = ? WHERE country_id = ?", array($country['displayName'], $country['value']));
+					}
+				}
+			}
 		}
 	}
 

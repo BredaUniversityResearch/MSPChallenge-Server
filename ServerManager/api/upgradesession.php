@@ -1,7 +1,7 @@
 <?php
 require_once '../init.php'; 
 
-//$user->hastobeLoggedIn();
+$user->hastobeLoggedIn();
 
 $db = DB::getInstance();
 
@@ -13,11 +13,9 @@ $response_array['message'] = 'No session ID given.';
 if(!empty($_POST['session_id'])) {
     $session_id = $_POST['session_id'];
     // then get upgrade info from ServerManager class
-    $game_creation_time = $db->cell("game_list.game_creation_time", ["id", "=", $session_id]);
-    if (!empty($game_creation_time)) {
-        // first rehash $game_creation_time into the int that ServerManager wants
-        $game_creation_time = (new DateTime("@".$game_creation_time))->format("Ymd");
-        $upgrade = ServerManager::getInstance()->CheckForUpgrade((int) $game_creation_time);
+    $server_version = $db->cell("game_list.server_version", ["id", "=", $session_id]);
+    if (!empty($server_version)) {
+        $upgrade = ServerManager::getInstance()->CheckForUpgrade($server_version);
         if ($upgrade !== false) {
             // ok, so let's call the server API!
             //get the correct token header for server API requests later on
@@ -25,7 +23,7 @@ if(!empty($_POST['session_id'])) {
             $api_url = ServerManager::getInstance()->GetServerURLBySessionId($session_id)."/api/update/".$upgrade;
             $return = json_decode(CallAPI("POST", $api_url, array(), $additionalHeaders, false));
             if ($return->success) {
-                if ($db->query("UPDATE game_list SET game_creation_time = ? WHERE id = ?", array(time(), $session_id))) {
+                if ($db->query("UPDATE game_list SET server_version = ? WHERE id = ?", array(ServerManager::getInstance()->GetCurrentVersion(), $session_id))) {
                     $response_array['status'] = 'success';
                     $response_array['message'] = 'Session upgraded successfully.';
                 }
@@ -40,7 +38,7 @@ if(!empty($_POST['session_id'])) {
         }
     }
     else {
-        $response_array['message'] = 'Could not get creation time of session from database.';
+        $response_array['message'] = 'Could not get server version of session from database.';
     }
 }
 

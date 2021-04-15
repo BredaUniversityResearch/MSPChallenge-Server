@@ -57,10 +57,7 @@ if (typeof jQuery == 'undefined') {
 }
 </script>
 
-<!-- Toasts -->
 <script src="<?=$url_app_root;?>js/toasts/tata.js"></script>
-
-<script src="<?=$url_app_root;?>js/manager.js"></script>
 
 <script src="<?=$url_app_root;?>js/jquery.tablesorter-2.31.1.min.js"></script>
 
@@ -74,6 +71,8 @@ if (typeof jQuery == 'undefined') {
 
 <script src="<?=$url_app_root;?>js/bootstrap.min.js"></script>
 
+<!-- ServerManager's main js, with cache busting -->
+<script src="<?=$url_app_root;?>js/manager.js?v=<?=time();?>"></script>
 
 </head>
 <body>

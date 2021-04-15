@@ -9,10 +9,11 @@ $geoserver = new GeoServer;
 $geoservers = $geoserver->getList();
 
 if (is_array($geoservers)) {
-	$api->setPayload($geoservers);
 	$api->setStatusSuccess();
+	$api->setPayload($geoservers);
 }
 else {
+	$api->setStatusFailure();
 	$api->setMessage($geoservers);
 }
 

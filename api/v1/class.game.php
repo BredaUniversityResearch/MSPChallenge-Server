@@ -10,6 +10,7 @@
 			["Config", Security::ACCESS_LEVEL_FLAG_NONE], //Required for login
 			"FutureRealtime", 
 			"GetActualDateForSimulatedMonth",
+			["getCountries", Security::ACCESS_LEVEL_FLAG_NONE],
 			"GetCurrentMonth",
 			["GetGameDetails", Security::ACCESS_LEVEL_FLAG_NONE],
 			"GetWatchdogAddress", 
@@ -77,14 +78,11 @@
 			}
 
 			$data['configured_simulations'] = $configuredSimulations;
-			$data['wiki_base_url'] = Config::GetInstance()->WikiConfig()['game_base_url'];
+			if (!isset($data['wiki_base_url'])) $data['wiki_base_url'] = Config::GetInstance()->WikiConfig()['game_base_url'];
 
-			$passwordData = Database::GetInstance()->query("SELECT game_session_password_admin, game_session_password_player FROM game_session");
-			if (count($passwordData) > 0)
-			{
-				$data["user_admin_has_password"] = !empty($passwordData[0]["game_session_password_admin"]);
-				$data["user_common_has_password"] = !empty($passwordData[0]["game_session_password_player"]);
-			}
+			$passwordchecks = (new GameSession)->CheckGameSessionPasswords();
+			$data["user_admin_has_password"] = $passwordchecks["adminhaspassword"];
+			$data["user_common_has_password"] = $passwordchecks["playerhaspassword"];
 
 			return $data;
 		}
@@ -182,7 +180,7 @@
 					foreach($layerMeta['layer_type'] as $country)
 					{
 						$countryId = $country['value'];
-						Database::GetInstance()->query("INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)", array($countryId, $country['polygonColor'], 0 ));
+						Database::GetInstance()->query("INSERT INTO country (country_id, country_name, country_colour, country_is_manager) VALUES (?, ?, ?, ?)", array($countryId, $country['displayName'], $country['polygonColor'], 0 ));
 					}
 				}
 			}
@@ -751,6 +749,11 @@
 				];
 			}
 			return $result;
+		}
+
+		public function getCountries()
+		{
+			return Database::GetInstance()->query("SELECT * FROM country WHERE country_name IS NOT NULL;");
 		}
 	}
 ?>
