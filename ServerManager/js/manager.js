@@ -762,11 +762,11 @@ function saveUserAccess() {
 	};
 	for (i = 0; i < 30; i++) {
 		vartocheck1 = '#users_player\\['+i+'\\]';
-		if ($(vartocheck1).text()) {
+		if ($(vartocheck1)) {
 			alldata["users_player["+i+"]"] = $(vartocheck1).text();
 		}
 		vartocheck2 = '#password_player\\['+i+'\\]';
-		if ($(vartocheck2).val()) {
+		if ($(vartocheck2)) {
 			alldata["password_player["+i+"]"] = $(vartocheck2).val();
 		}
 	}
@@ -1402,7 +1402,7 @@ function submitLoadSave() {
 
 function callLoadSave(formData) {
 	$.blockUI({ 
-		message: '<h3>Please wait...</h3>This can take anywhere between a couple of seconds to 20 minutes to complete, depending on the server being loaded.',
+		message: '<h3>Please wait...</h3>This can take anywhere between a couple of seconds to 20 minutes to complete, depending on the session being loaded.',
 		css: {  
 			border: 'none',
 			padding: '15px',

@@ -409,7 +409,7 @@ class GameSession extends Base
 					$adminhaspassword = !empty($password_admin["admin"]["password"]);
 				}
 				if ($password_player["provider"] == "local") {
-					foreach ($password_player as $team => $password) {
+					foreach ($password_player["password"] as $team => $password) {
 						if (!empty($password)) {
 							$playerhaspassword = true;
 							break;
