@@ -28,7 +28,8 @@
 			["Tick", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER] // Required for serverlistupdater.php to work in case of demo server
 		);
 
-		public function __construct($str=""){
+		public function __construct($str="")
+		{
 			parent::__construct($str);
 		}
 
@@ -57,7 +58,8 @@
 		 * @api {POST} /game/Config Config
 		 * @apiDescription Obtains the sessions' game configuration 
 		 */
-		public function Config(){
+		public function Config()
+		{
 			$data = $this->GetGameConfigValues();
 
 			$configuredSimulations = array();
@@ -92,7 +94,8 @@
 		 * @api {POST} /game/NextMonth NextMonth
 		 * @apiDescription Updates session database to indicate start of next simulated month
 		 */
-		public function NextMonth(){
+		public function NextMonth()
+		{
 			Database::GetInstance()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
 		}
 
@@ -139,12 +142,14 @@
 		* @api {POST} /game/GetCurrentMonth GetCurrentMonth
 		* @apiDescription Gets the current month of the active game.
 		*/
-		public function GetCurrentMonth() {
+		public function GetCurrentMonth() 
+		{
 			$result = array("game_currentmonth" => $this->GetCurrentMonthAsId());
 			return $result; //Base::JSON($result);
 		}
 
-		public function GetCurrentMonthAsId() {
+		public function GetCurrentMonthAsId() 
+		{
 			$currentMonth = Database::GetInstance()->query("SELECT game_currentmonth, game_state FROM game")[0];
 			if ($currentMonth["game_state"] == "SETUP") {
 				$currentMonth["game_currentmonth"] = -1;
@@ -152,11 +157,13 @@
 			return $currentMonth["game_currentmonth"];
 		}
 
-		public function Setupfilename(string $configFilename){
+		public function Setupfilename(string $configFilename)
+		{
 			Database::GetInstance()->query("UPDATE game SET game_configfile=?", array($configFilename));
 		}
 
-		public function SetupCountries($configData) {
+		public function SetupCountries($configData) 
+		{
 			$adminColor = "#FF00FFFF";
 			if (array_key_exists("user_admin_color", $configData))
 			{
@@ -188,7 +195,8 @@
 			Database::GetInstance()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
 		}
 
-		public function SetupGametime($data){
+		public function SetupGametime($data)
+		{
 			$_POST['user'] = 1; // should this go at some point?
 			$this->SetStartDate($data['start']);
 
@@ -216,7 +224,8 @@
 		 * @apiDescription Check if the server is online
 		 * @apiSuccess {string} online
 		 */
-		public function IsOnline(){
+		public function IsOnline()
+		{
 			return "online";
 		}
 
@@ -227,7 +236,8 @@
 		 * @apiDescription Get all layer meta data required for a game
 		 * @apiSuccess {string} JSON object
 		 */
-		public function Meta(bool $sort = false, bool $onlyActiveLayers = false, int $user){
+		public function Meta(bool $sort = false, bool $onlyActiveLayers = false, int $user)
+		{
 			Database::GetInstance()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
 
 			$activeQueryPart = "";
@@ -256,7 +266,8 @@
 		 * @apiSuccess {string} JSON object
 		 * @ForceNoTransaction
 		 */
-		public function Tick($showDebug=false) {
+		public function Tick($showDebug=false) 
+		{
 
 			$plan = new Plan();
 			$plan->Tick();
@@ -301,7 +312,8 @@
 			}
 		}
 
-		private function AreSimulationsUpToDate($tickData){
+		private function AreSimulationsUpToDate($tickData)
+		{
 			$config = $this->GetGameConfigValues();
 			if ((isset($config["MEL"]) && $tickData['month'] > $tickData['mel_lastmonth']) ||
 				(isset($config["CEL"]) && $tickData['month'] > $tickData['cel_lastmonth']) ||
@@ -312,7 +324,8 @@
 			return true;
 		}
 
-		private function CalculateUpdatedTime($showdebug = false){
+		private function CalculateUpdatedTime($showdebug = false)
+		{
 
 			$tick = Database::GetInstance()->query("SELECT
 				game_state as state,
@@ -375,7 +388,8 @@
 			return $tick;
 		}
 
-		private function TryTickServer($tickData, $showDebug) {
+		private function TryTickServer($tickData, $showDebug) 
+		{
 			if (!strstr($_SERVER['REQUEST_URI'], 'dev') || Config::GetInstance()->ShouldWaitForSimulationsInDev())
 			{
 				if(!$this->AreSimulationsUpToDate($tickData)){
@@ -457,7 +471,8 @@
 		 * @apiParam {int} months the amount of months the planning phase takes
 		 * @apiDescription set the amount of months the planning phase takes, should not be done during the simulation phase
 		 */
-		public function Planning(int $months){
+		public function Planning(int $months)
+		{
 			Database::GetInstance()->query("UPDATE game SET game_planning_gametime=?", array($months));
 		}
 
@@ -467,11 +482,13 @@
 		 * @apiParam {int} realtime length of planning phase (in seconds)
 		 * @apiDescription Set the duration of the planning phase in seconds
 		 */
-		public function Realtime(int $realtime){
+		public function Realtime(int $realtime)
+		{
 			Database::GetInstance()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
 		}
 
-		private function SetStartDate(int $a_startYear){
+		private function SetStartDate(int $a_startYear)
+		{
 			Database::GetInstance()->query("UPDATE game SET game_start=?", array($a_startYear));
 		}
 
@@ -481,7 +498,8 @@
 		 * @apiParam {string} realtime comma separated string of all the era times
 		 * @apiDescription Set the duration of future eras
 		 */
-		public function FutureRealtime(string $realtime){
+		public function FutureRealtime(string $realtime)
+		{
 			Database::GetInstance()->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
 		}
 
@@ -491,7 +509,8 @@
 		 * @apiParam {string} state new state of the game
 		 * @apiDescription Set the current game state
 		 */
-		public function State(string $state){
+		public function State(string $state)
+		{
 			$currentState = Database::GetInstance()->query("SELECT game_state FROM game")[0];
 			if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
 				throw new Exception("Invalid current state of ".$currentState["game_state"]); 
@@ -507,11 +526,13 @@
 			$this->OnGameStateUpdated($state);
 		}
 
-		private function OnGameStateUpdated($newGameState) {
+		private function OnGameStateUpdated($newGameState) 
+		{
 			$this->ChangeWatchdogState($newGameState);
 		}
 
-		private function GetWatchdogAddress($withport=false) {
+		private function GetWatchdogAddress($withport=false) 
+		{
 			if (!empty($this->watchdog_address)) {
 				if ($withport) return $this->watchdog_address.':'.$this->watchdog_port;
 				else return $this->watchdog_address;
@@ -528,7 +549,8 @@
 			}
 		}
 
-		private function GetWatchdogSessionUniqueToken() {
+		private function GetWatchdogSessionUniqueToken() 
+		{
 			$result = Database::GetInstance()->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
 			if (count($result) > 0) {
 				return $result[0]["game_session_watchdog_token"];
@@ -536,7 +558,8 @@
 			return "0";
 		}
 
-		private function TestWatchdogAlive() {
+		private function TestWatchdogAlive() 
+		{
 			try {
 				$this->CallBack($this->GetWatchdogAddress(true), array(), array(), false, false, array(CURLOPT_CONNECTTIMEOUT => 1));
 			}
@@ -549,11 +572,13 @@
 		/**
 		 * @ForceNoTransaction
 		 */
-		public function StartWatchdog() {
+		public function StartWatchdog() 
+		{
 			self::StartSimulationExe(array("exe" => "MSW.exe", "working_directory" => "simulations/MSW/"));
 		}
 
-		private static function StartSimulationExe($params) {
+		private static function StartSimulationExe($params) 
+		{
 			$apiEndpoint = GameSession::GetRequestApiRoot(); 
 			$args = isset($params["args"])? $params["args"]." " : "";
 			$args = $args."APIEndpoint ".$apiEndpoint;
@@ -566,7 +591,8 @@
 			Database::execInBackground('start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"');
 		}
 
-		public function ChangeWatchdogState($newWatchdogGameState) {
+		public function ChangeWatchdogState($newWatchdogGameState) 
+		{
 			if (!empty($this->GetWatchdogAddress(true))) 
 			{
 				// we want to change the watchdog state, but first we check if it is running
@@ -577,7 +603,7 @@
 					if (isset($requestHeader["MSPAPIToken"])) {
 						$headers[] = "MSPAPIToken: ".$requestHeader["MSPAPIToken"];
 					}
-					$success = $this->CallBack($this->GetWatchdogAddress(false).Config::GetInstance()->GetCodeBranch()."/api/Game/StartWatchdog", array(), $headers, true); //curl_exec($ch);
+					$success = $this->CallBack($this->GetWatchdogAddress(false)."/api/Game/StartWatchdog", array(), $headers, true); //curl_exec($ch);
 					sleep(3); //not sure if this is necessary
 				}
 
@@ -622,7 +648,8 @@
 			}
 		}
 
-		protected function GetUpdateTime($id){
+		protected function GetUpdateTime($id)
+		{
 			return Database::GetInstance()->query("SELECT user_lastupdate FROM user WHERE user_id=?", array($id))[0]['user_lastupdate'];
 		}
 
@@ -634,7 +661,8 @@
 		 * @apiParam user The id of the user logged on to the client requesting the update.
 		 * @apiDescription Gets the latest plans & messages from the server
 		 */
-		public function Latest(int $team_id, float $last_update_time, int $user){
+		public function Latest(int $team_id, float $last_update_time, int $user)
+		{
 			$debugPrefTimings = false;
 			$newtime = microtime(true);
 
