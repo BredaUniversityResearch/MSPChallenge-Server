@@ -113,10 +113,19 @@ class ServerListUpdater
 	{
 		$servermanager = ServerManager::getInstance();
 		$existingSessionData = $this->database->query(
-			"SELECT cv.file_path AS game_config_version_file_path, gl.password_admin AS password_admin, gl.password_player AS password_player, gs.address AS game_server_address, gw.address AS game_watchdog_server_address 
+			"SELECT cv.file_path AS game_config_version_file_path, 
+					gl.password_admin AS password_admin, 
+					gl.password_player AS password_player, 
+					gg.id AS game_geoserver_id,
+					gg.address AS game_geoserver_address,
+					gg.username AS game_geoserver_username,
+					gg.password AS game_geoserver_password,
+					gs.address AS game_server_address, 
+					gw.address AS game_watchdog_server_address 
 			FROM game_list gl 
 				JOIN game_config_version cv ON gl.game_config_version_id = cv.id 
 				JOIN game_servers gs ON gl.game_server_id = gs.id 
+				JOIN game_geoservers gg ON gl.game_geoserver_id = gg.id
 				JOIN game_watchdog_servers gw ON gl.watchdog_server_id = gw.id
 			WHERE gl.id = ?", array($sessionId));
 		if ($existingSessionData->count())
@@ -133,6 +142,10 @@ class ServerListUpdater
 					$sessionId,
 					$existingData->password_admin,
 					$existingData->password_player,
+					$existingData->game_geoserver_id, 
+					$existingData->game_geoserver_address, 
+					$existingData->game_geoserver_username, 
+					$existingData->game_geoserver_password,
 					$existingData->game_watchdog_server_address,
 					$existingData->game_server_address,
 					true,
