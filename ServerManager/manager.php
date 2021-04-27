@@ -824,6 +824,19 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 		</div>
 	</div>
 
+
+	<div role="alert" aria-live="assertive" id="LogToast" aria-atomic="true" class="toast" data-autohide="false" data-autoclose="false" style="width: 350px; position: absolute; top: 0; right: 0;">
+		<div class="toast-header">
+			<strong class="mr-auto">Session Activity Log</strong>
+			<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="toast-body" id="LogToastBody">
+			
+		</div>
+	</div>
+
 </div>
 
 <!-- Place any per-page javascript here -->
@@ -873,9 +886,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 
 		WatchdogServerList();
 		GetServerAddr();
-		GeoServerList();
-
-		
+		GeoServerList();		
 	});
 
 	regularupdateTablesManager = setInterval(function() {

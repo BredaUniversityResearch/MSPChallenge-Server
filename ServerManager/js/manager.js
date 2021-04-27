@@ -431,7 +431,7 @@ function sessionsListToTable(sessionsList) {
 
 function ShowState(v) {
 	if (v.show_state == "request") {
-		return v.show_state+' <i class="fa fa-spinner fa-pulse" title="Your session is being created. Please wait..."></i>';	
+		return v.show_state+' <i class="fa fa-spinner fa-pulse" title="Your session is being created. Click for a progress update." onClick="ShowLogToast('+v.id+');"></i>';	
 	}
 	else if (v.show_state == "setup") {
 		return v.show_state+' <i class="fa fa-check" title="This session is ready."></i>';
@@ -2071,4 +2071,78 @@ function submitNewGeoServer() {
 	}
 	$('#modalNewGeoServers').modal('hide');
 	$('#modalNewGeoServers').find("form").trigger("reset");
+}
+
+
+function ShowLogToast(session_id) {
+	// clear LogToast contents
+	log_concise_old = '';
+	UpdateLogToastContents(session_id);
+	// and call UpdateLogToastContents every 3 seconds
+	regularLogToastBodyUpdate = setInterval(function() {
+		UpdateLogToastContents(session_id);
+	}, 3000);
+	// call AutoCloseLogToast every 20 seconds
+	regularLogToastAutoCloseCheck = setInterval(function() {
+		AutoCloseLogToast(session_id);
+	}, 20000);
+	$('#LogToast').toast('show');
+}
+
+var log_concise_old = '';
+function UpdateLogToastContents(session_id) {
+	// read the log from getsessioninfo.php
+	$.post(
+		"api/getsessioninfo.php", 
+		{
+			Token: currentToken,
+			format: 'json',
+			session_id: session_id
+		},
+		function(data) {
+			var log_array = data.sessioninfo.log.split("<br />");
+			log_array = log_array.slice(-7);
+			var log_concise_new = log_array.join("<br />");
+			if (log_concise_new == log_concise_old) {
+				// if it is the same, flag the LogToast div for autoclose by setting it to true
+				$('#LogToast').prop('data-autoclose', true);
+			}
+			else {
+				// if it's not the same, set the LogToast autoclose to false
+				$('#LogToast').prop('data-autoclose', false);
+			}
+			// update logtoast content
+			log_concise_old = log_concise_new;
+			$("#LogToastBody").html(log_concise_new);
+
+		}
+	);
+}
+
+async function AutoCloseLogToast(session_id) {
+	// if autoclose is set to true right now, then ...
+	if ($('#LogToast').prop('data-autoclose')) {
+		// stop the regular UpdateLogToastContents calls
+		clearTimeout(regularLogToastBodyUpdate); 
+		for (var times = 0; times < 2; times++) { 
+			// wait a bit...
+			await new Promise(r => setTimeout(r, 6000));
+			// do one more UpdateLogToastContents attempt
+			UpdateLogToastContents(session_id);	
+		}
+		// is autoclose still set to true? then...
+		if ($('#LogToast').prop('data-autoclose')) {
+			// stop calling this function every once in a while
+			clearTimeout(regularLogToastAutoCloseCheck); 
+			// and hide LogToast as a wrap-up
+			$('#LogToast').toast('hide');
+		}
+		else {
+			// otherwise re-initialise UpdateLogToastContents every 3 seconds
+			regularLogToastBodyUpdate = setInterval(function() {
+				UpdateLogToastContents(session_id);
+			}, 3000);
+			// and this function will be called again later
+		}
+	}
 }
