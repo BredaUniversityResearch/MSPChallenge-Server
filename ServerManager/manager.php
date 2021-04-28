@@ -825,9 +825,9 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 	</div>
 
 
-	<div role="alert" aria-live="assertive" id="LogToast" aria-atomic="true" class="toast" data-autohide="false" data-autoclose="false" style="width: 350px; position: absolute; top: 0; right: 0;">
+	<div role="alert" aria-live="assertive" id="LogToast" aria-atomic="true" class="toast" data-autohide="false" data-autoclose="false" style="max-width: 650px !important; width: 650px; position: absolute; bottom: 0; right: 0;">
 		<div class="toast-header">
-			<strong class="mr-auto">Session Activity Log</strong>
+			<strong class="mr-auto" id="LogToastHeader"></strong>
 			<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
 			<span aria-hidden="true">&times;</span>
 			</button>

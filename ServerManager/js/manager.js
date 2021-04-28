@@ -2075,6 +2075,7 @@ function submitNewGeoServer() {
 
 
 function ShowLogToast(session_id) {
+	$('#LogToastHeader').html("Session Activity Log ("+session_id+")");
 	// clear LogToast contents
 	log_concise_old = '';
 	UpdateLogToastContents(session_id);
@@ -2101,8 +2102,9 @@ function UpdateLogToastContents(session_id) {
 		},
 		function(data) {
 			var log_array = data.sessioninfo.log.split("<br />");
-			log_array = log_array.slice(-7);
-			var log_concise_new = log_array.join("<br />");
+			log_array = log_array.slice(-7);			
+			log_array.forEach(LogToastContentItemCleanUp);
+			var log_concise_new = log_array.join("");
 			if (log_concise_new == log_concise_old) {
 				// if it is the same, flag the LogToast div for autoclose by setting it to true
 				$('#LogToast').prop('data-autoclose', true);
@@ -2114,9 +2116,18 @@ function UpdateLogToastContents(session_id) {
 			// update logtoast content
 			log_concise_old = log_concise_new;
 			$("#LogToastBody").html(log_concise_new);
-
 		}
 	);
+}
+
+function LogToastContentItemCleanUp(item, index, arr) {
+	item = item.replace(/\[[0-9\-\s:]+\]/, "");
+	item = item.replace("[ INFO ]", '<div style="color: green;">');
+	item = item.replace("[ ERROR ]", '<div style="color: red;">');
+	item = item.replace("[ WARN ]", '<div style="color: navy;">');
+	item = item.replace("[ DEBUG ]", '<div style="color: grey;">');
+	item += "</div>";
+	arr[index] = item;
 }
 
 async function AutoCloseLogToast(session_id) {
@@ -2124,10 +2135,10 @@ async function AutoCloseLogToast(session_id) {
 	if ($('#LogToast').prop('data-autoclose')) {
 		// stop the regular UpdateLogToastContents calls
 		clearTimeout(regularLogToastBodyUpdate); 
-		for (var times = 0; times < 2; times++) { 
+		for (var times = 0; times < 10; times++) { 
 			// wait a bit...
-			await new Promise(r => setTimeout(r, 6000));
-			// do one more UpdateLogToastContents attempt
+			await new Promise(r => setTimeout(r, 3000));
+			// do another UpdateLogToastContents attempt
 			UpdateLogToastContents(session_id);	
 		}
 		// is autoclose still set to true? then...
