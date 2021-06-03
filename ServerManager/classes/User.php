@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class User {
+class User extends Base {
 	private $_db, $_data, $_sessionName, $_isLoggedIn, $_cookieName,$_isNewAccount;
 	public $tableName = 'users';
 
@@ -48,15 +48,14 @@ class User {
 		if ($this->exists()) {
 			$servermanager = ServerManager::getInstance();
 			$params = array("jwt" => Session::get("currentToken"), "server_id" => $servermanager->GetServerID(), "audience" => $servermanager->GetBareHost());
-			$api_url = $servermanager->GetMSPAuthAPI().'authjwt.php';
-			$authorize = json_decode(CallAPI("POST", $api_url, $params));
-			if (isset($authorize->success)) {
-				if ($authorize->success) {
-						return true;
+			$authorize = Base::callAuthoriser("authjwt.php", $params);
+			if (isset($authorize["success"])) {
+				if ($authorize["success"]) {
+					return true;
 				}
 				else {
-					if (isset($authorize->error)) {
-						if ($authorize->error == 503) {
+					if (isset($authorize["error"])) {
+						if ($authorize["error"] == 503) {
 							die('MSP Challenge Authoriser cannot be reached. Are you sure you are connected to the internet?');
 						}
 					}
@@ -120,9 +119,27 @@ class User {
 	}
 
 	public function hastobeLoggedIn() {
-		if (!$this->_isLoggedIn) {
-			$this->forbidden();
+		if ($this->_isLoggedIn) return;
+		if (isset($_POST['session_id']) && isset($_POST['token'])) {
+			try {
+				$gamesession = new GameSession;
+				$gamesession->id = $_POST['session_id'];
+				$gamesession->get();
+				if ($gamesession->api_access_token == $_POST['token']) return;
+				$server_call = self::callServer(
+					"Security/checkaccess", 
+					array(
+						"scope" => "ServerManager",
+					),
+					$_POST['session_id'],
+					$_POST['token']
+				);
+				if ($server_call["success"] && $server_call["payload"]["status"] == "UpForRenewal") return; 
+			} catch (Exception $e) {
+				$this->forbidden();
+			}
 		}
+		$this->forbidden();
 	}
 
 	public function forbidden() {

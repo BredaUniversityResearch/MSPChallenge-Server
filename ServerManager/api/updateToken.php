@@ -1,26 +1,36 @@
 <?php 
 require_once '../init.php';
+$api = new API;
+$user = new User();
 
 $user->hastobeLoggedIn();
 
-$servermanager = ServerManager::getInstance();
-
-$return['status'] = 'error';
-$return['jwt'] = '';
-if (!empty($_POST['Token'])) {
-    // check the old token, get the new token in one go
-    $url = $servermanager->GetMSPAuthAPI().'checkjwt.php';
-    $checkoldgetnew = json_decode(CallAPI("POST", $url, array (
-                                                            "jwt" => $_POST['Token'],
-                                                            "audience" => $servermanager->GetBareHost()
-                                                        )));
-    // if old accepted and new returned
-    if ($checkoldgetnew->success && !empty($checkoldgetnew->jwt)) {
-        Session::put("currentToken", $checkoldgetnew->jwt);
-        $return['status'] = 'success';
-        $return['jwt'] = $checkoldgetnew->jwt;
-    }
+if (empty($_POST['token'])) {
+    $api->setMessage("Cannot do anything without a token.");
+    $api->Return();
 }
 
-echo json_encode($return);
+// check the old token and get the new token in one go
+$checkoldgetnew = Base::callAuthoriser(
+    'checkjwt.php', 
+    array(
+        "jwt" => $_POST['token'],
+        "audience" => ServerManager::getInstance()->GetBareHost()
+    ) 
+);
+
+// if old accepted and new returned
+if ($checkoldgetnew["success"] && !empty($checkoldgetnew["jwt"])) {
+    Session::put("currentToken", $checkoldgetnew["jwt"]);
+    $api->setStatusSuccess();
+    $api->setPayload(['jwt' => $checkoldgetnew["jwt"]]);
+    $api->Return();
+}
+
+$api->setMessage('Did not obtain new token.');
+$api->Return();
+
+
+
+
 ?>

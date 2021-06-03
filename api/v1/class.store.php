@@ -259,6 +259,26 @@ class Store extends Base
 		}
 	}
 
+	public static function ExtractRasterFilesFromZIP($raster_zip)
+	{
+		$folder = self::GetRasterStoreFolder();
+		self::EnsureFolderExists($folder);
+		self::EnsureFolderExists("temp");
+
+		$zip = new ZipArchive;
+        $res = $zip->open($raster_zip);
+        if ($res === TRUE) 
+		{
+			$total = $zip->numFiles - 3;
+			Log::LogDebug("There are ".$total." raster files in this save, unpacking... This could take a bit longer.");
+			$zip->extractTo("temp/");
+			$zip->close();
+			Log::LogDebug("Now moving all ".$total." raster files to their proper place...");
+			rcopy("temp/raster", $folder);
+			rrmdir("temp/");
+		}
+	}
+
 	private function LoadCSV($layerdata, $filename = "", $datastore = "")
 	{
 		$data = $layerdata;

@@ -1,6 +1,10 @@
 <?php
-require_once '../init.php';
 
+require_once "browseGameSession.php";
+
+/*
+require_once '../init.php';
+$user = new User();
 $allowed_visibilities = array('public','archived');
 
 header('Content-type: application/json');
@@ -100,5 +104,5 @@ function YouShouldUpdate() {
 
 
 
-
+*/
 ?>

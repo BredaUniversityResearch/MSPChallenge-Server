@@ -1,9 +1,10 @@
 <?php
 
-class ServerManager 
+class ServerManager extends Base
 {
     private static $_instance = null;
-    private $_db, $_server_id, $_server_name, $_server_address, $_server_versions, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
+    private $_db, $_server_id, $_server_versions, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
+    public $server_name, $server_address, $server_description;
 
       public function __construct() {
         $this->_server_versions = array(
@@ -22,8 +23,9 @@ class ServerManager
       private function CompletePropertiesFromDB() {
         $this->_db = DB::getInstance();
         $this->_server_id = $this->_db->cell("settings.value", array("name", "=", "server_id"));
-        $this->_server_name = $this->_db->cell("settings.value", array("name", "=", "server_name"));
-        $this->_server_address = $this->_db->cell('game_servers.address', array("id", "=", 1));
+        $this->server_name = $this->_db->cell("settings.value", array("name", "=", "server_name"));
+        $this->server_address = $this->_db->cell('game_servers.address', array("id", "=", 1));
+        $this->server_description = $this->_db->cell("settings.value", array("name", "=", "server_description"));
       }
 
       private function SetRootVars() {
@@ -77,13 +79,13 @@ class ServerManager
       }
         
       public function GetServerID() {
-        if (empty($this->_server_id)) $this->CompletePropertiesFromDB();
+        if (is_null($this->_server_id)) $this->CompletePropertiesFromDB();
         return $this->_server_id;
       }
 
       public function GetServerName() {
-        if (empty($this->_server_name)) $this->CompletePropertiesFromDB();
-        return $this->_server_name;
+        if (empty($this->server_name)) $this->CompletePropertiesFromDB();
+        return $this->server_name;
       }
 
       public function freshinstall() {
@@ -95,6 +97,7 @@ class ServerManager
           if ($this->freshinstall()) {
               $this->SetServerID();
               $this->SetServerName($user);
+              $this->SetServerDescription();
               return true;
           }
           return false;
@@ -108,23 +111,32 @@ class ServerManager
         return $this->_server_id;
       }
 
-      private function SetServerName($user=null) {
-        if (empty($this->_server_name)) {
-            if (empty($user)) return false;
-            //obtain a new random server_name
-            $currentDateTime = date("Ymd");
-            $serverName =  $user->data()->username . '_' . $currentDateTime;
-            try {
-                $response = file_get_contents('http://names.drycodes.com/1?nameOptions=cities');
-                $data = json_decode($response);
-                if ($data && (count($data) > 0)) {
-                    $serverName = $user->data()->username . "_" . strtolower($data[0]) . '_' . $currentDateTime;
-                }
-            } catch (Exception $e) { }
-            $this->_server_name = $serverName;
-            $this->_db->query("INSERT INTO settings (name, value) VALUES (?, ?);", array("server_name", $this->_server_name));
+      public function SetServerName($user=null) {
+        if (empty($this->server_name)) {
+          if (empty($user)) return false;
+          $this->server_name =  $user->data()->username . '_' . date("Ymd");
+          $this->_db->query("INSERT INTO settings (name, value) VALUES (?, ?);", array("server_name", $this->server_name));
         }
-        return $this->_server_name;
+        else {
+          $this->_db->query("UPDATE settings SET value = ? WHERE name = ?;", array($this->server_name, "server_name"));
+        }
+        return $this->server_name;
+      }
+
+      public function SetServerAddress($user=null) {
+        $this->_db->query("UPDATE game_servers SET address = ? WHERE id = 1;", array($this->server_address));
+        return $this->server_address;
+      }
+
+      public function SetServerDescription() {
+        if (empty($this->server_description)) {
+          $this->server_description =  "This is a new MSP Challenge server installation. The administrator has not changed this default description yet. This can be done through the ServerManager.";
+          $this->_db->query("INSERT INTO settings (name, value) VALUES (?, ?);", array("server_description", $this->server_description));
+        }
+        else {
+          $this->_db->query("UPDATE settings SET value = ? WHERE name = ?;", array($this->server_description, "server_description"));
+        }
+        return $this->server_description;
       }
       
       public function GetServerURLBySessionId($sessionId="") {
@@ -147,14 +159,14 @@ class ServerManager
       }
       
       public function GetTranslatedServerURL() {
-        if (empty($this->_server_address)) $this->CompletePropertiesFromDB();
+        if (empty($this->server_address)) $this->CompletePropertiesFromDB();
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
-          if ($_SERVER['SERVER_NAME'] != $this->_server_address) {
+          if ($_SERVER['SERVER_NAME'] != $this->server_address) {
             return $_SERVER['SERVER_NAME'];
           }
         }  
-        return $this->_server_address;
+        return $this->server_address;
       }
 
       public function GetServerRoot() {
@@ -175,23 +187,77 @@ class ServerManager
       }
 
       public function GetConfigBaseDirectory()	{
-        return $this->GetServerManagerRoot()."configfiles/";
+        $dir = $this->GetServerManagerRoot()."configfiles/";
+        if (!is_dir($dir)) mkdir($dir, 0777);
+        return $dir;
       }
       
       public function GetSessionArchiveBaseDirectory()	{
-        return $this->GetServerManagerRoot()."session_archive/";
+        $dir = $this->GetServerManagerRoot()."session_archive/";
+        if (!is_dir($dir)) mkdir($dir, 0777);
+        return $dir;
+      }
+
+      public function GetSessionArchivePrefix() {
+        return "session_archive_";
       }
 
       public function GetSessionSavesBaseDirectory() {
-        return $this->GetServerManagerRoot()."saves/";
+        $dir = $this->GetServerManagerRoot()."saves/";
+        if (!is_dir($dir)) mkdir($dir, 0777);
+        return $dir;
+      }
+
+      public function GetSessionSavesPrefix() {
+        return "save_";
+      }
+
+      public function GetSessionLogBaseDirectory() {
+        $dir = $this->GetServerManagerRoot()."log/";
+        if (!is_dir($dir)) mkdir($dir, 0777);
+        return $dir;
+      }
+
+      public function GetSessionLogPrefix() {
+        return "log_session_";
       }
       
       public function GetServerConfigBaseDirectory()	{
-        return $this->GetServerRoot()."running_session_config/";
+        $dir = $this->GetServerRoot()."running_session_config/";
+        if (!is_dir($dir)) mkdir($dir, 0777);
+        return $dir;
       }
       
       public function GetServerRasterBaseDirectory() {
-        return $this->GetServerRoot()."raster/";
+        $dir = $this->GetServerRoot()."raster/";
+        if (!is_dir($dir)) mkdir($dir, 0777);
+        return $dir;
+      }
+
+      public function GetServerSessionArchiveBaseDirectory() {
+        $dir = $this->GetServerRoot()."session_archive/";
+        if (!is_dir($dir)) mkdir($dir, 0777);
+        return $dir;
+      }
+
+      public function edit() {
+        $this->SetServerName();
+        $this->SetServerAddress();
+        $this->SetServerDescription();
+
+        $updateservername = Base::callAuthoriser(
+          'updateservernamejwt.php', 
+          array(
+              "jwt" => $this->getJWT(),
+              "audience" => $this->GetBareHost(),
+              "server_id" => $this->GetServerID(),
+              "server_name" => $this->GetServerName()
+          ) 
+      );
+      }
+
+      public function get() {
+        $this->CompletePropertiesFromDB();
       }
 
 }

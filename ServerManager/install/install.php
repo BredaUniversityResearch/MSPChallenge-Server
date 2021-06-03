@@ -23,6 +23,7 @@ ob_start();
 ?>
 
 <?php require_once '../init.php'; 
+$user = new User();
 $servermanager = ServerManager::getInstance();
 
 //install the database tables and content
@@ -36,10 +37,8 @@ require_once '../templates/header.php';
 if ($servermanager->install($user)) {
   //send it to the authoriser to store with successfully logged in user_id
   $params = array("jwt" => Session::get("currentToken"), "server_id" => $servermanager->GetServerID(), "server_name" => $servermanager->GetServerName(), "audience" => $servermanager->GetBareHost());
-  $url_freshinstall = $servermanager->GetMSPAuthAPI().'freshinstalljwt.php';
-  $response = CallAPI("POST", $url_freshinstall, $params);
-  $freshinstall = json_decode($response);
-  if ($freshinstall->success) {
+  $freshinstall = Base::callAuthoriser("freshinstalljwt.php", $params);
+  if ($freshinstall["success"]) {
       //echo 'settings sent <br/>'; ?>
       <div id="page-wrapper">
       	<div class="container">
@@ -50,7 +49,7 @@ if ($servermanager->install($user)) {
            but you can also add other users to it through the <a href="https://auth.mspchallenge.info">MSP Challenge Authoriser</a> application. You don't have to do this
            right now of course, or at all for that matter.</p>
           <p>You can go ahead and <a href="<?php echo ServerManager::getInstance()->GetServerManagerFolder();?>manager.php">set up your first MSP Challenge server</a>.</p>
-          <p>We also recommend you enter your computer's proper IP address or full-qualified domain name <a href="<?php echo ServerManager::getInstance()->GetServerManagerFolder();?>server_manager.php">under Settings</a>.</p>
+          <p>We also recommend you enter your computer's proper IP address or full-qualified domain name under Settings.</p>
         </div>
       </div>
       <?php

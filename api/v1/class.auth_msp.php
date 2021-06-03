@@ -43,7 +43,7 @@ class Auth_MSP extends Auths
                                     false,  // synchronous, so wait
                                     true)); // post as json
             if ($usercheck_return->success) {
-                return $usercheck_return->username;
+                return $usercheck_return->username; //$usercheck_return->email;
             }
             else {
                 throw new Exception("Username and/or password incorrect.");

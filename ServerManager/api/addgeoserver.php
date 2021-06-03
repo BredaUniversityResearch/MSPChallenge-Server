@@ -1,27 +1,22 @@
 <?php
 require_once '../init.php'; 
 
+$api = new API;
+$geoserver = new GeoServer;
+$user = new User();
+
 $user->hastobeLoggedIn();
 
-$api = new API;
-
-$geoserver = new GeoServer;
 $geoserver->name = $_POST['name'] ?? "";
 $geoserver->address = $_POST['address'] ?? "";
-$geoserver->username = $_POST['username'] ?? "";
-$geoserver->password = $_POST['password'] ?? "";
+$geoserver->username = base64_encode($_POST['username']) ?? ""; // only exception to the rule of having the class encode it, this is because we never decode it again in the ServerManager
+$geoserver->password = base64_encode($_POST['password']) ?? "";
+$geoserver->available = 1;
 
-$created = $geoserver->create();
-if ($created !== true)
-{
-	$api->setStatusFailure();
-	$api->setMessage($created);
-} else 
-{
-	$api->setStatusSuccess();
-	$api->setMessage("GeoServer has been added.");
-}
+$geoserver->add();
 
-$api->printReturn();
+$api->setStatusSuccess();
+$api->setPayload(["geoserver" => get_object_vars($geoserver)]);
+$api->Return();
 
 ?>

@@ -20,6 +20,4 @@ session_start();
 checklanguage();
 require ServerManager::getInstance()->GetServerManagerRoot().'lang/'.$_SESSION['us_lang'].".php";
 
-$user = new User();
-
 ?>

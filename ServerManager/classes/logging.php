@@ -9,7 +9,7 @@ class Logging
 
 	public static function Verbose($message)
 	{
-		/*if (is_array($message))
+		if (is_array($message))
 		{
 			print_r($message);
 			print("\n");
@@ -17,7 +17,7 @@ class Logging
 		else
 		{
 			print($message."\n");
-		}*/
+		}
 	}
 }
 

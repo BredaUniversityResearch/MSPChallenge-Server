@@ -92,7 +92,6 @@ CREATE TABLE `game_saves` (
   `demo_session` tinyint(1) NOT NULL DEFAULT 0,
   `api_access_token` varchar(32) NOT NULL DEFAULT '',
   `save_type` enum('full','layers') NOT NULL DEFAULT 'full',
-  `save_path` varchar(255) NOT NULL,
   `save_notes` longtext NOT NULL DEFAULT '',
   `save_visibility` enum('active','archived') NOT NULL DEFAULT 'active',
   `save_timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -141,7 +140,7 @@ CREATE TABLE `game_geoservers` (
 
 CREATE TABLE `settings` (
   `name` varchar(50) NOT NULL,
-  `value` varchar(50) NOT NULL
+  `value` LONGTEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -235,8 +234,7 @@ ALTER TABLE `game_list`
 -- Indexen voor tabel `game_saves`
 --
 ALTER TABLE `game_saves`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE (`save_path`);
+  ADD PRIMARY KEY (`id`);
      
 --
 -- Indexes for table `game_servers`
@@ -248,13 +246,17 @@ ALTER TABLE `game_servers`
 -- Indexes for table `game_watchdog_servers`
 --
 ALTER TABLE `game_watchdog_servers`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE(`address`),
+  ADD UNIQUE(`name`);
 
 --
 -- Indexen voor tabel `game_geoservers`
 --
 ALTER TABLE `game_geoservers`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE(`name`),
+  ADD UNIQUE(`address`);
 
 --
 -- Indexes for table `settings`
@@ -330,7 +332,7 @@ ALTER TABLE `game_geoservers`
   (3, 3, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'Clyde_marine_region_basic/Clyde_marine_region_basic_1.json', 'simcelt', 'Any'),
   (4, 4, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'North_Sea_Digitwin_basic/North_Sea_Digitwin_basic_1.json', 'northsee', 'Any');
 
-  INSERT INTO `game_geoservers` (`id`, `name`, `address`, `username`, `password`) VALUES ('1', 'Default: the public MSP Challenge GeoServer', 'automatically obtained', 'automatically obtained', 'automatically obtained'); 
+  INSERT INTO `game_geoservers` (`id`, `name`, `address`, `username`, `password`) VALUES ('1', 'Default: the public MSP Challenge GeoServer', 'https://geo.mspchallenge.info/geoserver/', 'YXV0b21hdGljYWxseW9idGFpbmVk', 'YXV0b21hdGljYWxseW9idGFpbmVk'); 
 
   INSERT INTO `settings` (`name`, `value`) VALUES 
   ('migration_20200618.php', 'Never'),
@@ -343,7 +345,8 @@ ALTER TABLE `game_geoservers`
   ('migration_20201130.php', 'Never'),
   ('migration_20210211.php', 'Never'),
   ('migration_20210325.php', 'Never'),
-  ('migration_20210413.php', 'Never');
+  ('migration_20210413.php', 'Never'),
+  ('migration_20210531.php', 'Never');
 
 
 ";

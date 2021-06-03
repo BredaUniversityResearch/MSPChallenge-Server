@@ -5,7 +5,7 @@
 
 		protected $allowed = array(
 			"Delete", 
-			"Export", 
+			"Export",
 			"Get",
 			"GetRaster", 
 			"GetRasterAtMonth",

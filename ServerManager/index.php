@@ -1,8 +1,9 @@
 <?php
 require_once 'init.php';
+$user = new User();
 $servermanager = ServerManager::getInstance();
 
-if(isset($user) && $user->isLoggedIn()){
+if($user->isLoggedIn()){
   if ($servermanager->freshinstall()) {
     // new installation, redirect to set up ServerManager database
     Redirect::to($servermanager->GetServerManagerFolder().'install/install.php');

@@ -244,7 +244,7 @@ class Base
 			$url_app_root = implode("/", $self_path) . "/";
 			if (file_exists($abs_app_root . $url_app_root . 'api_config.php')) break;
 		}
-		return rtrim($abs_app_root . $url_app_root, "/");
+		return $abs_app_root . $url_app_root;
 	}
 
 	public function PHPCanProxy()

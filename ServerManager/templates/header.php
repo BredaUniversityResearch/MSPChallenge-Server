@@ -37,23 +37,15 @@ require_once('header1_must_include.php'); ?>
 
 <link rel="stylesheet" href="<?=$url_app_root;?>css/timepicker.css">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap-editable/css/bootstrap-editable.css" integrity="sha256-YsJ7Lkc/YB0+ssBKz0c0GTx0RI+BnXcKH5SpnttERaY=" crossorigin="anonymous" />
-	<style>
-	.editableform-loading {
-	    background: url('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap-editable/img/loading.gif') center center no-repeat !important;
-	}
-	.editable-clear-x {
-	   background: url('https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap-editable/img/clear.png') center center no-repeat !important;
-	}
-	</style>
-
 <?php /* END OF ALL CSS! */ ?>
 
-<script src="<?=$url_app_root;?>js/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+
+
+<script src="<?=$url_app_root;?>js/jquery-3.1.1.min.js"></script>
 <!-- jQuery Fallback -->
 <script type="text/javascript">
 if (typeof jQuery == 'undefined') {
-	document.write(unescape("%3Cscript src='<?=$url_app_root;?>js/jquery.js' type='text/javascript'%3E%3C/script%3E"));
+	document.write(unescape("%3Cscript src='<?=$url_app_root;?>js/jquery-3.1.1.min.js' type='text/javascript'%3E%3C/script%3E"));
 }
 </script>
 
@@ -71,8 +63,12 @@ if (typeof jQuery == 'undefined') {
 
 <script src="<?=$url_app_root;?>js/bootstrap.min.js"></script>
 
-<!-- ServerManager's main js, with cache busting -->
-<script src="<?=$url_app_root;?>js/manager.js?v=<?=time();?>"></script>
+<!-- ServerManager's js, with cache busting -->
+<script src="<?=$url_app_root;?>js/manager.base.js?v=<?=time();?>"></script>
+<script src="<?=$url_app_root;?>js/manager.gamesession.js?v=<?=time();?>"></script>
+<script src="<?=$url_app_root;?>js/manager.gamesave.js?v=<?=time();?>"></script>
+<script src="<?=$url_app_root;?>js/manager.gameconfig.js?v=<?=time();?>"></script>
+<script src="<?=$url_app_root;?>js/manager.settings.js?v=<?=time();?>"></script>
 
 </head>
 <body>

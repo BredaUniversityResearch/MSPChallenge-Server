@@ -1,98 +1,13 @@
 <?php
 //functions that help things along. by definition functions that are so common or fundamental, require limited and diverse arguments, it makes no sense to turn them into classes
 
-function GetGameSessionAPIAuthenticationHeader($sessionId) {
-	$db = DB::getInstance();
-	$query = $db->query("SELECT game_list.api_access_token FROM game_list WHERE game_list.id = ?", array($sessionId));
-	$header = "MSPAPIToken: ";
-	if ($query->count() > 0)
-	{
-		$data = $query->first();
-
-		$header .= $data->api_access_token;
-	}
-	return $header;
+function getPublicObjectVars($obj) {
+  return get_object_vars($obj);
 }
 
-function GetReadableTimeFormat() {
-	return "Y-m-d H:i";
-}
-
- function UnixToReadableTime($unixTimestamp) {
-	return date(GetReadableTimeFormat(), $unixTimestamp);
-}
-
-function ensure_unique_name($name, $column, $table) {
-  // ensures that $name is a unique value in the database, given the $table and $column to check
-  // will add (1) or (2) for example to ensure the $name is unique
-  $db = DB::getInstance();
-  $foundrecord = $db->cell($table.".".$column, [$column, "=", $name]);
-  if ($foundrecord == $name) {
-    $counter = 0;
-    do {
-      $counter++;
-      $nametocheck = $name." (".$counter.")";
-      $foundrecord = $db->cell($table.".".$column, [$column, "=", $nametocheck]);
-    }
-    while ($foundrecord == $nametocheck);
-    $name = $nametocheck;
-  }
-  return $name;
-}
-
-function TransformGameList($list) {
-	// this function transforms the end results based on the occurence of reloaded saves
-	// if game_list.save_id is not zero, then we are dealing with a reloaded save
-	// in that case, 
-	// 1) config_file_name needs to be replaced by saves.game_config_files_filename
-	// 2) region needs to be replaced by saves.game_config_versions_region
-	foreach ($list as $row => $gamedata) {
-		if ((int) $gamedata["save_id"] > 0) {
-      if (!empty($gamedata["game_config_files_filename"])) $list[$row]["config_file_name"] = $gamedata["game_config_files_filename"];
-      if (!empty($gamedata["game_config_versions_region"])) $list[$row]["region"] = $gamedata["game_config_versions_region"];
-      $list[$row]["config_version_version"] = 1; // bogus value just for the client
-		}
-	}
-	return $list;
-}
-
-function CallAPI($method, $url, $data2send = false, $headers = array(), $asjson = true) {
-    $curl = curl_init();
-    switch ($method)
-    {
-      case "POST":
-          curl_setopt($curl, CURLOPT_POST, 1);
-          if ($data2send) {
-            if ($asjson) $data2send = json_encode($data2send);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $data2send);
-          }
-          break;
-      case "PUT":
-          curl_setopt($curl, CURLOPT_PUT, 1);
-          break;
-      default:
-          if ($data2send) {
-            $url = sprintf("%s?%s", $url, http_build_query($data2send));
-          }
-    }
-    if (!empty($headers) && is_array($headers)) {
-      curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-    }
-
-    // any proxy required for the external calls to the MSP Authoriser? (which are the only kind of external calls done by ServerManager)
-    $proxy = Config::get('msp_auth/with_proxy');
-    if (!empty($proxy) && strstr($url, ServerManager::getInstance()->GetMSPAuthAPI()) !== false && PHPCanProxy()) {
-      curl_setopt($curl, CURLOPT_PROXY, $proxy);
-      curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-      curl_setopt($curl, CURLOPT_MAXREDIRS, 1);
-    }
-    curl_setopt($curl, CURLOPT_USERAGENT, "MSP Challenge Server Manager API");
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-    $result = curl_exec($curl);
-    curl_close($curl);
-    return $result;
+function base64_encoded($string) {
+  if (base64_encode(base64_decode($string, true)) === $string) return true;
+  return false;
 }
 
 function PHPCanProxy() {
@@ -1198,7 +1113,6 @@ if(!function_exists('getUSPageFiles')) {
             }
 
 function checklanguage() {
-  $db = DB::getInstance();
   $your_token = $_SERVER['REMOTE_ADDR'];
   if(!empty($_POST['language_selector'])){
 

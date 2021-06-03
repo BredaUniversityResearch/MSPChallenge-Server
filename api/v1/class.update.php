@@ -68,6 +68,44 @@
 			Log::LogInfo("SetupSimulations -> Simulation(s) ".implode(" ", array_keys($configuredSimulations))." & test data is set up");
 		}
 
+		public function ReloadAdvanced($new_config_file_name, $dbase_file_path, $raster_files_path)
+		{
+			set_time_limit(Config::GetInstance()->GetLongRequestTimeout());
+
+			$success =  $this->Reload($new_config_file_name, $dbase_file_path, $raster_files_path);
+
+			return $success;
+		}
+
+		public function Reload($new_config_file_name, $dbase_file_path, $raster_files_path)
+		{
+			Log::SetupFileLogger(Log::GetRecreateLogPath());
+			Log::LogInfo("Reload -> Starting game session reload process...");
+			$finalreturn = false;
+			try {
+				$this->EmptyDatabase(); 
+				$this->RebuildDatabaseByDumpImport($dbase_file_path, $new_config_file_name);
+				$this->ClearRasterStorage();
+				$this->ExtractRasterFiles($raster_files_path);
+
+				Log::LogInfo("Reload -> Save reloaded.");
+				$finalreturn = true;
+			} catch (Throwable $e) {
+				Log::LogError("Reload -> Something went wrong.");
+				Log::LogError($e->getMessage()." on line ".$e->getLine()." of file ".$e->getFile());
+			}
+			finally
+			{
+				$phpOutput = ob_get_flush();
+				if (!empty($phpOutput)) {
+					Log::LogInfo("Additionally the page generated the following output: ".$phpOutput);
+				}
+				Log::ClearFileLogger();
+				return $finalreturn;
+			}
+			return $finalreturn;
+		}
+
 		/**
 		 * @apiGroup Update
 		 * @api {POST} /update/Reimport Reimport
@@ -184,6 +222,35 @@
 			Store::ClearRasterStoreFolder();
 
 			Log::LogInfo("ClearRasterStorage -> Cleared raster storage.");
+		}
+
+		public function ExtractRasterFiles($raster_zip)
+		{
+			Log::LogInfo("ExtractRasterFiles -> Starting reload of raster files...");
+
+			Store::ExtractRasterFilesFromZIP($raster_zip);
+
+			Log::LogInfo("ExtractRasterFiles -> Raster files reloaded.");
+		}
+
+		public function RebuildDatabaseByDumpImport($dbase_file_path, $new_config_file_name)
+		{
+			Log::LogInfo("RebuildDatabaseByDumpImport -> Recreating database from save's dump file ...");
+			$templocation = "export/DatabaseDumps/temp".rand(1,100).".sql";
+			if (copy($dbase_file_path, $templocation)) {
+				$db = Database::GetInstance();
+				$db->CreateDatabaseAndSelect();
+				$db->ImportMspDatabaseDump($templocation, true);
+				unlink($templocation);
+
+				$game = new Game();
+				$game->SetupFilename($new_config_file_name);
+				$this->ApplyGameConfig();	
+			}
+			else {
+				Log::LogError("Could not extract database dump from the save ZIP file.");
+			}
+			Log::LogInfo("RebuildDatabaseByDumpImport -> Database recreated.");
 		}
 
 		public function RebuildDatabase(string $filename, bool $silent = false)

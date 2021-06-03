@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once 'init.php'; 
-
+$user = new User();
 if (!$user->isAuthorised()) {
 	if ($user->isLoggedIn()) {
 		Redirect::to(ServerManager::getInstance()->GetServerManagerFolder().'logout.php');
@@ -292,12 +292,11 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 		</div>
 
 		<!-- Modal Session info -->
-		<button type="button" id="btnSessionInfo" class="btn btn-primary" data-toggle="modal" data-target="#sessionInfo" style="display: none;"></button>
 		<div class="modal fade" id="sessionInfo" tabindex="-1" role="dialog" aria-labelledby="sessionModalCenterTitle" aria-hidden="true">
 			<div class="modal-dialog modal-wide" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="sessionModalCenterTitle">Session Details</h5>
+						<input type="text" id="sessionModalCenterTitle" class="form-control modal-title" style="font-size: 1.25rem;" onchange="" />
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
@@ -305,6 +304,80 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 					<div class="modal-body">
 						<div class="table-responsive">
 							<table class="table table-hover table-border-left" id="sessionInfoTable">
+								<tr>
+									<th scope="col">ID</th>
+									<td class="text-right" id="sessionInfoID"></td>
+									<th scope="col">Visibility</th>
+									<td class="text-right" id="sessionInfoVisibility"></td>
+								</tr>
+								<tr>
+									<th scope="col">Simulation state</th>
+									<td class="text-right" id="sessionInfoGameState"></td>
+									<th scope="col">Session state</th>
+									<td class="text-right" id="sessionInfoSessionState"></td>
+								</tr>
+								<tr>
+									<th scope="col">Current Month</th>
+									<td class="text-right" id="sessionInfoCurrentMonth"></td>
+									<th scope="col">Ending Month</th>
+									<td class="text-right" id="sessionInfoEndMonth"></td>
+								</tr>
+								<tr>
+									<th scope="col">Setup Time</th>
+									<td class="text-right" id="sessionInfoGameCreationTime"></td>
+									<th scope="col" >Time Until End</th>
+									<td class="text-right" id="sessionInfoGameRunningTilTime"></td>
+								</tr>
+								<tr>
+									<th scope="col">Config File</th>
+									<td class="text-right">
+										<div id="sessionInfoConfigFilename"></div>
+										<div id="sessionInfoConfigVersion"></div>
+									</td>
+									<th scope="col">Simulation Server</th>
+									<td class="text-right">
+										<div id="sessionInfoWatchdogName"></div>
+										<div id="sessionInfoWatchdogAddress"></div>
+									</td>
+								</tr>
+								<tr>
+									<th scop="col">Active Players</th>
+									<td class="text-right" id="sessionInfoActivePlayers"></td>
+									<th scope="col">Demo Session?</th>
+									<td class="text-right" id="sessionInfoDemoStatus"></td>
+								</tr>
+								<tr class="table-info">
+									<td colspan="2">
+										<button id="sessionInfoButtonStartPause" class="btn btn-success btn-sm" onclick=""></button> 
+										<button id="sessionInfoButtonDemoToggle" class="btn btn-info btn-sm" onclick=""></button>
+									</td>
+									<td colspan="2" class="text-right">
+										<button id="sessionInfoButtonRecreateSession" class="btn btn-warning btn-sm" onclick=""></button>
+										<button id="sessionInfoButtonArchiveDownload" class="btn btn-warning btn-sm" onclick=""></button>
+										<button id="sessionInfoButtonUpgrade" class="btn btn-warning btn-sm" onclick=""></button>
+									</td>
+								</tr>
+								<tr class="table-info">
+									<td colspan="2">
+										<button id="sessionInfoButtonSaveFull" class="btn btn-secondary btn-sm" onclick=""></button>
+										<button id="sessionInfoButtonSaveLayers" class="btn btn-secondary btn-sm" onclick=""></button>
+									</td>
+									<td colspan="2" class="text-right">
+										<button id="sessionInfoButtonUserAccess" data-toggle="modal" data-target="#sessionUsers" class="btn btn-secondary btn-sm" onclick=""></button>
+										<button id="sessionInfoButtonExportPlans" class="btn btn-secondary btn-sm" onclick=""></button>
+									</td>
+								</tr>
+								<tr class="table-info">
+									<td colspan="4" class="text-left">
+										<button id="sessionInfoButtonServerLog" onclick="toggleSessionInfoLog()" class="btn btn-secondary btn-sm"><i class="fa fa-bars" aria-hidden="true"></i></i> Show/Hide Session Creation Log</button>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="4" class="text-center p-0">
+										<div id="sessionInfoLog" style="width: 100%; height: 115px; overflow-y:auto; font-size:14px; background-color: #e9ecef; text-align: left; resize: both; display: none;">
+										</div>
+									</td>
+								</tr>
 							</table>
 						</div>
 					</div>
@@ -371,19 +444,15 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 										<input type="text" class="form-control" id="newPlayerPassword" title="This feature offers minimal security only. The set password will be retrievable here in the ServerManager for all its users. So do not enter one of your personal, commonly-used passwords.">
 										<small id="userPasswordHelp" class="form-text text-muted">This and more sophisticated user access settings can always be changed after the session has been successfully created.</small>
 									</div>
+									<?php /* 
 									<div class="form-group">
-										<input type="hidden"  id="newGameServer" value="1" />
-									</div>
-									<div class="form-group">
-										<input type="hidden"  id="newVisibility" value="public" />
-										<?php /* 
 										<label for="newVisibility">Visibility</label>
 										<select class="form-control" id="newVisibility" required="required">
 											<option value="public" selected>public</option>
 											<option value="private">private</option>
 										</select>
-										*/?>
 									</div>
+									*/?>
 								</form>
 							</div>
 							<div class="tab-pane fade show" id="NewSessionModalLoadSave" role="tabpanel" aria-labelledby="NewSessionModalLoadSave-tab">
@@ -415,7 +484,6 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 		</div>
 
 		<!-- Modal Session user management -->
-		<button type="button" id="btnSessionUsers" class="btn btn-primary" data-toggle="modal" data-target="#sessionUsers" style="display: none;"></button>
 		<div class="modal fade" id="sessionUsers" tabindex="-1" role="dialog" aria-labelledby="sessionUsersCenterTitle" aria-hidden="true">
 			<div class="modal-dialog modal-wide" role="document">
 				<div class="modal-content">
@@ -557,7 +625,6 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 		</div>
 
 		<!-- Modal Save info -->
-		<button type="button" id="btnSaveInfo" class="btn btn-primary" data-toggle="modal" data-target="#saveInfo" style="display: none;"></button>
 		<div class="modal fade" id="saveInfo" tabindex="-1" role="dialog" aria-labelledby="saveModalCenterTitle" aria-hidden="true">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
@@ -570,6 +637,45 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 					<div class="modal-body">
 						<div class="table-responsive">
 							<table class="table table-hover table-border-left" id="saveInfoTable">
+								<tr class="bg-primary">
+									<td class="text-center" colspan="2" style="color: #FFFFFF" id="SaveInfoName"></td>
+								</tr>
+								<tr>
+									<th>Saved on</th>
+									<td class="text-right" id="SaveInfoTimestamp"></td>
+								</tr>
+								<tr>
+									<th>Month & Year of the Simulation</th>
+									<td class="text-right" id="SaveInfoMonth"></td>
+								</tr>
+								<tr>
+									<th>Configuration</th>
+									<td class="text-right" id="SaveInfoConfig"></td>
+								</tr>
+								<tr>
+									<th>Type</th>
+									<td class="text-right" id="SaveInfoType"></td>
+								</tr>
+								<tr>
+									<th>Visibility</th>
+									<td class="text-right" id="SaveInfoVisibility"></td>
+								</tr>
+								<tr>
+									<td colspan="2" class="text-left">
+										<p><strong>Notes</strong></p>
+										<form class="form-horizontal" role="form" data-toggle="validator" id="formSaveNotes" enctype="multipart/form-data">
+											<input type="hidden" id="SaveInfoId" />
+											<textarea class="form-control" id="SaveInfoNotes" rows="3" onchange="SaveNotes();"></textarea>
+										</form>
+									</td>
+								</tr>
+								<tr class="table-info">
+									<td class="text-center" colspan="2">
+										<button id="buttonLoadSave" class="btn btn-info btn-sm" onClick=""><i class="fa fa-plus-circle" title=""></i> Load</button>
+										<button id="buttonSaveDownload" class="btn btn-secondary btn-sm" onClick=""><i class="fa fa-download" title="Download save file"></i> Download</button>
+										<button id="buttonSaveArchive" class="btn btn-info btn-sm" onClick=""></button>
+									</td>
+								</tr>
 							</table>
 						</div>
 					</div>
@@ -620,6 +726,43 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 					<div class="modal-body">
 						<div class="table-responsive">
 							<table class="table table-hover table-border-left" id="configInfoTable">
+								<tr class="bg-primary">
+									<td class="text-center" colspan="2" style="color: #FFFFFF" id="ConfigInfoFilenameVersion"></td> <!--'+data.gameconfig.filename+' version '+data.gameconfig.version+'-->
+								</tr>
+								<tr>
+									<th>Date Uploaded</th>
+									<td class="text-right" id="ConfigInfoUploadTime"></td> <!-- '+data.gameconfig.upload_time+' -->
+								</tr>
+								<tr>
+									<th>Uploaded By</th>
+										<td class="text-right" id="ConfigInfoUploadUser"></td> <!-- '+data.gameconfig.upload_user+' -->
+									</tr>
+									<tr>
+										<th>Last Used</th>
+										<td class="text-right" id="ConfigInfoLastPlayedTime"></td> <!--'+data.gameconfig.last_played_time+'-->
+									</tr>
+									<tr>
+										<th>Filename</th>
+										<td class="text-right" id="ConfigInfoFilename"></td> <!--'+data.gameconfig.filename+'-->
+									</tr>
+									<tr>
+										<th>Description</th>
+										<td class="text-right" id="ConfigInfoDescription"></td> <!--'+data.gameconfig.description+'-->
+									</tr>
+									<tr>
+										<th>Version</th>
+										<td class="text-right" id="ConfigInfoVersion"></td> <!--'+data.gameconfig.version+'-->
+									</tr>
+									<tr>
+										<th>Change Message</th>
+										<td class="text-right" id="ConfigInfoVersionMessage"></td> <!-- '+data.gameconfig.version_message+'-->
+									</tr>
+									<tr class="table-info">
+										<td class="text-center" colspan="2">
+											<button id="buttonConfigDownload" class="btn btn-secondary btn-sm" onClick=""><i class="fa fa-download" title="Download config file"></i> Download</button>
+											<button id="buttonConfigArchive" class="btn btn-info btn-sm" onClick=""></button>
+										</td>
+									</tr>
 							</table>
 						</div>
 					</div>
@@ -679,27 +822,31 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h4 class="modal-title" id="ServerDetailsModalLabel">Server Address, Name & Description</h4>
+						<h4 class="modal-title" id="ServerDetailsModalLabel">Server Name, Description & Address</h4>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
 					</div>
 					<div class="modal-body">
-						<p>The default value is 'localhost'. This value makes MSP Challenge determine your current IP address automatically. In some cases that automatically determined IP address turns out to be erroneous or inaccessible, causing connection problems for MSP Challenge clients and any externally hosted background simulations. In those cases you can specify the public IP address or fully-qualified domain name of this machine below. Note that local IP addresses tend to change, so as soon as that happens you will have to specify the new exact IP address here again. If everything works well, then leave this setting alone.</p>
-						<form class="form-horizontal" role="form" data-toggle="validator" id="formNewWatchdogServer" enctype="multipart/form-data">
-							<div class="row">
-								<div class="col">
-									<label for="GameServerAddress">MSP Challenge Server machine's address</label>
-									<input type="text" class="form-control" id="ServerAddress" required="required"/>
-									<input type="hidden" id="ServerID" value="1"/>
-									<input type="hidden" id="ServerName" value="Default: the server machine"/>
-								</div>
+						<form class="form-horizontal" role="form" data-toggle="validator" id="formServerDetails" enctype="multipart/form-data">
+							<div class="form-group">
+								<label for="GameServerAddress">MSP Challenge Server name</label>
+								<input type="text" class="form-control" id="ServerName" required="required"/>
 							</div>
+							<div class="form-group">
+								<label for="GameServerAddress">MSP Challenge Server description</label>
+								<textarea class="form-control" id="ServerDescription" rows="3" required="required"/></textarea>
+							</div>
+							<div class="form-group">
+								<label for="GameServerAddress">MSP Challenge Server machine's address</label>
+								<input type="text" class="form-control" id="ServerAddress" required="required"/>
+							</div>
+							<p>The default value is 'localhost'. This value makes MSP Challenge determine your current IP address automatically. In some cases that automatically determined IP address turns out to be erroneous or inaccessible, causing connection problems for MSP Challenge clients and any externally hosted background simulations. In those cases you can specify the public IP address or fully-qualified domain name of this machine below. Note that local IP addresses tend to change, so as soon as that happens you will have to specify the new exact IP address here again. If everything works well, then leave this setting alone.</p>
 						</form>
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" onClick="submitNewServer();">Update</button>
+						<button type="button" class="btn btn-primary" onClick="editServerManager();">Update</button>
 					</div>
 				</div>
 			</div>
@@ -728,7 +875,8 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 							</tbody>
 						</table>
 						<form class="form-horizontal" role="form" data-toggle="validator" id="formNewWatchdogServer" enctype="multipart/form-data">
-							<h5>Add additional simulation server</h5>
+							<input type="hidden" id="editWatchdogID">
+							<h5 id="WatchdogFormTitle">Add additional simulation server</h5>
 							<div class="row">
 								<div class="col">
 									<label for="newWatchdogServerName">Simulation Server Name</label>
@@ -743,7 +891,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" onClick="submitNewWatchdogServer();">Add</button>
+						<button type="button" class="btn btn-primary" id="WatchdogFormButton" onClick="submitNewWatchdogServer();">Add</button>
 					</div>
 				</div>
 			</div>
@@ -765,14 +913,15 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 								<tr>
 									<th>GeoServer Name</th>
 									<th>Fully-qualified URL</th>
-									<th></th>
+									<th style="width: 75px;">Actions</th>
 								</tr>
 							</thead>
 							<tbody id="GeoServerBody">
 							</tbody>
 						</table>
 						<form class="form-horizontal" role="form" data-toggle="validator" id="formNewGeoServer">
-							<h5>Add a new GeoServer:</h5>
+							<input type="hidden" id="editGeoserverID">
+							<h5 id="GeoServerFormTitle">Add a new GeoServer</h5>
 							<div class="form-group">
 									<label for="newGeoServerName">GeoServer Name</label>
 									<input type="text" class="form-control" id="newGeoServerName" required="required" placeholder="required">
@@ -793,7 +942,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 					</div>
 					<div class="modal-footer">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-						<button type="button" class="btn btn-primary" onClick="submitNewGeoServer();">Add</button>
+						<button type="button" class="btn btn-primary" id="GeoServerFormButton" onClick="submitNewGeoServer();">Add</button>
 					</div>
 				</div>
 			</div>
@@ -825,7 +974,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 	</div>
 
 
-	<div role="alert" aria-live="assertive" id="LogToast" aria-atomic="true" class="toast" data-autohide="false" data-autoclose="false" style="max-width: 650px !important; width: 650px; position: absolute; bottom: 0; right: 0;">
+	<div role="status" aria-live="polite" id="LogToast" aria-atomic="true" class="toast hide" data-autohide="false" data-autoclose="false" style="max-width: 650px !important; width: 650px; position: fixed; bottom: 0; right: 0;">
 		<div class="toast-header">
 			<strong class="mr-auto" id="LogToastHeader"></strong>
 			<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
@@ -847,6 +996,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 	}, 30000);
 	
 	$(document).ready(function() {
+		// all about refreshing the sessions table (browse)
 		updateSessionsTable('public');
 		$("#buttonRefreshSessionsList").click(function() {
 			updateSessionsTable($('input[name=inlineRadioOptions]:checked').val());
@@ -855,9 +1005,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 			updateSessionsTable(this.value);
 		});
 
-		$('#newConfigFile').change(function() {
-			updateSelectNewConfigVersion(this.value);
-		});
+		// all  about refreshing the config table (browse)
 		updateConfigVersionsTable('active');
 		$("#buttonRefreshConfigVersionsList").click(function() {
 			updateConfigVersionsTable($('input[name=radioOptionConfig]:checked').val());
@@ -865,32 +1013,60 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 		$("#radioFilterConfigVersionsList input[type=radio]").change(function() {
 			updateConfigVersionsTable(this.value);
 		});
-		$("#newConfigFileOriginal").change(function() {
-			onUploadConfigFileOriginalSelected(this.value);
-		});
-		configListToOptions();
-		GeoServerListToOptions();
-		watchdogListToOptions();
 
+		// all about refreshing the saves table (browse)
 		updateSavesTable('active');
 		$("#buttonRefreshSavesList").click(function() {
 			updateSavesTable($('input[name=inlineRadioOptionSaves]:checked').val());
 		});
 		$('input[name=inlineRadioOptionSaves]').change(function() {
 			updateSavesTable(this.value);
+		});		
+			
+		// when showing modalNewSession, update the dropdown lists in the forms of both tabs
+		$('#modalNewSession').on('show.bs.modal', function (event) {
+			configListToOptions();
+			GeoServerListToOptions();
+			watchdogListToOptions();
+			if ($('#SaveFileSelector').val() == 0) SavesListToOptions();
+		});
+		$("#newConfigFileOriginal").change(function() {
+			onUploadConfigFileOriginalSelected(this.value);
+		});
+		$('#newConfigFile').change(function() {
+			updateSelectNewConfigVersion(this.value);
 		});
 		$("#SaveFileSelector").change(function() {
-			setNewServerName(this.value);
+			setNewServerNameInForm(this.value);
 		});
-		SavesListToOptions();
 
-		WatchdogServerList();
-		GetServerAddr();
-		GeoServerList();		
+		// when showing modalNewConfigFile, update the dropdown lists in the form
+		$('#modalNewConfigFile').on('show.bs.modal', function (event) {
+			configListToOptions();
+		});
+
+		// when showing modalNewSimServer, update the list (browse)
+		$('#modalNewSimServers').on('show.bs.modal', function (event) {
+			WatchdogServerList();
+		});
+
+		// when showing modalNewGeoServers, update the list (browse)
+		$('#modalNewGeoServers').on('show.bs.modal', function (event) {
+			GeoServerList();
+		});
+
+		// when showing modalServerDetails, update the values
+		$('#modalServerDetails').on('show.bs.modal', function (event) {
+			GetServerAddr();
+		});
 	});
 
 	regularupdateTablesManager = setInterval(function() {
 		updateSessionsTable($('input[name=inlineRadioOptions]:checked').val());
+		if ($('#sessionInfo').is(':visible')) {
+			getSessionInfo($('#sessionInfoID').html());
+		}
+
 		updateSavesTable($('input[name=inlineRadioOptionSaves]:checked').val());
 	}, 10000);
 	

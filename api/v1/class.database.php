@@ -308,4 +308,24 @@ class Database {
 			self::execInBackground($dumpCommand);
 		}
 	}
+
+	public function ImportMspDatabaseDump($importFilePath, $blockUntilComplete) 
+	{
+		//Creates a database dump at the given path blocks until it's done.
+		$this->ImportDatabaseDump($importFilePath, $blockUntilComplete, $this->db_host, $this->db_user, $this->db_pass, $this->GetDatabaseName());
+	}
+
+	public function ImportDatabaseDump($importFilePath, $blockUntilComplete, $databaseHost, $databaseUser, $dbPassword, $databaseName)
+	{
+		$dumpCommand = $this->GetMysqlExecutableDirectory()."/bin/mysql --user=\"".$databaseUser."\" --password=\"".$dbPassword."\" --host=\"".$databaseHost."\" \"".$databaseName."\" < \"".$importFilePath."\"";
+		if ($blockUntilComplete == true)
+		{
+			exec($dumpCommand);
+		}
+		else 
+		{
+			self::execInBackground($dumpCommand);
+		}
+	}
+
 }

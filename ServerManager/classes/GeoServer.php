@@ -3,91 +3,108 @@
 class GeoServer extends Base
 {
     private $_db;
-    private $_id;
-    private $_list;
+    private $_old;
 
     public $name;
     public $address;
     public $username;
-    public $password;    
+    public $password;
+    public $available;
+    public $id;
 
     public function __construct() 
     {
         $this->_db = DB::getInstance();
     }
 
-    private function setList($list)
-    {
-        if (!is_array($list)) $list = array();
-        $this->_list = array("geoserver" => $list);
-    }
-
     private function validateVars()
     {
-        foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $var)
-        {   
-            $varname = $var->getName();
-            if (empty($this->$varname)) return "Missing value for ".$varname;
-        }
-
-        $this->address = filter_var($this->address, FILTER_VALIDATE_URL);
-        if ($this->address === false) return "The GeoServer address is not a fully-qualified URL.";
-        if (substr($this->address, -1) != "/") $this->address .= "/";
-
-        return true;
+        if (self::HasSpecialChars($this->name)) 
+            throw new Exception("GeoServer name cannot contain special characters.");
+        if (filter_var($this->address, FILTER_VALIDATE_URL) === false) 
+            throw new Exception("The GeoServer address is not a fully-qualified URL.");
+        if (substr($this->address, -1) != "/") 
+            $this->address .= "/";
+        if (self::EmptyOrHasSpaces($this->username)) 
+            throw new Exception("GeoServer username cannot be empty or contain spaces.");
+        if (self::EmptyOrHasSpaces($this->password)) 
+            throw new Exception("GeoServer password cannot be empty or contain spaces.");
+        if (intval($this->available) !== 0 && intval($this->available) !== 1) 
+            throw new Exception("GeoServer available should be 0 or 1.");
     }
 
-    public function create() 
+    public function retrievePublic()
     {
-        $validated = $this->validateVars();
-        if ($validated === true)
+        $vars = array("jwt" => $this->_jwt, "audience" => ServerManager::getInstance()->GetBareHost());
+        $authoriser_call = self::callAuthoriser(
+            "geocredjwt.php", 
+            $vars
+        );
+        if (!$authoriser_call["success"]) throw new Exception("Could not obtain public MSP Challenge GeoServer credentials.");
+        $this->address = $authoriser_call["credentials"]["baseurl"] ?? "";
+        $this->username = $authoriser_call["credentials"]["username"] ?? "";
+        $this->password = $authoriser_call["credentials"]["password"] ?? "";
+    }
+
+    public function get() 
+    {
+        if (empty($this->id)) throw new Exception("Cannot obtain data without a valid id.");
+        
+        if (!$this->_db->query("SELECT * FROM game_geoservers WHERE id = ?", array($this->id))) throw new Exception($this->_db->errorString());
+        if ($this->_db->count() == 0) throw new Exception("GeoServer not found.");
+        foreach ($this->_db->first(true) as $varname => $varvalue)
         {
-            try 
-            {
-                $result = $this->_db->query("SELECT id FROM game_geoservers WHERE name LIKE ? OR address LIKE ?", array($this->name, $this->address));
-                if ($result->count())
-                {
-                    return "Duplicate GeoServer found in database. Please change name and/or address.";
-                } else
-                {
-                    if ($this->_db->query("INSERT INTO game_geoservers (name, address, username, password) VALUES (?, ?, ?, ?)", array($this->name, $this->address, base64_encode($this->username), base64_encode($this->password))))
-                    {
-                        return true;
-                    } else 
-                    {
-                        return $this->_db->errorString();
-                    }
-                }
-            } catch (Exception $e) 
-            {
-                return $e->getMessage();
-            }
-        } else
-        {
-            return $validated;
+            if (property_exists($this, $varname)) $this->$varname = $varvalue;
         }
+        
+        if ($this->id == 1 && !is_null($this->_jwt)) $this->retrievePublic(); // this will get the BUas public GeoServer address and credentials 
+
+        $this->_old = clone $this;
     }
 
     public function getList()
     {
-        $query_string = "SELECT id, address, name FROM game_geoservers";
-        try 
-        {
-            if ($this->_db->query($query_string)) 
-            {
-                $this->setList($this->_db->results(true));
-                return $this->_list;
-            }
-            else 
-            {
-                return $this->_db->errorString();
-            }
-        } catch (Exception $e) 
-        {
-            return $e->getMessage();
-        }
+        if (!$this->_db->query("SELECT id, name, address, available FROM game_geoservers")) throw new Exception($this->_db->errorString());
+        return $this->_db->results(true);
     }
 
-    
+    public function delete()
+    {
+        // soft delete only - either set or reverted
+        $this->get();
+        $this->available = ($this->available == 1) ? 0 : 1;
+        $this->edit();
+    }
+
+    public function edit()
+    {
+        if (empty($this->id)) throw new Exception("Cannot update without knowing which id to use.");
+        $this->validateVars();
+        $args = getPublicObjectVars($this);
+        $sql = "UPDATE game_geoservers SET 
+                    name = ?,
+                    address = ?,
+                    username = ?,
+                    password = ?,
+                    available = ?
+                WHERE id = ?";
+        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
+    }
+
+    public function add() 
+    {
+        $this->validateVars();
+        $args = getPublicObjectVars($this);
+        unset($args["id"]);
+        if (!$this->_db->query("INSERT INTO game_geoservers (
+                                    name, 
+                                    address, 
+                                    username, 
+                                    password,
+                                    available
+                                    ) VALUES (?, ?, ?, ?, ?)", 
+                                    $args)) throw new Exception($this->_db->errorString());
+        $this->id = $this->_db->lastId();
+    }    
     
 }

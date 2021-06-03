@@ -37,9 +37,9 @@
 				$authenticated = false;
 				if ($provider == "local") {
 					// simple locally stored password authentication
-					if ($country_id == 1) $authenticated = $country_password == $password_admin["admin"]["password"];
-					elseif ($country_id == 2) $authenticated = $country_password == $password_admin["region"]["password"];
-					else $authenticated = $country_password == $password_player["password"][$country_id];
+					if ($country_id == 1) $authenticated = $country_password == $password_admin["admin"]["value"];
+					elseif ($country_id == 2) $authenticated = $country_password == $password_admin["region"]["value"];
+					else $authenticated = $country_password == $password_player["value"][$country_id];
 
 					if (!$authenticated) throw new Exception("That password is incorrect.");
 				} 
@@ -48,11 +48,11 @@
 					$user_name = $this->callProvidersAuthentication($provider, $user_name, $country_password);
 					// now do the authorization
 					if (!empty($user_name)) {
-						if ($country_id == 1) $userlist = $password_admin["admin"]["users"];
-						elseif ($country_id == 2) $userlist = $password_admin["region"]["users"];
-						else $userlist = $password_player["users"][$country_id];
-
-						if (!in_array($user_name, $userlist)) throw new Exception("You are not allowed to log on for that country.");
+						if ($country_id == 1) $userlist = $password_admin["admin"]["value"];
+						elseif ($country_id == 2) $userlist = $password_admin["region"]["value"];
+						else $userlist = $password_player["value"][$country_id];
+						$userarray = explode(" ", $userlist);
+						if (!in_array($user_name, $userarray)) throw new Exception("You are not allowed to log on for that country.");
 					}
 					else throw new Exception("Could not authenticate you. Your username and/or password could be incorrect.");
 				}

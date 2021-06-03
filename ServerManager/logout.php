@@ -1,7 +1,7 @@
 <?php
 
 require_once 'init.php';
-
+$user = new User();
 $user->logout();
 
 require_once 'templates/header.php';

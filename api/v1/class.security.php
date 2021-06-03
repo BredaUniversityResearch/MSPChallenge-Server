@@ -30,10 +30,11 @@ class Security extends Base
 	 * @apiDescription Checks if the the current access token is valid to access a certain level. Currently only checks for full access tokens.
 	 * @apiSuccess Returns json object indicating status of the current token. { "status": ["Valid"|"UpForRenewal"|"Expired"] }
 	 */
-	public function CheckAccess()
+	public function CheckAccess($scope = "")
 	{
+		$scope = ($scope == "ServerManager") ? self::ACCESS_LEVEL_FLAG_SERVER_MANAGER : self::ACCESS_LEVEL_FLAG_FULL;
 		$accessTimeRemaining = 0;
-		$hasAccess = $this->ValidateAccess(self::ACCESS_LEVEL_FLAG_FULL, $accessTimeRemaining);
+		$hasAccess = $this->ValidateAccess($scope, $accessTimeRemaining);
 
 		$result = "Expired";
 		if ($hasAccess)

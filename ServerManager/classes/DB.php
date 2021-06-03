@@ -29,8 +29,6 @@ class DB {
 	);
 
 	private function __construct($config = []){
-		set_error_handler(array(&$this, 'CallbackFunction')); // the & is important
-
 		if($config == []) {
 			$this->_host = Config::get('mysql/host');
 			$this->_dbname = Config::get('mysql/db');
@@ -56,15 +54,10 @@ class DB {
 			$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
 		} catch (Exception $e) { 
 			// assumes connection failed because the database doesn't exist yet, so attempt to create and fill it, thereby reattempting connection
-			$this->_pdo = new PDO('mysql:host='.$this->_host.';', $this->_user, $this->_pass, self::$PDOArgs);
-			$this->dbase_install();
+			$this->attempt_dbase_install();
 		}
 		
 	}
-
-  static function CallbackFunction($errno, $errstr, $errfile, $errline) {
-      throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
-  }
 
 	public static function getInstance(){
 		if (!isset(self::$_instance)) {
@@ -116,13 +109,16 @@ class DB {
 		return $this->action('SELECT *',$table,array('id','=',$id));
 	}
 
-	public function action($action, $table, $where = array()){
+	public function action($action, $table, $where = array(), $orderby = null){
 		$sql    = "{$action} FROM {$table}";
 		$values = array();
 		$is_ok  = true;
 
 		if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
 			$sql .= " WHERE $where_text";
+
+		if (!is_null($orderby))
+			$sql .= " ORDER BY ".$orderby;
 
 		if ($is_ok)
 			if (!$this->query($sql, $values)->error())
@@ -223,8 +219,8 @@ class DB {
 		}
 	}
 
-	public function get($table, $where){
-		return $this->action('SELECT *', $table, $where);
+	public function get($table, $where, $orderby = null){
+		return $this->action('SELECT *', $table, $where, $orderby);
 	}
 
 	public function delete($table, $where){
@@ -372,11 +368,38 @@ class DB {
 		}		
 	}
 	
-	public function dbase_install() {
-		$this->_pdo->exec("CREATE DATABASE IF NOT EXISTS `".$this->_dbname."` DEFAULT CHARACTER SET utf8;");
-		$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
-		require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/mysql_structure.php");
-		$this->query($sqls);
+	public function attempt_dbase_install() {
+		try {
+			$this->_pdo = null;
+			$this->_pdo = new PDO('mysql:host='.$this->_host.';', $this->_user, $this->_pass, self::$PDOArgs);
+			$this->_pdo->exec("CREATE DATABASE IF NOT EXISTS `".$this->_dbname."` DEFAULT CHARACTER SET utf8;");
+			$this->_pdo = null;
+			$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
+			require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/mysql_structure.php");
+			$this->query($sqls);
+		}
+		catch (PDOException $e) {
+			// if the above connection attempt even fails, then assume MySQL cannot be connected to for another more general reason.
+			$this->_error = true;
+			$this->_errorInfo = $e->errorInfo;
+		}
+	}
+
+	public function ensure_unique_name($name, $column, $table) {
+		// ensures that $name is a unique value in the database, given the $table and $column to check
+		// will add (1) or (2) for example to ensure the $name is unique
+		$foundrecord = $this->cell($table.".".$column, [$column, "=", $name]);
+		if ($foundrecord == $name) {
+		  $counter = 0;
+		  do {
+			$counter++;
+			$nametocheck = $name." (".$counter.")";
+			$foundrecord = $this->cell($table.".".$column, [$column, "=", $nametocheck]);
+		  }
+		  while ($foundrecord == $nametocheck);
+		  $name = $nametocheck;
+		}
+		return $name;
 	}
 
 }

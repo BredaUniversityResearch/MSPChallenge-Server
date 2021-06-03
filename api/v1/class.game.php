@@ -10,9 +10,9 @@
 			["Config", Security::ACCESS_LEVEL_FLAG_NONE], //Required for login
 			"FutureRealtime", 
 			"GetActualDateForSimulatedMonth",
-			["getCountries", Security::ACCESS_LEVEL_FLAG_NONE],
+			"GetCountries",
 			"GetCurrentMonth",
-			["GetGameDetails", Security::ACCESS_LEVEL_FLAG_NONE],
+			["GetGameDetails", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
 			"GetWatchdogAddress", 
 			"IsOnline", 
 			"Latest",
@@ -20,12 +20,12 @@
 			"NextMonth", 
 			"Planning",
 			"Realtime", 
-			["Setupfilename", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], 
+			["Setupfilename", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], // nominated for full security
 			"Speed", 
-			["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], 
+			["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
 			["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], 
 			"TestWatchdogAlive",
-			["Tick", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER] // Required for serverlistupdater.php to work in case of demo server
+			["Tick", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER] // nominated for full security - Required for serverlistupdater.php to work in case of demo server
 		);
 
 		public function __construct($str="")
@@ -268,7 +268,6 @@
 		 */
 		public function Tick($showDebug=false) 
 		{
-
 			$plan = new Plan();
 			$plan->Tick();
 
@@ -310,6 +309,19 @@
 					}
 				}
 			}
+
+			//$this->UpdateGameDetailsAtServerManager(); // only activate this after the Tick call has moved out of the client and into the Watchdog
+		}
+
+		private function UpdateGameDetailsAtServerManager()
+		{
+			$postValues = $this->GetGameDetails();
+			$token = (new Security())->GetServerManagerToken()["token"];
+			$postValues["token"] = $token;
+			$postValues["session_id"] = GameSession::GetGameSessionIdForCurrentRequest();
+			$postValues["action"] = "demoCheck";
+			$url = GameSession::GetServerManagerApiRoot()."editGameSession.php";
+			$this->CallBack($url, $postValues);
 		}
 
 		private function AreSimulationsUpToDate($tickData)
@@ -759,7 +771,7 @@
 
 		public function GetGameDetails()
 		{
-			$databaseState = Database::GetInstance()->query("SELECT g.game_start, g.game_eratime, g.game_currentmonth, g.game_state, g.game_planning_realtime, COUNT(u.user_id) total,
+			$databaseState = Database::GetInstance()->query("SELECT g.game_start, g.game_eratime, g.game_currentmonth, g.game_state, g.game_planning_realtime, g.game_planning_era_realtime, g.game_planning_gametime, g.game_planning_monthsdone, COUNT(u.user_id) total,
 													sum(case when (UNIX_TIMESTAMP() - u.user_lastupdate < 3600 and u.user_loggedoff = 0) then 1 else 0 end) active_last_hour,
 													sum(case when (UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0) then 1 else 0 end) active_last_minute FROM game g, user u;");
 			
@@ -767,19 +779,34 @@
 			if (count($databaseState) > 0)
 			{
 				$state = $databaseState[0];
+
+				$realtime_per_era = explode(",", $state["game_planning_era_realtime"]);
+				$current_era = intval(floor($state["game_currentmonth"] / $state["game_planning_gametime"]));
+				$realtime_per_era[$current_era] = $state["game_planning_realtime"];
+				$seconds_per_month_current_era = round($state["game_planning_realtime"] / $state["game_eratime"]);
+				$months_remaining_current_era = $state["game_eratime"] - $state["game_planning_monthsdone"];
+				$total_remaining_time = $months_remaining_current_era * $seconds_per_month_current_era;
+				$nextera = $current_era + 1;
+				while (isset($realtime_per_era[$nextera])) 
+				{
+					$total_remaining_time += $realtime_per_era[$nextera];
+					$nextera++;
+				}
+				$running_til_time = time() + $total_remaining_time;
+
 				$result = ["game_start_year" => (int) $state["game_start"], 
 					"game_end_month" => $state["game_eratime"] * 4,
 					"game_current_month" => (int) $state["game_currentmonth"],
 					"game_state" => $state["game_state"],
-					"users_active_last_hour" => (int) $state["active_last_hour"],
-					"users_active_last_minute" => (int) $state["active_last_minute"],
-					"game_planning_realtime" => $state["game_planning_realtime"] * 4
+					"players_past_hour" => (int) $state["active_last_hour"],
+					"players_active" => (int) $state["active_last_minute"],
+					"game_running_til_time" => $running_til_time
 				];
 			}
 			return $result;
 		}
 
-		public function getCountries()
+		public function GetCountries()
 		{
 			return Database::GetInstance()->query("SELECT * FROM country WHERE country_name IS NOT NULL;");
 		}

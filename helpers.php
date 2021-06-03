@@ -13,6 +13,36 @@ function isJson($string) {
     return (json_last_error() == JSON_ERROR_NONE);
 }
 
+function rrmdir($src) {
+    $dir = opendir($src);
+    while(false !== ( $file = readdir($dir)) ) {
+        if (( $file != '.' ) && ( $file != '..' )) {
+            $full = $src . '/' . $file;
+            if ( is_dir($full) ) {
+                rrmdir($full);
+            }
+            else {
+                unlink($full);
+            }
+        }
+    }
+    closedir($dir);
+    rmdir($src);
+}
+
+function rcopy($src, $dst) {
+    if (file_exists ( $dst ))
+        rrmdir ( $dst );
+    if (is_dir ( $src )) {
+        mkdir ( $dst );
+        $files = scandir ( $src );
+        foreach ( $files as $file )
+            if ($file != "." && $file != "..")
+                rcopy ( "$src/$file", "$dst/$file" );
+    } else if (file_exists ( $src ))
+        copy ( $src, $dst );
+}
+
 if( !function_exists('apache_request_headers') ) {
     function apache_request_headers() {
         $arh = array();
