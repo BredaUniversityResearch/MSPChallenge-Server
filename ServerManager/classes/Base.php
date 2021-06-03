@@ -25,7 +25,7 @@ class Base
 
     public static function HasSpecialChars($string)
     {
-      return (preg_match('/[\\\\\/"`\'^€£$%*}{@#~!?><.,|=_+¬-]/', $string));
+      return (preg_match('/[\\\\\/"`\'^€£$%*}{@#~!?><.,|=+¬]/', $string));
     }
 
     public static function EmptyOrHasSpaces($string)

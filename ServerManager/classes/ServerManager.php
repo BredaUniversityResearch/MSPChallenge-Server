@@ -3,7 +3,7 @@
 class ServerManager extends Base
 {
     private static $_instance = null;
-    private $_db, $_server_id, $_server_versions, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
+    private $_old, $_db, $_server_id, $_server_versions, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
     public $server_name, $server_address, $server_description;
 
       public function __construct() {
@@ -26,6 +26,8 @@ class ServerManager extends Base
         $this->server_name = $this->_db->cell("settings.value", array("name", "=", "server_name"));
         $this->server_address = $this->_db->cell('game_servers.address', array("id", "=", 1));
         $this->server_description = $this->_db->cell("settings.value", array("name", "=", "server_description"));
+
+        $this->_old = clone $this;
       }
 
       private function SetRootVars() {
@@ -103,6 +105,11 @@ class ServerManager extends Base
           return false;
       }
       
+      public function SetServerAddress($user=null) {
+        $this->_db->query("UPDATE game_servers SET address = ? WHERE id = 1;", array($this->server_address));
+        return $this->server_address;
+      }
+
       private function SetServerID()  {
         if (empty($this->_server_id)) {
             $this->_server_id = uniqid('', true);
@@ -114,27 +121,30 @@ class ServerManager extends Base
       public function SetServerName($user=null) {
         if (empty($this->server_name)) {
           if (empty($user)) return false;
-          $this->server_name =  $user->data()->username . '_' . date("Ymd");
+          $this->server_name =  $user->data()->username . '_' . date("Ymd"); 
+        }
+        
+        if (is_a($this->_old, "ServerManager") && $this->_old->server_name == $this->server_name) return $this->server_name; // no need to do anything if nothing changes
+
+        $try_update = $this->_db->query("UPDATE settings SET value = ? WHERE name = ?;", array($this->server_name, "server_name"));
+        if ($try_update && $this->_db->count() == 0) 
+        {
           $this->_db->query("INSERT INTO settings (name, value) VALUES (?, ?);", array("server_name", $this->server_name));
         }
-        else {
-          $this->_db->query("UPDATE settings SET value = ? WHERE name = ?;", array($this->server_name, "server_name"));
-        }
         return $this->server_name;
-      }
-
-      public function SetServerAddress($user=null) {
-        $this->_db->query("UPDATE game_servers SET address = ? WHERE id = 1;", array($this->server_address));
-        return $this->server_address;
       }
 
       public function SetServerDescription() {
         if (empty($this->server_description)) {
           $this->server_description =  "This is a new MSP Challenge server installation. The administrator has not changed this default description yet. This can be done through the ServerManager.";
-          $this->_db->query("INSERT INTO settings (name, value) VALUES (?, ?);", array("server_description", $this->server_description));
         }
-        else {
-          $this->_db->query("UPDATE settings SET value = ? WHERE name = ?;", array($this->server_description, "server_description"));
+
+        if (is_a($this->_old, "ServerManager") && $this->_old->server_description == $this->server_description) return $this->server_description; // no need to do anything if nothing changes
+
+        $try_update = $this->_db->query("UPDATE settings SET value = ? WHERE name = ?;", array($this->server_description, "server_description"));
+        if ($try_update && $this->_db->count() == 0) 
+        {
+          $this->_db->query("INSERT INTO settings (name, value) VALUES (?, ?);", array("server_description", $this->server_description));
         }
         return $this->server_description;
       }
@@ -245,7 +255,7 @@ class ServerManager extends Base
         $this->SetServerAddress();
         $this->SetServerDescription();
 
-        $updateservername = Base::callAuthoriser(
+        $updateservername = Base::callAuthoriser( // doing this here because JWT won't be available elsewhere
           'updateservernamejwt.php', 
           array(
               "jwt" => $this->getJWT(),
@@ -253,7 +263,7 @@ class ServerManager extends Base
               "server_id" => $this->GetServerID(),
               "server_name" => $this->GetServerName()
           ) 
-      );
+        );
       }
 
       public function get() {
