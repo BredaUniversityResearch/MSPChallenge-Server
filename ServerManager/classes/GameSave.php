@@ -97,9 +97,9 @@ class GameSave extends Base
         return $content;
     }
 
-    private function getContentsGameList()
+    private function getContentsGameList($file=null)
     {
-        $file = $this->getFullZipPath();
+        if (is_null($file)) $file = $this->getFullZipPath();
         $zip = new ZipArchive;
         if ($zip->open($file) !== true) throw new Exception("Couldn't open the uploaded file. Are you sure it's a ZIP file?");
         $game_list_json = $zip->getFromName('game_list.json');
@@ -324,7 +324,7 @@ class GameSave extends Base
     public function addFromUpload($file)
     {
         if (empty($file)) throw new Exception("Didn't get an uploaded file, so can't continue.");
-        $savevars = $this->getContentsGameList();
+        $savevars = $this->getContentsGameList($file);
         $this->server_version = $savevars["server_version"] ?? "4.0-beta7"; // since this var was first added with beta8
         $this->name = DB::getInstance()->ensure_unique_name($savevars['name'], "name", "game_saves");
         $this->game_config_version_id = $savevars['game_config_version_id'];
@@ -459,7 +459,9 @@ class GameSave extends Base
         $gamesession->game_end_month = $this->game_end_month;
         $gamesession->game_current_month = $this->game_current_month;
         $gamesession->game_running_til_time = $this->game_running_til_time;
+        if (base64_encoded($this->password_admin)) $this->password_admin = base64_decode($this->password_admin);
         $gamesession->password_admin = $this->password_admin;
+        if (base64_encoded($this->password_player)) $this->password_player = base64_decode($this->password_player);
         $gamesession->password_player = $this->password_player;
         $gamesession->session_state = $this->session_state; 
         $gamesession->game_state = $this->game_state;

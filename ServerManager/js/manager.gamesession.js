@@ -28,7 +28,7 @@ function handleAllSessionInfoButtons(gamesession) {
 
 function deciderPlayPauseButtons(gamesession)
 {
-    if (gamesession.session_state == 'healthy' && gamesession.demo_session == 0) {
+    if (gamesession.session_state == 'healthy') {
         if(gamesession.game_state == 'pause' || gamesession.game_state == 'setup') {
             return 'play';
         } else if(gamesession.game_state == 'play' || gamesession.game_state == 'fastforward') {

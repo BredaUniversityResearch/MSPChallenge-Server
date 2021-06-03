@@ -197,7 +197,9 @@ class GameSession extends Base
         $this->game_start_year = $gamesave->game_start_year;
         $this->game_end_month = $gamesave->game_end_month;
         $this->game_current_month = $gamesave->game_current_month;
+        if (base64_encoded($gamesave->password_admin)) $gamesave->password_admin = base64_decode($gamesave->password_admin);
         $this->password_admin = $gamesave->password_admin;
+        if (base64_encoded($gamesave->password_player)) $gamesave->password_player = base64_decode($gamesave->password_player);
         $this->password_player = $gamesave->password_player;
         $this->game_state = $gamesave->game_state;
         $this->game_visibility = $gamesave->game_visibility;
