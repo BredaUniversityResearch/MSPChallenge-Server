@@ -5,11 +5,6 @@ function getPublicObjectVars($obj) {
   return get_object_vars($obj);
 }
 
-function base64_encoded($string) {
-  if (base64_encode(base64_decode($string, true)) === $string) return true;
-  return false;
-}
-
 function PHPCanProxy() {
   if (!empty(ini_get('open_basedir')) || ini_get('safe_mode')) {
     return false;

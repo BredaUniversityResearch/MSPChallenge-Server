@@ -459,11 +459,11 @@ class GameSave extends Base
         $gamesession->game_end_month = $this->game_end_month;
         $gamesession->game_current_month = $this->game_current_month;
         $gamesession->game_running_til_time = $this->game_running_til_time;
-        if (base64_encoded($this->password_admin)) $this->password_admin = base64_decode($this->password_admin);
+        if (Base::isNewPasswordFormat($this->password_admin)) $this->password_admin = base64_decode($this->password_admin); // backwards compatibility
         $gamesession->password_admin = $this->password_admin;
-        if (base64_encoded($this->password_player)) $this->password_player = base64_decode($this->password_player);
+        if (Base::isNewPasswordFormat($this->password_player)) $this->password_player = base64_decode($this->password_player); // backwards compatibility
         $gamesession->password_player = $this->password_player;
-        $gamesession->session_state = $this->session_state; 
+        $gamesession->session_state = 'request'; 
         $gamesession->game_state = $this->game_state;
         $gamesession->game_visibility = $this->game_visibility;
         $gamesession->players_active = $this->players_active;
@@ -474,20 +474,8 @@ class GameSave extends Base
         $gamesession->save_id = $this->id;
         $gamesession->add();
         
-        $watchdog = new Watchdog;
-        $watchdog->id = $gamesession->watchdog_server_id;
-        $watchdog->get();
+        $gamesession->sendLoadRequest();
         
-        $server_call = self::callServer(
-            "GameSession/LoadGameSave", 
-            array(
-                "save_path" => $this->getFullZipPath(),
-                "watchdog_address" => $watchdog->address,
-                "game_id" => $gamesession->id,
-                "response_address" => ServerManager::getInstance()->GetFullSelfAddress()."api/editGameSession.php"
-            )
-        );
-        if (!$server_call["success"]) throw new Exception($server_call["message"]);
         return true;
     }    
 }

@@ -155,7 +155,7 @@ function handleSaveLayersButton(gamesession) {
 }
 
 function handleUserAccessButton(gamesession) {
-    if (gamesession.session_state == 'healthy' && gamesession.server_version != "4.0-beta7") {
+    if (gamesession.session_state == 'healthy' && gamesession.server_version != "4.0-beta7") { // was introduced in beta8, all previous versions are designated beta7, even if older
         $('#sessionInfoButtonUserAccess').attr('onclick', 'showUserAccessManagement('+gamesession.id+')');
         $('#sessionInfoButtonUserAccess').html('<i class="fa fa-user" title="Set User Access"></i> Set User Access</button>');
         $('#sessionInfoButtonUserAccess').show();
@@ -330,7 +330,6 @@ function showUserAccessManagement(sessionId) {
         session_id: sessionId
     }
     $.when(CallAPI(url, data)).done(function(sessiondetails) {
-        $('#adminProviders').append('<input type="hidden" id="UserAccessSessionID" name="UserAccessSessionID" value="'+sessionId+'">');
         var countrylist = "";
         $.each(sessiondetails['gamecountries'], function(count, country) {
             countrylist += country["country_id"] + " ";
@@ -510,7 +509,7 @@ function addUserFields(type, country) {
 function saveUserAccess() {
     var url = 'api/editGameSession.php';
     var data = {
-        session_id: $('#UserAccessSessionID').val(),
+        session_id: $('#sessionInfoID').html(),
         password_admin: JSON.stringify(getPasswordAdmin()),
         password_player: JSON.stringify(getPasswordPlayer()),
         action: 'setUserAccess'
@@ -518,7 +517,6 @@ function saveUserAccess() {
 	$.when(CallAPI(url, data)).done(function(results) {
         if (results.success) {
             updateInfobox(MessageType.SUCCESS, "User access settings successfully saved.");
-            getSessionInfo($('#UserAccessSessionID').val());
         }
         else {
             updateInfobox(MessageType.ERROR, results.message);
@@ -620,7 +618,7 @@ function findUsersAtProvider(div, provider) {
 	userTextInput = userTextInput.replace(/\s\s+/g, ' ');
 	userTextInput = userTextInput.trim();
     var url = 'api/readGameSession.php';
-    var session_id = $('#UserAccessSessionID').val();
+    var session_id = $('#sessionInfoID').html();
     var data = {
         session_id: session_id
     }

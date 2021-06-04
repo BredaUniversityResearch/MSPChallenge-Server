@@ -31,7 +31,6 @@ else // session eminates from a config file, so from scratch
     $gameconfig->get();
 }  
 
-
 // now see if the associated watchdog can be obtained
 $watchdog->id = $gamesession->watchdog_server_id;
 $watchdog->get();

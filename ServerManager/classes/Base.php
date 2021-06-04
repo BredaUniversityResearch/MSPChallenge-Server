@@ -33,6 +33,16 @@ class Base
       return (strpos($string, " ") !== false || empty($string));
     }
 
+    public static function isNewPasswordFormat($string)
+    {
+      if (base64_encode(base64_decode($string, true)) === $string) {
+        if (isJson(base64_decode($string))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     // needs a function to call server API
     public static function callServer($endpoint, $data2send = false, $session_id="", $api_access_token="")
     {

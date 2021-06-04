@@ -75,9 +75,9 @@ class GameSession extends Base
         }
 
         // backwards compatibility (beta7 and earlier), when the password fields were unencoded strings
-        if (base64_encoded($this->password_admin)) $this->password_admin = base64_decode($this->password_admin);
+        if (Base::isNewPasswordFormat($this->password_admin)) $this->password_admin = base64_decode($this->password_admin);
         $this->password_admin = $this->CheckPasswordFormat("password_admin", $this->password_admin);
-        if (base64_encoded($this->password_player)) $this->password_player = base64_decode($this->password_player);
+        if (Base::isNewPasswordFormat($this->password_player)) $this->password_player = base64_decode($this->password_player);
         $this->password_player = $this->CheckPasswordFormat("password_player", $this->password_player);
 
         $log_dir = ServerManager::getInstance()->GetSessionLogBaseDirectory();
@@ -126,6 +126,29 @@ class GameSession extends Base
         unset($args["log"]);
         if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
         $this->id = $this->_db->lastId();
+    }
+
+    public function sendLoadRequest($allow_recreate = 0)
+    {
+        $gamesave = new GameSave;
+        $gamesave->id = $this->save_id;
+        $gamesave->get();
+
+        $watchdog = new Watchdog;
+        $watchdog->id = $this->watchdog_server_id;
+        $watchdog->get();
+        
+        $server_call = self::callServer(
+            "GameSession/LoadGameSave", 
+            array(
+                "save_path" => $gamesave->getFullZipPath(),
+                "watchdog_address" => $watchdog->address,
+                "game_id" => $this->id,
+                "response_address" => ServerManager::getInstance()->GetFullSelfAddress()."api/editGameSession.php",
+                "allow_recreate" => $allow_recreate
+            )
+        );
+        if (!$server_call["success"]) throw new Exception($server_call["message"]);
     }
 
     public function sendCreateRequest($allow_recreate = 0)
@@ -197,9 +220,9 @@ class GameSession extends Base
         $this->game_start_year = $gamesave->game_start_year;
         $this->game_end_month = $gamesave->game_end_month;
         $this->game_current_month = $gamesave->game_current_month;
-        if (base64_encoded($gamesave->password_admin)) $gamesave->password_admin = base64_decode($gamesave->password_admin);
+        if (Base::isNewPasswordFormat($gamesave->password_admin)) $gamesave->password_admin = base64_decode($gamesave->password_admin);
         $this->password_admin = $gamesave->password_admin;
-        if (base64_encoded($gamesave->password_player)) $gamesave->password_player = base64_decode($gamesave->password_player);
+        if (Base::isNewPasswordFormat($gamesave->password_player)) $gamesave->password_player = base64_decode($gamesave->password_player);
         $this->password_player = $gamesave->password_player;
         $this->game_state = $gamesave->game_state;
         $this->game_visibility = $gamesave->game_visibility;
@@ -209,21 +232,7 @@ class GameSession extends Base
         $this->api_access_token = $gamesave->api_access_token;
         $this->server_version = $gamesave->server_version;
 
-        $watchdog = new Watchdog;
-        $watchdog->id = $this->watchdog_server_id;
-        $watchdog->get();
-
-        $server_call = self::callServer(
-            "GameSession/LoadGameSave", 
-            array(
-                "save_path" => $gamesave->getFullZipPath(),
-                "watchdog_address" => $watchdog->address,
-                "game_id" => $this->id,
-                "response_address" => ServerManager::getInstance()->GetFullSelfAddress()."api/editGameSession.php",
-                "allow_recreate" => 1
-            )
-        );
-        if (!$server_call["success"]) throw new Exception($server_call["message"]);
+        $this->sendLoadRequest(1);
         $this->setToLoading();
         return true;
     }
@@ -334,7 +343,7 @@ class GameSession extends Base
             return json_encode($string_decoded);
         }
         
-        // only used once when creating new session
+        // only used when creating new session or loading a save from pre-beta8
         if ($adminorplayer == "password_admin") 
         {
             $newarray["admin"]["provider"] = "local";

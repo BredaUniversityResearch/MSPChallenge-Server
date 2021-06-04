@@ -117,10 +117,11 @@ function copyToClipboard(text) {
 	window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 }
 
+var log_concise_old, regularLogToastAutoCloseCheck, regularLogToastBodyUpdate;
 function ShowLogToast(session_id) {
 	// first cancel any previous logtoast updates that might still be running
-	if (typeof regularLogToastBodyUpdate !== 'undefined') clearTimeout(regularLogToastBodyUpdate); 
 	if (typeof regularLogToastAutoCloseCheck !== 'undefined') clearTimeout(regularLogToastAutoCloseCheck); 
+	if (typeof regularLogToastBodyUpdate !== 'undefined') clearTimeout(regularLogToastBodyUpdate); 
 
 	$('#LogToastHeader').html("Session Activity Log ("+session_id+")");
 	log_concise_old = '';
@@ -134,7 +135,6 @@ function ShowLogToast(session_id) {
 	$('#LogToast').toast('show');
 }
 
-var log_concise_old = '';
 function UpdateLogToastContents(session_id) {
 	// read the log from getsessioninfo.php
 	var url = "api/readGameSession.php";
