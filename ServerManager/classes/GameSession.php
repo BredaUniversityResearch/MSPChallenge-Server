@@ -132,7 +132,6 @@ class GameSession extends Base
     {
         $gamesave = new GameSave;
         $gamesave->id = $this->save_id;
-        $gamesave->get();
 
         $watchdog = new Watchdog;
         $watchdog->id = $this->watchdog_server_id;
@@ -416,6 +415,11 @@ class GameSession extends Base
 
     public function getList($where_array=array())
     {
+        if (isset($_POST['client_timestamp']) && !ServerManager::getInstance()->IsClientAllowed($_POST['client_timestamp']))
+        {
+            return $this->mustUpdateBogusList();
+        }
+        
         if (!$this->_db->action(
             "SELECT games.id, games.name, games.game_config_version_id, games.game_server_id, games.watchdog_server_id,
             games.game_creation_time, games.game_start_year, games.game_end_month, games.game_current_month, games.game_running_til_time,
@@ -453,6 +457,19 @@ class GameSession extends Base
             $where_array
         )) throw new Exception($this->_db->errorString());
         return $this->_db->results(true);
+    }
+
+    private function mustUpdateBogusList()
+    {
+        $return[0] = array('id'=> 0,
+						'name' => 'You are using a version of MSP Challenge incompatible with this server.',
+						'session_state' => 'archived',
+						'region' => 'none');
+        $return[1] = array('id'=> 0,
+                        'name' => 'Please download and install '.ServerManager::getInstance()->GetCurrentVersion().' from www.mspchallenge.info.',
+                        'session_state' => 'archived',
+                        'region' => 'none');
+        return $return;
     }
 
     public function getArchive()

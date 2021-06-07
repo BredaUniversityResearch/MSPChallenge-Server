@@ -3,13 +3,16 @@
 class ServerManager extends Base
 {
     private static $_instance = null;
-    private $_old, $_db, $_server_id, $_server_versions, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
+    private $_old, $_db, $_server_id, $_server_versions, $_server_accepted_clients, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
     public $server_name, $server_address, $server_description;
 
       public function __construct() {
         $this->_server_versions = array(
           "4.0-beta7",
           "4.0-beta8"
+        );
+        $this->_server_accepted_clients = array(
+          "4.0-beta8" => "2021-04-20 13:54:41Z"
         );
         $this->_server_current_version = end($this->_server_versions);
         $this->_server_upgrades = array(
@@ -62,6 +65,15 @@ class ServerManager extends Base
         }
         // return the upgrade function name or false
         return false;
+      }
+
+      public function IsClientAllowed($timestamp) {
+        if (!isset($this->_server_accepted_clients[$this->_server_current_version])) return true;
+
+        $minimum_client_version = (new DateTime($this->_server_accepted_clients[$this->_server_current_version]))->format("U");
+        $requested_version = (new DateTime($timestamp))->format("U");
+        if ($requested_version < $minimum_client_version) return false;
+        return true;
       }
 
       public function GetMSPAuthAPI() {
