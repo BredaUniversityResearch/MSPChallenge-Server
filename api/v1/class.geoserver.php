@@ -87,7 +87,7 @@
 			return json_encode($data);
 		}
 
-		public function GetAllRemoteLayers($region="northsee"){
+		public function GetAllRemoteLayers($region){
 			$layers = array();
 			$requestResult = json_decode($this->request("workspaces/".$region."/layers?format=json"), true);
 			if (!isset($requestResult["layers"]) || !isset($requestResult["layers"]["layer"])) 
