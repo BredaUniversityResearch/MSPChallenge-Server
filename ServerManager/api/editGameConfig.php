@@ -25,16 +25,6 @@ $gameconfig->region = $_POST["region"] ?? $gameconfig->region;
 $gameconfig->client_versions = $_POST["client_versions"] ?? $gameconfig->client_versions;
 $gameconfig->game_config_files_id = $_POST["game_config_files_id"] ?? $gameconfig->game_config_files_id;
 
-// then perform any allowed and existing object action requested
-$allowed_actions = array(
-    
-);
-$action = $_POST["action"] ?? "";
-if (method_exists($gameconfig, $action) && in_array($action, $allowed_actions)) 
-{
-    $api->setPayLoad([$action => $gameconfig->$action()]);
-}
-
 // ready to do final actual update
 $gameconfig->edit();
 $api->setPayLoad(["gameconfig" => get_object_vars($gameconfig)]);
