@@ -550,7 +550,7 @@ class GameSession extends Base
         $gameconfig->id = $this->game_config_version_id;
         $gameconfig->get();
         $configFileDecoded = $gameconfig->getContents();
-        if (isset($configFileDecoded->datamodel)) $configFileDecoded["datamodel"]["plans"] = $server_call["payload"];
+        if (isset($configFileDecoded["datamodel"])) $configFileDecoded["datamodel"]["plans"] = $server_call["payload"];
         else $configFileDecoded["plans"] = $server_call["payload"];
         $file_contents = json_encode($configFileDecoded, JSON_PRETTY_PRINT);
         return array(basename($gameconfig->file_path, ".json")."_With_Exported_Plans.json", $file_contents); // to be used by downloader.php
