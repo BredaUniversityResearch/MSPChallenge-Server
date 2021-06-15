@@ -241,16 +241,16 @@
 		public function ImportMeta(string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password)
 		{
 			$game = new Game();
-			$geoserver = new GeoServer($geoserver_url, $geoserver_username, $geoserver_password);
-
-			$struct = $geoserver->GetRemoteDirStruct();
-
 			$data = $game->GetGameConfigValues($configFilename);
-			$data = $data['meta'];
+			$metaData = $data['meta'];
+			$region = $data['region'];
 
-			foreach($data as $layerMetaData)
+			$geoserver = new GeoServer($geoserver_url, $geoserver_username, $geoserver_password);
+			$allLayers = $geoserver->GetAllRemoteLayers($region);
+			
+			foreach($metaData as $layerMetaData)
 			{
-				$dbLayerId = $this->VerifyLayerExists($layerMetaData["layer_name"], $struct);
+				$dbLayerId = $this->VerifyLayerExists($layerMetaData["layer_name"], $allLayers);
 				if ($dbLayerId != -1)
 				{
 					$this->ImportMetaForLayer($layerMetaData, $dbLayerId);
@@ -292,19 +292,11 @@
 			if(empty($d))
 			{
 				Log::LogWarning($layerName ." was not found. Has this layer been renamed or removed?");
-				$found = false;
-				foreach($struct as $dir){
-					foreach($dir as $subdir){
-						foreach($subdir as $file){
-							if($file == $layerName){
-								Base::Error($layerName . " exists on geoserver but not in your database. Try recreating the database.");
-								$found = true;
-								break;
-							}
-						}
-					}
+				if (in_array($layerName, $struct))
+				{
+					Base::Error($layerName . " exists on geoserver but not in your database. Try recreating the database.");
 				}
-				if(!$found)
+				else 
 				{
 					Base::Error($layerName . " has not been found on geoserver. Are you sure this file exists?");
 				}
