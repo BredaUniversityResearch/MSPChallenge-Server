@@ -382,16 +382,22 @@ class GameSession extends Base
         }        
         
         $countries = array();
+        if (!isset($configData['datamodel']) || !isset($configData['datamodel']['meta']))
+        {
+            return $countries;
+        }
+
         foreach($configData['datamodel']['meta'] as $layerMeta) 
         {
             if ($layerMeta['layer_name'] == $configData['datamodel']['countries'])
             {
                 foreach($layerMeta['layer_type'] as $country)
                 {
-                    $tempvalue["country_id"] = $country['value'];
-                    $tempvalue["country_name"] = $country['displayName'];
-                    $tempvalue["country_colour"] = $country['polygonColor'];
-                    $countries[] = $tempvalue;
+                    $countries[] = array(
+                        "country_id" => $country['value'],
+                        "country_name" => $country['displayName'],
+                        "country_colour" => $country['polygonColor']
+                    );
                 }
             }
         }
