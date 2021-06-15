@@ -268,7 +268,7 @@ function submitNewSession() {
         var url = 'api/addGameSession.php';
         var data = {
             name: $('#newSessionName').val(),
-            game_config_version_id: $('#newConfigFile').val(),
+            game_config_version_id: $('#newConfigVersion').val(),
             password_admin: $('#newAdminPassword').val(),
             password_player: $('#newPlayerPassword').val(),
             game_geoserver_id: $('#newGeoServer').val(),
