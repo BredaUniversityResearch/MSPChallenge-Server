@@ -7665,7 +7665,7 @@
         "BS_Connection_Lanes",
         "40kpoints_in_sea"
       ],
-      "country_border_layer": "BS_EEZ",
+      "country_border_layer": "BS_EEZ_BSH",
       "shipping_lane_point_merge_distance": 10000,
       "shipping_lane_subdivide_distance": 15000,
       "shipping_lane_implicit_distance_limit": 700000.0,
@@ -19820,7 +19820,7 @@
         ]
       },
       {
-        "layer_name": "BS_EEZ",
+        "layer_name": "BS_EEZ_BSH",
         "layer_geotype": "polygon",
         "layer_short": "Exclusive Economic Zone",
         "layer_category": "management",
@@ -20322,7 +20322,7 @@
         ]
       },
       {
-        "layer_name": "BS_Territorial_Waters",
+        "layer_name": "BS_Territorial_Waters_BSH",
         "layer_geotype": "line",
         "layer_short": "Territorial Waters",
         "layer_category": "management",
@@ -35148,7 +35148,7 @@
     "era_total_months": 96,
     "era_planning_months": 84,
     "era_planning_realtime": 7200,
-    "countries": "BS_EEZ",
+    "countries": "BS_EEZ_BSH",
     "minzoom": 1,
     "maxzoom": 60,
     "user_admin_name": "Admin",
