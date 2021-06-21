@@ -235,28 +235,54 @@ class Store extends Base
 		}
 	}
 
-	private function CreateRasterMeta($workspace, $filename)
+	private function CreateRasterMeta($workspace, $layername)
 	{
-		$meta = $this->geoserver->request("workspaces/" . $workspace . "/coveragestores/" . $filename . "/coverages/" . $filename . ".json");
-
+		$type = "RASTER"; // currently supports RASTER or WMS
+		$metaCheckType = $this->geoserver->request("workspaces/" . $workspace . "/layers/" . $layername );
 		try {
-			$data = json_decode($meta);
-
-			if (!isset($data->coverage))
-				throw new Exception("Layer could not be downloaded.");
-
-			$bb = $data->coverage->nativeBoundingBox;
-
-			$rasterMeta = array("url" => $filename . ".png", "boundingbox" => array(array($bb->minx, $bb->miny), array($bb->maxx, $bb->maxy)));
-
-			$q = Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_raster, layer_geotype, layer_group, layer_editable) VALUES (?, ?, ?, ?, ?)", array($filename, json_encode($rasterMeta), "raster", $workspace, 0));
-
-			return $rasterMeta;
+			$returnMetaCheckType = json_decode($metaCheckType);
+			if (!isset($returnMetaCheckType->layer->type))
+				throw new Exception("Layer type (local raster store or WMS store) could not be ascertained, so cannot continue with ".$layername);
+			$type = $returnMetaCheckType->layer->type;
 		} catch (Exception $e) {
-			//if this triggers something went horribly wrong. Probably means that Geoserver is down or broken in some way
-			throw new Exception("Something went wrong downloading " . $filename . ". Is the file on GeoServer? Should download be attempted at all?. Exception message: " . $e->getMessage());
-			//Base::Debug($e->getMessage()." - on line ".$e->getLine()." of file ".$e->getFile());
+			throw new Exception("Layer type (local raster store or WMS store) could not be ascertained, so cannot continue with ".$layername);
 		}
+
+		if ($type == "RASTER") 
+		{
+			$meta = $this->geoserver->request("workspaces/" . $workspace . "/coveragestores/" . $layername . "/coverages/" . $layername . ".json");
+			try {
+				$data = json_decode($meta);
+				if (!isset($data->coverage))
+					throw new Exception("Layer ".$layername." (raster) could not be downloaded.");
+				$bb = $data->coverage->nativeBoundingBox;
+			} catch (Exception $e) {
+				// if this triggers then either the GeoServer is down, could not be reached for some other reason, or has been set up wrongly for this code 
+				throw new Exception("Something went wrong downloading " . $layername . " (raster). Is the file on GeoServer? Should download be attempted at all?. Exception message: " . $e->getMessage());
+			}
+		}
+		elseif ($type == "WMS")
+		{
+			$meta = $this->geoserver->request("workspaces/" . $workspace . "/wmsstores/" . $layername . "/wmslayers/" . $layername);
+
+			try {
+				$data = json_decode($meta);
+				if (!isset($data->wmsLayer))
+					throw new Exception("Layer ".$layername." (WMS) could not be downloaded.");
+				$bb = $data->wmsLayer->nativeBoundingBox;
+			} catch (Exception $e) {
+				// if this triggers then either the GeoServer is down, could not be reached for some other reason, or has been set up wrongly for this code 
+				throw new Exception("Something went wrong downloading " . $layername . " (WMS). Is the file on GeoServer? Should download be attempted at all?. Exception message: " . $e->getMessage());
+			}
+		}
+		else 
+		{
+			throw new Exception("Layer ".$layername." returned a type that's not supported at this time. Only raster and WMS are supported");
+		}
+		
+		$rasterMeta = array("url" => $layername . ".png", "boundingbox" => array(array($bb->minx, $bb->miny), array($bb->maxx, $bb->maxy)));
+		$q = Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_raster, layer_geotype, layer_group, layer_editable) VALUES (?, ?, ?, ?, ?)", array($layername, json_encode($rasterMeta), "raster", $workspace, 0));
+		return $rasterMeta;
 	}
 
 	public static function ExtractRasterFilesFromZIP($raster_zip)
