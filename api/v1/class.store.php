@@ -250,7 +250,7 @@ class Store extends Base
 
 		if ($type == "RASTER") 
 		{
-			$meta = $this->geoserver->request("workspaces/" . $workspace . "/coveragestores/" . $layername . "/coverages/" . $layername . ".json");
+			$meta = $this->geoserver->request("workspaces/" . $workspace . "/coverages/" . $layername . ".json");
 			try {
 				$data = json_decode($meta);
 				if (!isset($data->coverage))
@@ -263,7 +263,7 @@ class Store extends Base
 		}
 		elseif ($type == "WMS")
 		{
-			$meta = $this->geoserver->request("workspaces/" . $workspace . "/wmsstores/" . $layername . "/wmslayers/" . $layername);
+			$meta = $this->geoserver->request("workspaces/" . $workspace . "/wmslayers/" . $layername);
 
 			try {
 				$data = json_decode($meta);
