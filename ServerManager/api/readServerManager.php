@@ -5,7 +5,7 @@ $api = new API;
 $servermanager = ServerManager::getInstance();
 $user = new User();
 
-// security disabled as the client can use this endpoint too - $user->hastobeLoggedIn();
+$user->hastobeLoggedIn();
 
 $servermanager->get();
 

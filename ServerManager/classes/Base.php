@@ -13,7 +13,7 @@ class Base
     {
       if (empty($this->_jwt))
       {
-        $vars = array("audience" => ServerManager::getInstance()->GetBareHost());
+        $vars = array("server_id" => ServerManager::getInstance()->GetServerID(), "audience" => ServerManager::getInstance()->GetBareHost());
         $authoriser_call = self::callAuthoriser(
             "getjwt.php", 
             $vars

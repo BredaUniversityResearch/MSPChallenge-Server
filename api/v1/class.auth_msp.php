@@ -20,13 +20,31 @@ class Auth_MSP extends Auths
     public function authenticate($username, $password)
     {
         // get a temp JWT from the Authoriser for further communication
-        $audience = GameSession::GetRequestApiRoot();
         try {
-            $jwt_return = json_decode($this->CallBack(Config::getInstance()->GetAuthJWTRetrieval(), 
-                                    array("audience" => $audience), 
-                                    array(), // no headers
-                                    false, // synchronous, so wait
-                                    true)); // post as json
+            // for this we first need this MSP Challenge's server_id from the ServerManager
+            $servermanager_return = json_decode(
+                                        $this->CallBack(
+                                            GameSession::GetServerManagerApiRoot()."readServerManager.php", 
+                                            array(
+                                                "token" => (new Security())->GetServerManagerToken()["token"], 
+                                                "session_id" => GameSession::GetGameSessionIdForCurrentRequest()
+                                            )
+                                        )
+                                    ); 
+            if (!$servermanager_return->success) throw new Exception();
+            // and we send the server_id through to the Authoriser to request a jwt (JSON web token)
+            $jwt_return = json_decode(
+                            $this->CallBack(
+                                Config::getInstance()->GetAuthJWTRetrieval(), 
+                                array(
+                                    "audience" => GameSession::GetRequestApiRoot(), 
+                                    "server_id" => $servermanager_return->servermanager->server_id
+                                ), 
+                                array(), // no headers
+                                false, // synchronous, so wait
+                                true // post as json
+                            )
+                        ); 
         } catch (Exception $e) {
             $jwt_return = new stdClass();
             $jwt_return->success = false;
@@ -36,7 +54,7 @@ class Auth_MSP extends Auths
             // use the jwt to check the sent username and password at the Authoriser
             $usercheck_return = json_decode($this->CallBack(Config::getInstance()->GetAuthJWTUserCheck(), 
                                     array("jwt" => $jwt, 
-                                          "audience" => $audience, 
+                                          "audience" => GameSession::GetRequestApiRoot(), 
                                           "username" => $username, 
                                           "password" => $password), 
                                     array(), // no headers 
@@ -55,13 +73,31 @@ class Auth_MSP extends Auths
     public function checkuser($users)
     {
         // get a temp JWT from the Authoriser for further communication
-        $audience = GameSession::GetRequestApiRoot();
         try {
-            $jwt_return = json_decode($this->CallBack(Config::getInstance()->GetAuthJWTRetrieval(), 
-                                    array("audience" => $audience), 
-                                    array(), // no headers
-                                    false, // synchronous, so wait
-                                    true)); // post as json
+            // for this we first need this MSP Challenge's server_id from the ServerManager
+            $servermanager_return = json_decode(
+                $this->CallBack(
+                    GameSession::GetServerManagerApiRoot()."readServerManager.php", 
+                    array(
+                        "token" => (new Security())->GetServerManagerToken()["token"], 
+                        "session_id" => GameSession::GetGameSessionIdForCurrentRequest()
+                    )
+                )
+            ); 
+            if (!$servermanager_return->success) throw new Exception();
+            // and we send the server_id through to the Authoriser to request a jwt (JSON web token)
+            $jwt_return = json_decode(
+                            $this->CallBack(
+                                Config::getInstance()->GetAuthJWTRetrieval(), 
+                                array(
+                                    "audience" => GameSession::GetRequestApiRoot(), 
+                                    "server_id" => $servermanager_return->servermanager->server_id
+                                ), 
+                                array(), // no headers
+                                false, // synchronous, so wait
+                                true // post as json
+                            )
+                        ); 
         } catch (Exception $e) {
             $jwt_return = new stdClass();
             $jwt_return->success = false;
@@ -71,7 +107,7 @@ class Auth_MSP extends Auths
             // use the jwt to check the sent username and password at the Authoriser
             $usercheck_return = json_decode($this->CallBack(Config::getInstance()->GetAuthJWTUserCheck(), 
                                     array("jwt" => $jwt, 
-                                          "audience" => $audience, 
+                                          "audience" => GameSession::GetRequestApiRoot(), 
                                           "username" => $users), 
                                     array(), // no headers 
                                     false,  // synchronous, so wait

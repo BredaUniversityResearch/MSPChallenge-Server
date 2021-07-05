@@ -3,8 +3,8 @@
 class ServerManager extends Base
 {
     private static $_instance = null;
-    private $_old, $_db, $_server_id, $_server_versions, $_server_accepted_clients, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
-    public $server_name, $server_address, $server_description;
+    private $_old, $_db, $_server_versions, $_server_accepted_clients, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
+    public $server_id, $server_name, $server_address, $server_description;
 
       public function __construct() {
         $this->_server_versions = array(
@@ -25,7 +25,7 @@ class ServerManager extends Base
 
       private function CompletePropertiesFromDB() {
         $this->_db = DB::getInstance();
-        $this->_server_id = $this->_db->cell("settings.value", array("name", "=", "server_id"));
+        $this->server_id = $this->_db->cell("settings.value", array("name", "=", "server_id"));
         $this->server_name = $this->_db->cell("settings.value", array("name", "=", "server_name"));
         $this->server_address = $this->_db->cell('game_servers.address', array("id", "=", 1));
         $this->server_description = $this->_db->cell("settings.value", array("name", "=", "server_description"));
@@ -93,8 +93,8 @@ class ServerManager extends Base
       }
         
       public function GetServerID() {
-        if (is_null($this->_server_id)) $this->CompletePropertiesFromDB();
-        return $this->_server_id;
+        if (is_null($this->server_id)) $this->CompletePropertiesFromDB();
+        return $this->server_id;
       }
 
       public function GetServerName() {
@@ -103,8 +103,8 @@ class ServerManager extends Base
       }
 
       public function freshinstall() {
-        if (empty($this->_server_id)) $this->CompletePropertiesFromDB();
-        return (empty($this->_server_id));
+        if (empty($this->server_id)) $this->CompletePropertiesFromDB();
+        return (empty($this->server_id));
       }
 
       public function install($user=null) {
@@ -123,11 +123,11 @@ class ServerManager extends Base
       }
 
       private function SetServerID()  {
-        if (empty($this->_server_id)) {
-            $this->_server_id = uniqid('', true);
-            $this->_db->query("INSERT INTO settings (name, value) VALUES (?, ?);", array("server_id", $this->_server_id));
+        if (empty($this->server_id)) {
+            $this->server_id = uniqid('', true);
+            $this->_db->query("INSERT INTO settings (name, value) VALUES (?, ?);", array("server_id", $this->server_id));
         }
-        return $this->_server_id;
+        return $this->server_id;
       }
 
       public function SetServerName($user=null) {
