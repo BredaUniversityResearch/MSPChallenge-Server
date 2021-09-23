@@ -1,0 +1,14 @@
+RewriteEngine On
+
+<IfModule mod_php7.c>
+	php_value max_execution_time 300
+	php_value memory_limit 512M
+</IfModule>
+
+RewriteCond %{REQUEST_URI} !\.(css|js)$
+
+RewriteRule ^([0-9]+)/api/(.*)$	index.php?session=$1&query=$2 [NC,L]
+RewriteRule ^debug/(.*)$		index.php?debug=1&query=$1 [NC,L]
+
+#Single-server support.
+RewriteRule ^api/(.*)$ 			index.php?session=-1&query=$1
