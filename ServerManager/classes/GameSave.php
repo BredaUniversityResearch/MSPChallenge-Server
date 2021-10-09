@@ -224,7 +224,7 @@ class GameSave extends Base
         for($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
             $filecontents = $zip->getFromIndex($i);
-            if (strstr($filename, ".json") !== false && isJson($filecontents)) {
+            if (strstr($filename, ".json") !== false && isJsonObject($filecontents)) {
                 $this->createShapefile($filecontents, $filename, $templocation); // don't add it to the ZIP straight-away, we're not sure it was created at this point
             }
             else {

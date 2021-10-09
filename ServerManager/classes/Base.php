@@ -36,7 +36,7 @@ class Base
     public static function isNewPasswordFormat($string)
     {
       if (base64_encode(base64_decode($string, true)) === $string) {
-        if (isJson(base64_decode($string))) {
+        if (isJsonObject(base64_decode($string))) {
           return true;
         }
       }

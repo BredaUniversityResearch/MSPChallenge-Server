@@ -8,9 +8,8 @@ function exceptions_error_handler($severity, $message, $filename, $lineno) {
 }
 /* End of PHP error and warning capturing code */
 
-function isJson($string) {
-    json_decode($string);
-    return (json_last_error() == JSON_ERROR_NONE);
+function isJsonObject($string) {
+    return is_object(json_decode($string));
 }
 
 function rrmdir($src) {

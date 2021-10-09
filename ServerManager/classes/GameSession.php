@@ -305,7 +305,7 @@ class GameSession extends Base
 
     private function CheckPasswordFormat($adminorplayer, $string)
     {
-        if (isJson($string)) 
+        if (isJsonObject($string))
         {
             // backwards compatibility
             $string_decoded = json_decode($string, true);

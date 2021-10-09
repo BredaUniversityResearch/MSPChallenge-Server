@@ -12,7 +12,7 @@ function PHPCanProxy() {
   return true;
 }
 
-function isJson($string) {
+function isJsonObject($string) {
     return is_object(json_decode($string));
 }
 
