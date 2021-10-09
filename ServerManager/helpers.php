@@ -13,14 +13,7 @@ function PHPCanProxy() {
 }
 
 function isJson($string) {
-    if (isInteger($string)) return false; // this is because the below will return true for integers!
-    json_decode($string);
-    return (json_last_error() == JSON_ERROR_NONE);
-}
-
-function isInteger($input) {
-    // stricter than is_int!
-    return(ctype_digit(strval($input)));
+    return is_object(json_decode($string));
 }
 
 // Readeable file size
