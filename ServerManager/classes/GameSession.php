@@ -39,7 +39,6 @@ class GameSession extends Base
         foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $var)
         {   
             $varname = $var->getName();
-            $temp[] = $varname;
             switch ($varname)
             {
                 case "password_player":
@@ -346,9 +345,9 @@ class GameSession extends Base
         if ($adminorplayer == "password_admin") 
         {
             $newarray["admin"]["provider"] = "local";
-            $newarray["admin"]["value"] = $string;
+            $newarray["admin"]["value"] = (string) $string;
             $newarray["region"]["provider"] = "local";
-            $newarray["region"]["value"] = $string;
+            $newarray["region"]["value"] = (string) $string;
         } 
         else 
         {
@@ -356,7 +355,7 @@ class GameSession extends Base
             $countries = $this->getCountries();
             if ($countries !== false) {
                 foreach ($countries as $country_data) {
-                    $newarray["value"][$country_data["country_id"]] = $string;
+                    $newarray["value"][$country_data["country_id"]] = (string) $string;
                 }
             }
         }
