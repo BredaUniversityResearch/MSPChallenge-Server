@@ -7,9 +7,9 @@ $user = new User();
 $errors = [];
 $successes = [];
 
-if (!empty($_GET['jwt'])) {
+if (!empty($_GET['returntoquery'])) {
   $arraySend = array (
-      "jwt" => $_GET['jwt'],
+      "jwt" => $_GET['returntoquery'],
       "audience" => $servermanager->GetBareHost()
     );
   
