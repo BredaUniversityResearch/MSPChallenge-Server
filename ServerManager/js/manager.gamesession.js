@@ -208,11 +208,7 @@ function updateSessionInfoList(data) {
     $('#sessionInfoWatchdogName').html(data.watchdog.name);
     $('#sessionInfoWatchdogAddress').html(data.watchdog.address);
     $('#sessionInfoActivePlayers').html(data.gamesession.players_past_hour);
-    if(data.gamesession.demo_session == 1){
-		$('#sessionInfoDemoStatus').html('<h5><span class="badge badge-success"><i class="fa fa-plug" aria-hidden="true"></i> ON </span></h5>');
-	} else {
-		$('#sessionInfoDemoStatus').html('<h5><span class="badge badge-secondary"><i class="fa fa-plug" aria-hidden="true"></i> OFF </span></h5>');
-	}
+    $('#sessionInfoGeoServer').html(data.geoserver.name);
     if (data.gamesession.log) $('#sessionInfoLog').html(data.gamesession.log.join("<br />"));
     
     handleAllSessionInfoButtons(data.gamesession);

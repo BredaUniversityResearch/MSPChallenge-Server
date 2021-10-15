@@ -341,10 +341,10 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 									</td>
 								</tr>
 								<tr>
-									<th scop="col">Active Players</th>
+                                    <th scope="col">GeoServer</th>
+                                    <td class="text-right" id="sessionInfoGeoServer"></td>
+                                    <th scop="col">Active Players</th>
 									<td class="text-right" id="sessionInfoActivePlayers"></td>
-									<th scope="col">Demo Session?</th>
-									<td class="text-right" id="sessionInfoDemoStatus"></td>
 								</tr>
 								<tr class="table-info">
 									<td colspan="2">
