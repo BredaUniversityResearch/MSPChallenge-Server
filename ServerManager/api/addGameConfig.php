@@ -20,8 +20,7 @@ else {
 
 // now go through the form vars
 $gameconfig->uploadTemp($_FILES['config_file']['tmp_name']);
-$gameconfig->description = $_POST["description"] ?? $gameconfig->description;
-$gameconfig->version_message = $_POST["version_message"] ?? $gameconfig->version_message;
+$gameconfig->processPostedVars();
 $gameconfig->visibility = "active";
 $gameconfig->upload_time = time();
 $gameconfig->upload_user = $user->data()->id;

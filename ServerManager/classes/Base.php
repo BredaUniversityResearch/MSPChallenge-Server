@@ -43,6 +43,16 @@ class Base
       return false;
     }
 
+    public function processPostedVars()
+    {
+        $args = getPublicObjectVars($this);
+        foreach ($args as $key => $value) {
+            if (isset($_POST[$key])) {
+                $this->$key = $_POST[$key];
+            }
+        }
+    }
+
     // needs a function to call server API
     public static function callServer($endpoint, $data2send = false, $session_id="", $api_access_token="")
     {

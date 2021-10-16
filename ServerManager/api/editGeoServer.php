@@ -11,7 +11,7 @@ $user->hastobeLoggedIn();
 $geoserver->id = $_POST["geoserver_id"] ?? "";
 $geoserver->get();
 
-// now optionally change all the object vars
+// now optionally change all the object vars - not using processPostedVars() here because of exception below
 $geoserver->name = $_POST['name'] ?? $geoserver->name;
 $geoserver->address = $_POST['address'] ?? $geoserver->address;
 $geoserver->username = isset($_POST['username']) ? base64_encode($_POST['username']) : $geoserver->username; // only exception to the rule of having the class encode it, this is because we never decode it again in the ServerManager

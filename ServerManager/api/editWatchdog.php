@@ -12,8 +12,7 @@ $watchdog->id = $_POST["watchdog_id"] ?? "";
 $watchdog->get();
 
 // now optionally change all the object vars
-$watchdog->name = $_POST['name'] ?? $watchdog->name;
-$watchdog->address = $_POST['address'] ?? $watchdog->address;
+$watchdog->processPostedVars();
 
 // ready to do final actual update
 $watchdog->edit();

@@ -7,8 +7,7 @@ $user = new User();
 
 $user->hastobeLoggedIn();
 
-$watchdog->name = $_POST['name'] ?? "";
-$watchdog->address = $_POST['address'] ?? "";
+$watchdog->processPostedVars();
 $watchdog->available = 1;
 
 $watchdog->add();
