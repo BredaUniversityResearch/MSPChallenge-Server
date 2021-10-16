@@ -203,7 +203,9 @@ class GameSession extends Base
     public function recreate()
     {
         if ($this->save_id > 0) return $this->reload();
-        
+
+        // after a server upgrade the version might have changed since session was first created
+        $this->server_version = ServerManager::getInstance()->GetCurrentVersion();
         $this->sendCreateRequest(1);
         $this->setToLoading();
         return true;
@@ -256,13 +258,13 @@ class GameSession extends Base
         {
             if ($this->_old->session_state == "healthy" && ($this->_old->game_state == "pause" || $this->_old->game_state == "setup")) 
             {
-                // healthy demo sessions need to return to play if previously set to pause or setup
+                // healthy demo sessions need to return to play if previously on pause or setup
                 $this->game_state = "play";
                 $this->changeGameState();
             }
-            elseif ($this->_old->session_state == "healthy" && $this->_old->game_state == "end")
+            elseif ($this->session_state == "healthy" && $this->game_state == "end")
             {
-                // demo sessions need to be recreated if they had ended previously
+                // demo sessions need to be recreated as soon as they have ended
                 $this->recreate();
             }
         }
