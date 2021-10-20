@@ -73,8 +73,9 @@
 				$configuredSimulations[] = "CEL";
 			}
 
-			foreach($data as $key => $d){
-				if((is_object($data[$key]) || is_array($data[$key])) && $key != "expertise_definitions"){
+			foreach($data as $key => $d)
+			{
+				if((is_object($data[$key]) || is_array($data[$key])) && $key != "expertise_definitions" && $key != "dependencies") {
 					unset($data[$key]);
 				}
 			}
