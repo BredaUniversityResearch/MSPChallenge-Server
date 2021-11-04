@@ -12,9 +12,9 @@ $gameconfig->game_config_files_id = $_POST["game_config_files_id"] ?? -1;
 if ($gameconfig->game_config_files_id > -1) {
     $gameconfig->get();
     $gameconfig->version++;
+    unset($_POST['filename']); //to make sure processPostedVars() doesn't overwrite the filename with null value
 }
 else {
-    $gameconfig->filename = $_POST["filename"] ?? "";
     $gameconfig->version = 1;
 }
 
