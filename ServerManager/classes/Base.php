@@ -53,6 +53,17 @@ class Base
         }
     }
 
+    public function ignorePostedVars($array)
+    {
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                if (isset($_POST[$value])) {
+                    unset($_POST[$value]);
+                }
+            }
+        }
+    }
+
     // needs a function to call server API
     public static function callServer($endpoint, $data2send = false, $session_id="", $api_access_token="")
     {
