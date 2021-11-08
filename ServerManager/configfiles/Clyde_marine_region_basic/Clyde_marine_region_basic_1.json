@@ -5043,6 +5043,2038 @@
         }
       ]
     },
+    "dependencies": {
+      "categories": [
+        {
+          "id": 1,
+          "name": "Energy"
+        },
+        {
+          "id": 4,
+          "name": "Shipping"
+        },
+        {
+          "id": 5,
+          "name": "Shipping Intensity"
+        },
+        {
+          "id": 6,
+          "name": "Other Activities"
+        },
+        {
+          "id": 7,
+          "name": "Fishing"
+        },
+        {
+          "id": 8,
+          "name": "Environment & Protection"
+        },
+        {
+          "id": 9,
+          "name": "Pressures"
+        },
+        {
+          "id": 10,
+          "name": "Benthos, Fish"
+        },
+        {
+          "id": 11,
+          "name": "Birds, Mammals"
+        }
+      ],
+      "items": [
+        {
+          "id": 1,
+          "category": 1,
+          "name": "Wind Farm",
+          "icon": "Energy"
+        },
+        {
+          "id": 2,
+          "category": 1,
+          "name": "Energy Cables",
+          "icon": "Energy"
+        },
+        {
+          "id": 3,
+          "category": 4,
+          "name": "Ports",
+          "icon": "Shipping"
+        },
+        {
+          "id": 4,
+          "category": 4,
+          "name": "Disposal Sites",
+          "icon": "Shipping"
+        },
+        {
+          "id": 5,
+          "category": 4,
+          "name": "Dredging Locations",
+          "icon": "Shipping"
+        },
+        {
+          "id": 6,
+          "category": 4,
+          "name": "No Shipping Zones",
+          "icon": "Shipping"
+        },
+        {
+          "id": 7,
+          "category": 4,
+          "name": "Anchorages",
+          "icon": "Shipping"
+        },
+        {
+          "id": 8,
+          "category": 5,
+          "name": "Cargo Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 9,
+          "category": 5,
+          "name": "Passenger Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 10,
+          "category": 5,
+          "name": "Maintenance Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 11,
+          "category": 5,
+          "name": "Recreation Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 12,
+          "category": 5,
+          "name": "Tanker Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 13,
+          "category": 6,
+          "name": "Fish Farms",
+          "icon": "aquaculture"
+        },
+		{
+          "id": 14,
+          "category": 6,
+          "name": "Shellfish Farms",
+          "icon": "aquaculture"
+        },
+        {
+          "id": 15,
+          "category": 6,
+          "name": "Recreational Boating Intensity",
+          "icon": "recreational"
+        },
+        {
+          "id": 16,
+          "category": 7,
+          "name": "Demersal Trawl Catch",
+          "icon": "fishing"
+        },
+        {
+          "id": 17,
+          "category": 7,
+          "name": "Seine Catch",
+          "icon": "fishing"
+        },
+        {
+          "id": 18,
+          "category": 7,
+          "name": "Nephrops Catch",
+          "icon": "fishing"
+        },
+		{
+          "id": 19,
+          "category": 7,
+          "name": "Scallops Catch",
+          "icon": "fishing"
+        },
+        {
+          "id": 20,
+          "category": 8,
+          "name": "Bathymetry",
+          "icon": "Ecology"
+        },
+        {
+          "id": 21,
+          "category": 8,
+          "name": "Marine Protected Area",
+          "icon": "Ecology"
+        },
+        {
+          "id": 22,
+          "category": 9,
+          "name": "Artificial Substrate",
+          "icon": "pressure"
+        },
+        {
+          "id": 23,
+          "category": 9,
+          "name": "Bottom Disturbance",
+          "icon": "pressure"
+        },
+        {
+          "id": 24,
+          "category": 9,
+          "name": "Noise",
+          "icon": "pressure"
+        },
+        {
+          "id": 25,
+          "category": 9,
+          "name": "Surface Disturbance",
+          "icon": "pressure"
+        },
+        {
+          "id": 26,
+          "category": 10,
+          "name": "Cod",
+          "icon": "fish"
+        },
+        {
+          "id": 27,
+          "category": 10,
+          "name": "Whiting",
+          "icon": "fish"
+        },
+        {
+          "id": 28,
+          "category": 10,
+          "name": "Flatfish",
+          "icon": "fish"
+        },
+        {
+          "id": 29,
+          "category": 10,
+          "name": "Herring",
+          "icon": "fish"
+        },
+        {
+          "id": 30,
+          "category": 10,
+          "name": "Mackerel",
+          "icon": "fish"
+        },
+        {
+          "id": 31,
+          "category": 10,
+          "name": "Sandeel",
+          "icon": "fish"
+        },
+        {
+          "id": 32,
+          "category": 11,
+          "name": "Rays and Skates",
+          "icon": "fish"
+        },
+        {
+          "id": 33,
+          "category": 11,
+          "name": "Sharks",
+          "icon": "fish"
+        },
+        {
+          "id": 34,
+          "category": 11,
+          "name": "Birds",
+          "icon": "birds"
+        },
+        {
+          "id": 35,
+          "category": 11,
+          "name": "Cetaceans",
+          "icon": "mammals"
+        },
+        {
+          "id": 36,
+          "category": 11,
+          "name": "Seals",
+          "icon": "mammals"
+        },
+        {
+          "id": 37,
+          "category": 11,
+          "name": "Benthic",
+          "icon": "macrobenthos"
+        },
+        {
+          "id": 38,
+          "category": 4,
+          "name": "Shipping Routes",
+          "icon": "Shipping"
+        },
+        {
+          "id": 39,
+          "category": 8,
+          "name": "Protection Demersal trawl",
+          "icon": "Ecology"
+        },	
+        {
+          "id": 40,
+          "category": 8,
+          "name": "Protection Scallop fleet",
+          "icon": "Ecology"
+        },	
+        {
+          "id": 41,
+          "category": 8,
+          "name": "Protection Nephrops fleet",
+          "icon": "Ecology"
+        },	
+        {
+          "id": 42,
+          "category": 8,
+          "name": "Protection Pots and creels",
+          "icon": "Ecology"
+        },	
+        {
+          "id": 43,
+          "category": 8,
+          "name": "Protection Seine",
+          "icon": "Ecology"
+        },
+	    {
+          "id": 44,
+          "category": 8,
+          "name": "Natura 2000",
+          "icon": "Ecology"
+        },
+	    {
+          "id": 45,
+          "category": 4,
+          "name": "Total Shipping Intensity",
+          "icon": "Shipping"
+        }		
+      ],
+      "links": [
+        {
+          "fromId": 1,
+          "toId": 22,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Pylons and Foundations",
+              "description": "Wind turbine pylons in the water as well as their foundations on the seabed. [[wiki://ClydeRegion:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 22,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Cable on seabed",
+              "description": "Cable laid on the seabed (so not dug into it). [[wiki://ClydeRegion:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 13,
+          "toId": 22,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Fish pond / tank components",
+              "description": "Fish pond / tank components in the water. [[wiki://ClydeRegion:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 14,
+          "toId": 22,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Shellfish farm structure",
+              "description": "Structure in the water and on the seabed. [[wiki://ClydeRegion:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 5,
+          "toId": 24,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Ship cranes, shovels and pipes",
+              "description": "Cranes, shovels and pipes in the water and on the seabed. [[wiki://ClydeRegion:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 15,
+          "toId": 24,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Boats, yachts, ships",
+              "description": "Recreational boats, yachts or ships sailing at sea. [[wiki://ClydeRegion:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 24,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Construction in water and on seabed",
+              "description": "Wind energy turbine construction in water and on the seabed. Diminished once completed. [[wiki://ClydeRegion:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 24,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Construction in water and on seabed",
+              "description": "Cable laid on or dug into the seabed. Non-existent once completed. [[wiki://ClydeRegion:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 45,
+          "toId": 24,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Shipping Intensity",
+              "description": "Noise produced by all shipping vessels sailing at sea. [[wiki://ClydeRegion:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 3,
+          "toId": 24,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Port operations",
+              "description": "Vessels arriving and departing, loading and unloading cargo and passengers. [[wiki://ClydeRegion:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 7,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Vessels holding, waiting, bunkering",
+              "description": "Vessels using buoys to hold, wait or bunker raw materials. [[wiki://ClydeRegion:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 15,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Boats, yachts, ships",
+              "description": "Recreational boats, yachts or ships sailing at sea. [[wiki://ClydeRegion:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Construction on seabed",
+              "description": "Wind energy turbine construction in water and on the seabed. Non-existent once completed. [[wiki://ClydeRegion:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Construction",
+              "description": "Laying electric cables on the seabed. Non-existent once completed. [[wiki://ClydeRegion:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 45,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Shipping intensity",
+              "description": "Surface disturbance produced by all shipping vessels sailing at sea. [[wiki://ClydeRegion:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 13,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Fish pond / tank components",
+              "description": "Fish pond / tank components in the water. [[wiki://ClydeRegion:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 14,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Structures for shellfish farming",
+              "description": "Structures for shellfish farming in the water. [[wiki://ClydeRegion:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 7,
+          "toId": 23,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Anchored buoys tugging and scraping",
+              "description": "Anchored Buoys tugging and scraping the seabed. [[wiki://ClydeRegion:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 5,
+          "toId": 23,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Ship shovels and pipes",
+              "description": "Shovels and pipes scraping and extracting from the seabed. [[wiki://ClydeRegion:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 23,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Cable on seabed",
+              "description": "Electricity cable laid on or dug into the seabed. Non-existent once completed. [[wiki://ClydeRegion:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 4,
+          "toId": 23,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Dumping materials",
+              "description": "Materials (sand, gravel) being dump on the seabed. [[wiki://ClydeRegion:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 3,
+          "toId": 23,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Anchoring on seabed",
+              "description": "Anchoring of shellfish structures on the seabed.  [[wiki://ClydeRegion:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 23,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Construction on seabed",
+              "description": "Wind energy turbine being constructed on the seabed. Non-existent once completed. [[wiki://ClydeRegion:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 39,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Demersal trawling prohibited",
+              "description": "Scraping fishing nets over an electricity cable laid on or in the seabed is dangerous. [[wiki://ClydeRegion:Protection_Demersal_Trawl|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 39,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Demersal trawling prohibited",
+              "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. [[wiki://ClydeRegion:Protection_Demersal_Trawl|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 3,
+          "toId": 39,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by demersal trawlers",
+              "description": "Demersal trawlers never fish right next to or just outside of ports, they sail out a bit first. [[wiki://ClydeRegion:Protection_Demersal_Trawl|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 21,
+          "toId": 39,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional demersal trawling ban",
+              "description": "If desired, demersal trawling can be banned from operating in a particular Marine Protected Area. [[wiki://ClydeRegion:Protection_Demersal_Trawl|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 44,
+          "toId": 39,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional demersal trawling ban",
+              "description": "If desired, demersal trawling can be banned from operating in a particular Natura 2000 Area. [[wiki://ClydeRegion:Protection_Demersal_Trawl|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 13,
+          "toId": 39,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets are not allowed in fish farms. [[wiki://ClydeRegion:Protection_Demersal_Trawl|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 14,
+          "toId": 39,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets are not allowed in shellfish farms. [[wiki://ClydeRegion:Protection_Demersal_Trawl|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 7,
+          "toId": 39,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by demersal trawlers",
+              "description": "Demersal trawlers avoid anchorages. [[wiki://ClydeRegion:Protection_Demersal_Trawl|More info...]]"
+            }
+          ]
+        },
+	   {
+          "fromId": 2,
+          "toId": 40,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Scallop fleets prohibited",
+              "description": "Using scallop dredges over an electricity cable laid on or in the seabed is dangerous. [[wiki://ClydeRegion:Protection_Scallop_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 40,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Scallop fleets prohibited",
+              "description": "Using scallop dredges over the seabed at a wind farm is dangerous. [[wiki://ClydeRegion:Protection_Scallop_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 3,
+          "toId": 40,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by scallop fleet",
+              "description": "Scallop fleets never fish right next to or just outside of ports, they sail out a bit first. [[wiki://ClydeRegion:Protection_Scallop_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 21,
+          "toId": 40,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional scallop fleet ban",
+              "description": "If desired, scallop fleet can be banned from operating in a particular Marine Protected Area. [[wiki://ClydeRegion:Protection_Scallop_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 44,
+          "toId": 40,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional scallop fleet ban",
+              "description": "If desired, scallop fleet can be banned from operating in a particular Natura 2000 Area. [[wiki://ClydeRegion:Protection_Scallop_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 13,
+          "toId": 40,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets are not allowed in fish farms. [[wiki://ClydeRegion:Protection_Scallop_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 14,
+          "toId": 40,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets are not allowed in shellfish farms. [[wiki://ClydeRegion:Protection_Scallop_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 7,
+          "toId": 40,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by scallop fleet",
+              "description": "Scallop fleet avoid anchorages. [[wiki://ClydeRegion:Protection_Against_Scallop_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 2,
+          "toId": 41,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Nephrops fleets prohibited",
+              "description": "Fishing for nephrops over an electricity cable laid on or in the seabed is dangerous. [[wiki://ClydeRegion:Protection_Nephrops_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 41,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Nephrops fleets prohibited",
+              "description": "Using scallop dredges over the seabed at a wind farm is dangerous. [[wiki://ClydeRegion:Protection_Nephrops_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 3,
+          "toId": 41,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by nephrops fleet",
+              "description": "Scallop fleets never fish right next to or just outside of ports, they sail out a bit first. [[wiki://ClydeRegion:Protection_Nephrops_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 21,
+          "toId": 41,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional nephrops fleet ban",
+              "description": "If desired, nephrops fleet can be banned from operating in a particular Marine Protected Area. [[wiki://ClydeRegion:Protection_Nephrops_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 44,
+          "toId": 41,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional nephrops fleet ban",
+              "description": "If desired, nephrops fleet can be banned from operating in a particular Natura 2000 Area. [[wiki://ClydeRegion:Protection_Nephrops_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 13,
+          "toId": 41,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets are not allowed in fish farms. [[wiki://ClydeRegion:Protection_Nephrops_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 14,
+          "toId": 41,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets are not allowed in shellfish farms. [[wiki://ClydeRegion:Protection_Nephrops_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 7,
+          "toId": 41,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by nephrops fleet",
+              "description": "Nephrops fleet avoid anchorages. [[wiki://ClydeRegion:Protection_Nephrops_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 2,
+          "toId": 42,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Pots and creels fleets prohibited",
+              "description": "Fishing with pots and creels over an electricity cable laid on or in the seabed is dangerous. [[wiki://ClydeRegion:Protection_Post_and_Creels|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 42,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Nephrops fleet prohibited",
+              "description": "Fishing with pots and creels over the seabed at a wind farm is dangerous. [[wiki://ClydeRegion:Protection_Post_and_Creels|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 21,
+          "toId": 42,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional nephrops fleet ban",
+              "description": "If desired, fishing with pots and creels can be banned from operating in a particular Marine Protected Area. [[wiki://ClydeRegion:Protection_Post_and_Creels|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 44,
+          "toId": 42,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional nephrops fleet ban",
+              "description": "If desired,  fishing with pots and creels can be banned from operating in a particular Natura 2000 Area. [[wiki://ClydeRegion:Protection_Post_and_Creels|More info...]]"
+            }
+          ]
+        },		
+		{
+          "fromId": 2,
+          "toId": 43,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Seine fleet prohibited",
+              "description": "Seine  fleets are not allowed to fish over electricity cables. [[wiki://ClydeRegion:Protection_Seine_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 43,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Seine fleets prohibited",
+              "description": "Seine  fleets are not allowed to fish in wind farms. [[wiki://ClydeRegion:Protection_Seine_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 3,
+          "toId": 43,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by seine fleets",
+              "description": "Seine fleet never fish right next to or just outside of ports, they sail out a bit first. [[wiki://ClydeRegion:Protection_Seine_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 21,
+          "toId": 43,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional seine fleet ban",
+              "description": "If desired, seine fleet can be banned from operating in a particular Marine Protected Area. [[wiki://ClydeRegion:Protection_Seine_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 44,
+          "toId": 43,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional seine fleet ban",
+              "description": "If desired, seine fleet can be banned from operating in a particular Natura 2000 Area. [[wiki://ClydeRegion:Protection_Seine_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 13,
+          "toId": 43,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets are not allowed in fish farms. [[wiki://ClydeRegion:Protection_Seine_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 14,
+          "toId": 43,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets are not allowed in shellfish farms. [[wiki://ClydeRegion:Protection_Seine_Fleet|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 7,
+          "toId": 43,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by seine fleet",
+              "description": "Seine fleet avoid anchorages. [[wiki://ClydeRegion:Protection_Seine_Fleet|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Maintenance",
+              "description": "The existance of wind farms increases maintenance shipping [[wiki://ClydeRegion:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 8,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Cargo vessels not allowed in wind farms [[wiki://ClydeRegion:Shipping_Cargo_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 9,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Passenger ships not allowed in wind farms [[wiki://ClydeRegion:Shipping_Passenger_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Tanker vessels not allowed in wind farms [[wiki://ClydeRegion:Shipping_Tanker_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 6,
+          "toId": 8,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No Cargo Shipping",
+              "description": "There is no cargo shipping in no shipping zones for cargo vessels [[wiki://ClydeRegion:Shipping_Cargo_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 6,
+          "toId": 9,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No Passenger Shipping",
+              "description": "There is no passenger shipping in no shipping zones for passenger vessels [[wiki://ClydeRegion:Shipping_Passenger_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 6,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No Tanker Shipping",
+              "description": "There is no tanker shipping in no shipping zones for tanker vessels [[wiki://ClydeRegion:Shipping_Tanker_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 20,
+          "toId": 8,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Cargo Shipping Avoids Shallow Waters",
+              "description": "Cargo shipping avoids shallow waters [[wiki://ClydeRegion:Shipping_Cargo_Total|More info...]]" 
+			}
+          ]
+        },
+        {
+          "fromId": 20,
+          "toId": 9,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Passenger Vessels Avoid Shallow Waters",
+              "description": "Passenger vessels avoid shallow waters [[wiki://ClydeRegion:Shipping_Passenger_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 20,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Tanker Vessels Avoid Shallow Waters",
+              "description": "Tanker vessels avoid shallow waters [[wiki://ClydeRegion:Shipping_Tanker_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 38,
+          "toId": 8,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Cargo Vessels Prefer Shipping Routes",
+              "description": "Cargo vessels prefer shipping routes [[wiki://ClydeRegion:Shipping_Cargo_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 38,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Tanker Vessels Prefer Shipping Routes",
+              "description": "Tanker vessels prefer shipping routes [[wiki://ClydeRegion:Shipping_Tanker_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 38,
+          "toId": 9,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Passenger Vessels Prefer Shipping Routes",
+              "description": "Passenger vessels prefer shipping routes [[wiki://ClydeRegion:Shipping_Passenger_Total|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Cod Avoids Noise",
+              "description": "Cod avoids noisy areas [[wiki://ClydeRegion:Cod|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 35,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Cetaceans Avoid Noise",
+              "description": "Cetaceans avoid noisy areas [[wiki://ClydeRegion:Cetaceans|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 25,
+          "toId": 35,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Cetaceans Avoid Surface Disturbance",
+              "description": "Cetaceans avoid surface disturbance [[wiki://ClydeRegion:Cetaceans|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 36,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Seals Avoid Noise",
+              "description": "Seals avoid noise [[wiki://ClydeRegion:Seals|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 25,
+          "toId": 36,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Seals Avoid Surface Disturbance",
+              "description": "Seals avoid surface disturbance [[wiki://ClydeRegion:Seals|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 34,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Birds Avoid Noise",
+              "description": "Birds avoid noise [[wiki://ClydeRegion:Birds |More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 33,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Sharks Avoid Noise",
+              "description": "Sharks avoid noise [[wiki://ClydeRegion:Sharks |More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 32,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Rays and Skates Avoid Noise",
+              "description": "Rays and skates avoid noise [[wiki://ClydeRegion:Rays_and_Skates |More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 23,
+          "toId": 32,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Rays and Skates Avoid Bottom Disturbance",
+              "description": "Rays and skates avoid bottom disturbance [[wiki://ClydeRegion:Rays_and_Skates |More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 24,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Whiting Avoid Noise",
+              "description": "Whiting avoid noise [[wiki://ClydeRegion:Whiting |More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Flatfish Avoid Noise",
+              "description": "Flatfish avoid noise [[wiki://ClydeRegion:Flatfish |More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 23,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Flatfish Avoid Bottom Disturbance",
+              "description": "Flatfish avoid bottom disturbance [[wiki://ClydeRegion:Flatfish |More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Mackerel Avoid Noise",
+              "description": "Mackerel avoid noise [[wiki://ClydeRegion:Mackerel |More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Herring Avoids Noise",
+              "description": "Herring avoids noisy areas [[wiki://ClydeRegion:Herring|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Sandeel Avoids Noise",
+              "description": "Sandeel avoids noise [[wiki://ClydeRegion:Sandeel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 23,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Benthic Avoid Bottom Disturbance",
+              "description": "Benthic species are highly affected by bottom disturbance  [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 36,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Seals eat cod [[wiki://ClydeRegion:Cod|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 36,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Seals eat whiting [[wiki://ClydeRegion:Whiting|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 36,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Seals eat flatfish [[wiki://ClydeRegion:Flatfish|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 36,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Seals eat herring [[wiki://ClydeRegion:Herring|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 36,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Predation",
+              "description": "Seals eat sandeel [[wiki://ClydeRegion:Sandeel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Cetaceans eat sandeel  [[wiki://ClydeRegion:Sandeel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 34,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Birds eat cod  [[wiki://ClydeRegion:Cod|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 34,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Birds eat mackerel  [[wiki://ClydeRegion:Mackerel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 34,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Predation",
+              "description": "Birds eat herring  [[wiki://ClydeRegion:Herring|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 34,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Birds eat sandeel  [[wiki://ClydeRegion:Sandeel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 34,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Birds eat benthic species  [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 33,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Bigger sharks eat smaller sharks  [[wiki://ClydeRegion:Sharks|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 32,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Sharks eat rays and skates  [[wiki://ClydeRegion:Rays_and_Skates|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Sharks eat cod [[wiki://ClydeRegion:Cod|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Sharks eat whiting [[wiki://ClydeRegion:Whiting|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Sharks eat flatfish  [[wiki://ClydeRegion:Flatfish|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Sharks eat mackerel [[wiki://ClydeRegion:Mackerel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Predation",
+              "description": "Sharks eat herring  [[wiki://ClydeRegion:Herring|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Sharks eat sandeel [[wiki://ClydeRegion: Sandeel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Sharks eat benthic species  [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 32,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Rays and skates eat flatfish  [[wiki://ClydeRegion:Rays_and_Skates|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 32,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Rays and skates eat herring [[wiki://ClydeRegion:Herring|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 32,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Rays and skates eat sandeel  [[wiki://ClydeRegion:Sandeel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 32,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Predation",
+              "description": "Rays and skates eat benthic species [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 26,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Bigger cod eats smaller cod [[wiki://ClydeRegion:Cod|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 26,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Cod eats whiting [[wiki://ClydeRegion:Whiting|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 26,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Cod eats flatfish [[wiki://ClydeRegion:Flatfish|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 26,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Cod eats herring [[wiki://ClydeRegion:Herring|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 26,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Cod eats sandeel [[wiki://ClydeRegion:Sandeel|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 26,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Cod eats benthic species [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Bigger whiting eat smaller whiting [[wiki://ClydeRegion:Whiting|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 27,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Whiting eats mackerel [[wiki://ClydeRegion:Mackerel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Whiting eats herring [[wiki://ClydeRegion:Herring|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Whiting eats sandeel [[wiki://ClydeRegion:Sandeel|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Predation",
+              "description": "Whiting eats benthic species [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 28,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Predation",
+              "description": "Flatfish eat benthic species [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 37,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Predation",
+              "description": "Benthic species eat other benthic species [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 16,
+          "toId": 33,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Demersal trawl catches sharks [[wiki://ClydeRegion:Sharks|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 16,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Demersal trawl catches cod [[wiki://ClydeRegion:Cod|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 16,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Demersal trawl catches whiting [[wiki://ClydeRegion:Whiting|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 16,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Demersal trawl catches flatfish [[wiki://ClydeRegion:Flatfish|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 16,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Demersal trawl catches benthic species [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 19,
+          "toId": 37,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing",
+              "description": "Scallop fleet catches benthic species [[wiki://ClydeRegion:Benthic|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 18,
+          "toId": 33,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Nephrops fleet catches sharks [[wiki://ClydeRegion:Shark|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 18,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Nephrops fleet catches cod [[wiki://ClydeRegion:Cod|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 18,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Nephrops fleet catches whiting [[wiki://ClydeRegion:Whiting|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 18,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Nephrops fleet catches flatfish [[wiki://ClydeRegion:Flatfish|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 17,
+          "toId": 33,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Seine fleet catches sharks [[wiki://ClydeRegion:Sharks|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 17,
+          "toId": 32,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Seine fleet catches rays and skates [[wiki://ClydeRegion:Rays_and_Skates|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 17,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Seine fleet catches cod [[wiki://ClydeRegion:Cod|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 17,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Seine fleet catches whiting [[wiki://ClydeRegion:Whiting|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 17,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Seine fleet catches flatfish [[wiki://ClydeRegion:Flatfish|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 17,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Seine fleet catches mackerel [[wiki://ClydeRegion:Mackerel|More info...]]"
+            }
+          ]
+        },
+		{
+          "fromId": 17,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Seine fleet catches herring [[wiki://ClydeRegion:Herring|More info...]]"
+            }
+          ]
+        }
+      ],
+      "impactTypes": [
+        {
+          "id": 1,
+          "type": "POSITIVE",
+          "iconIndicator": "ARROW",
+          "iconAmount": 2
+        },
+        {
+          "id": 2,
+          "type": "NEGATIVE",
+          "iconIndicator": "ARROW",
+          "iconAmount": 2
+        }
+      ]
+    },
     "meta": [
       {
         "layer_name": "_PLAYAREA_CR",
@@ -9779,7 +11811,7 @@
             "View": "NAME",
             "Edit": "NAME"
           },
-          "text_color": "#0504aaFF",
+          "text_color": "#0504AAFF",
           "text_size": "M",
           "zoom_cutoff": 0.1,
           "x": 0.0,
@@ -13053,7 +15085,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -13091,7 +15123,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13116,9 +15148,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13143,9 +15175,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13170,7 +15202,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -13197,9 +15229,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13213,33 +15245,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -13260,7 +15265,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -13298,7 +15303,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13323,9 +15328,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13350,9 +15355,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13377,7 +15382,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -13404,9 +15409,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13420,33 +15425,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -13467,7 +15445,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -13505,7 +15483,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13530,9 +15508,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13557,9 +15535,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13584,7 +15562,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -13611,9 +15589,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13627,33 +15605,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -13674,7 +15625,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -13712,7 +15663,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13737,9 +15688,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13764,9 +15715,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13791,7 +15742,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -13818,9 +15769,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13834,33 +15785,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -13881,7 +15805,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -13919,7 +15843,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13944,9 +15868,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13971,9 +15895,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13998,7 +15922,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -14025,9 +15949,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14041,33 +15965,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -14088,7 +15985,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -14126,7 +16023,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14151,9 +16048,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14178,9 +16075,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14205,7 +16102,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -14232,9 +16129,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14248,33 +16145,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -14295,7 +16165,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -14333,7 +16203,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14358,9 +16228,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14385,9 +16255,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14412,7 +16282,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -14439,9 +16309,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14455,33 +16325,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -14502,7 +16345,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -14540,7 +16383,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14565,9 +16408,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14592,9 +16435,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14619,7 +16462,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -14646,9 +16489,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14662,33 +16505,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -14709,7 +16525,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -14747,7 +16563,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14772,9 +16588,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14799,9 +16615,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14826,7 +16642,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -14853,9 +16669,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14869,33 +16685,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -14916,7 +16705,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -14954,7 +16743,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14979,9 +16768,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15006,9 +16795,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15033,7 +16822,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -15060,9 +16849,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15076,33 +16865,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -15123,7 +16885,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -15161,7 +16923,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15186,9 +16948,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15213,9 +16975,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15240,7 +17002,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -15267,9 +17029,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15283,33 +17045,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -15330,7 +17065,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -15368,7 +17103,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15393,9 +17128,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15420,9 +17155,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15447,7 +17182,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -15474,9 +17209,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15490,33 +17225,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -15537,7 +17245,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -15575,7 +17283,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15600,9 +17308,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15627,9 +17335,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15654,7 +17362,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -15681,9 +17389,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15697,33 +17405,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -15744,7 +17425,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -15782,7 +17463,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15807,9 +17488,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFFF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15834,9 +17515,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15861,7 +17542,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -15888,9 +17569,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15904,33 +17585,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -15951,7 +17605,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -16014,9 +17668,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16041,9 +17695,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16068,7 +17722,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -16095,9 +17749,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16111,33 +17765,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -16158,7 +17785,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -16196,7 +17823,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16221,9 +17848,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16248,9 +17875,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16275,7 +17902,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -16302,9 +17929,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16318,33 +17945,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -16365,7 +17965,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -16428,9 +18028,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFCA",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16455,9 +18055,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16482,7 +18082,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -16509,9 +18109,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16525,33 +18125,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -16572,7 +18145,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -16635,9 +18208,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16662,9 +18235,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16689,7 +18262,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -16716,9 +18289,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16732,33 +18305,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -16779,7 +18325,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -16817,7 +18363,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16842,9 +18388,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16869,9 +18415,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16896,7 +18442,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -16923,9 +18469,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -16939,33 +18485,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -16986,7 +18505,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -17024,7 +18543,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17049,9 +18568,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17076,9 +18595,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17103,7 +18622,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -17130,9 +18649,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17146,33 +18665,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -17193,7 +18685,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -17231,7 +18723,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17256,9 +18748,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17283,9 +18775,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17310,7 +18802,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -17337,9 +18829,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17353,33 +18845,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -17394,13 +18859,13 @@
       {
         "layer_name": "mel_Shannon_Diversity_Indicator",
         "layer_geotype": "raster",
-        "layer_short": "Shannin Diversity Indicator",
+        "layer_short": "Shannon Diversity Indicator",
         "layer_category": "ecology",
         "layer_subcategory": "biodiversity_indicator",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -17438,7 +18903,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17463,9 +18928,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17490,9 +18955,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17517,7 +18982,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -17544,9 +19009,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17560,33 +19025,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -17607,7 +19045,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -17645,7 +19083,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17670,9 +19108,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17697,9 +19135,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17724,7 +19162,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -17751,9 +19189,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17767,33 +19205,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -17814,7 +19225,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -17852,7 +19263,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17877,9 +19288,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17904,9 +19315,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17931,7 +19342,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -17958,9 +19369,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -17974,33 +19385,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -18021,7 +19405,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -18059,7 +19443,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18084,9 +19468,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18111,9 +19495,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18138,7 +19522,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -18165,9 +19549,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18181,33 +19565,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -18228,7 +19585,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -18266,7 +19623,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18291,9 +19648,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18318,9 +19675,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18345,7 +19702,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -18372,9 +19729,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18388,33 +19745,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -18435,7 +19765,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -18473,7 +19803,7 @@
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#0000FFFF",
+            "polygonColor": "#0000FFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18498,9 +19828,9 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 250,
             "displayPolygon": 1,
-            "polygonColor": "#00FF00FF",
+            "polygonColor": "#00FFFFC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18525,9 +19855,9 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 500,
             "displayPolygon": 1,
-            "polygonColor": "#FFFF00FF",
+            "polygonColor": "#00FF00C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18552,7 +19882,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 750,
             "displayPolygon": 1,
             "polygonColor": "#FF8000FF",
             "polygonPatternName": "5",
@@ -18579,9 +19909,9 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#FF0000FF",
+            "polygonColor": "#FF0000C9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -18595,33 +19925,6 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Extreme",
-            "approval": "EEZ",
-            "value": 0,
-            "displayPolygon": 1,
-            "polygonColor": "#FFFFFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFFFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFFFFFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",

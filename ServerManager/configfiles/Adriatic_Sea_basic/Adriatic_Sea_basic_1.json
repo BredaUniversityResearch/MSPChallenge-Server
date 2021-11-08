@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "4/21/2021",
-    "data_model_hash": "054AF85AAD1D33F7B95C0B5564D4B068017649C3EECD071F61A50D75E45C1A2E",
+    "date_modified": "18/10/2021",
+    "data_model_hash": "68A7CA8D26622F0F0A1DFB3A9C463D59CF5A19A85081FC2B4605884B59AD2FEC",
     "errors": 0,
     "editor_version": 0.0,
     "min_supported_client": "",
@@ -189,6 +189,7 @@
         "plan_name": "Shipping starting plan",
         "plan_gametime": -1,
         "plan_type": "0,0,0",
+        "plan_alters_energy_distribution": 0,
         "layers": [
           {
             "layer_id": 11,
@@ -1210,6 +1211,586 @@
         "restriction_settings": []
       }
     ],
+    "dependencies": {
+      "categories": [
+        {
+          "id": 1,
+          "name": "Energy"
+        },
+        {
+          "id": 3,
+          "name": "Shipping"
+        },
+        {
+          "id": 4,
+          "name": "Shipping Intensity"
+        },
+        {
+          "id": 5,
+          "name": "Recreational"
+        },
+        {
+          "id": 6,
+          "name": "Fishing"
+        },
+        {
+          "id": 7,
+          "name": "Environment & Protection"
+        }
+      ],
+      "items": [
+        {
+          "id": 1,
+          "category": 1,
+          "name": "Wind Farms",
+          "icon": "Energy"
+        },
+        {
+          "id": 2,
+          "category": 1,
+          "name": "Oil & Gas Installations",
+          "icon": "grey_energy"
+        },
+        {
+          "id": 3,
+          "category": 2,
+          "name": "Electricity Cables",
+          "icon": "Energy"
+        },
+        {
+          "id": 4,
+          "category": 2,
+          "name": "Pipelines",
+          "icon": "Energy"
+        },
+        {
+          "id": 5,
+          "category": 2,
+          "name": "Telecom Cables",
+          "icon": "Energy"
+        },
+        {
+          "id": 6,
+          "category": 3,
+          "name": "Ports",
+          "icon": "Shipping"
+        },
+        {
+          "id": 7,
+          "category": 3,
+          "name": "Dredging and Deposit Sites",
+          "icon": "Shipping"
+        },
+        {
+          "id": 8,
+          "category": 3,
+          "name": "Sand Extraction",
+          "icon": "Shipping"
+        },
+        {
+          "id": 9,
+          "category": 3,
+          "name": "No Shipping Zones",
+          "icon": "Shipping"
+        },
+        {
+          "id": 10,
+          "category": 4,
+          "name": "Cargo Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 11,
+          "category": 4,
+          "name": "Passenger Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 12,
+          "category": 4,
+          "name": "Maintenance Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 13,
+          "category": 4,
+          "name": "Tanker Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 14,
+          "category": 4,
+          "name": "Total Shipping Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 15,
+          "category": 5,
+          "name": "Aquaculture",
+          "icon": "aquaculture"
+        },
+        {
+          "id": 17,
+          "category": 5,
+          "name": "Military Areas",
+          "icon": "restricted_zones"
+        },
+        {
+          "id": 18,
+          "category": 5,
+          "name": "Bathing Waters",
+          "icon": "recreational"
+        },
+        {
+          "id": 19,
+          "category": 5,
+          "name": "Fishing Intensity",
+          "icon": "recreational"
+        },
+        {
+          "id": 20,
+          "category": 6,
+          "name": "Fishing Restrictions",
+          "icon": "fishing"
+        },
+        {
+          "id": 23,
+          "category": 7,
+          "name": "Bathymetry",
+          "icon": "Ecology"
+        },
+        {
+          "id": 24,
+          "category": 7,
+          "name": "Marine Protected Area",
+          "icon": "Ecology"
+        },
+        {
+          "id": 25,
+          "category": 8,
+          "name": "Wave Farm",
+          "icon": "Energy"
+        },
+        {
+          "id": 26,
+          "category": 8,
+          "name": "Tidal Farms",
+          "icon": "Energy"
+        },
+        {
+          "id": 27,
+          "category": 8,
+          "name": "Interconnectors",
+          "icon": "energy"
+        },
+        {
+          "id": 28,
+          "category": 8,
+          "name": "Areas to be Avoided",
+          "icon": "shipping"
+        },
+        {
+          "id": 29,
+          "category": 9,
+          "name": "Ancorages",
+          "icon": "shipping"
+        },
+        {
+          "id": 30,
+          "category": 9,
+          "name": "Precautionary Areas",
+          "icon": "shipping"
+        },
+        {
+          "id": 31,
+          "category": 9,
+          "name": "Marina",
+          "icon": "recreational"
+        },
+        {
+          "id": 35,
+          "category": 3,
+          "name": "IMO Shipping Lanes",
+          "icon": "Shipping"
+        }
+      ],
+      "links": [
+        {
+          "fromId": 20,
+          "toId": 19,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing restrictions",
+              "description": "Fishing may be restricted for nature conservation purposes. [[wiki://AdriaticSea:Fishing_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 19,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing restrictions",
+              "description": "If desired, fishing fleets can be banned from operating in a particular Marine Protected Area. [[wiki://AdriaticSea:Fishing_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 19,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing in wind parks is not allowed. [[wiki://AdriaticSea:Fishing_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 19,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing not allowed",
+              "description": "Fishing fleets steer clear of known or popular shipping routes. [[wiki://AdriaticSea:Fishing_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Wind farms maintenance",
+              "description": "The existance of wind farms increases maintenance shipping [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Wind farms obstruct cargo shipping",
+              "description": "Cargo vessels not allowed in wind farms [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Wind farms obstruct passenger shipping",
+              "description": "Passenger ships not allowed in wind farms [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Wind farms obstruct tanker shipping",
+              "description": "Tanker vessels not allowed in wind farms [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 25,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Wave farms maintenance",
+              "description": "The existance of wave farms increases maintenance shipping [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 25,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Wave farms obstruct cargo shipping",
+              "description": "Cargo vessels not allowed in wave farms [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 25,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Wave farms obstruct passenger shipping",
+              "description": "Passenger ships not allowed in wave farms [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 25,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Wave farms obstruct tanker shipping",
+              "description": "Tanker vessels not allowed in wave farms [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 26,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Tidal farms maintenance",
+              "description": "The existance of tidal farms increases maintenance shipping [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 26,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Tidal farms obstruct cargo shipping",
+              "description": "Cargo vessels not allowed in tidal farms [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 26,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Tidal farms obstruct passenger shipping",
+              "description": "Passenger ships not allowed in tidal farms [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 26,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Tidal farms obstruct tanker shipping",
+              "description": "Tanker vessels not allowed in tidal farms [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Oil and gas installations maintenance",
+              "description": "The existance of oil and gas installations increases maintenance shipping [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Oil and gas installations cargo shipping",
+              "description": "Cargo vessels not allowed to cross oil and gas installations [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Oil and gas installations obstruct passenger shipping",
+              "description": "Passenger ships not allowed to cross oil and gas installations [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Oil and gas installations obstruct tanker shipping",
+              "description": "Tanker vessels not allowed to cross oil and gas installations [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No cargo shipping",
+              "description": "There is no cargo shipping in no shipping zones for cargo vessels [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No passenger shipping",
+              "description": "There is no passenger shipping in no shipping zones for passenger vessels [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No tanker shipping",
+              "description": "There is no tanker shipping in no shipping zones for tanker vessels [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No maintenance shipping",
+              "description": "There is no maintenance shipping in no shipping zones for maintenance vessels [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 23,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Cargo shipping avoids shallow waters",
+              "description": "Cargo shipping avoids shallow waters [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 23,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Passenger vessels avoid shallow waters",
+              "description": "Passenger vessels avoid shallow waters [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 23,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Tanker vessels avoid shallow waters",
+              "description": "Tanker vessels avoid shallow waters [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Cargo vessels prefer IMO routes",
+              "description": "Cargo vessels prefer IMO Routes [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Tanker vessels prefer IMO routes",
+              "description": "Tanker vessels prefer IMO Routes [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Passenger vessels prefer IMO routes",
+              "description": "Passenger vessels prefer IMO Routes [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        }
+      ],
+      "impactTypes": [
+        {
+          "id": 1,
+          "type": "POSITIVE",
+          "iconIndicator": "ARROW",
+          "iconAmount": 2
+        },
+        {
+          "id": 2,
+          "type": "NEGATIVE",
+          "iconIndicator": "ARROW",
+          "iconAmount": 2
+        }
+      ]
+    },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
       "grey_centerpoint_sprite": "oilbarrel",
@@ -32941,584 +33522,6 @@
       ]
     },
     "MEL": null,
-    "dependencies": {
-      "categories": [
-        {
-          "id": 1,
-          "name": "Energy"
-        },
-        {
-          "id": 3,
-          "name": "Shipping"
-        },
-        {
-          "id": 4,
-          "name": "Shipping Intensity"
-        },
-        {
-          "id": 5,
-          "name": "Recreational"
-        },
-        {
-          "id": 6,
-          "name": "Fishing"
-        },
-        {
-          "id": 7,
-          "name": "Environment & Protection"
-        }
-      ],
-      "items": [
-        {
-          "id": 1,
-          "category": 1,
-          "name": "Wind Farms",
-          "icon": "Energy"
-        },
-        {
-          "id": 2,
-          "category": 1,
-          "name": "Oil & Gas Installations",
-          "icon": "grey_energy"
-        },
-        {
-          "id": 3,
-          "category": 2,
-          "name": "Electricity Cables",
-          "icon": "Energy"
-        },
-        {
-          "id": 4,
-          "category": 2,
-          "name": "Pipelines",
-          "icon": "Energy"
-        },
-        {
-          "id": 5,
-          "category": 2,
-          "name": "Telecom Cables",
-          "icon": "Energy"
-        },
-        {
-          "id": 6,
-          "category": 3,
-          "name": "Ports",
-          "icon": "Shipping"
-        },
-        {
-          "id": 7,
-          "category": 3,
-          "name": "Dredging and Deposit Sites",
-          "icon": "Shipping"
-        },
-        {
-          "id": 8,
-          "category": 3,
-          "name": "Sand Extraction",
-          "icon": "Shipping"
-        },
-        {
-          "id": 9,
-          "category": 3,
-          "name": "No Shipping Zones",
-          "icon": "Shipping"
-        },
-        {
-          "id": 10,
-          "category": 4,
-          "name": "Cargo Intensity",
-          "icon": "shipping_activity"
-        },
-        {
-          "id": 11,
-          "category": 4,
-          "name": "Passenger Intensity",
-          "icon": "shipping_activity"
-        },
-        {
-          "id": 12,
-          "category": 4,
-          "name": "Maintenance Intensity",
-          "icon": "shipping_activity"
-        },
-        {
-          "id": 13,
-          "category": 4,
-          "name": "Tanker Intensity",
-          "icon": "shipping_activity"
-        },
-        {
-          "id": 14,
-          "category": 4,
-          "name": "Total Shipping Intensity",
-          "icon": "shipping_activity"
-        },
-        {
-          "id": 15,
-          "category": 5,
-          "name": "Aquaculture",
-          "icon": "aquaculture"
-        },
-        {
-          "id": 17,
-          "category": 5,
-          "name": "Military Areas",
-          "icon": "restricted_zones"
-        },
-        {
-          "id": 18,
-          "category": 5,
-          "name": "Bathing Waters",
-          "icon": "recreational"
-        },
-		{
-          "id": 19,
-          "category": 5,
-          "name": "Fishing Intensity",
-          "icon": "recreational"
-        },
-        {
-          "id": 20,
-          "category": 6,
-          "name": "Fishing Restrictions",
-          "icon": "fishing"
-        },
-        {
-          "id": 23,
-          "category": 7,
-          "name": "Bathymetry",
-          "icon": "Ecology"
-        },
-        {
-          "id": 24,
-          "category": 7,
-          "name": "Marine Protected Area",
-          "icon": "Ecology"
-        },
-        {
-          "id": 25,
-          "category": 8,
-          "name": "Wave Farm",
-          "icon": "Energy"
-        },
-        {
-          "id": 26,
-          "category": 8,
-          "name": "Tidal Farms",
-          "icon": "Energy"
-        },
-        {
-          "id": 27,
-          "category": 8,
-          "name": "Interconnectors",
-          "icon": "energy"
-        },
-        {
-          "id": 28,
-          "category": 8,
-          "name": "Areas to be Avoided",
-          "icon": "shipping"
-        },
-        {
-          "id": 29,
-          "category": 9,
-          "name": "Ancorages",
-          "icon": "shipping"
-        },
-        {
-          "id": 30,
-          "category": 9,
-          "name": "Precautionary Areas",
-          "icon": "shipping"
-        },
-        {
-          "id": 31,
-          "category": 9,
-          "name": "Marina",
-          "icon": "recreational"
-        },
-        {
-          "id": 35,
-          "category": 3,
-          "name": "IMO Shipping Lanes",
-          "icon": "Shipping"
-        }
-      ],
-      "links": [
-		{
-          "fromId": 20,
-          "toId": 19,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Fishing restrictions",
-              "description": "Fishing may be restricted for nature conservation purposes. [[wiki://AdriaticSea:Fishing_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 24,
-          "toId": 19,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Fishing restrictions",
-              "description": "If desired, fishing fleets can be banned from operating in a particular Marine Protected Area. [[wiki://AdriaticSea:Fishing_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 1,
-          "toId": 19,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Fishing not allowed",
-              "description": "Fishing in wind parks is not allowed. [[wiki://AdriaticSea:Fishing_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 35,
-          "toId": 19,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Fishing not allowed",
-              "description": "Fishing fleets steer clear of known or popular shipping routes. [[wiki://AdriaticSea:Fishing_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 1,
-          "toId": 12,
-          "lines": [
-            {
-              "impactId": 1,
-              "thickness": "low",
-              "title": "Wind farms maintenance",
-              "description": "The existance of wind farms increases maintenance shipping [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 1,
-          "toId": 10,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Wind farms obstruct cargo shipping",
-              "description": "Cargo vessels not allowed in wind farms [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 1,
-          "toId": 11,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Wind farms obstruct passenger shipping",
-              "description": "Passenger ships not allowed in wind farms [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 1,
-          "toId": 13,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Wind farms obstruct tanker shipping",
-              "description": "Tanker vessels not allowed in wind farms [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
-            }
-          ]
-        },        {
-          "fromId": 25,
-          "toId": 12,
-          "lines": [
-            {
-              "impactId": 1,
-              "thickness": "low",
-              "title": "Wave farms maintenance",
-              "description": "The existance of wave farms increases maintenance shipping [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 25,
-          "toId": 10,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Wave farms obstruct cargo shipping",
-              "description": "Cargo vessels not allowed in wave farms [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 25,
-          "toId": 11,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Wave farms obstruct passenger shipping",
-              "description": "Passenger ships not allowed in wave farms [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 25,
-          "toId": 13,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Wave farms obstruct tanker shipping",
-              "description": "Tanker vessels not allowed in wave farms [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
-            }
-          ]
-        },        {
-          "fromId": 26,
-          "toId": 12,
-          "lines": [
-            {
-              "impactId": 1,
-              "thickness": "low",
-              "title": "Tidal farms maintenance",
-              "description": "The existance of tidal farms increases maintenance shipping [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 26,
-          "toId": 10,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Tidal farms obstruct cargo shipping",
-              "description": "Cargo vessels not allowed in tidal farms [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 26,
-          "toId": 11,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Tidal farms obstruct passenger shipping",
-              "description": "Passenger ships not allowed in tidal farms [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 26,
-          "toId": 13,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Tidal farms obstruct tanker shipping",
-              "description": "Tanker vessels not allowed in tidal farms [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
-            }
-          ]
-        },
-		{
-          "fromId": 2,
-          "toId": 12,
-          "lines": [
-            {
-              "impactId": 1,
-              "thickness": "low",
-              "title": "Oil and gas installations maintenance",
-              "description": "The existance of oil and gas installations increases maintenance shipping [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 2,
-          "toId": 10,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Oil and gas installations cargo shipping",
-              "description": "Cargo vessels not allowed to cross oil and gas installations [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 2,
-          "toId": 11,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Oil and gas installations obstruct passenger shipping",
-              "description": "Passenger ships not allowed to cross oil and gas installations [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 2,
-          "toId": 13,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "Oil and gas installations obstruct tanker shipping",
-              "description": "Tanker vessels not allowed to cross oil and gas installations [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 9,
-          "toId": 10,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "No cargo shipping",
-              "description": "There is no cargo shipping in no shipping zones for cargo vessels [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 9,
-          "toId": 11,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "No passenger shipping",
-              "description": "There is no passenger shipping in no shipping zones for passenger vessels [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 9,
-          "toId": 13,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "No tanker shipping",
-              "description": "There is no tanker shipping in no shipping zones for tanker vessels [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
-            }
-          ]
-        },
-		{
-          "fromId": 9,
-          "toId": 12,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "high",
-              "title": "No maintenance shipping",
-              "description": "There is no maintenance shipping in no shipping zones for maintenance vessels [[wiki://AdriaticSea:Maintenance_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 23,
-          "toId": 10,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "low",
-              "title": "Cargo shipping avoids shallow waters",
-              "description": "Cargo shipping avoids shallow waters [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 23,
-          "toId": 11,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "low",
-              "title": "Passenger vessels avoid shallow waters",
-              "description": "Passenger vessels avoid shallow waters [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 23,
-          "toId": 13,
-          "lines": [
-            {
-              "impactId": 2,
-              "thickness": "low",
-              "title": "Tanker vessels avoid shallow waters",
-              "description": "Tanker vessels avoid shallow waters [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 35,
-          "toId": 10,
-          "lines": [
-            {
-              "impactId": 1,
-              "thickness": "medium",
-              "title": "Cargo vessels prefer IMO routes",
-              "description": "Cargo vessels prefer IMO Routes [[wiki://AdriaticSea:Cargo_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 35,
-          "toId": 13,
-          "lines": [
-            {
-              "impactId": 1,
-              "thickness": "medium",
-              "title": "Tanker vessels prefer IMO routes",
-              "description": "Tanker vessels prefer IMO Routes [[wiki://AdriaticSea:Tanker_Intensity|More info...]]"
-            }
-          ]
-        },
-        {
-          "fromId": 35,
-          "toId": 11,
-          "lines": [
-            {
-              "impactId": 1,
-              "thickness": "medium",
-              "title": "Passenger vessels prefer IMO routes",
-              "description": "Passenger vessels prefer IMO Routes [[wiki://AdriaticSea:Passenger_Intensity|More info...]]"
-            }
-          ]
-        }
-      ],
-      "impactTypes": [
-        {
-          "id": 1,
-          "type": "POSITIVE",
-          "iconIndicator": "ARROW",
-          "iconAmount": 2
-        },
-        {
-          "id": 2,
-          "type": "NEGATIVE",
-          "iconIndicator": "ARROW",
-          "iconAmount": 2
-        }
-      ]
-    },
     "meta": [
       {
         "layer_name": "_PLAYAREA_AS",
@@ -33803,8 +33806,8 @@
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
             "innerGlowIterations": 5,
-            "innerGlowMultiplier": 2.0,
-            "innerGlowPixelSize": 6.0,
+            "innerGlowMultiplier": 1.0,
+            "innerGlowPixelSize": 3.0,
             "displayLines": 1,
             "lineColor": "#FF6E77FF",
             "lineWidth": 1.0,
@@ -33827,14 +33830,14 @@
             "displayPolygon": 1,
             "polygonColor": "#00FF81C0",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
+            "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
             "innerGlowIterations": 5,
             "innerGlowMultiplier": 1.0,
-            "innerGlowPixelSize": 2.0,
+            "innerGlowPixelSize": 3.0,
             "displayLines": 1,
             "lineColor": "#00FF81FF",
-            "lineWidth": 2.0,
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -33858,7 +33861,7 @@
             "innerGlowRadius": 2,
             "innerGlowIterations": 5,
             "innerGlowMultiplier": 1.0,
-            "innerGlowPixelSize": 2.0,
+            "innerGlowPixelSize": 3.0,
             "displayLines": 1,
             "lineColor": "#FF5CEDFF",
             "lineWidth": 1.0,
@@ -33881,7 +33884,7 @@
             "displayPolygon": 1,
             "polygonColor": "#ACACAC95",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
+            "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
             "innerGlowIterations": 5,
             "innerGlowMultiplier": 1.0,
@@ -36188,7 +36191,7 @@
             "View": "name",
             "Edit": "name"
           },
-          "text_color": "#0504aaFF",
+          "text_color": "#0504AAFF",
           "text_size": "M",
           "zoom_cutoff": 0.1,
           "x": 0.0,
@@ -40176,7 +40179,7 @@
         },
         "layer_info_properties": null
       },
-	  {
+      {
         "layer_name": "AS_target_species_new",
         "layer_geotype": "polygon",
         "layer_short": "Target species",
@@ -42091,7 +42094,7 @@
         "layer_depth": -2,
         "layer_type": {
           "0": {
-            "displayName": "<3 m/s",
+            "displayName": "< 3 m/s",
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
@@ -42102,7 +42105,7 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#7AC943FF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -42118,7 +42121,7 @@
             "media": ""
           },
           "1": {
-            "displayName": "3-4 m/s",
+            "displayName": "3 - 4 m/s",
             "approval": "EEZ",
             "value": 200,
             "displayPolygon": 1,
@@ -42129,7 +42132,7 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#FF00FFFF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -42145,7 +42148,7 @@
             "media": ""
           },
           "2": {
-            "displayName": "4-5 m/s",
+            "displayName": "4 - 5 m/s",
             "approval": "EEZ",
             "value": 400,
             "displayPolygon": 1,
@@ -42156,7 +42159,7 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#FF00FFFF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -42172,7 +42175,7 @@
             "media": ""
           },
           "3": {
-            "displayName": "5-6 m/s",
+            "displayName": "5 - 6 m/s",
             "approval": "EEZ",
             "value": 600,
             "displayPolygon": 1,
@@ -42183,7 +42186,7 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#FF00FFFF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -42199,7 +42202,7 @@
             "media": ""
           },
           "4": {
-            "displayName": "6-7 m/s",
+            "displayName": "6 - 7 m/s",
             "approval": "EEZ",
             "value": 800,
             "displayPolygon": 1,
@@ -42210,7 +42213,7 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#FF00FFFF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -42224,6 +42227,33 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": ""
+          },
+          "5": {
+            "displayName": "7 - 8 m/s",
+            "approval": "NotDependent",
+            "value": 1000,
+            "displayPolygon": 1,
+            "polygonColor": "#FB6243FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 0,
+            "lineColor": "#000000FF",
+            "lineWidth": 0.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
           }
         },
         "layer_info_properties": null
@@ -42271,7 +42301,7 @@
         "layer_depth": -2,
         "layer_type": {
           "0": {
-            "displayName": "3-4 m/s",
+            "displayName": "<3 m/s",
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
@@ -42298,7 +42328,7 @@
             "media": ""
           },
           "1": {
-            "displayName": "4-5 m/s",
+            "displayName": "3 - 4 m/s",
             "approval": "EEZ",
             "value": 200,
             "displayPolygon": 1,
@@ -42325,7 +42355,7 @@
             "media": ""
           },
           "2": {
-            "displayName": "5-6 m/s",
+            "displayName": "4 - 5 m/s",
             "approval": "EEZ",
             "value": 400,
             "displayPolygon": 1,
@@ -42352,7 +42382,7 @@
             "media": ""
           },
           "3": {
-            "displayName": "6-7 m/s",
+            "displayName": "5 - 6 m/s",
             "approval": "EEZ",
             "value": 600,
             "displayPolygon": 1,
@@ -42379,7 +42409,7 @@
             "media": ""
           },
           "4": {
-            "displayName": "7-8 m/s",
+            "displayName": "6 - 7 m/s",
             "approval": "EEZ",
             "value": 800,
             "displayPolygon": 1,
@@ -42404,6 +42434,33 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": ""
+          },
+          "5": {
+            "displayName": "7 - 8 m/s",
+            "approval": "NotDependent",
+            "value": 1000,
+            "displayPolygon": 1,
+            "polygonColor": "#FB6243FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 0,
+            "lineColor": "#000000FF",
+            "lineWidth": 0.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
           }
         },
         "layer_info_properties": null
@@ -42451,7 +42508,7 @@
         "layer_depth": -2,
         "layer_type": {
           "0": {
-            "displayName": "3-4 m/s",
+            "displayName": "< 3 m/s",
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
@@ -42478,7 +42535,7 @@
             "media": ""
           },
           "1": {
-            "displayName": "4-5 m/s",
+            "displayName": " 3 - 4 m/s",
             "approval": "EEZ",
             "value": 200,
             "displayPolygon": 1,
@@ -42505,7 +42562,7 @@
             "media": ""
           },
           "2": {
-            "displayName": "5-6 m/s",
+            "displayName": "4 - 5 m/s",
             "approval": "EEZ",
             "value": 400,
             "displayPolygon": 1,
@@ -42532,7 +42589,7 @@
             "media": ""
           },
           "3": {
-            "displayName": "6-7 m/s",
+            "displayName": "5 - 6 m/s",
             "approval": "EEZ",
             "value": 600,
             "displayPolygon": 1,
@@ -42559,7 +42616,7 @@
             "media": ""
           },
           "4": {
-            "displayName": "7-8 m/s",
+            "displayName": "6 - 7 m/s",
             "approval": "EEZ",
             "value": 800,
             "displayPolygon": 1,
@@ -42584,6 +42641,33 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": ""
+          },
+          "5": {
+            "displayName": "7 - 8 m/s",
+            "approval": "NotDependent",
+            "value": 1000,
+            "displayPolygon": 1,
+            "polygonColor": "#FB6243FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 0,
+            "lineColor": "#000000FF",
+            "lineWidth": 0.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
           }
         },
         "layer_info_properties": null
@@ -42631,7 +42715,7 @@
         "layer_depth": -2,
         "layer_type": {
           "0": {
-            "displayName": "3-4 m/s",
+            "displayName": "< 3 m/s",
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
@@ -42658,7 +42742,7 @@
             "media": ""
           },
           "1": {
-            "displayName": "4-5 m/s",
+            "displayName": "3 - 4 m/s",
             "approval": "EEZ",
             "value": 200,
             "displayPolygon": 1,
@@ -42685,7 +42769,7 @@
             "media": ""
           },
           "2": {
-            "displayName": "5-6 m/s",
+            "displayName": "4 - 5 m/s",
             "approval": "EEZ",
             "value": 400,
             "displayPolygon": 1,
@@ -42712,7 +42796,7 @@
             "media": ""
           },
           "3": {
-            "displayName": "6-7 m/s",
+            "displayName": "5 -6 m/s",
             "approval": "EEZ",
             "value": 600,
             "displayPolygon": 1,
@@ -42739,7 +42823,7 @@
             "media": ""
           },
           "4": {
-            "displayName": "7-8 m/s",
+            "displayName": "6 - 7 m/s",
             "approval": "EEZ",
             "value": 800,
             "displayPolygon": 1,
@@ -42764,6 +42848,33 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": ""
+          },
+          "5": {
+            "displayName": "7 - 8 m/s",
+            "approval": "NotDependent",
+            "value": 1000,
+            "displayPolygon": 1,
+            "polygonColor": "#FB6243FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 0,
+            "lineColor": "#000000FF",
+            "lineWidth": 0.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
           }
         },
         "layer_info_properties": null
@@ -43965,8 +44076,8 @@
     "user_admin_color": "#FF00FFFF",
     "user_region_manager_color": "#00FFFFFF",
     "region_base_url": "https://knowledge.mspchallenge.info/wiki/Main_Page",
-    "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "restriction_point_size": 1.0,
+    "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "windfarm_data_api_url": null
   }
 }
