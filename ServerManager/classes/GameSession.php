@@ -165,7 +165,7 @@ class GameSession extends Base
         $watchdog->get();
 
         $server_call = self::callServer(
-            "GameSession/CreateGameSession", 
+            "GameSession/CreateGameSession",
             array(
                 "game_id" => $this->id,
                 "config_file" => $gameconfig->getFile(),
@@ -247,7 +247,7 @@ class GameSession extends Base
 
     private function revert()
     {
-        $this->_db->query("DELETE FROM game_list WHERE id = ?;", $this->id);
+        $this->_db->query("DELETE FROM game_list WHERE id = ?;", array($this->id));
     }
 
     public function demoCheck()
