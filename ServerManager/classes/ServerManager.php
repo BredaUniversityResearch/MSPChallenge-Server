@@ -14,7 +14,7 @@ class ServerManager extends Base
         );
         $this->_server_accepted_clients = array(
             "4.0-beta8" => "2021-04-20 13:54:41Z",
-            "4.0-beta9" => "2021-04-20 13:54:41Z"
+            "4.0-beta9" => "2021-11-08 08:13:08Z"
         );
         $this->_server_current_version = end($this->_server_versions);
         $this->_server_upgrades = array( // make sure these functions exist in server API update class and is actually callable - just letters and numbers of course
