@@ -11,9 +11,7 @@ $servermanager->get();
 
 // optionally change all the object vars
 $servermanager->setJWT($_POST['jwt'] ?? "");
-$servermanager->server_name = $_POST['server_name'] ?? $servermanager->server_name;
-$servermanager->server_address = $_POST['server_address'] ?? $servermanager->server_address;
-$servermanager->server_description = $_POST['server_description'] ?? $servermanager->server_description;
+$servermanager->processPostedVars();
 
 // ready to do final actual update
 $servermanager->edit();

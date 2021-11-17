@@ -8,12 +8,7 @@ $user = new User();
 $user->hastobeLoggedIn();
 
 $gamesession->setJWT($_POST['jwt'] ?? "");
-$gamesession->name = $_POST["name"] ?? "";
-$gamesession->game_config_version_id = $_POST["game_config_version_id"] ?? "";
-$gamesession->game_geoserver_id = $_POST["game_geoserver_id"] ?? "";
-$gamesession->watchdog_server_id = $_POST["watchdog_server_id"] ?? "";
-$gamesession->password_admin = $_POST["password_admin"] ?? "";
-$gamesession->password_player = $_POST["password_player"] ?? "";
+$gamesession->processPostedVars();
 $gamesession->id = -1;
 $gamesession->game_server_id = 1;
 $gamesession->game_creation_time = time();

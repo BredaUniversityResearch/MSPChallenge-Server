@@ -236,7 +236,11 @@
 		public function RebuildDatabaseByDumpImport($dbase_file_path, $new_config_file_name)
 		{
 			Log::LogInfo("RebuildDatabaseByDumpImport -> Recreating database from save's dump file ...");
-			$templocation = "export/DatabaseDumps/temp".rand(1,100).".sql";
+			$outputDirectory = "export/DatabaseDumps/";
+			if (!is_dir($outputDirectory)) {
+				mkdir($outputDirectory);
+			}
+			$templocation = $outputDirectory."temp".rand(1,100).".sql";
 			if (copy($dbase_file_path, $templocation)) {
 				$db = Database::GetInstance();
 				$db->CreateDatabaseAndSelect();

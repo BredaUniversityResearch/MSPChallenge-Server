@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "4/15/2021",
-    "data_model_hash": "997E19B0316A70CFF9871875FE43A6CF80ADEE77EF99FDEBCA988EF5478739A8",
+    "date_modified": "21/10/2021",
+    "data_model_hash": "E7FEFCCF8EC8A9D2E48DFC584F5DBDD25EFA069AA43B826DC145B3B6238790AE",
     "errors": 0,
     "editor_version": 0.0,
     "min_supported_client": "",
@@ -845,6 +845,7 @@
         "plan_name": "BS_SHIPPING_STARTING_PLAN",
         "plan_gametime": -1,
         "plan_type": "0,0,0",
+        "plan_alters_energy_distribution": 0,
         "layers": [
           {
             "layer_id": 84,
@@ -4745,6 +4746,7 @@
         "plan_name": "BS_ENERGY_STARTING_PLAN_GREEN",
         "plan_gametime": -1,
         "plan_type": "1,0,0",
+        "plan_alters_energy_distribution": 0,
         "layers": [
           {
             "layer_id": 87,
@@ -7650,6 +7652,1598 @@
         "restriction_settings": []
       }
     ],
+    "dependencies": {
+      "categories": [
+        {
+          "id": 1,
+          "name": "Energy"
+        },
+        {
+          "id": 2,
+          "name": "Cables and Pipelines"
+        },
+        {
+          "id": 3,
+          "name": "Shipping"
+        },
+        {
+          "id": 4,
+          "name": "Shipping Intensity"
+        },
+        {
+          "id": 5,
+          "name": "Other human activities"
+        },
+        {
+          "id": 6,
+          "name": "Fishing"
+        },
+        {
+          "id": 7,
+          "name": "Environment & Protection"
+        },
+        {
+          "id": 8,
+          "name": "Pressures"
+        },
+        {
+          "id": 9,
+          "name": "Fish"
+        },
+        {
+          "id": 10,
+          "name": "Birds, Mammals, Benthos"
+        }
+      ],
+      "items": [
+        {
+          "id": 1,
+          "category": 1,
+          "name": "Renewable Energy Sources",
+          "icon": "Energy"
+        },
+        {
+          "id": 2,
+          "category": 1,
+          "name": "Oil & Gas Platforms",
+          "icon": "grey_energy"
+        },
+        {
+          "id": 3,
+          "category": 2,
+          "name": "Energy Cables",
+          "icon": "cables_and_pipelines"
+        },
+        {
+          "id": 4,
+          "category": 2,
+          "name": "Pipelines",
+          "icon": "cables_and_pipelines"
+        },
+        {
+          "id": 5,
+          "category": 2,
+          "name": "Other Cables",
+          "icon": "cables_and_pipelines"
+        },
+        {
+          "id": 6,
+          "category": 3,
+          "name": "Ports",
+          "icon": "Shipping"
+        },
+        {
+          "id": 7,
+          "category": 3,
+          "name": "Dredging Deposit Sites",
+          "icon": "Shipping"
+        },
+        {
+          "id": 8,
+          "category": 3,
+          "name": "Sand & Gravel Extraction",
+          "icon": "Shipping"
+        },
+        {
+          "id": 9,
+          "category": 3,
+          "name": "No Shipping Zones",
+          "icon": "Shipping"
+        },
+        {
+          "id": 10,
+          "category": 4,
+          "name": "Cargo Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 11,
+          "category": 4,
+          "name": "Passenger Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 12,
+          "category": 4,
+          "name": "Maintenance Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 13,
+          "category": 4,
+          "name": "Tanker Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 14,
+          "category": 4,
+          "name": "Automated Vessel Intensity",
+          "icon": "shipping_activity"
+        },
+        {
+          "id": 15,
+          "category": 5,
+          "name": "Finfish Farms",
+          "icon": "aquaculture"
+        },
+        {
+          "id": 16,
+          "category": 5,
+          "name": "Shellfish Farms",
+          "icon": "aquaculture"
+        },
+        {
+          "id": 17,
+          "category": 5,
+          "name": "Military Areas",
+          "icon": "restricted_zones"
+        },
+        {
+          "id": 18,
+          "category": 5,
+          "name": "Bathing Sites",
+          "icon": "recreational"
+        },
+        {
+          "id": 19,
+          "category": 5,
+          "name": "Recreational Fishing",
+          "icon": "recreational"
+        },
+        {
+          "id": 20,
+          "category": 6,
+          "name": "Active Demersal Catch",
+          "icon": "fishing"
+        },
+        {
+          "id": 21,
+          "category": 6,
+          "name": "Passive Demersal Catch",
+          "icon": "fishing"
+        },
+        {
+          "id": 22,
+          "category": 6,
+          "name": "Pelagic Catch",
+          "icon": "fishing"
+        },
+        {
+          "id": 23,
+          "category": 7,
+          "name": "Bathymetry",
+          "icon": "Ecology"
+        },
+        {
+          "id": 24,
+          "category": 7,
+          "name": "Marine Protected Area",
+          "icon": "Ecology"
+        },
+        {
+          "id": 38,
+          "category": 7,
+          "name": "Fisheries Closure",
+          "icon": "Ecology"
+        },
+        {
+          "id": 39,
+          "category": 7,
+          "name": "Cod Fisheries Closure",
+          "icon": "Ecology"
+        },
+        {
+          "id": 25,
+          "category": 8,
+          "name": "Artificial Substrate",
+          "icon": "pressure"
+        },
+        {
+          "id": 26,
+          "category": 8,
+          "name": "Bottom Disturbance",
+          "icon": "pressure"
+        },
+        {
+          "id": 27,
+          "category": 8,
+          "name": "Noise",
+          "icon": "pressure"
+        },
+        {
+          "id": 28,
+          "category": 8,
+          "name": "Surface Disturbance",
+          "icon": "pressure"
+        },
+        {
+          "id": 29,
+          "category": 9,
+          "name": "Cod",
+          "icon": "fish"
+        },
+        {
+          "id": 30,
+          "category": 9,
+          "name": "Herring Baltic Proper",
+          "icon": "fish"
+        },
+        {
+          "id": 31,
+          "category": 9,
+          "name": "Sprat",
+          "icon": "fish"
+        },
+        {
+          "id": 32,
+          "category": 9,
+          "name": "Herring Bothnian Sea",
+          "icon": "fish"
+        },
+        {
+          "id": 33,
+          "category": 10,
+          "name": "Seal",
+          "icon": "mammals"
+        },
+        {
+          "id": 34,
+          "category": 10,
+          "name": "Benthos",
+          "icon": "macrobenthos"
+        },
+        {
+          "id": 35,
+          "category": 3,
+          "name": "IMO Shipping Lanes",
+          "icon": "Shipping"
+        },
+        {
+          "id": 36,
+          "category": 3,
+          "name": "National Shipping Lanes",
+          "icon": "Shipping"
+        },
+        {
+          "id": 37,
+          "category": 3,
+          "name": "BS_Dredging_Sites",
+          "icon": "Shipping"
+        }
+      ],
+      "links": [
+        {
+          "fromId": 1,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Pylons and Foundations",
+              "description": "Wind turbine pylons in the water as well as their foundations on the seabed. [[wiki://BalticSea:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Pylons and Foundations",
+              "description": "Oil & gas rig pylons in the water as well as their foundations on the seabed. [[wiki://BalticSea:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 4,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Pipelines on seabed",
+              "description": "Pipelines laid on the seabed (so not dug into it). [[wiki://BalticSea:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 15,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Fish pond / tank components",
+              "description": "Fish pond / tank components in the water. [[wiki://BalticSea:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 16,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Fish pond / tank components",
+              "description": "Fish pond / tank components in the water. [[wiki://BalticSea:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 6,
+          "toId": 25,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Port levees, docks, quays, jetties",
+              "description": "All the port infrastructure in the water and on the seabed. [[wiki://BalticSea:Artificial_Substrate|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 8,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Ship cranes, shovels and pipes",
+              "description": "Cranes, shovels and pipes in the water and on the seabed. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 37,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Ship cranes, shovels and pipes",
+              "description": "Cranes, shovels and pipes in the water and on the seabed. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 17,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Military exercises or dumping of ammunitions",
+              "description": "Military exercises or dumping of ammunitions. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Drill pipes and bits",
+              "description": "Drill pipes in the water and drill bits on the seabed. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 4,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Pipeline construction",
+              "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Construction in water and on seabed",
+              "description": "Wind energy turbine construction in water and on the seabed. Diminished once completed. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Residual noise and vibrations on water and seabed",
+              "description": "Residual wind energy turbine vibrations in water and seabed. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 10,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Larger cargo vessels",
+              "description": "Larger container or bulk cargo vessels sailing at sea. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 12,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Construction and maintenance of infrastructure",
+              "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas installations. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 11,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Ocean liners or cruise ships",
+              "description": "Ocean liners or cruise ships sailing at sea. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 14,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Automated vessels ships",
+              "description": "Automated vessels ships sailing at sea. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 13,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Tankers transporting oil, gas",
+              "description": "Large tankers typically transporting oil or gas. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 6,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Port operations",
+              "description": "Vessels arriving and departing, loading and unloading cargo and passengers. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 6,
+          "toId": 27,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Port operations",
+              "description": "Vessels arriving and departing, loading and unloading cargo and passengers. [[wiki://BalticSea:Noise|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Oil & gas rig and operations",
+              "description": "Oil & gas rig pylons and drilling operations in the water. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Construction on seabed",
+              "description": "Wind energy turbine construction on the seabed. Diminished once completed. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Wind park operation",
+              "description": "Wind energy turbine operation. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 10,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Larger cargo vessels",
+              "description": "Larger container or bulk cargo vessels sailing at sea. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 12,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Construction and maintenance of infrastructure",
+              "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas installations. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 11,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Ocean liners or cruise ships",
+              "description": "Ocean liners or cruise ships sailing at sea. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 13,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Tankers transporting oil, gas",
+              "description": "Large tankers typically transporting oil or gas. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 14,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Automated vessels",
+              "description": "Automated vessels. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 16,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Fish pond / tank components",
+              "description": "Fish pond / tank components in the water. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 15,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Fish pond / tank components",
+              "description": "Fish pond / tank components in the water. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 17,
+          "toId": 28,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Military areas",
+              "description": "Military exercise contributes to surface disturbance. [[wiki://BalticSea:Surface_Disturbance|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 8,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Ship shovels and pipes",
+              "description": "Shovels and pipes scraping and extracting from the seabed. [[wiki://BalticSea:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 3,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Cable on seabed",
+              "description": "Electricity cable laid on or dug into the seabed. Non-existent once completed. [[wiki://BalticSea:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Oil & gas extraction operations",
+              "description": "Oil & gas rig drilling and extraction operations on the seabed. [[wiki://BalticSea:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 4,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Pipeline construction",
+              "description": "Pipelines laid on the seabed or dug into it. Almost non-existent once completed. [[wiki://BalticSea:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 4,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Pipelines",
+              "description": "Pipelines laid on the seabed or dug into it [[wiki://BalticSea:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 7,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Dumping materials",
+              "description": "Materials (sand, gravel) being dump on the seabed. [[wiki://BalticSea:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 37,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Ship shovels and pipes",
+              "description": "Shovels and pipes scraping and extracting from the seabed. Non-existent once completed. [[wiki://BalticSea:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 26,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "high",
+              "title": "Construction on seabed",
+              "description": "Wind energy turbine construction on the seabed. Non-existent once completed. [[wiki://BalticSea:Bottom_Disturbace|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 20,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Active demersal catch prohibited",
+              "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. [[wiki://BalticSea:Protection_Active_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 20,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by active demersal fleets",
+              "description": "Active demersal fleets always steer clear of known or popular shipping routes. [[wiki://BalticSea:Protection_Active_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 6,
+          "toId": 20,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by active demersal fleets",
+              "description": "Bottom trawlers never fish right next to or just outside of ports, they sail out a bit first. [[wiki://BalticSea:Protection_Active_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 20,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional active demersal fleets ban",
+              "description": "If desired, active demersal fleets can be banned from operating in a particular Marine Protected Area. [[wiki://BalticSea:Protection_Active_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 38,
+          "toId": 20,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Active demersal fleets ban",
+              "description": "Active demersal fleets are banned from operating in fisheries closure. [[wiki://BalticSea:Protection_Active_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 39,
+          "toId": 20,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Active demersal fleets ban",
+              "description": "Active demersal fleets are banned from operating in cod fisheries closure. [[wiki://BalticSea:Protection_Active_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 21,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Passive demersal catch ban",
+              "description": "Passive demersal catch in the water column at a wind farm are dangerous. [[wiki://BalticSea:Protection_Passive_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 38,
+          "toId": 21,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Passive demersal catch ban",
+              "description": "Passive demersal catch are banned from operating in fisheries closure. [[wiki://BalticSea:Protection_Passive_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 39,
+          "toId": 21,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Passive demersal catch ban",
+              "description": "Passive demersal catch are banned from operating in cod fisheries closure. [[wiki://BalticSea:Protection_Passive_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 21,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Optional passive demersal catch ban",
+              "description": "If desired, passive demersal fleets can be banned from operating in a particular Marine Protected Area. [[wiki://BalticSea:Protection_Passive_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 21,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Avoided by passive demersal fleets",
+              "description": "Passive demersal fleets always steer clear of known or popular shipping routes. [[wiki://BalticSea:Protection_Passive_Demersal|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 38,
+          "toId": 22,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Pelagic catch not allowed",
+              "description": "Pelagic catch not allowed in fisheries closure. [[wiki://BalticSea:Protection_Pelagic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 24,
+          "toId": 22,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Pelagic catch not allowed",
+              "description": "If desired, passive demersal fleets can be banned from operating in a particular Marine Protected Area. [[wiki://BalticSea:Protection_Pelagic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 22,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Pelagic catch not allowed",
+              "description": "Fishing in wind parks is not allowed. [[wiki://BalticSea:Protection_Pelagic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 22,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Pelagic catch not allowed",
+              "description": "Pelagic fleets always steer clear of known or popular shipping routes. [[wiki://BalticSea:Protection_Pelagic|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Maintenance",
+              "description": "The existance of wind farms increases maintenance shipping [[wiki://BalticSea:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Cargo vessels not allowed in wind farms [[wiki://BalticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Passenger ships not allowed in wind farms [[wiki://BalticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Tanker vessels not allowed in wind farms [[wiki://BalticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 1,
+          "toId": 14,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Automated vessels not allowed in wind farms [[wiki://BalticSea:Automated_Vessel_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "low",
+              "title": "Maintenance",
+              "description": "The existance of oil and gas installations increases maintenance shipping [[wiki://BalticSea:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Cargo vessels not allowed to cross oil and gas installations [[wiki://BalticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Passenger ships not allowed to cross oil and gas installations [[wiki://BalticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Tanker vessels not allowed to cross oil and gas installations [[wiki://BalticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 2,
+          "toId": 14,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Obstruction",
+              "description": "Automated vessels not allowed to cross oil and gas installations [[wiki://BalticSea:Automated_Vessel_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No cargo shipping",
+              "description": "There is no cargo shipping in no shipping zones for cargo vessels [[wiki://BalticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No passenger shipping",
+              "description": "There is no passenger shipping in no shipping zones for passenger vessels [[wiki://BalticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No tanker shipping",
+              "description": "There is no tanker shipping in no shipping zones for tanker vessels [[wiki://BalticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 12,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No maintenance shipping",
+              "description": "There is no maintenance shipping in no shipping zones for maintenance vessels [[wiki://BalticSea:Maintenance_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 9,
+          "toId": 14,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "No automated vessel shipping",
+              "description": "There is no automated vessel shipping in no shipping zones for automated vessel vessels [[wiki://BalticSea:Automated_Vessel_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 23,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Cargo shipping avoids shallow waters",
+              "description": "Cargo shipping avoids shallow waters [[wiki://BalticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 23,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Passenger vessels avoid shallow waters",
+              "description": "Passenger vessels avoid shallow waters [[wiki://BalticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 23,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Tanker vessels avoid shallow waters",
+              "description": "Tanker vessels avoid shallow waters [[wiki://BalticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Cargo vessels prefer IMO routes",
+              "description": "Cargo vessels prefer IMO Routes [[wiki://BalticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Tanker vessels prefer IMO routes",
+              "description": "Tanker vessels prefer IMO Routes [[wiki://BalticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 35,
+          "toId": 11,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Passenger vessels prefer IMO routes",
+              "description": "Passenger vessels prefer IMO Routes [[wiki://BalticSea:Passenger_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 36,
+          "toId": 13,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Tanker vessels prefer national shipping lanes",
+              "description": "Tanker vessels prefer national shipping lanes [[wiki://BalticSea:Tanker_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 36,
+          "toId": 10,
+          "lines": [
+            {
+              "impactId": 1,
+              "thickness": "medium",
+              "title": "Cargo vessels prefer national shipping lanes",
+              "description": "Cargo vessels prefer national shipping lanes [[wiki://BalticSea:Cargo_Intensity|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Cod avoids noise",
+              "description": "Cod avoids noisy areas [[wiki://BalticSea:Cod_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 26,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Cod avoids bottom disturbance",
+              "description": "Cod avoids bottom disturbance [[wiki://BalticSea:Cod_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 28,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Cod avoids surface disturbance",
+              "description": "Cod avoids surface disturbance [[wiki://BalticSea:Cod_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 33,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Seals avoid noise",
+              "description": "Seals avoid noise [[wiki://BalticSea:Seals_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 28,
+          "toId": 33,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Seals avoid surface disturbance",
+              "description": "Seals avoid surface disturbance [[wiki://BalticSea:Seals_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Herring in Baltic Proper avoids noise",
+              "description": "Herring in Baltic Proper avoids noisy areas [[wiki://BalticSea:Herring_Biomass_-_Baltic_Proper|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 28,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Herring in Baltic Proper avoids surface disturbance",
+              "description": "Herring in Baltic Proper avoids surface disturbance [[wiki://BalticSea:Herring_Biomass_-_Baltic_Proper|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 32,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Herring in Bothnian Sea avoids noise",
+              "description": "Herring in Bothnian Sea avoids noisy areas [[wiki://BalticSea:Herring_Biomass_-_Bothnian_Sea|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 28,
+          "toId": 32,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Herring in Bothnian Sea avoids surface disturbance",
+              "description": "Herring in Bothnian Sea avoids surface disturbance [[wiki://BalticSea:Herring_Biomass_-_Bothnian_Sea|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 27,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Sprat Avoids Noise",
+              "description": "Sprat avoids noisy areas [[wiki://BalticSea:Sprat_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 28,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Sprat avoids surface disturbance",
+              "description": "Sprat avoids surface disturbance [[wiki://BalticSea:Sprat_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 26,
+          "toId": 34,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Benthos avoids bottom disturbance",
+              "description": "Benthos avoids bottom disturbance [[wiki://BalticSea:Benthos_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 34,
+          "toId": 34,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Benthos predation",
+              "description": "Species of benthos preys among each other [[wiki://BalticSea:Benthos_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 30,
+          "toId": 34,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Herring (Baltic Proper) predation",
+              "description": "Herring (Baltic Proper) feeds on benthos species [[wiki://BalticSea:Benthos_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 32,
+          "toId": 34,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Herring (Bothnian Sea) predation",
+              "description": "Herring (Bothnian Sea) feeds on benthos species [[wiki://BalticSea:Benthos_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 29,
+          "toId": 34,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Cod predation",
+              "description": "Cod feeds on benthos species [[wiki://BalticSea:Benthos_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 29,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Cod predation",
+              "description": "(Cod feeds on sprat [[wiki://BalticSea:Sprat_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Seals predation",
+              "description": "Seals feed on sprat [[wiki://BalticSea:Sprat_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 29,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Cod predation",
+              "description": "Cod feeds on herring from the Baltic Proper [[wiki://BalticSea:Herring_Biomass_-_Baltic_Proper|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Seals predation",
+              "description": "Seals feed on herring from the Baltic Proper [[wiki://BalticSea:Herring_Biomass_-_Baltic_Proper|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 32,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Seals predation",
+              "description": "Seals feed on herring from the Bothnian Sea [[wiki://BalticSea:Herring_Biomass_-_Bothnian_Sea|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 33,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Seals predation",
+              "description": "Seals feed on cod [[wiki://BalticSea:Cod_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 20,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Active demersal fleets catch sprat [[wiki://BalticSea:Sprat_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 22,
+          "toId": 31,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Pelagic fleets catch sprat [[wiki://BalticSea:Sprat_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 20,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Active demersal fleets catch herring from the Baltic Proper [[wiki://BalticSea:Herring_Biomass_-_Baltic_Proper|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 21,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Passive demersal fleets catch herring from the Baltic Proper [[wiki://BalticSea:Herring_Biomass_-_Baltic_Proper|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 22,
+          "toId": 30,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Pelagic fleets catch herring from the Baltic Proper [[wiki://BalticSea:Herring_Biomass_-_Baltic_Proper|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 22,
+          "toId": 32,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Pelagic fleets catch herring from the Bothnian Sea[[wiki://BalticSea:Herring_Biomass_-_Bothnian_Sea|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 20,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "medium",
+              "title": "Fishing",
+              "description": "Active demersal fleets catch cod [[wiki://BalticSea:Cod_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 21,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "high",
+              "title": "Fishing",
+              "description": "Passive demersal fleets catch cod [[wiki://BalticSea:Cod_Biomass|More info...]]"
+            }
+          ]
+        },
+        {
+          "fromId": 22,
+          "toId": 29,
+          "lines": [
+            {
+              "impactId": 2,
+              "thickness": "low",
+              "title": "Fishing",
+              "description": "Pelagic fleets catch cod [[wiki://BalticSea:Cod_Biomass|More info...]]"
+            }
+          ]
+        }
+      ],
+      "impactTypes": [
+        {
+          "id": 1,
+          "type": "POSITIVE",
+          "iconIndicator": "ARROW",
+          "iconAmount": 2
+        },
+        {
+          "id": 2,
+          "type": "NEGATIVE",
+          "iconIndicator": "ARROW",
+          "iconAmount": 2
+        }
+      ]
+    },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
       "grey_centerpoint_sprite": "oilbarrel",
@@ -22013,7 +23607,7 @@
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_raster_minimum_value_cutoff": 0.0,
         "layer_active": 1,
         "layer_selectable": 1,
         "layer_editable": 0,
@@ -22043,11 +23637,11 @@
         "layer_depth": -2,
         "layer_type": {
           "0": {
-            "displayName": "< 5 °C",
+            "displayName": "< 3 °C",
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#FFFFD780",
+            "polygonColor": "#FFFFD4CC",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -22070,11 +23664,11 @@
             "media": ""
           },
           "1": {
-            "displayName": "5 °C",
+            "displayName": "3 - 6°C",
             "approval": "EEZ",
             "value": 200,
             "displayPolygon": 1,
-            "polygonColor": "#FDDC1E80",
+            "polygonColor": "#FEE391C7",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -22097,11 +23691,11 @@
             "media": ""
           },
           "2": {
-            "displayName": "8 °C",
+            "displayName": "6°- 9 C",
             "approval": "EEZ",
             "value": 400,
             "displayPolygon": 1,
-            "polygonColor": "#FFBB1C80",
+            "polygonColor": "#FFBB1CC9",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -22109,7 +23703,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FDDC1E80",
+            "lineColor": "#FEC44FC9",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -22124,11 +23718,11 @@
             "media": ""
           },
           "3": {
-            "displayName": "10 °C",
+            "displayName": "9 °-12 C",
             "approval": "EEZ",
             "value": 600,
             "displayPolygon": 1,
-            "polygonColor": "#FA882180",
+            "polygonColor": "#FE9929C7",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -22151,11 +23745,11 @@
             "media": ""
           },
           "4": {
-            "displayName": "12 °C",
+            "displayName": "12 - 15 C",
             "approval": "EEZ",
             "value": 800,
             "displayPolygon": 1,
-            "polygonColor": "#E6000080",
+            "polygonColor": "#E60000CB",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -22163,7 +23757,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FF00FFFF",
+            "lineColor": "#D95F0ECD",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -22178,11 +23772,11 @@
             "media": ""
           },
           "5": {
-            "displayName": "> 12 °C",
+            "displayName": "15 - 18 C",
             "approval": "EEZ",
             "value": 1000,
             "displayPolygon": 1,
-            "polygonColor": "#95000080",
+            "polygonColor": "#950000CA",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -22190,7 +23784,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FF00FFFF",
+            "lineColor": "#993404CD",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -23569,7 +25163,7 @@
             "View": "name",
             "Edit": "name"
           },
-          "text_color": "#0504aaFF",
+          "text_color": "#0504AAFF",
           "text_size": "M",
           "zoom_cutoff": 0.1,
           "x": 0.0,
@@ -25882,7 +27476,7 @@
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
-        "layer_raster_material": "RasterMELNew",
+        "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
@@ -25945,7 +27539,7 @@
           "1": {
             "displayName": "Low",
             "approval": "EEZ",
-            "value": 0,
+            "value": 200,
             "displayPolygon": 1,
             "polygonColor": "#05F6FDFF",
             "polygonPatternName": "5",
@@ -25972,7 +27566,7 @@
           "2": {
             "displayName": "Medium",
             "approval": "EEZ",
-            "value": 0,
+            "value": 400,
             "displayPolygon": 1,
             "polygonColor": "#A5FF57FF",
             "polygonPatternName": "5",
@@ -25999,7 +27593,7 @@
           "3": {
             "displayName": "High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 600,
             "displayPolygon": 1,
             "polygonColor": "#EFF80FFF",
             "polygonPatternName": "5",
@@ -26026,7 +27620,7 @@
           "4": {
             "displayName": "Extra High",
             "approval": "EEZ",
-            "value": 0,
+            "value": 800,
             "displayPolygon": 1,
             "polygonColor": "#FD0B01FF",
             "polygonPatternName": "5",
@@ -26053,7 +27647,7 @@
           "5": {
             "displayName": "Extreme",
             "approval": "EEZ",
-            "value": 0,
+            "value": 1000,
             "displayPolygon": 1,
             "polygonColor": "#8C0100FF",
             "polygonPatternName": "5",
@@ -35156,10 +36750,8 @@
     "user_admin_color": "#FF00FFFF",
     "user_region_manager_color": "#00FFFFFF",
     "region_base_url": "https://wiki.msp.guraas.com/index.php?title=Main_Page",
-    "geoserver_url": null,
-    "geoserver_username": null,
-    "geoserver_password": null,
     "restriction_point_size": 5.0,
+    "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "windfarm_data_api_url": null
   }
 }

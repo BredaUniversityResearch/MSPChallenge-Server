@@ -324,13 +324,15 @@ ALTER TABLE `game_geoservers`
   (1, 'North_Sea_basic', 'North Sea basic configuration file supplied by BUas'),
   (2, 'Baltic_Sea_basic', 'Baltic Sea basic configuration file supplied by BUas'),
   (3, 'Clyde_marine_region_basic', 'Clyde marine region basic configuration file supplied by BUas'),
-  (4, 'North_Sea_Digitwin_basic', 'North Sea Digitwin basic configuration file supplied by BUas');
+  (4, 'North_Sea_Digitwin_basic', 'North Sea Digitwin basic configuration file supplied by BUas'),
+  (5, 'Adriatic_Sea_basic', 'Adriatic Sea basic configuration file supplied by BUas');
 
   INSERT INTO `game_config_version` (`id`, `game_config_files_id`, `version`, `version_message`, `visibility`, `upload_time`, `upload_user`, `last_played_time`, `file_path`, `region`, `client_versions`) VALUES
   (1, 1, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'North_Sea_basic/North_Sea_basic_1.json', 'northsee', 'Any'),
   (2, 2, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'Baltic_Sea_basic/Baltic_Sea_basic_1.json', 'balticline', 'Any'),
   (3, 3, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'Clyde_marine_region_basic/Clyde_marine_region_basic_1.json', 'simcelt', 'Any'),
-  (4, 4, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'North_Sea_Digitwin_basic/North_Sea_Digitwin_basic_1.json', 'northsee', 'Any');
+  (4, 4, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'North_Sea_Digitwin_basic/North_Sea_Digitwin_basic_1.json', 'northsee', 'Any'),
+  (5, 5, 1, 'See www.mspchallenge.info', 'active', 1585692000, 1, 0, 'Adriatic_Sea_basic/Adriatic_Sea_basic_1.json', 'adriatic', 'Any');
 
   INSERT INTO `game_geoservers` (`id`, `name`, `address`, `username`, `password`) VALUES ('1', 'Default: the public MSP Challenge GeoServer', 'https://geo.mspchallenge.info/geoserver/', 'YXV0b21hdGljYWxseW9idGFpbmVk', 'YXV0b21hdGljYWxseW9idGFpbmVk'); 
 
@@ -346,7 +348,8 @@ ALTER TABLE `game_geoservers`
   ('migration_20210211.php', 'Never'),
   ('migration_20210325.php', 'Never'),
   ('migration_20210413.php', 'Never'),
-  ('migration_20210531.php', 'Never');
+  ('migration_20210531.php', 'Never'),
+  ('migration_20211004.php', 'Never');
 
 
 ";

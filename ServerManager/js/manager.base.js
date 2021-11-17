@@ -120,8 +120,8 @@ function copyToClipboard(text) {
 var log_concise_old, regularLogToastAutoCloseCheck, regularLogToastBodyUpdate;
 function ShowLogToast(session_id) {
 	// first cancel any previous logtoast updates that might still be running
-	if (typeof regularLogToastAutoCloseCheck !== 'undefined') clearTimeout(regularLogToastAutoCloseCheck); 
-	if (typeof regularLogToastBodyUpdate !== 'undefined') clearTimeout(regularLogToastBodyUpdate); 
+	if (typeof regularLogToastAutoCloseCheck !== 'undefined') clearInterval(regularLogToastAutoCloseCheck);
+	if (typeof regularLogToastBodyUpdate !== 'undefined') clearInterval(regularLogToastBodyUpdate);
 
 	$('#LogToastHeader').html("Session Activity Log ("+session_id+")");
 	log_concise_old = '';
@@ -169,14 +169,14 @@ function LogToastContentItemCleanUp(item, index, arr) {
 async function AutoCloseLogToast(session_id) {
 	if ($('#LogToast').prop('data-autoclose')) {
 		// stop the regular UpdateLogToastContents calls, but do another bunch of UpdateLogToastContents calls first
-		clearTimeout(regularLogToastBodyUpdate); 
+		clearInterval(regularLogToastBodyUpdate);
 		for (var times = 0; times < 10; times++) { 
 			await new Promise(r => setTimeout(r, 3000));
 			UpdateLogToastContents(session_id);	
 		}
 		if ($('#LogToast').prop('data-autoclose')) {
 			// stop calling this function and hide LogToast as a wrap-up
-			clearTimeout(regularLogToastAutoCloseCheck); 
+			clearInterval(regularLogToastAutoCloseCheck);
 			$('#LogToast').toast('hide');
 		}
 		else {

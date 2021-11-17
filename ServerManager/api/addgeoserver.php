@@ -7,6 +7,7 @@ $user = new User();
 
 $user->hastobeLoggedIn();
 
+// not using processPostedVars() here because of exception below
 $geoserver->name = $_POST['name'] ?? "";
 $geoserver->address = $_POST['address'] ?? "";
 $geoserver->username = base64_encode($_POST['username']) ?? ""; // only exception to the rule of having the class encode it, this is because we never decode it again in the ServerManager

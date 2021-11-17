@@ -12,9 +12,8 @@ function PHPCanProxy() {
   return true;
 }
 
-function isJson($string) {
- json_decode($string);
- return (json_last_error() == JSON_ERROR_NONE);
+function isJsonObject($string) {
+    return is_object(json_decode($string));
 }
 
 // Readeable file size

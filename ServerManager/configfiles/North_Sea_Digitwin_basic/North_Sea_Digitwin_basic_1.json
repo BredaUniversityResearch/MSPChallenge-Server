@@ -35170,7 +35170,7 @@
           "1": {
             "displayName": "0.4-0.8",
             "approval": "EEZ",
-            "value": 125,
+            "value": 200,
             "displayPolygon": 1,
             "polygonColor": "#386AFFFF",
             "polygonPatternName": "1",
@@ -35197,7 +35197,7 @@
           "2": {
             "displayName": "0.8-1.2",
             "approval": "EEZ",
-            "value": 250,
+            "value": 400,
             "displayPolygon": 1,
             "polygonColor": "#33C2FFFF",
             "polygonPatternName": "1",
@@ -35222,9 +35222,9 @@
             "media": "wiki://NorthSea:Noise"
           },
           "3": {
-            "displayName": "1.2-1.5",
+            "displayName": "1.2-1.6",
             "approval": "EEZ",
-            "value": 375,
+            "value": 600,
             "displayPolygon": 1,
             "polygonColor": "#59FFE1FF",
             "polygonPatternName": "1",
@@ -35249,9 +35249,9 @@
             "media": ""
           },
           "4": {
-            "displayName": "1.5-2.0",
+            "displayName": "1.6-2.0",
             "approval": "EEZ",
-            "value": 500,
+            "value": 800,
             "displayPolygon": 1,
             "polygonColor": "#B6FF8FFF",
             "polygonPatternName": "1",
@@ -35276,9 +35276,9 @@
             "media": "wiki://NorthSea:Noise"
           },
           "5": {
-            "displayName": "2.0-2.5",
+            "displayName": "2.0-2.4",
             "approval": "NotDependent",
-            "value": 625,
+            "value": 1000,
             "displayPolygon": 1,
             "polygonColor": "#EEFF38FF",
             "polygonPatternName": null,
@@ -35303,9 +35303,9 @@
             "media": null
           },
           "6": {
-            "displayName": "2.5-3.0",
+            "displayName": "2.4-2.8",
             "approval": "NotDependent",
-            "value": 750,
+            "value": 1000,
             "displayPolygon": 1,
             "polygonColor": "#FFC800FF",
             "polygonPatternName": null,
@@ -35330,9 +35330,9 @@
             "media": null
           },
           "7": {
-            "displayName": "3.0-3.5",
+            "displayName": "2.8-3.2",
             "approval": "NotDependent",
-            "value": 875,
+            "value": 1000,
             "displayPolygon": 1,
             "polygonColor": "#FF7700FF",
             "polygonPatternName": null,
@@ -35356,8 +35356,8 @@
             "availability": 0,
             "media": null
           },
-          "8": {
-            "displayName": "3.5-6.0",
+		  "8": {
+            "displayName": "> 3.2",
             "approval": "NotDependent",
             "value": 1000,
             "displayPolygon": 1,

@@ -36,11 +36,32 @@ class Base
     public static function isNewPasswordFormat($string)
     {
       if (base64_encode(base64_decode($string, true)) === $string) {
-        if (isJson(base64_decode($string))) {
+        if (isJsonObject(base64_decode($string))) {
           return true;
         }
       }
       return false;
+    }
+
+    public function processPostedVars()
+    {
+        $args = getPublicObjectVars($this);
+        foreach ($args as $key => $value) {
+            if (isset($_POST[$key])) {
+                $this->$key = $_POST[$key];
+            }
+        }
+    }
+
+    public function ignorePostedVars($array)
+    {
+        if (is_array($array)) {
+            foreach ($array as $value) {
+                if (isset($_POST[$value])) {
+                    unset($_POST[$value]);
+                }
+            }
+        }
     }
 
     // needs a function to call server API

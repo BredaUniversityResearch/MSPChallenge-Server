@@ -39,7 +39,6 @@ class GameSession extends Base
         foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $var)
         {   
             $varname = $var->getName();
-            $temp[] = $varname;
             switch ($varname)
             {
                 case "password_player":
@@ -166,7 +165,7 @@ class GameSession extends Base
         $watchdog->get();
 
         $server_call = self::callServer(
-            "GameSession/CreateGameSession", 
+            "GameSession/CreateGameSession",
             array(
                 "game_id" => $this->id,
                 "config_file" => $gameconfig->getFile(),
@@ -204,7 +203,9 @@ class GameSession extends Base
     public function recreate()
     {
         if ($this->save_id > 0) return $this->reload();
-        
+
+        // after a server upgrade the version might have changed since session was first created
+        $this->server_version = ServerManager::getInstance()->GetCurrentVersion();
         $this->sendCreateRequest(1);
         $this->setToLoading();
         return true;
@@ -246,7 +247,7 @@ class GameSession extends Base
 
     private function revert()
     {
-        $this->_db->query("DELETE FROM game_list WHERE id = ?;", $this->id);
+        $this->_db->query("DELETE FROM game_list WHERE id = ?;", array($this->id));
     }
 
     public function demoCheck()
@@ -257,13 +258,13 @@ class GameSession extends Base
         {
             if ($this->_old->session_state == "healthy" && ($this->_old->game_state == "pause" || $this->_old->game_state == "setup")) 
             {
-                // healthy demo sessions need to return to play if previously set to pause or setup
+                // healthy demo sessions need to return to play if previously on pause or setup
                 $this->game_state = "play";
                 $this->changeGameState();
             }
-            elseif ($this->_old->session_state == "healthy" && $this->_old->game_state == "end")
+            elseif ($this->session_state == "healthy" && $this->game_state == "end")
             {
-                // demo sessions need to be recreated if they had ended previously
+                // demo sessions need to be recreated as soon as they have ended
                 $this->recreate();
             }
         }
@@ -306,7 +307,7 @@ class GameSession extends Base
 
     private function CheckPasswordFormat($adminorplayer, $string)
     {
-        if (isJson($string)) 
+        if (isJsonObject($string))
         {
             // backwards compatibility
             $string_decoded = json_decode($string, true);
@@ -346,9 +347,9 @@ class GameSession extends Base
         if ($adminorplayer == "password_admin") 
         {
             $newarray["admin"]["provider"] = "local";
-            $newarray["admin"]["value"] = $string;
+            $newarray["admin"]["value"] = (string) $string;
             $newarray["region"]["provider"] = "local";
-            $newarray["region"]["value"] = $string;
+            $newarray["region"]["value"] = (string) $string;
         } 
         else 
         {
@@ -356,7 +357,7 @@ class GameSession extends Base
             $countries = $this->getCountries();
             if ($countries !== false) {
                 foreach ($countries as $country_data) {
-                    $newarray["value"][$country_data["country_id"]] = $string;
+                    $newarray["value"][$country_data["country_id"]] = (string) $string;
                 }
             }
         }

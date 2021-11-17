@@ -6,6 +6,7 @@ $api = new API;
 $gamesession = new GameSession;
 $gameconfig = new GameConfig;
 $watchdog = new Watchdog;
+$geoserver = new GeoServer;
 $user = new User();
 
 $user->hastobeLoggedIn();
@@ -35,6 +36,10 @@ else // session eminates from a config file, so from scratch
 $watchdog->id = $gamesession->watchdog_server_id;
 $watchdog->get();
 
+// same for associated geoserver
+$geoserver->id = $gamesession->game_geoserver_id;
+$geoserver->get();
+
 // ok, return everything
 $gamesession_vars = get_object_vars($gamesession);
 $gamesession_vars["gamearchive"] = $gamesession->getArchive();
@@ -44,6 +49,7 @@ $api->setPayload(["gamesession_pretty" => $gamesession->getPrettyVars()]);
 $api->setPayload(["gamecountries" => $gamesession->getCountries()]);
 $api->setPayload(["gameconfig" => get_object_vars($gameconfig)]);
 $api->setPayload(["watchdog" => get_object_vars($watchdog)]);
+$api->setPayload(["geoserver" => get_object_vars($geoserver)]);
 $api->setStatusSuccess();
 $api->Return();
 

@@ -73,8 +73,9 @@
 				$configuredSimulations[] = "CEL";
 			}
 
-			foreach($data as $key => $d){
-				if((is_object($data[$key]) || is_array($data[$key])) && $key != "expertise_definitions"){
+			foreach($data as $key => $d)
+			{
+				if((is_object($data[$key]) || is_array($data[$key])) && $key != "expertise_definitions" && $key != "dependencies") {
 					unset($data[$key]);
 				}
 			}
@@ -310,7 +311,7 @@
 				}
 			}
 
-			//$this->UpdateGameDetailsAtServerManager(); // only activate this after the Tick call has moved out of the client and into the Watchdog
+			$this->UpdateGameDetailsAtServerManager(); // only activate this after the Tick call has moved out of the client and into the Watchdog
 		}
 
 		private function UpdateGameDetailsAtServerManager()
@@ -797,7 +798,7 @@
 				$result = ["game_start_year" => (int) $state["game_start"], 
 					"game_end_month" => $state["game_eratime"] * 4,
 					"game_current_month" => (int) $state["game_currentmonth"],
-					"game_state" => $state["game_state"],
+					"game_state" => strtolower($state["game_state"]),
 					"players_past_hour" => (int) $state["active_last_hour"],
 					"players_active" => (int) $state["active_last_minute"],
 					"game_running_til_time" => $running_til_time
