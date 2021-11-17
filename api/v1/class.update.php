@@ -18,7 +18,8 @@
 			"SetupSimulations",
 			"ImportScenario",
 			"ManualExportDatabase",
-			["From40beta7To40beta8", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+			["From40beta7To40beta8", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+			["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
 		);
 
 		public function __construct($str="")
@@ -358,6 +359,11 @@
 					}
 				}
 			}
+		}
+
+		public function From40beta7To40beta9()
+		{
+			$this->From40beta7To40beta8();
 		}
 	}
 

@@ -17,8 +17,9 @@ class ServerManager extends Base
             "4.0-beta9" => "2021-04-20 13:54:41Z"
         );
         $this->_server_current_version = end($this->_server_versions);
-        $this->_server_upgrades = array(
-          "From40beta7To40beta8" // make sure this function exists in server API update class and is actually callable - just letters and numbers of course
+        $this->_server_upgrades = array( // make sure these functions exist in server API update class and is actually callable - just letters and numbers of course
+            "From40beta7To40beta8",
+            "From40beta7To40beta9"
         );
         $this->SetRootVars();
         $this->_msp_auth_url = "https://auth.mspchallenge.info";
