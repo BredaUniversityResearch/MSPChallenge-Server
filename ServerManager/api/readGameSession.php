@@ -37,8 +37,10 @@ $watchdog->id = $gamesession->watchdog_server_id;
 $watchdog->get();
 
 // same for associated geoserver
-$geoserver->id = $gamesession->game_geoserver_id;
-$geoserver->get();
+if ($gamesession->game_geoserver_id > 0) { // will be 0 when session was actually a reload of a save rather than eminating from geoserver
+    $geoserver->id = $gamesession->game_geoserver_id;
+    $geoserver->get();
+}
 
 // ok, return everything
 $gamesession_vars = get_object_vars($gamesession);
