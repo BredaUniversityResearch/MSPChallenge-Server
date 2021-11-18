@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "16/11/2021",
-    "data_model_hash": "CDCD058E5B2C8081C80787865BB75B08BF673A7D585A9428F63B2281AD887332",
+    "date_modified": "18/11/2021",
+    "data_model_hash": "D4AED76ADC4CCB0ECFB5BF2E3635FC5377DE41569484A2AAF31C6C8A7FC58EC1",
     "errors": 0,
     "editor_version": 0.0,
     "min_supported_client": "",
@@ -22193,6 +22193,11 @@
               "name": "NS_Energy_Cables_Edit",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "NS_Fisheries_Closure_DT",
+              "influence": 1.0,
+              "construction": false
             }
           ]
         },
@@ -22238,6 +22243,11 @@
               "name": "NS_Energy_Cables_Edit",
               "influence": 1.0,
               "construction": true
+            },
+            {
+              "name": "NS_Fisheries_Closure_DT",
+              "influence": 1.0,
+              "construction": false
             }
           ]
         },
@@ -22276,6 +22286,11 @@
             },
             {
               "name": "NS_Ports_Point",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "NS_Fisheries_Closure_DT",
               "influence": 1.0,
               "construction": false
             }
@@ -37261,8 +37276,8 @@
         "layer_category": "ecology",
         "layer_subcategory": "birds_and_mammals",
         "layer_download_from_geoserver": 1,
-        "layer_width": 3150,
-        "layer_height": 4900,
+        "layer_width": 1575,
+        "layer_height": 2450,
         "layer_raster_material": "RasterMELCustomizable",
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
@@ -37708,7 +37723,7 @@
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.5,
+        "layer_raster_minimum_value_cutoff": 0.2,
         "layer_active": 1,
         "layer_selectable": 1,
         "layer_editable": 0,
@@ -37727,7 +37742,7 @@
           "0": {
             "displayName": "Modiolus modiolus beds",
             "approval": "NotDependent",
-            "value": 0,
+            "value": 1,
             "displayPolygon": 1,
             "polygonColor": "#BEF3F6FF",
             "polygonPatternName": null,
@@ -38190,6 +38205,92 @@
             "displayPolygon": 1,
             "polygonColor": "#0D6D08FF",
             "polygonPatternName": null,
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 0,
+            "lineColor": "#000000FF",
+            "lineWidth": 0.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": null
+          }
+        },
+        "layer_info_properties": null
+      },
+      {
+        "layer_name": "NS_Fisheries_Closure_DT",
+        "layer_geotype": "polygon",
+        "layer_short": "Fisheries closure",
+        "layer_category": "ecology",
+        "layer_subcategory": "fishing",
+        "layer_download_from_geoserver": 1,
+        "layer_width": 0,
+        "layer_height": 0,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": null,
+        "layer_information": null,
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [],
+        "layer_editing_type": "protection",
+        "layer_special_entity_type": "Default",
+        "layer_depth": 0,
+        "layer_type": {
+          "0": {
+            "displayName": "Approved",
+            "approval": "NotDependent",
+            "value": 0,
+            "displayPolygon": 1,
+            "polygonColor": "#029FF6BF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 0,
+            "lineColor": "#000000FF",
+            "lineWidth": 0.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": null
+          },
+          "1": {
+            "displayName": "Not yet legislated",
+            "approval": "NotDependent",
+            "value": 1,
+            "displayPolygon": 1,
+            "polygonColor": "#029FF6FF",
+            "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
