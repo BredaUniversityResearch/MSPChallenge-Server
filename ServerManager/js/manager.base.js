@@ -120,8 +120,8 @@ function copyToClipboard(text) {
 var log_concise_old, regularLogToastAutoCloseCheck, regularLogToastBodyUpdate;
 function ShowLogToast(session_id) {
 	// first cancel any previous logtoast updates that might still be running
-	if (typeof regularLogToastAutoCloseCheck !== 'undefined') clearInterval(regularLogToastAutoCloseCheck);
-	if (typeof regularLogToastBodyUpdate !== 'undefined') clearInterval(regularLogToastBodyUpdate);
+	clearInterval(regularLogToastAutoCloseCheck);
+	clearInterval(regularLogToastBodyUpdate);
 
 	$('#LogToastHeader').html("Session Activity Log ("+session_id+")");
 	log_concise_old = '';
