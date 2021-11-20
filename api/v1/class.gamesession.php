@@ -540,6 +540,9 @@ class GameSession extends Base
 		}
 
 		$this->ResetWatchdogAddress($watchdog_address);
+
+        $game = new Game();
+        $watchdogSuccess = $game->ChangeWatchdogState("PAUSE"); // reloaded saves always start paused
 		
 		if (!empty($response_address)) 
 		{
