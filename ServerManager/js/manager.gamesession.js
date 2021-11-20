@@ -101,7 +101,7 @@ function handleDemoToggle(gamesession) {
 }
 
 function handleArchiveButton(gamesession) {
-    if (gamesession.session_state == 'failed' || gamesession.session_state == 'request' || (gamesession.session_state == 'healthy' && (gamesession.game_state == 'pause' || gamesession.game_state == 'setup' || gamesession.game_state == 'end'))) {
+    if (gamesession.session_state == 'failed' || gamesession.session_state == 'request' || (gamesession.session_state == 'healthy' && (gamesession.game_state == 'pause' || gamesession.game_state == 'setup' || gamesession.game_state == 'end' || gamesession.game_state == 'simulation'))) {
         $('#sessionInfoButtonArchiveDownload').html('<i class="fa fa-archive" title="Archive Session"></i> Archive Session');
         $('#sessionInfoButtonArchiveDownload').attr('onclick', 'archiveSession('+gamesession.id+')');
         $('#sessionInfoButtonArchiveDownload').show();
@@ -195,7 +195,7 @@ function handleExportPlansButton(gamesession) {
 }
 
 function handleSessionRecreateButton(gamesession) {
-    if(gamesession.session_state == 'request' || gamesession.session_state == 'failed' || gamesession.game_state == 'end' || (gamesession.session_state == 'healthy' && (gamesession.game_state == 'pause' || gamesession.game_state == 'setup')) ) {
+    if(gamesession.session_state == 'request' || gamesession.session_state == 'failed' || gamesession.game_state == 'end' || (gamesession.session_state == 'healthy' && (gamesession.game_state == 'pause' || gamesession.game_state == 'setup' || gamesession.game_state == 'simulation')) ) {
         $('#sessionInfoButtonRecreateSession').attr('onclick', 'RecreateSession('+gamesession.id+')');
         $('#sessionInfoButtonRecreateSession').html('<i class="fa fa-repeat" title="Recreate Session"></i> Recreate Session</button>');
         $('#sessionInfoButtonRecreateSession').show();
