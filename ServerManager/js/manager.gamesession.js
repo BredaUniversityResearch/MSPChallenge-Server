@@ -20,14 +20,14 @@ function handleAllSessionInfoButtons(gamesession) {
     handleDemoToggle(gamesession);
     handleExportPlansButton(gamesession);
     handlePlayPauseButton(gamesession);
+    handleFastForwardButton(gamesession);
     handleArchiveButton(gamesession);
     handleSaveFullButton(gamesession);
     handleSaveLayersButton(gamesession);
     handleSessionRecreateButton(gamesession);
 }
 
-function deciderPlayPauseButtons(gamesession)
-{
+function deciderPlayPauseButtons(gamesession) {
     if (gamesession.session_state == 'healthy') {
         if(gamesession.game_state == 'pause' || gamesession.game_state == 'setup') {
             return 'play';
@@ -44,12 +44,12 @@ function deciderPlayPauseButtons(gamesession)
 function handlePlayPauseButton(gamesession) {
     var decider = deciderPlayPauseButtons(gamesession);
     if (decider == 'play') {
-        $('#sessionInfoButtonStartPause').html('<i class="fa fa-play" title="Start Simulation"></i> Start Simulation');
+        $('#sessionInfoButtonStartPause').html('<i class="fa fa-play" title="Start"></i> Play');
         $('#sessionInfoButtonStartPause').attr('onclick', 'changeGameState(\'play\', '+gamesession.id+')');
         $('#sessionInfoButtonStartPause').removeAttr('disabled');
         $('#sessionInfoButtonStartPause').show();
     } else if(decider == 'pause') {
-        $('#sessionInfoButtonStartPause').html('<i class="fa fa-pause" title="Pause Simulation"></i> Pause Simulation');
+        $('#sessionInfoButtonStartPause').html('<i class="fa fa-pause" title="Pause"></i> Pause');
         $('#sessionInfoButtonStartPause').attr('onclick', 'changeGameState(\'pause\', '+gamesession.id+')');
         $('#sessionInfoButtonStartPause').removeAttr('disabled');
         $('#sessionInfoButtonStartPause').show();
@@ -60,6 +60,26 @@ function handlePlayPauseButton(gamesession) {
         $('#sessionInfoButtonStartPause').show();
     } else if (decider == 'hide') {
         $('#sessionInfoButtonStartPause').hide();
+    }
+}
+
+function handleFastForwardButton(gamesession) {
+    if (gamesession.session_state == 'healthy') {
+        if (gamesession.game_state == 'fastforward') {
+            $('#sessionInfoButtonFastForward').html('<i class="fa fa-fast-forward" title="Fast-forwarding"></i> Fast-forwarding');
+            $('#sessionInfoButtonFastForward').attr('onclick', '');
+            $('#sessionInfoButtonFastForward').attr('disabled', 'disabled');
+            $('#sessionInfoButtonFastForward').show();
+        } else if (gamesession.game_state == 'setup' || gamesession.game_state == 'end' || gamesession.game_state == 'simulation') {
+            $('#sessionInfoButtonFastForward').hide();
+        } else {
+            $('#sessionInfoButtonFastForward').html('<i class="fa fa-fast-forward" title="Fast-forward"></i> Fast-forward');
+            $('#sessionInfoButtonFastForward').attr('onclick', 'changeGameState(\'fastforward\', ' + gamesession.id + ')');
+            $('#sessionInfoButtonFastForward').removeAttr('disabled');
+            $('#sessionInfoButtonFastForward').show();
+        }
+    } else {
+        $('#sessionInfoButtonFastForward').hide();
     }
 }
 

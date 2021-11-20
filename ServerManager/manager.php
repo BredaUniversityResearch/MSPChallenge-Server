@@ -348,8 +348,9 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 								</tr>
 								<tr class="table-info">
 									<td colspan="2">
-										<button id="sessionInfoButtonStartPause" class="btn btn-success btn-sm" onclick=""></button> 
-										<button id="sessionInfoButtonDemoToggle" class="btn btn-info btn-sm" onclick=""></button>
+										<button id="sessionInfoButtonStartPause" class="btn btn-success btn-sm" onclick=""></button>
+                                        <button id="sessionInfoButtonFastForward" class="btn btn-success btn-sm" onclick=""></button>
+                                        <button id="sessionInfoButtonDemoToggle" class="btn btn-info btn-sm" onclick=""></button>
 									</td>
 									<td colspan="2" class="text-right">
 										<button id="sessionInfoButtonRecreateSession" class="btn btn-warning btn-sm" onclick=""></button>

@@ -55,7 +55,7 @@ class ServerManager extends Base
           self::$_instance = new ServerManager();
         }
         return self::$_instance;
-	    }
+      }
 
       public function CheckForUpgrade($versiondetermined) {
         if (!empty($versiondetermined)) {
@@ -285,5 +285,3 @@ class ServerManager extends Base
       }
 
 }
-
-?>
