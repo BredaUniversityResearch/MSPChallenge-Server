@@ -203,7 +203,7 @@ class GameSession extends Base
 		$postValues["token"] = $token; // to pass ServerManager security
 		$postValues["api_access_token"] = $token; // to store in ServerManager
 
-		if ($result !== true)
+		if (!$result)
 		{
 			if (!empty($response_address)) 
 			{

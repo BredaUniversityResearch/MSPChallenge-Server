@@ -82,7 +82,6 @@
 		{
 			Log::SetupFileLogger(Log::GetRecreateLogPath());
 			Log::LogInfo("Reload -> Starting game session reload process...");
-			$finalreturn = false;
 			try {
 				$this->EmptyDatabase(); 
 				$this->RebuildDatabaseByDumpImport($dbase_file_path, $new_config_file_name);
@@ -90,21 +89,19 @@
 				$this->ExtractRasterFiles($raster_files_path);
 
 				Log::LogInfo("Reload -> Save reloaded.");
-				$finalreturn = true;
+				return true;
 			} catch (Throwable $e) {
 				Log::LogError("Reload -> Something went wrong.");
 				Log::LogError($e->getMessage()." on line ".$e->getLine()." of file ".$e->getFile());
-			}
-			finally
-			{
+
 				$phpOutput = ob_get_flush();
 				if (!empty($phpOutput)) {
 					Log::LogInfo("Additionally the page generated the following output: ".$phpOutput);
 				}
 				Log::ClearFileLogger();
-				return $finalreturn;
+
+				return false;
 			}
-			return $finalreturn;
 		}
 
 		/**
@@ -116,36 +113,32 @@
 		{
 			Log::SetupFileLogger(Log::GetRecreateLogPath());
 			Log::LogInfo("Reimport -> Starting game session creation process...");
-			$finalreturn = false;
 			try {
 				$this->EmptyDatabase();
 				$this->ClearRasterStorage();
 				$this->RebuildDatabase($configFilename);
+				$this->SetupSecurityTokens(); //this needs to happen as early as possible to be able to return a failed state to the ServerManager in case something goes wrong
 				$this->ImportLayerGeometry($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
 				$this->ClearEnergy();
 				$this->ImportLayerMeta($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
 				$this->ImportRestrictions();
 				$this->SetupSimulations($configFilename);	
 				$this->ImportScenario();
-				$this->SetupSecurityTokens();
 
 				Log::LogInfo("Reimport -> Created session.");
-				$finalreturn = true;
+				return true;
 			} catch (Throwable $e) {
 				Log::LogError("Reimport -> Something went wrong.");
 				Log::LogError($e->getMessage()." on line ".$e->getLine()." of file ".$e->getFile());
-				throw $e;
-			}
-			finally
-			{
+
 				$phpOutput = ob_get_flush();
 				if (!empty($phpOutput)) {
 					Log::LogInfo("Additionally the page generated the following output: ".$phpOutput);
 				}
 				Log::ClearFileLogger();
-				return $finalreturn;
+
+				return false;
 			}
-			return $finalreturn;
 		}
 
 
@@ -153,9 +146,7 @@
 		{
 			set_time_limit(Config::GetInstance()->GetLongRequestTimeout());
 
-			$success =  $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
-
-			return $success;
+			return $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
 		}
 
 		public function ImportLayerGeometry(string $configFilename, string $geoserver_url, string $geoserver_username, string $geoserver_password)
