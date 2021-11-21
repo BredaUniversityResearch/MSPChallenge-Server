@@ -74,7 +74,7 @@ class GameSave extends Base
         if (empty($this->id)) throw new Exception("Cannot obtain GameSave without a valid id.");
         if (!$this->_db->query("SELECT * FROM game_saves WHERE id = ?", array($this->id))) 
             throw new Exception($this->_db->errorString());
-        if ($this->_db->count() == 0) throw new Exception("Save not found.");
+        if ($this->_db->count() == 0) throw new Exception("Save ".$this->id." not found.");
         foreach ($this->_db->first(true) as $varname => $varvalue)
         {
             if (property_exists($this, $varname)) $this->$varname = $varvalue;
@@ -224,7 +224,7 @@ class GameSave extends Base
         for($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
             $filecontents = $zip->getFromIndex($i);
-            if (strstr($filename, ".json") !== false && isJsonObject($filecontents)) {
+            if (strstr($filename, ".json") !== false && isJsonArray($filecontents)) {
                 $this->createShapefile($filecontents, $filename, $templocation); // don't add it to the ZIP straight-away, we're not sure it was created at this point
             }
             else {

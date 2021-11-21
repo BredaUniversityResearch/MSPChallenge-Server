@@ -16,6 +16,10 @@ function isJsonObject($string) {
     return is_object(json_decode($string));
 }
 
+function isJsonArray($string) {
+    return is_array(json_decode($string, true));
+}
+
 // Readeable file size
 function size($path) {
     $bytes = sprintf('%u', filesize($path));
