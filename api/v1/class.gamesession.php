@@ -483,9 +483,8 @@ class GameSession extends Base
 			if (empty($allow_recreate) || $allow_recreate == false)
 			{
 				throw new Exception("Session already exists.");
-			}
-			else 
-			{
+			} else
+            {
 				$security = new Security();
 				Database::GetInstance()->SwitchToSessionDatabase($sessionId);
 				Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
@@ -529,11 +528,11 @@ class GameSession extends Base
 		$postValues["session_id"] = self::GetGameSessionIdForCurrentRequest();
 		$postValues["token"] = (new Security())->GetServerManagerToken()["token"]; // to pass ServerManager security
 			
-		if ($result !== true)
+		if (!$result)
 		{
 			if (!empty($response_address)) 
 			{
-				$postValues["session_state"] = "Failed"; 
+				$postValues["session_state"] = "failed";
 				$this->CallBack($response_address, $postValues);
 			}
 			throw new Exception("Reload of save failed");

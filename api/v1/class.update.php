@@ -73,9 +73,7 @@
 		{
 			set_time_limit(Config::GetInstance()->GetLongRequestTimeout());
 
-			$success =  $this->Reload($new_config_file_name, $dbase_file_path, $raster_files_path);
-
-			return $success;
+			return $this->Reload($new_config_file_name, $dbase_file_path, $raster_files_path);
 		}
 
 		public function Reload($new_config_file_name, $dbase_file_path, $raster_files_path)
