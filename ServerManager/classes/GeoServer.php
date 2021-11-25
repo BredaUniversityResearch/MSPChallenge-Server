@@ -48,7 +48,7 @@ class GeoServer extends Base
 
     public function get() 
     {
-        if (empty($this->id)) throw new Exception("Cannot obtain data without a valid id.");
+        if (empty($this->id)) throw new Exception("Cannot obtain data without a valid geoserver id.");
         
         if (!$this->_db->query("SELECT * FROM game_geoservers WHERE id = ?", array($this->id))) throw new Exception($this->_db->errorString());
         if ($this->_db->count() == 0) throw new Exception("GeoServer not found.");

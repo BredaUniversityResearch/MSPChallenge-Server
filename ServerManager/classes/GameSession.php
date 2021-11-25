@@ -228,7 +228,9 @@ class GameSession extends Base
         $this->game_visibility = $gamesave->game_visibility;
         $this->players_active = $gamesave->players_active;
         $this->players_past_hour = $gamesave->players_past_hour;
-        $this->demo_session = $gamesave->demo_session;
+        if (empty($this->demo_session)) { // in case a previous reload became a demo session, it should remain that upon next reload
+            $this->demo_session = $gamesave->demo_session;
+        }
         $this->api_access_token = $gamesave->api_access_token;
         $this->server_version = $gamesave->server_version;
 
@@ -577,9 +579,12 @@ class GameSession extends Base
 
     public function changeGameState()
     {
-        if (!is_a($this->_old, "GameSession")) throw new Exception("Can't continue as I don't have the old GameSession object.");
-        if (strcasecmp($this->_old->game_state, $this->game_state) == 0) 
-            throw new Exception("The session is already in state ".$this->game_state.".");
+        if (!is_a($this->_old, "GameSession")) {
+            throw new Exception("Can't continue as I don't have the old GameSession object.");
+        }
+        if (strcasecmp($this->_old->game_state, $this->game_state) == 0) {
+            throw new Exception("The session is already in state " . $this->game_state . ".");
+        }
         switch ($this->_old->game_state) {
             case 'end':
                 throw new Exception("The session has already ended, so can't change its state.");
@@ -597,7 +602,9 @@ class GameSession extends Base
             $this->id, 
             $this->api_access_token
         );
-        if (!$server_call["success"]) throw new Exception($server_call["message"]);
+        if (!$server_call["success"]) {
+            throw new Exception($server_call["message"]);
+        }
         return true;
     }
 }

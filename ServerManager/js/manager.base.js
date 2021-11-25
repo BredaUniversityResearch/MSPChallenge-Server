@@ -120,18 +120,16 @@ function copyToClipboard(text) {
 var log_concise_old, regularLogToastAutoCloseCheck, regularLogToastBodyUpdate;
 function ShowLogToast(session_id) {
 	// first cancel any previous logtoast updates that might still be running
-	if (typeof regularLogToastAutoCloseCheck !== 'undefined') clearInterval(regularLogToastAutoCloseCheck);
-	if (typeof regularLogToastBodyUpdate !== 'undefined') clearInterval(regularLogToastBodyUpdate);
+	clearInterval(regularLogToastBodyUpdate);
 
 	$('#LogToastHeader').html("Session Activity Log ("+session_id+")");
 	log_concise_old = '';
+
 	UpdateLogToastContents(session_id);
 	regularLogToastBodyUpdate = setInterval(function() {
 		UpdateLogToastContents(session_id);
 	}, 3000);
-	regularLogToastAutoCloseCheck = setInterval(function() {
-		AutoCloseLogToast(session_id);
-	}, 20000);
+
 	$('#LogToast').toast('show');
 }
 
@@ -146,6 +144,11 @@ function UpdateLogToastContents(session_id) {
 		log_array.forEach(LogToastContentItemCleanUp);
 		var log_concise_new = log_array.join("");
 		if (log_concise_new == log_concise_old) {
+			if ($('#LogToast').prop('data-autoclose')) {
+				// so only if the old log was deemed unchanged *twice*, should the window be closed
+				clearInterval(regularLogToastBodyUpdate);
+				$('#LogToast').toast('hide');
+			}
 			$('#LogToast').prop('data-autoclose', true);
 		}
 		else {
@@ -164,28 +167,6 @@ function LogToastContentItemCleanUp(item, index, arr) {
 	item = item.replace("[ DEBUG ]", '<div style="color: grey;">');
 	item += "</div>";
 	arr[index] = item;
-}
-
-async function AutoCloseLogToast(session_id) {
-	if ($('#LogToast').prop('data-autoclose')) {
-		// stop the regular UpdateLogToastContents calls, but do another bunch of UpdateLogToastContents calls first
-		clearInterval(regularLogToastBodyUpdate);
-		for (var times = 0; times < 10; times++) { 
-			await new Promise(r => setTimeout(r, 3000));
-			UpdateLogToastContents(session_id);	
-		}
-		if ($('#LogToast').prop('data-autoclose')) {
-			// stop calling this function and hide LogToast as a wrap-up
-			clearInterval(regularLogToastAutoCloseCheck);
-			$('#LogToast').toast('hide');
-		}
-		else {
-			// otherwise re-initialise UpdateLogToastContents every 3 seconds and this function will be called again later
-			regularLogToastBodyUpdate = setInterval(function() {
-				UpdateLogToastContents(session_id);
-			}, 3000);
-		}
-	}
 }
 
 function isFormValid(currentForm) {

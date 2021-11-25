@@ -5,13 +5,13 @@ class GameSession extends Base
 	protected $allowed = array(
 		["CreateGameSession", Security::ACCESS_LEVEL_FLAG_NONE],
 		["CreateGameSessionAndSignal", Security::ACCESS_LEVEL_FLAG_NONE],
-		["ArchiveGameSession", Security::ACCESS_LEVEL_FLAG_NONE],			// should be possible to secure this
-		["ArchiveGameSessionInternal", Security::ACCESS_LEVEL_FLAG_NONE],	// should be possible to secure this
-		["SaveSession", Security::ACCESS_LEVEL_FLAG_NONE],					// should be possible to secure this
+		["ArchiveGameSession", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+		["ArchiveGameSessionInternal", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+		["SaveSession", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
 		["LoadGameSave", Security::ACCESS_LEVEL_FLAG_NONE],
 		["LoadGameSaveAndSignal", Security::ACCESS_LEVEL_FLAG_NONE],
-		["CreateGameSessionZip", Security::ACCESS_LEVEL_FLAG_NONE],			// should be possible to secure this
-		["CreateGameSessionLayersZip", Security::ACCESS_LEVEL_FLAG_NONE],	// should be possible to secure this
+		["CreateGameSessionZip", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+		["CreateGameSessionLayersZip", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
 		["ResetWatchdogAddress", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
 		["SetUserAccess", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
 	);
@@ -203,7 +203,7 @@ class GameSession extends Base
 		$postValues["token"] = $token; // to pass ServerManager security
 		$postValues["api_access_token"] = $token; // to store in ServerManager
 
-		if ($result !== true)
+		if (!$result)
 		{
 			if (!empty($response_address)) 
 			{
@@ -309,9 +309,16 @@ class GameSession extends Base
 	public function CreateGameSessionZip(string $response_url = "", int $save_id = 0, string $preferredfolder = self::ARCHIVE_DIRECTORY, string $preferredname = "session_archive_") 
 	{		
 		$sessionId = self::GetGameSessionIdForCurrentRequest();	
-		if (empty($save_id)) $save_id = $sessionId;
-		if ($preferredfolder == self::ARCHIVE_DIRECTORY) $preferredfolder = Base::Dir().$preferredfolder;
-		$zippath = $preferredfolder.$preferredname.$save_id.".zip";
+		if (empty($save_id)) {
+            $preferredid = $sessionId;
+        }
+        else {
+            $preferredid = $save_id;
+        }
+		if ($preferredfolder == self::ARCHIVE_DIRECTORY) {
+            $preferredfolder = Base::Dir().$preferredfolder;
+        }
+		$zippath = $preferredfolder.$preferredname.$preferredid.".zip";
 		$sqlDumpPath = Base::Dir().self::EXPORT_DIRECTORY."db_export_".$sessionId.".sql"; 
 
 		Store::EnsureFolderExists($preferredfolder);
@@ -328,7 +335,9 @@ class GameSession extends Base
 		$sessionFiles = array($sqlDumpPath, $configFilePath);
 
 		$zip = new ZipArchive();
-		if ($zip->open($zippath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) throw new Exception("Wasn't able to create the ZIP file: ".$zippath);
+		if ($zip->open($zippath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            throw new Exception("Wasn't able to create the ZIP file: ".$zippath);
+        }
 		foreach($sessionFiles as $file) 
 		{
 			if (is_readable($file)) {
@@ -350,7 +359,15 @@ class GameSession extends Base
 		if (!empty($response_url))
 		{
 			$token = (new Security())->GetServerManagerToken()["token"];
-			$postValues = array("token" => $token, "save_id" => $save_id, "session_id" => $sessionId, "zippath" => $zippath, "action" => "processZip");
+			$postValues = array(
+                "token" => $token,
+                "session_id" => $sessionId,
+                "zippath" => $zippath,
+                "action" => "processZip"
+            );
+            if (!empty($save_id)) {
+                $postValues["save_id"] = $save_id;
+            }
 			$this->CallBack($response_url, $postValues);
 		}
 		
@@ -465,9 +482,9 @@ class GameSession extends Base
 		
 		$requestHeader = apache_request_headers();
 		$headers = array();
-		if (isset($requestHeader["Authorization"])) {
-			$headers[] = "Authorization: ".$requestHeader["Authorization"];
-		}
+        if (isset($requestHeader["MSPAPIToken"])) {
+            $headers[] = "MSPAPIToken: ".$requestHeader["MSPAPIToken"];
+        }
 		
 		$result = $this->CallBack($baseUrl.$apiUrl, $postValues, $headers, $async);
 		
@@ -483,9 +500,8 @@ class GameSession extends Base
 			if (empty($allow_recreate) || $allow_recreate == false)
 			{
 				throw new Exception("Session already exists.");
-			}
-			else 
-			{
+			} else
+            {
 				$security = new Security();
 				Database::GetInstance()->SwitchToSessionDatabase($sessionId);
 				Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
@@ -529,17 +545,20 @@ class GameSession extends Base
 		$postValues["session_id"] = self::GetGameSessionIdForCurrentRequest();
 		$postValues["token"] = (new Security())->GetServerManagerToken()["token"]; // to pass ServerManager security
 			
-		if ($result !== true)
+		if (!$result)
 		{
 			if (!empty($response_address)) 
 			{
-				$postValues["session_state"] = "Failed"; 
+				$postValues["session_state"] = "failed";
 				$this->CallBack($response_address, $postValues);
 			}
 			throw new Exception("Reload of save failed");
 		}
 
 		$this->ResetWatchdogAddress($watchdog_address);
+
+        $game = new Game();
+        $watchdogSuccess = $game->ChangeWatchdogState("PAUSE"); // reloaded saves always start paused
 		
 		if (!empty($response_address)) 
 		{
