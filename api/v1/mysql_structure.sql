@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`layer` (
   `layer_melupdate_construction` TINYINT(1) NOT NULL DEFAULT 0,
   `layer_filecreationtime` DOUBLE NOT NULL DEFAULT 0,
   `layer_media` VARCHAR(255) NULL,
+  `layer_entity_value_max` FLOAT NULL,
   PRIMARY KEY (`layer_id`),
   INDEX `fk_layer_layer1_idx` (`layer_original_id` ASC),
   CONSTRAINT `fk_layer_layer1`
