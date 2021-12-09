@@ -14,8 +14,7 @@
 			"GetCurrentMonth",
 			["GetGameDetails", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
 			"GetWatchdogAddress", 
-			"IsOnline", 
-			"Latest",
+			"IsOnline",
 			"Meta", 
 			"NextMonth", 
 			"Planning",
@@ -24,8 +23,7 @@
 			"Speed", 
 			["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
 			["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], 
-			"TestWatchdogAlive",
-			["Tick", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER] // nominated for full security - Required for serverlistupdater.php to work in case of demo server
+			"TestWatchdogAlive"
 		);
 
 		public function __construct($str="")
@@ -261,13 +259,12 @@
 		}
 
 		/**
-		 * @apiGroup Game
-		 * @api {POST} /game/tick Tick
-		 * @apiDescription Tick the game server, updating the plans if required
-		 * @apiSuccess {string} JSON object
-		 * @ForceNoTransaction
+		 * Tick the game server, updating the plans if required
+		 *
+		 * @param bool $showDebug
+		 * @throws Exception
 		 */
-		public function Tick($showDebug=false) 
+		public function Tick(bool $showDebug=false): void
 		{
 			$plan = new Plan();
 			$plan->Tick();
@@ -666,13 +663,15 @@
 			return Database::GetInstance()->query("SELECT user_lastupdate FROM user WHERE user_id=?", array($id))[0]['user_lastupdate'];
 		}
 
+
 		/**
-		 * @apiGroup Game
-		 * @api {POST} /game/latest Latest game data
-		 * @apiParam team_id The team_id (country_id) that we want to get the latest data for.
-		 * @apiParam last_update_time The last time the client has received an update tick.
-		 * @apiParam user The id of the user logged on to the client requesting the update.
-		 * @apiDescription Gets the latest plans & messages from the server
+		 * Gets the latest plans & messages from the server
+		 *
+		 * @param int $team_id
+		 * @param float $last_update_time
+		 * @param int $user
+		 * @return array|string
+		 * @throws Exception
 		 */
 		public function Latest(int $team_id, float $last_update_time, int $user)
 		{
@@ -687,19 +686,17 @@
 			$warning = new Warning("");
 			$objective = new Objective("");
 			$data = array();
-
-			// Because we have varying precision across the database for the last updated times we substract 1 here to make sure we have all the data.
-			$time = floatval($last_update_time);
+			$data['prev_update_time'] = $last_update_time;
 
 			$data['tick'] = $this->CalculateUpdatedTime(false);
 			if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after tick<br />"; }
 
-			$data['plan'] = $plan->Latest($time);
+			$data['plan'] = $plan->Latest($last_update_time);
 			if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after plan<br />"; }
 
 			foreach($data['plan'] as &$p){
 				//only send the geometry when it's required
-				$p['layers'] = $layer->Latest($p['layers'], $time, $p['id']);
+				$p['layers'] = $layer->Latest($p['layers'], $last_update_time, $p['id']);
 				if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after layers<br />"; }
 
 				if( ($p['state'] == "DESIGN" && $p['previousstate'] == "CONSULTATION" && $p['country'] != $team_id)){
@@ -707,23 +704,23 @@
 				}
 			}
 
-			$data['planmessages'] = $plan->GetMessages($time);
+			$data['planmessages'] = $plan->GetMessages($last_update_time);
 			if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after plan messages<br />"; }
 
 			//return any raster layers that need to be updated
-			$data['raster'] = $layer->LatestRaster($time);
+			$data['raster'] = $layer->LatestRaster($last_update_time);
 			if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after raster<br />"; }
 
-			$data['energy'] = $energy->Latest($time);
+			$data['energy'] = $energy->Latest($last_update_time);
 			if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after energy<br />"; }
 
-			$data['kpi'] = $kpi->Latest($time, $team_id);
+			$data['kpi'] = $kpi->Latest($last_update_time, $team_id);
 			if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after kpi<br />"; }
 
-			$data['warning'] = $warning->Latest($time);
+			$data['warning'] = $warning->Latest($last_update_time);
 			if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after warning<br />"; }
 
-			$data['objectives'] = $objective->Latest($time);
+			$data['objectives'] = $objective->Latest($last_update_time);
 			if ($debugPrefTimings) { echo (microtime(true) - $newtime) . " elapsed after objective<br />"; }
 
 			$data['update_time'] = $newtime - 0.001; //Add a slight fudge of 1ms to the update times to avoid rounding issues.

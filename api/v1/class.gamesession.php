@@ -46,7 +46,7 @@ class GameSession extends Base
 	{
 		if (isset($GLOBALS['RequestApiRoot'])) return $GLOBALS['RequestApiRoot'];
 		
-		$server_name = $_SERVER["SERVER_NAME"];
+		$server_name = $_SERVER["SERVER_NAME"] ?? gethostname();
 		$apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
 		$apiRoot = str_replace("//", "/", $apiRoot);
 		$protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
@@ -66,7 +66,7 @@ class GameSession extends Base
 	{
 		if (isset($GLOBALS['ServerManagerApiRoot'])) return $GLOBALS['ServerManagerApiRoot'];
 
-		$server_name = $_SERVER["SERVER_NAME"];
+		$server_name = $_SERVER["SERVER_NAME"] ?? gethostname();
 		$protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
 		$apiFolder = "/ServerManager/api/";
 		
