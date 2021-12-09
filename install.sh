@@ -1,23 +1,29 @@
 #!/bin/bash
 
+VERSION_DEFAULT="5.4"
+
 setGitHooksPostsCheckout() {
-    cat > .git/hooks/post-checkout <<- 'CONTENT'
+  VERSION=$1
+  if [[ -z $1 ]]; then
+    VERSION="$VERSION_DEFAULT"
+  fi
+  cat > .git/hooks/post-checkout <<- CONTENT
 #!/bin/bash
-PREV_COMMIT=$1
-POST_COMMIT=$2
+PREV_COMMIT=\$1
+POST_COMMIT=\$2
 NOCOLOR='\e[0m]';
 REDCOLOR='\e[37;41m';
-if [[ -f composer.lock ]]; then
-  DIFF=`git diff --shortstat $PREV_COMMIT..$POST_COMMIT composer.lock`
-  if [[ $DIFF != "" ]]; then
-    echo -e "$REDCCOLOR composer.lock has changed. You must run "bash install.sh"$NOCOLOR"
+COMPOSER_JSON_FILE="composer-symfony${VERSION}.json"
+if [[ -f \$COMPOSER_JSON_FILE ]]; then
+  DIFF=\`git diff --shortstat \$PREV_COMMIT..\$POST_COMMIT \$COMPOSER_JSON_FILE\`
+  if [[ \$DIFF != "" ]]; then
+    echo -e "\$REDCCOLOR composer.lock has changed. You must run "bash install.sh"\$NOCOLOR"
   fi
 fi
 CONTENT
 }
 
 setSymfonyVersion() {
-  VERSION_DEFAULT="5.4"
   VERSION=$1
   if [[ -z $1 ]]; then
     VERSION="$VERSION_DEFAULT"
