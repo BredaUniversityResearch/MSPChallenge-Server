@@ -89,3 +89,6 @@ composer.json
 composer.lock
 symfony.lock
 /config
+
+# linter cache
+.php-cs-fixer.cache
