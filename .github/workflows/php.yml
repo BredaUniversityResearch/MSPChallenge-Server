@@ -10,5 +10,7 @@ jobs:
         php-version: ['7.4']
     steps:
       - uses: actions/checkout@v2
+        with:
+          path: MSPChallenge-Server
       - name: run linters
         run: cd MSPChallenge-Server && ./test.sh
