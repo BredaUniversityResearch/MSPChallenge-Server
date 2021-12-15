@@ -22,7 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ob_start();
 ?>
 
-<?php require_once '../init.php'; 
+<?php
+require_once __DIR__ . '/../init.php';
 $user = new User();
 $servermanager = ServerManager::getInstance();
 
@@ -32,7 +33,7 @@ if (!$user->isLoggedIn()) { die(); }
 if (!$servermanager->freshinstall()) { die(); }
 
 $db = DB::getInstance();
-require_once '../templates/header.php';
+require_once __DIR__ . '/../templates/header.php';
 
 if ($servermanager->install($user)) {
   //send it to the authoriser to store with successfully logged in user_id

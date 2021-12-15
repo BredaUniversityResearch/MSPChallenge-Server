@@ -1,5 +1,5 @@
 <?php
-require_once '../init.php'; 
+require_once __DIR__ . '/../init.php';
 $fileDownloader = new FileDownloader;
 $user = new User();
 $user->hastobeLoggedIn();
