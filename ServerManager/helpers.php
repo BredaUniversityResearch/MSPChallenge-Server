@@ -105,30 +105,6 @@ function display_successes($successes = array()){
 	return $html;
 }
 
-//preformatted var_dump function
-function dump($var,$adminOnly=false,$localhostOnly=false){
-    if($adminOnly && isAdmin() && !$localhostOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
-    if($localhostOnly && isLocalhost() && !$adminOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
-    if($localhostOnly && isLocalhost() && $adminOnly && isAdmin()){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
-    if(!$localhostOnly && !$adminOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
-}
-
 //preformatted dump and die function
 function dnd($var,$adminOnly=false,$localhostOnly=false){
     if($adminOnly && isAdmin() && !$localhostOnly){
@@ -335,6 +311,7 @@ if(!function_exists('usernameExists')) {
 //Retrieve a list of all .php files in root files folder
 if(!function_exists('getPageFiles')) {
   function getPageFiles() {
+    global $us_url_root;
     $directory = "../";
     $pages = glob($directory . "*.php");
     foreach ($pages as $page){
@@ -348,6 +325,7 @@ if(!function_exists('getPageFiles')) {
 //Retrive a list of all .php files in users/ folder
 if(!function_exists('getUSPageFiles')) {
   function getUSPageFiles() {
+    global $us_url_root;
     $directory = "../users/";
     $pages = glob($directory . "*.php");
     foreach ($pages as $page){

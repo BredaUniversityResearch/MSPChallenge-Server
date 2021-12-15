@@ -19,6 +19,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     const EVENT_ON_CLIENT_MESSAGE_SENT = 'EVENT_ON_CLIENT_MESSAGE_SENT';
 
     private string $projectDir;
+    private ?int $gameSessionId = null;
 
     protected array $clients = [];
     protected array $clientInfoContainer = [];
@@ -27,6 +28,11 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     {
         $this->projectDir = $projectDir;
         parent::__construct();
+    }
+
+    public function setGameSessionId(int $gameSessionId): void
+    {
+        $this->gameSessionId = $gameSessionId;
     }
 
     public function getClientInfo(int $clientResourceId): ?array
@@ -45,9 +51,15 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     public function onMessage(ConnectionInterface $from, $msg)
     {
-        $data = json_decode($msg, true);
-        $this->clientInfoContainer[$from->resourceId] = $data;
-        $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_MESSAGE_RECEIVED, $from->resourceId, $data));
+        $clientInfo = json_decode($msg, true);
+        if (null != $this->gameSessionId && $this->gameSessionId != $clientInfo['game_session_id']) {
+            // do not connect this client, client is from another game session.
+            $from->close();
+            return;
+        }
+
+        $this->clientInfoContainer[$from->resourceId] = $clientInfo;
+        $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_MESSAGE_RECEIVED, $from->resourceId, $clientInfo));
     }
 
     public function onClose(ConnectionInterface $conn)
@@ -72,11 +84,15 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             APIHelper::SetupApiLoader($this->projectDir . '/');
             $game = new Game();
 
-            // todo: change all database connection to use async drift dbal connector
+            // todo: change all database connection to using drift/dbal
             $clientInfoPerSessionContainer = collect($this->clientInfoContainer)->groupBy('game_session_id', true);
+            if ($this->gameSessionId != null) {
+                $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($this->gameSessionId);
+            }
             $dataSent = [];
             foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
-                $_GET['session'] = $gameSessionId;
+                // for backwards compatibility
+                $_REQUEST['session'] = $_GET['session'] = $gameSessionId;
                 $_SERVER['REQUEST_URI'] = '';
                 $game->Tick();
                 foreach ($clientInfoContainer as $connResourceId => $clientInfo) {

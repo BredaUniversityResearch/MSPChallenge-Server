@@ -19,6 +19,8 @@ function fix() {
 
 PATHS="
 src
+ServerManager/config.php
+legacy.php
 "
 
 for p in $PATHS

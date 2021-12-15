@@ -50,7 +50,7 @@ class Security extends Base
 	* @api {POST} /security/RequestToken RequestToken
 	* @apiDescription Requests a new access token for the API.
 	* @apiParam expired_token OPTIONAL A previously used access token that is now expired. Needs a valid REQUEST_ACCESS token to be sent with the request before it generates a new token with the same access as the expired token.
-	* @apiSuccess Returns json object indicating success and the token containing token identifier and unix timestap for until when it's valid. { "success": [0|1], "token": { "token": [identifier], "valid_until": [timestamp]" }
+	* @apiSuccess Returns json object indicating success and the token containing token identifier and unix timestap for until when it's valid. { "success": [0|1], "token": { "token": [identifier], "valid_until": [timestamp] } }
 	*/
 	public function RequestToken(string $expired_token = "")
 	{

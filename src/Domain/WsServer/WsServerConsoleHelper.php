@@ -26,8 +26,6 @@ class WsServerConsoleHelper implements EventSubscriberInterface
     // space required for height, table header, footer and spacing
     const HEIGHT_RESERVED_CHARS = 7;
 
-    const TERMINAL_HEIGHT = 50;
-
     private WsServer $wsServer;
     private Table $table;
     private array $tableInput = [];
@@ -66,7 +64,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             $clientData = $clientDataContainer[$clientId];
             $this->processTableInput($clientId, $event->getEventName(), $clientData, $allowedDataCharsWidth);
         }
-        $numClients = max(1, count($this->tableInput));
+        $numClients = count($this->tableInput);
         $this->table
             ->setStyle('box')
             ->setHeaders(['client', 'time', 'event', 'data'])
@@ -91,9 +89,10 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         }
         $numClients = max(1, $numClients);
         $data = json_encode($clientData, JSON_PRETTY_PRINT);
+        $terminal = new Terminal();
         $allowedDataCharsHeight = max(
             1, // remove the first {
-            floor((self::TERMINAL_HEIGHT - self::HEIGHT_RESERVED_CHARS) / $numClients)
+            floor(($terminal->getHeight() - self::HEIGHT_RESERVED_CHARS) / $numClients)
         );
         $lines = array_slice(explode("\n", $data), 1, $allowedDataCharsHeight);
         $clientData = collect($lines)

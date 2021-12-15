@@ -1,3 +1,47 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
+server_manager:
+  resource: 'ServerManager/routes.yaml'
+  prefix: '/ServerManager'
+
+# per session support
+# RewriteRule ^([0-9]+)/api/(.*)$	index.php?session=$1&query=$2 [NC,L]
+legacy_api_session:
+  path: '/{slashes}{session}/{slashes2}api/{query}'
+  controller: App\Controller\LegacyController
+  defaults:
+    slashes: ''
+    slashes2: ''
+  requirements:
+    session: '\d+'
+    query: '.*'
+    slashes: '(\/+)?'
+    slashes2: '(\/+)?'
+
+# RewriteRule ^debug/(.*)$		index.php?debug=1&query=$1 [NC,L]
+legacy_debug:
+  path: '/{slashes}debug/{query}'
+  controller: App\Controller\LegacyController
+  defaults:
+    debug: 1
+    session: -1
+    slashes: ''
+  requirements:
+    query: '.*'
+    slashes: '(\/+)?'
+
+#Single-server support.
+#RewriteRule ^api/(.*)$ 			index.php?session=-1&query=$1
+legacy_api:
+  path: '/{slashes}api/{query}'
+  controller: App\Controller\LegacyController
+  defaults:
+    session: -1
+    slashes: ''
+  requirements:
+    query: '.*'
+    slashes: '(\/+)?'
+
+legacy_not_found:
+  path: '/{anything}'
+  controller: App\Controller\LegacyController::notFound
+  requirements:
+    anything: '.*'
