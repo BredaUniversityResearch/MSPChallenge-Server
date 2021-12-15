@@ -179,7 +179,7 @@ class GameSession extends Base
                 "response_address" => ServerManager::getInstance()->GetFullSelfAddress()."api/editGameSession.php"
             )
         );
-        if (!$server_call["success"]) 
+        if (!$server_call["success"])
         {
             if ($allow_recreate == 0) $this->revert();
             throw new Exception($server_call["message"]);
@@ -434,6 +434,7 @@ class GameSession extends Base
             games.game_creation_time, games.game_start_year, games.game_end_month, games.game_current_month, games.game_running_til_time,
             games.session_state, games.game_state, games.game_visibility, games.players_active, games.players_past_hour,
             '".ServerManager::getInstance()->GetServerURLBySessionId()."' AS game_server_address,
+            '".ServerManager::getInstance()->GetWsServerURLBySessionId()."' AS game_ws_server_address,
             watchdogs.name AS watchdog_name, watchdogs.address AS watchdog_address, games.save_id, 
             CASE
                 WHEN games.save_id > 0 THEN 0
