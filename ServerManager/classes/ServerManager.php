@@ -1,4 +1,4 @@
-vi<?php
+<?php
 
 use App\Domain\Common\GetConstantsTrait;
 
@@ -216,7 +216,7 @@ class ServerManager extends Base
         return $url;
     }
 
-    public function getWsServerURLBySessionId(int $sessionId = 0)
+    public function getWsServerURLBySessionId(int $sessionId = 0): string
     {
         $addressModificationKey = 'ws_server/address_modification';
         $addressModificationValue = Config::get($addressModificationKey) ?? 'none';
