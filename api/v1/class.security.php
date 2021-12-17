@@ -34,7 +34,7 @@ class Security extends Base
 	{
 		$scope = ($scope == "ServerManager") ? self::ACCESS_LEVEL_FLAG_SERVER_MANAGER : self::ACCESS_LEVEL_FLAG_FULL;
 		$accessTimeRemaining = 0;
-		$hasAccess = $this->ValidateAccess($scope, $accessTimeRemaining);
+        $hasAccess = $this->validateAccess($scope, $accessTimeRemaining);
 
 		$result = "Expired";
 		if ($hasAccess)
@@ -157,8 +157,11 @@ class Security extends Base
 		return false;
 	}
 
-	public function ValidateAccess($requiredAccessLevelFlags, &$tokenValidTimeRemaining = null)
-	{
+    public function validateAccess(
+        int $requiredAccessLevelFlags,
+        int &$tokenValidTimeRemaining = null,
+        ?string $token = null
+    ): bool {
 		if (self::DISABLE_SECURITY_CHECK)
 		{
 			$tokenValidTimeRemaining = self::DEFAULT_TOKEN_LIFETIME_SECONDS;
@@ -170,25 +173,23 @@ class Security extends Base
 			return true;
 		}
 
-		$token = $this->GetCurrentRequestTokenDetails();
-		if ($token == null)
-		{
+        $tokenDetails = null === $token ?
+            $this->GetCurrentRequestTokenDetails() : $this->GetTokenDetails($token);
+        if ($tokenDetails == null) {
 			return false;
 		}
 
-		if (!$this->TokenHasAccess($token, $requiredAccessLevelFlags))
-		{
+        if (!$this->TokenHasAccess($tokenDetails, $requiredAccessLevelFlags)) {
 			return false;
 		}
 
-		if ($token["valid_time_remaining"] < 0 && $token["expiry_time"] > 0)
-		{
+        if ($tokenDetails["valid_time_remaining"] < 0 && $tokenDetails["expiry_time"] > 0) {
 			return false;
 		}
 
 		if($tokenValidTimeRemaining !== null)
 		{
-			$tokenValidTimeRemaining = $token["valid_time_remaining"];
+            $tokenValidTimeRemaining = $tokenDetails["valid_time_remaining"];
 		}
 		return true;
 	}
