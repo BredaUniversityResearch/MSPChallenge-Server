@@ -32,6 +32,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
     private ConsoleOutput $output;
     private ConsoleSectionOutput $section;
     private string $startDateTime;
+    private ?int $terminalHeight = null;
 
     public function __construct(WsServer $wsServer, ConsoleOutput $output)
     {
@@ -41,6 +42,11 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         $this->section = $output->section();
         $this->table = new Table($output);
         $this->startDateTime = date('j M H:i:s');
+    }
+
+    public function setTerminalHeight(?int $terminalHeight): void
+    {
+        $this->terminalHeight = $terminalHeight;
     }
 
     public function notifyWsServerDataChange(NameAwareEvent $event): void
@@ -96,9 +102,13 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         $numClients = max(1, $numClients);
         $data = json_encode($clientData, JSON_PRETTY_PRINT);
         $terminal = new Terminal();
+        $terminalHeight = $this->terminalHeight ?? $terminal->getHeight();
+        if ($terminalHeight < self::HEIGHT_RESERVED_CHARS) {
+            $terminalHeight = self::HEIGHT_RESERVED_CHARS + 1;
+        }
         $allowedDataCharsHeight = max(
             1, // remove the first {
-            floor(($terminal->getHeight() - self::HEIGHT_RESERVED_CHARS) / $numClients)
+            floor(($terminalHeight - self::HEIGHT_RESERVED_CHARS) / $numClients)
         );
         $lines = array_slice(explode("\n", $data), 1, $allowedDataCharsHeight);
         $clientData = collect($lines)

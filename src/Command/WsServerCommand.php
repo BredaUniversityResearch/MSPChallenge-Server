@@ -16,6 +16,7 @@ class WsServerCommand extends Command
 {
     const OPTION_PORT = 'port';
     const OPTION_GAME_SESSION_ID = 'game-session-id';
+    const OPTION_FIXED_TERMINAL_HEIGHT = 'fixed-terminal-height';
 
     protected static $defaultName = 'app:ws-server';
 
@@ -43,6 +44,12 @@ class WsServerCommand extends Command
                 's',
                 InputOption::VALUE_OPTIONAL,
                 'only clients with this Game session ID will be allowed keep a connection'
+            )
+            ->addOption(
+                self::OPTION_FIXED_TERMINAL_HEIGHT,
+                't',
+                InputOption::VALUE_OPTIONAL,
+                'fixed terminal height, the number of rows allowed'
             );
     }
 
@@ -55,6 +62,7 @@ class WsServerCommand extends Command
         // the console helper will handle the console output using events dispatched by the wsServer
         /** @var ConsoleOutput $output */
         $consoleHelper = new WsServerConsoleHelper($this->wsServer, $output);
+        $consoleHelper->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
 
         $server = IoServer::factory(
             new HttpServer(new \Ratchet\WebSocket\WsServer($this->wsServer)),
