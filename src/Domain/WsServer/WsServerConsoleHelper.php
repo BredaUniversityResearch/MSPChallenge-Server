@@ -65,6 +65,12 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             $this->processTableInput($clientId, $event->getEventName(), $clientData, $allowedDataCharsWidth);
         }
         $numClients = count($this->tableInput);
+
+        $wsServerStats = $this->wsServer->getStats();
+        array_walk($wsServerStats, function (&$item, $key) {
+            $item = $key . '=' . Util::formatMilliseconds($item * 1000);
+        });
+
         $this->table
             ->setStyle('box')
             ->setHeaders(['client', 'time', 'event', 'data'])
@@ -75,7 +81,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             ->setColumnWidth(3, $allowedDataCharsWidth)
             ->setFooterTitle(
                 $numClients . ' clients connected / started: ' . $this->startDateTime . ' / ' .
-                Util::getHumanReadableSize(memory_get_usage())
+                Util::getHumanReadableSize(memory_get_usage()) . ' / ' . implode(' / ', $wsServerStats)
             )
         ;
         $this->table->render();
