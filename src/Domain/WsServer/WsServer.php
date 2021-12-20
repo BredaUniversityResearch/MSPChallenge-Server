@@ -146,7 +146,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         require_once 'api/class.apihelper.php';
         APIHelper::SetupApiLoader($this->projectDir . '/');
 
-        $loop->addPeriodicTimer(4, function () {
+        $loop->addPeriodicTimer(2, function () {
             // todo: change all database connection to using drift/dbal
             $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
                 ->groupBy(
