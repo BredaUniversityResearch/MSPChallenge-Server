@@ -23,8 +23,8 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         self::WIDTH_RESERVED_CHARS_EVENT_NAME +
         self::WIDTH_RESERVED_CHARS_TABLE;
 
-    // space required for height, table header, footer and spacing
-    const HEIGHT_RESERVED_CHARS = 7;
+    // space required for height, table header, footer and cursor itself
+    const HEIGHT_RESERVED_LINES = 5;
 
     private WsServer $wsServer;
     private Table $table;
@@ -102,15 +102,20 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         $numClients = max(1, $numClients);
         $data = json_encode($clientData, JSON_PRETTY_PRINT);
         $terminal = new Terminal();
-        $terminalHeight = $this->terminalHeight ?? $terminal->getHeight();
-        if ($terminalHeight < self::HEIGHT_RESERVED_CHARS) {
-            $terminalHeight = self::HEIGHT_RESERVED_CHARS + 1;
-        }
-        $allowedDataCharsHeight = max(
+        $availableTotalLines = $this->terminalHeight ?? $terminal->getHeight();
+        $availableTotalLines -= self::HEIGHT_RESERVED_LINES;
+        $availableTotalLines = max(1, $availableTotalLines); // at least 1 line left to write
+        $minLinesPerClient = floor($availableTotalLines / $numClients);
+        $spareLines = $availableTotalLines - ($minLinesPerClient * $numClients);
+
+        $lines = array_slice(
+            explode("\n", $data),
             1, // remove the first {
-            floor(($terminalHeight - self::HEIGHT_RESERVED_CHARS) / $numClients)
+            // at least 1 line to write for the client -- might push the height limit, is ok
+            max(1, $minLinesPerClient +
+                // add another "spare" line for the first x clients
+                (array_search($clientId, array_keys($this->tableInput)) < $spareLines ? 1 : 0))
         );
-        $lines = array_slice(explode("\n", $data), 1, $allowedDataCharsHeight);
         $clientData = collect($lines)
             ->map(function ($str) use ($allowedDataCharsWidth) {
                 return substr($str, 4, $allowedDataCharsWidth);
