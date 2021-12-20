@@ -36,4 +36,18 @@ class Util
         $time = call_user_func_array('sprintf', array_reverse($args));
         return rtrim($time, '0');
     }
+
+    public static function getMedian(array $values): ?float
+    {
+        $count = count($values);
+        if ($count === 0) {
+            return null;
+        }
+        asort($values);
+        $half = floor($count / 2);
+        if ($count % 2) {
+            return $values[$half];
+        }
+        return ($values[$half - 1] + $values[$half]) / 2.0;
+    }
 }

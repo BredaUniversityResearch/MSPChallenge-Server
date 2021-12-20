@@ -73,9 +73,23 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         $numClients = count($this->tableInput);
 
         $wsServerStats = $this->wsServer->getStats();
-        array_walk($wsServerStats, function (&$item, $key) {
-            $item = $key . '=' . Util::formatMilliseconds($item * 1000);
-        });
+
+        $wsServerStats = collect($wsServerStats)
+            ->groupBy(function ($item, $key) {
+                if (false === $pos = strpos($key, '.')) {
+                    return $key;
+                }
+                return substr($key, 0, $pos);
+            })
+            ->map(function ($items) {
+                return $items->map(function ($item) {
+                    return Util::formatMilliseconds(($item ?? 0) * 1000);
+                })->all();
+            })
+            ->map(function ($items, $key) {
+                return $key . '=' . implode(' ', $items);
+            })
+            ->all();
 
         $this->table
             ->setStyle('box')
@@ -85,10 +99,9 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             ->setColumnWidth(1, self::WIDTH_RESERVED_CHARS_TIME)
             ->setColumnWidth(2, self::WIDTH_RESERVED_CHARS_EVENT_NAME)
             ->setColumnWidth(3, $allowedDataCharsWidth)
-            ->setFooterTitle(
-                $numClients . ' clients connected / started: ' . $this->startDateTime . ' / ' .
-                Util::getHumanReadableSize(memory_get_usage()) . ' / ' . implode(' / ', $wsServerStats)
-            )
+            ->setHeaderTitle($numClients . ' clients connected / started: ' . $this->startDateTime . ' / ' .
+                Util::getHumanReadableSize(memory_get_usage()))
+            ->setFooterTitle(implode(' / ', $wsServerStats))
         ;
         $this->table->render();
     }

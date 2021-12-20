@@ -3,6 +3,7 @@ namespace App\Domain\WsServer;
 
 use APIHelper;
 use App\Domain\Event\NameAwareEvent;
+use App\Domain\Helper\Util;
 use Exception;
 use Game;
 use GuzzleHttp\Psr7\Request;
@@ -26,6 +27,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     private string $projectDir;
     private ?int $gameSessionId = null;
     private array $stats = [];
+    private array $medianValues = [];
 
     protected array $clients = [];
     protected array $clientInfoContainer = [];
@@ -116,6 +118,28 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         $conn->close();
     }
 
+    private function statsLoopStart(string $category)
+    {
+        $this->medianValues[$category] = [];
+        $this->stats[$category.'.worst_of_loop'] = 0;
+        $this->stats[$category.'.median_of_loop'] = 0;
+    }
+
+    private function statsLoopRegister(string $category, float $timeElapsed)
+    {
+        $this->medianValues[$category][] = $timeElapsed;
+        $this->stats[$category.'.worst_of_loop'] = max(
+            $this->stats[$category.'.worst_of_loop'] ?? 0,
+            $timeElapsed
+        );
+        $this->stats[$category.'.worst_ever'] = max($this->stats[$category.'.worst_ever'] ?? 0, $timeElapsed);
+    }
+
+    private function statsLoopEnd(string $category)
+    {
+        $this->stats[$category.'.median_of_loop'] = Util::getMedian($this->medianValues[$category]);
+    }
+
     public function registerLoop(LoopInterface $loop)
     {
         set_include_path(get_include_path() . PATH_SEPARATOR . $this->projectDir);
@@ -136,15 +160,19 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             }
             $dataSent = [];
             $timeStart = microtime(true);
+
+            $this->statsLoopStart('tick');
+            $this->statsLoopStart('latest');
             foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
                 // for backwards compatibility
                 $_REQUEST['session'] = $_GET['session'] = $gameSessionId;
                 $_SERVER['REQUEST_URI'] = '';
 
+                // stats BEGIN
                 $tickTimeStart = microtime(true);
                 $this->getGame()->Tick();
-                $tickTimeElapsed = microtime(true) - $tickTimeStart;
-                $this->stats['tick'] = max($this->stats['tick'] ?? 0, $tickTimeElapsed);
+                $this->statsLoopRegister('tick', microtime(true) - $tickTimeStart);
+                // stats END
 
                 foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                     $latestTimeStart = microtime(true);
@@ -156,8 +184,8 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                     )) {
                         // Client's token has been expired, let the client re-connected with a new token.
                         $this->clients[$connResourceId]->close();
-                        $latestTimeElapsed = microtime(true) - $latestTimeStart;
-                        $this->stats['latest'] = max($this->stats['latest'] ?? 0, $latestTimeElapsed);
+
+                        $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
                         continue;
                     }
                     $payload = $this->getGame()->Latest(
@@ -166,8 +194,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         $clientInfo['user']
                     );
                     if (empty($payload)) {
-                        $latestTimeElapsed = microtime(true) - $latestTimeStart;
-                        $this->stats['latest'] = max($this->stats['latest'] ?? 0, $latestTimeElapsed);
+                        $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
                         continue;
                     }
                     $this->clientInfoContainer[$connResourceId]['last_update_time'] = $payload['update_time'];
@@ -178,12 +205,16 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                     ]);
                     $dataSent[$connResourceId] = $payload;
                     $this->clients[$connResourceId]->send($json);
-                    $latestTimeElapsed = microtime(true) - $latestTimeStart;
-                    $this->stats['latest'] = max($this->stats['latest'] ?? 0, $latestTimeElapsed);
+
+                    $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
                 }
             }
+            $this->statsLoopEnd('tick');
+            $this->statsLoopEnd('latest');
+
             $timeElapsed = microtime(true) - $timeStart;
-            $this->stats['loop'] = max($this->stats['loop'] ?? 0, $timeElapsed);
+            $this->stats['loop'] = $timeElapsed;
+            $this->stats['loop.worst_ever'] = max($this->stats['loop.worst_ever'] ?? 0, $timeElapsed);
             if (!empty($dataSent)) {
                 $this->dispatch(
                     new NameAwareEvent(self::EVENT_ON_CLIENT_MESSAGE_SENT, array_keys($dataSent), $dataSent)
