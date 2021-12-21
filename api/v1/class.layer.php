@@ -308,38 +308,57 @@
 			}
 		}
 
+		private function MetaValueValidation($key, $val)
+		{	
+			// all key-based validation first		
+			$convertZeroToNull = array(
+				"layer_entity_value_max" // float - used to convert 0.0 to null
+			);			
+			if (in_array($key, $convertZeroToNull)) {
+				if (empty($val)) {
+					return null; // meaning: null returned if value was "", null, 0, 0.0 or false
+				}
+			}
+			
+			// all value-based validation second
+			if (is_array($val)) {
+				return json_encode($val);
+			}
+			if ($val == null) {
+				return "";
+			}
+			
+			return $val;
+		}
+
 		private function ImportMetaForLayer(array $layerData, int $dbLayerId)
 		{
+			//these meta vars are to be ignored in the importer
+			$ignoreList = array(
+				"layer_id",
+				"layer_name",
+				"layer_original_id",
+				"layer_raster",
+				"layer_width",
+				"layer_height",
+				"layer_raster_material",
+				"layer_raster_pattern",
+				"layer_raster_minimum_value_cutoff",
+				"layer_raster_color_interpolation",
+				"layer_raster_filter_mode",
+				"approval",
+				"layer_download_from_geoserver"
+			);
+
 			$inserts = "";
 			$insertarr = array();
-			foreach($layerData as $key => $val){
-				//these keys are to be ignored in the importer
-				if($key == "layer_id" || 
-					$key == "layer_name" || 
-					$key == "layer_original_id" || 
-					$key == "layer_raster" || 
-					$key == "layer_width" || 
-					$key == "layer_height" || 
-					$key == "layer_raster_material" || 
-					$key == "layer_raster_pattern" ||
-					$key == "layer_raster_minimum_value_cutoff" ||
-					$key == "layer_raster_color_interpolation" ||
-					$key == "layer_raster_filter_mode" ||
-					$key == "approval" || 
-					$key == "layer_download_from_geoserver" ) {
+			foreach($layerData as $key => $val) {
+				if (in_array($key, $ignoreList)) {
 					continue;
 				}
 				else{
 					$inserts .= $key . "=?, ";
-					if(is_array($val)){
-						array_push($insertarr, json_encode($val));
-					}
-					else{
-						if($val != null)
-							array_push($insertarr, $val);
-						else
-							array_push($insertarr, "");
-					}
+					array_push($insertarr, $this->MetaValueValidation($key, $val));
 				}
 			}
 
