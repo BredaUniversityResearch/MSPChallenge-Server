@@ -252,11 +252,11 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     public function registerLoop(LoopInterface $loop)
     {
         $this->tick();
-        $loop->addPeriodicTimer(2, function() {
-           $this->tick();
+        $loop->addPeriodicTimer(2, function () {
+            $this->tick();
         });
-        $loop->addPeriodicTimer(0.1, function() {
-           $this->latest();
+        $loop->addPeriodicTimer(0.1, function () {
+            $this->latest();
         });
     }
 
