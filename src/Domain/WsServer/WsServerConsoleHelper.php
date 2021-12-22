@@ -49,19 +49,17 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         $this->terminalHeight = $terminalHeight;
     }
 
-    public function notifyWsServerDataChange(NameAwareEvent $event): void
+    private function process(NameAwareEvent $event, int $allowedDataCharsWidth): void
     {
-        $this->output->write(sprintf("\033\143"));
-
-        $clientIds = $event->getSubject();
+        if (null === $clientIds = $event->getSubject()) {
+            return;
+        }
         $clientDataContainer = $event->getArguments();
         // convert to array
         if (!is_array($clientIds)) {
             $clientDataContainer = [$clientIds => $clientDataContainer];
             $clientIds = [$clientIds];
         }
-        $terminal = new Terminal();
-        $allowedDataCharsWidth = max(0, $terminal->getWidth() - self::WIDTH_RESERVED_CHARS);
         foreach ($clientIds as $clientId) {
             if ($event->getEventName() == WsServer::EVENT_ON_CLIENT_DISCONNNECTED) {
                 unset($this->tableInput[$clientId]);
@@ -70,11 +68,12 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             $clientData = $clientDataContainer[$clientId];
             $this->processTableInput($clientId, $event->getEventName(), $clientData, $allowedDataCharsWidth);
         }
-        $numClients = count($this->tableInput);
+    }
 
+    private function getWsServerStats(): array
+    {
         $wsServerStats = $this->wsServer->getStats();
-
-        $wsServerStats = collect($wsServerStats)
+        return collect($wsServerStats)
             ->groupBy(function ($item, $key) {
                 if (false === $pos = strpos($key, '.')) {
                     return $key;
@@ -90,7 +89,15 @@ class WsServerConsoleHelper implements EventSubscriberInterface
                 return $key . '=' . implode(' ', $items);
             })
             ->all();
+    }
 
+    public function notifyWsServerDataChange(NameAwareEvent $event): void
+    {
+        $terminal = new Terminal();
+        $allowedDataCharsWidth = max(0, $terminal->getWidth() - self::WIDTH_RESERVED_CHARS);
+        $this->process($event, $allowedDataCharsWidth);
+        $wsServerStats = $this->getWsServerStats();
+        $numClients = count($this->tableInput);
         $this->table
             ->setStyle('box')
             ->setHeaders(['client', 'time', 'event', 'data'])
@@ -103,11 +110,19 @@ class WsServerConsoleHelper implements EventSubscriberInterface
                 Util::getHumanReadableSize(memory_get_usage()))
             ->setFooterTitle(implode(' / ', $wsServerStats))
         ;
-        $this->table->render();
+        if ($event->getEventName() == WsServer::EVENT_ON_STATS_UPDATE) {
+            $this->output->write(sprintf("\033\143"));
+            $this->table->render();
+            return;
+        }
     }
 
-    private function processTableInput($clientId, $eventName, $clientData, $allowedDataCharsWidth)
-    {
+    private function processTableInput(
+        int $clientId,
+        string $eventName,
+        array $clientData,
+        int $allowedDataCharsWidth
+    ): void {
         $numClients = count($this->tableInput);
         if ($eventName == WsServer::EVENT_ON_CLIENT_CONNECTED) {
             $numClients += 1;
@@ -150,7 +165,8 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             WsServer::EVENT_ON_CLIENT_DISCONNNECTED => 'notifyWsServerDataChange',
             WsServer::EVENT_ON_CLIENT_ERROR => 'notifyWsServerDataChange',
             WsServer::EVENT_ON_CLIENT_MESSAGE_RECEIVED => 'notifyWsServerDataChange',
-            WsServer::EVENT_ON_CLIENT_MESSAGE_SENT => 'notifyWsServerDataChange'
+            WsServer::EVENT_ON_CLIENT_MESSAGE_SENT => 'notifyWsServerDataChange',
+            WsServer::EVENT_ON_STATS_UPDATE => 'notifyWsServerDataChange'
         ];
     }
 }

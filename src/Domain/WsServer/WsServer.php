@@ -23,6 +23,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     const EVENT_ON_CLIENT_ERROR = 'EVENT_ON_CLIENT_ERROR';
     const EVENT_ON_CLIENT_MESSAGE_RECEIVED = 'EVENT_ON_CLIENT_MESSAGE_RECEIVED';
     const EVENT_ON_CLIENT_MESSAGE_SENT = 'EVENT_ON_CLIENT_MESSAGE_SENT';
+    const EVENT_ON_STATS_UPDATE = 'EVENT_ON_STATS_UPDATE';
 
     private string $projectDir;
     private ?int $gameSessionId = null;
@@ -139,85 +140,123 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     private function statsLoopEnd(string $category)
     {
+        if (!array_key_exists($category.'.median_of_loop', $this->stats)) {
+            return;
+        }
         $this->stats[$category.'.median_of_loop'] = Util::getMedian($this->medianValues[$category]);
+    }
+
+    private function tick()
+    {
+        // todo: change all database connection to using drift/dbal
+        $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
+            ->groupBy(
+                function ($value, $key) {
+                    return $this->clientHeaders[$key][WsServer::HEADER_GAME_SESSION_ID];
+                },
+                true
+            );
+        if ($this->gameSessionId != null) {
+            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($this->gameSessionId);
+        }
+        $timeStart = microtime(true);
+
+        // end previous loop of "latest"
+        $this->statsLoopEnd('latest');
+
+        $this->dispatch(
+            new NameAwareEvent(self::EVENT_ON_STATS_UPDATE)
+        );
+
+        // start a new
+        $this->statsLoopStart('tick');
+        $this->statsLoopStart('latest'); // such that "latest" median are measured within the tick period of 2 sec
+        foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
+            // for backwards compatibility
+            $_REQUEST['session'] = $_GET['session'] = $gameSessionId;
+            $_SERVER['REQUEST_URI'] = '';
+
+            // stats BEGIN
+            $tickTimeStart = microtime(true);
+            $this->getGame()->Tick();
+            $this->statsLoopRegister('tick', microtime(true) - $tickTimeStart);
+            // stats END
+        }
+        $this->statsLoopEnd('tick');
+
+        $timeElapsed = microtime(true) - $timeStart;
+        $this->stats['loop'] = $timeElapsed; // such that "loop" is measured within the tick period of 2 sec
+        $this->stats['loop.worst_ever'] = max($this->stats['loop.worst_ever'] ?? 0, $timeElapsed);
+    }
+
+    private function latest()
+    {
+        // todo: change all database connection to using drift/dbal
+        $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
+            ->groupBy(
+                function ($value, $key) {
+                    return $this->clientHeaders[$key][WsServer::HEADER_GAME_SESSION_ID];
+                },
+                true
+            );
+        if ($this->gameSessionId != null) {
+            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($this->gameSessionId);
+        }
+        $dataSent = [];
+        foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
+            // for backwards compatibility
+            $_REQUEST['session'] = $_GET['session'] = $gameSessionId;
+            $_SERVER['REQUEST_URI'] = '';
+            foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
+                $latestTimeStart = microtime(true);
+                $accessTimeRemaining = 0; // not used
+                if (false === $this->getSecurity()->validateAccess(
+                    Security::ACCESS_LEVEL_FLAG_FULL,
+                    $accessTimeRemaining,
+                    $this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]
+                )) {
+                    // Client's token has been expired, let the client re-connected with a new token.
+                    $this->clients[$connResourceId]->close();
+
+                    $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
+                    continue;
+                }
+                $payload = $this->getGame()->Latest(
+                    $clientInfo['team_id'],
+                    $clientInfo['last_update_time'],
+                    $clientInfo['user']
+                );
+                if (empty($payload)) {
+                    $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
+                    continue;
+                }
+                $this->clientInfoContainer[$connResourceId]['last_update_time'] = $payload['update_time'];
+                $json = json_encode([
+                    "success" => true,
+                    "message" => null,
+                    "payload" => $payload
+                ]);
+                $dataSent[$connResourceId] = $payload;
+                $this->clients[$connResourceId]->send($json);
+
+                $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
+            }
+        }
+        if (!empty($dataSent)) {
+            $this->dispatch(
+                new NameAwareEvent(self::EVENT_ON_CLIENT_MESSAGE_SENT, array_keys($dataSent), $dataSent)
+            );
+        }
     }
 
     public function registerLoop(LoopInterface $loop)
     {
-        $loop->addPeriodicTimer(2, function () {
-            // todo: change all database connection to using drift/dbal
-            $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
-                ->groupBy(
-                    function ($value, $key) {
-                        return $this->clientHeaders[$key][WsServer::HEADER_GAME_SESSION_ID];
-                    },
-                    true
-                );
-            if ($this->gameSessionId != null) {
-                $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($this->gameSessionId);
-            }
-            $dataSent = [];
-            $timeStart = microtime(true);
-
-            $this->statsLoopStart('tick');
-            $this->statsLoopStart('latest');
-            foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
-                // for backwards compatibility
-                $_REQUEST['session'] = $_GET['session'] = $gameSessionId;
-                $_SERVER['REQUEST_URI'] = '';
-
-                // stats BEGIN
-                $tickTimeStart = microtime(true);
-                $this->getGame()->Tick();
-                $this->statsLoopRegister('tick', microtime(true) - $tickTimeStart);
-                // stats END
-
-                foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
-                    $latestTimeStart = microtime(true);
-                    $accessTimeRemaining = 0; // not used
-                    if (false === $this->getSecurity()->validateAccess(
-                        Security::ACCESS_LEVEL_FLAG_FULL,
-                        $accessTimeRemaining,
-                        $this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]
-                    )) {
-                        // Client's token has been expired, let the client re-connected with a new token.
-                        $this->clients[$connResourceId]->close();
-
-                        $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
-                        continue;
-                    }
-                    $payload = $this->getGame()->Latest(
-                        $clientInfo['team_id'],
-                        $clientInfo['last_update_time'],
-                        $clientInfo['user']
-                    );
-                    if (empty($payload)) {
-                        $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
-                        continue;
-                    }
-                    $this->clientInfoContainer[$connResourceId]['last_update_time'] = $payload['update_time'];
-                    $json = json_encode([
-                        "success" => true,
-                        "message" => null,
-                        "payload" => $payload
-                    ]);
-                    $dataSent[$connResourceId] = $payload;
-                    $this->clients[$connResourceId]->send($json);
-
-                    $this->statsLoopRegister('latest', microtime(true) - $latestTimeStart);
-                }
-            }
-            $this->statsLoopEnd('tick');
-            $this->statsLoopEnd('latest');
-
-            $timeElapsed = microtime(true) - $timeStart;
-            $this->stats['loop'] = $timeElapsed;
-            $this->stats['loop.worst_ever'] = max($this->stats['loop.worst_ever'] ?? 0, $timeElapsed);
-            if (!empty($dataSent)) {
-                $this->dispatch(
-                    new NameAwareEvent(self::EVENT_ON_CLIENT_MESSAGE_SENT, array_keys($dataSent), $dataSent)
-                );
-            }
+        $this->tick();
+        $loop->addPeriodicTimer(2, function() {
+           $this->tick();
+        });
+        $loop->addPeriodicTimer(0.1, function() {
+           $this->latest();
         });
     }
 
