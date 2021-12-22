@@ -1,102 +1,93 @@
 <?php
 
+// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
 class Config
 {
-	private $msp_auth = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/";
-		
-	private static $instance;
-	public static function GetInstance()
-	{
-		if (Config::$instance == null)
-		{
-			Config::$instance = new Config();
-		}
-		return Config::$instance;
-	}
+    private const DEFAULT_GAME_AUTOSAVE_INTERVAL = 120;
+    private const MSP_AUTH = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/";
+        
+    private static ?Config $instance = null;
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public static function GetInstance(): self
+    {
+        if (self::$instance == null) {
+            self::$instance = new Config();
+        }
+        return self::$instance;
+    }
 
-	private $configRoot = null;
+    private ?array $configRoot = null;
 
-	private function __construct()
-	{
-		$this->LoadConfigFile();
-	}
+    private function __construct()
+    {
+        $this->LoadConfigFile();
+    }
 
-	private function LoadConfigFile()
-	{
-		require_once(APIHelper::GetBaseFolder()."api_config.php");
-		$this->configRoot = $GLOBALS['api_config'];
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    private function LoadConfigFile(): void
+    {
+        /** @noinspection PhpIncludeInspection */
+        require_once(APIHelper::GetBaseFolder().'api_config.php');
+        $this->configRoot = $GLOBALS['api_config'];
+    }
 
-	public function GetCodeBranch()
-	{
-		return $this->configRoot["code_branch"];
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetAuth(): string
+    {
+        return self::MSP_AUTH;
+    }
 
-	public function GetAuth() 
-	{
-		return $this->msp_auth;
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetAuthJWTRetrieval(): string
+    {
+        return $this->GetAuth().'getjwt.php';
+    }
 
-	public function GetAuthJWTRetrieval() 
-	{
-		return $this->GetAuth()."getjwt.php";
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetAuthJWTUserCheck(): string
+    {
+        return $this->GetAuth().'checkuserjwt.php';
+    }
 
-	public function GetAuthJWTUserCheck() 
-	{
-		return $this->GetAuth()."checkuserjwt.php";
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetAuthWithProxy(): ?string
+    {
+        return $this->configRoot['msp_auth_with_proxy'] ?? null;
+    }
 
-	public function GetGeoserverCredentialsEndpoint()
-	{
-		return $this->GetAuth()."geocredjwt.php";
-	}
-	
-	public function GetAuthWithProxy()
-	{
-		if (!empty($this->configRoot["msp_auth_with_proxy"])) return $this->configRoot["msp_auth_with_proxy"];
-		else return false;
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetGameAutosaveInterval(): int
+    {
+        return $this->configRoot['game_autosave_interval'] ?? self::DEFAULT_GAME_AUTOSAVE_INTERVAL;
+    }
 
-	public function GetGameAutosaveInterval()
-	{
-		return $this->configRoot["game_autosave_interval"];
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetLongRequestTimeout(): int
+    {
+        return $this->configRoot['long_request_timeout'] ?? ini_get('max_execution_time');
+    }
 
-	public function GetLongRequestTimeout()
-	{
-		return $this->configRoot["long_request_timeout"];
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function ShouldWaitForSimulationsInDev(): bool
+    {
+        return $this->configRoot['wait_for_simulations_in_dev'] ?? false;
+    }
 
-	public function ShouldWaitForSimulationsInDev()
-	{
-		return $this->configRoot["wait_for_simulations_in_dev"];
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function WikiConfig(): array
+    {
+        return $this->configRoot['wiki'] ?? [];
+    }
 
-	public function RemoteApiUrl()
-	{
-		return $this->configRoot["remote_api_url"];
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function DatabaseConfig(): array
+    {
+        return $this->configRoot['database'] ?? [];
+    }
 
-	public function WikiConfig()
-	{
-		return $this->configRoot["wiki"];
-	}
-
-	public function DevConfig()
-	{
-		return isset($this->configRoot["dev_config"])? $this->configRoot["dev_config"] : array();
-	}
-
-	public function DatabaseConfig()
-	{
-		return isset($this->configRoot["database"])? $this->configRoot["database"] : array();
-	}
-
-	public function GetUnitTestLoggerConfig()
-	{
-		return isset($this->configRoot["unit_test_logger"])? $this->configRoot["unit_test_logger"] : array();
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetUnitTestLoggerConfig(): array
+    {
+        return $this->configRoot['unit_test_logger'] ?? [];
+    }
 }
-
-?>

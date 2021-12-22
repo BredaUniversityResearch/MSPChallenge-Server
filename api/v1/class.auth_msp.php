@@ -1,127 +1,123 @@
 <?php
 
-/* 
-when you create your own authentication provider subclass, make sure you define these methods:
-public function getName();
-public function authenticate($username, $password);
-just like in the default MSP Challenge authentication provider below.
-*/
-
+/**
+ * when you create your own authentication provider subclass, make sure you define these methods:
+ * public function getName();
+ * public function authenticate($username, $password);
+ * just like in the default MSP Challenge authentication provider below.
+ *
+ * @noinspection PhpUnused
+ */
+// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace,Squiz.Classes.ValidClassName.NotCamelCaps
 class Auth_MSP extends Auths
 {
-
-    private $name = 'MSP Challenge';
+    private string $name = 'MSP Challenge';
     
-    public function getName() 
+    public function getName(): string
     {
-        return $this->name; 
-    }   
-    
-    public function authenticate($username, $password)
-    {
-        // get a temp JWT from the Authoriser for further communication
-        try {
-            // for this we first need this MSP Challenge's server_id from the ServerManager
-            $servermanager_return = json_decode(
-                                        $this->CallBack(
-                                            GameSession::GetServerManagerApiRoot()."readServerManager.php", 
-                                            array(
-                                                "token" => (new Security())->GetServerManagerToken()["token"], 
-                                                "session_id" => GameSession::GetGameSessionIdForCurrentRequest()
-                                            )
-                                        )
-                                    ); 
-            if (!$servermanager_return->success) throw new Exception();
-            // and we send the server_id through to the Authoriser to request a jwt (JSON web token)
-            $jwt_return = json_decode(
-                            $this->CallBack(
-                                Config::getInstance()->GetAuthJWTRetrieval(), 
-                                array(
-                                    "audience" => GameSession::GetRequestApiRoot(), 
-                                    "server_id" => $servermanager_return->servermanager->server_id
-                                ), 
-                                array(), // no headers
-                                false, // synchronous, so wait
-                                true // post as json
-                            )
-                        ); 
-        } catch (Exception $e) {
-            $jwt_return = new stdClass();
-            $jwt_return->success = false;
-        }
-        if ($jwt_return->success) {
-            $jwt = $jwt_return->jwt;
-            // use the jwt to check the sent username and password at the Authoriser
-            $usercheck_return = json_decode($this->CallBack(Config::getInstance()->GetAuthJWTUserCheck(), 
-                                    array("jwt" => $jwt, 
-                                          "audience" => GameSession::GetRequestApiRoot(), 
-                                          "username" => $username, 
-                                          "password" => $password), 
-                                    array(), // no headers 
-                                    false,  // synchronous, so wait
-                                    true)); // post as json
-            if ($usercheck_return->success) {
-                return $usercheck_return->username; //$usercheck_return->email;
-            }
-            else {
-                throw new Exception("Username and/or password incorrect.");
-            }
-        }
-        throw new Exception("Could not authenticate through ".$this->getName().". Try again later or get in touch with your facilitator.");
+        return $this->name;
     }
 
-    public function checkuser($users)
+    private function getJsonWebTokenObject(): object
     {
         // get a temp JWT from the Authoriser for further communication
         try {
             // for this we first need this MSP Challenge's server_id from the ServerManager
-            $servermanager_return = json_decode(
+            $serverManagerReturn = json_decode(
                 $this->CallBack(
-                    GameSession::GetServerManagerApiRoot()."readServerManager.php", 
+                    GameSession::GetServerManagerApiRoot()."readServerManager.php",
                     array(
-                        "token" => (new Security())->GetServerManagerToken()["token"], 
+                        "token" => (new Security())->GetServerManagerToken()["token"],
                         "session_id" => GameSession::GetGameSessionIdForCurrentRequest()
                     )
                 )
-            ); 
-            if (!$servermanager_return->success) throw new Exception();
+            );
+            if (!$serverManagerReturn->success) {
+                throw new Exception();
+            }
             // and we send the server_id through to the Authoriser to request a jwt (JSON web token)
-            $jwt_return = json_decode(
-                            $this->CallBack(
-                                Config::getInstance()->GetAuthJWTRetrieval(), 
-                                array(
-                                    "audience" => GameSession::GetRequestApiRoot(), 
-                                    "server_id" => $servermanager_return->servermanager->server_id
-                                ), 
-                                array(), // no headers
-                                false, // synchronous, so wait
-                                true // post as json
-                            )
-                        ); 
+            $jwtReturn = json_decode(
+                $this->CallBack(
+                    Config::getInstance()->GetAuthJWTRetrieval(),
+                    array(
+                        "audience" => GameSession::GetRequestApiRoot(),
+                        "server_id" => $serverManagerReturn->servermanager->server_id
+                    ),
+                    array(), // no headers
+                    false, // synchronous, so wait
+                    true // post as json
+                )
+            );
         } catch (Exception $e) {
-            $jwt_return = new stdClass();
-            $jwt_return->success = false;
+            $jwtReturn = new stdClass();
+            $jwtReturn->success = false;
         }
-        if ($jwt_return->success) {
-            $jwt = $jwt_return->jwt;
-            // use the jwt to check the sent username and password at the Authoriser
-            $usercheck_return = json_decode($this->CallBack(Config::getInstance()->GetAuthJWTUserCheck(), 
-                                    array("jwt" => $jwt, 
-                                          "audience" => GameSession::GetRequestApiRoot(), 
-                                          "username" => $users), 
-                                    array(), // no headers 
-                                    false,  // synchronous, so wait
-                                    true)); // post as json
-            if ($usercheck_return->success) {
-                return array("found" => $usercheck_return->found, "notfound" => $usercheck_return->notfound);
-            }
-            else {
-                throw new Exception("Users not found.");
-            }
-        }
-        throw new Exception("Could not authenticate through ".$this->getName().". Try again later or get in touch with your facilitator.");
+        return $jwtReturn;
     }
 
-}
+    /**
+     * @throws Exception
+     */
+    public function authenticate(string $username, string $password): string
+    {
+        $jwtReturn = $this->getJsonWebTokenObject();
+        if (!$jwtReturn->success) {
+            throw new Exception(
+                "Could not authenticate through ".$this->getName().
+                ". Try again later or get in touch with your facilitator."
+            );
+        }
 
-?>
+        $jwt = $jwtReturn->jwt;
+        // use the jwt to check the sent username and password at the Authoriser
+        $userCheckReturn = json_decode($this->CallBack(
+            Config::getInstance()->GetAuthJWTUserCheck(),
+            array(
+                "jwt" => $jwt,
+                "audience" => GameSession::GetRequestApiRoot(),
+                "username" => $username,
+                "password" => $password
+            ),
+            array(), // no headers
+            false,  // synchronous, so wait
+            true
+        )); // post as json
+        if (!$userCheckReturn->success) {
+            throw new Exception("Username and/or password incorrect.");
+        }
+        return $userCheckReturn->username; //$userCheckReturn->email;
+    }
+
+    /**
+     * @throws Exception
+     * @noinspection SpellCheckingInspection
+     */
+    public function checkuser(string $username): array
+    {
+        $jwtReturn = $this->getJsonWebTokenObject();
+        if (!$jwtReturn->success) {
+            throw new Exception(
+                "Could not authenticate through ".$this->getName().
+                ". Try again later or get in touch with your facilitator."
+            );
+        }
+        $jwt = $jwtReturn->jwt;
+        // use the jwt to check the sent username and password at the Authoriser
+        $usercheck_return = json_decode($this->CallBack(
+            Config::getInstance()->GetAuthJWTUserCheck(),
+            array(
+                "jwt" => $jwt,
+                "audience" => GameSession::GetRequestApiRoot(),
+                "username" => $username
+            ),
+            array(), // no headers
+            false,  // synchronous, so wait
+            true
+        )); // post as json
+        if (!is_object($usercheck_return) || !property_exists($usercheck_return, 'success') ||
+            !$usercheck_return->success) {
+            throw new Exception("Users not found.");
+        }
+        return array("found" => $usercheck_return->found, "notfound" => $usercheck_return->notfound);
+    }
+}

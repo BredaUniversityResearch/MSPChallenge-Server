@@ -1,9 +1,10 @@
 <?php
 
+// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
 abstract class Auths extends Base
 {
     // delete this after initial development!
-    protected $allowed = array(
+    private const ALLOWED = array(
         ["getName", Security::ACCESS_LEVEL_FLAG_NONE],
         ["authenticate", Security::ACCESS_LEVEL_FLAG_NONE],
         ["checkuser", Security::ACCESS_LEVEL_FLAG_NONE],
@@ -11,20 +12,18 @@ abstract class Auths extends Base
     );
     // because authconn will talk to the auth providers only
 
-    public function __construct($method = "")
+    public function __construct(string $method = '')
     {
-        parent::__construct($method);
+        parent::__construct($method, self::ALLOWED);
     }
 
     abstract public function getName();
-    abstract public function authenticate($username, $password);
-    abstract public function checkuser($username);
+    abstract public function authenticate(string $username, string $password);
 
-    public function authorize($username, $team) 
+    /** @noinspection SpellCheckingInspection */
+    abstract public function checkuser(string $username): array;
+
+    public function authorize(string $username, string $team)
     {
-
     }
-
 }
-
-?>

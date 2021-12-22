@@ -2,11 +2,11 @@
 set -e
 
 function summary() {
-  ./tools/phpcs --standard=PSR2 --report=summary -n "$1"
+  ./tools/phpcs --standard=PSR2 --report=summary "$1"
 }
 
 function lint() {
-  ./tools/phpcs --standard=PSR2 -n "$1"
+  ./tools/phpcs --standard=PSR2 "$1" -s
 }
 
 function detectMess() {
@@ -21,6 +21,7 @@ PATHS="
 src
 ServerManager/config.php
 legacy.php
+api/v1
 "
 
 for p in $PATHS
