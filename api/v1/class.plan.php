@@ -1037,7 +1037,7 @@
 					$fixedGeometryId = $mappedGeometryIds[$baseGeometryInfo["geometry_persistent"]];
 				}
 				else {
-					Base::Debug("Found geometry ID (Fallback field \"geometry_persistent\": ". $baseGeometryInfo["geometry_persistent"].") which is not referenced by msp id and hasn't been imported by the plans importer yet.");
+					Base::Debug("Found geometry ID (Fallback field \"geometry_persistent\": ". $baseGeometryInfo["geometry_persistent"].") which is not referenced by msp id and hasn't been imported by the plans importer yet. ".var_export($baseGeometryInfo, true));
 				}
 			}
 			return $fixedGeometryId;
