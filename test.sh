@@ -21,7 +21,8 @@ PATHS="
 src
 ServerManager/config.php
 legacy.php
-api/v1
+api
+api_test
 "
 
 for p in $PATHS

@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Batch extends Base
 {
     private const REFERENCE_SPECIFIER = "!Ref:";
@@ -107,7 +110,13 @@ class Batch extends Base
             $endpoint = $task['api_batch_task_api_endpoint'];
             $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
 
-            array_walk_recursive($callData, "Batch::FixupReferences", $cachedResults);
+            array_walk_recursive(
+                $callData,
+                function (&$value, $key, array $presentResults) {
+                    self::FixupReferences($value, $key, $presentResults);
+                },
+                $cachedResults
+            );
 
             $endpointData = Router::ParseEndpointString($endpoint);
             $taskResult = Router::ExecuteCall($endpointData['class'], $endpointData['method'], $callData, false);
@@ -134,7 +143,6 @@ class Batch extends Base
      * @param mixed $key
      * @param array $presentResults
      * @throws Exception
-     * @noinspection PhpUnusedParameterInspection
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function FixupReferences(&$value, $key, array $presentResults): void

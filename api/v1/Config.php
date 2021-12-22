@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use App\Domain\API\APIHelper;
+
 class Config
 {
     private const DEFAULT_GAME_AUTOSAVE_INTERVAL = 120;
@@ -27,7 +30,7 @@ class Config
     private function LoadConfigFile(): void
     {
         /** @noinspection PhpIncludeInspection */
-        require_once(APIHelper::GetBaseFolder().'api_config.php');
+        require_once(APIHelper::getInstance()->GetBaseFolder().'api_config.php');
         $this->configRoot = $GLOBALS['api_config'];
     }
 

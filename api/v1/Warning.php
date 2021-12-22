@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Warning extends Base
 {
     private const ALLOWED = array(
@@ -16,10 +19,6 @@ class Warning extends Base
 
     /**
      * @apiGroup Warning
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {POST} /warning/post Post
      * @apiParam {added} Json array of IssueObjects that are added.
@@ -97,7 +96,6 @@ class Warning extends Base
 
     /**
      * @apiGroup Warning
-     * @throws Exception
      * @throws Exception
      * @api {POST} /warning/SetShippingIssues Set shipping issues
      * @apiParam {string} issues The JSON encoded issues of SEL.APIShippingIssue type.

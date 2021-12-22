@@ -1,16 +1,16 @@
 <?php
 namespace App\Domain\WsServer;
 
-use APIHelper;
+use App\Domain\API\APIHelper;
+use App\Domain\API\v1\Game;
+use App\Domain\API\v1\Security;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\Helper\Util;
 use Exception;
-use Game;
 use GuzzleHttp\Psr7\Request;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use React\EventLoop\LoopInterface;
-use Security;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class WsServer extends EventDispatcher implements MessageComponentInterface
@@ -38,8 +38,11 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         return $this->stats;
     }
 
-    public function __construct(string $projectDir)
-    {
+    public function __construct(
+        string $projectDir,
+        // below is required by legacy to be auto-wired
+        \App\Domain\API\APIHelper $apiHelper
+    ) {
         $this->projectDir = $projectDir;
         parent::__construct();
     }
@@ -78,7 +81,6 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             $conn->close();
             return;
         }
-
 
         // not a valid token, connection not allowed
         $accessTimeRemaining = 0;
@@ -142,10 +144,6 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     public function registerLoop(LoopInterface $loop)
     {
-        set_include_path(get_include_path() . PATH_SEPARATOR . $this->projectDir);
-        require_once 'api/class.apihelper.php';
-        APIHelper::SetupApiLoader($this->projectDir . '/');
-
         $loop->addPeriodicTimer(2, function () {
             // todo: change all database connection to using drift/dbal
             $clientInfoPerSessionContainer = collect($this->clientInfoContainer)

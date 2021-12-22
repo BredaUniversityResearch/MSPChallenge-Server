@@ -1,6 +1,7 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
 abstract class Auths extends Base
 {
     // delete this after initial development!
@@ -17,8 +18,8 @@ abstract class Auths extends Base
         parent::__construct($method, self::ALLOWED);
     }
 
-    abstract public function getName();
-    abstract public function authenticate(string $username, string $password);
+    abstract public function getName(): string;
+    abstract public function authenticate(string $username, string $password): string;
 
     /** @noinspection SpellCheckingInspection */
     abstract public function checkuser(string $username): array;

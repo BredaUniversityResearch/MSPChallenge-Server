@@ -1,6 +1,12 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+use PDO;
+use PDOException;
+use PDOStatement;
+
 class Database
 {
     private bool $configurationApplied = false;

@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Layer extends Base
 {
     public GeoServer $geoserver;
@@ -42,9 +45,6 @@ class Layer extends Base
     /**
      * @apiGroup Layer
      * @apiDescription Export a layer to .json
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {POST} /layer/Export/ Export
      * @apiParam {int} layer_id id of the layer to export
@@ -213,9 +213,6 @@ class Layer extends Base
     /**
      * @apiGroup Layer
      * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @api {POST} /layer/GetRaster GetRaster
      * @apiParam layer_name Name of the layer corresponding to the image data.
      * @apiDescription Retrieves image data for raster.
@@ -275,10 +272,6 @@ class Layer extends Base
     /**
      * @apiGroup Layer
      * @apiDescription Import metadata for a set of layers as defined under 'meta' in the session's config file
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {POST} /layer/ImportMeta
      * @apiParam {string} configFilename
@@ -488,7 +481,6 @@ class Layer extends Base
      * @apiGroup Layer
      * @apiDescription Gets a single layer meta data by name.
      * @throws Exception
-     * @throws Exception
      * @api {POST} /layer/MetaByName MetaByName
      * @apiParam {string} name name of the layer that we want the meta for
      * @apiSuccess {string} JSON JSON Object.
@@ -561,11 +553,6 @@ class Layer extends Base
 
     /**
      * @apiGroup Layer
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {POST} /layer/UpdateRaster
      * @apiParam {string} layer_name Name of the layer the raster image is for.

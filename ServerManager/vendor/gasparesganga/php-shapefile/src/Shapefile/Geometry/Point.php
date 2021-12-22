@@ -54,7 +54,7 @@ class Point extends Geometry
     private $y = null;
     
     /**
-     * @var floa|null   Z coordinate
+     * @var float|null   Z coordinate
      */
     private $z = null;
     

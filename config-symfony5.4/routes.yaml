@@ -40,6 +40,12 @@ legacy_api:
     query: '.*'
     slashes: '(\/+)?'
 
+legacy_api_test:
+  path: '/api_test{anything}'
+  controller: App\Controller\LegacyController::apiTest
+  requirements:
+    anything: '.*'
+
 legacy_not_found:
   path: '/{anything}'
   controller: App\Controller\LegacyController::notFound

@@ -1,5 +1,10 @@
 <?php
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+
+namespace App\Domain\API\v1;
+
+use Exception;
+use stdClass;
+
 class Cel extends Base
 {
     private const ALLOWED = array(
@@ -69,7 +74,6 @@ class Cel extends Base
 
     /**
      * @apiGroup Cel
-     * @throws Exception
      * @throws Exception
      * @api {POST} /cel/ShouldUpdate Should Update
      * @apiDescription Should Cel update this month?
@@ -249,7 +253,6 @@ class Cel extends Base
 
     /**
      * @apiGroup Cel
-     * @throws Exception
      * @throws Exception
      * @api {POST} /cel/SetGridCapacity Set Grid Capacity
      * @apiDescription Set the energy capacity of a grid per country, uses the server month time

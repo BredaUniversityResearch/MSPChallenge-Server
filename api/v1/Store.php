@@ -1,6 +1,14 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+use Generator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use stdClass;
+use ZipArchive;
+
 class Store extends Base
 {
     public GeoServer $geoserver;

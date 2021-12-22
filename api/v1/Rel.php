@@ -1,7 +1,10 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
-class REL extends Base
+namespace App\Domain\API\v1;
+
+use Exception;
+
+class Rel extends Base
 {
     private const ALLOWED = array(
         "GetRestrictionGeometry",

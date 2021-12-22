@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Game extends Base
 {
     private string $watchdog_address = '';

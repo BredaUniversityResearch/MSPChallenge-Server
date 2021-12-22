@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Security extends Base
 {
     const ACCESS_LEVEL_FLAG_FULL = 0x7FFFFFFF;
@@ -52,9 +55,6 @@ class Security extends Base
 
     /**
      * @apiGroup Security
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {POST} /security/RequestToken RequestToken
      * @apiDescription Requests a new access token for the API.

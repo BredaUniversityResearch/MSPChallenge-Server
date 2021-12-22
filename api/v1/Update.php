@@ -1,6 +1,11 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use App\Domain\API\APIHelper;
+use Exception;
+use Throwable;
+
 class Update extends Base
 {
     private const ALLOWED = array(
@@ -61,20 +66,20 @@ class Update extends Base
         $configuredSimulations = $sims->GetConfiguredSimulationTypes();
         if (array_key_exists("MEL", $configuredSimulations)) {
             Log::LogInfo("SetupSimulations -> Setting up MEL tables...");
-            $mel = new MEL();
+            $mel = new Mel();
             $mel->OnReimport($data['MEL']);
             Log::LogInfo("SetupSimulations -> Done setting up MEL...");
         }
 
         if (array_key_exists("SEL", $configuredSimulations)) {
             Log::LogInfo("SetupSimulations -> Setting up SEL tables...");
-            $sel = new SEL();
+            $sel = new Sel();
             $sel->ReimportShippingLayers();
         }
         
         if (array_key_exists("REL", $configuredSimulations)) {
             Log::LogInfo("SetupSimulations -> Setting up REL tables...");
-            $rel = new REL();
+            $rel = new Rel();
             $rel->OnReimport();
         }
         Log::LogInfo(
@@ -314,21 +319,19 @@ class Update extends Base
         //Ensure database exists
         $db = Database::GetInstance();
         $db->CreateDatabaseAndSelect();
-
         //import the db structure
-        $query = file_get_contents(APIHelper::GetCurrentSessionServerApiFolder()."mysql_structure.sql");
+        $query = file_get_contents(APIHelper::getInstance()->GetCurrentSessionServerApiFolder()."mysql_structure.sql");
         //Replace the default database name with the desired one required for the session.
         $query = str_replace("`".$defaultDatabaseName."`", "`".$db->GetDatabaseName()."`", $query);
         $db->query($query);
-        //file_put_contents(APIHelper::GetCurrentSessionServerApiFolder()."mysql_structure_edit.sql", $query);
 
         //run the inserts
-        $query = file_get_contents(APIHelper::GetCurrentSessionServerApiFolder()."mysql_inserts.sql");
+        $query = file_get_contents(APIHelper::getInstance()->GetCurrentSessionServerApiFolder()."mysql_inserts.sql");
         $query = str_replace("`".$defaultDatabaseName."`", "`".$db->GetDatabaseName()."`", $query);
         $db->query($query);
         $db->query(
             "INSERT INTO game_session_api_version (game_session_api_version_server) VALUES (?)",
-            array(APIHelper::GetCurrentSessionServerApiVersion())
+            array(APIHelper::getInstance()->GetCurrentSessionServerApiVersion())
         );
 
         $game = new Game();

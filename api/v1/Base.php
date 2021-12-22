@@ -1,11 +1,16 @@
 <?php
 
+namespace App\Domain\API\v1;
+
+use App\Domain\API\APIHelper;
+use Exception;
+use TypeError;
+
 function IsFeatureFlagEnabled(string $featureName): bool
 {
     return (isset($GLOBALS['feature_flags'][$featureName]) && $GLOBALS['feature_flags'][$featureName] == true);
 }
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
 class Base
 {
     public static bool $debug = false;
@@ -277,7 +282,7 @@ class Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AutoloadAllClasses(): void
     {
-        $apifolder = APIHelper::GetCurrentSessionServerApiFolder();
+        $apifolder = APIHelper::getInstance()->GetCurrentSessionServerApiFolder();
         foreach (array_diff(scandir($apifolder), array('..', '.')) as $file) {
             $file = strtolower($file);
             if (substr($file, 0, 6) == "class.") {

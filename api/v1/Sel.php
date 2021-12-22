@@ -1,7 +1,10 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
-class SEL extends Base
+namespace App\Domain\API\v1;
+
+use stdClass;
+
+class Sel extends Base
 {
     private const ALLOWED = array(
         "GetAreaOutputConfiguration",
@@ -1025,7 +1028,7 @@ class SEL extends Base
         if ($config != null && array_key_exists("game_client_settings", $config)) {
             return $config["game_client_settings"];
         } else {
-            return new stdClass(); //"{}";
+            return new stdClass();
         }
     }
 }

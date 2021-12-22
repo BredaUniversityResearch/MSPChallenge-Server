@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Log extends Base
 {
     const WARNING = "Warning";
@@ -82,7 +85,9 @@ class Log extends Base
     public static function SetupFileLogger(string $logPath): void
     {
         file_put_contents($logPath, "");
-        ob_start("Log::RecreateLoggingHandler", 16);
+        ob_start(function (string $message, int $phase) {
+            return self::RecreateLoggingHandler($message, $phase);
+        }, 16);
         ob_implicit_flush(1);
     }
 
@@ -139,7 +144,6 @@ class Log extends Base
         print($dateNow . " [ ". $logCategory . ' ] - ' . $message);
     }
 
-    /** @noinspection PhpUnusedParameterInspection */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function RecreateLoggingHandler(string $message, int $phase): string
     {

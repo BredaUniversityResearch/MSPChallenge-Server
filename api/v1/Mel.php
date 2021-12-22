@@ -1,6 +1,9 @@
 <?php
 
-// // phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Mel extends Base
 {
     private const ALLOWED = array(
@@ -321,7 +324,6 @@ class Mel extends Base
     /**
      * @apiGroup MEL
      * @apiDescription Gets all the geometry data of a layer
-     * @throws Exception
      * @throws Exception
      * @api {POST} /mel/GeometryExportName Geometry Export Name
      * @apiParam {string} layer name to return the geometry data for

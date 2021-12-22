@@ -1,5 +1,10 @@
 <?php
 
+namespace App\Domain\API\v1;
+
+use Exception;
+use stdClass;
+
 /**
  * when you create your own authentication provider subclass, make sure you define these methods:
  * public function getName();
@@ -8,11 +13,11 @@
  *
  * @noinspection PhpUnused
  */
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace,Squiz.Classes.ValidClassName.NotCamelCaps
+// phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps
 class Auth_MSP extends Auths
 {
     private string $name = 'MSP Challenge';
-    
+
     public function getName(): string
     {
         return $this->name;

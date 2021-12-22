@@ -4,12 +4,16 @@ namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class LegacyController
 {
-    public function __construct(string $projectDir)
-    {
+    public function __construct(
+        string $projectDir,
+        // below is required by legacy to be auto-wired
+        \App\Domain\API\APIHelper $apiHelper
+    ) {
         set_include_path(get_include_path() . PATH_SEPARATOR . $projectDir);
     }
 
@@ -31,6 +35,16 @@ class LegacyController
         ob_end_clean();
 
         return new JsonResponse($json, 200);
+    }
+
+    public function apiTest(Request $request): Response
+    {
+        ob_start();
+        require('api_test/index.php');
+        $content = ob_get_contents();
+        ob_end_clean();
+
+        return new Response($content);
     }
 
     public function notFound()

@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Geometry extends Base
 {
     private const ALLOWED = array(
@@ -21,8 +24,6 @@ class Geometry extends Base
 
     /**
      * @apiGroup Geometry
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {post} /geometry/post Post
      * @apiDescription Create a new geometry entry in a plan
@@ -79,7 +80,6 @@ class Geometry extends Base
 
     /**
      * @apiGroup Geometry
-     * @throws Exception
      * @throws Exception
      * @api {POST} /geometry/PostSubtractive Post Subtractive
      * @apiDescription Create a new subtractive polygon on an existing polygon

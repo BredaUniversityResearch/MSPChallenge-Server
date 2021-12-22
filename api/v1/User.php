@@ -1,6 +1,11 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use DateTime;
+use DateTimeInterface;
+use Exception;
+
 class User extends Base
 {
     private const ALLOWED = array(
@@ -18,14 +23,6 @@ class User extends Base
     /**
      * @apiGroup User
      * @apiDescription Creates a new session for the desired country id.
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {POST} /user/RequestSession Set State
      * @apiSuccess {json} Returns a json object describing the 'success' state, the 'session_id' generated for the user.

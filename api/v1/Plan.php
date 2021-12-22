@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Plan extends Base
 {
     private const ALLOWED = array(
@@ -1780,7 +1783,6 @@ class Plan extends Base
     /**
      * @apiGroup Plan
      * @apiDescription Lock a plan
-     * @throws Exception
      * @throws Exception
      * @api {POST} /plan/lock Lock
      * @apiParam {int} plan plan id

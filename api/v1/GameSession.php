@@ -1,6 +1,13 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use ZipArchive;
+
 class GameSession extends Base
 {
     private const ALLOWED = array(
@@ -130,9 +137,6 @@ class GameSession extends Base
      * @apiGroup GameSession
      * @apiDescription Sets up a new game session with the supplied information.
      * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @api {POST} /GameSession/CreateGameSession Creates new game session
      * @apiParam {int} game_id Session identifier for this game.
      * @apiParam {string} config_file_content JSON Object of the config file.
@@ -223,11 +227,6 @@ class GameSession extends Base
      * @apiGroup GameSession
      * @apiDescription For internal use: creates a new game session with the given config file path.
      * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @api {POST} /GameSession/CreateGameSession Creates new game session
      * @apiParam {string} config_file_path Local path to the config file.
      * @apiParam {string} password_admin Admin password for this session
@@ -314,7 +313,6 @@ class GameSession extends Base
      * @apiGroup GameSession
      * @apiDescription Archives a game session with a specified ID.
      * @throws Exception
-     * @throws Exception
      * @api {POST} /GameSession/ArchiveGameSession Archives game session
      * @apiParam {string} response_url API call that we make with the zip encoded in the body upon completion.
      * @ForceNoTransaction
@@ -340,8 +338,6 @@ class GameSession extends Base
     /**
      * @apiGroup GameSession
      * @apiDescription Archives a game session with a specified ID.
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {POST} /GameSession/ArchiveGameSessionInternal Archives game session, internal method
      * @apiParam {string} response_url API call that we make with the zip path upon completion.
@@ -372,9 +368,6 @@ class GameSession extends Base
 
     /** @noinspection PhpUnused
      * @noinspection SpellCheckingInspection
-     * @throws Exception
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

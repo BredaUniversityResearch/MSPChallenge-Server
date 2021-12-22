@@ -1,6 +1,9 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
+namespace App\Domain\API\v1;
+
+use Exception;
+
 class Objective extends Base
 {
     private const ALLOWED = array(
@@ -18,8 +21,6 @@ class Objective extends Base
 
     /**
      * @apiGroup Objective
-     * @throws Exception
-     * @throws Exception
      * @throws Exception
      * @api {POST} /objective/post Post
      * @apiParam {int} country country id, set -1 if you want to add an objective to all countries
