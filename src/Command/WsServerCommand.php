@@ -17,6 +17,7 @@ class WsServerCommand extends Command
     const OPTION_PORT = 'port';
     const OPTION_GAME_SESSION_ID = 'game-session-id';
     const OPTION_FIXED_TERMINAL_HEIGHT = 'fixed-terminal-height';
+    const OPTION_TABLE_OUTPUT = 'table-output';
 
     protected static $defaultName = 'app:ws-server';
 
@@ -42,27 +43,35 @@ class WsServerCommand extends Command
             ->addOption(
                 self::OPTION_GAME_SESSION_ID,
                 's',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'only clients with this Game session ID will be allowed keep a connection'
             )
             ->addOption(
                 self::OPTION_FIXED_TERMINAL_HEIGHT,
+                'f',
+                InputOption::VALUE_REQUIRED,
+                'fixed terminal height, the number of rows allowed'
+            )
+            ->addOption(
+                self::OPTION_TABLE_OUTPUT,
                 't',
                 InputOption::VALUE_OPTIONAL,
-                'fixed terminal height, the number of rows allowed'
+                'enable client connections table output with statistics'
             );
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        if ($input->getOption(self::OPTION_GAME_SESSION_ID) != null) {
+        if (null != $input->getOption(self::OPTION_GAME_SESSION_ID)) {
             $this->wsServer->setGameSessionId($input->getOption(self::OPTION_GAME_SESSION_ID));
         }
 
-        // the console helper will handle the console output using events dispatched by the wsServer
-        /** @var ConsoleOutput $output */
-        $consoleHelper = new WsServerConsoleHelper($this->wsServer, $output);
-        $consoleHelper->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
+        if ($input->hasOption(self::OPTION_TABLE_OUTPUT)) {
+            // the console helper will handle the table output using events dispatched by the wsServer
+            /** @var ConsoleOutput $output */
+            $consoleHelper = new WsServerConsoleHelper($this->wsServer, $output);
+            $consoleHelper->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
+        }
 
         $server = IoServer::factory(
             new HttpServer(new \Ratchet\WebSocket\WsServer($this->wsServer)),
