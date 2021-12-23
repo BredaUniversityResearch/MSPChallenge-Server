@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# to enable git-for-windows symlinks, see here: https://github.com/git-for-windows/git/pull/156
+export MSYS=winsymlinks:nativestrict
 VERSION_DEFAULT="5.4"
 
 setGitHooksPostsCheckout() {
@@ -54,6 +56,11 @@ setSymfonyVersion() {
 
   rm -f config
   ln -s "${CONFIG_DIR}" config
+  RETVAL=$?
+  if [ $RETVAL -eq 1 ]; then
+        printf "Could not create symlink.\n\nHint:\nDid you check 'Enable symbolic links' when installing git-for-windows?\nAnd make sure to run Git Bash as Administator"
+	exit 1;
+  fi
 
   rm -f composer.json
   ln -s "${COMPOSER_JSON_FILE}" composer.json
