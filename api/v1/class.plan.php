@@ -1037,7 +1037,7 @@
 					$fixedGeometryId = $mappedGeometryIds[$baseGeometryInfo["geometry_persistent"]];
 				}
 				else {
-					Base::Debug("Found geometry ID (Fallback field \"geometry_persistent\": ". $baseGeometryInfo["geometry_persistent"].") which is not referenced by msp id and hasn't been imported by the plans importer yet.");
+					Base::Debug("Found geometry ID (Fallback field \"geometry_persistent\": ". $baseGeometryInfo["geometry_persistent"].") which is not referenced by msp id and hasn't been imported by the plans importer yet. ".var_export($baseGeometryInfo, true));
 				}
 			}
 			return $fixedGeometryId;
@@ -1263,7 +1263,10 @@
 		{
 			
 			$result = Database::GetInstance()->query("SELECT plan_lock_user_id FROM plan WHERE plan_id = ?", array($id));
-			if (empty($result) || empty($result[0]["plan_lock_user_id"])) throw new Exception("Plan was not found or already unlocked.");
+			if (empty($result) || empty($result[0]["plan_lock_user_id"]))
+			{
+				return; // no need to return an exception or do anything, the plan is just already unlocked.
+			}
 						
 			if ($force_unlock == 1)
 			{
