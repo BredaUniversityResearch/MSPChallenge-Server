@@ -311,9 +311,9 @@
         /**
          * @param string $key
          * @param mixed|null $val
-         * @return string|null
+         * @return mixed|null
          */
-        private function metaValueValidation(string $key, $val): ?string
+        private function metaValueValidation(string $key, $val)
 		{	
 			// all key-based validation first		
 			$convertZeroToNull = [
