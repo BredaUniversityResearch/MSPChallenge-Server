@@ -308,12 +308,17 @@
 			}
 		}
 
-		private function MetaValueValidation($key, $val)
+        /**
+         * @param string $key
+         * @param mixed|null $val
+         * @return string|null
+         */
+        private function metaValueValidation(string $key, $val): ?string
 		{	
 			// all key-based validation first		
-			$convertZeroToNull = array(
-				"layer_entity_value_max" // float - used to convert 0.0 to null
-			);			
+			$convertZeroToNull = [
+				'layer_entity_value_max' // float - used to convert 0.0 to null
+			];
 			if (in_array($key, $convertZeroToNull)) {
 				if (empty($val)) {
 					return null; // meaning: null returned if value was "", null, 0, 0.0 or false
@@ -321,11 +326,14 @@
 			}
 			
 			// all value-based validation second
-			if (is_array($val)) {
-				return json_encode($val);
+			if (is_array($val) || is_object($val)) {
+				if (false === $result = json_encode($val)) {
+                    return '';
+                }
+                return $result;
 			}
 			if ($val == null) {
-				return "";
+				return '';
 			}
 			
 			return $val;
@@ -358,7 +366,7 @@
 				}
 				else{
 					$inserts .= $key . "=?, ";
-					array_push($insertarr, $this->MetaValueValidation($key, $val));
+					array_push($insertarr, $this->metaValueValidation($key, $val));
 				}
 			}
 
