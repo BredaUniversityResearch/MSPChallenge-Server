@@ -37,6 +37,12 @@ class LegacyController
         return new JsonResponse($json, 200);
     }
 
+    public function apidoc(): void
+    {
+        require('Documentation/index.html');
+        exit;
+    }
+
     public function apiTest(Request $request): Response
     {
         ob_start();

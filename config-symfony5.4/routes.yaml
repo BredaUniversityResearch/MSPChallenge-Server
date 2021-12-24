@@ -2,6 +2,13 @@ server_manager:
   resource: 'ServerManager/routes.yaml'
   prefix: '/ServerManager'
 
+# fall-back: should be handled by nginx or apache rules!
+apidoc:
+  path: '/Documentation/{anything}'
+  controller: App\Controller\LegacyController::apidoc
+  requirements:
+    anything: '.*'
+
 # per session support
 # RewriteRule ^([0-9]+)/api/(.*)$	index.php?session=$1&query=$2 [NC,L]
 legacy_api_session:
