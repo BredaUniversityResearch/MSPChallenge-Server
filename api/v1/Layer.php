@@ -296,7 +296,7 @@ class Layer extends Base
 
         $geoserver = new GeoServer($geoserver_url, $geoserver_username, $geoserver_password);
         $allLayers = $geoserver->GetAllRemoteLayers($region);
-            
+
         foreach ($metaData as $layerMetaData) {
             $dbLayerId = $this->VerifyLayerExists($layerMetaData["layer_name"], $allLayers);
             if ($dbLayerId != -1) {
@@ -365,47 +365,74 @@ class Layer extends Base
     }
 
     /**
+     * @param string $key
+     * @param mixed|null $val
+     * @return mixed|null
+     */
+    private function metaValueValidation(string $key, $val)
+    {
+        // all key-based validation first
+        $convertZeroToNull = [
+            'layer_entity_value_max' // float - used to convert 0.0 to null
+        ];
+        if (in_array($key, $convertZeroToNull)) {
+            if (empty($val)) {
+                return null; // meaning: null returned if value was "", null, 0, 0.0 or false
+            }
+        }
+
+        // all value-based validation second
+        if (is_array($val) || is_object($val)) {
+            if (false === $result = json_encode($val)) {
+                return '';
+            }
+            return $result;
+        }
+        if ($val == null) {
+            return '';
+        }
+
+        return $val;
+    }
+
+    /**
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function ImportMetaForLayer(array $layerData, int $dbLayerId): void
+    private function ImportMetaForLayer(array $layerData, int $dbLayerId)
     {
+        //these meta vars are to be ignored in the importer
+        $ignoreList = array(
+            "layer_id",
+            "layer_name",
+            "layer_original_id",
+            "layer_raster",
+            "layer_width",
+            "layer_height",
+            "layer_raster_material",
+            "layer_raster_pattern",
+            "layer_raster_minimum_value_cutoff",
+            "layer_raster_color_interpolation",
+            "layer_raster_filter_mode",
+            "approval",
+            "layer_download_from_geoserver"
+        );
+
         $inserts = "";
-        $insertArr = array();
+        $insertarr = array();
         foreach ($layerData as $key => $val) {
-            //these keys are to be ignored in the importer
-            if ($key == "layer_id" ||
-                $key == "layer_name" ||
-                $key == "layer_original_id" ||
-                $key == "layer_raster" ||
-                $key == "layer_width" ||
-                $key == "layer_height" ||
-                $key == "layer_raster_material" ||
-                $key == "layer_raster_pattern" ||
-                $key == "layer_raster_minimum_value_cutoff" ||
-                $key == "layer_raster_color_interpolation" ||
-                $key == "layer_raster_filter_mode" ||
-                $key == "approval" ||
-                $key == "layer_download_from_geoserver") {
+            if (in_array($key, $ignoreList)) {
                 continue;
             } else {
                 $inserts .= $key . "=?, ";
-                if (is_array($val)) {
-                    array_push($insertArr, json_encode($val));
-                } else {
-                    if ($val != null) {
-                        array_push($insertArr, $val);
-                    } else {
-                        array_push($insertArr, "");
-                    }
-                }
+                array_push($insertarr, $this->metaValueValidation($key, $val));
             }
         }
 
         $inserts = substr($inserts, 0, -2);
-            
-        array_push($insertArr, $dbLayerId);
-        Database::GetInstance()->query("UPDATE layer SET " . $inserts . " WHERE layer_id=?", $insertArr);
+
+        array_push($insertarr, $dbLayerId);
+        Database::GetInstance()->query("UPDATE layer SET " . $inserts . " WHERE layer_id=?", $insertarr);
 
         //Import raster specific information.
         if ($layerData["layer_geotype"] == "raster") {
@@ -432,11 +459,13 @@ class Layer extends Base
             if (isset($layerData["layer_raster_filter_mode"])) {
                 $existingRasterInfo["layer_raster_filter_mode"] = $layerData["layer_raster_filter_mode"];
             }
-                
+
             Database::GetInstance()->query(
-                "UPDATE layer SET layer_raster = ? WHERE layer_id = ?",
-                array(json_encode($existingRasterInfo),
-                $dbLayerId)
+                "
+                UPDATE layer SET layer_raster = ?
+                WHERE layer_id = ?
+                ",
+                array(json_encode($existingRasterInfo), $dbLayerId)
             );
         }
 

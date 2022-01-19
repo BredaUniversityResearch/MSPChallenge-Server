@@ -581,7 +581,8 @@ class Store extends Base
                 if ($geometryData == null) {
                     Log::LogWarning(
                         "Could not import geometry with id ".$feature["id"]." of layer ".$filename.
-                        ". Found NULL geometry."
+                        ". The feature in question has NULL geometry. Here's some property information to help find ".
+                        "the feature: MSP ID: ".$mspId." - ".substr(var_export($featureProperties, true), 0, 80)
                     );
                     continue;
                 }

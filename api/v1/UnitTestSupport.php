@@ -49,7 +49,9 @@ class UnitTestSupport extends Base
         }
 
         $requestKey = strtolower($class)."::".strtolower($method);
-        if ($this->IsCallIdentifierOnIgnoreList($requestKey)) {
+        if ($this->IsCallIdentifierOnIgnoreList($requestKey) ||
+            $this->CallIdentifierRecordingNoLongerRequired($requestKey)
+        ) {
             return;
         }
 
@@ -65,31 +67,17 @@ class UnitTestSupport extends Base
                 mkdir($outputFolder, 0666, true);
             }
         
-            $filename = ((string)microtime(true)).".json";
+            $filename = ((string)number_format(microtime(true), 4, '.', ''))."-".$class."-".$method.".json";
             file_put_contents($outputFolder.$filename, json_encode($outputData));
 
-            $statFilePath = $outputFolder."summary.json";
-            $data = array();
-            
-            $statFile = fopen($statFilePath, "c+");
-            /** @noinspection PhpStatementHasEmptyBodyInspection */
-            while (!flock($statFile, LOCK_EX)) {
-                // nothing to do.
-            }
-            fseek($statFile, 0, SEEK_END);
-            $statFileSize = ftell($statFile);
-            if ($statFileSize > 0) {
-                fseek($statFile, 0);
-                $statData = fread($statFile, filesize($statFilePath));
-                $data = json_decode($statData, true);
-            }
-            
+            $data = $this->ReadAndReturnSummaryJSON();
             if (isset($data[$requestKey])) {
                 $data[$requestKey] = $data[$requestKey] + 1;
             } else {
                 $data[$requestKey] = 1;
             }
-
+            $statFilePath = $outputFolder."summary.json";
+            $statFile = fopen($statFilePath, "c+");
             ftruncate($statFile, 0);
             fseek($statFile, 0);
             fwrite($statFile, json_encode($data, JSON_PRETTY_PRINT));
@@ -107,5 +95,39 @@ class UnitTestSupport extends Base
             $callIdentifier,
             $config["request_filter"]["ignore"]
         ));
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    private function CallIdentifierRecordingNoLongerRequired(string $callIdentifier): bool
+    {
+        $config = Config::GetInstance()->GetUnitTestLoggerConfig();
+
+        $data = $this->ReadAndReturnSummaryJSON();
+        return (
+            isset($data[$callIdentifier]) && isset($config["request_filter"]["onlyonce"]) &&
+            in_array($callIdentifier, $config["request_filter"]["onlyonce"])
+        );
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    private function ReadAndReturnSummaryJSON()
+    {
+        $outputFolder = self::GetIntermediateFolder();
+        $statFilePath = $outputFolder."summary.json";
+        $data = array();
+
+        $statFile = fopen($statFilePath, "c+");
+        while (!flock($statFile, LOCK_EX)) {
+            continue;
+        }
+        fseek($statFile, 0, SEEK_END);
+        $statFileSize = ftell($statFile);
+        if ($statFileSize > 0) {
+            fseek($statFile, 0, SEEK_SET);
+            $statData = fread($statFile, filesize($statFilePath));
+            $data = json_decode($statData, true);
+        }
+        fclose($statFile);
+        return $data;
     }
 }
