@@ -4,7 +4,7 @@ namespace App\Domain\API\v1;
 
 use Exception;
 
-class Mel extends Base
+class MEL extends Base
 {
     private const ALLOWED = array(
         "OnReimport",

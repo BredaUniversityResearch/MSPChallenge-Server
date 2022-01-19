@@ -4,7 +4,7 @@ namespace App\Domain\API\v1;
 
 use Exception;
 
-class Rel extends Base
+class REL extends Base
 {
     private const ALLOWED = array(
         "GetRestrictionGeometry",

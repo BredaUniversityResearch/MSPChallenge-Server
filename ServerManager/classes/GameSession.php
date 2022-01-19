@@ -17,7 +17,7 @@ class GameSession extends Base
     public $game_running_til_time;
     public $password_admin;
     public $password_player;
-    public $session_state; 
+    public $session_state;
     public $game_state;
     public $game_visibility;
     public $players_active;
@@ -29,68 +29,87 @@ class GameSession extends Base
     public $log;
     public $id;
     
-    public function __construct() 
+    public function __construct()
     {
         $this->_db = DB::getInstance();
     }
 
     private function validateVars()
     {
-        foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $var)
-        {   
+        foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $var) {
             $varname = $var->getName();
-            switch ($varname)
-            {
+            switch ($varname) {
                 case "password_player":
                 case "password_admin":
                     $this->$varname = $this->CheckPasswordFormat($varname, $this->$varname);
                     break;
                 case "name":
-                    if (self::HasSpecialChars($this->name)) throw new Exception("Session name cannot contain special characters.");
+                    if (self::HasSpecialChars($this->name)) {
+                        throw new Exception("Session name cannot contain special characters.");
+                    }
                     break;
                 case "session_state":
-                    if (!in_array($this->session_state, array("request", "initializing", "healthy", "failed", "archived"))) throw new Exception("That session state is not allowed.");
+                    if (!in_array($this->session_state, array("request", "initializing", "healthy", "failed", "archived"))) {
+                        throw new Exception("That session state is not allowed.");
+                    }
                     break;
                 case "game_state":
                     $this->game_state = strtolower($this->game_state);
-                    if (!in_array($this->game_state, array("setup", "simulation", "play", "pause", "end", "fastforward"))) throw new Exception("That game state is not allowed.");
+                    if (!in_array($this->game_state, array("setup", "simulation", "play", "pause", "end", "fastforward"))) {
+                        throw new Exception("That game state is not allowed.");
+                    }
                     break;
                 case "log":
                     break; // ignoring, because not stored in dbase
                 default:
-                    if (strlen($this->$varname) == 0) throw new Exception("Missing value for ".$varname);
+                    if (strlen($this->$varname) == 0) {
+                        throw new Exception("Missing value for ".$varname);
+                    }
             }
         }
     }
 
     public function get()
     {
-        if (empty($this->id)) throw new Exception("Cannot obtain GameSession without a valid id.");
-        if (!$this->_db->query("SELECT * FROM game_list WHERE id = ?", array($this->id))) throw new Exception($this->_db->errorString());
-        if ($this->_db->count() == 0) throw new Exception("Session not found.");
-        foreach ($this->_db->first(true) as $varname => $varvalue)
-        {
-            if (property_exists($this, $varname)) $this->$varname = $varvalue;
+        if (empty($this->id)) {
+            throw new Exception("Cannot obtain GameSession without a valid id.");
+        }
+        if (!$this->_db->query("SELECT * FROM game_list WHERE id = ?", array($this->id))) {
+            throw new Exception($this->_db->errorString());
+        }
+        if ($this->_db->count() == 0) {
+            throw new Exception("Session not found.");
+        }
+        foreach ($this->_db->first(true) as $varname => $varvalue) {
+            if (property_exists($this, $varname)) {
+                $this->$varname = $varvalue;
+            }
         }
 
         // backwards compatibility (beta7 and earlier), when the password fields were unencoded strings
-        if (Base::isNewPasswordFormat($this->password_admin)) $this->password_admin = base64_decode($this->password_admin);
+        if (Base::isNewPasswordFormat($this->password_admin)) {
+            $this->password_admin = base64_decode($this->password_admin);
+        }
         $this->password_admin = $this->CheckPasswordFormat("password_admin", $this->password_admin);
-        if (Base::isNewPasswordFormat($this->password_player)) $this->password_player = base64_decode($this->password_player);
+        if (Base::isNewPasswordFormat($this->password_player)) {
+            $this->password_player = base64_decode($this->password_player);
+        }
         $this->password_player = $this->CheckPasswordFormat("password_player", $this->password_player);
 
         $log_dir = ServerManager::getInstance()->GetSessionLogBaseDirectory();
         $log_path = $log_dir . ServerManager::getInstance()->GetSessionLogPrefix() . $this->id . ".log";
-        if (file_exists($log_path)) 
-        {
+        if (file_exists($log_path)) {
             $log_contents = file_get_contents($log_path);
-            if ($log_contents === false) $this->log = "Session log does not exist (yet).";
-            else $this->log = explode(PHP_EOL, rtrim($log_contents));
+            if ($log_contents === false) {
+                $this->log = "Session log does not exist (yet).";
+            } else {
+                $this->log = explode(PHP_EOL, rtrim($log_contents));
+            }
         }
         $this->_old = clone $this;
     }
 
-    public function add() 
+    public function add()
     {
         $this->validateVars();
         $args = array();
@@ -123,7 +142,9 @@ class GameSession extends Base
         $args["password_player"] = base64_encode($args["password_player"]);
         unset($args["id"]);
         unset($args["log"]);
-        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
+        if (!$this->_db->query($sql, $args)) {
+            throw new Exception($this->_db->errorString());
+        }
         $this->id = $this->_db->lastId();
     }
 
@@ -137,7 +158,7 @@ class GameSession extends Base
         $watchdog->get();
         
         $server_call = self::callServer(
-            "GameSession/LoadGameSave", 
+            "GameSession/LoadGameSave",
             array(
                 "save_path" => $gamesave->getFullZipPath(),
                 "watchdog_address" => $watchdog->address,
@@ -146,7 +167,9 @@ class GameSession extends Base
                 "allow_recreate" => $allow_recreate
             )
         );
-        if (!$server_call["success"]) throw new Exception($server_call["message"]);
+        if (!$server_call["success"]) {
+            throw new Exception($server_call["message"]);
+        }
     }
 
     public function sendCreateRequest($allow_recreate = 0)
@@ -179,9 +202,10 @@ class GameSession extends Base
                 "response_address" => ServerManager::getInstance()->GetFullSelfAddress()."api/editGameSession.php"
             )
         );
-        if (!$server_call["success"])
-        {
-            if ($allow_recreate == 0) $this->revert();
+        if (!$server_call["success"]) {
+            if ($allow_recreate == 0) {
+                $this->revert();
+            }
             throw new Exception($server_call["message"]);
         }
 
@@ -189,9 +213,9 @@ class GameSession extends Base
         $gameconfig->edit();
 
         $authoriser_call = self::callAuthoriser(
-            "logcreatejwt.php", 
+            "logcreatejwt.php",
             array(
-                "jwt" => $this->getJWT(), 
+                "jwt" => $this->getJWT(),
                 "audience" => ServerManager::getInstance()->GetBareHost(),
                 "server_id" => ServerManager::getInstance()->GetServerID(),
                 "region" => $gameconfig->region,
@@ -202,7 +226,9 @@ class GameSession extends Base
 
     public function recreate()
     {
-        if ($this->save_id > 0) return $this->reload();
+        if ($this->save_id > 0) {
+            return $this->reload();
+        }
 
         // after a server upgrade the version might have changed since session was first created
         $this->server_version = ServerManager::getInstance()->GetCurrentVersion();
@@ -220,9 +246,13 @@ class GameSession extends Base
         $this->game_start_year = $gamesave->game_start_year;
         $this->game_end_month = $gamesave->game_end_month;
         $this->game_current_month = $gamesave->game_current_month;
-        if (Base::isNewPasswordFormat($gamesave->password_admin)) $gamesave->password_admin = base64_decode($gamesave->password_admin);
+        if (Base::isNewPasswordFormat($gamesave->password_admin)) {
+            $gamesave->password_admin = base64_decode($gamesave->password_admin);
+        }
         $this->password_admin = $gamesave->password_admin;
-        if (Base::isNewPasswordFormat($gamesave->password_player)) $gamesave->password_player = base64_decode($gamesave->password_player);
+        if (Base::isNewPasswordFormat($gamesave->password_player)) {
+            $gamesave->password_player = base64_decode($gamesave->password_player);
+        }
         $this->password_player = $gamesave->password_player;
         $this->game_state = $gamesave->game_state;
         $this->game_visibility = $gamesave->game_visibility;
@@ -254,18 +284,16 @@ class GameSession extends Base
 
     public function demoCheck()
     {
-        if (!is_a($this->_old, "GameSession")) throw new Exception("Cannot continue as I don't have original GameSession object.");
+        if (!is_a($this->_old, "GameSession")) {
+            throw new Exception("Cannot continue as I don't have original GameSession object.");
+        }
 
-        if ($this->demo_session == 1) 
-        {
-            if ($this->_old->session_state == "healthy" && ($this->_old->game_state == "pause" || $this->_old->game_state == "setup")) 
-            {
+        if ($this->demo_session == 1) {
+            if ($this->_old->session_state == "healthy" && ($this->_old->game_state == "pause" || $this->_old->game_state == "setup")) {
                 // healthy demo sessions need to return to play if previously on pause or setup
                 $this->game_state = "play";
                 $this->changeGameState();
-            }
-            elseif ($this->session_state == "healthy" && $this->game_state == "end")
-            {
+            } elseif ($this->session_state == "healthy" && $this->game_state == "end") {
                 // demo sessions need to be recreated as soon as they have ended
                 $this->recreate();
             }
@@ -275,7 +303,9 @@ class GameSession extends Base
 
     public function edit()
     {
-        if (empty($this->id)) throw new Exception("Cannot update without knowing which id to use.");
+        if (empty($this->id)) {
+            throw new Exception("Cannot update without knowing which id to use.");
+        }
         $this->validateVars();
         $args = getPublicObjectVars($this);
         $args["password_admin"] = base64_encode($args["password_admin"]);
@@ -304,41 +334,44 @@ class GameSession extends Base
                     save_id = ?,
                     server_version = ?
                 WHERE id = ?";
-        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
+        if (!$this->_db->query($sql, $args)) {
+            throw new Exception($this->_db->errorString());
+        }
     }
 
     private function CheckPasswordFormat($adminorplayer, $string)
     {
-        if (isJsonObject($string))
-        {
+        if (isJsonObject($string)) {
             // backwards compatibility
             $string_decoded = json_decode($string, true);
             if (isset($string_decoded["admin"])) {
                 if (isset($string_decoded["admin"]["password"])) {
                     $string_decoded["admin"]["value"] = $string_decoded["admin"]["password"];
                     unset($string_decoded["admin"]["password"]);
-                }
-                elseif (isset($string_decoded["admin"]["users"])) {
-                    if (is_array($string_decoded["admin"]["users"])) $string_decoded["admin"]["users"] = implode(" ", $string_decoded["admin"]["users"]);
+                } elseif (isset($string_decoded["admin"]["users"])) {
+                    if (is_array($string_decoded["admin"]["users"])) {
+                        $string_decoded["admin"]["users"] = implode(" ", $string_decoded["admin"]["users"]);
+                    }
                     $string_decoded["admin"]["value"] = $string_decoded["admin"]["users"];
                     unset($string_decoded["admin"]["users"]);
                 }
                 if (isset($string_decoded["region"]["password"])) {
                     $string_decoded["region"]["value"] = $string_decoded["region"]["password"];
                     unset($string_decoded["region"]["password"]);
-                }
-                elseif (isset($string_decoded["region"]["users"])) {
-                    if (is_array($string_decoded["region"]["users"])) $string_decoded["region"]["users"] = implode(" ", $string_decoded["region"]["users"]);
+                } elseif (isset($string_decoded["region"]["users"])) {
+                    if (is_array($string_decoded["region"]["users"])) {
+                        $string_decoded["region"]["users"] = implode(" ", $string_decoded["region"]["users"]);
+                    }
                     $string_decoded["region"]["value"] = $string_decoded["region"]["users"];
                     unset($string_decoded["region"]["users"]);
                 }
-            }
-            elseif (isset($string_decoded["password"])) {
+            } elseif (isset($string_decoded["password"])) {
                 $string_decoded["value"] = $string_decoded["password"];
                 unset($string_decoded["password"]);
-            }
-            elseif (isset($string_decoded["users"])) {
-                if (is_array($string_decoded["users"])) $string_decoded["users"] = implode(" ", $string_decoded["users"]);
+            } elseif (isset($string_decoded["users"])) {
+                if (is_array($string_decoded["users"])) {
+                    $string_decoded["users"] = implode(" ", $string_decoded["users"]);
+                }
                 $string_decoded["value"] = $string_decoded["users"];
                 unset($string_decoded["users"]);
             }
@@ -346,15 +379,12 @@ class GameSession extends Base
         }
         
         // only used when creating new session or loading a save from pre-beta8
-        if ($adminorplayer == "password_admin") 
-        {
+        if ($adminorplayer == "password_admin") {
             $newarray["admin"]["provider"] = "local";
             $newarray["admin"]["value"] = (string) $string;
             $newarray["region"]["provider"] = "local";
             $newarray["region"]["value"] = (string) $string;
-        } 
-        else 
-        {
+        } else {
             $newarray["provider"] = "local";
             $countries = $this->getCountries();
             if ($countries !== false) {
@@ -366,36 +396,33 @@ class GameSession extends Base
         return json_encode($newarray);
     }
 
-    public function getCountries() 
-    { // using config files rather than the session database for this, as this function can be called pre session existence
-        if (!empty($this->save_id)) // session eminates from a save as save_id is neither null nor 0
-        {
+    public function getCountries()
+    {
+ // using config files rather than the session database for this, as this function can be called pre session existence
+        if (!empty($this->save_id)) { // session eminates from a save as save_id is neither null nor 0
             $gamesave = new GameSave;
             $gamesave->id = $this->save_id;
             $gamesave->get();
             $configData = $gamesave->getContentsConfig();
-        }
-        else // session eminates from a config file, so from scratch
+        } else // session eminates from a config file, so from scratch
         {
-            if (empty($this->game_config_version_id)) throw new Exception("Cannot obtain GameConfig without a valid id.");
+            if (empty($this->game_config_version_id)) {
+                throw new Exception("Cannot obtain GameConfig without a valid id.");
+            }
             $gameconfig = new GameConfig;
             $gameconfig->id = $this->game_config_version_id;
             $gameconfig->get();
             $configData = $gameconfig->getContents();
-        }        
+        }
         
         $countries = array();
-        if (!isset($configData['datamodel']) || !isset($configData['datamodel']['meta']))
-        {
+        if (!isset($configData['datamodel']) || !isset($configData['datamodel']['meta'])) {
             return $countries;
         }
 
-        foreach($configData['datamodel']['meta'] as $layerMeta) 
-        {
-            if ($layerMeta['layer_name'] == $configData['datamodel']['countries'])
-            {
-                foreach($layerMeta['layer_type'] as $country)
-                {
+        foreach ($configData['datamodel']['meta'] as $layerMeta) {
+            if ($layerMeta['layer_name'] == $configData['datamodel']['countries']) {
+                foreach ($layerMeta['layer_type'] as $country) {
                     $countries[] = array(
                         "country_id" => $country['value'],
                         "country_name" => $country['displayName'],
@@ -410,22 +437,23 @@ class GameSession extends Base
     public function setUserAccess()
     {
         $server_call = self::callServer(
-            "gamesession/SetUserAccess", 
+            "gamesession/SetUserAccess",
             array(
-                "password_admin" => base64_encode($this->password_admin), 
+                "password_admin" => base64_encode($this->password_admin),
                 "password_player" => base64_encode($this->password_player)
             ),
-            $this->id, 
+            $this->id,
             $this->api_access_token
         );
-        if (!$server_call["success"]) throw new Exception($server_call["message"]);
+        if (!$server_call["success"]) {
+            throw new Exception($server_call["message"]);
+        }
         return true;
     }
 
-    public function getList($where_array=array())
+    public function getList($where_array = array())
     {
-        if (isset($_POST['client_timestamp']) && !ServerManager::getInstance()->IsClientAllowed($_POST['client_timestamp']))
-        {
+        if (isset($_POST['client_timestamp']) && !ServerManager::getInstance()->IsClientAllowed($_POST['client_timestamp'])) {
             return $this->mustUpdateBogusList();
         }
         
@@ -463,18 +491,20 @@ class GameSession extends Base
             LEFT JOIN game_watchdog_servers AS watchdogs ON games.watchdog_server_id = watchdogs.id
             LEFT JOIN game_config_version AS config_versions ON games.game_config_version_id = config_versions.id
             LEFT JOIN game_config_files AS config_files ON config_versions.game_config_files_id = config_files.id
-            LEFT JOIN game_saves AS saves ON saves.id = games.save_id", 
+            LEFT JOIN game_saves AS saves ON saves.id = games.save_id",
             $where_array
-        )) throw new Exception($this->_db->errorString());
+        )) {
+            throw new Exception($this->_db->errorString());
+        }
         return $this->_db->results(true);
     }
 
     private function mustUpdateBogusList()
     {
         $return[0] = array('id'=> 0,
-						'name' => 'You are using a version of MSP Challenge incompatible with this server.',
-						'session_state' => 'archived',
-						'region' => 'none');
+                        'name' => 'You are using a version of MSP Challenge incompatible with this server.',
+                        'session_state' => 'archived',
+                        'region' => 'none');
         $return[1] = array('id'=> 0,
                         'name' => 'Please download and install '.ServerManager::getInstance()->GetCurrentVersion().' from www.mspchallenge.info.',
                         'session_state' => 'archived',
@@ -484,7 +514,9 @@ class GameSession extends Base
 
     public function getArchive()
     {
-        if ($this->session_state != "archived") return false;
+        if ($this->session_state != "archived") {
+            return false;
+        }
         $file = ServerManager::getInstance()->GetSessionArchiveBaseDirectory().ServerManager::getInstance()->GetSessionArchivePrefix();
         $file .= $this->id.".zip";
         if (file_exists($file)) {
@@ -512,12 +544,14 @@ class GameSession extends Base
         $upgrade = ServerManager::getInstance()->CheckForUpgrade($this->server_version);
         if ($upgrade !== false) {
             $server_call = self::callServer(
-                "update/".$upgrade, 
+                "update/".$upgrade,
                 array(),
-                $this->id, 
+                $this->id,
                 $this->api_access_token
             );
-            if (!$server_call["success"]) throw new Exception($server_call["message"]);
+            if (!$server_call["success"]) {
+                throw new Exception($server_call["message"]);
+            }
             $this->server_version = ServerManager::getInstance()->GetCurrentVersion();
             return true;
         }
@@ -528,19 +562,24 @@ class GameSession extends Base
     {
         // really a soft delete   // revert() is a hard delete
         $this->get();
-        if ($this->session_state == "archived") 
+        if ($this->session_state == "archived") {
             throw new Exception("The session is already archived.");
-        if ($this->session_state == "request")
+        }
+        if ($this->session_state == "request") {
             throw new Exception("The session is being set up, so cannot archive at this time.");
-        if ($this->game_state == "simulation") 
+        }
+        if ($this->game_state == "simulation") {
             throw new Exception("The session is simulating, so cannot archive it at this time.");
+        }
         $server_call = self::callServer(
-            "gamesession/ArchiveGameSession", 
+            "gamesession/ArchiveGameSession",
             array("response_url" => ServerManager::getInstance()->GetFullSelfAddress()."api/editGameSession.php"),
-            $this->id, 
+            $this->id,
             $this->api_access_token
         );
-        if (!$server_call["success"]) throw new Exception($server_call["message"]);
+        if (!$server_call["success"]) {
+            throw new Exception($server_call["message"]);
+        }
         $this->session_state = "archived";
         $this->edit();
         return true;
@@ -549,27 +588,31 @@ class GameSession extends Base
     public function getConfigWithPlans()
     {
         $server_call = self::callServer(
-            "plan/ExportPlansToJson", 
+            "plan/ExportPlansToJson",
             array(),
-            $this->id, 
+            $this->id,
             $this->api_access_token
         );
-        if (!$server_call["success"]) throw new Exception($server_call["message"]);
+        if (!$server_call["success"]) {
+            throw new Exception($server_call["message"]);
+        }
 
         $gameconfig = new GameConfig;
         $gameconfig->id = $this->game_config_version_id;
         $gameconfig->get();
         $configFileDecoded = $gameconfig->getContents();
-        if (isset($configFileDecoded["datamodel"])) $configFileDecoded["datamodel"]["plans"] = $server_call["payload"];
-        else $configFileDecoded["plans"] = $server_call["payload"];
+        if (isset($configFileDecoded["datamodel"])) {
+            $configFileDecoded["datamodel"]["plans"] = $server_call["payload"];
+        } else {
+            $configFileDecoded["plans"] = $server_call["payload"];
+        }
         $file_contents = json_encode($configFileDecoded, JSON_PRETTY_PRINT);
         return array(basename($gameconfig->file_path, ".json")."_With_Exported_Plans.json", $file_contents); // to be used by downloader.php
     }
 
     public function processZip()
     {
-        if(isset($_POST['zippath']) && is_file($_POST['zippath'])) 
-        {
+        if (isset($_POST['zippath']) && is_file($_POST['zippath'])) {
             $outputDirectory = ServerManager::getInstance()->GetSessionArchiveBaseDirectory();
             $storeFilePath = $outputDirectory.basename($_POST['zippath']);
             rename($_POST['zippath'], $storeFilePath);
@@ -591,16 +634,18 @@ class GameSession extends Base
                 throw new Exception("The session has already ended, so can't change its state.");
                 break;
             case 'setup':
-                if ($this->game_state != "play") throw new Exception("The session is in setup, so only play is available at this time.");
+                if ($this->game_state != "play") {
+                    throw new Exception("The session is in setup, so only play is available at this time.");
+                }
                 break;
             case 'simulation':
                 throw new Exception("The session is simulating, so cannot change its state at this time.");
                 break;
         }
         $server_call = self::callServer(
-            "game/State", 
+            "game/State",
             array("state" => $this->game_state),
-            $this->id, 
+            $this->id,
             $this->api_access_token
         );
         if (!$server_call["success"]) {

@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use Exception;
+use React\Promise\PromiseInterface;
 
 class Log extends Base
 {
@@ -38,6 +39,26 @@ class Log extends Base
     public function Event(string $source, string $severity, string $message, string $stack_trace = ""): void
     {
         self::PostEvent($source, $severity, $message, $stack_trace);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function postEventAsync(
+        string $source,
+        string $severity,
+        string $message,
+        string $stackTrace
+    ): PromiseInterface {
+        return $this->getAsyncDatabase()->insert(
+            'event_log',
+            [
+                'event_log_source' => $source,
+                'event_log_severity' => $severity,
+                'event_log_message' => $message,
+                'event_log_stack_trace' => $stackTrace
+            ]
+        );
     }
 
     /**

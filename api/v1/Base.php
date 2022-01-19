@@ -3,7 +3,10 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\API\APIHelper;
+use App\Domain\Helper\AsyncDatabase;
+use Drift\DBAL\Connection;
 use Exception;
+use React\EventLoop\Loop;
 use TypeError;
 
 function IsFeatureFlagEnabled(string $featureName): bool
@@ -20,8 +23,8 @@ class Base
     public static string $public = "dbfc9c465c3ed8394049f848344f4ab8";
 
     private bool $isValid = false;
-
     private array $allowed;
+    private ?Connection $asyncDatabase = null;
 
     /**
      * @throws Exception
@@ -37,6 +40,26 @@ class Base
     public function isValid(): bool
     {
         return $this->isValid;
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function getAsyncDatabase(): Connection
+    {
+        if (null === $this->asyncDatabase) {
+            // fail-safe: try to create an async database from current request information if there is no instance set.
+            if (GameSession::INVALID_SESSION_ID === $gameSessionId = GameSession::GetGameSessionIdForCurrentRequest()) {
+                throw new Exception('Missing required async database connection.');
+            }
+            $this->asyncDatabase = AsyncDatabase::createGameSessionConnection(Loop::get(), $gameSessionId);
+        }
+        return $this->asyncDatabase;
+    }
+
+    public function setAsyncDatabase(Connection $asyncDatabase): void
+    {
+        $this->asyncDatabase = $asyncDatabase;
     }
 
     /**
@@ -198,7 +221,7 @@ class Base
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function PHPCanProxy(): bool
+    public static function PHPCanProxy(): bool
     {
         if (!empty(ini_get('open_basedir')) || ini_get('safe_mode')) {
             return false;
@@ -231,7 +254,7 @@ class Base
         //  (MSP Authoriser, BUas GeoServer, or any other GeoServer)
         $proxy = Config::GetInstance()->GetAuthWithProxy();
         if (!empty($proxy) && strstr($url, GameSession::GetRequestApiRoot()) === false &&
-            strstr($url, "localhost") === false && $this->PHPCanProxy()
+            strstr($url, "localhost") === false && self::PHPCanProxy()
         ) {
             curl_setopt($ch, CURLOPT_PROXY, $proxy);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -279,6 +302,9 @@ class Base
         return $return;
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AutoloadAllClasses(): void
     {

@@ -2,7 +2,10 @@
 
 namespace App\Domain\API\v1;
 
+use Drift\DBAL\Result;
 use Exception;
+use React\Promise\PromiseInterface;
+use function App\parallel;
 
 class Layer extends Base
 {
@@ -623,94 +626,120 @@ class Layer extends Base
      * @throws Exception
      * @noinspection PhpUnusedParameterInspection
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(array $layers, float $time, int $planId): array
+    public function latest(array $layers, float $time, int $planId): PromiseInterface
     {
         // get all the geometry of a plan, excluding the geometry that has been deleted in the current plan, or has
         //   been replaced by a newer generation (so highest geometry_id of any persistent ID)
+        $promises = [];
         foreach ($layers as $key => $layer) {
-            $layers[$key]['geometry'] = Database::GetInstance()->query(
-                "
-                SELECT
-                    geometry_id as id, 
-                    geometry_geometry as geometry, 
-                    geometry_country_id as country,
-                    geometry_FID as FID,
-                    geometry_data as data,
-                    geometry_layer_id as layer,
-                    geometry_active as active,
-                    geometry_subtractive as subtractive,
-                    geometry_type as type,
-                    geometry_persistent as persistent,
-                    geometry_mspid as mspid
-                FROM geometry
-                WHERE geometry_layer_id=:layer_id AND geometry_deleted = 0 
-                    AND geometry_id NOT IN (
-                        SELECT plan_delete.plan_delete_geometry_persistent
-                        FROM plan_delete
-                        WHERE plan_delete.plan_delete_geometry_persistent = geometry_id AND
-                              plan_delete.plan_delete_layer_id = :layer_id
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            $promises[$key] = $this->getAsyncDatabase()->query(
+                $qb
+                    ->select(
+                        'geometry_id as id',
+                        'geometry_geometry as geometry',
+                        'geometry_country_id as country',
+                        'geometry_FID as FID',
+                        'geometry_data as data',
+                        'geometry_layer_id as layer',
+                        'geometry_active as active',
+                        'geometry_subtractive as subtractive',
+                        'geometry_type as type',
+                        'geometry_persistent as persistent',
+                        'geometry_mspid as mspid',
                     )
-                    AND (geometry_id, geometry_persistent) IN (
-                        SELECT MAX(geometry_id), geometry_persistent
-                        FROM geometry
-                        WHERE geometry_layer_id = :layer_id GROUP BY geometry_persistent
-                    ) 	
-                ORDER BY geometry_FID, geometry_subtractive
-                ",
-                array("layer_id" => $layer['layerid'])
+                    ->from('geometry')
+                    ->where(
+                        $qb->expr()->and(
+                            'geometry_layer_id = ?',
+                            'geometry_deleted = 0',
+                            $qb->expr()->notIn(
+                                'geometry_id',
+                                '
+                                SELECT plan_delete.plan_delete_geometry_persistent
+                                FROM plan_delete
+                                WHERE plan_delete.plan_delete_geometry_persistent = geometry_id
+                                  AND plan_delete.plan_delete_layer_id = ?',
+                            ),
+                            $qb->expr()->in(
+                                '(geometry_id, geometry_persistent)',
+                                '
+                                SELECT MAX(geometry_id), geometry_persistent
+                                FROM geometry
+                                WHERE geometry_layer_id = ?
+                                GROUP BY geometry_persistent',
+                            )
+                        )
+                    )
+                    ->orderBy('geometry_FID, geometry_subtractive')
+                    ->setParameters(array_fill(0, 3, $layer['layerid']))
             );
-            $layers[$key]['geometry'] = self::MergeGeometry($layers[$key]['geometry']);
         }
-
-        $deleted = Database::GetInstance()->query(
-            "
-            SELECT plan_delete_geometry_persistent as geometry, plan_delete_layer_id as layerid,
-                   layer_original_id as original
-            FROM plan_delete
-            LEFT JOIN layer ON plan_delete.plan_delete_layer_id=layer.layer_id
-            WHERE plan_delete_plan_id=? ORDER BY layerid
-            ",
-            array($planId)
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promises['deleted'] = $this->getAsyncDatabase()->query(
+            $qb
+                ->select(
+                    'pd.plan_delete_geometry_persistent as geometry',
+                    'pd.plan_delete_layer_id as layerid',
+                    'l.layer_original_id as original'
+                )
+                ->from('plan_delete', 'pd')
+                ->leftJoin('pd', 'layer', 'l', 'pd.plan_delete_layer_id=l.layer_id')
+                ->where('pd.plan_delete_plan_id = ' . $qb->createPositionalParameter($planId))
+                ->orderBy('pd.plan_delete_layer_id')
         );
-
-        foreach ($deleted as $del) {
-            $found = false;
-
-            foreach ($layers as &$layer) {
-                if (isset($layer['layerid']) && $del['layerid'] == $layer['layerid']) {
-                    if (!isset($layer['deleted'])) {
-                        $layer['deleted'] = array();
-                    }
-                    array_push($layer['deleted'], $del['geometry']);
-                    $found = true;
-                    break;
+        return parallel($promises, 1) // todo: if performance allows, increase threads
+            ->then(function (array $results) use ($layers) {
+                /** @var Result[] $results */
+                foreach ($layers as $key => $layer) {
+                    $layers[$key]['geometry'] = $results[$key]->fetchAllRows();
+                    $layers[$key]['geometry'] = self::MergeGeometry($layers[$key]['geometry']);
                 }
-            }
+                $deleted = $results['deleted']->fetchAllRows();
+                foreach ($deleted as $del) {
+                    $found = false;
 
-            if (!$found) {
-                array_push($layers, array());
+                    foreach ($layers as &$layer) {
+                        if (isset($layer['layerid']) && $del['layerid'] == $layer['layerid']) {
+                            if (!isset($layer['deleted'])) {
+                                $layer['deleted'] = array();
+                            }
+                            array_push($layer['deleted'], $del['geometry']);
+                            $found = true;
+                            break;
+                        }
+                    }
+                    unset($layer);
 
-                $layers[sizeof($layers)-1]['deleted'] = array(
-                    'layerid' => $del['layerid'],
-                    'original' => $del['original'],
-                    'deleted' => array($del['geometry'])
-                );
-            }
-        }
-            
-        return $layers;
+                    if (!$found) {
+                        array_push($layers, array());
+
+                        $layers[sizeof($layers)-1]['deleted'] = array(
+                            'layerid' => $del['layerid'],
+                            'original' => $del['original'],
+                            'deleted' => array($del['geometry'])
+                        );
+                    }
+                }
+                return $layers;
+            });
     }
 
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function LatestRaster(float $time): array
+    public function latestRaster(float $time): PromiseInterface
     {
-        return Database::GetInstance()->query(
-            "SELECT layer_raster as raster, layer_id as id FROM layer WHERE layer_geotype=? AND layer_lastupdate>?",
-            array("raster", $time)
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->select(
+                    'layer_raster as raster',
+                    'layer_id as id'
+                )
+                ->from('layer')
+                ->where('layer_geotype = ' . $qb->createPositionalParameter('raster'))
+                ->andWhere('layer_lastupdate > ' . $qb->createPositionalParameter($time))
         );
     }
 

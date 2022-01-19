@@ -2,9 +2,10 @@
 
 namespace App\Domain\API\v1;
 
+use Exception;
 use stdClass;
 
-class Sel extends Base
+class SEL extends Base
 {
     private const ALLOWED = array(
         "GetAreaOutputConfiguration",

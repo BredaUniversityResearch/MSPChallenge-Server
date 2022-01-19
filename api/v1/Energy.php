@@ -2,7 +2,11 @@
 
 namespace App\Domain\API\v1;
 
+use Drift\DBAL\Result;
 use Exception;
+use React\Promise\PromiseInterface;
+use function App\parallel;
+use function Clue\React\Block\await;
 
 class Energy extends Base
 {
@@ -512,27 +516,34 @@ class Energy extends Base
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(float $time): array
+    public function latest(float $time): PromiseInterface
     {
-        $data = array();
-        $data['connections'] = Database::GetInstance()->query("SELECT 
-				energy_connection_start_id as start,
-				energy_connection_end_id as end,
-				energy_connection_cable_id as cable,
-				energy_connection_start_coordinates as coords,
-				energy_connection_active as active
-			FROM energy_connection WHERE energy_connection_lastupdate > ?", array($time));
-
-        $data["output"] = Database::GetInstance()->query("SELECT 
-				energy_output_geometry_id as id, 
-				energy_output_capacity as capacity,
-				energy_output_maxcapacity as maxcapacity, 
-				energy_output_active as active
-				FROM energy_output 
-				WHERE energy_output_lastupdate > ?", array($time));
-
-        return $data;
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promises[] = $this->getAsyncDatabase()->query(
+            $qb
+                ->select(
+                    'energy_connection_start_id as start',
+                    'energy_connection_end_id as end',
+                    'energy_connection_cable_id as cable',
+                    'energy_connection_start_coordinates as coords',
+                    'energy_connection_active as active',
+                )
+                ->from('energy_connection')
+                ->where('energy_connection_lastupdate > ' . $qb->createPositionalParameter($time))
+        );
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promises[] = $this->getAsyncDatabase()->query(
+            $qb
+                ->select(
+                    'energy_output_geometry_id as id',
+                    'energy_output_capacity as capacity',
+                    'energy_output_maxcapacity as maxcapacity',
+                    'energy_output_active as active'
+                )
+                ->from('energy_output')
+                ->where('energy_output_lastupdate > ' . $qb->createPositionalParameter($time))
+        );
+        return parallel($promises, 1); // todo: if performance allows, increase threads
     }
 
     /**
@@ -548,7 +559,7 @@ class Energy extends Base
     {
         $planId = $plan_id;
         $result = array();
-        $this->FindDependentEnergyPlans($planId, $result);
+        await($this->findDependentEnergyPlans($planId, $result));
         return $result;
     }
 
@@ -557,115 +568,206 @@ class Energy extends Base
      *
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function FindDependentEnergyPlans(int $planId, array &$result): void
+    public function findDependentEnergyPlans(int $planId, array &$result): PromiseInterface
     {
-        $planIdsDependentOnThisPlan = array();
-
-        $referencePlanData = Database::GetInstance()->query(
-            "SELECT plan_gametime FROM plan WHERE plan_id = ? ",
-            array($planId)
-        )[0];
-            
-        //Plans that are referencing the same persisten grid ids.
-        $planChangingReferencedGrids = Database::GetInstance()->query(
-            "
-            SELECT plan.plan_id 
-            FROM plan
-            INNER JOIN grid ON plan.plan_id = grid.grid_plan_id
-            WHERE (
-                plan.plan_gametime > :planGameTime OR (
-                    plan.plan_gametime = :planGameTime AND plan.plan_id > :planId
-                )
-            ) AND grid.grid_persistent IN (
-              SELECT grid.grid_persistent FROM grid WHERE grid.grid_plan_id = :planId
-            )
-			",
-            array(":planGameTime" => $referencePlanData['plan_gametime'], ":planId" => $planId)
-        );
-        foreach ($planChangingReferencedGrids as $plan) {
-            if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) && !in_array($plan['plan_id'], $result)) {
-                $planIdsDependentOnThisPlan[] = $plan['plan_id'];
-            }
-        }
-
-        //Plans that are deleting the persistent Id
-        $plansReferencingDeletedGrids = Database::GetInstance()->query(
-            "
-            SELECT plan.plan_id 
-            FROM plan
-            INNER JOIN grid_removed ON plan.plan_id = grid_removed.grid_removed_plan_id
-            WHERE (
-                plan.plan_gametime > :planGameTime OR (
-                    plan.plan_gametime = :planGameTime AND plan.plan_id > :planId)
-                ) AND (
-                    grid_removed.grid_removed_grid_persistent IN (
-                        SELECT grid.grid_persistent FROM grid WHERE grid.grid_plan_id = :planId
-                    ) OR grid_removed.grid_removed_grid_persistent IN (
-                        SELECT grid_removed.grid_removed_grid_persistent
-                        FROM grid_removed
-                        WHERE grid_removed.grid_removed_grid_persistent = :planId)
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->select('plan_gametime')
+                ->from('plan')
+                ->where('plan_id = ' . $qb->createPositionalParameter($planId))
+                ->setMaxResults(1)
+        )
+        ->then(function (Result $queryResult) use ($planId, &$result) {
+            $referencePlanData = $queryResult->fetchFirstRow();
+            //Plans that are referencing the same persistent grid ids.
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->select('p.plan_id')
+                    ->from('plan', 'p')
+                    ->innerJoin('p', 'grid', 'g', 'p.plan_id = g.grid_plan_id')
+                    ->where(
+                        $qb->expr()->and(
+                            $qb->expr()->or(
+                                'p.plan_gametime > ' .
+                                    $qb->createPositionalParameter($referencePlanData['plan_gametime']),
+                                $qb->expr()->and(
+                                    'p.plan_gametime = ' .
+                                        $qb->createPositionalParameter($referencePlanData['plan_gametime']),
+                                    'p.plan_id > ' . $qb->createPositionalParameter($planId)
+                                )
+                            ),
+                            $qb->expr()->in(
+                                'g.grid_persistent',
+                                'SELECT grid.grid_persistent FROM grid WHERE grid.grid_plan_id = ' .
+                                    $qb->createPositionalParameter($planId)
+                            )
+                        )
                     )
-			",
-            array(":planGameTime" => $referencePlanData['plan_gametime'], ":planId" => $planId)
-        );
-        foreach ($plansReferencingDeletedGrids as $plan) {
-            if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) && !in_array($plan['plan_id'], $result)) {
-                $planIdsDependentOnThisPlan[] = $plan['plan_id'];
-            }
-        }
+            )
+            ->then(function (Result $queryResult) use (&$result, $planId, $referencePlanData) {
+                $planChangingReferencedGrids = $queryResult->fetchAllRows();
+                $planIdsDependentOnThisPlan = [];
+                foreach ($planChangingReferencedGrids as $plan) {
+                    if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) &&
+                        !in_array($plan['plan_id'], $result)) {
+                        $planIdsDependentOnThisPlan[] = $plan['plan_id'];
+                    }
+                }
 
-        //Plans that have connections to any geometry in the current plan.
-        $plansWithCablesReferencingGeometry = Database::GetInstance()->query(
-            "
-            SELECT plan_connection.plan_id
-			FROM energy_connection 
-				INNER JOIN geometry geometry_start
-				    ON energy_connection.energy_connection_start_id = geometry_start.geometry_id
-				INNER JOIN plan_layer plan_layer_start
-				    ON geometry_start.geometry_layer_id = plan_layer_start.plan_layer_layer_id
-				INNER JOIN geometry geometry_end
-				    ON energy_connection.energy_connection_end_id = geometry_end.geometry_id
-				INNER JOIN plan_layer plan_layer_end
-				    ON geometry_end.geometry_layer_id = plan_layer_end.plan_layer_layer_id
-				INNER JOIN geometry geometry_connection
-				    ON energy_connection.energy_connection_cable_id = geometry_connection.geometry_id
-				INNER JOIN plan_layer plan_layer_connection
-				    ON geometry_connection.geometry_layer_id = plan_layer_connection.plan_layer_layer_id
-				INNER JOIN plan plan_connection ON plan_layer_connection.plan_layer_plan_id = plan_connection.plan_id
-			WHERE (
-			    geometry_start.geometry_active = 1 AND geometry_end.geometry_active = 1 AND
-			    geometry_connection.geometry_active = 1
-			) AND (
-			    (
-			        plan_layer_start.plan_layer_plan_id = :planId AND plan_connection.plan_id != :planId AND (
-			            plan_connection.plan_gametime > :planGameTime OR (
-			                plan_connection.plan_gametime = :planGameTime AND plan_connection.plan_id > :planId
-			            )
-			        )
-			    ) OR (
-			        plan_layer_end.plan_layer_plan_id = :planId AND plan_connection.plan_id != :planId AND (
-			            plan_connection.plan_gametime > :planGameTime OR (
-			                plan_connection.plan_gametime = :planGameTime AND plan_connection.plan_id > :planId
-			            )
-			        )
-			    )
-			)
-			",
-            array(":planId" => $planId, ":planGameTime" => $referencePlanData['plan_gametime'])
-        );
-        foreach ($plansWithCablesReferencingGeometry as $plan) {
-            if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) && !in_array($plan['plan_id'], $result)) {
-                $planIdsDependentOnThisPlan[] = $plan['plan_id'];
-            }
-        }
+                //Plans that are deleting the persistent id
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->select('p.plan_id')
+                        ->from('plan', 'p')
+                        ->innerJoin('p', 'grid_removed', 'gr', 'p.plan_id = gr.grid_removed_plan_id')
+                        ->where(
+                            $qb->expr()->and(
+                                $qb->expr()->or(
+                                    'p.plan_gametime > ' .
+                                        $qb->createPositionalParameter($referencePlanData['plan_gametime']),
+                                    $qb->expr()->and(
+                                        'p.plan_gametime = ' .
+                                            $qb->createPositionalParameter($referencePlanData['plan_gametime']),
+                                        'p.plan_id > ' . $qb->createPositionalParameter($planId)
+                                    )
+                                ),
+                                $qb->expr()->or(
+                                    $qb->expr()->in(
+                                        'gr.grid_removed_grid_persistent',
+                                        'SELECT grid.grid_persistent FROM grid WHERE grid.grid_plan_id = ' .
+                                            $qb->createPositionalParameter($planId)
+                                    ),
+                                    $qb->expr()->in(
+                                        'gr.grid_removed_grid_persistent',
+                                        '
+                                        SELECT grid_removed.grid_removed_grid_persistent
+                                        FROM grid_removed
+                                        WHERE grid_removed.grid_removed_grid_persistent = ' .
+                                            $qb->createPositionalParameter($planId)
+                                    )
+                                )
+                            )
+                        )
+                )
+                ->then(function (Result $queryResult) use (
+                    &$result,
+                    $planId,
+                    $referencePlanData,
+                    $planIdsDependentOnThisPlan
+                ) {
+                    $plansReferencingDeletedGrids = $queryResult->fetchAllRows();
+                    foreach ($plansReferencingDeletedGrids as $plan) {
+                        if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) &&
+                            !in_array($plan['plan_id'], $result)) {
+                            $planIdsDependentOnThisPlan[] = $plan['plan_id'];
+                        }
+                    }
 
-        foreach ($planIdsDependentOnThisPlan as $erroredPlanId) {
-            if (!in_array($erroredPlanId, $result)) {
-                array_push($result, $erroredPlanId);
-                $this->FindDependentEnergyPlans($erroredPlanId, $result);
-            }
-        }
+                    // temp. function to re-use part of query where
+                    $fnGeneratePlanLayerWherePart = function (string $planLayerTableName) use (
+                        $planId,
+                        $referencePlanData
+                    ) {
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        return $qb->expr()->and(
+                            $planLayerTableName . '.plan_layer_plan_id = ' . $qb->createPositionalParameter($planId),
+                            'plan_connection.plan_id != ' . $qb->createPositionalParameter($planId),
+                            $qb->expr()->or(
+                                'plan_connection.plan_gametime > ' .
+                                    $qb->createPositionalParameter($referencePlanData['plan_gametime']),
+                                $qb->expr()->and(
+                                    'plan_connection.plan_gametime = ' .
+                                        $qb->createPositionalParameter($referencePlanData['plan_gametime']),
+                                    'plan_connection.plan_id > ' . $qb->createPositionalParameter($planId)
+                                )
+                            )
+                        );
+                    };
+
+                    //Plans that have connections to any geometry in the current plan.
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select('pc.plan_id')
+                            ->from('energy_connection', 'ec')
+                            ->innerJoin(
+                                'ec',
+                                'geometry',
+                                'geometry_start',
+                                'ec.energy_connection_start_id = geometry_start.geometry_id'
+                            )
+                            ->innerJoin(
+                                'geometry_start',
+                                'plan_layer',
+                                'plan_layer_start',
+                                'geometry_start.geometry_layer_id = plan_layer_start.plan_layer_layer_id'
+                            )
+                            ->innerJoin(
+                                'ec',
+                                'geometry',
+                                'geometry_end',
+                                'ec.energy_connection_end_id = geometry_end.geometry_id'
+                            )
+                            ->innerJoin(
+                                'geometry_end',
+                                'plan_layer',
+                                'plan_layer_end',
+                                'geometry_end.geometry_layer_id = plan_layer_end.plan_layer_layer_id'
+                            )
+                            ->innerJoin(
+                                'ec',
+                                'geometry',
+                                'geometry_connection',
+                                'ec.energy_connection_cable_id = geometry_connection.geometry_id'
+                            )
+                            ->innerJoin(
+                                'geometry_connection',
+                                'plan_layer',
+                                'plan_layer_connection',
+                                'geometry_connection.geometry_layer_id = plan_layer_connection.plan_layer_layer_id'
+                            )
+                            ->innerJoin(
+                                'plan_layer_connection',
+                                'plan',
+                                'plan_connection',
+                                'plan_layer_connection.plan_layer_plan_id = plan_connection.plan_id'
+                            )
+                            ->where($qb->expr()->and(
+                                'geometry_start.geometry_active = 1',
+                                'geometry_end.geometry_active = 1',
+                                'geometry_connection.geometry_active = 1',
+                                $qb->expr()->or(
+                                    $fnGeneratePlanLayerWherePart('plan_layer_start'),
+                                    $fnGeneratePlanLayerWherePart('plan_layer_end')
+                                )
+                            ))
+                    )
+                    ->then(function (Result $queryResult) use (
+                        &$result,
+                        $planIdsDependentOnThisPlan
+                    ) {
+                        $plansWithCablesReferencingGeometry = $queryResult->fetchAllRows();
+                        foreach ($plansWithCablesReferencingGeometry as $plan) {
+                            if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) &&
+                                !in_array($plan['plan_id'], $result)) {
+                                $planIdsDependentOnThisPlan[] = $plan['plan_id'];
+                            }
+                        }
+                        $promises = [];
+                        foreach ($planIdsDependentOnThisPlan as $erroredPlanId) {
+                            if (!in_array($erroredPlanId, $result)) {
+                                array_push($result, $erroredPlanId);
+                                $promises[] = $this->findDependentEnergyPlans($erroredPlanId, $result);
+                            }
+                        }
+                        return parallel($promises, 1); // todo: if performance allows, increase threads
+                    });
+                });
+            });
+        });
     }
 
     /**

@@ -1,9 +1,45 @@
 {
+    "clue/block-react": {
+        "version": "v1.5.0"
+    },
+    "clue/http-proxy-react": {
+        "version": "v1.7.0"
+    },
+    "composer/package-versions-deprecated": {
+        "version": "1.11.99.4"
+    },
+    "doctrine/cache": {
+        "version": "2.1.1"
+    },
+    "doctrine/dbal": {
+        "version": "3.2.0"
+    },
+    "doctrine/deprecations": {
+        "version": "v0.5.3"
+    },
+    "doctrine/event-manager": {
+        "version": "1.1.1"
+    },
+    "drift/dbal": {
+        "version": "0.1.4"
+    },
     "psr/event-dispatcher": {
         "version": "1.0.0"
     },
     "psr/http-factory": {
         "version": "1.0.1"
+    },
+    "react/http": {
+        "version": "v1.5.0"
+    },
+    "react/mysql": {
+        "version": "v0.5.6"
+    },
+    "react/promise-stream": {
+        "version": "v1.3.0"
+    },
+    "ringcentral/psr7": {
+        "version": "1.3.0"
     },
     "symfony/cache": {
         "version": "v5.4.0"

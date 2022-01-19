@@ -66,20 +66,20 @@ class Update extends Base
         $configuredSimulations = $sims->GetConfiguredSimulationTypes();
         if (array_key_exists("MEL", $configuredSimulations)) {
             Log::LogInfo("SetupSimulations -> Setting up MEL tables...");
-            $mel = new Mel();
+            $mel = new MEL();
             $mel->OnReimport($data['MEL']);
             Log::LogInfo("SetupSimulations -> Done setting up MEL...");
         }
 
         if (array_key_exists("SEL", $configuredSimulations)) {
             Log::LogInfo("SetupSimulations -> Setting up SEL tables...");
-            $sel = new Sel();
+            $sel = new SEL();
             $sel->ReimportShippingLayers();
         }
         
         if (array_key_exists("REL", $configuredSimulations)) {
             Log::LogInfo("SetupSimulations -> Setting up REL tables...");
-            $rel = new Rel();
+            $rel = new REL();
             $rel->OnReimport();
         }
         Log::LogInfo(

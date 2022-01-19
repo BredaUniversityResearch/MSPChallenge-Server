@@ -370,9 +370,9 @@ class Store extends Base
         array $multi,
         int $layerId,
         string $jsonData,
-        int $countryId,
+        ?int $countryId,
         int $type,
-        int $mspId
+        ?int $mspId
     ): void {
         $lastId = 0;
         for ($j = 0; $j < sizeof($multi); $j++) {
@@ -502,6 +502,7 @@ class Store extends Base
 
             $jsonDecodeTotal += (microtime(true) - $jsonDecodeStart);
 
+            $countryId = 0;
             $this->moveDataFromArray($arr, $type, $mspId, $missingMspIds, $countryId);
 
             $jsonData = json_encode($arr);
@@ -572,6 +573,8 @@ class Store extends Base
             if ($feature["geometry_name"] == "the_geom") {
                 $featureProperties = $feature["properties"];
 
+                $type = '0';
+                $countryId = 0;
                 $this->moveDataFromArray($featureProperties, $type, $mspId, $missingMspIds, $countryId);
 
                 $geometryData = $feature["geometry"];
@@ -635,13 +638,13 @@ class Store extends Base
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function InsertGeometry(
-        int    $layerId,
+        int $layerId,
         string $geometry,
         string $data,
-        int    $countryId,
-        int    $type,
-        int    $mspId,
-        int    $subtractive = 0
+        ?int $countryId,
+        int $type,
+        ?int $mspId,
+        int $subtractive = 0
     ): int {
         return Database::GetInstance()->query(
             "

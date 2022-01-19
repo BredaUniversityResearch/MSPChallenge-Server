@@ -2,7 +2,12 @@
 
 namespace App\Domain\API\v1;
 
+use Drift\DBAL\Result;
 use Exception;
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
+use function App\resolveOnFutureTick;
+use function Clue\React\Block\await;
 
 class Security extends Base
 {
@@ -91,6 +96,64 @@ class Security extends Base
     }
 
     /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public function generateTokenAsync(
+        int $accessLevel = self::ACCESS_LEVEL_FLAG_FULL,
+        int $lifetimeSeconds = self::DEFAULT_TOKEN_LIFETIME_SECONDS
+    ): PromiseInterface {
+        return $this->getAsyncDatabase()->query(
+            $this->getAsyncDatabase()->createQueryBuilder()
+                ->delete('api_token')
+                ->where('api_token_valid_until != 0')
+                ->andWhere('api_token_valid_until < DATE_ADD(NOW(), INTERVAL -? SECOND)')
+                ->setParameters([self::TOKEN_DELETE_AFTER_TIME])
+        )
+        ->then(function (/*Result $result*/) use ($lifetimeSeconds, $accessLevel) {
+            $token = random_int(0, PHP_INT_MAX);
+            if ($lifetimeSeconds == self::TOKEN_LIFETIME_INFINITE) {
+                return $this->getAsyncDatabase()->insert(
+                    'api_token',
+                    [
+                        'api_token_token' => $token,
+                        'api_token_scope' => $accessLevel,
+                        'api_token_valid_until' => 0
+                    ]
+                );
+            } else {
+                return $this->getAsyncDatabase()->query(
+                    $this->getAsyncDatabase()->createQueryBuilder()
+                        ->insert('api_token')
+                        ->values([
+                            'api_token_token' => $token,
+                            'api_token_scope' => $accessLevel,
+                            'api_token_valid_until' => 'DATE_ADD(NOW(), INTERVAL ? SECOND)'
+                        ])
+                        ->setParameters([$lifetimeSeconds])
+                );
+            }
+        })
+        ->then(function (Result $result) {
+            $id = $result->getLastInsertedId() ?? 0;
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->select('api_token_token', 'api_token_valid_until')
+                    ->from('api_token')
+                    ->where('api_token_id = ' . $qb->createPositionalParameter($id))
+            );
+        })
+        ->then(function (Result $result) {
+            $row = $result->fetchFirstRow();
+            return [
+                'token' => $row['api_token_token'] ?? null,
+                'valid_until' => $row['api_token_valid_until'] ?? null
+            ];
+        });
+    }
+
+    /**
      * Returns array of [token => TokenValue, valid_until => UnixTimestamp]
      *
      * @throws Exception
@@ -100,37 +163,7 @@ class Security extends Base
         int $accessLevel = self::ACCESS_LEVEL_FLAG_FULL,
         int $lifetimeSeconds = self::DEFAULT_TOKEN_LIFETIME_SECONDS
     ): array {
-        Database::GetInstance()->query(
-            "
-            DELETE FROM api_token
-            WHERE api_token_valid_until != 0
-            AND api_token_valid_until < DATE_ADD(NOW(), INTERVAL -? SECOND)
-            ",
-            array(self::TOKEN_DELETE_AFTER_TIME)
-        );
-
-        $token = random_int(0, PHP_INT_MAX);
-        if ($lifetimeSeconds == self::TOKEN_LIFETIME_INFINITE) {
-            $id = Database::GetInstance()->query(
-                "INSERT INTO api_token (api_token_token, api_token_scope, api_token_valid_until) VALUES(?, ?, 0)",
-                array($token, $accessLevel),
-                true
-            );
-        } else {
-            $id = Database::GetInstance()->query(
-                "
-                INSERT INTO api_token (api_token_token, api_token_scope, api_token_valid_until)
-                VALUES(?, ?, DATE_ADD(NOW(), INTERVAL ? SECOND))
-                ",
-                array($token, $accessLevel, $lifetimeSeconds),
-                true
-            );
-        }
-        $result = Database::GetInstance()->query(
-            "SELECT api_token_token, api_token_valid_until FROM api_token WHERE api_token_id = ?",
-            array($id)
-        );
-        return array("token" => $result[0]["api_token_token"], "valid_until" => $result[0]["api_token_valid_until"]);
+        return await($this->generateTokenAsync($accessLevel, $lifetimeSeconds));
     }
 
     /**
@@ -156,25 +189,43 @@ class Security extends Base
     }
 
     /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public function getSpecialTokenAsync(int $accessLevel): PromiseInterface
+    {
+        $deferred = new Deferred();
+        if ($accessLevel == self::ACCESS_LEVEL_FLAG_REQUEST_TOKEN ||
+            $accessLevel == self::ACCESS_LEVEL_FLAG_SERVER_MANAGER) {
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            $this->getAsyncDatabase()->query(
+                $qb
+                    ->select('api_token_token')
+                    ->from('api_token')
+                    ->where('api_token_valid_until = 0')
+                    ->andWhere('api_token_scope = ' . $qb->createPositionalParameter($accessLevel))
+                    ->setMaxResults(1)
+            )
+            ->then(function (Result $result) use ($deferred) {
+                $row = $result->fetchFirstRow();
+                $deferred->resolve($row['api_token_token'] ?? '');
+            })
+            ->otherwise(function () use ($deferred) {
+                $deferred->resolve('');
+            });
+            return $deferred->promise();
+        }
+        return resolveOnFutureTick($deferred, '')->promise();
+    }
+
+    /**
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function GetSpecialToken(int $accessLevel): array
     {
-        if ($accessLevel == self::ACCESS_LEVEL_FLAG_REQUEST_TOKEN ||
-            $accessLevel == self::ACCESS_LEVEL_FLAG_SERVER_MANAGER) {
-            $tokenInfo = Database::GetInstance()->query(
-                "
-                SELECT api_token_token FROM api_token WHERE api_token_valid_until = 0 AND api_token_scope = ?",
-                array($accessLevel)
-            );
-            $token = "";
-            if (count($tokenInfo) > 0) {
-                $token = $tokenInfo[0]["api_token_token"];
-            }
-            return array("token" => $token);
-        }
-        return array("token" => "");
+        $result['token'] = await($this->getSpecialTokenAsync($accessLevel));
+        return $result;
     }
 
     /**

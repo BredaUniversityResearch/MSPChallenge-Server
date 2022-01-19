@@ -15,36 +15,36 @@ class Util
         $seconds = floor($milliseconds / 1000);
         $minutes = floor($seconds / 60);
 
-        $format = '%03ums';
+        $format = '%ums';
         $milliseconds = $milliseconds % 1000;
         $args[] = $milliseconds;
 
         $seconds = $seconds % 60;
         if ($seconds > 0) {
-            $format = '%02us.' . $format;
+            $format = '%us.' . $format;
             $args[] = $seconds;
         }
 
         $minutes = $minutes % 60;
         if ($minutes > 0) {
-            $format = '%02um:' . $format;
+            $format = '%um:' . $format;
             $args[] = $minutes;
         }
 
         $args[] = $format;
 
-        $time = call_user_func_array('sprintf', array_reverse($args));
-        return rtrim($time, '0');
+        return call_user_func_array('sprintf', array_reverse($args));
     }
 
     public static function getMedian(array $values): ?float
     {
+        $values = array_values($values);
         $count = count($values);
         if ($count === 0) {
             return null;
         }
         asort($values);
-        $half = floor($count / 2);
+        $half = (int)floor($count / 2);
         if ($count % 2) {
             return $values[$half];
         }

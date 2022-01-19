@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use Exception;
+use React\Promise\PromiseInterface;
 
 class Objective extends Base
 {
@@ -106,19 +107,23 @@ class Objective extends Base
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(float $time): array
+    public function latest(float $time): PromiseInterface
     {
-        return Database::GetInstance()->query("SELECT 
-				objective_id, 
-				objective_country_id as country_id,
-				objective_title as title, 
-				objective_description as description, 
-				objective_deadline as deadline,
-				objective_active as active,
-				objective_complete as complete
-				FROM objective
-				WHERE objective_lastupdate>?", array($time));
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->select(
+                    'objective_id',
+                    'objective_country_id as country_id',
+                    'objective_title as title',
+                    'objective_description as description',
+                    'objective_deadline as deadline',
+                    'objective_active as active',
+                    'objective_complete as complete',
+                )
+                ->from('objective')
+                ->where('objective_lastupdate > ' . $qb->createPositionalParameter($time))
+        );
     }
 
     /**

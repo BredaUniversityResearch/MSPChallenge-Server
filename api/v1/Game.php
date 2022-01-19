@@ -2,7 +2,17 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\MSPBrowser;
+use App\SilentFailException;
+use Doctrine\DBAL\Exception\InvalidArgumentException;
+use Drift\DBAL\Result;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
+use function App\resolveOnFutureTick;
+use function Clue\React\Block\await;
+use function React\Promise\all;
 
 class Game extends Base
 {
@@ -26,8 +36,7 @@ class Game extends Base
         ["Setupfilename", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], // nominated for full security
         "Speed",
         ["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
-        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        "TestWatchdogAlive"
+        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
     );
 
     public function __construct(string $method = '')
@@ -126,7 +135,16 @@ class Game extends Base
             $path = GameSession::CONFIG_DIRECTORY . $filename;
         }
 
-        return file_get_contents($path);
+        // 5 min cache. why 5min? Such that the websocket server will refresh the config once in a while
+        static $cacheTime = null;
+        static $cache = [];
+        if (array_key_exists($path, $cache) &&
+            ($cacheTime === null || time() - $cacheTime < 300)) {
+            return $cache[$path];
+        }
+        $cacheTime = time();
+        $cache[$path] = file_get_contents($path);
+        return $cache[$path];
     }
 
     /**
@@ -305,67 +323,128 @@ class Game extends Base
      * Tick the game server, updating the plans if required
      *
      * @param bool $showDebug
+     * @return PromiseInterface
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Tick(bool $showDebug = false): void
+    public function Tick(bool $showDebug = false): PromiseInterface
     {
         $plan = new Plan();
-        $plan->Tick();
+        $plan->setAsyncDatabase($this->getAsyncDatabase());
+        // Plan tick first: to clean up plans
+        return $plan->Tick()
+            // fetch game information, incl. state name
+            ->then(function (/*Result $result*/) {
+                return $this->getTickData();
+            })
+            ->then(function (Result $result) use ($showDebug) {
+                if (null !== $tickData = $result->fetchFirstRow()) {
+                    if (null !== $promise = $this->tryTickServer($tickData, $showDebug)) {
+                        return $promise
+                            ->then(function () {
+                                // only activate this after the Tick call has moved out of the client and into the
+                                //   Watchdog
+                                return $this->UpdateGameDetailsAtServerManager();
+                            });
+                    }
+                }
+                // only activate this after the Tick call has moved out of the client and into the Watchdog
+                return $this->UpdateGameDetailsAtServerManager();
+            });
+    }
 
-        //Update server time and month
-        $tick = Database::GetInstance()->query("SELECT game_lastupdate as lastupdate,
-				game_currentmonth as month,
-				game_planning_gametime as era_gametime,
-				game_planning_realtime as era_realtime,
-				game_mel_lastmonth as mel_lastmonth,
-				game_cel_lastmonth as cel_lastmonth,
-				game_sel_lastmonth as sel_lastmonth,
-				game_state as state
-			FROM game")[0];
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    private function getTickData(): PromiseInterface
+    {
+        return $this->getAsyncDatabase()->query(
+            $this->getAsyncDatabase()->createQueryBuilder()
+                ->select(
+                    'game_lastupdate as lastupdate',
+                    'game_currentmonth as month',
+                    'game_planning_gametime as era_gametime',
+                    'game_planning_realtime as era_realtime',
+                    'game_mel_lastmonth as mel_lastmonth',
+                    'game_cel_lastmonth as cel_lastmonth',
+                    'game_sel_lastmonth as sel_lastmonth',
+                    'game_state as state'
+                )
+                ->from('game')
+                ->setMaxResults(1)
+        );
+    }
 
-        $state = $tick["state"];
+    /**
+     * @throws Exception
+     */
+    private function tryTickServer(array $tickData, bool $showDebug): ?PromiseInterface
+    {
+        $state = $tickData['state'];
+        // no "tick" required for these state names
+        if (in_array($state, ['END', 'PAUSE', 'SETUP'])) {
+            return null;
+        }
 
-        if ($state != "END" && $state != "PAUSE" && $state != "SETUP") {
-            $currenttime = microtime(true);
-            $lastupdate = $tick['lastupdate'];
-            $diff = $currenttime - $lastupdate;
-
-            $secondspermonth = $tick['era_realtime'] / $tick['era_gametime'];
-            if ($state == "SIMULATION" || $state == "FASTFORWARD") {
-                $secondspermonth = 0.2;
+        // check if we should postpone the "tick"
+        $diff = microtime(true) - $tickData['lastupdate'];
+        $secondsPerMonth = ($state == 'SIMULATION' || $state == 'FASTFORWARD') ? 0.2 :
+            ($tickData['era_realtime'] / $tickData['era_gametime']);
+        if ($diff <= $secondsPerMonth) {
+            if ($showDebug) {
+                self::Debug("Waiting for update time " . ($secondsPerMonth - $diff) . " seconds remaining");
             }
+            return null;
+        }
 
-            if ($diff > $secondspermonth) {
-                if ($showDebug) {
-                    self::Debug("Trying to tick the server");
-                }
+        // let's do the "tick" which updates server time and month
+        if ($showDebug) {
+            self::Debug("Trying to tick the server");
+        }
 
-                $this->TryTickServer($tick, $showDebug);
-            } else {
+        if (!strstr($_SERVER['REQUEST_URI'], 'dev') || Config::GetInstance()->ShouldWaitForSimulationsInDev()) {
+            if (!$this->AreSimulationsUpToDate($tickData)) {
                 if ($showDebug) {
-                    self::Debug("Waiting for update time ".($secondspermonth - $diff). " seconds remaining");
+                    self::Debug('Waiting for simulations to update.');
                 }
+                return null;
             }
         }
 
-        // only activate this after the Tick call has moved out of the client and into the Watchdog
-        $this->UpdateGameDetailsAtServerManager();
+        return $this->serverTickInternal($tickData['lastupdate'], $showDebug)
+            ->otherwise(function (SilentFailException $e) {
+                // Handle the rejection, and don't propagate. This is like catch without a rethrow
+                return null;
+            });
     }
 
     /**
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function UpdateGameDetailsAtServerManager()
+    private function UpdateGameDetailsAtServerManager(): PromiseInterface
     {
-        $postValues = $this->GetGameDetails();
-        $token = (new Security())->GetServerManagerToken()["token"];
-        $postValues["token"] = $token;
-        $postValues["session_id"] = GameSession::GetGameSessionIdForCurrentRequest();
-        $postValues["action"] = "demoCheck";
-        $url = GameSession::GetServerManagerApiRoot()."editGameSession.php";
-        $this->CallBack($url, $postValues);
+        return $this->getGameDetailsAsync()
+            ->then(function (array $postValues) {
+                $security = new Security();
+                $security->setAsyncDatabase($this->getAsyncDatabase());
+                return $security->getSpecialTokenAsync(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
+                    ->then(function (string $token) use ($postValues) {
+                        $postValues['token'] = $token;
+                        $postValues['session_id'] = GameSession::GetGameSessionIdForCurrentRequest();
+                        $postValues['action'] = 'demoCheck';
+                        $url = GameSession::GetServerManagerApiRoot().'editGameSession.php';
+                        $browser = new MSPBrowser($url);
+                        return $browser->post(
+                            $url,
+                            [
+                                'Content-Type' => 'application/x-www-form-urlencoded'
+                            ],
+                            http_build_query($postValues)
+                        );
+                    });
+            });
     }
 
     /**
@@ -387,171 +466,238 @@ class Game extends Base
      * @throws Exception
      * @noinspection PhpSameParameterValueInspection
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function CalculateUpdatedTime(bool $showDebug = false): array
+    private function calculateUpdatedTime(bool $showDebug = false): PromiseInterface
     {
-        $tick = Database::GetInstance()->query(
-            "
-            SELECT game_state as state, game_lastupdate as lastupdate, game_currentmonth as month,
-				game_start as start, game_planning_gametime as era_gametime, game_planning_realtime as era_realtime,
-				game_planning_era_realtime as planning_era_realtime, game_planning_monthsdone as era_monthsdone,
-				game_mel_lastmonth as mel_lastmonth, game_cel_lastmonth as cel_lastmonth,
-                game_sel_lastmonth as sel_lastmonth, game_eratime as era_time
-			FROM game
-			"
-        )[0];
-
-        $state = $tick["state"];
-        $secondsPerMonth = $tick['era_realtime'] / $tick['era_gametime'];
-
-        //only update if the game is playing
-        if ($state != "END" && $state != "PAUSE" && $state != "SETUP") {
-            $currentTime = microtime(true);
-            $lastUpdate = $tick['lastupdate'];
-
-            //if the last update was at time 0, this is the very first tick happening for this game
-            if ($lastUpdate == 0) {
-                Database::GetInstance()->query("UPDATE game SET game_lastupdate=?", array(microtime(true)));
-                $lastUpdate = microtime(true);
-                $currentTime = $lastUpdate;
-            }
-
-            $diff = $currentTime - $lastUpdate;
-            $secondsPerMonth = $tick['era_realtime'] / $tick['era_gametime'];
-
-            if ($diff < $secondsPerMonth) {
-                $tick['era_timeleft'] = $tick['era_realtime'] - $diff - ($tick['era_monthsdone'] * $secondsPerMonth);
+        return  $this->getAsyncDatabase()->query(
+            $this->getAsyncDatabase()->createQueryBuilder()
+                ->select(
+                    'game_state as state',
+                    'game_lastupdate as lastupdate',
+                    'game_currentmonth as month',
+                    'game_start as start',
+                    'game_planning_gametime as era_gametime',
+                    'game_planning_realtime as era_realtime',
+                    'game_planning_era_realtime as planning_era_realtime',
+                    'game_planning_monthsdone as era_monthsdone',
+                    'game_mel_lastmonth as mel_lastmonth',
+                    'game_cel_lastmonth as cel_lastmonth',
+                    'game_sel_lastmonth as sel_lastmonth',
+                    'game_eratime as era_time'
+                )
+                ->from('game')
+                ->setMaxResults(1)
+        )
+        ->then(function (Result $result) use ($showDebug) {
+            $assureGameLatestUpdate = new Deferred();
+            $tick = $result->fetchFirstRow();
+            //only update if the game is playing
+            if (!in_array($tick['state'], ['END', 'PAUSE', 'SETUP']) && $tick['lastupdate'] == 0) {
+                //if the last update was at time 0, this is the very first tick happening for this game
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                $this->getAsyncDatabase()->query(
+                    $qb
+                        ->update('game')
+                        ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                )
+                ->done(function (Result $result) use (&$tick, $assureGameLatestUpdate) {
+                    $tick['lastupdate'] = microtime(true);
+                    $assureGameLatestUpdate->resolve();
+                });
             } else {
-                $tick['era_timeleft'] = -1;
+                $assureGameLatestUpdate->resolve();
             }
+            return $assureGameLatestUpdate->promise()
+                ->then(function () use ($tick, $showDebug) {
+                    $state = $tick["state"];
+                    $secondsPerMonth = $tick['era_realtime'] / $tick['era_gametime'];
 
-            if ($showDebug) {
-                self::Debug("diff: " . $diff);
-            }
+                    //only update if the game is playing
+                    if ($state != "END" && $state != "PAUSE" && $state != "SETUP") {
+                        $currentTime = microtime(true);
+                        $lastUpdate = $tick['lastupdate'];
+                        assert($lastUpdate != 0);
 
-            if ($showDebug) {
-                self::Debug("timeleft: " . $tick['era_timeleft']);
-            }
-        } elseif ($state == "PAUSE" || $state == "SETUP") {
-            //[MSP-1116] Seems sensible?
-            $tick['era_timeleft'] = $tick['era_realtime'] - ($tick['era_monthsdone'] * $secondsPerMonth);
-            if ($showDebug) {
-                echo "GAME PAUSED";
-            }
-        } else {
-            if ($showDebug) {
-                echo "GAME ENDED";
-            }
-        }
+                        $diff = $currentTime - $lastUpdate;
+                        $secondsPerMonth = $tick['era_realtime'] / $tick['era_gametime'];
 
-        if ($showDebug) {
-            self::Debug($tick);
-        }
+                        if ($diff < $secondsPerMonth) {
+                            $tick['era_timeleft'] = $tick['era_realtime'] - $diff -
+                                ($tick['era_monthsdone'] * $secondsPerMonth);
+                        } else {
+                            $tick['era_timeleft'] = -1;
+                        }
 
-        return $tick;
+                        if ($showDebug) {
+                            self::Debug("diff: " . $diff);
+                        }
+
+                        if ($showDebug) {
+                            self::Debug("timeleft: " . $tick['era_timeleft']);
+                        }
+                    } elseif ($state == "PAUSE" || $state == "SETUP") {
+                        //[MSP-1116] Seems sensible?
+                        $tick['era_timeleft'] = $tick['era_realtime'] - ($tick['era_monthsdone'] * $secondsPerMonth);
+                        if ($showDebug) {
+                            echo "GAME PAUSED";
+                        }
+                    } else {
+                        if ($showDebug) {
+                            echo "GAME ENDED";
+                        }
+                    }
+
+                    if ($showDebug) {
+                        self::Debug($tick);
+                    }
+
+                    return $tick;
+                });
+        });
     }
 
     /**
+     * @throws InvalidArgumentException
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function TryTickServer($tickData, $showDebug): void
+    private function lockServerTickUpdate(float $lastUpdate): PromiseInterface
     {
-        if (!strstr($_SERVER['REQUEST_URI'], 'dev') || Config::GetInstance()->ShouldWaitForSimulationsInDev()) {
-            if (!$this->AreSimulationsUpToDate($tickData)) {
-                if ($showDebug) {
-                    self::Debug("Waiting for simulations to update.");
+        $deferred = new Deferred();
+        $this->getAsyncDatabase()
+            ->update(
+                'game',
+                [
+                    'game_is_running_update' => 0,
+                    'game_lastupdate' => $lastUpdate
+                ],
+                [
+                    'game_is_running_update' => 1,
+                    'game_lastupdate' => microtime(true)
+                ]
+            )
+            ->done(function (Result $result) use ($deferred) {
+                if ($result->getAffectedRows() == 0) {
+                    $deferred->reject();
+                    return;
                 }
-                return;
-            }
-        }
-
-        $result = Database::GetInstance()->queryReturnAffectedRowCount(
-            "
-            UPDATE game SET game_is_running_update = 1, game_lastupdate = ?
-            WHERE game_is_running_update = 0 AND game_lastupdate = ?
-            ",
-            array(microtime(true), $tickData["lastupdate"])
-        );
-        if ($result == 1) {
-            //Spawn thread eventually.
-            if ($showDebug) {
-                self::Debug("Ticking server.");
-            }
-            $this->ServerTickInternal();
-        } elseif ($showDebug) {
-            self::Debug("Update already in progress.");
-        }
+                $deferred->resolve();
+            });
+        return $deferred->promise();
     }
 
     /**
+     * Updates time to the next month
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function ServerTickInternal(): void
+    private function advanceGameTime(int $currentMonth, int $monthsDone, string $state, array $tick): PromiseInterface
     {
-        //Updates time to the next month.
-        $tick = Database::GetInstance()->query("SELECT
-				game_state as state,
-				game_currentmonth as month,
-				game_planning_gametime as era_gametime,
-				game_planning_realtime as era_realtime,
-				game_planning_era_realtime as planning_era_realtime,
-				game_planning_monthsdone as era_monthsdone,
-				game_eratime as era_time,
-				game_autosave_month_interval as autosave_interval_months
-			FROM game")[0];
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
 
-        $state = $tick['state'];
+        // set the default update query and its values
+        $qb
+            ->update('game')
+            ->set('game_lastupdate', microtime(true))
+            ->set('game_currentmonth', $currentMonth)
+            ->set('game_planning_monthsdone', $monthsDone);
 
-        $monthsdone = $tick['era_monthsdone'] + 1;
-        $currentmonth = $tick['month'] + 1;
-
-        //update all the plans which ticks the server.
-        $plan = new Plan();
-        $plan->UpdateLayerState($currentmonth);
-
-        if ($currentmonth >= ($tick['era_time'] * 4)) { //Hardcoded to 4 eras as designed.
+        if ($currentMonth >= ($tick['era_time'] * 4)) { //Hardcoded to 4 eras as designed.
             //Entire game is done.
-            Database::GetInstance()->query(
-                "UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?",
-                array(microtime(true), $currentmonth, $monthsdone, "END")
-            );
-            $this->OnGameStateUpdated("END");
-        } elseif (($state == "PLAY" || $state == "FASTFORWARD") && $monthsdone >= $tick['era_gametime'] &&
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->set('game_state', 'END')
+            )
+            ->then(function (/*Result $result*/) {
+                return $this->onGameStateUpdated('END');
+            });
+        } elseif (($state == "PLAY" || $state == "FASTFORWARD") && $monthsDone >= $tick['era_gametime'] &&
             $tick['era_gametime'] < $tick['era_time']) {
             //planning phase is complete, move to the simulation phase
-            Database::GetInstance()->query(
-                "UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?",
-                array(microtime(true), $currentmonth, 0, "SIMULATION")
-            );
-            $this->OnGameStateUpdated("SIMULATION");
-        } elseif (($state == "SIMULATION" && $monthsdone >= $tick['era_time'] - $tick['era_gametime']) ||
-            $monthsdone >= $tick['era_time']) {
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->set('game_planning_monthsdone', 0)
+                    ->set('game_state', 'SIMULATION')
+            )
+            ->then(function (/*Result $result*/) {
+                return $this->onGameStateUpdated('SIMULATION');
+            });
+        } elseif (($state == "SIMULATION" && $monthsDone >= $tick['era_time'] - $tick['era_gametime']) ||
+            $monthsDone >= $tick['era_time']) {
             //simulation is done, reset everything to start a new play phase
-            $era = floor($currentmonth / $tick['era_time']);
-            $era_realtime = explode(",", $tick['planning_era_realtime']);
-            Database::GetInstance()->query(
-                "
-                UPDATE game
-                SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?, game_state=?,
-                    game_planning_realtime=?
-                ",
-                array(microtime(true), $currentmonth, 0, "PLAY", $era_realtime[$era])
-            );
-            $this->OnGameStateUpdated("PLAY");
+            $era = floor($currentMonth / $tick['era_time']);
+            $era_realtime = explode(',', $tick['planning_era_realtime']);
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->set('game_planning_monthsdone', 0)
+                    ->set('game_state', 'PLAY')
+                    ->set('game_planning_realtime', $era_realtime[$era])
+            )
+            ->then(function (/*Result $result*/) {
+                return $this->onGameStateUpdated('PLAY');
+            });
         } else {
-            Database::GetInstance()->query(
-                "UPDATE game SET game_lastupdate=?, game_currentmonth=?, game_planning_monthsdone=?",
-                array(microtime(true), $currentmonth, $monthsdone)
-            );
+            return $this->getAsyncDatabase()->query($qb);
         }
+    }
 
-        if (($tick['month'] % $tick['autosave_interval_months']) == 0) {
-            $this->AutoSaveDatabase();
-        }
+    /**
+     * @throws Exception
+     */
+    private function serverTickInternal(float $lastUpdate, bool $showDebug): PromiseInterface
+    {
+        return $this->lockServerTickUpdate($lastUpdate)
+            ->then(
+                function () use ($showDebug) {
+                    if ($showDebug) {
+                        self::Debug('Ticking server.');
+                    }
+                    return $this->getAsyncDatabase()->query(
+                        $this->getAsyncDatabase()->createQueryBuilder()
+                            ->select(
+                                'game_state as state',
+                                'game_currentmonth as month',
+                                'game_planning_gametime as era_gametime',
+                                'game_planning_realtime as era_realtime',
+                                'game_planning_era_realtime as planning_era_realtime',
+                                'game_planning_monthsdone as era_monthsdone',
+                                'game_eratime as era_time',
+                                'game_autosave_month_interval as autosave_interval_months'
+                            )
+                            ->from('game')
+                            ->setMaxResults(1)
+                    );
+                },
+                function () use ($showDebug) {
+                    $rejectReason = 'Update already in progress.';
+                    if ($showDebug) {
+                        self::Debug($rejectReason);
+                    }
+                    throw new SilentFailException($rejectReason);
+                }
+            )
+            ->then(function (Result $result) {
+                $tick = $result->fetchFirstRow();
+                $state = $tick['state'];
 
-        Database::GetInstance()->query("UPDATE game SET game_is_running_update = 0");
+                $monthsDone = $tick['era_monthsdone'] + 1;
+                $currentMonth = $tick['month'] + 1;
+
+                //update all the plans which ticks the server.
+                $plan = new Plan();
+                $plan->setAsyncDatabase($this->getAsyncDatabase());
+                return $plan->updateLayerState($currentMonth)
+                    ->then(function () use ($currentMonth, $monthsDone, $state, $tick) {
+                        return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
+                    })
+                    ->then(function () use ($tick) {
+                        if (($tick['month'] % $tick['autosave_interval_months']) == 0) {
+                            $this->AutoSaveDatabase(); // this is async by default
+                        }
+                        return $this->getAsyncDatabase()->query(
+                            $this->getAsyncDatabase()->createQueryBuilder()
+                                ->update('game')
+                                ->set('game_is_running_update', 0)
+                        );
+                    });
+            });
     }
 
     /**
@@ -621,30 +767,29 @@ class Game extends Base
         if ($currentState["game_state"] == "SETUP") {
             //Starting plans should be implemented when we any state "PLAY"
             $plan = new Plan();
-            $plan->UpdateLayerState(0);
+            await($plan->updateLayerState(0));
         }
 
         Database::GetInstance()->query(
             "UPDATE game SET game_lastupdate = ?, game_state=?",
             array(microtime(true), $state)
         );
-        $this->OnGameStateUpdated($state);
+        await($this->onGameStateUpdated($state));
     }
 
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function OnGameStateUpdated(string $newGameState): void
+    private function onGameStateUpdated(string $newGameState): PromiseInterface
     {
-        $this->ChangeWatchdogState($newGameState);
+        return $this->changeWatchdogState($newGameState);
     }
 
     /**
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetWatchdogAddress(bool $withPort = false): string
+    public function GetWatchdogAddress(bool $withPort = false): string
     {
         if (!empty($this->watchdog_address)) {
             if ($withPort) {
@@ -670,37 +815,24 @@ class Game extends Base
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetWatchdogSessionUniqueToken(): string
+    private function getWatchdogSessionUniqueToken(): PromiseInterface
     {
-        $result = Database::GetInstance()->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
-        if (count($result) > 0) {
-            return $result[0]["game_session_watchdog_token"];
-        }
-        return "0";
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function TestWatchdogAlive(): bool
-    {
-        try {
-            $this->CallBack(
-                $this->GetWatchdogAddress(true),
-                array(),
-                array(),
-                false,
-                false,
-                array(CURLOPT_CONNECTTIMEOUT => 1)
-            );
-        } catch (Exception $e) {
-            return false;
-        }
-        return true;
+        return $this->getAsyncDatabase()->query(
+            $this->getAsyncDatabase()->createQueryBuilder()
+                ->select('game_session_watchdog_token')
+                ->from('game_session')
+                ->setMaxResults(1)
+        )
+        ->then(function (Result $result) {
+            $row = $result->fetchFirstRow();
+            return $row['game_session_watchdog_token'] ?? '0';
+        });
     }
 
     /**
      * @ForceNoTransaction
      * @noinspection PhpUnused
+     * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
@@ -708,7 +840,10 @@ class Game extends Base
         self::StartSimulationExe(array("exe" => "MSW.exe", "working_directory" => "simulations/MSW/"));
     }
 
-    /** @noinspection PhpSameParameterValueInspection */
+    /**
+     * @throws Exception
+     * @noinspection PhpSameParameterValueInspection
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function StartSimulationExe(array $params): void
     {
@@ -727,155 +862,310 @@ class Game extends Base
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function ChangeWatchdogState(string $newWatchdogGameState): bool
+    private function assureWatchdogAlive(): ?PromiseInterface
     {
-        if (empty($this->GetWatchdogAddress(true))) {
-            return false;
+        // note(MH): GetWatchdogAddress is not async, but it is cached once it has been retrieved once, so that's "fine"
+        $url = $this->GetWatchdogAddress(true);
+        if (empty($url)) {
+            return null;
         }
 
-        // we want to change the watchdog state, but first we check if it is running
-        if (!$this->TestWatchdogAlive()) {
-            // so the Watchdog is off, and now it should be switched on
-            $requestHeader = apache_request_headers();
-            $headers = array();
-            if (isset($requestHeader["MSPAPIToken"])) {
-                $headers[] = "MSPAPIToken: ".$requestHeader["MSPAPIToken"];
-            }
-            $this->CallBack(
-                $this->GetWatchdogAddress()."/api/Game/StartWatchdog",
-                array(),
-                $headers,
-                true
-            ); //curl_exec($ch);
-            sleep(3); //not sure if this is necessary
-        }
-
-        $apiRoot = GameSession::GetRequestApiRoot();
-
-        $simulationsHelper = new Simulations();
-        $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
-        $security = new Security();
-        $newAccessToken = json_encode($security->GenerateToken());
-        $recoveryToken = json_encode($security->GetRecoveryToken());
-
-        // If we post this as an array it will come out as a multipart/form-data and it's easier for MSW to manually
-        //   create the string here.
-        $postValues = "game_session_api=".urlencode($apiRoot).
-            "&game_session_token=".urlencode($this->GetWatchdogSessionUniqueToken()).
-            "&game_state=".urlencode($newWatchdogGameState).
-            "&required_simulations=".urlencode($simulations).
-            "&api_access_token=".urlencode($newAccessToken).
-            "&api_access_renew_token=".urlencode($recoveryToken);
-
-        $response = $this->CallBack(
-            $this->GetWatchdogAddress(true)."/Watchdog/UpdateState",
-            $postValues,
-            array()
-        ); //curl_exec($ch);
-
-        $log = new Log();
-
-        $decodedResponse = json_decode($response, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $log->PostEvent(
-                "Watchdog",
-                Log::ERROR,
-                "Received invalid response from watchdog. Response: \"".$response."\"",
-                "ChangeWatchdogState()"
+        // we want to use the watchdog, but first we check if it is running
+        $browser = new MSPBrowser($url);
+        $deferred = new Deferred();
+        $browser->request('GET', $url)
+            ->done(
+                // watchdog is running
+                function (/*ResponseInterface $response*/) use ($deferred) {
+                    $deferred->resolve();
+                },
+                // so the Watchdog is off, and now it should be switched on
+                function (/*Exception $e*/) use ($deferred) {
+                    self::StartWatchdog();
+                    $deferred->resolve();
+                }
             );
-            return false;
-        }
-
-        if ($decodedResponse["success"] != 1) {
-            $log->PostEvent(
-                "Watchdog",
-                Log::ERROR,
-                "Watchdog responded with failure to change game state request. Response: \"".
-                $decodedResponse["message"]."\"",
-                "ChangeWatchdogState()"
-            );
-            return false;
-        }
-
-        return true;
+        return $deferred->promise();
     }
 
     /**
-     * Gets the latest plans & messages from the server
-     *
-     * @param int $team_id
-     * @param float $last_update_time
-     * @param int $user
-     * @return array|string
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $team_id, float $last_update_time, int $user)/*: array|string */ // <-- for php 8
+    public function changeWatchdogState(string $newWatchdogGameState): ?PromiseInterface
     {
-        // define('DEBUG_PREF_TIMING', true);
+        if (null === $promise = $this->assureWatchdogAlive()) {
+            return null;
+        }
+        return $promise
+            ->then(function () {
+                return GameSession::getRequestApiRootAsync();
+            })
+            ->then(function (string $apiRoot) use ($newWatchdogGameState) {
+                $simulationsHelper = new Simulations();
+                $simulationsHelper->setAsyncDatabase($this->getAsyncDatabase());
+                $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
+                $security = new Security();
+                $security->setAsyncDatabase($this->getAsyncDatabase());
+                return $security->generateTokenAsync()
+                    ->then(function (array $result) use (
+                        $security,
+                        $simulations,
+                        $apiRoot,
+                        $newWatchdogGameState
+                    ) {
+                        $newAccessToken = json_encode($result);
+                        return $security->getSpecialTokenAsync(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
+                            ->then(function (string $token) use (
+                                $security,
+                                $simulations,
+                                $apiRoot,
+                                $newWatchdogGameState,
+                                $newAccessToken
+                            ) {
+                                $recoveryToken = json_encode(['token' => $token]);
+                                return $this->getWatchdogSessionUniqueToken()
+                                    ->then(function (string $watchdogSessionUniqueToken) use (
+                                        $security,
+                                        $simulations,
+                                        $apiRoot,
+                                        $newWatchdogGameState,
+                                        $newAccessToken,
+                                        $recoveryToken
+                                    ) {
+                                        // note(MH): GetWatchdogAddress is not async, but it is cached once it
+                                        //   has been retrieved once, so that's "fine"
+                                        $url = $this->GetWatchdogAddress(true)."/Watchdog/UpdateState";
+                                        $browser = new MSPBrowser($url);
+                                        $postValues = [
+                                            'game_session_api' => $apiRoot,
+                                            'game_session_token' => $watchdogSessionUniqueToken,
+                                            'game_state' => $newWatchdogGameState,
+                                            'required_simulations' => $simulations,
+                                            'api_access_token' => $newAccessToken,
+                                            'api_access_renew_token' => $recoveryToken
+                                        ];
+                                        return $browser->post(
+                                            $url,
+                                            [
+                                                'Content-Type' => 'application/x-www-form-urlencoded'
+                                            ],
+                                            http_build_query($postValues)
+                                        );
+                                    });
+                            });
+                    });
+            })
+            ->then(function (ResponseInterface $response) {
+                $log = new Log();
+                $log->setAsyncDatabase($this->getAsyncDatabase());
 
-        $newTime = microtime(true);
+                $responseContent = $response->getBody()->getContents();
+                $decodedResponse = json_decode($responseContent, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return $log->postEventAsync(
+                        "Watchdog",
+                        Log::ERROR,
+                        "Received invalid response from watchdog. Response: \"".$responseContent."\"",
+                        "changeWatchdogState()"
+                    );
+                }
 
-        //returns all updated data since the last updated time
-        $plan = new Plan("");
-        $layer = new Layer("");
-        $energy = new Energy("");
-        $kpi = new Kpi("");
-        $warning = new Warning("");
-        $objective = new Objective("");
-        $data = array();
-        $data['prev_update_time'] = $last_update_time;
+                if ($decodedResponse["success"] != 1) {
+                    return $log->postEventAsync(
+                        "Watchdog",
+                        Log::ERROR,
+                        "Watchdog responded with failure to change game state request. Response: \"".
+                        $decodedResponse["message"]."\"",
+                        "changeWatchdogState()"
+                    );
+                }
+                return resolveOnFutureTick(new Deferred(), $decodedResponse)->promise();
+            });
+    }
 
-        $data['tick'] = $this->CalculateUpdatedTime();
+    private function latestLevel2(array $tick, float $lastUpdateTime, float $newTime, array &$data): PromiseInterface
+    {
+        $data['tick'] = $tick;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after tick<br />";
         }
+        $plan = new Plan();
+        $plan->setAsyncDatabase($this->getAsyncDatabase());
+        return $plan->latestAsync($lastUpdateTime);
+    }
 
-        $data['plan'] = $plan->Latest($last_update_time);
+    /**
+     * @throws Exception
+     */
+    private function latestLevel3(
+        array $planData,
+        float $lastUpdateTime,
+        float $newTime,
+        array &$data
+    ): PromiseInterface {
+        $data['plan'] = $planData;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after plan<br />";
         }
 
-        foreach ($data['plan'] as &$p) {
+        $layer = new Layer();
+        $layer->setAsyncDatabase($this->getAsyncDatabase());
+        $promises = [];
+        foreach ($data['plan'] as $p) {
+            $promises[] = $layer->latest($p['layers'], $lastUpdateTime, $p['id']);
+        }
+        return all(
+            $promises
+        );
+    }
+
+    private function latestLevel4(
+        array $layersContainer,
+        int $teamId,
+        float $lastUpdateTime,
+        float $newTime,
+        array &$data
+    ): PromiseInterface {
+        foreach ($data['plan'] as $key => &$p) {
             //only send the geometry when it's required
-            $p['layers'] = $layer->Latest($p['layers'], $last_update_time, $p['id']);
+            $p['layers'] = $layersContainer[$key];
             if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
                 echo (microtime(true) - $newTime) . " elapsed after layers<br />";
             }
 
-            if (($p['state'] == "DESIGN" && $p['previousstate'] == "CONSULTATION" && $p['country'] != $team_id)) {
+            if ((
+                $p['state'] == "DESIGN" && $p['previousstate'] == "CONSULTATION" &&
+                $p['country'] != $teamId
+            )) {
                 $p['active'] = 0;
             }
         }
+        unset($p);
 
-        $data['planmessages'] = $plan->GetMessages($last_update_time);
+        $plan = new Plan();
+        $plan->setAsyncDatabase($this->getAsyncDatabase());
+        return $plan->getMessagesAsync(
+            $lastUpdateTime
+        );
+    }
+
+    private function latestLevel5(
+        Result $queryResult,
+        float $lastUpdateTime,
+        float $newTime,
+        array &$data
+    ): PromiseInterface {
+        $data['planmessages'] = $queryResult->fetchAllRows();
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after plan messages<br />";
         }
 
         //return any raster layers that need to be updated
-        $data['raster'] = $layer->LatestRaster($last_update_time);
+        $layer = new Layer();
+        $layer->setAsyncDatabase($this->getAsyncDatabase());
+        return $layer->latestRaster(
+            $lastUpdateTime
+        );
+    }
+
+    private function latestLevel6(
+        Result $queryResult,
+        float $lastUpdateTime,
+        float $newTime,
+        array &$data
+    ): PromiseInterface {
+        $data['raster'] = $queryResult->fetchAllRows();
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after raster<br />";
         }
 
-        $data['energy'] = $energy->Latest($last_update_time);
+        $energy = new Energy();
+        $energy->setAsyncDatabase($this->getAsyncDatabase());
+        return $energy->latest(
+            $lastUpdateTime
+        );
+    }
+
+    /**
+     * @param Result[] $queryResults
+     * @param float $lastUpdateTime
+     * @param int $teamId
+     * @param float $newTime
+     * @param array $data
+     * @return PromiseInterface
+     * @throws Exception
+     */
+    private function latestLevel7(
+        array $queryResults,
+        int $teamId,
+        float $lastUpdateTime,
+        float $newTime,
+        array &$data
+    ): PromiseInterface {
+        $data['energy']['connections'] = $queryResults[0]->fetchAllRows();
+        $data['energy']['output'] = $queryResults[1]->fetchAllRows();
+
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after energy<br />";
         }
 
-        $data['kpi'] = $kpi->Latest($last_update_time, $team_id);
+        $kpi = new Kpi();
+        $kpi->setAsyncDatabase($this->getAsyncDatabase());
+        return $kpi->latestAsync(
+            $lastUpdateTime,
+            $teamId
+        );
+    }
+
+    private function latestLevel8(
+        array $queryResults,
+        float $lastUpdateTime,
+        float $newTime,
+        array &$data
+    ): PromiseInterface {
+        $data['kpi']['ecology'] = $queryResults[0]->fetchAllRows();
+        $data['kpi']['shipping'] = $queryResults[1]->fetchAllRows();
+        $data['kpi']['energy'] = $queryResults[2]->fetchAllRows();
+
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after kpi<br />";
         }
 
-        $data['warning'] = $warning->Latest($last_update_time);
+        $warning = new Warning();
+        $warning->setAsyncDatabase($this->getAsyncDatabase());
+        return $warning->latest(
+            $lastUpdateTime
+        );
+    }
+
+    private function latestLevel9(
+        array $queryResults,
+        float $lastUpdateTime,
+        float $newTime,
+        array &$data
+    ): PromiseInterface {
+        $data['warning']['plan_issues'] = $queryResults[0]->fetchAllRows();
+        $data['warning']['shipping_issues'] = $queryResults[1]->fetchAllRows();
+
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after warning<br />";
         }
 
-        $data['objectives'] = $objective->Latest($last_update_time);
+        $objective = new Objective();
+        $objective->setAsyncDatabase($this->getAsyncDatabase());
+        return $objective->latest(
+            $lastUpdateTime
+        );
+    }
+
+    private function latestLevel10(
+        Result $result,
+        int $user,
+        float $newTime,
+        array &$data
+    ): ?PromiseInterface {
+        $data['objectives'] = $result->fetchAllRows();
+
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after objective<br />";
         }
@@ -894,13 +1184,155 @@ class Game extends Base
             empty($data['warning']) &&
             empty($data['raster']) &&
             empty($data['objectives'])) {
-            return "";
+            $data = '';
+            return null;
         }
-        Database::GetInstance()->query(
-            "UPDATE user SET user_lastupdate=? WHERE user_id=?",
-            array($newTime, $user)
+
+        return $this->getAsyncDatabase()->update(
+            'user',
+            [
+                'user_id' => $user
+            ],
+            [
+                'user_lastupdate' => $newTime
+            ]
         );
-        return $data;
+    }
+
+    /**
+     * Gets the latest plans & messages from the server
+     *
+     * @param int $teamId
+     * @param float $lastUpdateTime
+     * @param int $user
+     * @return PromiseInterface
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Latest(int $teamId, float $lastUpdateTime, int $user): PromiseInterface
+    {
+        return $this->calculateUpdatedTime(
+        )
+        ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
+            $newTime = microtime(true);
+            $data = array();
+            $data['prev_update_time'] = $lastUpdateTime;
+            return $this->latestLevel2(
+                $tick,
+                $lastUpdateTime,
+                $newTime,
+                $data
+            )
+            ->then(function (array $planData) use (
+                $teamId,
+                $lastUpdateTime,
+                $user,
+                $newTime,
+                &$data
+            ) {
+                return $this->latestLevel3(
+                    $planData,
+                    $lastUpdateTime,
+                    $newTime,
+                    $data
+                )
+                ->then(function (array $layersContainer) use (
+                    $teamId,
+                    $lastUpdateTime,
+                    $user,
+                    $newTime,
+                    &$data
+                ) {
+                    return $this->latestLevel4(
+                        $layersContainer,
+                        $teamId,
+                        $lastUpdateTime,
+                        $newTime,
+                        $data
+                    )
+                    ->then(function (Result $result) use (
+                        $teamId,
+                        $lastUpdateTime,
+                        $user,
+                        $newTime,
+                        &$data
+                    ) {
+                        return $this->latestLevel5(
+                            $result,
+                            $lastUpdateTime,
+                            $newTime,
+                            $data
+                        )
+                        ->then(function (Result $result) use (
+                            $teamId,
+                            $lastUpdateTime,
+                            $user,
+                            $newTime,
+                            &$data
+                        ) {
+                            return $this->latestLevel6(
+                                $result,
+                                $lastUpdateTime,
+                                $newTime,
+                                $data
+                            )
+                            ->then(function (array $results) use (
+                                $teamId,
+                                $lastUpdateTime,
+                                $user,
+                                $newTime,
+                                &$data
+                            ) {
+                                return $this->latestLevel7(
+                                    $results,
+                                    $teamId,
+                                    $lastUpdateTime,
+                                    $newTime,
+                                    $data
+                                )
+                                ->then(function (array $results) use (
+                                    $lastUpdateTime,
+                                    $user,
+                                    $newTime,
+                                    &$data
+                                ) {
+                                    return $this->latestLevel8(
+                                        $results,
+                                        $lastUpdateTime,
+                                        $newTime,
+                                        $data
+                                    )
+                                    ->then(function (array $results) use (
+                                        $lastUpdateTime,
+                                        $user,
+                                        $newTime,
+                                        &$data
+                                    ) {
+                                        return $this->latestLevel9(
+                                            $results,
+                                            $lastUpdateTime,
+                                            $newTime,
+                                            $data
+                                        )
+                                        ->then(function (Result $result) use (
+                                            $lastUpdateTime,
+                                            $user,
+                                            $newTime,
+                                            &$data
+                                        ) {
+                                            return $this->latestLevel10($result, $user, $newTime, $data)
+                                                ->then(function (/*?Result $result */) use ($data) {
+                                                    return $data;
+                                                });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
     }
 
     /**
@@ -926,53 +1358,71 @@ class Game extends Base
     }
 
     /**
+     * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetGameDetails(): array
+    public function getGameDetailsAsync(): PromiseInterface
     {
-        $databaseState = Database::GetInstance()->query(
-            "
-            SELECT g.game_start, g.game_eratime, g.game_currentmonth, g.game_state, g.game_planning_realtime,
-                   g.game_planning_era_realtime, g.game_planning_gametime, g.game_planning_monthsdone,
-                   COUNT(u.user_id) total,
-                   sum(
-                       IF(UNIX_TIMESTAMP() - u.user_lastupdate < 3600 and u.user_loggedoff = 0, 1, 0)
-                   ) active_last_hour,
-                   sum(
-                       IF(UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0, 1, 0)
-                   ) active_last_minute
-            FROM game g, user u;
-            "
-        );
-            
-        $result = array();
-        if (count($databaseState) > 0) {
-            $state = $databaseState[0];
-
-            $realtime_per_era = explode(",", $state["game_planning_era_realtime"]);
-            $current_era = intval(floor($state["game_currentmonth"] / $state["game_planning_gametime"]));
-            $realtime_per_era[$current_era] = $state["game_planning_realtime"];
-            $seconds_per_month_current_era = round($state["game_planning_realtime"] / $state["game_eratime"]);
-            $months_remaining_current_era = $state["game_eratime"] - $state["game_planning_monthsdone"];
-            $total_remaining_time = $months_remaining_current_era * $seconds_per_month_current_era;
-            $nextera = $current_era + 1;
-            while (isset($realtime_per_era[$nextera])) {
-                $total_remaining_time += $realtime_per_era[$nextera];
-                $nextera++;
+        return $this->getAsyncDatabase()->query(
+            $this->getAsyncDatabase()->createQueryBuilder()
+                ->select(
+                    'g.game_start',
+                    'g.game_eratime',
+                    'g.game_currentmonth',
+                    'g.game_state',
+                    'g.game_planning_realtime',
+                    'g.game_planning_era_realtime',
+                    'g.game_planning_gametime',
+                    'g.game_planning_monthsdone',
+                    'COUNT(u.user_id) total',
+                    '
+                    sum(
+                        IF(UNIX_TIMESTAMP() - u.user_lastupdate < 3600 and u.user_loggedoff = 0, 1, 0)
+                    ) active_last_hour',
+                    '
+                    sum(
+                        IF(UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0, 1, 0)
+                    ) active_last_minute'
+                )
+                ->from('game', 'g')
+                ->join('g', 'user', 'u')
+        )
+        ->then(function (Result $result) {
+            if (null === $state = $result->fetchFirstRow()) {
+                return [];
             }
-            $running_til_time = time() + $total_remaining_time;
 
-            $result = ["game_start_year" => (int) $state["game_start"],
+            $realtimePerEra = explode(",", $state["game_planning_era_realtime"]);
+            $currentEra = intval(floor($state["game_currentmonth"] / $state["game_planning_gametime"]));
+            $realtimePerEra[$currentEra] = $state["game_planning_realtime"];
+            $secondsPerMonthCurrentEra = round($state["game_planning_realtime"] / $state["game_eratime"]);
+            $monthsRemainingCurrentEra = $state["game_eratime"] - $state["game_planning_monthsdone"];
+            $totalRemainingTime = $monthsRemainingCurrentEra * $secondsPerMonthCurrentEra;
+            $nextEra = $currentEra + 1;
+            while (isset($realtimePerEra[$nextEra])) {
+                $totalRemainingTime += $realtimePerEra[$nextEra];
+                $nextEra++;
+            }
+            $runningTilTime = time() + $totalRemainingTime;
+            return [
+                "game_start_year" => (int) $state["game_start"],
                 "game_end_month" => $state["game_eratime"] * 4,
                 "game_current_month" => (int) $state["game_currentmonth"],
                 "game_state" => strtolower($state["game_state"]),
                 "players_past_hour" => (int) $state["active_last_hour"],
                 "players_active" => (int) $state["active_last_minute"],
-                "game_running_til_time" => $running_til_time
+                "game_running_til_time" => $runningTilTime
             ];
-        }
-        return $result;
+        });
+    }
+
+    /**
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetGameDetails(): array
+    {
+        return await($this->getGameDetailsAsync());
     }
 
     /**

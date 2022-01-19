@@ -4,7 +4,6 @@ namespace App\Domain\API\v1;
 
 // Routes the HTTP request incl. its parameters to the correct class method, and wraps that method's results in a
 //   consistent response
-use App\Domain\API\APIHelper;
 use Exception;
 use ReflectionClass;
 use ReflectionException;
@@ -102,10 +101,17 @@ class Router
             return self::FormatResponse($success, $message, null, $className, $method, $data);
         }
 
-        // since the Router class itself is part of api version, we can just use the Router's class name spaced name
-        //   and replace the last name part
-        $fullClassName = str_replace('Router', $className, self::class);
-        $class = new $fullClassName($method);
+        try {
+            // since the Router class itself is part of api version, we can just use the Router's class name spaced name
+            //   and replace the last name part
+            $fullClassName = str_replace('Router', $className, self::class);
+            $class = new $fullClassName($method);
+        } catch (\RuntimeException $e) {
+            // attempt class name with all upper case letters
+            $fullClassName = str_replace('Router', strtoupper($className), self::class);
+            $class = new $fullClassName($method);
+        }
+
         $message = null;
         $payload = null;
         if (!$class->isValid()) {

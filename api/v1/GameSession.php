@@ -2,11 +2,18 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Helper\AsyncDatabase;
+use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;
+use React\EventLoop\Loop;
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ZipArchive;
+use function App\resolveOnFutureTick;
+use function Clue\React\Block\await;
 
 class GameSession extends Base
 {
@@ -49,34 +56,45 @@ class GameSession extends Base
         return $sessionId;
     }
 
-    //returns the base API endpoint. e.g. http://localhost/1/
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetRequestApiRoot(): string
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public static function getRequestApiRootAsync(): PromiseInterface
     {
         if (isset($GLOBALS['RequestApiRoot'])) {
-            return $GLOBALS['RequestApiRoot'];
+            $deferred = new Deferred();
+            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'])->promise();
         }
-        
-        $server_name = $_SERVER["SERVER_NAME"] ?? gethostname();
+
         $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
         /** @noinspection HttpUrlsUsage */
         $protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
-    
-        $dbConfig = Config::GetInstance()->DatabaseConfig();
-        $temporaryConnection = Database::CreateTemporaryDBConnection(
-            $dbConfig["host"],
-            $dbConfig["user"],
-            $dbConfig["password"],
-            $dbConfig["database"]
-        );
-        foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1;") as $row) {
-            $server_name = $row["address"];
-            //if ($server_name == "localhost") $server_name = getHostByName(getHostName());
-            $GLOBALS['RequestApiRoot'] = $protocol.$server_name.$apiRoot;
-        }
-        
-        return $protocol.$server_name.$apiRoot;
+
+        $connection = AsyncDatabase::createServerManagerConnection(Loop::get());
+        return $connection->query(
+            $connection->createQueryBuilder()
+                ->select('address')
+                ->from('game_servers')
+                ->setMaxResults(1)
+        )
+        ->then(function (Result $result) use ($protocol, $apiRoot) {
+            $row = $result->fetchFirstRow() ?? [];
+            $serverName = $row['address'] ?? $_SERVER["SERVER_NAME"] ?? gethostname();
+            $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$apiRoot;
+            return $GLOBALS['RequestApiRoot'];
+        });
+    }
+
+    /**
+     * returns the base API endpoint. e.g. http://localhost/1/
+     *
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public static function GetRequestApiRoot(): string
+    {
+        return await(self::getRequestApiRootAsync());
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -286,7 +304,12 @@ class GameSession extends Base
         //Notify the simulation that the game has been setup so we start the simulations.
         //This is needed because MEL needs to be run before the game to setup the initial fishing values.
         $game = new Game();
-        $watchdogSuccess = $game->ChangeWatchdogState("SETUP");
+        $game->setAsyncDatabase($this->getAsyncDatabase());
+        $watchdogSuccess = false;
+        if (null !== $promise = $game->changeWatchdogState("SETUP")) {
+            await($promise);
+            $watchdogSuccess = true;
+        };
 
         if (!empty($response_address)) {
             $postValues["session_state"] = $watchdogSuccess == true ? "healthy" : "failed";
@@ -348,7 +371,8 @@ class GameSession extends Base
     public function ArchiveGameSessionInternal(string $response_url): void
     {
         $game = new Game();
-        $game->ChangeWatchdogState('end');
+        $game->setAsyncDatabase($this->getAsyncDatabase());
+        await($game->changeWatchdogState('end'));
         
         $zippath = $this->CreateGameSessionZip($response_url);
         
@@ -731,7 +755,8 @@ class GameSession extends Base
         $this->ResetWatchdogAddress($watchdog_address);
 
         $game = new Game();
-        $game->ChangeWatchdogState("PAUSE"); // reloaded saves always start paused
+        $game->setAsyncDatabase($this->getAsyncDatabase());
+        await($game->changeWatchdogState("PAUSE")); // reloaded saves always start paused
         
         if (!empty($response_address)) {
             $postValues["session_state"] = "healthy";

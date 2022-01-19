@@ -5,7 +5,7 @@ namespace App\Domain\API\v1;
 use Exception;
 use stdClass;
 
-class Cel extends Base
+class CEL extends Base
 {
     private const ALLOWED = array(
         "GetConnections",

@@ -3,6 +3,10 @@
 namespace App\Domain\API\v1;
 
 use Exception;
+use React\Promise\PromiseInterface;
+use function App\chain;
+use function App\parallel;
+use function React\Promise\all;
 
 class Warning extends Base
 {
@@ -133,30 +137,37 @@ class Warning extends Base
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(float $time): array
+    public function latest(float $time): PromiseInterface
     {
-        $result = array();
-        $result['plan_issues'] = Database::GetInstance()->query("SELECT 
-				warning_id as issue_database_id,
-				warning_active as active,
-				warning_layer_id as plan_layer_id,
-				warning_issue_type as type,
-				warning_x as x,
-				warning_y as y,
-				warning_source_plan_id as source_plan_id,
-				warning_restriction_id as restriction_id
-			FROM warning WHERE warning_last_update>?", array($time));
-
-        $result['shipping_issues'] = Database::GetInstance()->query("SELECT 
-				shipping_warning_id as warning_id,
-				shipping_warning_source_geometry_persistent_id as source_geometry_persistent_id,
-				shipping_warning_destination_geometry_persistent_id as destination_geometry_persistent_id,
-				shipping_warning_message as message,
-				shipping_warning_active as active
-			FROM shipping_warning
-			WHERE shipping_warning_lastupdate > ?", array($time));
-
-        return $result;
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promises[] = $this->getAsyncDatabase()->query(
+            $qb
+                ->select(
+                    'warning_id as issue_database_id',
+                    'warning_active as active',
+                    'warning_layer_id as plan_layer_id',
+                    'warning_issue_type as type',
+                    'warning_x as x',
+                    'warning_y as y',
+                    'warning_source_plan_id as source_plan_id',
+                    'warning_restriction_id as restriction_id'
+                )
+                ->from('warning')
+                ->where('warning_last_update > ' . $qb->createPositionalParameter($time))
+        );
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promises[] = $this->getAsyncDatabase()->query(
+            $qb
+                ->select(
+                    'shipping_warning_id as warning_id',
+                    'shipping_warning_source_geometry_persistent_id as source_geometry_persistent_id',
+                    'shipping_warning_destination_geometry_persistent_id as destination_geometry_persistent_id',
+                    'shipping_warning_message as message',
+                    'shipping_warning_active as active'
+                )
+                ->from('shipping_warning')
+                ->where('shipping_warning_lastupdate > ' . $qb->createPositionalParameter($time))
+        );
+        return parallel($promises, 1); // todo: if performance allows, increase threads
     }
 }
