@@ -638,10 +638,10 @@ class Plan extends Base
         return $this->getAsyncDatabase()->update(
             'plan_layer',
             [
-                'plan_layer_id', $planLayer['plan_layer_id']
+                'plan_layer_id' => $planLayer['plan_layer_id']
             ],
             [
-                'plan_layer_state', $state
+                'plan_layer_state' => $state
             ]
         )
         ->then(function (/*Result $result*/) use ($state, $planLayer) {
