@@ -521,10 +521,10 @@ class Store extends Base
 								if (sizeof($multi) > 1 && $j != 0) 
 								{
 									//this is a subtractive polygon
-									$this->InsertGeometry($layerId, json_encode($multi[$j]), $encodedFeatureData, $countryId, $type, null, $lastId);
+									$this->InsertGeometry($layerId, json_encode($multi[$j]), $encodedFeatureData, $countryId, $type, null, $lastId, $filename);
 								} else 
 								{
-									$lastId = $this->InsertGeometry($layerId, json_encode($multi[$j]), $encodedFeatureData, $countryId, $type, $mspid);
+									$lastId = $this->InsertGeometry($layerId, json_encode($multi[$j]), $encodedFeatureData, $countryId, $type, $mspid, 0, $filename);
 								}
 							}
 						}
@@ -532,12 +532,12 @@ class Store extends Base
 				}
 				else if (strcasecmp ($geometryData["type"], "Point") == 0)
 				{
-					$this->InsertGeometry($layerId, json_encode(array($geometryData["coordinates"])), $encodedFeatureData, $countryId, $type, $mspid);
+					$this->InsertGeometry($layerId, json_encode(array($geometryData["coordinates"])), $encodedFeatureData, $countryId, $type, $mspid, 0, $filename);
 				}
 				else if (strcasecmp ($geometryData["type"], "MultiLineString") == 0)
 				{
 					foreach ($geometryData["coordinates"] as $line) {
-						$this->InsertGeometry($layerId, json_encode($line), $encodedFeatureData, $countryId, $type, $mspid);
+						$this->InsertGeometry($layerId, json_encode($line), $encodedFeatureData, $countryId, $type, $mspid, 0, $filename);
 					}
 				}
 				else 
@@ -549,8 +549,14 @@ class Store extends Base
 
 	}
 	
-	private function InsertGeometry($layerid, $geometry, $data, $countryId, $type, $mspid, $subtractive = 0)
+	private function InsertGeometry($layerid, $geometry, $data, $countryId, $type, $mspid, $subtractive = 0, $layername = "")
 	{
+        if (IsFeatureFlagEnabled("auto_mspids_by_hash") && $subtractive === 0 && is_null($mspid))
+        {
+           Log::LogDebug(" -> Auto-generating an MSP ID for a bit of geometry in layer " . $filename . " .");
+           $mspid = hash('fnv1a64', $layername.$geometry); // so many algos to choose from, but this one seemed to have low collision, reasonable speed, and simply availability to PHP in default installation
+        }
+
 		$persistentid = Database::GetInstance()->query(
 			"INSERT INTO geometry (geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_mspid, geometry_subtractive) 
 								VALUES (?, ?, ?, ?, ?, ?, ?)",
