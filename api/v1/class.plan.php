@@ -651,7 +651,7 @@
 		//export the plans for the config file
 		public function Export(&$result, &$errors = null){
 			//Make sure we don't export plans with NULL name as these are auto generated fishing plans.
-			$plans = Database::GetInstance()->query("SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type, plan_alters_energy_distribution FROM plan WHERE plan_active=? AND plan_state<>? AND plan_name IS NOT NULL", array(1, "DELETED"));
+			$plans = Database::GetInstance()->query("SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type, plan_alters_energy_distribution FROM plan WHERE plan_active = ? AND plan_state <> ? AND plan_name <> ''", array(1, "DELETED"));
 
 			//Key value pair of persistent IDs have been remapped (key) to the new value (value).
 			$remappedPersistentGeometryIds = array();

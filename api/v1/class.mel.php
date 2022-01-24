@@ -117,7 +117,7 @@
 			$numCountries = count($countries);
 
 			$planid = Database::GetInstance()->query("INSERT INTO plan (plan_name, plan_country_id, plan_gametime, plan_state, plan_type) VALUES (?, ?, ?, ?, ?)", 
-				array("FISHING_STARTING_PLAN", 1, -1, "IMPLEMENTED", "0,1,0"), true
+				array("", 1, -1, "IMPLEMENTED", "0,1,0"), true
 			);
 
 			$config = $this->Config();
