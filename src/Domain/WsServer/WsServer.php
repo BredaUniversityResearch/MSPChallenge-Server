@@ -276,6 +276,30 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         return [];
                     }
 
+                    // do not allow any locked plans
+                    if (collect($payload['plan'])
+                        ->whereNotNull('locked')
+                        ->count()) {
+                        return [];
+                    }
+
+                    // if the payload is equal to the previous one, no need to send it now
+                    if (isset($this->clientInfoContainer[$connResourceId]['prev_payload'])) {
+                        $p1 = $this->clientInfoContainer[$connResourceId]['prev_payload'];
+                        $p2 = $payload;
+                        unset(
+                            $p1['prev_update_time'],
+                            $p1['update_time'],
+                            $p2['prev_update_time'],
+                            $p2['update_time']
+                        );
+                        if (0 == strcmp(json_encode($p1), json_encode($p2))) {
+                            unset($p1, $p2);
+                            return []; // no need to send
+                        }
+                    }
+
+                    $this->clientInfoContainer[$connResourceId]['prev_payload'] = $payload;
                     $this->clientInfoContainer[$connResourceId]['last_update_time'] = $payload['update_time'];
                     $json = json_encode([
                         "success" => true,
@@ -328,6 +352,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             assertFulfilled(
                 $this->latest()
                     ->then(function (array $payloadContainer) {
+                        $payloadContainer = array_filter($payloadContainer);
                         if (!empty($payloadContainer)) {
                             $this->dispatch(
                                 new NameAwareEvent(
