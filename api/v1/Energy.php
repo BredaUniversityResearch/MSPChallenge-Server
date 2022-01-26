@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use Doctrine\DBAL\Query\QueryBuilder;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
@@ -667,11 +668,13 @@ class Energy extends Base
                     }
 
                     // temp. function to re-use part of query where
-                    $fnGeneratePlanLayerWherePart = function (string $planLayerTableName) use (
+                    $fnGeneratePlanLayerWherePart = function (
+                        QueryBuilder $qb,
+                        string $planLayerTableName
+                    ) use (
                         $planId,
                         $referencePlanData
                     ) {
-                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
                         return $qb->expr()->and(
                             $planLayerTableName . '.plan_layer_plan_id = ' . $qb->createPositionalParameter($planId),
                             'plan_connection.plan_id != ' . $qb->createPositionalParameter($planId),
@@ -691,7 +694,7 @@ class Energy extends Base
                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
                     return $this->getAsyncDatabase()->query(
                         $qb
-                            ->select('pc.plan_id')
+                            ->select('plan_connection.plan_id')
                             ->from('energy_connection', 'ec')
                             ->innerJoin(
                                 'ec',
@@ -740,8 +743,8 @@ class Energy extends Base
                                 'geometry_end.geometry_active = 1',
                                 'geometry_connection.geometry_active = 1',
                                 $qb->expr()->or(
-                                    $fnGeneratePlanLayerWherePart('plan_layer_start'),
-                                    $fnGeneratePlanLayerWherePart('plan_layer_end')
+                                    $fnGeneratePlanLayerWherePart($qb, 'plan_layer_start'),
+                                    $fnGeneratePlanLayerWherePart($qb, 'plan_layer_end')
                                 )
                             ))
                     )
