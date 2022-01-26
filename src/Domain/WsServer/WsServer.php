@@ -276,13 +276,6 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         return [];
                     }
 
-//                    // do not allow any locked plans for this user
-//                    if (collect($payload['plan'])
-//                        ->where('locked', $clientInfo['user'])
-//                        ->count()) {
-//                        return [];
-//                    }
-
                     // if the payload is equal to the previous one, no need to send it now
                     if (isset($this->clientInfoContainer[$connResourceId]['prev_payload'])) {
                         $p1 = $this->clientInfoContainer[$connResourceId]['prev_payload'];
