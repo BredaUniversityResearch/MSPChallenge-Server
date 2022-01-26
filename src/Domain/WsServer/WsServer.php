@@ -30,7 +30,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     const EVENT_ON_STATS_UPDATE = 'EVENT_ON_STATS_UPDATE';
 
     const TICK_MIN_INTERVAL_SEC = 2;
-    const LATEST_MIN_INTERVAL_SEC = 0.2;
+    const LATEST_MIN_INTERVAL_SEC = 0.6;
 
     private string $projectDir;
     private ?int $gameSessionId = null;
