@@ -55,6 +55,10 @@ class DB {
 			// XAMPP doesn't seem to remove databases when it uninstalls MySQL (which means a reinstall could lead to problems because the dbase will still be there but maybe empty/outdated)
 			// so check if the server_id is available in the settings table - caught below if it doesn't
 			$server_id_attempt = $this->cell("settings.value", array("name", "=", "server_id"));
+            if (empty($server_id_attempt))
+            {
+                throw new Exception();
+            }
 		} catch (Exception $e) { 
 			// assumes connection failed because the database doesn't exist yet, so attempt to create and fill it, thereby reattempting connection
 			$this->attempt_dbase_install();
