@@ -3,10 +3,12 @@
 namespace App;
 
 use Closure;
+use Doctrine\DBAL\Exception\DriverException;
 use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Yaml\Yaml;
 use function React\Promise\all;
 
 function resolveOnFutureTick(Deferred $deferred, $resolveValue = null, ?LoopInterface $loop = null): Deferred
@@ -50,10 +52,25 @@ function chain(array $promises): ?PromiseInterface
         $nextKey = key($promises);
     }
     $promise
-        ->then(function ($result) use ($deferred, &$results, $nextKey) {
-            $results[$nextKey] = $result;
-            $deferred->resolve($results);
-        });
+        ->then(
+            function ($result) use ($deferred, &$results, $nextKey) {
+                $results[$nextKey] = $result;
+                $deferred->resolve($results);
+            },
+            function ($reason) use ($deferred) {
+                if ($reason instanceof DriverException) {
+                    /** @var DriverException $reason */
+                    $deferred->reject(new \Exception(
+                        $reason->getMessage() . PHP_EOL .
+                            'query: ' . PHP_EOL . $reason->getQuery()->getSQL() . PHP_EOL .
+                            'parameters: ' . PHP_EOL . Yaml::dump($reason->getQuery()->getParams()),
+                        $reason->getCode(),
+                        $reason
+                    ));
+                }
+                $deferred->reject($reason);
+            }
+        );
     return $deferred->promise();
 }
 

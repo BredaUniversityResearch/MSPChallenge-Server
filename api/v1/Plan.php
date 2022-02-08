@@ -2,7 +2,9 @@
 
 namespace App\Domain\API\v1;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\InvalidArgumentException;
+use Doctrine\DBAL\ParameterType;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
@@ -585,18 +587,21 @@ class Plan extends Base
                         ),
                         $qb->expr()->in(
                             'grid_persistent',
-                            'SELECT g.grid_persistent FROM (SELECT * FROM grid) AS g WHERE g.grid_plan_id = ' .
+                            'SELECT g.grid_persistent FROM grid g WHERE g.grid_plan_id = ' .
                                 $qb->createPositionalParameter($planObject['plan_id'])
                         )
                     ))
-                    ->andWhere('plan_gametime < ' . $qb->createPositionalParameter($planObject['plan_gametime']))
 
                     // since it is not possible to use this innerJoin with an update with DBAL, use a sub query instead:
                     // ->innerJoin('grid', 'plan', 'plan', 'grid.grid_plan_id = plan.plan_id')
                     ->andWhere(
                         $qb->expr()->in(
                             'grid.grid_plan_id',
-                            'SELECT plan_id from plan WHERE plan.plan_id = grid.grid_plan_id'
+                            '
+                            SELECT plan_id
+                            FROM plan p
+                            WHERE p.plan_id = grid.grid_plan_id AND p.plan_gametime < ' .
+                                $qb->createPositionalParameter($planObject['plan_gametime'])
                         )
                     )
             );
@@ -795,12 +800,12 @@ class Plan extends Base
                     $qb->expr()->and(
                         $qb->expr()->and(
                             $qb->expr()->or(
-                                'plan.plan_id != ' . $qb->createPositionalParameter($currentPlanId),
-                                'plan.plan_id IS NULL'
+                                'p.plan_id != ' . $qb->createPositionalParameter($currentPlanId),
+                                'p.plan_id IS NULL'
                             ),
                             $qb->expr()->or(
-                                'plan.plan_state = ' . $qb->createPositionalParameter('IMPLEMENTED'),
-                                'plan.plan_id IS NULL'
+                                'p.plan_state = ' . $qb->createPositionalParameter('IMPLEMENTED'),
+                                'p.plan_id IS NULL'
                             )
                         ),
                         $qb->expr()->in(
@@ -815,17 +820,17 @@ class Plan extends Base
                 )
         )
         ->then(function (Result $result) {
-            $idsToDisable = $result->fetchAllRows();
+            $idsToDisable = collect($result->fetchAllRows() ?? [])->flatten()->all();
+            $idsToDisable = empty($idsToDisable) ? [0] : $idsToDisable;
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->update('geometry')
                     ->set('geometry_active', 0)
                     ->where(
-                        $qb->expr()->or(
-                            $qb->expr()->in('geometry_id', $idsToDisable),
-                            $qb->expr()->in('geometry_subtractive', $idsToDisable)
-                        )
+                        'geometry_id IN (' .
+                            implode(',', $idsToDisable) .
+                        ') or geometry_subtractive IN (' . implode(',', $idsToDisable) . ')'
                     )
             );
         });
@@ -836,10 +841,12 @@ class Plan extends Base
      */
     private function updateFishing(int $planId): PromiseInterface
     {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
-            $this->getAsyncDatabase()->createQueryBuilder()
+            $qb
+                ->select('*')
                 ->from('fishing')
-                ->where('fishing_plan_id', $planId)
+                ->where('fishing_plan_id = ' . $qb->createPositionalParameter($planId))
         )
         ->then(function (Result $result) use ($planId) {
             $fishing = $result->fetchAllRows();
