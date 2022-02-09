@@ -27,6 +27,10 @@
 		 */
 		public function Post(string $FID = "", int $persistent = null, string $data = "", int $country = null, int $plan = -1, int $layer, string $geometry)
 		{
+            if ($country == -1) {
+                $country = null;
+            }
+
 			$newid = Database::GetInstance()->query("INSERT INTO geometry (geometry_layer_id, geometry_geometry, geometry_FID, geometry_persistent, geometry_data, geometry_country_id) 
 									VALUES (?, ?, ?, ?, ?, ?)", array($layer, $geometry, $FID, $persistent, $data, $country), true);
 
