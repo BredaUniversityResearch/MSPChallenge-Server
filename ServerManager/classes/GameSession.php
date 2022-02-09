@@ -646,7 +646,7 @@ class GameSession extends Base
             $this->id,
             $this->api_access_token
         );
-        if (($server_call["success"] ?? false) == false) {
+        if (empty($server_call["success"])) {
             throw new Exception($server_call["message"] ?? '');
         }
         return true;
