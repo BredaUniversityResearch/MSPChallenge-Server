@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`geometry` (
   `geometry_subtractive` INT(11) NOT NULL DEFAULT 0,
   `geometry_type` VARCHAR(75) NOT NULL DEFAULT 0,
   `geometry_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Has this geometry been deleted by a user? This only applies to geometry inside a plan that hasn\'t become active. E.g. geometry is created in plan, plan is submitted to server, user deletes geometry from said plan, geometry_deleted = 1.',
-  `geometry_mspid` INT NULL,
+  `geometry_mspid` VARCHAR(16) NULL,
   PRIMARY KEY (`geometry_id`, `geometry_layer_id`),
   INDEX `fk_gis_layer1_idx` (`geometry_layer_id` ASC),
   INDEX `geometry_persistent` (`geometry_persistent` ASC),

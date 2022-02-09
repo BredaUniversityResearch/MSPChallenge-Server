@@ -372,7 +372,8 @@ class Store extends Base
         string $jsonData,
         ?int $countryId,
         int $type,
-        ?int $mspId
+        ?int $mspId,
+        string $filename
     ): void {
         $lastId = 0;
         for ($j = 0; $j < sizeof($multi); $j++) {
@@ -385,7 +386,8 @@ class Store extends Base
                     $countryId,
                     $type,
                     null,
-                    $lastId
+                    $lastId,
+                    $filename
                 );
             } else {
                 $lastId = $this->InsertGeometry(
@@ -394,7 +396,9 @@ class Store extends Base
                     $jsonData,
                     $countryId,
                     $type,
-                    $mspId
+                    $mspId,
+                    0,
+                    $filename
                 );
             }
         }
@@ -516,7 +520,15 @@ class Store extends Base
                             if (!is_array($multi)) {
                                 continue;
                             }
-                            $this->insertMultiPolygon($multi, $layer_id, $jsonData, $countryId, $type, $mspId);
+                            $this->insertMultiPolygon(
+                                $multi,
+                                $layer_id,
+                                $jsonData,
+                                $countryId,
+                                $type,
+                                $mspId,
+                                $filename
+                            );
                         }
                         break;
                     case "POINT":
@@ -526,12 +538,23 @@ class Store extends Base
                             $jsonData,
                             $countryId,
                             $type,
-                            $mspId
+                            $mspId,
+                            0,
+                            $filename
                         );
                         break;
                     case "MULTILINESTRING":
                         foreach ($decodedJsonData as $line) {
-                            $this->InsertGeometry($layer_id, json_encode($line), $jsonData, $countryId, $type, $mspId);
+                            $this->InsertGeometry(
+                                $layer_id,
+                                json_encode($line),
+                                $jsonData,
+                                $countryId,
+                                $type,
+                                $mspId,
+                                0,
+                                $filename
+                            );
                         }
                         break;
                 }
@@ -603,7 +626,15 @@ class Store extends Base
                         if (!is_array($multi)) {
                             continue;
                         }
-                        $this->insertMultiPolygon($multi, $layerId, $encodedFeatureData, $countryId, $type, $mspId);
+                        $this->insertMultiPolygon(
+                            $multi,
+                            $layerId,
+                            $encodedFeatureData,
+                            $countryId,
+                            $type,
+                            $mspId,
+                            $filename
+                        );
                     }
                 } elseif (strcasecmp($geometryData["type"], "Point") == 0) {
                     $this->InsertGeometry(
@@ -612,7 +643,9 @@ class Store extends Base
                         $encodedFeatureData,
                         $countryId,
                         $type,
-                        $mspId
+                        $mspId,
+                        0,
+                        $filename
                     );
                 } elseif (strcasecmp($geometryData["type"], "MultiLineString") == 0) {
                     foreach ($geometryData["coordinates"] as $line) {
@@ -622,7 +655,9 @@ class Store extends Base
                             $encodedFeatureData,
                             $countryId,
                             $type,
-                            $mspId
+                            $mspId,
+                            0,
+                            $filename
                         );
                     }
                 } else {
@@ -645,8 +680,16 @@ class Store extends Base
         ?int $countryId,
         int $type,
         ?int $mspId,
-        int $subtractive = 0
+        int $subtractive = 0,
+        string $layerName = ''
     ): int {
+        if (IsFeatureFlagEnabled('auto_mspids_by_hash') && $subtractive === 0 && is_null($mspId)) {
+             Log::LogDebug(' -> Auto-generating an MSP ID for a bit of geometry in layer ' . $layerName . ' .');
+             // so many algorithms to choose from, but this one seemed to have low collision, reasonable speed,
+             //   and simply availability to PHP in default installation
+             $mspId = hash('fnv1a64', $layerName.$geometry);
+        }
+
         return Database::GetInstance()->query(
             "
             INSERT INTO geometry (

@@ -1198,7 +1198,7 @@ class Plan extends Base
         $plans = Database::GetInstance()->query(
             "
             SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type, plan_alters_energy_distribution
-            FROM plan WHERE plan_active=? AND plan_state<>? AND plan_name IS NOT NULL
+            FROM plan WHERE plan_active=? AND plan_state<>? AND plan_name <> ''
             ",
             array(1, "DELETED")
         );

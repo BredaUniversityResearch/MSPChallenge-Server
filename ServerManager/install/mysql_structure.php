@@ -5,7 +5,7 @@ $sqls = "
 -- Table structure for table `game_config_files`
 --
 
-CREATE TABLE `game_config_files` (
+CREATE TABLE IF NOT EXISTS `game_config_files` (
   `id` int(11) NOT NULL,
   `filename` varchar(45) NOT NULL COMMENT 'no whitespaces and other strage characters please and without file extension (.json)',
   `description` mediumtext DEFAULT NULL
@@ -17,7 +17,7 @@ CREATE TABLE `game_config_files` (
 -- Table structure for table `game_config_version`
 --
 
-CREATE TABLE `game_config_version` (
+CREATE TABLE IF NOT EXISTS `game_config_version` (
   `id` int(11) NOT NULL,
   `game_config_files_id` int(11) NOT NULL,
   `version` int(11) NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `game_config_version` (
 -- Table structure for table `game_list`
 --
 
-CREATE TABLE `game_list` (
+CREATE TABLE IF NOT EXISTS `game_list` (
 `id` int(11) NOT NULL,
   `name` varchar(128) NOT NULL,
   `game_config_version_id` int(11) NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE `game_list` (
 -- Tabelstructuur voor tabel `game_saves`
 --
 
-CREATE TABLE `game_saves` (
+CREATE TABLE IF NOT EXISTS `game_saves` (
   `id` int(11) NOT NULL,
   `name` varchar(128) NOT NULL,
   `game_config_version_id` int(11) NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE `game_saves` (
 -- Table structure for table `game_servers`
 --
 
-CREATE TABLE `game_servers` (
+CREATE TABLE IF NOT EXISTS `game_servers` (
   `id` int(11) NOT NULL,
   `name` varchar(128) NOT NULL,
   `address` varchar(255) NOT NULL COMMENT 'with trailing slash'
@@ -116,7 +116,7 @@ CREATE TABLE `game_servers` (
 -- Table structure for table `game_watchdog_servers`
 --
 
-CREATE TABLE `game_watchdog_servers` (
+CREATE TABLE IF NOT EXISTS `game_watchdog_servers` (
   `id` int(11) NOT NULL,
   `name` varchar(128) NOT NULL,
   `address` varchar(255) NOT NULL COMMENT 'with trailing slash',
@@ -125,7 +125,7 @@ CREATE TABLE `game_watchdog_servers` (
 
 -- --------------------------------------------------------
 
-CREATE TABLE `game_geoservers` (
+CREATE TABLE IF NOT EXISTS `game_geoservers` (
   `id` int(11) NOT NULL,
   `name` varchar(128) NOT NULL,
   `address` varchar(255) NOT NULL,
@@ -138,13 +138,13 @@ CREATE TABLE `game_geoservers` (
 -- Table structure for table `settings`
 --
 
-CREATE TABLE `settings` (
+CREATE TABLE IF NOT EXISTS `settings` (
   `name` varchar(50) NOT NULL,
   `value` LONGTEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
 `id` int(11) NOT NULL,
   `email` varchar(155) NOT NULL,
   `email_new` varchar(155) DEFAULT NULL,
