@@ -55,7 +55,7 @@ class WsServerCommand extends Command
             ->addOption(
                 self::OPTION_TABLE_OUTPUT,
                 't',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_NONE,
                 'enable client connections table output with statistics'
             );
     }
@@ -66,7 +66,7 @@ class WsServerCommand extends Command
             $this->wsServer->setGameSessionId($input->getOption(self::OPTION_GAME_SESSION_ID));
         }
 
-        if ($input->hasOption(self::OPTION_TABLE_OUTPUT)) {
+        if ($input->getOption(self::OPTION_TABLE_OUTPUT)) {
             // the console helper will handle the table output using events dispatched by the wsServer
             /** @var ConsoleOutput $output */
             $consoleHelper = new WsServerConsoleHelper($this->wsServer, $output);
