@@ -18,9 +18,13 @@ IF %ERRORLEVEL% NEQ 0 (
    %exe% install %service% C:\xampp\php\php.exe bin/console app:ws-server --env=prod %2 %3 %4 %5 %6 %7 %8 %9
 )
 %exe% set %service% AppDirectory %~dp0
+%exe% set %service% AppStdout %~dp0var\log\%service%.log
+%exe% set %service% AppStderr %~dp0var\log\%service%.log
+%exe% set %service% AppRotateFiles 1
 %exe% get %service% AppDirectory
 %exe% get %service% Application
 %exe% get %service% AppParameters
+%exe% get %service% AppStdout
 %exe% restart %service%
 %exe% status %service%
 goto eof
@@ -43,6 +47,7 @@ goto eof
 %exe% get %service% AppDirectory
 %exe% get %service% Application
 %exe% get %service% AppParameters
+%exe% get %service% AppStdout
 goto eof
 
 :eof
