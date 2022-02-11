@@ -27,8 +27,14 @@ function assertFulfilled(PromiseInterface $promise, ?Closure $onFullfulled = nul
 {
     $promise->done(
         $onFullfulled,
-        function (string $reason) {
-            assert(false, $reason);
+        function ($reason) {
+            if (is_string($reason)) {
+                throw new \Exception($reason);
+            }
+            if ($reason instanceof \Throwable) {
+                throw $reason;
+            }
+            throw new \Exception('error, reason: ' . var_export($reason, true));
         }
     );
 }
