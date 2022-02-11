@@ -66,12 +66,14 @@ class WsServerCommand extends Command
             $this->wsServer->setGameSessionId($input->getOption(self::OPTION_GAME_SESSION_ID));
         }
 
-        if ($input->getOption(self::OPTION_TABLE_OUTPUT)) {
-            // the console helper will handle the table output using events dispatched by the wsServer
-            /** @var ConsoleOutput $output */
-            $consoleHelper = new WsServerConsoleHelper($this->wsServer, $output);
-            $consoleHelper->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
-        }
+        // the console helper will handle console output using events dispatched by the wsServer
+        /** @var ConsoleOutput $output */
+        $consoleHelper = new WsServerConsoleHelper(
+            $this->wsServer,
+            $output,
+            $input->getOption(self::OPTION_TABLE_OUTPUT)
+        );
+        $consoleHelper->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
 
         $server = IoServer::factory(
             new HttpServer(new \Ratchet\WebSocket\WsServer($this->wsServer)),
@@ -79,6 +81,7 @@ class WsServerCommand extends Command
         );
         $this->wsServer->registerLoop($server->loop);
         $server->run();
+
         return Command::SUCCESS;
     }
 }

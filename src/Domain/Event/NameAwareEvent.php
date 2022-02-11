@@ -18,4 +18,9 @@ class NameAwareEvent extends GenericEvent implements NameAwareEventInterface
     {
         return $this->eventName;
     }
+
+    public function toArray(): array
+    {
+        return get_object_vars($this);
+    }
 }

@@ -32,7 +32,6 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     const TICK_MIN_INTERVAL_SEC = 2;
     const LATEST_MIN_INTERVAL_SEC = 0.6;
 
-    private string $projectDir;
     private ?int $gameSessionId = null;
     private array $stats = [];
     private array $medianValues = [];
@@ -53,11 +52,9 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     }
 
     public function __construct(
-        string $projectDir,
         // below is required by legacy to be auto-wired
         \App\Domain\API\APIHelper $apiHelper
     ) {
-        $this->projectDir = $projectDir;
         parent::__construct();
     }
 

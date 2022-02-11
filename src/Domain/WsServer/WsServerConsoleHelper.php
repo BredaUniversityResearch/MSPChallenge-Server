@@ -6,9 +6,9 @@ use App\Domain\Event\NameAwareEvent;
 use App\Domain\Helper\Util;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Output\ConsoleSectionOutput;
 use Symfony\Component\Console\Terminal;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Yaml\Yaml;
 
 class WsServerConsoleHelper implements EventSubscriberInterface
 {
@@ -30,16 +30,16 @@ class WsServerConsoleHelper implements EventSubscriberInterface
     private Table $table;
     private array $tableInput = [];
     private ConsoleOutput $output;
-    private ConsoleSectionOutput $section;
     private string $startDateTime;
     private ?int $terminalHeight = null;
+    private bool $tableOutput = false;
 
-    public function __construct(WsServer $wsServer, ConsoleOutput $output)
+    public function __construct(WsServer $wsServer, ConsoleOutput $output, bool $tableOutput)
     {
         $this->wsServer = $wsServer;
         $wsServer->addSubscriber($this);
         $this->output = $output;
-        $this->section = $output->section();
+        $this->tableOutput = $tableOutput;
         $this->table = new Table($output);
         $this->startDateTime = date('j M H:i:s');
     }
@@ -51,6 +51,9 @@ class WsServerConsoleHelper implements EventSubscriberInterface
 
     private function process(NameAwareEvent $event, int $allowedDataCharsWidth): void
     {
+        if (!$this->tableOutput) {
+            return;
+        }
         if (null === $clientIds = $event->getSubject()) {
             return;
         }
@@ -68,6 +71,11 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             $clientData = $clientDataContainer[$clientId];
             $this->processTableInput($clientId, $event->getEventName(), $clientData, $allowedDataCharsWidth);
         }
+    }
+
+    private function outputEvent(NameAwareEvent $event)
+    {
+        $this->output->writeln(Yaml::dump($event->toArray()));
     }
 
     private function getWsServerStats(): array
@@ -97,6 +105,15 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         $allowedDataCharsWidth = max(0, $terminal->getWidth() - self::WIDTH_RESERVED_CHARS);
         $this->process($event, $allowedDataCharsWidth);
         $wsServerStats = $this->getWsServerStats();
+        if (!$this->tableOutput) {
+            // skip output on stats update event to reduce the output frequency, just output any other event along with
+            //   the latest stats
+            if ($event->getEventName() != WsServer::EVENT_ON_STATS_UPDATE) {
+                $this->outputEvent($event);
+                $this->output->writeln(Yaml::dump($wsServerStats));
+            }
+            return;
+        }
         $numClients = count($this->tableInput);
         $this->table
             ->setStyle('box')
@@ -113,7 +130,6 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         if ($event->getEventName() == WsServer::EVENT_ON_STATS_UPDATE) {
             $this->output->write(sprintf("\033\143"));
             $this->table->render();
-            return;
         }
     }
 
