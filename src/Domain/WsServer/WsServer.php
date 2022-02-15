@@ -280,8 +280,10 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         unset(
                             $p1['prev_update_time'],
                             $p1['update_time'],
+                            $p1['era_timeleft'],
                             $p2['prev_update_time'],
-                            $p2['update_time']
+                            $p2['update_time'],
+                            $p2['era_timeleft'],
                         );
                         if (0 == strcmp(json_encode($p1), json_encode($p2))) {
                             unset($p1, $p2);
