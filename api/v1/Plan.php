@@ -7,6 +7,7 @@ use Doctrine\DBAL\Exception\InvalidArgumentException;
 use Doctrine\DBAL\ParameterType;
 use Drift\DBAL\Result;
 use Exception;
+use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\parallel;
 use function Clue\React\Block\await;
@@ -798,15 +799,13 @@ class Plan extends Base
                 ->leftJoin('pl', 'plan', 'p', 'pl.plan_layer_plan_id = p.plan_id')
                 ->where(
                     $qb->expr()->and(
-                        $qb->expr()->and(
-                            $qb->expr()->or(
-                                'p.plan_id != ' . $qb->createPositionalParameter($currentPlanId),
-                                'p.plan_id IS NULL'
-                            ),
-                            $qb->expr()->or(
-                                'p.plan_state = ' . $qb->createPositionalParameter('IMPLEMENTED'),
-                                'p.plan_id IS NULL'
-                            )
+                        $qb->expr()->or(
+                            'p.plan_id != ' . $qb->createPositionalParameter($currentPlanId),
+                            'p.plan_id IS NULL'
+                        ),
+                        $qb->expr()->or(
+                            'p.plan_state = ' . $qb->createPositionalParameter('IMPLEMENTED'),
+                            'p.plan_state IS NULL'
                         ),
                         $qb->expr()->in(
                             'g.geometry_persistent',
@@ -821,7 +820,9 @@ class Plan extends Base
         )
         ->then(function (Result $result) {
             $idsToDisable = collect($result->fetchAllRows() ?? [])->flatten()->all();
-            $idsToDisable = empty($idsToDisable) ? [0] : $idsToDisable;
+            if (empty($idsToDisable)) {
+                return new Result([], null, 0);
+            }
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             return $this->getAsyncDatabase()->query(
                 $qb
