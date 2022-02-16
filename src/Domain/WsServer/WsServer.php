@@ -17,6 +17,14 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use function App\assertFulfilled;
 use function React\Promise\all;
 
+function wdo(string $message) // WsServer debugging output if enabled by WS_SERVER_DEBUG_OUTPUT via .env file
+{
+    if (($_ENV['WS_SERVER_DEBUG_OUTPUT'] ?: false) === false) {
+        return;
+    }
+    echo $message . PHP_EOL;
+}
+
 class WsServer extends EventDispatcher implements MessageComponentInterface
 {
     const HEADER_GAME_SESSION_ID = 'GameSessionId';
@@ -30,7 +38,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     const EVENT_ON_STATS_UPDATE = 'EVENT_ON_STATS_UPDATE';
 
     const TICK_MIN_INTERVAL_SEC = 2;
-    const LATEST_MIN_INTERVAL_SEC = 0.6;
+    const LATEST_MIN_INTERVAL_SEC = 0.2;
 
     private ?int $gameSessionId = null;
     private array $stats = [];
@@ -81,19 +89,20 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             })
             ->all();
 
-        // required headers are not there, do not allow connection
         if (!array_key_exists(self::HEADER_GAME_SESSION_ID, $headers) ||
             !array_key_exists(self::HEADER_MSP_API_TOKEN, $headers)) {
+            // required headers are not there, do not allow connection
+            wdo('required headers are not there, do not allow connection');
             $conn->close();
             return;
         }
         if (null != $this->gameSessionId && $this->gameSessionId != $headers[self::HEADER_GAME_SESSION_ID]) {
-            // do not connect this client, client is from another game session.
+            // do not connect this client, client is from another game session
+            wdo('do not connect this client, client is from another game session');
             $conn->close();
             return;
         }
 
-        // not a valid token, connection not allowed
         $accessTimeRemaining = 0;
         $_REQUEST['session'] = $_GET['session'] = $headers[self::HEADER_GAME_SESSION_ID];
         if (false === $this->getSecurity($headers[self::HEADER_GAME_SESSION_ID])->validateAccess(
@@ -101,6 +110,8 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             $accessTimeRemaining,
             $headers[self::HEADER_MSP_API_TOKEN]
         )) {
+            // not a valid token, connection not allowed
+            wdo('not a valid token, connection not allowed');
             $conn->close();
             return;
         }
@@ -176,6 +187,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     private function tick(): PromiseInterface
     {
+        wdo('starting "tick"');
         $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
             ->groupBy(
                 function ($value, $key) {
@@ -194,7 +206,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             $_REQUEST['session'] = $_GET['session'] = $gameSessionId;
             $_SERVER['REQUEST_URI'] = '';
 
-            // stats BEGIN
+            wdo('starting "tick" for game session: ' . $gameSessionId);
             $tickTimeStart = microtime(true);
             $promises[$gameSessionId] = $this->getGame(
                 $gameSessionId
@@ -204,7 +216,6 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                     return $gameSessionId; // just to identify this tick
                 }
             );
-            // stats END
         }
 
         $timeElapsed = microtime(true) - $timeStart;
@@ -216,6 +227,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     private function latest(): PromiseInterface
     {
+        wdo('starting "latest"');
         $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
             ->groupBy(
                 function ($value, $key) {
@@ -229,8 +241,9 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         $promises = [];
         $this->statsLoopStart('latest');
         foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
-            // wait for a first finished tick
             if (!array_key_exists($gameSessionId, $this->finishedTicksGameSessionIds)) {
+                // wait for a first finished tick
+                wdo('wait for a first finished tick');
                 continue;
             }
 
@@ -244,36 +257,41 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                     $accessTimeRemaining,
                     $this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]
                 )) {
-                    // Client's token has been expired, let the client re-connected with a new token.
+                    // Client's token has been expired, let the client re-connected with a new token
+                    wdo('Client\'s token has been expired, let the client re-connected with a new token');
                     $this->clients[$connResourceId]->close();
                     continue;
                 }
                 $latestTimeStart = microtime(true);
+                wdo('Starting "latest" for: ' . $connResourceId);
                 $promises[$connResourceId] = $this->getGame($gameSessionId)->Latest(
                     $clientInfo['team_id'],
                     $clientInfo['last_update_time'],
                     $clientInfo['user']
                 )
                 ->then(function ($payload) use ($connResourceId, $latestTimeStart, $clientInfo) {
+                    wdo('Created "latest" payload for: ' . $connResourceId);
                     $this->statsLoopRegister('latest', $connResourceId, microtime(true) - $latestTimeStart);
                     if (empty($payload)) {
+                        wdo('empty payload');
                         return [];
                     }
                     if (!array_key_exists($connResourceId, $this->clients)) {
-                        // disconnected while running this async code, just return empty payload, nothing was sent...
+                        // disconnected while running this async code, just return empty payload, nothing was sent
+                        wdo('disconnected while running this async code, just return empty payload, nothing was sent');
                         $e = new ClientDisconnectedException();
                         $e->setConnResourceId($connResourceId);
                         throw $e;
                     }
-                    // encountered another issue: mismatch between the "used" client info's last_update_time
-                    //   and the "latest", so this payload will not be accepted, and should not be sent anymore...
                     if ($clientInfo['last_update_time'] !=
                         $this->clientInfoContainer[$connResourceId]['last_update_time']) {
+                        // encountered another issue: mismatch between the "used" client info's last_update_time
+                        //   and the "latest", so this payload will not be accepted, and should not be sent anymore...
+                        wdo('mismatch between the "used" client info\'s last_update_time and the "latest"');
                         // just return empty payload, nothing was sent...
                         return [];
                     }
 
-                    // if the payload is equal to the previous one, no need to send it now
                     if (isset($this->clientInfoContainer[$connResourceId]['prev_payload'])) {
                         $p1 = $this->clientInfoContainer[$connResourceId]['prev_payload'];
                         $p2 = $payload;
@@ -287,6 +305,8 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         );
                         if (0 == strcmp(json_encode($p1), json_encode($p2))) {
                             unset($p1, $p2);
+                            // if the payload is equal to the previous one, no need to send it now
+                            wdo('if the payload is equal to the previous one, no need to send it now');
                             return []; // no need to send
                         }
                     }
@@ -298,6 +318,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         "message" => null,
                         "payload" => $payload
                     ]);
+                    wdo('send payload to: ' . $connResourceId);
                     $this->clients[$connResourceId]->send($json);
                     return $payload;
                 });
@@ -313,6 +334,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             assertFulfilled(
                 $this->tick()
                     ->then(function (array $tickGameSessionIds) {
+                        wdo('just finished tick for game session ids: ' . implode(', ', $tickGameSessionIds));
                         $this->finishedTicksGameSessionIds += $tickGameSessionIds;
                         $this->dispatch(
                             new NameAwareEvent(self::EVENT_ON_STATS_UPDATE)
@@ -325,11 +347,14 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                 function () use ($loop, $startTime) {
                     $elapsedSec = (microtime(true) - $startTime) * 0.000001;
                     if ($elapsedSec > self::TICK_MIN_INTERVAL_SEC) {
+                        wdo('starting new future tick');
                         $loop->futureTick($this->repeatedTickFunction($loop));
                         return;
                     }
                     $waitingSec = self::TICK_MIN_INTERVAL_SEC - $elapsedSec;
+                    wdo('awaiting new future tick for ' . $waitingSec . ' sec');
                     $loop->addTimer($waitingSec, function () use ($loop) {
+                        wdo('starting new future tick');
                         $loop->futureTick($this->repeatedTickFunction($loop));
                     });
                 }
@@ -344,6 +369,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             assertFulfilled(
                 $this->latest()
                     ->then(function (array $payloadContainer) {
+                        wdo('just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer)));
                         $payloadContainer = array_filter($payloadContainer);
                         if (!empty($payloadContainer)) {
                             $this->dispatch(
@@ -362,11 +388,14 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                 function () use ($loop, $startTime) {
                     $elapsedSec = (microtime(true) - $startTime) * 0.000001;
                     if ($elapsedSec > self::LATEST_MIN_INTERVAL_SEC) {
+                        wdo('starting new future "latest"');
                         $loop->futureTick($this->repeatedLatestFunction($loop));
                         return;
                     }
                     $waitingSec = self::LATEST_MIN_INTERVAL_SEC - $elapsedSec;
+                    wdo('awaiting new future "latest" for ' . $waitingSec . ' sec');
                     $loop->addTimer($waitingSec, function () use ($loop) {
+                        wdo('starting new future "latest"');
                         $loop->futureTick($this->repeatedLatestFunction($loop));
                     });
                 }
