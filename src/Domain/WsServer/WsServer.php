@@ -9,6 +9,7 @@ use App\Domain\Helper\Util;
 use Closure;
 use Exception;
 use GuzzleHttp\Psr7\Request;
+use PDOException;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use React\EventLoop\LoopInterface;
@@ -153,6 +154,13 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     public function onError(ConnectionInterface $conn, Exception $e)
     {
+        // detect PDOException, could also be a previous exception
+        while ($e !== null) {
+            if ($e instanceof PDOException) {
+                throw $e; // let the Websocket server crash on database query errors.
+            }
+            $e = $e->getPrevious();
+        }
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_ERROR, $conn->resourceId, [$e->getMessage()]));
         $conn->close();
     }

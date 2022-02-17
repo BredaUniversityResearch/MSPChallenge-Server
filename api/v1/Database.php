@@ -143,9 +143,13 @@ class Database
         try {
             $query = $this->executeQuery($statement, $vars);
         } catch (Exception $e) {
-            throw new Exception("Query exception: ".$e->getMessage()." Query: ".
+            throw new Exception(
+                "Query exception: ".$e->getMessage()." Query: ".
                 str_replace(array("\n", "\r", "\t"), " ", var_export($statement, true)).
-                " Vars: ".str_replace(array("\n", "\r"), "", var_export($vars, true)));
+                " Vars: ".str_replace(array("\n", "\r"), "", var_export($vars, true)),
+                $e->getCode(), // just pass the original exception code
+                $e // pass previous such that it is possible to debug back to the original exception
+            );
         }
 
         if ($getId == true) {
