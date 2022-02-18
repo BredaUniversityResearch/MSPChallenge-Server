@@ -873,7 +873,11 @@ class Game extends Base
         // we want to use the watchdog, but first we check if it is running
         $browser = new MSPBrowser($url);
         $deferred = new Deferred();
-        $browser->request('GET', $url)
+        $browser
+            // any response is acceptable, even 4xx or 5xx status codes
+            ->withRejectErrorResponse(false)
+            ->withTimeout(1)
+            ->request('GET', $url)
             ->done(
                 // watchdog is running
                 function (/*ResponseInterface $response*/) use ($deferred) {
