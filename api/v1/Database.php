@@ -17,8 +17,11 @@ class Database
     
     private ?PDO $conn = null;
     private bool $isTransactionRunning = false;
-    
-    private static ?Database $instance = null;
+
+    /**
+     * @var Database[] array
+     */
+    private static array $instances = [];
 
     protected string $salt = 'c02b7d24a066adb747fdeb12deb21bfa';
 
@@ -28,15 +31,22 @@ class Database
         PDO::ATTR_TIMEOUT => 5
     );
 
+    private int $sessionId;
+
     /**
      * @throws Exception
      */
-    public function __construct()
+    public function __construct(int $overrideSessionId = GameSession::INVALID_SESSION_ID)
     {
-        if (self::$instance != null) {
-            throw new Exception("Creation of multiple database instances.");
+        // note that it is possible that sessionId is equal to INVALID_SESSION_ID (=-1), in which case the Database
+        //   instance is created, but will not do any queries since there will be no valid configuration/connection
+        $this->sessionId = ($overrideSessionId == GameSession::INVALID_SESSION_ID) ?
+            GameSession::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
+
+        if (self::$instances[$this->sessionId] != null) {
+            throw new Exception("Creation of multiple database instances for session: " . $this->sessionId);
         }
-        self::$instance = $this;
+        self::$instances[$this->sessionId] = $this;
         $this->SetupConfiguration();
     }
 
@@ -49,44 +59,54 @@ class Database
             $this->DBRollbackTransaction();
             throw new Exception("DB destructed when transaction was still running. Rolling back");
         }
-        self::$instance = null;
+        self::$instances[$this->sessionId] = null;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetInstance(): Database
+    public static function GetInstance(int $overrideSessionId = GameSession::INVALID_SESSION_ID): Database
     {
-        if (self::$instance == null) {
-            self::$instance = new Database();
+        // note that it is possible that sessionId is equal to INVALID_SESSION_ID (=-1), in which case the Database
+        //   instance is created, but will not do any queries since there will be no valid configuration/connection
+        $sessionId = ($overrideSessionId == GameSession::INVALID_SESSION_ID) ?
+            GameSession::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
+        if (!isset(self::$instances[$sessionId])) {
+            self::$instances[$sessionId] = new Database($sessionId);
         }
-        return self::$instance;
+        return self::$instances[$sessionId];
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function SetupConfiguration(int $overrideSessionId = GameSession::INVALID_SESSION_ID): void
+    private function SetupConfiguration(): bool
     {
-        if ($this->configurationApplied === false) {
-            $dbConfig = Config::GetInstance()->DatabaseConfig();
-            $this->db_host = $dbConfig["host"];
-            $this->db_user = $dbConfig["user"];
-            $this->db_pass = $dbConfig["password"];
-
-            $sessionId = ($overrideSessionId == GameSession::INVALID_SESSION_ID) ?
-                GameSession::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
-            if ($sessionId != GameSession::INVALID_SESSION_ID) {
-                $this->db_name = $dbConfig["multisession_database_prefix"].$sessionId;
-                $this->configurationApplied = true;
-            } else {
-                // a proper sessionId is simply required
-                $this->configurationApplied = false;
-            }
+        // valid configured setup has already been applied
+        if ($this->configurationApplied) {
+            return true;
         }
+
+        $dbConfig = Config::GetInstance()->DatabaseConfig();
+        $this->db_host = $dbConfig["host"];
+        $this->db_user = $dbConfig["user"];
+        $this->db_pass = $dbConfig["password"];
+
+        if ($this->sessionId != GameSession::INVALID_SESSION_ID) {
+            $this->db_name = $dbConfig["multisession_database_prefix"].$this->sessionId;
+            $this->configurationApplied = true;
+        } else {
+            // a proper sessionId is simply required
+            $this->configurationApplied = false;
+        }
+
+        return $this->configurationApplied;
     }
 
-    private function connectToDatabase(): void
+    private function connectToDatabase(): bool
     {
         if ($this->conn == null) {
+            // check if configuration has been applied
+            if (!$this->SetupConfiguration()) {
+                return false;
+            }
             try {
-                $this->SetupConfiguration();
                 $this->conn = new PDO(
                     'mysql:host='.$this->db_host.';dbname='.$this->db_name,
                     $this->db_user,
@@ -95,8 +115,10 @@ class Database
                 );
             } catch (PDOException $e) {
                 $this->conn = null;
+                return false;
             }
         }
+        return true;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -134,8 +156,7 @@ class Database
         ?array $vars = null,
         bool $getId = false
     ) {/*: array|string */ // <-- for php 8
-        $this->connectToDatabase();
-        if (!$this->isConnectedToDatabase()) {
+        if (!$this->connectToDatabase()) {
             return [];
         }
         $result = array();
@@ -193,7 +214,9 @@ class Database
      */
     private function executeQuery(string $statement, ?array $vars)/*: false|PDOStatement*/ // <<-- for php 8
     {
-        $this->connectToDatabase();
+        if (!$this->connectToDatabase()) {
+            return false;
+        }
         
         if (false === $query = $this->prepareQuery($statement)) {
             return false;
@@ -208,7 +231,9 @@ class Database
      */
     public function prepareQuery(string $statement)/*: false|PDOStatement*/ // <<-- for php 8
     {
-        $this->connectToDatabase();
+        if (!$this->connectToDatabase()) {
+            return false;
+        }
         return $this->conn->prepare($statement);
     }
 
@@ -237,7 +262,9 @@ class Database
     public function quote(string $string)/*: false|string*/ // <<-- for php 8
     {
         //Simple wrapper for PDO::Quote since that needs an instance of the connection...
-        $this->connectToDatabase();
+        if (!$this->connectToDatabase()) {
+            return false;
+        }
         return $this->conn->quote($string);
     }
 
@@ -308,8 +335,7 @@ class Database
      */
     public function DBStartTransaction(): void
     {
-        $this->connectToDatabase();
-        if ($this->isConnectedToDatabase()) {
+        if ($this->connectToDatabase()) {
             if ($this->isTransactionRunning) {
                 throw new Exception("Running multiple transactions");
             }

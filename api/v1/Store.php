@@ -54,10 +54,10 @@ class Store extends Base
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function ClearRasterStoreFolder(): void
+    public static function ClearRasterStoreFolder(int $gameSessionId): void
     {
-        self::DeleteDirectory(self::GetRasterStoreFolder());
-        self::DeleteDirectory(self::GetRasterArchiveFolder());
+        self::DeleteDirectory(self::GetRasterStoreFolder($gameSessionId));
+        self::DeleteDirectory(self::GetRasterArchiveFolder($gameSessionId));
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -80,20 +80,21 @@ class Store extends Base
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetRasterStoreFolder(): string
+    public static function GetRasterStoreFolder(int $gameSessionId): string
     {
         $storeFolder = "raster/";
-        $gameSessionId = GameSession::GetGameSessionIdForCurrentRequest();
         $storeFolder .= ($gameSessionId != GameSession::INVALID_SESSION_ID) ? $gameSessionId . "/" : "default/";
         return $storeFolder;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetRasterStoreFolderContents(): Generator
+    public static function GetRasterStoreFolderContents(int $gameSessionId): Generator
     {
         // this is a generator function - notice the use of yield to save up on memory use
         try {
-            $dirIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Store::GetRasterStoreFolder()));
+            $dirIterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(Store::GetRasterStoreFolder($gameSessionId))
+            );
         } catch (Exception $e) {
             $dirIterator = array();
         }
@@ -105,9 +106,9 @@ class Store extends Base
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetRasterArchiveFolder(): string
+    public static function GetRasterArchiveFolder(int $gameSessionId): string
     {
-        $folder = self::GetRasterStoreFolder();
+        $folder = self::GetRasterStoreFolder($gameSessionId);
         return $folder . "archive/";
     }
 
@@ -147,8 +148,8 @@ class Store extends Base
 
                 $url = $layer->GetExport($region, $filename, "PNG", $layerMetaData, $rasterMeta);
 
-                self::EnsureFolderExists(self::GetRasterStoreFolder());
-                file_put_contents(self::GetRasterStoreFolder() . $filename . ".png", $url);
+                self::EnsureFolderExists(self::GetRasterStoreFolder($this->getGameSessionId()));
+                file_put_contents(self::GetRasterStoreFolder($this->getGameSessionId()) . $filename . ".png", $url);
             } else {
                 // Create the metadata for the raster layer, but don't fill in the layer_raster field.
                 //   This must be done by something else later.
@@ -294,9 +295,9 @@ class Store extends Base
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function ExtractRasterFilesFromZIP(string $raster_zip): void
+    public static function ExtractRasterFilesFromZIP(string $raster_zip, int $gameSessionId): void
     {
-        $folder = self::GetRasterStoreFolder();
+        $folder = self::GetRasterStoreFolder($gameSessionId);
         self::EnsureFolderExists($folder);
         self::EnsureFolderExists("temp");
 

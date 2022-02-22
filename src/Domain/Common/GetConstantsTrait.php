@@ -8,7 +8,7 @@ trait GetConstantsTrait
 {
     public function getConstants()
     {
-        $class = new ReflectionClass(__CLASS__);
+        $class = new ReflectionClass(get_called_class());
         return $class->getConstants();
     }
 }

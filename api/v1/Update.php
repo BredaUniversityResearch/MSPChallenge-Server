@@ -263,7 +263,7 @@ class Update extends Base
     {
         Log::LogInfo("ClearRasterStorage -> Starting clear raster storage...");
 
-        Store::ClearRasterStoreFolder();
+        Store::ClearRasterStoreFolder($this->getGameSessionId());
 
         Log::LogInfo("ClearRasterStorage -> Cleared raster storage.");
     }
@@ -273,7 +273,7 @@ class Update extends Base
     {
         Log::LogInfo("ExtractRasterFiles -> Starting reload of raster files...");
 
-        Store::ExtractRasterFilesFromZIP($raster_zip);
+        Store::ExtractRasterFilesFromZIP($raster_zip, $this->getGameSessionId());
 
         Log::LogInfo("ExtractRasterFiles -> Raster files reloaded.");
     }

@@ -20,7 +20,7 @@ use function React\Promise\all;
 
 function wdo(string $message) // WsServer debugging output if enabled by WS_SERVER_DEBUG_OUTPUT via .env file
 {
-    if (($_ENV['WS_SERVER_DEBUG_OUTPUT'] ?: false) === false) {
+    if (empty($_ENV['WS_SERVER_DEBUG_OUTPUT'])) {
         return;
     }
     echo $message . PHP_EOL;
@@ -30,6 +30,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 {
     const HEADER_GAME_SESSION_ID = 'GameSessionId';
     const HEADER_MSP_API_TOKEN = 'MSPAPIToken';
+    const LATEST_CLIENT_UPDATE_SPEED = 1.0;
 
     const EVENT_ON_CLIENT_CONNECTED = 'EVENT_ON_CLIENT_CONNECTED';
     const EVENT_ON_CLIENT_DISCONNNECTED = 'EVENT_ON_CLIENT_DISCONNNECTED';
@@ -51,6 +52,16 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     private array $clientHeaders = [];
 
     /**
+     * @var Game[]
+     */
+    private array $gameInstances = [];
+
+    /**
+     * @var Security[]
+     */
+    private array $securityInstances = [];
+
+    /**
      * @var int[]
      */
     private array $finishedTicksGameSessionIds = [];
@@ -64,6 +75,9 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         // below is required by legacy to be auto-wired
         \App\Domain\API\APIHelper $apiHelper
     ) {
+        // for backwards compatibility, to prevent missing request data errors
+        $_SERVER['REQUEST_URI'] = '';
+
         parent::__construct();
     }
 
@@ -105,7 +119,6 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         }
 
         $accessTimeRemaining = 0;
-        $_REQUEST['session'] = $_GET['session'] = $headers[self::HEADER_GAME_SESSION_ID];
         if (false === $this->getSecurity($headers[self::HEADER_GAME_SESSION_ID])->validateAccess(
             Security::ACCESS_LEVEL_FLAG_FULL,
             $accessTimeRemaining,
@@ -124,6 +137,11 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     public function onMessage(ConnectionInterface $from, $msg)
     {
+        if (!array_key_exists($from->resourceId, $this->clientHeaders)) {
+            wdo('received message, although no connection headers were registered... ignoring...');
+            return;
+        }
+
         $clientInfo = json_decode($msg, true);
         $this->clientInfoContainer[$from->resourceId] = $clientInfo;
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_MESSAGE_RECEIVED, $from->resourceId, $clientInfo));
@@ -135,7 +153,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         unset($this->clientInfoContainer[$conn->resourceId]);
         unset($this->clientHeaders[$conn->resourceId]);
 
-        // clean up latest ticks by active game session ids.
+        // clean up latest ticks and instances by active game session ids.
         $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
             ->groupBy(
                 function ($value, $key) {
@@ -146,6 +164,14 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             ->all();
         $this->finishedTicksGameSessionIds = array_diff_key(
             $this->finishedTicksGameSessionIds,
+            $clientInfoPerSessionContainer
+        );
+        $this->gameInstances = array_diff_key(
+            $this->gameInstances,
+            $clientInfoPerSessionContainer
+        );
+        $this->securityInstances = array_diff_key(
+            $this->securityInstances,
             $clientInfoPerSessionContainer
         );
 
@@ -210,15 +236,9 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
-            // for backwards compatibility
-            $_REQUEST['session'] = $_GET['session'] = $gameSessionId;
-            $_SERVER['REQUEST_URI'] = '';
-
             wdo('starting "tick" for game session: ' . $gameSessionId);
             $tickTimeStart = microtime(true);
-            $promises[$gameSessionId] = $this->getGame(
-                $gameSessionId
-            )->Tick()->then(
+            $promises[$gameSessionId] = $this->getGame($gameSessionId)->Tick()->then(
                 function () use ($tickTimeStart, $gameSessionId) {
                     $this->statsLoopRegister('tick', $gameSessionId, microtime(true) - $tickTimeStart);
                     return $gameSessionId; // just to identify this tick
@@ -251,13 +271,10 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
             if (!array_key_exists($gameSessionId, $this->finishedTicksGameSessionIds)) {
                 // wait for a first finished tick
-                wdo('wait for a first finished tick');
+                wdo('wait for a first finished tick: ' . $gameSessionId);
                 continue;
             }
 
-            // for backwards compatibility
-            $_REQUEST['session'] = $_GET['session'] = $gameSessionId;
-            $_SERVER['REQUEST_URI'] = '';
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $accessTimeRemaining = 0; // not used
                 if (false === $this->getSecurity($gameSessionId)->validateAccess(
@@ -300,23 +317,24 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         return [];
                     }
 
-                    if (isset($this->clientInfoContainer[$connResourceId]['prev_payload'])) {
-                        $p1 = $this->clientInfoContainer[$connResourceId]['prev_payload'];
-                        $p2 = $payload;
-                        unset(
-                            $p1['prev_update_time'],
-                            $p1['update_time'],
-                            $p1['era_timeleft'],
-                            $p2['prev_update_time'],
-                            $p2['update_time'],
-                            $p2['era_timeleft'],
+                    if (isset($this->clientInfoContainer[$connResourceId]['prev_payload']) &&
+                        in_array(
+                            (string)$this->comparePayloads(
+                                $this->clientInfoContainer[$connResourceId]['prev_payload'],
+                                $payload
+                            ),
+                            [
+                                EPayloadDifferenceType::NO_DIFFERENCES,
+                                EPayloadDifferenceType::NONESSENTIAL_DIFFERENCES
+                            ]
+                        )
+                    ) {
+                        // no essential payload differences compared to the previous one, no need to send it now
+                        wdo(
+                            'no essential payload differences compared to the previous one, ' .
+                            'no need to send it now'
                         );
-                        if (0 == strcmp(json_encode($p1), json_encode($p2))) {
-                            unset($p1, $p2);
-                            // if the payload is equal to the previous one, no need to send it now
-                            wdo('if the payload is equal to the previous one, no need to send it now');
-                            return []; // no need to send
-                        }
+                        return []; // no need to send
                     }
 
                     $this->clientInfoContainer[$connResourceId]['prev_payload'] = $payload;
@@ -333,6 +351,41 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             }
         }
         return all($promises);
+    }
+
+    private function comparePayloads(array $p1, array $p2): EPayloadDifferenceType
+    {
+        // any state change is essential
+        if ($p1['tick']['state'] !== $p2['tick']['state']) {
+            return new EPayloadDifferenceType(EPayloadDifferenceType::ESSENTIAL_DIFFERENCES);
+        }
+
+        // remember for later
+        $eraTimeLeftDiff = abs($p1['tick']['era_timeleft'] - $p2['tick']['era_timeleft']);
+
+        // if there are any other changes then "time" fields, it is essential
+        unset(
+            $p1['prev_update_time'],
+            $p1['update_time'],
+            $p1['tick']['era_timeleft'],
+            $p2['prev_update_time'],
+            $p2['update_time'],
+            $p2['tick']['era_timeleft'],
+        );
+        if (0 != strcmp(json_encode($p1), json_encode($p2))) {
+            return new EPayloadDifferenceType(EPayloadDifferenceType::ESSENTIAL_DIFFERENCES);
+        }
+
+        // or if the difference in era_timeleft is larger than self::LATEST_CLIENT_UPDATE_SPEED
+        if ($eraTimeLeftDiff > self::LATEST_CLIENT_UPDATE_SPEED) {
+            return new EPayloadDifferenceType(EPayloadDifferenceType::ESSENTIAL_DIFFERENCES);
+        }
+
+        return $eraTimeLeftDiff < PHP_FLOAT_EPSILON ?
+            // note that prev_update_time and update_time are not part of the difference comparison
+            new EPayloadDifferenceType(EPayloadDifferenceType::NO_DIFFERENCES) :
+            // era time is different, but nonessential
+            new EPayloadDifferenceType(EPayloadDifferenceType::NONESSENTIAL_DIFFERENCES);
     }
 
     private function repeatedTickFunction(LoopInterface $loop): Closure
@@ -416,6 +469,17 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         $this->loop = $loop;
         $loop->futureTick($this->repeatedTickFunction($loop));
         $loop->futureTick($this->repeatedLatestFunction($loop));
+
+        // do a dummy SELECT 1 query every 4 hours to prevent the "wait_timeout" of mysql (Default is 8 hours).
+        //  if the wait timeout would go off, the database connection will be broken, and the error
+        //  "2006 MySQL server has gone away" will appear.
+        $loop->addPeriodicTimer(14400, function () {
+            $promises = [];
+            foreach ($this->gameInstances as $gameSessionId => $game) {
+                $promises[$gameSessionId] = $game->doDummyQuery();
+            }
+            assertFulfilled(all($promises));
+        });
     }
 
     /**
@@ -423,29 +487,33 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
      */
     private function getGame(int $gameSessionId): Game
     {
-        static $instances = [];
-        if (!array_key_exists($gameSessionId, $instances)) {
+        if (!array_key_exists($gameSessionId, $this->gameInstances)) {
             $game = new Game();
+            $game->setGameSessionId($gameSessionId);
             $game->setAsyncDatabase(
-                AsyncDatabase::createGameSessionConnection($this->loop, $gameSessionId),
+                AsyncDatabase::createGameSessionConnection($this->loop, $gameSessionId)
             );
 
             // do some PRE CACHING calls
             $game->GetWatchdogAddress(true);
             $game->LoadConfigFile();
 
-            $instances[$gameSessionId] = $game;
+            $this->gameInstances[$gameSessionId] = $game;
         }
-        return $instances[$gameSessionId];
+        return $this->gameInstances[$gameSessionId];
     }
 
     private function getSecurity(int $gameSessionId): Security
     {
-        static $instances = [];
-        if (!array_key_exists($gameSessionId, $instances)) {
-            $instances[$gameSessionId] = new Security();
+        if (!array_key_exists($gameSessionId, $this->securityInstances)) {
+            $security = new Security();
+            $security->setGameSessionId($gameSessionId);
+            $security->setAsyncDatabase(
+                AsyncDatabase::createGameSessionConnection($this->loop, $gameSessionId)
+            );
+            $this->securityInstances[$gameSessionId] = $security;
         }
-        return $instances[$gameSessionId];
+        return $this->securityInstances[$gameSessionId];
     }
 
     public function dispatch(object $event, ?string $eventName = null): object

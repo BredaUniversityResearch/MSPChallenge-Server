@@ -304,6 +304,7 @@ class GameSession extends Base
         //Notify the simulation that the game has been setup so we start the simulations.
         //This is needed because MEL needs to be run before the game to setup the initial fishing values.
         $game = new Game();
+        $game->setGameSessionId($this->getGameSessionId());
         $game->setAsyncDatabase($this->getAsyncDatabase());
         $watchdogSuccess = false;
         if (null !== $promise = $game->changeWatchdogState("SETUP")) {
@@ -371,6 +372,7 @@ class GameSession extends Base
     public function ArchiveGameSessionInternal(string $response_url): void
     {
         $game = new Game();
+        $game->setGameSessionId($this->getGameSessionId());
         $game->setAsyncDatabase($this->getAsyncDatabase());
         await($game->changeWatchdogState('end'));
         
@@ -386,7 +388,7 @@ class GameSession extends Base
             
             Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
             
-            self::RemoveDirectory(Store::GetRasterStoreFolder());
+            self::RemoveDirectory(Store::GetRasterStoreFolder($this->getGameSessionId()));
         }
     }
 
@@ -484,7 +486,7 @@ class GameSession extends Base
                 $zip->addFile($file, pathinfo($file, PATHINFO_BASENAME));
             }
         }
-        foreach (Store::GetRasterStoreFolderContents() as $rasterfile) {
+        foreach (Store::GetRasterStoreFolderContents($this->getGameSessionId()) as $rasterfile) {
             if (is_readable($rasterfile)) {
                 $pathName = pathinfo($rasterfile, PATHINFO_DIRNAME);
                 if (stripos($pathName, "archive") !== false) {
@@ -755,6 +757,7 @@ class GameSession extends Base
         $this->ResetWatchdogAddress($watchdog_address);
 
         $game = new Game();
+        $game->setGameSessionId($this->getGameSessionId());
         $game->setAsyncDatabase($this->getAsyncDatabase());
         await($game->changeWatchdogState("PAUSE")); // reloaded saves always start paused
         

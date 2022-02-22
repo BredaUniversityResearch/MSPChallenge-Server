@@ -8,6 +8,7 @@ use Drift\DBAL\Connection;
 use Exception;
 use React\EventLoop\Loop;
 use TypeError;
+use function Clue\React\Block\await;
 
 function IsFeatureFlagEnabled(string $featureName): bool
 {
@@ -25,6 +26,8 @@ class Base
     private bool $isValid = false;
     private array $allowed;
     private ?Connection $asyncDatabase = null;
+
+    private ?int $gameSessionId = null;
 
     /**
      * @throws Exception
@@ -49,7 +52,7 @@ class Base
     {
         if (null === $this->asyncDatabase) {
             // fail-safe: try to create an async database from current request information if there is no instance set.
-            if (GameSession::INVALID_SESSION_ID === $gameSessionId = GameSession::GetGameSessionIdForCurrentRequest()) {
+            if (GameSession::INVALID_SESSION_ID === $gameSessionId = $this->getGameSessionId()) {
                 throw new Exception('Missing required async database connection.');
             }
             $this->asyncDatabase = AsyncDatabase::createGameSessionConnection(Loop::get(), $gameSessionId);
@@ -326,5 +329,20 @@ class Base
             }
         }
         return false;
+    }
+
+    public function getGameSessionId(): int
+    {
+        // Use the game session that was "set" to this instance
+        if ($this->gameSessionId != null) {
+            return $this->gameSessionId;
+        }
+        // Otherwise, try to retrieve the game session id from the request
+        return GameSession::GetGameSessionIdForCurrentRequest();
+    }
+
+    public function setGameSessionId(?int $gameSessionId): void
+    {
+        $this->gameSessionId = $gameSessionId;
     }
 }

@@ -75,13 +75,13 @@ class Security extends Base
     {
         $token = null;
 
-        $requestToken = $this->GetCurrentRequestTokenDetails();
+        $requestToken = $this->getCurrentRequestTokenDetails();
         if ($requestToken != null) {
             if ($this->TokenHasAccess($requestToken, self::ACCESS_LEVEL_FLAG_FULL)) {
                 $token = $this->GenerateToken();
             } else {
                 if (!empty($expired_token)) {
-                    $expiredTokenDetails = $this->GetTokenDetails($expired_token);
+                    $expiredTokenDetails = $this->getTokenDetails($expired_token);
                     if ($expiredTokenDetails != null) {
                         $token = $this->GenerateToken($expiredTokenDetails['api_token_scope']);
                     }
@@ -206,13 +206,15 @@ class Security extends Base
                     ->andWhere('api_token_scope = ' . $qb->createPositionalParameter($accessLevel))
                     ->setMaxResults(1)
             )
-            ->then(function (Result $result) use ($deferred) {
-                $row = $result->fetchFirstRow();
-                $deferred->resolve($row['api_token_token'] ?? '');
-            })
-            ->otherwise(function () use ($deferred) {
-                $deferred->resolve('');
-            });
+            ->done(
+                function (Result $result) use ($deferred) {
+                    $row = $result->fetchFirstRow();
+                    $deferred->resolve($row['api_token_token'] ?? '');
+                },
+                function () use ($deferred) {
+                    $deferred->resolve('');
+                }
+            );
             return $deferred->promise();
         }
         return resolveOnFutureTick($deferred, '')->promise();
@@ -231,23 +233,21 @@ class Security extends Base
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetCurrentRequestTokenDetails(): ?array
+    private function getCurrentRequestTokenDetails(): ?array
     {
         $token = $this->FindAuthenticationHeaderValue();
         if ($token == null) {
             return null;
         }
-        return $this->GetTokenDetails($token);
+        return $this->getTokenDetails($token);
     }
 
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetTokenDetails(string $tokenValue): ?array
+    private function getTokenDetails(string $tokenValue): ?array
     {
-        $details = Database::GetInstance()->query(
+        $details = Database::GetInstance($this->getGameSessionId())->query(
             "SELECT api_token_scope, UNIX_TIMESTAMP(api_token_valid_until) as expiry_time,
             UNIX_TIMESTAMP(api_token_valid_until) - UNIX_TIMESTAMP(NOW()) as valid_time_remaining
             FROM api_token WHERE api_token_token = ?
@@ -287,7 +287,7 @@ class Security extends Base
         }
 
         $tokenDetails = null === $token ?
-            $this->GetCurrentRequestTokenDetails() : $this->GetTokenDetails($token);
+            $this->getCurrentRequestTokenDetails() : $this->getTokenDetails($token);
         if ($tokenDetails == null) {
             return false;
         }

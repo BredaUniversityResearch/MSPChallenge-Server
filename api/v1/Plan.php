@@ -479,6 +479,7 @@ class Plan extends Base
     {
         $dependentPlans = [];
         $energy = new Energy();
+        $energy->setGameSessionId($this->getGameSessionId());
         $energy->setAsyncDatabase($this->getAsyncDatabase());
         return $energy->findDependentEnergyPlans($planId, $dependentPlans)
             ->then(function () use ($planName, &$dependentPlans) {
@@ -1177,7 +1178,7 @@ class Plan extends Base
     public function ExportPlansToJson(int $session = 0): array
     {
         if ($session > 0) {
-            $_GET['session'] = $session;
+            $this->setGameSessionId($session);
         }
         $dataToReturn = [];
         $errors = [];

@@ -28,13 +28,18 @@ function assertFulfilled(PromiseInterface $promise, ?Closure $onFullfulled = nul
     $promise->done(
         $onFullfulled,
         function ($reason) {
+            // we are going to bail! no exception catches possible
+            assert_options(ASSERT_BAIL | ASSERT_ACTIVE);
             if (is_string($reason)) {
-                throw new \Exception($reason);
+                assert(false, $reason);
+                exit(1); // hard-exit, needed somehow.... ?
             }
             if ($reason instanceof \Throwable) {
-                throw $reason;
+                assert(false, $reason->getMessage());
+                exit(1); // hard-exit
             }
-            throw new \Exception('error, reason: ' . var_export($reason, true));
+            assert(false, 'error, reason: ' . print_r($reason, true));
+            exit(1); // hard-exit
         }
     );
 }

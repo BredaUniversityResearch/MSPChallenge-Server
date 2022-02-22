@@ -44,6 +44,14 @@ class Game extends Base
         parent::__construct($method, self::ALLOWED);
     }
 
+    public function doDummyQuery(): PromiseInterface
+    {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb->select('1')
+        );
+    }
+
     /**
      * @apiGroup Game
      * @throws Exception
@@ -128,7 +136,7 @@ class Game extends Base
     public function LoadConfigFile(string $filename = ''): string
     {
         if ($filename == "") {    //if there's no file given, use the one in the database
-            $data = Database::GetInstance()->query("SELECT game_configfile FROM game");
+            $data = Database::GetInstance($this->getGameSessionId())->query("SELECT game_configfile FROM game");
 
             $path = GameSession::CONFIG_DIRECTORY . $data[0]['game_configfile'];
         } else {
@@ -330,6 +338,7 @@ class Game extends Base
     public function Tick(bool $showDebug = false): PromiseInterface
     {
         $plan = new Plan();
+        $plan->setGameSessionId($this->getGameSessionId());
         $plan->setAsyncDatabase($this->getAsyncDatabase());
         // Plan tick first: to clean up plans
         return $plan->Tick()
@@ -428,21 +437,23 @@ class Game extends Base
         return $this->getGameDetailsAsync()
             ->then(function (array $postValues) {
                 $security = new Security();
+                $security->setGameSessionId($this->getGameSessionId());
                 $security->setAsyncDatabase($this->getAsyncDatabase());
                 return $security->getSpecialTokenAsync(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
                     ->then(function (string $token) use ($postValues) {
                         $postValues['token'] = $token;
-                        $postValues['session_id'] = GameSession::GetGameSessionIdForCurrentRequest();
+                        $postValues['session_id'] = $this->getGameSessionId();
                         $postValues['action'] = 'demoCheck';
                         $url = GameSession::GetServerManagerApiRoot().'editGameSession.php';
                         $browser = new MSPBrowser($url);
-                        return $browser->post(
-                            $url,
-                            [
+                        return $browser
+                            ->post(
+                                $url,
+                                [
                                 'Content-Type' => 'application/x-www-form-urlencoded'
-                            ],
-                            http_build_query($postValues)
-                        );
+                                ],
+                                http_build_query($postValues)
+                            );
                     });
             });
     }
@@ -682,6 +693,7 @@ class Game extends Base
 
                 //update all the plans which ticks the server.
                 $plan = new Plan();
+                $plan->setGameSessionId($this->getGameSessionId());
                 $plan->setAsyncDatabase($this->getAsyncDatabase());
                 return $plan->updateLayerState($currentMonth)
                     ->then(function () use ($currentMonth, $monthsDone, $state, $tick) {
@@ -798,7 +810,7 @@ class Game extends Base
             return $this->watchdog_address;
         }
 
-        $result = Database::GetInstance()->query(
+        $result = Database::GetInstance($this->getGameSessionId())->query(
             "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
         );
         if (count($result) > 0) {
@@ -906,9 +918,11 @@ class Game extends Base
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
                 $simulationsHelper = new Simulations();
+                $simulationsHelper->setGameSessionId($this->getGameSessionId());
                 $simulationsHelper->setAsyncDatabase($this->getAsyncDatabase());
                 $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
                 $security = new Security();
+                $security->setGameSessionId($this->getGameSessionId());
                 $security->setAsyncDatabase($this->getAsyncDatabase());
                 return $security->generateTokenAsync()
                     ->then(function (array $result) use (
@@ -961,6 +975,7 @@ class Game extends Base
             })
             ->then(function (ResponseInterface $response) {
                 $log = new Log();
+                $log->setGameSessionId($this->getGameSessionId());
                 $log->setAsyncDatabase($this->getAsyncDatabase());
 
                 $responseContent = $response->getBody()->getContents();
@@ -994,6 +1009,7 @@ class Game extends Base
             echo (microtime(true) - $newTime) . " elapsed after tick<br />";
         }
         $plan = new Plan();
+        $plan->setGameSessionId($this->getGameSessionId());
         $plan->setAsyncDatabase($this->getAsyncDatabase());
         return $plan->latestAsync($lastUpdateTime);
     }
@@ -1013,6 +1029,7 @@ class Game extends Base
         }
 
         $layer = new Layer();
+        $layer->setGameSessionId($this->getGameSessionId());
         $layer->setAsyncDatabase($this->getAsyncDatabase());
         $promises = [];
         foreach ($data['plan'] as $p) {
@@ -1047,6 +1064,7 @@ class Game extends Base
         unset($p);
 
         $plan = new Plan();
+        $plan->setGameSessionId($this->getGameSessionId());
         $plan->setAsyncDatabase($this->getAsyncDatabase());
         return $plan->getMessagesAsync(
             $lastUpdateTime
@@ -1066,6 +1084,7 @@ class Game extends Base
 
         //return any raster layers that need to be updated
         $layer = new Layer();
+        $layer->setGameSessionId($this->getGameSessionId());
         $layer->setAsyncDatabase($this->getAsyncDatabase());
         return $layer->latestRaster(
             $lastUpdateTime
@@ -1084,6 +1103,7 @@ class Game extends Base
         }
 
         $energy = new Energy();
+        $energy->setGameSessionId($this->getGameSessionId());
         $energy->setAsyncDatabase($this->getAsyncDatabase());
         return $energy->latest(
             $lastUpdateTime
@@ -1114,6 +1134,7 @@ class Game extends Base
         }
 
         $kpi = new Kpi();
+        $kpi->setGameSessionId($this->getGameSessionId());
         $kpi->setAsyncDatabase($this->getAsyncDatabase());
         return $kpi->latestAsync(
             $lastUpdateTime,
@@ -1136,6 +1157,7 @@ class Game extends Base
         }
 
         $warning = new Warning();
+        $warning->setGameSessionId($this->getGameSessionId());
         $warning->setAsyncDatabase($this->getAsyncDatabase());
         return $warning->latest(
             $lastUpdateTime
@@ -1156,6 +1178,7 @@ class Game extends Base
         }
 
         $objective = new Objective();
+        $objective->setGameSessionId($this->getGameSessionId());
         $objective->setAsyncDatabase($this->getAsyncDatabase());
         return $objective->latest(
             $lastUpdateTime
