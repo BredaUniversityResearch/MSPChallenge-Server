@@ -12,7 +12,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class WsServerConsoleHelper implements EventSubscriberInterface
 {
-    const WIDTH_RESERVED_CHARS_CLIENT = 11;
+    const WIDTH_RESERVED_CHARS_CLIENT = 17;
     const WIDTH_RESERVED_CHARS_TIME = 8;
     const WIDTH_RESERVED_CHARS_EVENT_NAME = 23;
     const WIDTH_RESERVED_CHARS_TABLE = 15;
@@ -166,8 +166,15 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             })
             ->implode("\n");
          $clientInfo = $this->wsServer->getClientInfo($clientId) ?? [];
+         $clientHeaders = $this->wsServer->getClientHeaders($clientId) ?? [];
          $this->tableInput[$clientId] = [
-            $clientId . ' t' . ($clientInfo['team_id'] ?? '') . ' u' . ($clientInfo['user'] ?? ''),
+             sprintf(
+                 '%1$04d g%2$02d t%3$02d u%4$03d',
+                 $clientId,
+                 $clientHeaders[WsServer::HEADER_GAME_SESSION_ID] ?? '',
+                 $clientInfo['team_id'] ?? '',
+                 $clientInfo['user'] ?? ''
+             ),
             date("H:i:s"),
             substr($eventName, 9), // removes the EVENT_ON_ prefix from event name
             $clientData

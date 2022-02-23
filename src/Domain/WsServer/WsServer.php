@@ -86,6 +86,14 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         $this->gameSessionId = $gameSessionId;
     }
 
+    public function getClientHeaders(int $clientResourceId): ?array
+    {
+        if (!array_key_exists($clientResourceId, $this->clientHeaders)) {
+            return null;
+        }
+        return $this->clientHeaders[$clientResourceId];
+    }
+
     public function getClientInfo(int $clientResourceId): ?array
     {
         if (!array_key_exists($clientResourceId, $this->clientInfoContainer)) {
