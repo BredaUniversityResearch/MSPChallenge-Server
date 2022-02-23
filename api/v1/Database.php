@@ -43,7 +43,7 @@ class Database
         $this->sessionId = ($overrideSessionId == GameSession::INVALID_SESSION_ID) ?
             GameSession::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
 
-        if (self::$instances[$this->sessionId] != null) {
+        if (isset(self::$instances[$this->sessionId])) {
             throw new Exception("Creation of multiple database instances for session: " . $this->sessionId);
         }
         self::$instances[$this->sessionId] = $this;
