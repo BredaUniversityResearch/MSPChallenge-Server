@@ -129,6 +129,19 @@
     "symfony/polyfill-php81": {
         "version": "v1.23.0"
     },
+    "symfony/routing": {
+        "version": "5.4",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "5.3",
+            "ref": "85de1d8ae45b284c3c84b668171d2615049e698f"
+        },
+        "files": [
+            "./config/packages/routing.yaml",
+            "./config/routes.yaml"
+        ]
+    },
     "symfony/runtime": {
         "version": "v5.4.0"
     },
