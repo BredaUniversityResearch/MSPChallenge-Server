@@ -22,15 +22,18 @@ class WsServerCommand extends Command
     protected static $defaultName = 'app:ws-server';
 
     private WsServer $wsServer;
+    private string $projectDir;
 
-    public function __construct(WsServer $wsServer)
+    public function __construct(WsServer $wsServer, string $projectDir)
     {
         $this->wsServer = $wsServer;
+        $this->projectDir = $projectDir;
         parent::__construct();
     }
 
     protected function configure(): void
     {
+        require($this->projectDir . '/ServerManager/config.php');
         $this
             ->setHelp('Run the websocket server for MSP Challenge')
             ->addOption(
@@ -38,7 +41,7 @@ class WsServerCommand extends Command
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'the server port to use',
-                '8080'
+                $GLOBALS['config']['ws_server']['port'] ?: 45001
             )
             ->addOption(
                 self::OPTION_GAME_SESSION_ID,

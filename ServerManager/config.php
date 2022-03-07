@@ -5,8 +5,10 @@ $codeBranch = '/';
 $GLOBALS['config'] = array(
     'ws_server' => [
         'scheme' => 'ws://',
-        'host' => 'localhost',
-        'port' => 8080,
+        // if "host" is not set, ServerManager::getInstance()->GetTranslatedServerURL() is used,
+        //   which is the same host as the api server.
+        // 'host' => 'localhost',
+        'port' => 45001,
         'uri' => '',
         'address_modification' => 'none' // none, add_game_session_id_to_port, add_game_session_id_to_uri
     ],

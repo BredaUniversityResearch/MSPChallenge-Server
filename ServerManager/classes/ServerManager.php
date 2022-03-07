@@ -241,7 +241,9 @@ class ServerManager extends Base
                     )
                 );
         }
-        return Config::get('ws_server/scheme') . Config::get('ws_server/host') . ':' . $port . $uri;
+        return Config::get('ws_server/scheme') .
+            (Config::get('ws_server/host') ?: ServerManager::getInstance()->GetTranslatedServerURL()) .
+            ':' . $port . $uri;
     }
 
     public function GetFullSelfAddress()
