@@ -15,9 +15,9 @@ PREV_COMMIT=\$1
 POST_COMMIT=\$2
 NOCOLOR='\e[0m]';
 REDCOLOR='\e[37;41m';
-COMPOSER_JSON_FILE="composer-symfony${VERSION}.json"
-if [[ -f \$COMPOSER_JSON_FILE ]]; then
-  DIFF=\`git diff --shortstat \$PREV_COMMIT..\$POST_COMMIT \$COMPOSER_JSON_FILE\`
+COMPOSER_LOCK_FILE="composer-symfony${VERSION}.lock"
+if [[ -f \$COMPOSER_LOCK_FILE ]]; then
+  DIFF=\`git diff --shortstat \$PREV_COMMIT..\$POST_COMMIT \$COMPOSER_LOCK_FILE\`
   if [[ \$DIFF != "" ]]; then
     echo -e "\$REDCCOLOR composer.lock has changed. You must run "bash install.sh"\$NOCOLOR"
   fi
