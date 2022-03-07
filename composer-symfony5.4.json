@@ -57,11 +57,13 @@
         },
         "post-install-cmd": [
             "@auto-scripts",
+	    "cghooks remove -f post-merge pre-push",
 	    "cghooks add --ignore-lock"
 	],
         "post-update-cmd": [
             "@auto-scripts",
-	    "cghooks update"
+	    "cghooks remove -f post-merge pre-push",
+	    "cghooks add --ignore-lock"
         ],
 	"cghooks": "vendor/bin/cghooks"
     },
