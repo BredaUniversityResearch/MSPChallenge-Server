@@ -95,3 +95,5 @@ symfony.lock
 
 # skip adminer/
 /adminer/
+cghooks.lock
+

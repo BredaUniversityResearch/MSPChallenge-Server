@@ -58,7 +58,7 @@
         "post-install-cmd": [
             "@auto-scripts",
 	    "cghooks add --ignore-lock"
-        ],
+	],
         "post-update-cmd": [
             "@auto-scripts",
 	    "cghooks update"
@@ -70,11 +70,7 @@
     },
     "extra": {
 	"hooks": {
-            "config": {
-                "stop-on-failure": ["pre-push"]
-	   },
-	   "post-merge": "bash install.sh",
-	   "pre-push": "bash test.sh"
+	   "post-merge": "bash install.sh"
 	},
         "symfony": {
             "allow-contrib": false,
