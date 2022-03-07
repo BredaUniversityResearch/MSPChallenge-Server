@@ -67,7 +67,12 @@
     },
     "extra": {
 	"hooks": {
-           "post-merge": "bash install.sh"
+            "config": {
+                "stop-on-failure": ["pre-push"]
+	   },
+	   "commit-msg": "grep -q '[A-Z]+-[0-9]+.*' $1",
+           "post-merge": "bash install.sh",
+	   "pre-push": "bash test.sh"
 	},
         "symfony": {
             "allow-contrib": false,
