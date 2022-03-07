@@ -56,22 +56,39 @@
             "cache:clear": "symfony-cmd"
         },
         "post-install-cmd": [
-            "@auto-scripts"
-        ],
+            "@auto-scripts",
+	    "cghooks remove -f post-merge pre-push",
+	    "cghooks add --ignore-lock"
+	],
         "post-update-cmd": [
-            "@auto-scripts"
-        ]
+            "@auto-scripts",
+	    "cghooks remove -f post-merge pre-push",
+	    "cghooks add --ignore-lock"
+        ],
+	"cghooks": "vendor/bin/cghooks"
     },
     "conflict": {
         "symfony/symfony": "*"
     },
     "extra": {
+	"hooks": {
+           "config": {
+               "stop-on-failure": ["pre-push"]
+	   },
+	   "post-merge": [
+               "bash install.sh"
+	   ],
+           "pre-push": [
+               "bash test.sh"
+	   ]
+        },
         "symfony": {
             "allow-contrib": false,
             "require": "5.4.*"
         }
     },
     "require-dev": {
+        "brainmaestro/composer-git-hooks": "^2.8",
         "symfony/stopwatch": "5.4.*",
         "symfony/web-profiler-bundle": "5.4.*"
     }

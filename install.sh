@@ -4,27 +4,6 @@
 export MSYS=winsymlinks:nativestrict
 VERSION_DEFAULT="5.4"
 
-setGitHooksPostsCheckout() {
-  VERSION=$1
-  if [[ -z $1 ]]; then
-    VERSION="$VERSION_DEFAULT"
-  fi
-  cat > .git/hooks/post-checkout <<- CONTENT
-#!/bin/bash
-PREV_COMMIT=\$1
-POST_COMMIT=\$2
-NOCOLOR='\e[0m]';
-REDCOLOR='\e[37;41m';
-COMPOSER_JSON_FILE="composer-symfony${VERSION}.json"
-if [[ -f \$COMPOSER_JSON_FILE ]]; then
-  DIFF=\`git diff --shortstat \$PREV_COMMIT..\$POST_COMMIT \$COMPOSER_JSON_FILE\`
-  if [[ \$DIFF != "" ]]; then
-    echo -e "\$REDCCOLOR composer.lock has changed. You must run "bash install.sh"\$NOCOLOR"
-  fi
-fi
-CONTENT
-}
-
 setSymfonyVersion() {
   VERSION=$1
   if [[ -z $1 ]]; then
@@ -76,7 +55,6 @@ setSymfonyVersion() {
   fi
 }
 
-setGitHooksPostsCheckout
 setSymfonyVersion "${@:1}"
 set -e
 
