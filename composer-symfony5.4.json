@@ -56,11 +56,14 @@
             "cache:clear": "symfony-cmd"
         },
         "post-install-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+	    "cghooks add --ignore-lock"
         ],
         "post-update-cmd": [
-            "@auto-scripts"
-        ]
+            "@auto-scripts",
+	    "cghooks update"
+        ],
+	"cghooks": "vendor/bin/cghooks"
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -70,8 +73,7 @@
             "config": {
                 "stop-on-failure": ["pre-push"]
 	   },
-	   "commit-msg": "grep -q '[A-Z]+-[0-9]+.*' $1",
-           "post-merge": "bash install.sh",
+	   "post-merge": "bash install.sh",
 	   "pre-push": "bash test.sh"
 	},
         "symfony": {
