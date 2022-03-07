@@ -70,8 +70,16 @@
     },
     "extra": {
 	"hooks": {
-	   "post-merge": "bash install.sh"
-	},
+           "config": {
+               "stop-on-failure": ["pre-push"]
+	   },
+	   "post-merge": [
+               "bash install.sh"
+	   ],
+           "pre-push": [
+               "bash test.sh"
+	   ]
+        },
         "symfony": {
             "allow-contrib": false,
             "require": "5.4.*"
