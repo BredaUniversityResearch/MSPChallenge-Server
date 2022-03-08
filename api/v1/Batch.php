@@ -86,7 +86,6 @@ class Batch extends Base
      *   (if non-empty) and payload which is the result of the call.
      * When failed this object contains failed_task_id which references the execution_task_id returned in the
      *   AddToBatch.
-     * @ForceTransaction
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
