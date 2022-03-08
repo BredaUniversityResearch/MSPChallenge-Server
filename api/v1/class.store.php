@@ -553,7 +553,7 @@ class Store extends Base
 	{
         if (IsFeatureFlagEnabled("auto_mspids_by_hash") && $subtractive === 0 && is_null($mspid))
         {
-           Log::LogDebug(" -> Auto-generating an MSP ID for a bit of geometry in layer " . $filename . " .");
+           Log::LogDebug(" -> Auto-generating an MSP ID for a bit of geometry in layer " . $layername . " .");
            $mspid = hash('fnv1a64', $layername.$geometry); // so many algos to choose from, but this one seemed to have low collision, reasonable speed, and simply availability to PHP in default installation
         }
 
