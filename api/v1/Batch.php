@@ -3,7 +3,6 @@
 namespace App\Domain\API\v1;
 
 use Exception;
-use Symfony\Component\VarDumper\Cloner\Data;
 
 class Batch extends Base
 {
@@ -105,10 +104,6 @@ class Batch extends Base
 			ORDER BY api_batch_task_group", array($batch_id));
         if (empty($data)) {
             throw new Exception("Tried to execute an empty batch");
-        }
-
-        if (empty($data)) {
-            return $batchResult;
         }
 
         Database::GetInstance()->DBStartTransaction();
