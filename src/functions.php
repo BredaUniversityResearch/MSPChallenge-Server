@@ -35,7 +35,7 @@ function assertFulfilled(PromiseInterface $promise, ?Closure $onFullfulled = nul
                 exit(1); // hard-exit, needed somehow.... ?
             }
             if ($reason instanceof \Throwable) {
-                assert(false, $reason->getMessage());
+                assert(false, $reason->getMessage() . PHP_EOL . $reason->getTraceAsString());
                 exit(1); // hard-exit
             }
             assert(false, 'error, reason: ' . print_r($reason, true));

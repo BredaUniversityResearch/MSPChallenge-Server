@@ -29,6 +29,7 @@ class Simulations extends Base
     {
         $result = array();
         $game = new Game();
+        $game->setGameSessionId($this->getGameSessionId());
         $config = $game->GetGameConfigValues();
         foreach (self::POSSIBLE_SIMULATIONS as $possibleSim) {
             if (array_key_exists($possibleSim, $config) && is_array($config[$possibleSim])) {

@@ -71,7 +71,7 @@ class Game extends Base
         }
 
         $outputFile = $outputDirectory."AutoDump_".date("Y-m-d_H-i").".sql";
-        Database::GetInstance()->CreateMspDatabaseDump($outputFile, false);
+        Database::GetInstance($this->getGameSessionId())->CreateMspDatabaseDump($outputFile, false);
     }
 
     /**
@@ -421,7 +421,7 @@ class Game extends Base
             }
         }
 
-        return $this->serverTickInternal($tickData['lastupdate'], $showDebug)
+        return $this->serverTickInternal($showDebug)
             ->otherwise(function (SilentFailException $e) {
                 // Handle the rejection, and don't propagate. This is like catch without a rethrow
                 return null;
@@ -567,35 +567,6 @@ class Game extends Base
     }
 
     /**
-     * @throws InvalidArgumentException
-     * @throws Exception
-     */
-    private function lockServerTickUpdate(float $lastUpdate): PromiseInterface
-    {
-        $deferred = new Deferred();
-        $this->getAsyncDatabase()
-            ->update(
-                'game',
-                [
-                    'game_is_running_update' => 0,
-                    'game_lastupdate' => $lastUpdate
-                ],
-                [
-                    'game_is_running_update' => 1,
-                    'game_lastupdate' => microtime(true)
-                ]
-            )
-            ->done(function (Result $result) use ($deferred) {
-                if ($result->getAffectedRows() == 0) {
-                    $deferred->reject();
-                    return;
-                }
-                $deferred->resolve();
-            });
-        return $deferred->promise();
-    }
-
-    /**
      * Updates time to the next month
      * @throws Exception
      */
@@ -614,7 +585,7 @@ class Game extends Base
             //Entire game is done.
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set('game_state', 'END')
+                    ->set('game_state', $qb->createPositionalParameter('END'))
             )
             ->then(function (/*Result $result*/) {
                 return $this->onGameStateUpdated('END');
@@ -625,7 +596,7 @@ class Game extends Base
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->set('game_planning_monthsdone', 0)
-                    ->set('game_state', 'SIMULATION')
+                    ->set('game_state', $qb->createPositionalParameter('SIMULATION'))
             )
             ->then(function (/*Result $result*/) {
                 return $this->onGameStateUpdated('SIMULATION');
@@ -638,10 +609,10 @@ class Game extends Base
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->set('game_planning_monthsdone', 0)
-                    ->set('game_state', 'PLAY')
+                    ->set('game_state', $qb->createPositionalParameter('PLAY'))
                     ->set('game_planning_realtime', $era_realtime[$era])
             )
-            ->then(function (/*Result $result*/) {
+            ->then(function (Result $result) {
                 return $this->onGameStateUpdated('PLAY');
             });
         } else {
@@ -652,64 +623,47 @@ class Game extends Base
     /**
      * @throws Exception
      */
-    private function serverTickInternal(float $lastUpdate, bool $showDebug): PromiseInterface
+    private function serverTickInternal(bool $showDebug): PromiseInterface
     {
-        return $this->lockServerTickUpdate($lastUpdate)
-            ->then(
-                function () use ($showDebug) {
-                    if ($showDebug) {
-                        self::Debug('Ticking server.');
-                    }
-                    return $this->getAsyncDatabase()->query(
-                        $this->getAsyncDatabase()->createQueryBuilder()
-                            ->select(
-                                'game_state as state',
-                                'game_currentmonth as month',
-                                'game_planning_gametime as era_gametime',
-                                'game_planning_realtime as era_realtime',
-                                'game_planning_era_realtime as planning_era_realtime',
-                                'game_planning_monthsdone as era_monthsdone',
-                                'game_eratime as era_time',
-                                'game_autosave_month_interval as autosave_interval_months'
-                            )
-                            ->from('game')
-                            ->setMaxResults(1)
-                    );
-                },
-                function () use ($showDebug) {
-                    $rejectReason = 'Update already in progress.';
-                    if ($showDebug) {
-                        self::Debug($rejectReason);
-                    }
-                    throw new SilentFailException($rejectReason);
-                }
-            )
-            ->then(function (Result $result) {
-                $tick = $result->fetchFirstRow();
-                $state = $tick['state'];
+        if ($showDebug) {
+            self::Debug('Ticking server.');
+        }
+        return $this->getAsyncDatabase()->query(
+            $this->getAsyncDatabase()->createQueryBuilder()
+                ->select(
+                    'game_state as state',
+                    'game_currentmonth as month',
+                    'game_planning_gametime as era_gametime',
+                    'game_planning_realtime as era_realtime',
+                    'game_planning_era_realtime as planning_era_realtime',
+                    'game_planning_monthsdone as era_monthsdone',
+                    'game_eratime as era_time',
+                    'game_autosave_month_interval as autosave_interval_months'
+                )
+                ->from('game')
+                ->setMaxResults(1)
+        )
+        ->then(function (Result $result) {
+            $tick = $result->fetchFirstRow();
+            $state = $tick['state'];
 
-                $monthsDone = $tick['era_monthsdone'] + 1;
-                $currentMonth = $tick['month'] + 1;
+            $monthsDone = $tick['era_monthsdone'] + 1;
+            $currentMonth = $tick['month'] + 1;
 
-                //update all the plans which ticks the server.
-                $plan = new Plan();
-                $plan->setGameSessionId($this->getGameSessionId());
-                $plan->setAsyncDatabase($this->getAsyncDatabase());
-                return $plan->updateLayerState($currentMonth)
-                    ->then(function () use ($currentMonth, $monthsDone, $state, $tick) {
-                        return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
-                    })
-                    ->then(function () use ($tick) {
-                        if (($tick['month'] % $tick['autosave_interval_months']) == 0) {
-                            $this->AutoSaveDatabase(); // this is async by default
-                        }
-                        return $this->getAsyncDatabase()->query(
-                            $this->getAsyncDatabase()->createQueryBuilder()
-                                ->update('game')
-                                ->set('game_is_running_update', 0)
-                        );
-                    });
-            });
+            //update all the plans which ticks the server.
+            $plan = new Plan();
+            $plan->setGameSessionId($this->getGameSessionId());
+            $plan->setAsyncDatabase($this->getAsyncDatabase());
+            return $plan->updateLayerState($currentMonth)
+                ->then(function () use ($currentMonth, $monthsDone, $state, $tick) {
+                    return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
+                })
+                ->then(function () use ($tick) {
+                    if (($tick['month'] % $tick['autosave_interval_months']) == 0) {
+                        $this->AutoSaveDatabase(); // this is async by default
+                    }
+                });
+        });
     }
 
     /**

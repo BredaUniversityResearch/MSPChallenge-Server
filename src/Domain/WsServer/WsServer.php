@@ -9,6 +9,7 @@ use App\Domain\Helper\Util;
 use Closure;
 use Exception;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Support\Collection;
 use PDOException;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
@@ -162,14 +163,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         unset($this->clientHeaders[$conn->resourceId]);
 
         // clean up latest ticks and instances by active game session ids.
-        $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
-            ->groupBy(
-                function ($value, $key) {
-                    return $this->clientHeaders[$key][WsServer::HEADER_GAME_SESSION_ID];
-                },
-                true
-            )
-            ->all();
+        $clientInfoPerSessionContainer = $this->getClientInfoPerSessionCollection()->all();
         $this->finishedTicksGameSessionIds = array_diff_key(
             $this->finishedTicksGameSessionIds,
             $clientInfoPerSessionContainer
@@ -189,11 +183,14 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     public function onError(ConnectionInterface $conn, Exception $e)
     {
         // detect PDOException, could also be a previous exception
-        while ($e !== null) {
+        while (true) {
             if ($e instanceof PDOException) {
                 throw $e; // let the Websocket server crash on database query errors.
             }
-            $e = $e->getPrevious();
+            if (null === $previous = $e->getPrevious()) {
+                break;
+            }
+            $e = $previous;
         }
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_ERROR, $conn->resourceId, [$e->getMessage()]));
         $conn->close();
@@ -230,28 +227,23 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     private function tick(): PromiseInterface
     {
         wdo('starting "tick"');
-        $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
-            ->groupBy(
-                function ($value, $key) {
-                    return $this->clientHeaders[$key][WsServer::HEADER_GAME_SESSION_ID];
-                },
-                true
-            );
+        $clientInfoPerSessionCollection = $this->getClientInfoPerSessionCollection();
         if ($this->gameSessionId != null) {
-            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($this->gameSessionId);
+            $clientInfoPerSessionCollection = $clientInfoPerSessionCollection->only($this->gameSessionId);
         }
         $timeStart = microtime(true);
 
         $promises = [];
-        foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
+        foreach ($clientInfoPerSessionCollection as $gameSessionId => $clientInfoContainer) {
             wdo('starting "tick" for game session: ' . $gameSessionId);
             $tickTimeStart = microtime(true);
-            $promises[$gameSessionId] = $this->getGame($gameSessionId)->Tick()->then(
-                function () use ($tickTimeStart, $gameSessionId) {
-                    $this->statsLoopRegister('tick', $gameSessionId, microtime(true) - $tickTimeStart);
-                    return $gameSessionId; // just to identify this tick
-                }
-            );
+            $promises[$gameSessionId] = $this->getGame($gameSessionId)->Tick(!empty($_ENV['WS_SERVER_DEBUG_OUTPUT']))
+                ->then(
+                    function () use ($tickTimeStart, $gameSessionId) {
+                        $this->statsLoopRegister('tick', $gameSessionId, microtime(true) - $tickTimeStart);
+                        return $gameSessionId; // just to identify this tick
+                    }
+                );
         }
 
         $timeElapsed = microtime(true) - $timeStart;
@@ -267,7 +259,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
             ->groupBy(
                 function ($value, $key) {
-                    return $this->clientHeaders[$key][WsServer::HEADER_GAME_SESSION_ID];
+                    return $this->clientHeaders[$key][self::HEADER_GAME_SESSION_ID];
                 },
                 true
             );
@@ -369,16 +361,18 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         }
 
         // remember for later
-        $eraTimeLeftDiff = abs($p1['tick']['era_timeleft'] - $p2['tick']['era_timeleft']);
+        $p1TickEraTimeleft = $p1['tick']['era_timeleft'] ?? 0;
+        $p2TickEraTimeleft = $p2['tick']['era_timeleft'] ?? 0;
+        $eraTimeLeftDiff = abs($p1TickEraTimeleft - $p2TickEraTimeleft);
 
         // if there are any other changes then "time" fields, it is essential
         unset(
             $p1['prev_update_time'],
             $p1['update_time'],
-            $p1['tick']['era_timeleft'],
+            $p1TickEraTimeleft,
             $p2['prev_update_time'],
             $p2['update_time'],
-            $p2['tick']['era_timeleft'],
+            $p2TickEraTimeleft
         );
         if (0 != strcmp(json_encode($p1), json_encode($p2))) {
             return new EPayloadDifferenceType(EPayloadDifferenceType::ESSENTIAL_DIFFERENCES);
@@ -530,5 +524,16 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             return parent::dispatch($event, $event->getEventName());
         }
         return parent::dispatch($event, $eventName);
+    }
+
+    private function getClientInfoPerSessionCollection(): Collection
+    {
+        return collect($this->clientInfoContainer)
+            ->groupBy(
+                function ($value, $key) {
+                    return $this->clientHeaders[$key][self::HEADER_GAME_SESSION_ID];
+                },
+                true
+            );
     }
 }
