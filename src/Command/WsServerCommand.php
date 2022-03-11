@@ -83,6 +83,13 @@ class WsServerCommand extends Command
             $input->getOption(self::OPTION_PORT)
         );
         $this->wsServer->registerLoop($server->loop);
+        sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
+            switch ($event) {
+                case PHP_WINDOWS_EVENT_CTRL_C:
+                    $server->loop->stop();
+                    break;
+            }
+        });
         $server->run();
 
         return Command::SUCCESS;
