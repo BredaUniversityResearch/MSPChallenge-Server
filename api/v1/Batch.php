@@ -105,7 +105,6 @@ class Batch extends Base
             throw new Exception("Tried to execute an empty batch");
         }
 
-        Database::GetInstance()->DBStartTransaction();
         foreach ($data as $task) {
             $endpoint = $task['api_batch_task_api_endpoint'];
             $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
@@ -134,7 +133,6 @@ class Batch extends Base
                 $cachedResults[$task['api_batch_task_reference_identifier']] = $taskResult["payload"];
             }
         }
-        Database::GetInstance()->DBCommitTransaction();
 
         return $batchResult;
     }
