@@ -99,3 +99,7 @@ symfony.lock
 # github hooks lock file
 cghooks.lock
 
+# Symfony CLI -- just run tools/install-tools.sh
+tools/Win/LICENSE
+tools/Win/README.md
+tools/Win/symfony.exe
