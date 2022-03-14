@@ -95,5 +95,7 @@ symfony.lock
 
 # skip adminer/
 /adminer/
+
+# github hooks lock file
 cghooks.lock
 
