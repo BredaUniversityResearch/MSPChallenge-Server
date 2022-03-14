@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../init.php';
+require __DIR__ . '/../init.php';
 
 $api = new API;
 $gameconfig = new GameConfig;
@@ -18,5 +18,3 @@ $api->setPayload(["gameconfig" => get_object_vars($gameconfig)]);
 $api->setPayload(["gameconfig_pretty" => $gameconfig->getPrettyVars()]);
 $api->setStatusSuccess();
 $api->Return();
-
-?>

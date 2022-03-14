@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../init.php';
+require __DIR__ . '/../init.php';
 
 $api = new API;
 $gamesave = new GameSave;
@@ -19,8 +19,7 @@ $allowed_actions = array(
     "processZip" // called by server API gamesession/CreateGameSessionZip and gamesession/CreateGameSessionLayersZip
 );
 $action = $_POST["action"] ?? "";
-if (method_exists($gamesave, $action) && in_array($action, $allowed_actions)) 
-{
+if (method_exists($gamesave, $action) && in_array($action, $allowed_actions)) {
     $api->setPayLoad([$action => $gamesave->$action()]);
 }
 
@@ -29,5 +28,3 @@ $gamesave->edit();
 $api->setPayLoad(["gamesave" => get_object_vars($gamesave)]);
 $api->setStatusSuccess();
 $api->Return();
-
-?>

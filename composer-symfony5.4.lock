@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3ecc7980c323395da8dbee0b65964601",
+    "content-hash": "583bc8f9b931a4358c4ac73a20f76641",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -305,16 +305,16 @@
         },
         {
             "name": "doctrine/dbal",
-            "version": "3.3.2",
+            "version": "3.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "35eae239ef515d55ebb24e9d4715cad09a4f58ed"
+                "reference": "82331b861727c15b1f457ef05a8729e508e7ead5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/35eae239ef515d55ebb24e9d4715cad09a4f58ed",
-                "reference": "35eae239ef515d55ebb24e9d4715cad09a4f58ed",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/82331b861727c15b1f457ef05a8729e508e7ead5",
+                "reference": "82331b861727c15b1f457ef05a8729e508e7ead5",
                 "shasum": ""
             },
             "require": {
@@ -329,14 +329,14 @@
             "require-dev": {
                 "doctrine/coding-standard": "9.0.0",
                 "jetbrains/phpstorm-stubs": "2021.1",
-                "phpstan/phpstan": "1.4.0",
+                "phpstan/phpstan": "1.4.6",
                 "phpstan/phpstan-strict-rules": "^1.1",
-                "phpunit/phpunit": "9.5.11",
+                "phpunit/phpunit": "9.5.16",
                 "psalm/plugin-phpunit": "0.16.1",
                 "squizlabs/php_codesniffer": "3.6.2",
                 "symfony/cache": "^5.2|^6.0",
                 "symfony/console": "^2.7|^3.0|^4.0|^5.0|^6.0",
-                "vimeo/psalm": "4.16.1"
+                "vimeo/psalm": "4.22.0"
             },
             "suggest": {
                 "symfony/console": "For helpful console commands such as SQL execution and import of files."
@@ -396,7 +396,7 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/dbal/issues",
-                "source": "https://github.com/doctrine/dbal/tree/3.3.2"
+                "source": "https://github.com/doctrine/dbal/tree/3.3.3"
             },
             "funding": [
                 {
@@ -412,7 +412,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-02-05T16:33:45+00:00"
+            "time": "2022-03-09T15:39:50+00:00"
         },
         {
             "name": "doctrine/deprecations",
@@ -709,6 +709,58 @@
             "time": "2020-11-24T22:02:12+00:00"
         },
         {
+            "name": "gasparesganga/php-shapefile",
+            "version": "v3.3.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/gasparesganga/php-shapefile.git",
+                "reference": "839475272ef8c7585f5afa31939c95d6d02371a6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/gasparesganga/php-shapefile/zipball/839475272ef8c7585f5afa31939c95d6d02371a6",
+                "reference": "839475272ef8c7585f5afa31939c95d6d02371a6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Shapefile\\": "src/Shapefile/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Gaspare Sganga",
+                    "email": "contact@gasparesganga.com",
+                    "homepage": "https://gasparesganga.com/labs/php-shapefile/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP library to read and write ESRI Shapefiles, compatible with WKT and GeoJSON",
+            "homepage": "https://gasparesganga.com/labs/php-shapefile/",
+            "keywords": [
+                "ESRI",
+                "Shapefile",
+                "dbf",
+                "geojson",
+                "shape",
+                "shp",
+                "wkt"
+            ],
+            "support": {
+                "issues": "https://github.com/gasparesganga/php-shapefile/issues",
+                "source": "https://github.com/gasparesganga/php-shapefile/tree/v3.3.3"
+            },
+            "time": "2020-09-17T08:22:36+00:00"
+        },
+        {
             "name": "guzzlehttp/psr7",
             "version": "2.1.0",
             "source": {
@@ -825,7 +877,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v8.83.3",
+            "version": "v8.83.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -879,7 +931,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v8.83.3",
+            "version": "v8.83.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -927,7 +979,7 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v8.83.3",
+            "version": "v8.83.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",

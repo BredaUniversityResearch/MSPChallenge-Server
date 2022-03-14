@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../init.php';
+require __DIR__ . '/../init.php';
 
 $api = new API;
 $gamesession = new GameSession;
@@ -10,12 +10,9 @@ $user = new User();
 $user->hastobeLoggedIn();
 
 $gamesession->id = $_POST["session_id"] ?? 0;
-if ($gamesession->id == 0 && isset($_FILES['uploadedSaveFile']['tmp_name']))
-{
+if ($gamesession->id == 0 && isset($_FILES['uploadedSaveFile']['tmp_name'])) {
     $gamesave->addFromUpload($_FILES['uploadedSaveFile']['tmp_name'] ?? '');
-}
-elseif ($gamesession->id > 0)
-{
+} elseif ($gamesession->id > 0) {
     $gamesession->get();
 
     $gameconfig->id = $gamesession->game_config_version_id;
@@ -32,7 +29,7 @@ elseif ($gamesession->id > 0)
     $gamesave->game_end_month = $gamesession->game_end_month;
     $gamesave->game_current_month = $gamesession->game_current_month;
     $gamesave->game_running_til_time = $gamesession->game_running_til_time;
-    $gamesave->password_admin = base64_encode($gamesession->password_admin); 
+    $gamesave->password_admin = base64_encode($gamesession->password_admin);
     $gamesave->password_player = base64_encode($gamesession->password_player);
     $gamesave->session_state = $gamesession->session_state;
     $gamesave->game_state = $gamesession->game_state;
@@ -48,15 +45,11 @@ elseif ($gamesession->id > 0)
     $gamesave->id = -1;
     $gamesave->add();
     
-    // then perform request for save zip 
+    // then perform request for save zip
     $gamesave->createZip($gamesession);
-}
-else
-{
+} else {
     throw new Exception("Confusing request, cannot continue.");
 }
 $api->setStatusSuccess();
 $api->setPayload(["gamesave" => get_object_vars($gamesave)]);
 $api->Return();
-
-?>

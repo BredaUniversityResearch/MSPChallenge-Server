@@ -12,6 +12,7 @@
         "clue/block-react": "^1.5",
         "clue/http-proxy-react": "^1.7",
         "drift/dbal": "^0.1.4",
+        "gasparesganga/php-shapefile": "3.3.3",
         "illuminate/collections": "^8.73.2",
         "react/http": "^1.5",
         "react/mysql": "^0.5.6",
@@ -57,30 +58,30 @@
         },
         "post-install-cmd": [
             "@auto-scripts",
-	    "cghooks remove -f post-merge pre-push",
-	    "cghooks add --ignore-lock"
-	],
+            "cghooks remove -f post-merge pre-push",
+            "cghooks add --ignore-lock"
+        ],
         "post-update-cmd": [
             "@auto-scripts",
-	    "cghooks remove -f post-merge pre-push",
-	    "cghooks add --ignore-lock"
+            "cghooks remove -f post-merge pre-push",
+            "cghooks add --ignore-lock"
         ],
-	"cghooks": "vendor/bin/cghooks"
+        "cghooks": "vendor/bin/cghooks"
     },
     "conflict": {
         "symfony/symfony": "*"
     },
     "extra": {
-	"hooks": {
+    "hooks": {
            "config": {
                "stop-on-failure": ["pre-push"]
-	   },
-	   "post-merge": [
+           },
+           "post-merge": [
                "bash install.sh"
-	   ],
+           ],
            "pre-push": [
                "bash test.sh"
-	   ]
+           ]
         },
         "symfony": {
             "allow-contrib": false,

@@ -23,27 +23,38 @@ ob_start();
 ?>
 
 <?php
-require_once __DIR__ . '/../init.php';
+require __DIR__ . '/../init.php';
 $user = new User();
 $servermanager = ServerManager::getInstance();
 
 //install the database tables and content
 
-if (!$user->isLoggedIn()) { die(); } 
-if (!$servermanager->freshinstall()) { die(); }
+if (!$user->isLoggedIn()) {
+    die();
+}
+if (!$servermanager->freshinstall()) {
+    die();
+}
 
 $db = DB::getInstance();
 require_once __DIR__ . '/../templates/header.php';
 
 if ($servermanager->install($user)) {
   //send it to the authoriser to store with successfully logged in user_id
-  $params = array("jwt" => Session::get("currentToken"), "server_id" => $servermanager->GetServerID(), "server_name" => $servermanager->GetServerName(), "audience" => $servermanager->GetBareHost());
-  $freshinstall = Base::callAuthoriser("freshinstalljwt.php", $params);
-  if ($freshinstall["success"]) {
-      //echo 'settings sent <br/>'; ?>
+    $params = array(
+            "jwt" => Session::get("currentToken"),
+        "server_id" => $servermanager->GetServerID(),
+        "server_name" => $servermanager->GetServerName(),
+        "audience" => $servermanager->GetBareHost()
+    );
+    $freshinstall = Base::callAuthoriser("freshinstalljwt.php", $params);
+    if ($freshinstall["success"]) {
+        // @codingStandardsIgnoreStart
+        //echo 'settings sent <br/>';
+        ?>
       <div id="page-wrapper">
-      	<div class="container">
-      		<div id="infobox"></div>
+        <div class="container">
+            <div id="infobox"></div>
           <h1>New installation</h1>
           <p>This is a new installation of the Server Manager application.</p>
           <p>You, <strong><?=$user->data()->username;?></strong>, are now the primary user of this Server Manager. This means that you can not only use this application,
@@ -53,10 +64,11 @@ if ($servermanager->install($user)) {
           <p>We also recommend you enter your computer's proper IP address or full-qualified domain name under Settings.</p>
         </div>
       </div>
-      <?php
-  }
-  else {
-    ?>
+        <?php
+        // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreStart
+    } else {
+        ?>
     <div id="page-wrapper">
       <div class="container">
         <div id="infobox"></div>
@@ -64,9 +76,12 @@ if ($servermanager->install($user)) {
         <p>Unfortunately, something went wrong. Please try again later or get in touch with us through <a href="http://community.mspchallenge.info">community.mspchallenge.info</a> to get support.</p>
       </div>
     </div>
-    <?php
-  }
+        <?php
+        // @codingStandardsIgnoreEnd
+    }
 }
 ?>
 <!-- footers -->
-<?php require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/footer.php'; // the final html footer copyright row + the external js calls ?>
+<?php
+// the final html footer copyright row + the external js calls ?>
+require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/footer.php';
