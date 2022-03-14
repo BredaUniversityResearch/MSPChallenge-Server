@@ -1,4 +1,8 @@
 #!/bin/bash
+
+CWD="$(pwd)"
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 function download() {
   curl -OLs https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
   curl -OLs https://phpmd.org/static/latest/phpmd.phar
@@ -20,5 +24,7 @@ function makeExecutables() {
   makeExecutable phpmd
 }
 
+cd "${SCRIPT_DIR}"
 download
 makeExecutables
+cd "${CWD}"

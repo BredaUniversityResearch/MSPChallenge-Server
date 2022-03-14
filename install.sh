@@ -64,5 +64,6 @@ fi
 
 "$COMPOSER_BINARY" install
 "$COMPOSER_BINARY" dump-autoload -o $COMPOSER_ARGS
+bash tools/install-tools.sh
 
 exit 0
