@@ -15,6 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class WsServerCommand extends Command
 {
     const OPTION_PORT = 'port';
+    const OPTION_ADDRESS = 'address';
     const OPTION_GAME_SESSION_ID = 'game-session-id';
     const OPTION_FIXED_TERMINAL_HEIGHT = 'fixed-terminal-height';
     const OPTION_TABLE_OUTPUT = 'table-output';
@@ -35,13 +36,20 @@ class WsServerCommand extends Command
     {
         require($this->projectDir . '/ServerManager/config.php');
         $this
-            ->setHelp('Run the websocket server for MSP Challenge')
+            ->setDescription('Run the websocket server for MSP Challenge')
             ->addOption(
                 self::OPTION_PORT,
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'the server port to use',
                 $GLOBALS['config']['ws_server']['port'] ?: 45001
+            )
+            ->addOption(
+                self::OPTION_ADDRESS,
+                'a',
+                InputOption::VALUE_REQUIRED,
+                'the server address to use',
+                '0.0.0.0'
             )
             ->addOption(
                 self::OPTION_GAME_SESSION_ID,
@@ -80,7 +88,8 @@ class WsServerCommand extends Command
 
         $server = IoServer::factory(
             new HttpServer(new \Ratchet\WebSocket\WsServer($this->wsServer)),
-            $input->getOption(self::OPTION_PORT)
+            $input->getOption(self::OPTION_PORT),
+            $input->getOption(self::OPTION_ADDRESS)
         );
         $this->wsServer->registerLoop($server->loop);
         sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
