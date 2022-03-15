@@ -83,5 +83,5 @@ if ($servermanager->install($user)) {
 ?>
 <!-- footers -->
 <?php
-// the final html footer copyright row + the external js calls ?>
+// the final html footer copyright row + the external js calls
 require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/footer.php';
