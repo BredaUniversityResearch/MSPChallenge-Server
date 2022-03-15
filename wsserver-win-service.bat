@@ -13,6 +13,8 @@ if "%~1"=="get" goto get
 if "%~1"=="logging_off" goto logging_off
 if "%~1"=="logging_on" goto logging_on
 if "%~1"=="" goto get
+if "%~1"=="firewall_add" goto firewall_add
+if "%~1"=="firewall_remove" goto firewall_remove
 goto default
 
 :install
@@ -26,7 +28,7 @@ IF %ERRORLEVEL% NEQ 0 (
 goto get
 
 :blank
-echo Argument 1 must be either: remove/install/stop/start/restart/status/get/logging_on/logging_off
+echo Argument 1 must be either: remove/install/stop/start/restart/status/get/logging_on/logging_off/firewall_add/firewall_remove
 echo Followed by any additional parameter supported by the command
 goto eof
 
@@ -63,6 +65,14 @@ echo AppParameters:
 %exe% get %service% AppParameters
 echo Log path is:
 %exe% get %service% AppStdout
+goto eof
+
+:firewall_add
+netsh advfirewall firewall add rule name="MSP Websocket server" dir=in action=allow protocol=TCP localport=45001
+goto eof
+
+:firewall_remove
+netsh advfirewall firewall delete rule name="MSP Websocket server"
 goto eof
 
 :eof
