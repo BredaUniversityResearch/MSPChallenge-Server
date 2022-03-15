@@ -25,6 +25,7 @@ IF %ERRORLEVEL% NEQ 0 (
 %exe% set %service% AppDirectory %~dp0
 %exe% restart %service%
 %exe% status %service%
+call :FirewallAddRule
 goto get
 
 :blank
@@ -39,6 +40,7 @@ goto eof
 :remove
 %exe% stop %service%
 %exe% remove %service% confirm
+call :FirewallRemoveRule
 goto eof
 
 :logging_on
@@ -56,6 +58,14 @@ goto get
 %exe% status %service%
 goto get
 
+:firewall_add
+call :FirewallAddRule
+goto eof
+
+:firewall_remove
+call :FirewallRemoveRule
+goto eof
+
 :get
 echo AppDirectory:
 %exe% get %service% AppDirectory
@@ -67,17 +77,19 @@ echo Log path is:
 %exe% get %service% AppStdout
 goto eof
 
-:firewall_add
-netsh advfirewall firewall add rule name="MSP Websocket server" dir=in action=allow protocol=TCP localport=45001
-goto eof
-
-:firewall_remove
-netsh advfirewall firewall delete rule name="MSP Websocket server"
-goto eof
-
 :eof
 endlocal
 IF %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
 )
 exit /b 0
+
+rem ======= all funtions below =======
+:FirewallAddRule
+netsh advfirewall firewall add rule name="MSP Websocket server" dir=in action=allow protocol=TCP localport=45001
+exit /b 0
+
+:FirewallRemoveRule
+netsh advfirewall firewall delete rule name="MSP Websocket server"
+exit /b 0
+
