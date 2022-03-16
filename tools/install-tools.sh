@@ -36,6 +36,7 @@ function makeExecutable() {
 SCRIPT_DIR="\$( cd -- "\$( dirname -- "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 php "\${SCRIPT_DIR}/$1.phar" "\$@"
 CONTENT
+  chmod u+x "$1"
 }
 
 function makeExecutables() {
