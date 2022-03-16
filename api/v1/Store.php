@@ -93,7 +93,7 @@ class Store extends Base
         // this is a generator function - notice the use of yield to save up on memory use
         try {
             $dirIterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator(Store::GetRasterStoreFolder($gameSessionId))
+                new RecursiveDirectoryIterator(self::GetRasterStoreFolder($gameSessionId))
             );
         } catch (Exception $e) {
             $dirIterator = array();
