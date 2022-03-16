@@ -33,6 +33,7 @@ ServerManager/logout.php
 ServerManager/manager.php
 "
 
+bash ./tools/install-tools.sh
 for p in $PATHS
 do
   if [[ "$1" == "--fix" ]]; then

@@ -100,12 +100,6 @@ symfony.lock
 cghooks.lock
 
 # Tools incl. Symfony CLI -- just run tools/install-tools.sh
-tools/phpcbf
-tools/phpcbf.phar
-tools/phpcs
-tools/phpcs.phar
-tools/phpmd
-tools/phpmd.phar
-tools/Win/LICENSE
-tools/Win/README.md
-tools/Win/symfony.exe
+/tools/
+!/tools/install-tools.sh
+!/tools/Win/nssm/

@@ -3,8 +3,8 @@ setlocal
 
 set service=MSPWsServer
 reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
-set exe=tools\Win\nssm-win64.exe
-if %OS%==32BIT set exe=tools\Win\nssm-win32.exe
+set exe=tools\Win\nssm\nssm-win64.exe
+if %OS%==32BIT set exe=tools\Win\nssm\nssm-win32.exe
 
 if "%~1"=="" goto blank
 if "%~1"=="install" goto install
