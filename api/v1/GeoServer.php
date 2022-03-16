@@ -89,6 +89,7 @@ class GeoServer extends Base
         );
 
         try {
+            Log::LogInfo("Calling geoserver: ".$this->baseurl.$url);
             $result = $this->CallBack(
                 $this->baseurl . $url,
                 array(),                // no content to send

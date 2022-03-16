@@ -415,7 +415,8 @@ class Layer extends Base
             "layer_raster_color_interpolation",
             "layer_raster_filter_mode",
             "approval",
-            "layer_download_from_geoserver"
+            "layer_download_from_geoserver",
+            "layer_property_as_type"
         );
 
         $inserts = "";
@@ -770,6 +771,24 @@ class Layer extends Base
                 ->where('layer_geotype = ' . $qb->createPositionalParameter('raster'))
                 ->andWhere('layer_lastupdate > ' . $qb->createPositionalParameter($time))
         );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getExportLayerDescriptions(
+        string $workspace,
+        string $layer
+    ): array {
+        $response = $this->geoserver->ows($workspace . "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers=" . urlencode($workspace) . ":" . urlencode($layer) . "&outputFormat=application/json");
+        $data = json_decode($response, true, 512, JSON_BIGINT_AS_STRING);
+        if (json_last_error() != JSON_ERROR_NONE)
+        {
+            $data = [];
+            $data["layerDescriptions"] = [];
+            $data["error"] = "Failed to decode JSON response from Geoserver. Error: ".json_last_error_msg().". Response: ".PHP_EOL.$response;
+        }
+        return $data;
     }
 
     /**

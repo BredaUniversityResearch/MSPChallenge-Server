@@ -164,8 +164,16 @@ class Store extends Base
             if (!array_key_exists("layer_download_from_geoserver", $layerMetaData) ||
                 $layerMetaData["layer_download_from_geoserver"] == true
             ) {
-                $json = $layer->GetExport($region, $filename, "JSON");
-                $this->LoadJSON($json, $filename, $region);
+                $layerDescriptionRequest = $layer->getExportLayerDescriptions($region, $filename);
+                if (isset($layerDescriptionRequest["error"]))
+                {
+                    Log::LogError($layerDescriptionRequest["error"]);
+                }
+                foreach ($layerDescriptionRequest["layerDescriptions"] as $individualLayer) {
+                    $json = $layer->GetExport($region, $individualLayer["layerName"], "JSON", [], null);
+                    $this->LoadJSON($json, $filename, $region, $layerMetaData);
+                }
+
             } else {
                 // Create the metadata for the vector layer, but don't fill the geometry table.
                 //   This will be up to the players.
@@ -315,37 +323,45 @@ class Store extends Base
     }
 
     private function moveDataFromArray(
-        array &$arr,
-        string &$type,
+        array $layerMetaData,
+        array &$featureProperties,
+        int &$type,
         ?int &$mspId,
-        int &$missingMspIds,
-        int &$countryId
+        ?int &$countryId
     ): void {
-        $type = '0';
-        if (isset($arr['type'])) {
-            $type = str_replace(' ', '', $arr['type']);
-            unset($arr['type']);
 
-            if ($type == "") {
-                $type = '0';
+        if (array_key_exists("layer_property_as_type", $layerMetaData) && !empty($layerMetaData["layer_property_as_type"])) {
+            // check if the layer_property_as_type value exists in $featureProperties
+            if (key_exists($layerMetaData["layer_property_as_type"], $featureProperties)) {
+                $type = '-1';
+                // translate the found $featureProperties value to the type integer using the layer_type > value definition in $layerMetaData
+                foreach ($layerMetaData["layer_type"] as $key => $layerTypeMetaData) {
+                    // identify the 'other' category
+                    if (strtolower($layerTypeMetaData["value"]) == "other") {
+                        $keyOther = $key;
+                    }
+                    if ($layerTypeMetaData["value"] == $featureProperties[$layerMetaData["layer_property_as_type"]]) {
+                        $type = $key;
+                        break;
+                    }
+                }
+                if ($type == -1) {
+                    $type = $keyOther ?? 0;
+                }
             }
+        } else if (isset($featureProperties['type']) && is_numeric($featureProperties['type'])) {
+            $type = intval($featureProperties['type']);
+            unset($featureProperties['type']);
         }
 
-        $mspId = null;
-        if (isset($arr['mspid'])) {
-            $mspId = $arr['mspid'];
-            unset($arr['mspid']);
-        } else {
-            $missingMspIds++;
+        if (isset($featureProperties['mspid']) && is_numeric($featureProperties['mspid']) && intval($featureProperties['mspid']) !== 0) {
+            $mspId = intval($featureProperties['mspid']);
+            unset($featureProperties['mspid']);
         }
 
-        $countryId = null;
-        if (isset($arr['country_id'])) {
-            $countryId = intval($arr['country_id']);
-            if (!is_int($countryId) || $countryId === 0) {
-                $countryId = null;
-            }
-            unset($arr['country_id']);
+        if (isset($featureProperties['country_id']) && is_numeric($featureProperties['country_id']) && intval($featureProperties['country_id']) !== 0) {
+            $countryId = intval($featureProperties['country_id']);
+            unset($featureProperties['country_id']);
         }
     }
 
@@ -394,7 +410,7 @@ class Store extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function LoadJSON(string $jsonString, string $filename, string $dataStore): void
+    private function LoadJSON(string $jsonString, string $filename, string $dataStore, array $layerMetaData): void
     {
         $data = json_decode($jsonString, true, 512, JSON_BIGINT_AS_STRING);
         if (json_last_error() != JSON_ERROR_NONE) {
@@ -404,58 +420,64 @@ class Store extends Base
             );
         }
 
-        $layerId = -1;
-        $mspId = null;
-        $missingMspIds = 0;
-
         foreach ($data["features"] as $feature) {
-            if ($feature["geometry_name"] == "the_geom") {
-                $featureProperties = $feature["properties"];
+            $featureProperties = $feature["properties"];
 
-                $type = '0';
-                $countryId = 0;
-                $this->moveDataFromArray($featureProperties, $type, $mspId, $missingMspIds, $countryId);
+            $type = '0';
+            $mspId = null;
+            $countryId = null;
+            $this->moveDataFromArray($layerMetaData, $featureProperties, $type, $mspId, $countryId);
 
-                $geometryData = $feature["geometry"];
-                if ($geometryData == null) {
-                    Log::LogWarning(
-                        "Could not import geometry with id ".$feature["id"]." of layer ".$filename.
-                        ". The feature in question has NULL geometry. Here's some property information to help find ".
-                        "the feature: MSP ID: ".$mspId." - ".substr(var_export($featureProperties, true), 0, 80)
-                    );
-                    continue;
-                }
+            $geometryData = $feature["geometry"];
+            if ($geometryData == null) {
+                Log::LogWarning(
+                    "Could not import geometry with id ".$feature["id"]." of layer ".$filename.
+                    ". The feature in question has NULL geometry. Here's some property information to help find ".
+                    "the feature: MSP ID: ".$mspId." - ".substr(var_export($featureProperties, true), 0, 80)
+                );
+                continue;
+            }
 
-                if ($layerId === -1) {
-                    // First geometry type defines layer type. Would like to pull this out but we need to find the first
-                    //   "the_geom" instance.
-                    $layerId = Database::GetInstance()->query(
-                        "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
-                        array($filename, $geometryData["type"], $dataStore),
-                        true
-                    );
-                }
-    
-                $encodedFeatureData = json_encode($featureProperties);
-                if (strcasecmp($geometryData["type"], "MultiPolygon") == 0) {
-                    foreach ($geometryData["coordinates"] as $multi) {
-                        if (!is_array($multi)) {
-                            continue;
-                        }
-                        $this->insertMultiPolygon(
-                            $multi,
-                            $layerId,
-                            $encodedFeatureData,
-                            $countryId,
-                            $type,
-                            $mspId,
-                            $filename
-                        );
+            $layerId = $this->getLayerId($filename, $geometryData["type"], $dataStore);
+
+            // let's make sure we are always working with multidata: multipolygon, multilinestring, multipoint
+            if ($geometryData["type"] == "Polygon" || $geometryData["type"] == "LineString" ||  $geometryData["type"] == "Point") {
+                $geometryData["coordinates"] = [$geometryData["coordinates"]];
+                $geometryData["type"] = "Multi".$geometryData["type"];
+            }
+
+            $encodedFeatureData = json_encode($featureProperties);
+            if (strcasecmp($geometryData["type"], "MultiPolygon") == 0) {
+                foreach ($geometryData["coordinates"] as $multi) {
+                    if (!is_array($multi)) {
+                        continue;
                     }
-                } elseif (strcasecmp($geometryData["type"], "Point") == 0) {
+                    $this->insertMultiPolygon(
+                        $multi,
+                        $layerId,
+                        $encodedFeatureData,
+                        $countryId,
+                        $type,
+                        $mspId,
+                        $filename
+                    );
+                }
+            } elseif (strcasecmp($geometryData["type"], "MultiPoint") == 0) {
+                $this->InsertGeometry(
+                    $layerId,
+                    json_encode($geometryData["coordinates"]),
+                    $encodedFeatureData,
+                    $countryId,
+                    $type,
+                    $mspId,
+                    0,
+                    $filename
+                );
+            } elseif (strcasecmp($geometryData["type"], "MultiLineString") == 0) {
+                foreach ($geometryData["coordinates"] as $line) {
                     $this->InsertGeometry(
                         $layerId,
-                        json_encode(array($geometryData["coordinates"])),
+                        json_encode($line),
                         $encodedFeatureData,
                         $countryId,
                         $type,
@@ -463,26 +485,29 @@ class Store extends Base
                         0,
                         $filename
                     );
-                } elseif (strcasecmp($geometryData["type"], "MultiLineString") == 0) {
-                    foreach ($geometryData["coordinates"] as $line) {
-                        $this->InsertGeometry(
-                            $layerId,
-                            json_encode($line),
-                            $encodedFeatureData,
-                            $countryId,
-                            $type,
-                            $mspId,
-                            0,
-                            $filename
-                        );
-                    }
-                } else {
-                    throw new Exception(
-                        "Encountered unknown feature type ".$geometryData["type"]." in layer ".$filename
-                    );
                 }
+            } else {
+                throw new Exception(
+                    "Encountered unknown feature type ".$geometryData["type"]." in layer ".$filename
+                );
             }
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getLayerId(
+        string $layerName,
+        string $layerGeoType,
+        string $layerGroup
+    ): int {
+        $checkExists = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name = ?", array($layerName));
+        if (!empty($checkExists) && isset($checkExists[0]["layer_id"]))
+        {
+            return $checkExists[0]["layer_id"];
+        }
+        return Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)", array($layerName, $layerGeoType, $layerGroup), true);
     }
 
     /**
