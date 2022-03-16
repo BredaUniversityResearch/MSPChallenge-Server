@@ -1,0 +1,17 @@
+index:
+    path: /
+    controller: App\Controller\ServerManager\LegacyController
+    defaults:
+      script: 'index.php'
+
+script:
+    path: /{script}
+    controller: App\Controller\ServerManager\LegacyController
+    requirements:
+        script: '.+\.php'
+
+not_found:
+  path: '/{anything}'
+  controller: App\Controller\ServerManager\LegacyController::notFound
+  requirements:
+    anything: '.*'

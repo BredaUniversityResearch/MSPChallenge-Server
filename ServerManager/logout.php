@@ -1,10 +1,10 @@
 <?php
-
-require_once 'init.php';
+require 'init.php';
 $user = new User();
 $user->logout();
 
 require_once 'templates/header.php';
+// @codingStandardsIgnoreStart
 ?>
 <div id="page-wrapper">
   <div class="container">
@@ -13,10 +13,7 @@ require_once 'templates/header.php';
     <p>You have logged out and are being redirected. <a href="https://auth.mspchallenge.info/users/logout.php">Click here</a> if nothing happens.</p>
   </div>
 </div>
-
-<?php require_once 'templates/footer.php'; // the final html footer copyright row + the external js calls 
-
-
+<?php
+// @codingStandardsIgnoreEnd
+require_once 'templates/footer.php'; // the final html footer copyright row + the external js calls
 Redirect::to('https://auth.mspchallenge.info/users/logout.php');
-
-?>

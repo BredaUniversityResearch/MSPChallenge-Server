@@ -1,5 +1,5 @@
-<?php 
-require_once '../init.php';
+<?php
+require __DIR__ . '/../init.php';
 $api = new API;
 $user = new User();
 
@@ -12,11 +12,11 @@ if (empty($_POST['token'])) {
 
 // check the old token and get the new token in one go
 $checkoldgetnew = Base::callAuthoriser(
-    'checkjwt.php', 
+    'checkjwt.php',
     array(
         "jwt" => $_POST['token'],
         "audience" => ServerManager::getInstance()->GetBareHost()
-    ) 
+    )
 );
 
 // if old accepted and new returned
@@ -29,8 +29,3 @@ if ($checkoldgetnew["success"] && !empty($checkoldgetnew["jwt"])) {
 
 $api->setMessage('Did not obtain new token.');
 $api->Return();
-
-
-
-
-?>
