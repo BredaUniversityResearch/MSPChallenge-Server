@@ -332,7 +332,7 @@ class Store extends Base
 
         if (array_key_exists("layer_property_as_type", $layerMetaData) && !empty($layerMetaData["layer_property_as_type"])) {
             // check if the layer_property_as_type value exists in $featureProperties
-            if (key_exists($layerMetaData["layer_property_as_type"], $featureProperties)) {
+            if (array_key_exists($layerMetaData["layer_property_as_type"], $featureProperties)) {
                 $type = '-1';
                 // translate the found $featureProperties value to the type integer using the layer_type > value definition in $layerMetaData
                 foreach ($layerMetaData["layer_type"] as $key => $layerTypeMetaData) {
