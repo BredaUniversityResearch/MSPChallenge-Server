@@ -328,11 +328,13 @@ class Store extends Base
         ?int &$countryId
     ): void {
 
-        if (array_key_exists("layer_property_as_type", $layerMetaData) && !empty($layerMetaData["layer_property_as_type"])) {
+        if (array_key_exists("layer_property_as_type", $layerMetaData)
+            && !empty($layerMetaData["layer_property_as_type"])
+        ) {
             // check if the layer_property_as_type value exists in $featureProperties
             if (array_key_exists($layerMetaData["layer_property_as_type"], $featureProperties)) {
                 $type = '-1';
-                // translate the found $featureProperties value to the type integer using the layer_type > value definition in $layerMetaData
+                // translate the found $featureProperties value to the type integer
                 foreach ($layerMetaData["layer_type"] as $key => $layerTypeMetaData) {
                     // identify the 'other' category
                     if (strtolower($layerTypeMetaData["value"]) == "other") {
@@ -347,17 +349,25 @@ class Store extends Base
                     $type = $keyOther ?? 0;
                 }
             }
-        } elseif (isset($featureProperties['type']) && is_numeric($featureProperties['type'])) {
+        } elseif (isset($featureProperties['type'])
+            && is_numeric($featureProperties['type'])
+        ) {
             $type = intval($featureProperties['type']);
             unset($featureProperties['type']);
         }
 
-        if (isset($featureProperties['mspid']) && is_numeric($featureProperties['mspid']) && intval($featureProperties['mspid']) !== 0) {
+        if (isset($featureProperties['mspid'])
+            && is_numeric($featureProperties['mspid'])
+            && intval($featureProperties['mspid']) !== 0
+        ) {
             $mspId = intval($featureProperties['mspid']);
             unset($featureProperties['mspid']);
         }
 
-        if (isset($featureProperties['country_id']) && is_numeric($featureProperties['country_id']) && intval($featureProperties['country_id']) !== 0) {
+        if (isset($featureProperties['country_id'])
+            && is_numeric($featureProperties['country_id'])
+            && intval($featureProperties['country_id']) !== 0
+        ) {
             $countryId = intval($featureProperties['country_id']);
             unset($featureProperties['country_id']);
         }
@@ -439,7 +449,10 @@ class Store extends Base
             $layerId = $this->getLayerId($filename, $geometryData["type"], $dataStore);
 
             // let's make sure we are always working with multidata: multipolygon, multilinestring, multipoint
-            if ($geometryData["type"] == "Polygon" || $geometryData["type"] == "LineString" ||  $geometryData["type"] == "Point") {
+            if ($geometryData["type"] == "Polygon"
+                || $geometryData["type"] == "LineString"
+                ||  $geometryData["type"] == "Point"
+            ) {
                 $geometryData["coordinates"] = [$geometryData["coordinates"]];
                 $geometryData["type"] = "Multi".$geometryData["type"];
             }
@@ -500,11 +513,18 @@ class Store extends Base
         string $layerGeoType,
         string $layerGroup
     ): int {
-        $checkExists = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name = ?", array($layerName));
+        $checkExists = Database::GetInstance()->query(
+            "SELECT layer_id FROM layer WHERE layer_name = ?",
+            array($layerName)
+        );
         if (!empty($checkExists) && isset($checkExists[0]["layer_id"])) {
             return $checkExists[0]["layer_id"];
         }
-        return Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)", array($layerName, $layerGeoType, $layerGroup), true);
+        return Database::GetInstance()->query(
+            "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
+            array($layerName, $layerGeoType, $layerGroup),
+            true
+        );
     }
 
     /**
