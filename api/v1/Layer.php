@@ -782,8 +782,7 @@ class Layer extends Base
     ): array {
         $response = $this->geoserver->ows($workspace . "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers=" . urlencode($workspace) . ":" . urlencode($layer) . "&outputFormat=application/json");
         $data = json_decode($response, true, 512, JSON_BIGINT_AS_STRING);
-        if (json_last_error() != JSON_ERROR_NONE)
-        {
+        if (json_last_error() != JSON_ERROR_NONE) {
             $data = [];
             $data["layerDescriptions"] = [];
             $data["error"] = "Failed to decode JSON response from Geoserver. Error: ".json_last_error_msg().". Response: ".PHP_EOL.$response;

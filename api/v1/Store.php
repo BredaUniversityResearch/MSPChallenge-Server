@@ -165,15 +165,13 @@ class Store extends Base
                 $layerMetaData["layer_download_from_geoserver"] == true
             ) {
                 $layerDescriptionRequest = $layer->getExportLayerDescriptions($region, $filename);
-                if (isset($layerDescriptionRequest["error"]))
-                {
+                if (isset($layerDescriptionRequest["error"])) {
                     Log::LogError($layerDescriptionRequest["error"]);
                 }
                 foreach ($layerDescriptionRequest["layerDescriptions"] as $individualLayer) {
                     $json = $layer->GetExport($region, $individualLayer["layerName"], "JSON", [], null);
                     $this->LoadJSON($json, $filename, $region, $layerMetaData);
                 }
-
             } else {
                 // Create the metadata for the vector layer, but don't fill the geometry table.
                 //   This will be up to the players.
@@ -349,7 +347,7 @@ class Store extends Base
                     $type = $keyOther ?? 0;
                 }
             }
-        } else if (isset($featureProperties['type']) && is_numeric($featureProperties['type'])) {
+        } elseif (isset($featureProperties['type']) && is_numeric($featureProperties['type'])) {
             $type = intval($featureProperties['type']);
             unset($featureProperties['type']);
         }
@@ -503,8 +501,7 @@ class Store extends Base
         string $layerGroup
     ): int {
         $checkExists = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name = ?", array($layerName));
-        if (!empty($checkExists) && isset($checkExists[0]["layer_id"]))
-        {
+        if (!empty($checkExists) && isset($checkExists[0]["layer_id"])) {
             return $checkExists[0]["layer_id"];
         }
         return Database::GetInstance()->query("INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)", array($layerName, $layerGeoType, $layerGroup), true);
