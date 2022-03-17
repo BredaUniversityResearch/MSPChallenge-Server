@@ -1,3 +1,3 @@
 <?php
 
-require "browseGameSession.php";
+require_once "browseGameSession.php";

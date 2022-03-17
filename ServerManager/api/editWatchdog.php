@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../init.php';
+require_once '../init.php'; 
 
 $api = new API;
 $watchdog = new Watchdog;
@@ -19,3 +19,5 @@ $watchdog->edit();
 $api->setPayLoad(["watchdog" => get_object_vars($watchdog)]);
 $api->setStatusSuccess();
 $api->Return();
+
+?>

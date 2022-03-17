@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../init.php';
+require_once '../init.php'; 
 
 $api = new API;
 $gameconfig = new GameConfig;
@@ -12,9 +12,9 @@ $gameconfig->game_config_files_id = $_POST["game_config_files_id"] ?? -1;
 if ($gameconfig->game_config_files_id > -1) {
     $gameconfig->get();
     $gameconfig->version++;
-    // to make sure processPostedVars() doesn't overwrite the filename with null value
-    $gameconfig->ignorePostedVars(['filename']);
-} else {
+    $gameconfig->ignorePostedVars(['filename']); //to make sure processPostedVars() doesn't overwrite the filename with null value
+}
+else {
     $gameconfig->version = 1;
 }
 
@@ -31,3 +31,5 @@ $gameconfig->add();
 $api->setPayload(["gameconfig" => get_object_vars($gameconfig)]);
 $api->setStatusSuccess();
 $api->Return();
+
+?>

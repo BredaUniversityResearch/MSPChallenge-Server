@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../init.php';
+require_once '../init.php'; 
 
 $api = new API;
 $gameconfig = new GameConfig;
@@ -19,3 +19,5 @@ $gameconfig->edit();
 $api->setPayLoad(["gameconfig" => get_object_vars($gameconfig)]);
 $api->setStatusSuccess();
 $api->Return();
+
+?>

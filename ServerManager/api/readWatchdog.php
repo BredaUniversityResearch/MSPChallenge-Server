@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../init.php';
+require_once '../init.php'; 
 
 $api = new API;
 $watchdog = new Watchdog;
@@ -13,3 +13,5 @@ $watchdog->get();
 $api->setPayload(["watchdog" => get_object_vars($watchdog)]);
 $api->setStatusSuccess();
 $api->Return();
+
+?>

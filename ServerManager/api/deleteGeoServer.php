@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../init.php';
+require_once '../init.php'; 
 
 $api = new API;
 $geoserver = new GeoServer;
@@ -13,3 +13,5 @@ $geoserver->delete();
 $api->setStatusSuccess();
 $api->setPayload(["geoserver" => get_object_vars($geoserver)]);
 $api->Return();
+
+?>

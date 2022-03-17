@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../init.php';
+require_once '../init.php'; 
 
 $api = new API;
 $geoserver = new GeoServer;
@@ -12,3 +12,5 @@ $geoserver->setJWT($_POST['jwt'] ?? "");
 $api->setPayload(["geoserverslist" => $geoserver->getList()]);
 $api->setStatusSuccess();
 $api->Return();
+
+?>

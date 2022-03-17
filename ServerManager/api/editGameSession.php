@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../init.php';
+require_once '../init.php'; 
 
 $api = new API;
 $gamesession = new GameSession;
@@ -23,11 +23,11 @@ $allowed_actions = array(
     "changeGameState", // called in JS functions startSession, pauseSession
     "processZip", // called by server API gamesession/ArchiveGameSessionInternal
     "recreate", // called by JS function RecreateSession
-    // called by server API game/Tick >> UpdateGameDetailsAtServerManager and by JS function toggleDemoSession
-    "demoCheck"
+    "demoCheck" // called by server API game/Tick >> UpdateGameDetailsAtServerManager and by JS function toggleDemoSession
 );
 $action = $_POST["action"] ?? "";
-if (method_exists($gamesession, $action) && in_array($action, $allowed_actions)) {
+if (method_exists($gamesession, $action) && in_array($action, $allowed_actions)) 
+{
     $api->setPayLoad([$action => $gamesession->$action()]);
 }
 
@@ -36,3 +36,5 @@ $gamesession->edit();
 $api->setPayLoad(["gamesession" => get_object_vars($gamesession)]);
 $api->setStatusSuccess();
 $api->Return();
+
+?>
