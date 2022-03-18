@@ -67,14 +67,19 @@ call :FirewallRemoveRule
 goto eof
 
 :get
-echo AppDirectory:
-%exe% get %service% AppDirectory
-echo Application:
-%exe% get %service% Application
-echo AppParameters:
-%exe% get %service% AppParameters
-echo Log path is:
-%exe% get %service% AppStdout
+if not "%~2"=="" (
+  echo %2:
+  %exe% get %service% %2
+) else (
+  echo AppDirectory:
+  %exe% get %service% AppDirectory
+  echo Application:
+  %exe% get %service% Application
+  echo AppParameters:
+  %exe% get %service% AppParameters
+  echo Log path is:
+  %exe% get %service% AppStdout
+)
 goto eof
 
 :eof
