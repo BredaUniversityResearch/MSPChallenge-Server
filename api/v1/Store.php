@@ -328,26 +328,26 @@ class Store extends Base
         ?int &$countryId
     ): void {
 
-        if (array_key_exists("layer_property_as_type", $layerMetaData)
-            && !empty($layerMetaData["layer_property_as_type"])
-        ) {
+        if (!empty($layerMetaData["layer_property_as_type"])) {
             // check if the layer_property_as_type value exists in $featureProperties
-            if (array_key_exists($layerMetaData["layer_property_as_type"], $featureProperties)) {
-                $type = '-1';
+            $type = '-1';
+            if (!empty($featureProperties[$layerMetaData["layer_property_as_type"]])) {
                 // translate the found $featureProperties value to the type integer
                 foreach ($layerMetaData["layer_type"] as $key => $layerTypeMetaData) {
-                    // identify the 'other' category
-                    if (strtolower($layerTypeMetaData["value"]) == "other") {
-                        $keyOther = $key;
-                    }
-                    if ($layerTypeMetaData["value"] == $featureProperties[$layerMetaData["layer_property_as_type"]]) {
-                        $type = $key;
-                        break;
+                    if (!empty($layerTypeMetaData["map_type"])) {
+                        // identify the 'other' category
+                        if (strtolower($layerTypeMetaData["map_type"]) == "other") {
+                            $keyOther = $key;
+                        }
+                        if ($layerTypeMetaData["map_type"] == $featureProperties[$layerMetaData["layer_property_as_type"]]) {
+                            $type = $key;
+                            break;
+                        }
                     }
                 }
-                if ($type == -1) {
-                    $type = $keyOther ?? 0;
-                }
+            }
+            if ($type == -1) {
+                $type = $keyOther ?? 0;
             }
         } elseif (isset($featureProperties['type'])
             && is_numeric($featureProperties['type'])
