@@ -20,6 +20,21 @@ function download() {
   if [[ $FORCE == 1 || ! -f phpcbf.phar ]]; then
     curl -OLs https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar
   fi
+  if [[ $FORCE == 1 || ! -f ./adminer/index.php ]]; then
+    curl --create-dirs -Lso ./adminer/adminer.php https://www.adminer.org/latest-mysql-en.php
+    cat > ./adminer/index.php <<- CONTENT
+<?php
+function adminer_object() {
+    class MyAdminer extends Adminer {
+        function login(\$login, \$password) {
+          return true;
+        }
+	}
+	return new MyAdminer;
+}
+include "./adminer.php";
+CONTENT
+  fi
 
   # install Windows tools
   if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
