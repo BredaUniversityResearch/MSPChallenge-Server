@@ -332,15 +332,16 @@ class Store extends Base
             // check if the layer_property_as_type value exists in $featureProperties
             $type = '-1';
             if (!empty($featureProperties[$layerMetaData["layer_property_as_type"]])) {
-                // translate the found $featureProperties value to the type integer
-                foreach ($layerMetaData["layer_type"] as $key => $layerTypeMetaData) {
+                $featureTypeProperty = $featureProperties[$layerMetaData["layer_property_as_type"]];
+                foreach ($layerMetaData["layer_type"] as $layerTypeMetaData) {
                     if (!empty($layerTypeMetaData["map_type"])) {
                         // identify the 'other' category
                         if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                            $keyOther = $key;
+                            $keyOther = $layerTypeMetaData["value"];
                         }
-                        if ($layerTypeMetaData["map_type"] == $featureProperties[$layerMetaData["layer_property_as_type"]]) {
-                            $type = $key;
+                        // translate the found $featureProperties value to the type value
+                        if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+                            $type = $layerTypeMetaData["value"];
                             break;
                         }
                     }
