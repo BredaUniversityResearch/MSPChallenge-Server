@@ -337,7 +337,7 @@ class Store extends Base
                     if (!empty($layerTypeMetaData["map_type"])) {
                         // identify the 'other' category
                         if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                            $keyOther = $layerTypeMetaData["value"];
+                            $typeOther = $layerTypeMetaData["value"];
                         }
                         // translate the found $featureProperties value to the type value
                         if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
@@ -348,7 +348,7 @@ class Store extends Base
                 }
             }
             if ($type == -1) {
-                $type = $keyOther ?? 0;
+                $type = $typeOther ?? 0;
             }
         } elseif (isset($featureProperties['type'])
             && is_numeric($featureProperties['type'])
