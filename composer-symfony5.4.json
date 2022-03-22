@@ -33,6 +33,9 @@
             "composer/package-versions-deprecated": true,
             "symfony/flex": true,
             "symfony/runtime": true
+        },
+        "platform": {
+            "php": "7.4"
         }
     },
     "autoload": {
