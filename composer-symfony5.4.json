@@ -59,6 +59,7 @@
         "post-install-cmd": [
             "@auto-scripts",
             "cghooks remove -f post-merge pre-push",
+            "chmod -R ug+w .git",
             "cghooks add --ignore-lock"
         ],
         "post-update-cmd": [
