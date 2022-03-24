@@ -20,7 +20,7 @@ class APIHelper
         $this->currentBaseFolder = $projectDir . '/';
 
         // constructor will be called by Symfony services mechanism.
-        //   Register instance such that legacy code use ::getInstance()
+        //   Register instance such that legacy code can use ::getInstance()
         self::$instance = $this;
     }
 
