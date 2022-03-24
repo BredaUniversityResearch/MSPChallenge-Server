@@ -6,6 +6,7 @@
     "require": 
     {
         "php": ">=7.4",
+        "ext-pdo": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "cboden/ratchet": "^0.4",
