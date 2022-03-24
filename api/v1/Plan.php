@@ -479,8 +479,7 @@ class Plan extends Base
     {
         $dependentPlans = [];
         $energy = new Energy();
-        $energy->setGameSessionId($this->getGameSessionId());
-        $energy->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($energy);
         return $energy->findDependentEnergyPlans($planId, $dependentPlans)
             ->then(function () use ($planName, &$dependentPlans) {
                 $promises = [];
@@ -2102,10 +2101,22 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Description(int $id, string $description = ""): void
     {
-        Database::GetInstance()->query(
-            "UPDATE plan SET plan_description=?, plan_lastupdate=? WHERE plan_id=?",
-            array($description, microtime(true), $id)
-        );
+        await($this->descriptionAsync($id, $description));
+    }
+
+    public function descriptionAsync(int $id, string $description = ''): PromiseInterface
+    {
+        $deferred = new Deferred();
+
+        $this->getAsyncDatabase()->update('plan', ['plan_id' => $id], [
+            'plan_description' => $description,
+            'plan_lastupdate' => microtime(true)
+        ])
+        ->then(function (Result $result) use ($deferred) {
+            $deferred->resolve(); // return void, we do not care about the result
+        });
+
+        return $deferred->promise();
     }
 
     /**
@@ -2171,25 +2182,39 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Unlock(int $id, int $user, int $force_unlock = 0): void
     {
-        $result = Database::GetInstance()->query(
-            "SELECT plan_lock_user_id FROM plan WHERE plan_id = ?",
-            array($id)
-        );
-        if (empty($result) || empty($result[0]["plan_lock_user_id"])) {
-            return; // no need to return an exception or do anything, the plan is just already unlocked.
-        }
-                        
-        if ($force_unlock == 1) {
-            Database::GetInstance()->query(
-                "UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=?",
-                array(null, microtime(true), $id)
-            );
-        } else {
-            Database::GetInstance()->query(
-                "UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=? AND plan_lock_user_id = ?",
-                array(null, microtime(true), $id, $user)
-            );
-        }
+        await($this->unlockAsync($id, $user, $force_unlock));
+    }
+
+    public function unlockAsync(int $id, int $user, int $force_unlock = 0): PromiseInterface
+    {
+        $deferred = new Deferred();
+
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->select('plan_lock_user_id')
+                ->from('plan')
+                ->where('plan_id = ' . $qb->createPositionalParameter($id))
+        )
+        ->then(function (Result $result) use ($id, $user, $force_unlock) {
+            $row = $result->fetchFirstRow();
+            if (empty($row['plan_lock_user_id'])) {
+                return null; // no need to return an exception or do anything, the plan is just already unlocked.
+            }
+            $where = ['plan_id' => $id];
+            if ($force_unlock == 0) {
+                $where['plan_lock_user_id'] = $user;
+            }
+            return $this->getAsyncDatabase()->update('plan', $where, [
+                'plan_lock_user_id' => null,
+                'plan_lastupdate' => microtime(true)
+            ]);
+        })
+        ->then(function (?Result $result) use ($deferred) {
+            $deferred->resolve(); // return void, we do not care about the result
+        });
+
+        return $deferred->promise();
     }
 
     /**

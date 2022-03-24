@@ -1,12 +1,14 @@
 <?php
 namespace App\Domain\WsServer;
 
+use App\Domain\API\v1\Batch;
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Security;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\Helper\AsyncDatabase;
 use App\Domain\Helper\Util;
 use Closure;
+use Drift\DBAL\Connection;
 use Exception;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Collection;
@@ -42,6 +44,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     const TICK_MIN_INTERVAL_SEC = 2;
     const LATEST_MIN_INTERVAL_SEC = 0.2;
+    const EXECUTE_BATCHES_MIN_INTERVAL_SEC = 1;
 
     private ?int $gameSessionId = null;
     private array $stats = [];
@@ -53,6 +56,11 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
     private array $clientHeaders = [];
 
     /**
+     * @var Connection[]
+     */
+    private array $databaseInstances = [];
+
+    /**
      * @var Game[]
      */
     private array $gameInstances = [];
@@ -61,6 +69,11 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
      * @var Security[]
      */
     private array $securityInstances = [];
+
+    /**
+     * @var Batch[]
+     */
+    private array $batchesInstances = [];
 
     /**
      * @var int[]
@@ -120,15 +133,19 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             $conn->close();
             return;
         }
-        if (null != $this->gameSessionId && $this->gameSessionId != $headers[self::HEADER_GAME_SESSION_ID]) {
+        $gameSessionId = $headers[self::HEADER_GAME_SESSION_ID];
+        if (null != $this->gameSessionId && $this->gameSessionId != $gameSessionId) {
             // do not connect this client, client is from another game session
             wdo('do not connect this client, client is from another game session');
             $conn->close();
             return;
         }
 
+        // since we need client headers to create a Base instances, set it before calling getSecurity(...)
+        $this->clientHeaders[$conn->resourceId] = $headers;
+
         $accessTimeRemaining = 0;
-        if (false === $this->getSecurity($headers[self::HEADER_GAME_SESSION_ID])->validateAccess(
+        if (false === $this->getSecurity($conn->resourceId)->validateAccess(
             Security::ACCESS_LEVEL_FLAG_FULL,
             $accessTimeRemaining,
             $headers[self::HEADER_MSP_API_TOKEN]
@@ -140,7 +157,6 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         }
 
         $this->clients[$conn->resourceId] = $conn;
-        $this->clientHeaders[$conn->resourceId] = $headers;
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_CONNECTED, $conn->resourceId, $headers));
     }
 
@@ -161,19 +177,14 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         unset($this->clients[$conn->resourceId]);
         unset($this->clientInfoContainer[$conn->resourceId]);
         unset($this->clientHeaders[$conn->resourceId]);
+        unset($this->gameInstances[$conn->resourceId]);
+        unset($this->securityInstances[$conn->resourceId]);
+        unset($this->batchesInstances[$conn->resourceId]);
 
-        // clean up latest ticks and instances by active game session ids.
+        // clean up "finishedTicksGameSessionIds" by active game session ids.
         $clientInfoPerSessionContainer = $this->getClientInfoPerSessionCollection()->all();
         $this->finishedTicksGameSessionIds = array_diff_key(
             $this->finishedTicksGameSessionIds,
-            $clientInfoPerSessionContainer
-        );
-        $this->gameInstances = array_diff_key(
-            $this->gameInstances,
-            $clientInfoPerSessionContainer
-        );
-        $this->securityInstances = array_diff_key(
-            $this->securityInstances,
             $clientInfoPerSessionContainer
         );
 
@@ -237,7 +248,12 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         foreach ($clientInfoPerSessionCollection as $gameSessionId => $clientInfoContainer) {
             wdo('starting "tick" for game session: ' . $gameSessionId);
             $tickTimeStart = microtime(true);
-            $promises[$gameSessionId] = $this->getGame($gameSessionId)->Tick(!empty($_ENV['WS_SERVER_DEBUG_OUTPUT']))
+
+            // just pick the first connection Game instance using this game session
+            /** @var Collection $clientInfoContainer */
+            $connResourceId = key($clientInfoContainer->all());
+
+            $promises[$gameSessionId] = $this->getGame($connResourceId)->Tick(!empty($_ENV['WS_SERVER_DEBUG_OUTPUT']))
                 ->then(
                     function () use ($tickTimeStart, $gameSessionId) {
                         $this->statsLoopRegister('tick', $gameSessionId, microtime(true) - $tickTimeStart);
@@ -277,7 +293,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $accessTimeRemaining = 0; // not used
-                if (false === $this->getSecurity($gameSessionId)->validateAccess(
+                if (false === $this->getSecurity($connResourceId)->validateAccess(
                     Security::ACCESS_LEVEL_FLAG_FULL,
                     $accessTimeRemaining,
                     $this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]
@@ -289,7 +305,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                 }
                 $latestTimeStart = microtime(true);
                 wdo('Starting "latest" for: ' . $connResourceId);
-                $promises[$connResourceId] = $this->getGame($gameSessionId)->Latest(
+                $promises[$connResourceId] = $this->getGame($connResourceId)->Latest(
                     $clientInfo['team_id'],
                     $clientInfo['last_update_time'],
                     $clientInfo['user']
@@ -302,8 +318,8 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         return [];
                     }
                     if (!array_key_exists($connResourceId, $this->clients)) {
-                        // disconnected while running this async code, just return empty payload, nothing was sent
-                        wdo('disconnected while running this async code, just return empty payload, nothing was sent');
+                        // disconnected while running this async code, nothing was sent
+                        wdo('disconnected while running this async code, nothing was sent');
                         $e = new ClientDisconnectedException();
                         $e->setConnResourceId($connResourceId);
                         throw $e;
@@ -340,13 +356,71 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                     $this->clientInfoContainer[$connResourceId]['prev_payload'] = $payload;
                     $this->clientInfoContainer[$connResourceId]['last_update_time'] = $payload['update_time'];
                     $json = json_encode([
-                        "success" => true,
-                        "message" => null,
-                        "payload" => $payload
+                        'type' => 'Game/Latest',
+                        'success' => true,
+                        'message' => null,
+                        'payload' => $payload
                     ]);
                     wdo('send payload to: ' . $connResourceId);
                     $this->clients[$connResourceId]->send($json);
                     return $payload;
+                });
+            }
+        }
+        return all($promises);
+    }
+
+    private function executeBatches(): PromiseInterface
+    {
+        wdo('starting "executeBatches"');
+        $clientInfoPerSessionContainer = collect($this->clientInfoContainer)
+            ->groupBy(
+                function ($value, $key) {
+                    return $this->clientHeaders[$key][self::HEADER_GAME_SESSION_ID];
+                },
+                true
+            );
+        if ($this->gameSessionId != null) {
+            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($this->gameSessionId);
+        }
+        $promises = [];
+        $this->statsLoopStart('executeBatches');
+        foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
+            if (!array_key_exists($gameSessionId, $this->finishedTicksGameSessionIds)) {
+                // wait for a first finished tick
+                wdo('wait for a first finished tick: ' . $gameSessionId);
+                continue;
+            }
+
+            foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
+                $timeStart = microtime(true);
+                wdo('Starting "executeBatches" for: ' . $connResourceId);
+                $promises[$connResourceId] = $this->getBatch($connResourceId)->executeQueuedBatchesFor(
+                    $clientInfo['team_id'],
+                    $clientInfo['user']
+                )
+                ->then(function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
+                    wdo('Created "executeBatches" payload for: ' . $connResourceId);
+                    $this->statsLoopRegister('executeBatches', $connResourceId, microtime(true) - $timeStart);
+                    if (empty($batchResultContainer)) {
+                        return [];
+                    }
+                    if (!array_key_exists($connResourceId, $this->clients)) {
+                        // disconnected while running this async code, nothing was sent
+                        wdo('disconnected while running this async code, nothing was sent');
+                        $e = new ClientDisconnectedException();
+                        $e->setConnResourceId($connResourceId);
+                        throw $e;
+                    }
+
+                    $json = json_encode([
+                        'type' => 'Batch/ExecuteBatch',
+                        'success' => true,
+                        'message' => null,
+                        'payload' => $batchResultContainer
+                    ]);
+                    $this->clients[$connResourceId]->send($json);
+                    return $batchResultContainer;
                 });
             }
         }
@@ -390,87 +464,87 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             new EPayloadDifferenceType(EPayloadDifferenceType::NONESSENTIAL_DIFFERENCES);
     }
 
-    private function repeatedTickFunction(LoopInterface $loop): Closure
+    private function createTickPromiseFunction(): Closure
     {
-        return function () use ($loop) {
-            $startTime = microtime(true);
-            assertFulfilled(
-                $this->tick()
-                    ->then(function (array $tickGameSessionIds) {
-                        wdo('just finished tick for game session ids: ' . implode(', ', $tickGameSessionIds));
-                        $this->finishedTicksGameSessionIds += $tickGameSessionIds;
-                        $this->dispatch(
-                            new NameAwareEvent(self::EVENT_ON_STATS_UPDATE)
-                        );
-                        $this->statsLoopEnd('tick');
-                        // reset new loops after "stats update"
-                        $this->statsLoopStart('tick');
-                        $this->statsLoopStart('latest');
-                    }),
-                function () use ($loop, $startTime) {
-                    $elapsedSec = (microtime(true) - $startTime) * 0.000001;
-                    if ($elapsedSec > self::TICK_MIN_INTERVAL_SEC) {
-                        wdo('starting new future tick');
-                        $loop->futureTick($this->repeatedTickFunction($loop));
-                        return;
-                    }
-                    $waitingSec = self::TICK_MIN_INTERVAL_SEC - $elapsedSec;
-                    wdo('awaiting new future tick for ' . $waitingSec . ' sec');
-                    $loop->addTimer($waitingSec, function () use ($loop) {
-                        wdo('starting new future tick');
-                        $loop->futureTick($this->repeatedTickFunction($loop));
-                    });
-                }
-            );
+        return function () {
+            return $this->tick()
+                ->then(function (array $tickGameSessionIds) {
+                    wdo('just finished tick for game session ids: ' . implode(', ', $tickGameSessionIds));
+                    $this->finishedTicksGameSessionIds += $tickGameSessionIds;
+                    $this->dispatch(
+                        new NameAwareEvent(self::EVENT_ON_STATS_UPDATE)
+                    );
+                    $this->statsLoopEnd('tick');
+                    // reset new loops after "stats update"
+                    $this->statsLoopStart('tick');
+                    $this->statsLoopStart('latest');
+                });
         };
     }
 
-    private function repeatedLatestFunction(LoopInterface $loop): Closure
+    private function createLatestPromiseFunction(): Closure
     {
-        return function () use ($loop) {
-            $startTime = microtime(true);
-            assertFulfilled(
-                $this->latest()
-                    ->then(function (array $payloadContainer) {
-                        wdo('just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer)));
-                        $payloadContainer = array_filter($payloadContainer);
-                        if (!empty($payloadContainer)) {
-                            $this->dispatch(
-                                new NameAwareEvent(
-                                    self::EVENT_ON_CLIENT_MESSAGE_SENT,
-                                    array_keys($payloadContainer),
-                                    $payloadContainer
-                                )
-                            );
-                        }
-                        $this->statsLoopEnd('latest');
-                    })
-                    ->otherwise(function (ClientDisconnectedException $e) {
-                        // nothing to do.
-                    }),
-                function () use ($loop, $startTime) {
-                    $elapsedSec = (microtime(true) - $startTime) * 0.000001;
-                    if ($elapsedSec > self::LATEST_MIN_INTERVAL_SEC) {
-                        wdo('starting new future "latest"');
-                        $loop->futureTick($this->repeatedLatestFunction($loop));
-                        return;
+        return function () {
+            return $this->latest()
+                ->then(function (array $payloadContainer) {
+                    wdo('just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer)));
+                    $payloadContainer = array_filter($payloadContainer);
+                    if (!empty($payloadContainer)) {
+                        $this->dispatch(
+                            new NameAwareEvent(
+                                self::EVENT_ON_CLIENT_MESSAGE_SENT,
+                                array_keys($payloadContainer),
+                                $payloadContainer
+                            )
+                        );
                     }
-                    $waitingSec = self::LATEST_MIN_INTERVAL_SEC - $elapsedSec;
-                    wdo('awaiting new future "latest" for ' . $waitingSec . ' sec');
-                    $loop->addTimer($waitingSec, function () use ($loop) {
-                        wdo('starting new future "latest"');
-                        $loop->futureTick($this->repeatedLatestFunction($loop));
-                    });
-                }
-            );
+                    $this->statsLoopEnd('latest');
+                })
+                ->otherwise(function (ClientDisconnectedException $e) {
+                    // nothing to do.
+                });
+        };
+    }
+
+    private function createExecuteBatchesPromiseFunction(): Closure
+    {
+        return function () {
+            return $this->executeBatches()
+                ->then(function (array $clientToBatchResultContainer) {
+                    wdo(
+                        'just finished "executeBatches" for connections: ' .
+                        implode(', ', array_keys($clientToBatchResultContainer))
+                    );
+                    wdo(json_encode($clientToBatchResultContainer));
+                    $this->statsLoopEnd('executeBatches');
+                })
+                ->otherwise(function (ClientDisconnectedException $e) {
+                    // nothing to do.
+                });
         };
     }
 
     public function registerLoop(LoopInterface $loop)
     {
         $this->loop = $loop;
-        $loop->futureTick($this->repeatedTickFunction($loop));
-        $loop->futureTick($this->repeatedLatestFunction($loop));
+        $loop->futureTick($this->createRepeatedFunction(
+            $loop,
+            'tick',
+            $this->createTickPromiseFunction(),
+            self::TICK_MIN_INTERVAL_SEC
+        ));
+        $loop->futureTick($this->createRepeatedFunction(
+            $loop,
+            'latest',
+            $this->createLatestPromiseFunction(),
+            self::LATEST_MIN_INTERVAL_SEC
+        ));
+        $loop->futureTick($this->createRepeatedFunction(
+            $loop,
+            'executeBatches',
+            $this->createExecuteBatchesPromiseFunction(),
+            self::EXECUTE_BATCHES_MIN_INTERVAL_SEC
+        ));
 
         // do a dummy SELECT 1 query every 4 hours to prevent the "wait_timeout" of mysql (Default is 8 hours).
         //  if the wait timeout would go off, the database connection will be broken, and the error
@@ -484,38 +558,60 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         });
     }
 
+    private function getAsyncDatabase(int $gameSessionId): Connection
+    {
+        if (!array_key_exists($gameSessionId, $this->databaseInstances)) {
+            $this->databaseInstances[$gameSessionId] =
+                AsyncDatabase::createGameSessionConnection($this->loop, $gameSessionId);
+        }
+        return $this->databaseInstances[$gameSessionId];
+    }
+
     /**
      * @throws Exception
      */
-    private function getGame(int $gameSessionId): Game
+    private function getGame(int $connResourceId): Game
     {
-        if (!array_key_exists($gameSessionId, $this->gameInstances)) {
+        $gameSessionId = $this->clientHeaders[$connResourceId][self::HEADER_GAME_SESSION_ID];
+        if (!array_key_exists($connResourceId, $this->gameInstances)) {
             $game = new Game();
             $game->setGameSessionId($gameSessionId);
-            $game->setAsyncDatabase(
-                AsyncDatabase::createGameSessionConnection($this->loop, $gameSessionId)
-            );
+            $game->setAsyncDatabase($this->getAsyncDatabase($gameSessionId));
+            $game->setToken($this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]);
 
             // do some PRE CACHING calls
             $game->GetWatchdogAddress(true);
             $game->LoadConfigFile();
 
-            $this->gameInstances[$gameSessionId] = $game;
+            $this->gameInstances[$connResourceId] = $game;
         }
-        return $this->gameInstances[$gameSessionId];
+        return $this->gameInstances[$connResourceId];
     }
 
-    private function getSecurity(int $gameSessionId): Security
+    private function getSecurity(int $connResourceId): Security
     {
-        if (!array_key_exists($gameSessionId, $this->securityInstances)) {
+        $gameSessionId = $this->clientHeaders[$connResourceId][self::HEADER_GAME_SESSION_ID];
+        if (!array_key_exists($connResourceId, $this->securityInstances)) {
             $security = new Security();
             $security->setGameSessionId($gameSessionId);
-            $security->setAsyncDatabase(
-                AsyncDatabase::createGameSessionConnection($this->loop, $gameSessionId)
-            );
-            $this->securityInstances[$gameSessionId] = $security;
+            $security->setAsyncDatabase($this->getAsyncDatabase($gameSessionId));
+            $security->setToken($this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]);
+            $this->securityInstances[$connResourceId] = $security;
         }
-        return $this->securityInstances[$gameSessionId];
+        return $this->securityInstances[$connResourceId];
+    }
+
+    private function getBatch(int $connResourceId): Batch
+    {
+        $gameSessionId = $this->clientHeaders[$connResourceId][self::HEADER_GAME_SESSION_ID];
+        if (!array_key_exists($connResourceId, $this->batchesInstances)) {
+            $batch = new Batch();
+            $batch->setGameSessionId($gameSessionId);
+            $batch->setAsyncDatabase($this->getAsyncDatabase($gameSessionId));
+            $batch->setToken($this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]);
+            $this->batchesInstances[$connResourceId] = $batch;
+        }
+        return $this->batchesInstances[$connResourceId];
     }
 
     public function dispatch(object $event, ?string $eventName = null): object
@@ -535,5 +631,49 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                 },
                 true
             );
+    }
+
+    private function createRepeatedFunction(
+        LoopInterface $loop,
+        string $name,
+        Closure $promiseFunction,
+        float $minIntervalSec
+    ): Closure {
+        return function () use ($loop, $promiseFunction, $name, $minIntervalSec) {
+            $startTime = microtime(true);
+            assertFulfilled(
+                $promiseFunction(),
+                $this->createRepeatedOnFulfilledFunction(
+                    $loop,
+                    $name,
+                    $startTime,
+                    $minIntervalSec,
+                    $this->createRepeatedFunction($loop, $name, $promiseFunction, $minIntervalSec)
+                )
+            );
+        };
+    }
+
+    private function createRepeatedOnFulfilledFunction(
+        LoopInterface $loop,
+        string $name,
+        float $startTime,
+        float $minIntervalSec,
+        Closure $repeatedFunction
+    ): Closure {
+        return function () use ($loop, $startTime, $minIntervalSec, $name, $repeatedFunction) {
+            $elapsedSec = (microtime(true) - $startTime) * 0.000001;
+            if ($elapsedSec > $minIntervalSec) {
+                wdo('starting new future "' . $name .'"');
+                $loop->futureTick($repeatedFunction);
+                return;
+            }
+            $waitingSec = $minIntervalSec - $elapsedSec;
+            wdo('awaiting new future "' . $name . '" for ' . $waitingSec . ' sec');
+            $loop->addTimer($waitingSec, function () use ($loop, $name, $repeatedFunction) {
+                wdo('starting new future "' . $name . '"');
+                $loop->futureTick($repeatedFunction);
+            });
+        };
     }
 }

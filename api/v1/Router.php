@@ -4,11 +4,17 @@ namespace App\Domain\API\v1;
 
 // Routes the HTTP request incl. its parameters to the correct class method, and wraps that method's results in a
 //   consistent response
+use App\Domain\Common\ObjectMethod;
+use App\Domain\Helper\RouterUtil;
+use Closure;
 use Exception;
+use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 use Throwable;
+use function App\resolveOnFutureTick;
 
 class Router
 {
@@ -42,7 +48,7 @@ class Router
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function RouteApiCall(string $apiCallUrl, array $data): array
     {
-        $endpointData = self::ParseEndpointString($apiCallUrl);
+        $endpointData = self::parseEndpointString($apiCallUrl);
         try {
             $result = self::ExecuteCall(
                 $endpointData["class"],
@@ -58,7 +64,7 @@ class Router
 
             return $result;
         } catch (Exception $e) {
-            return self::FormatResponse(
+            return self::formatResponse(
                 false,
                 $e->getMessage(),
                 null,
@@ -69,8 +75,7 @@ class Router
         }
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function ParseEndpointString(string $apiCallUrl): array
+    public static function parseEndpointString(string $apiCallUrl): array
     {
         $arr = explode("/", $apiCallUrl);
         $class = ucfirst($arr[0]);
@@ -85,20 +90,101 @@ class Router
 
     /**
      * @throws ReflectionException
+     */
+    public static function executeCallAsync(
+        ObjectMethod $objectMethod,
+        array $data,
+        ?Closure $preExecuteCallback = null,
+        ?Closure $postExecuteCallback = null
+    ): PromiseInterface {
+        $class = $objectMethod->getInstance();
+        $className = (new ReflectionClass($class))->getShortName();
+        $method = $objectMethod->getMethod();
+        $payload = null;
+        /** @var Base $class */
+        if (!$class->isValid()) {
+            // security check failed in this instance, so class method not allowed
+            $message = Base::ErrorString(new Exception("Access denied (Security)."));
+            $response = self::formatResponse(false, $message, $payload, $className, $method, $data);
+            return resolveOnFutureTick(new Deferred(), $response)->promise();
+        }
+
+        if (false === method_exists($class, $method)) {
+            // this can only mean that the class method doesn't exist, even though the class does
+            $message = Base::ErrorString(new Exception("Invalid method."));
+            $response = self::formatResponse(false, $message, $payload, $className, $method, $data);
+            return resolveOnFutureTick(new Deferred(), $response)->promise();
+        }
+
+        if (null !== $preExecuteCallback) {
+            $preExecuteCallback($data);
+        }
+
+        $classData = new ReflectionClass($class);
+        $methodData = $classData->getMethod($method);
+
+        // everything ok, try to actually call the class method and catch any exceptions thrown
+        $arguments = self::resolveArguments($classData, $methodData, $data);
+
+        $asyncMethod = $method . 'Async';
+        if (!method_exists($class, $asyncMethod)) {
+            $asyncMethod = null;
+        }
+        $methodToUse = $asyncMethod ?? $method;
+        try {
+            $promise = $class->$methodToUse(...$arguments);
+        } catch (Throwable $e) {
+            // execution failed, perhaps because of database connection failure or PHP warning, or because
+            //   endpoint threw exception
+            // PHP code parsing errors are caught in the shutdown function as defined in helpers.php
+            $message = Base::ErrorString($e);
+            $response = self::formatResponse(false, $message, null, $className, $method, $data);
+            return resolveOnFutureTick(new Deferred(), $response)->promise();
+        }
+
+        if (!($promise instanceof PromiseInterface)) {
+            // method is not async
+            $response = self::formatResponse(
+                false,
+                'This method is not asynchronous',
+                null,
+                $className,
+                $method,
+                $data
+            );
+            return resolveOnFutureTick(new Deferred(), $response)->promise();
+        }
+
+        return $promise
+            ->then(function ($payload) use ($className, $method, $data, $postExecuteCallback) {
+                if (null !== $postExecuteCallback) {
+                    $postExecuteCallback($payload);
+                }
+                // execution worked, payload has been set, message can remain empty
+                return self::formatResponse(true, '', $payload, $className, $method, $data);
+            });
+    }
+
+    /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function ExecuteCall(
-        string $className,
-        string $method,
-        array $data,
-        bool $startDatabaseTransaction = true
-    ): array {
+    public static function createObjectMethodFromEndpoint(string $endpoint): ObjectMethod
+    {
+        $endpointData = self::ParseEndpointString($endpoint);
+        return new ObjectMethod(
+            self::createObjectFrom($endpointData['class'], $endpointData['method']),
+            $endpointData['method']
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    private static function createObjectFrom(string $className, string $method): object
+    {
         //make sure the class exists is allowed to be called at all, and if not, immediately fail
         if (!self::AllowedClass($className)) {
-            $success = false;
-            $message = Base::ErrorString(new Exception("Invalid class."));
-            return self::FormatResponse($success, $message, null, $className, $method, $data);
+            throw new Exception('Invalid class: '. $className);
         }
 
         try {
@@ -112,6 +198,26 @@ class Router
             $class = new $fullClassName($method);
         }
 
+        return $class;
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public static function ExecuteCall(
+        string $className,
+        string $method,
+        array $data,
+        bool $startDatabaseTransaction = true
+    ): array {
+        try {
+            $class = self::createObjectFrom($className, $method);
+        } catch (Exception $e) {
+            $message = Base::ErrorString(new Exception('Invalid class.'));
+            return self::FormatResponse(false, $message, null, $className, $method, $data);
+        }
         $message = null;
         $payload = null;
         if (!$class->isValid()) {
@@ -124,7 +230,7 @@ class Router
 
             // everything ok, try to actually call the class method - wrapped in a transaction - and catch any
             //   exceptions thrown
-            $arguments = self::ResolveArguments($classData, $methodData, $data);
+            $arguments = self::resolveArguments($classData, $methodData, $data);
             $CallWantsTransaction = self::CheckMethodCommentsForTransactionOptions($methodData);
             try {
                 if ($CallWantsTransaction && $startDatabaseTransaction) {
@@ -147,7 +253,7 @@ class Router
                 }
 
                 $message = Base::ErrorString($e);
-                return self::FormatResponse($success, $message, null, $className, $method, $data);
+                return self::formatResponse($success, $message, null, $className, $method, $data);
             }
             // execution worked, payload has been set, message can remain empty
             $success = true;
@@ -156,14 +262,13 @@ class Router
             $success = false;
             $message = Base::ErrorString(new Exception("Invalid method."));
         }
-        return self::FormatResponse($success, $message, $payload, $className, $method, $data);
+        return self::formatResponse($success, $message, $payload, $className, $method, $data);
     }
 
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private static function ResolveArguments(
+    private static function resolveArguments(
         ReflectionClass $classData,
         ReflectionMethod $methodData,
         array $argumentsArray
@@ -235,7 +340,7 @@ class Router
      * @return array
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private static function FormatResponse(
+    private static function formatResponse(
         bool $success,
         ?string $message,
         $payload = null,
@@ -243,14 +348,16 @@ class Router
         string $method = '',
         array $data = []
     ): array {
+        $request = $className . '/' . $method;
         if (!$success) {
             $message .= PHP_EOL .
-            "Request: " . $className . "/" . $method . PHP_EOL .
+            "Request: " . $request . PHP_EOL .
             "Call data: " . str_replace(array("\n", "\r"), "", var_export($data, true)) . PHP_EOL .
             "Request URI: " . $_SERVER['REQUEST_URI'];
         }
 
         return array(
+            "type" => $request,
             "success" => $success,
             "message" => $message,
             "payload" => $payload
@@ -263,8 +370,7 @@ class Router
      * @return bool
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private static function TrySafeCast(&$input, string $targetType): bool
+    private static function trySafeCast(&$input, string $targetType): bool
     {
         if ($targetType == "string") {
             $input = strval($input);

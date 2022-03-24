@@ -304,8 +304,7 @@ class GameSession extends Base
         //Notify the simulation that the game has been setup so we start the simulations.
         //This is needed because MEL needs to be run before the game to setup the initial fishing values.
         $game = new Game();
-        $game->setGameSessionId($this->getGameSessionId());
-        $game->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($game);
         $watchdogSuccess = false;
         if (null !== $promise = $game->changeWatchdogState("SETUP")) {
             await($promise);
@@ -372,8 +371,7 @@ class GameSession extends Base
     public function ArchiveGameSessionInternal(string $response_url): void
     {
         $game = new Game();
-        $game->setGameSessionId($this->getGameSessionId());
-        $game->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($game);
         await($game->changeWatchdogState('end'));
         
         $zippath = $this->CreateGameSessionZip($response_url);
@@ -757,8 +755,7 @@ class GameSession extends Base
         $this->ResetWatchdogAddress($watchdog_address);
 
         $game = new Game();
-        $game->setGameSessionId($this->getGameSessionId());
-        $game->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($game);
         await($game->changeWatchdogState("PAUSE")); // reloaded saves always start paused
         
         if (!empty($response_address)) {

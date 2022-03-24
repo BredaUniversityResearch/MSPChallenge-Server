@@ -745,7 +745,9 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `msp`.`api_batch` (
   `api_batch_id` INT NOT NULL AUTO_INCREMENT,
-  `api_batch_state` ENUM('Setup', 'Success', 'Failed') NOT NULL DEFAULT 'Setup',
+  `api_batch_state` ENUM('Setup', 'Queued', 'Executing', 'Success', 'Failed') NOT NULL DEFAULT 'Setup',
+  `api_batch_country_id` int(10) unsigned,
+  `api_batch_user_id` int(10) unsigned,
   PRIMARY KEY (`api_batch_id`))
 ENGINE = InnoDB;
 

@@ -23,25 +23,31 @@ class Base
 
     public static string $public = "dbfc9c465c3ed8394049f848344f4ab8";
 
-    private bool $isValid = false;
+    private string $method = '';
+    private ?bool $isValid = null;
     private array $allowed;
     private ?Connection $asyncDatabase = null;
 
     private ?int $gameSessionId = null;
+    private ?string $token = null;
 
     /**
      * @throws Exception
      */
     public function __construct(string $method = '', array $allowed = [])
     {
+        $this->method = $method;
         $this->allowed = $allowed;
-        if ($method !== '') {
-            $this->isValid = $this->Validate($this->allowed, $method);
-        }
     }
 
     public function isValid(): bool
     {
+        if (null === $this->isValid) {
+            $this->isValid = false;
+            if ($this->method !== '') {
+                $this->isValid = $this->Validate($this->allowed, $this->method);
+            }
+        }
         return $this->isValid;
     }
 
@@ -172,7 +178,7 @@ class Base
             if ($d['data'] == "[]") {
                 $arr[sizeof($arr) - 1]['data'] = "";
             } else {
-                $arr[sizeof($arr) - 1]['data'] = json_decode($d['data']);
+                $arr[sizeof($arr) - 1]['data'] = json_decode($d['data'] ?? '');
             }
         }
 
@@ -203,6 +209,7 @@ class Base
         }
 
         $security = new Security();
+        $this->asyncDataTransferTo($security);
         return $calledFunctionAllowed && $security->validateAccess($accessFlagsRequired);
     }
 
@@ -344,5 +351,45 @@ class Base
     public function setGameSessionId(?int $gameSessionId): void
     {
         $this->gameSessionId = $gameSessionId;
+    }
+
+    public function getToken(): ?string
+    {
+        // Use the token that was "set" to this instance
+        if ($this->token != null) {
+            return $this->token;
+        }
+        // Otherwise, try to retrieve the token from the request
+        return $this->findAuthenticationHeaderValue();
+    }
+
+    public function setToken(?string $token): void
+    {
+        $this->token = $token;
+    }
+
+    private function findAuthenticationHeaderValue(): ?string
+    {
+        $requestHeaders = [];
+        // is only available in the Apache, FastCGI, CLI, and FPM webservers.
+        if (function_exists('apache_request_headers')) {
+            $requestHeaders = apache_request_headers();
+        }
+        $requestHeaders = array_change_key_case($requestHeaders, CASE_LOWER);
+
+        if (isset($requestHeaders["mspapitoken"])) {
+            return $requestHeaders["mspapitoken"];
+        }
+        return null;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function asyncDataTransferTo(Base $other)
+    {
+        $other->setGameSessionId($this->getGameSessionId());
+        $other->setAsyncDatabase($this->getAsyncDatabase());
+        $other->setToken($this->getToken());
     }
 }

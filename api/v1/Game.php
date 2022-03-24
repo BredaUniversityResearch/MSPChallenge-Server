@@ -338,8 +338,7 @@ class Game extends Base
     public function Tick(bool $showDebug = false): PromiseInterface
     {
         $plan = new Plan();
-        $plan->setGameSessionId($this->getGameSessionId());
-        $plan->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($plan);
         // Plan tick first: to clean up plans
         return $plan->Tick()
             // fetch game information, incl. state name
@@ -437,8 +436,7 @@ class Game extends Base
         return $this->getGameDetailsAsync()
             ->then(function (array $postValues) {
                 $security = new Security();
-                $security->setGameSessionId($this->getGameSessionId());
-                $security->setAsyncDatabase($this->getAsyncDatabase());
+                $this->asyncDataTransferTo($security);
                 return $security->getSpecialTokenAsync(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
                     ->then(function (string $token) use ($postValues) {
                         $postValues['token'] = $token;
@@ -652,8 +650,7 @@ class Game extends Base
 
             //update all the plans which ticks the server.
             $plan = new Plan();
-            $plan->setGameSessionId($this->getGameSessionId());
-            $plan->setAsyncDatabase($this->getAsyncDatabase());
+            $this->asyncDataTransferTo($plan);
             return $plan->updateLayerState($currentMonth)
                 ->then(function () use ($currentMonth, $monthsDone, $state, $tick) {
                     return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
@@ -872,12 +869,10 @@ class Game extends Base
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
                 $simulationsHelper = new Simulations();
-                $simulationsHelper->setGameSessionId($this->getGameSessionId());
-                $simulationsHelper->setAsyncDatabase($this->getAsyncDatabase());
+                $this->asyncDataTransferTo($simulationsHelper);
                 $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
                 $security = new Security();
-                $security->setGameSessionId($this->getGameSessionId());
-                $security->setAsyncDatabase($this->getAsyncDatabase());
+                $this->asyncDataTransferTo($security);
                 return $security->generateTokenAsync()
                     ->then(function (array $result) use (
                         $security,
@@ -929,8 +924,7 @@ class Game extends Base
             })
             ->then(function (ResponseInterface $response) {
                 $log = new Log();
-                $log->setGameSessionId($this->getGameSessionId());
-                $log->setAsyncDatabase($this->getAsyncDatabase());
+                $this->asyncDataTransferTo($log);
 
                 $responseContent = $response->getBody()->getContents();
                 $decodedResponse = json_decode($responseContent, true);
@@ -963,9 +957,8 @@ class Game extends Base
             echo (microtime(true) - $newTime) . " elapsed after tick<br />";
         }
         $plan = new Plan();
-        $plan->setGameSessionId($this->getGameSessionId());
-        $plan->setAsyncDatabase($this->getAsyncDatabase());
-        return $plan->latestAsync($lastUpdateTime);
+        $this->asyncDataTransferTo($plan);
+        return $plan->latestAsync((int)$lastUpdateTime);
     }
 
     /**
@@ -983,8 +976,7 @@ class Game extends Base
         }
 
         $layer = new Layer();
-        $layer->setGameSessionId($this->getGameSessionId());
-        $layer->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($layer);
         $promises = [];
         foreach ($data['plan'] as $p) {
             $promises[] = $layer->latest($p['layers'], $lastUpdateTime, $p['id']);
@@ -1018,8 +1010,7 @@ class Game extends Base
         unset($p);
 
         $plan = new Plan();
-        $plan->setGameSessionId($this->getGameSessionId());
-        $plan->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($plan);
         return $plan->getMessagesAsync(
             $lastUpdateTime
         );
@@ -1038,8 +1029,7 @@ class Game extends Base
 
         //return any raster layers that need to be updated
         $layer = new Layer();
-        $layer->setGameSessionId($this->getGameSessionId());
-        $layer->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($layer);
         return $layer->latestRaster(
             $lastUpdateTime
         );
@@ -1057,8 +1047,7 @@ class Game extends Base
         }
 
         $energy = new Energy();
-        $energy->setGameSessionId($this->getGameSessionId());
-        $energy->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($energy);
         return $energy->latest(
             $lastUpdateTime
         );
@@ -1088,10 +1077,9 @@ class Game extends Base
         }
 
         $kpi = new Kpi();
-        $kpi->setGameSessionId($this->getGameSessionId());
-        $kpi->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($kpi);
         return $kpi->latestAsync(
-            $lastUpdateTime,
+            (int)$lastUpdateTime,
             $teamId
         );
     }
@@ -1111,8 +1099,7 @@ class Game extends Base
         }
 
         $warning = new Warning();
-        $warning->setGameSessionId($this->getGameSessionId());
-        $warning->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($warning);
         return $warning->latest(
             $lastUpdateTime
         );
@@ -1132,8 +1119,7 @@ class Game extends Base
         }
 
         $objective = new Objective();
-        $objective->setGameSessionId($this->getGameSessionId());
-        $objective->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($objective);
         return $objective->latest(
             $lastUpdateTime
         );

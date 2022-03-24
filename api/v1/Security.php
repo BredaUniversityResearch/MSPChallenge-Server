@@ -235,7 +235,7 @@ class Security extends Base
      */
     private function getCurrentRequestTokenDetails(): ?array
     {
-        $token = $this->FindAuthenticationHeaderValue();
+        $token = $this->getToken();
         if ($token == null) {
             return null;
         }
@@ -304,17 +304,5 @@ class Security extends Base
             $tokenValidTimeRemaining = $tokenDetails["valid_time_remaining"];
         }
         return true;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function FindAuthenticationHeaderValue(): ?string
-    {
-        $requestHeaders = apache_request_headers();
-        $requestHeaders = array_change_key_case($requestHeaders, CASE_LOWER);
-
-        if (isset($requestHeaders["mspapitoken"])) {
-            return $requestHeaders["mspapitoken"];
-        }
-        return null;
     }
 }
