@@ -9,6 +9,8 @@
         "ext-pdo": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-zip": "*",
+        "ext-json": "*",
         "cboden/ratchet": "^0.4",
         "clue/block-react": "^1.5",
         "clue/http-proxy-react": "^1.7",
@@ -34,6 +36,9 @@
             "composer/package-versions-deprecated": true,
             "symfony/flex": true,
             "symfony/runtime": true
+        },
+        "platform": {
+            "php": "7.4"
         }
     },
     "autoload": {

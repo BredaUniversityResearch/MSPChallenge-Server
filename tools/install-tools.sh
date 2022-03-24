@@ -27,10 +27,14 @@ function download() {
 function adminer_object() {
     class MyAdminer extends Adminer {
         function login(\$login, \$password) {
-          return true;
+            return true;
         }
-	}
-	return new MyAdminer;
+        function credentials() {
+            // server, username and password for connecting to database
+            return array('localhost', 'root', '');
+        }
+  }
+  return new MyAdminer;
 }
 include "./adminer.php";
 CONTENT
