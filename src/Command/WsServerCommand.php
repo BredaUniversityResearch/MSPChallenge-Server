@@ -19,6 +19,8 @@ class WsServerCommand extends Command
     const OPTION_GAME_SESSION_ID = 'game-session-id';
     const OPTION_FIXED_TERMINAL_HEIGHT = 'fixed-terminal-height';
     const OPTION_TABLE_OUTPUT = 'table-output';
+    const OPTION_MESSAGE_MAX_LINES = 'message-max-lines';
+    const OPTION_MESSAGE_FILTER = 'message-filter';
 
     protected static $defaultName = 'app:ws-server';
 
@@ -59,7 +61,7 @@ class WsServerCommand extends Command
             )
             ->addOption(
                 self::OPTION_FIXED_TERMINAL_HEIGHT,
-                'f',
+                null,
                 InputOption::VALUE_REQUIRED,
                 'fixed terminal height, the number of rows allowed'
             )
@@ -68,6 +70,18 @@ class WsServerCommand extends Command
                 't',
                 InputOption::VALUE_NONE,
                 'enable client connections table output with statistics'
+            )
+            ->addOption(
+                self::OPTION_MESSAGE_MAX_LINES,
+                'l',
+                InputOption::VALUE_REQUIRED,
+                'the maximum number of lines for each message'
+            )
+            ->addOption(
+                self::OPTION_MESSAGE_FILTER,
+                'f',
+                InputOption::VALUE_REQUIRED,
+                'only show messages containing this text'
             );
     }
 
@@ -96,7 +110,9 @@ class WsServerCommand extends Command
         $consoleHelper = new WsServerConsoleHelper(
             $this->wsServer,
             $output,
-            $input->getOption(self::OPTION_TABLE_OUTPUT)
+            $input->getOption(self::OPTION_TABLE_OUTPUT),
+            $input->getOption(self::OPTION_MESSAGE_MAX_LINES),
+            $input->getOption(self::OPTION_MESSAGE_FILTER),
         );
         $consoleHelper->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
 

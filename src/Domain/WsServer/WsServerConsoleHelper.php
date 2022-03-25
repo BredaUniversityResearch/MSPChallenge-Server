@@ -33,15 +33,24 @@ class WsServerConsoleHelper implements EventSubscriberInterface
     private string $startDateTime;
     private ?int $terminalHeight = null;
     private bool $tableOutput = false;
+    private ?int $messageMaxLines = null;
+    private ?string $messageFilter = null;
 
-    public function __construct(WsServer $wsServer, ConsoleOutput $output, bool $tableOutput)
-    {
+    public function __construct(
+        WsServer $wsServer,
+        ConsoleOutput $output,
+        bool $tableOutput,
+        ?int $messageMaxLines,
+        ?string $messageFilter
+    ) {
         $this->wsServer = $wsServer;
         $wsServer->addSubscriber($this);
         $this->output = $output;
         $this->tableOutput = $tableOutput;
         $this->table = new Table($output);
         $this->startDateTime = date('j M H:i:s');
+        $this->messageFilter = $messageFilter;
+        $this->messageMaxLines = $messageMaxLines;
     }
 
     public function setTerminalHeight(?int $terminalHeight): void
@@ -133,52 +142,78 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         }
     }
 
-    private function processTableInput(
+    private function processClientData(
         int $clientId,
         string $eventName,
         array $clientData,
         int $allowedDataCharsWidth
-    ): void {
+    ): ?string {
         $numClients = count($this->tableInput);
         if ($eventName == WsServer::EVENT_ON_CLIENT_CONNECTED) {
             $numClients += 1;
         }
         $numClients = max(1, $numClients);
         $data = json_encode($clientData, JSON_PRETTY_PRINT);
+
+        if ($this->messageFilter != null) {
+            if (false === strpos($data, $this->messageFilter)) {
+                return null;
+            }
+        }
+
         $terminal = new Terminal();
         $availableTotalLines = $this->terminalHeight ?? $terminal->getHeight();
         $availableTotalLines -= self::HEIGHT_RESERVED_LINES;
         $availableTotalLines = max(1, $availableTotalLines); // at least 1 line left to write
         $minLinesPerClient = floor($availableTotalLines / $numClients);
         $spareLines = $availableTotalLines - ($minLinesPerClient * $numClients);
-
-        $lines = array_slice(
+        $newLines = array_slice(
             explode("\n", $data),
             1, // remove the first {
+            $this->messageMaxLines
+        );
+        $newLines[] = str_repeat('-', $allowedDataCharsWidth);
+
+        static $linesCache = [];
+        $linesCache = array_merge($newLines, $linesCache);
+
+        $linesCache = array_slice(
+            $linesCache,
+            0,
             // at least 1 line to write for the client -- might push the height limit, is ok
             max(1, $minLinesPerClient +
                 // add another "spare" line for the first x clients
                 (array_search($clientId, array_keys($this->tableInput)) < $spareLines ? 1 : 0))
         );
-        $clientData = collect($lines)
+
+        return collect($linesCache)
             ->map(function ($str) use ($allowedDataCharsWidth) {
                 return substr($str, 4, $allowedDataCharsWidth);
             })
             ->implode("\n");
-         $clientInfo = $this->wsServer->getClientInfo($clientId) ?? [];
-         $clientHeaders = $this->wsServer->getClientHeaders($clientId) ?? [];
-         $this->tableInput[$clientId] = [
-             sprintf(
-                 '%1$04d g%2$02d t%3$02d u%4$03d',
-                 $clientId,
-                 $clientHeaders[WsServer::HEADER_GAME_SESSION_ID] ?? '',
-                 $clientInfo['team_id'] ?? '',
-                 $clientInfo['user'] ?? ''
-             ),
+    }
+
+    private function processTableInput(
+        int $clientId,
+        string $eventName,
+        array $clientData,
+        int $allowedDataCharsWidth
+    ): void {
+        $clientInfo = $this->wsServer->getClientInfo($clientId) ?? [];
+        $clientHeaders = $this->wsServer->getClientHeaders($clientId) ?? [];
+        $clientData = $this->processClientData($clientId, $eventName, $clientData, $allowedDataCharsWidth);
+        $this->tableInput[$clientId] = [
+            sprintf(
+                '%1$04d g%2$02d t%3$02d u%4$03d',
+                $clientId,
+                $clientHeaders[WsServer::HEADER_GAME_SESSION_ID] ?? '',
+                $clientInfo['team_id'] ?? '',
+                $clientInfo['user'] ?? ''
+            ),
             date("H:i:s"),
             substr($eventName, 9), // removes the EVENT_ON_ prefix from event name
-            $clientData
-         ];
+            $clientData ?? $this->tableInput[$clientId][3] ?? ''
+        ];
     }
 
     public static function getSubscribedEvents(): array
