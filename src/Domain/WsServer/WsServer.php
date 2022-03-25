@@ -20,6 +20,7 @@ use React\Promise\PromiseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use function App\assertFulfilled;
 use function React\Promise\all;
+use function React\Promise\reject;
 
 function wdo(string $message) // WsServer debugging output if enabled by WS_SERVER_DEBUG_OUTPUT via .env file
 {
@@ -498,10 +499,14 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                             )
                         );
                     }
+                    wdo(json_encode($payloadContainer));
                     $this->statsLoopEnd('latest');
                 })
-                ->otherwise(function (ClientDisconnectedException $e) {
-                    // nothing to do.
+                ->otherwise(function ($reason) {
+                    if ($reason instanceof ClientDisconnectedException) {
+                        return null;
+                    }
+                    return reject($reason);
                 });
         };
     }
@@ -515,11 +520,24 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         'just finished "executeBatches" for connections: ' .
                         implode(', ', array_keys($clientToBatchResultContainer))
                     );
+                    $clientToBatchResultContainer = array_filter($clientToBatchResultContainer);
+                    if (!empty($clientToBatchResultContainer)) {
+                        $this->dispatch(
+                            new NameAwareEvent(
+                                self::EVENT_ON_CLIENT_MESSAGE_SENT,
+                                array_keys($clientToBatchResultContainer),
+                                $clientToBatchResultContainer
+                            )
+                        );
+                    }
                     wdo(json_encode($clientToBatchResultContainer));
                     $this->statsLoopEnd('executeBatches');
                 })
-                ->otherwise(function (ClientDisconnectedException $e) {
-                    // nothing to do.
+                ->otherwise(function ($reason) {
+                    if ($reason instanceof ClientDisconnectedException) {
+                        return null;
+                    }
+                    return reject($reason);
                 });
         };
     }
