@@ -64,13 +64,11 @@
         },
         "post-install-cmd": [
             "@auto-scripts",
-            "cghooks remove -f post-merge pre-push",
-            "cghooks add --ignore-lock"
+            "bash tools/cghooks-fresh-install.sh"
         ],
         "post-update-cmd": [
             "@auto-scripts",
-            "cghooks remove -f post-merge pre-push",
-            "cghooks add --ignore-lock"
+            "bash tools/cghooks-fresh-install.sh"
         ],
         "cghooks": "vendor/bin/cghooks"
     },
@@ -78,7 +76,7 @@
         "symfony/symfony": "*"
     },
     "extra": {
-    "hooks": {
+        "hooks": {
            "config": {
                "stop-on-failure": ["pre-push"]
            },
