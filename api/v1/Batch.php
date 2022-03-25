@@ -236,16 +236,18 @@ class Batch extends Base
             $this->getAsyncDatabase()->query(
                 $qb
                     ->update('api_batch')
-                    ->set('api_batch_state', 'Executing')
+                    ->set('api_batch_state', $qb->createPositionalParameter('Executing'))
                     ->where($qb->expr()->in('api_batch_id', $batchIds))
             )
-            ->done(function (Result $dummy) use ($deferred, $result) {
-                // just pass the original result.
-                $deferred->resolve($result);
-            })
-            ->otherwise(function () use ($deferred, $batchIds) {
-                $deferred->reject('Could not set to status "Executing" for batch ids: ' . implode(', ', $batchIds));
-            });
+            ->done(
+                function (Result $dummy) use ($deferred, $result) {
+                    // just pass the original result.
+                    $deferred->resolve($result);
+                },
+                function () use ($deferred, $batchIds) {
+                    $deferred->reject('Could not set to status "Executing" for batch ids: ' . implode(', ', $batchIds));
+                }
+            );
             return $deferred->promise();
         })
         ->then(function (Result $result) use (&$promises, $batchIds) {
@@ -304,7 +306,7 @@ class Batch extends Base
                         $this->getAsyncDatabase()->query(
                             $qb
                                 ->update('api_batch')
-                                ->set('api_batch_state', 'Success')
+                                ->set('api_batch_state', $qb->createPositionalParameter('Success'))
                                 ->where($qb->expr()->in('api_batch_id', $batchIds))
                         );
 
@@ -321,7 +323,7 @@ class Batch extends Base
                     $this->getAsyncDatabase()->query(
                         $qb
                             ->update('api_batch')
-                            ->set('api_batch_state', 'Failed')
+                            ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
                             ->where($qb->expr()->in('api_batch_id', $batchIds))
                     );
                     // Propagate by returning rejection
