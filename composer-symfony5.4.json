@@ -6,7 +6,7 @@
     "require": 
     {
         "php": ">=7.4",
-    "ext-pdo": "*",
+        "ext-pdo": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-zip": "*",
