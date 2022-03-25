@@ -22,10 +22,18 @@ git merge --quiet HEAD &> /dev/null
 result=$?
 if [ $result -ne 0 ]
 then
-    echo "Merge in progress. Cannot install cghooks. Please re-run ${0} after merge."
+    echo -e "Merge in progress. \e[31mCannot install cghooks. Please re-run ${0} manually after merge.\e[0m"
     exit 4
 fi
 
 ./vendor/bin/cghooks remove -f post-merge pre-push
 ./vendor/bin/cghooks add --ignore-lock
+result=$?
+if [ $result -ne 0 ]
+then
+    echo -e "\e[31mFailed to add cghooks\e[0m"
+    exit 5
+fi
+
+echo -e "\e[32mSuccessfully added cghooks\e[0m"
 exit 0
