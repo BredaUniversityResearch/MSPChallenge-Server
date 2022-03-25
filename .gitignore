@@ -102,4 +102,5 @@ cghooks.lock
 # Tools incl. Symfony CLI -- just run tools/install-tools.sh
 /tools/
 !/tools/install-tools.sh
+!/tools/cghooks-fresh-install.sh
 !/tools/Win/nssm/
