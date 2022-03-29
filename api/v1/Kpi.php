@@ -6,6 +6,7 @@ use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
 use function App\parallel;
+use function App\tpf;
 use function Clue\React\Block\await;
 
 class Kpi extends Base
@@ -117,31 +118,37 @@ class Kpi extends Base
             );
 
         // ecology
-        $promises[] = $this->getAsyncDatabase()->query(
-            $qb
-                ->setParameters([$time, $country, 'ECOLOGY'])
-        );
+        $toPromiseFunctions[] = tpf(function () use ($qb, $time, $country) {
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->setParameters([$time, $country, 'ECOLOGY'])
+            );
+        });
         // shipping
-        $promises[] = $this->getAsyncDatabase()->query(
-            $qb
-                ->setParameters([$time, $country, 'SHIPPING'])
-        );
+        $toPromiseFunctions[] = tpf(function () use ($qb, $time, $country) {
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->setParameters([$time, $country, 'SHIPPING'])
+            );
+        });
 
         // energy
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        $promises[] = $this->getAsyncDatabase()->query(
-            $qb
-                ->select(
-                    'energy_kpi_grid_id as grid',
-                    'energy_kpi_month as month',
-                    'energy_kpi_country_id as country',
-                    'energy_kpi_actual as actual',
-                )
-                ->from('energy_kpi')
-                ->where('energy_kpi_lastupdate > ' . $qb->createPositionalParameter($time))
-        );
+        $toPromiseFunctions[] = tpf(function () use ($qb, $time) {
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->select(
+                        'energy_kpi_grid_id as grid',
+                        'energy_kpi_month as month',
+                        'energy_kpi_country_id as country',
+                        'energy_kpi_actual as actual',
+                    )
+                    ->from('energy_kpi')
+                    ->where('energy_kpi_lastupdate > ' . $qb->createPositionalParameter($time))
+            );
+        });
 
-        return parallel($promises, 1); // todo: if performance allows, increase threads
+        return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
     }
 
     /**

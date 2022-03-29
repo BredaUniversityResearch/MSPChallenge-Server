@@ -2,10 +2,8 @@
 
 namespace App\Domain\API\v1;
 
-// Routes the HTTP request incl. its parameters to the correct class method, and wraps that method's results in a
-//   consistent response
 use App\Domain\Common\ObjectMethod;
-use App\Domain\Helper\RouterUtil;
+use App\Domain\WsServer\ClientDisconnectedException;
 use Closure;
 use Exception;
 use React\Promise\Deferred;
@@ -16,6 +14,8 @@ use ReflectionMethod;
 use Throwable;
 use function App\resolveOnFutureTick;
 
+// Routes the HTTP request incl. its parameters to the correct class method, and wraps that method's results in a
+//   consistent response
 class Router
 {
     public const ALLOWED_CLASSES = array(
@@ -89,7 +89,7 @@ class Router
     }
 
     /**
-     * @throws ReflectionException
+     * @throws Exception
      */
     public static function executeCallAsync(
         ObjectMethod $objectMethod,
@@ -100,20 +100,10 @@ class Router
         $class = $objectMethod->getInstance();
         $className = (new ReflectionClass($class))->getShortName();
         $method = $objectMethod->getMethod();
-        $payload = null;
+
         /** @var Base $class */
         if (!$class->isValid()) {
-            // security check failed in this instance, so class method not allowed
-            $message = Base::ErrorString(new Exception("Access denied (Security)."));
-            $response = self::formatResponse(false, $message, $payload, $className, $method, $data);
-            return resolveOnFutureTick(new Deferred(), $response)->promise();
-        }
-
-        if (false === method_exists($class, $method)) {
-            // this can only mean that the class method doesn't exist, even though the class does
-            $message = Base::ErrorString(new Exception("Invalid method."));
-            $response = self::formatResponse(false, $message, $payload, $className, $method, $data);
-            return resolveOnFutureTick(new Deferred(), $response)->promise();
+            throw new ClientDisconnectedException('Access denied (Security)');
         }
 
         if (null !== $preExecuteCallback) {
@@ -143,16 +133,7 @@ class Router
         }
 
         if (!($promise instanceof PromiseInterface)) {
-            // method is not async
-            $response = self::formatResponse(
-                false,
-                'This method is not asynchronous',
-                null,
-                $className,
-                $method,
-                $data
-            );
-            return resolveOnFutureTick(new Deferred(), $response)->promise();
+            throw new Exception('This method is not asynchronous: ' . $className . ':' . $methodToUse);
         }
 
         return $promise
@@ -160,8 +141,7 @@ class Router
                 if (null !== $postExecuteCallback) {
                     $postExecuteCallback($payload);
                 }
-                // execution worked, payload has been set, message can remain empty
-                return self::formatResponse(true, '', $payload, $className, $method, $data);
+                return $payload;
             });
     }
 
@@ -348,16 +328,17 @@ class Router
         string $method = '',
         array $data = []
     ): array {
-        $request = $className . '/' . $method;
         if (!$success) {
             $message .= PHP_EOL .
-            "Request: " . $request . PHP_EOL .
+            "Request: " . $className . "/" . $method . PHP_EOL .
             "Call data: " . str_replace(array("\n", "\r"), "", var_export($data, true)) . PHP_EOL .
             "Request URI: " . $_SERVER['REQUEST_URI'];
         }
 
         return array(
-            "type" => $request,
+            // no need for header information from api, only needed for websocket server communication.
+            "header_type" => null,
+            "header_data" => null,
             "success" => $success,
             "message" => $message,
             "payload" => $payload

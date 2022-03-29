@@ -2,15 +2,16 @@
 
 namespace App\Domain\API\v1;
 
-use Doctrine\DBAL\Connection;
+use App\Domain\Common\ToPromiseFunction;
 use Doctrine\DBAL\Exception\InvalidArgumentException;
-use Doctrine\DBAL\ParameterType;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\parallel;
+use function App\tpf;
 use function Clue\React\Block\await;
+use function React\Promise\all;
 
 class Plan extends Base
 {
@@ -186,7 +187,7 @@ class Plan extends Base
         //   1.
         // This should ofc be done before energy elements are removed from the plan.
         $planData = Database::GetInstance()->query("SELECT plan_name FROM plan WHERE plan_id = ?", array($plan));
-        await($this->setAllDependentEnergyPlansToError($plan, $planData[0]["plan_name"]));
+        await(($this->setAllDependentEnergyPlansToError($plan, $planData[0]["plan_name"]))());
 
         Database::GetInstance()->query("DELETE FROM grid WHERE grid_plan_id=?", array($plan));
         // Set the target plans energy error to 0
@@ -354,7 +355,7 @@ class Plan extends Base
             $erroringEnergyPlans = array();
             $energy = new Energy();
             if ($performEnergyDependencyCheck) {
-                await($energy->findDependentEnergyPlans($id, $erroringEnergyPlans));
+                await(($energy->findDependentEnergyPlans($id, $erroringEnergyPlans))());
             }
             if ($performEnergyOverlapCheck) {
                 $energy->FindOverlappingEnergyPlans($id, $erroringEnergyPlans);
@@ -439,26 +440,26 @@ class Plan extends Base
             })
             ->then(function (Result $result) use ($currentGameTime) {
                 $plansToUpdate = $result->fetchAllRows();
-                $promises = [];
+                $toPromiseFunctions = [];
                 foreach ($plansToUpdate as $plan) {
-                    if (null === $promise = $this->updatePlanState($currentGameTime, $plan)) {
+                    if (null === $toPromiseFunction = $this->updatePlanState($currentGameTime, $plan)) {
                         continue;
                     }
-                    $promises[] = $promise;
+                    $toPromiseFunctions[] = $toPromiseFunction;
                 }
-                return parallel($promises, 1);// todo: if performance allows, increase threads
+                return parallel($toPromiseFunctions, 1);// todo: if performance allows, increase threads
             });
     }
 
     /**
      * @throws Exception
      */
-    private function archivePlan(int $planId, string $planName, string $message): PromiseInterface
+    private function archivePlan(int $planId, string $planName, string $message): ToPromiseFunction
     {
-        $promises[] = $this->messageAsync($planId, 1, 'SYSTEM', $message);
+        $toPromiseFunctions[] = $this->messageAsync($planId, 1, 'SYSTEM', $message);
         // set all plans to deleted when it has not been approved or implemented yet and the start construction date has
         //   already passed
-        $promises[] = $this->getAsyncDatabase()->update(
+        $toPromiseFunctions[] = $this->getAsyncDatabase()->update(
             'plan',
             [
                 'plan_id' => $planId
@@ -468,50 +469,54 @@ class Plan extends Base
                 'plan_state' => 'DELETED'
             ]
         );
-        $promises[] = $this->setAllDependentEnergyPlansToError($planId, $planName);
-        return parallel($promises, 1); // todo: if performance allows, increase threads
+        $toPromiseFunctions[] = $this->setAllDependentEnergyPlansToError($planId, $planName);
+        return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
     }
 
     /**
      * @throws Exception
      */
-    private function setAllDependentEnergyPlansToError(int $planId, string $planName): PromiseInterface
+    private function setAllDependentEnergyPlansToError(int $planId, string $planName): ToPromiseFunction
     {
         $dependentPlans = [];
         $energy = new Energy();
         $this->asyncDataTransferTo($energy);
-        return $energy->findDependentEnergyPlans($planId, $dependentPlans)
+        $tpf = $energy->findDependentEnergyPlans($planId, $dependentPlans);
+        $promise = $tpf();
+        return $promise
             ->then(function () use ($planName, &$dependentPlans) {
-                $promises = [];
+                $toPromiseFunctions = [];
                 foreach ($dependentPlans as $erroredPlanId) {
-                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    $promises[] = $this->getAsyncDatabase()->query(
-                        $qb
-                            ->update('plan', 'p')
-                            ->set('p.plan_energy_error', 1)
-                            ->set('p.plan_previousstate', 'p.plan_state')
-                            ->set('p.plan_state', $qb->createPositionalParameter('DESIGN'))
-                            ->set('p.plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
-                            ->where('p.plan_id = ' . $qb->createPositionalParameter($erroredPlanId))
-                    )
-                    ->then(function (/*Result $result*/) use ($planName, $erroredPlanId) {
-                        return $this->messageAsync(
-                            $erroredPlanId,
-                            1,
-                            "SYSTEM",
-                            "Plan was moved back to design after plan \"".$planName.
-                            "\" was archived due to conflicts in the energy system."
-                        );
+                    $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, $planName) {
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        return $this->getAsyncDatabase()->query(
+                            $qb
+                                ->update('plan', 'p')
+                                ->set('p.plan_energy_error', 1)
+                                ->set('p.plan_previousstate', 'p.plan_state')
+                                ->set('p.plan_state', $qb->createPositionalParameter('DESIGN'))
+                                ->set('p.plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                                ->where('p.plan_id = ' . $qb->createPositionalParameter($erroredPlanId))
+                        )
+                        ->then(function (/*Result $result*/) use ($planName, $erroredPlanId) {
+                            return $this->messageAsync(
+                                $erroredPlanId,
+                                1,
+                                "SYSTEM",
+                                "Plan was moved back to design after plan \"".$planName.
+                                "\" was archived due to conflicts in the energy system."
+                            );
+                        });
                     });
                 }
-                return parallel($promises, 1); // todo: if performance allows, increase threads
+                return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
             });
     }
 
     /**
      * @throws Exception
      */
-    private function updatePlanState(int $currentGametime, array $planObject): ?PromiseInterface
+    private function updatePlanState(int $currentGametime, array $planObject): ?ToPromiseFunction
     {
         if ($currentGametime == $planObject['plan_constructionstart']) {
             if ($planObject['plan_state'] != "APPROVED") {
@@ -548,72 +553,74 @@ class Plan extends Base
         }
         
         //plan is implemented, set plan to IMPLEMENTED and handle energy grid
-        return $this->getAsyncDatabase()->update(
-            'plan',
-            [
-                'plan_id' => $planObject['plan_id']
-            ],
-            [
-                'plan_lastupdate' => microtime(true),
-                'plan_state' => 'IMPLEMENTED'
-            ]
-        )
-        // todo: find out if we can do some of this in parallel and not sequential ???
-        ->then(function (/*Result $result*/) use ($planObject) {
-            // Disable all geometry that we reference in previous plans.
-            return $this->disableReferencedGeometryFromPreviousPlans($planObject['plan_id']);
-        })
-        ->then(function (/*Result $result*/) use ($planObject) {
-            return $this->updateFishing($planObject['plan_id']);
-        })
-        ->then(function (/*Result $result*/) use ($planObject) {
-            return $this->messageAsync($planObject['plan_id'], 1, "SYSTEM", "Plan was implemented.");
-        })
-        ->then(function (/*Result $result*/) use ($planObject) {
-            // Update energy grid states, disable all grids that have been deleted and have been reimplemented
-            //   in this plan.
-            $qb = $this->getAsyncDatabase()->createQueryBuilder();
-            /** @noinspection SqlResolve */
-            return $this->getAsyncDatabase()->query(
-                $qb
-                    ->update('grid')
-                    ->set('grid_active', 0)
-                    ->where($qb->expr()->or(
-                        $qb->expr()->in(
-                            'grid_persistent',
-                            '
-                            SELECT grid_removed_grid_persistent
-                            FROM grid_removed
-                            WHERE grid_removed_plan_id = ' . $qb->createPositionalParameter($planObject['plan_id'])
-                        ),
-                        $qb->expr()->in(
-                            'grid_persistent',
-                            'SELECT g.grid_persistent FROM grid g WHERE g.grid_plan_id = ' .
-                                $qb->createPositionalParameter($planObject['plan_id'])
-                        )
-                    ))
+        return tpf(function () use ($planObject) {
+            return $this->getAsyncDatabase()->update(
+                'plan',
+                [
+                    'plan_id' => $planObject['plan_id']
+                ],
+                [
+                    'plan_lastupdate' => microtime(true),
+                    'plan_state' => 'IMPLEMENTED'
+                ]
+            )
+            // todo: find out if we can do some of this in parallel and not sequential ???
+            ->then(function (/*Result $result*/) use ($planObject) {
+                // Disable all geometry that we reference in previous plans.
+                return $this->disableReferencedGeometryFromPreviousPlans($planObject['plan_id']);
+            })
+            ->then(function (/*Result $result*/) use ($planObject) {
+                return $this->updateFishing($planObject['plan_id']);
+            })
+            ->then(function (/*Result $result*/) use ($planObject) {
+                return $this->messageAsync($planObject['plan_id'], 1, "SYSTEM", "Plan was implemented.");
+            })
+            ->then(function (/*Result $result*/) use ($planObject) {
+                // Update energy grid states, disable all grids that have been deleted and have been reimplemented
+                //   in this plan.
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                /** @noinspection SqlResolve */
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->update('grid')
+                        ->set('grid_active', 0)
+                        ->where($qb->expr()->or(
+                            $qb->expr()->in(
+                                'grid_persistent',
+                                '
+                                SELECT grid_removed_grid_persistent
+                                FROM grid_removed
+                                WHERE grid_removed_plan_id = ' . $qb->createPositionalParameter($planObject['plan_id'])
+                            ),
+                            $qb->expr()->in(
+                                'grid_persistent',
+                                'SELECT g.grid_persistent FROM grid g WHERE g.grid_plan_id = ' .
+                                    $qb->createPositionalParameter($planObject['plan_id'])
+                            )
+                        ))
 
-                    // since it is not possible to use this innerJoin with an update with DBAL, use a sub query instead:
-                    // ->innerJoin('grid', 'plan', 'plan', 'grid.grid_plan_id = plan.plan_id')
-                    ->andWhere(
-                        $qb->expr()->in(
-                            'grid.grid_plan_id',
-                            '
-                            SELECT plan_id
-                            FROM plan p
-                            WHERE p.plan_id = grid.grid_plan_id AND p.plan_gametime < ' .
-                                $qb->createPositionalParameter($planObject['plan_gametime'])
+                        // since it is not possible to use this innerJoin with an update with DBAL,
+                        //  use a sub query instead:
+                        //  ->innerJoin('grid', 'plan', 'plan', 'grid.grid_plan_id = plan.plan_id')
+                        ->andWhere(
+                            $qb->expr()->in(
+                                'grid.grid_plan_id',
+                                '
+                                SELECT plan_id
+                                FROM plan p
+                                WHERE p.plan_id = grid.grid_plan_id AND p.plan_gametime < ' .
+                                    $qb->createPositionalParameter($planObject['plan_gametime'])
+                            )
                         )
-                    )
-            );
+                );
+            });
         });
     }
 
     /**
-     * @throws InvalidArgumentException
      * @throws Exception
      */
-    private function updatePlanLayerState(array $planLayer, int $currentGameTime): ?PromiseInterface
+    private function updatePlanLayerState(array $planLayer, int $currentGameTime): ?ToPromiseFunction
     {
         if ($planLayer['plan_layer_state'] == "INACTIVE") {
             return null;
@@ -641,71 +648,20 @@ class Plan extends Base
         }
 
         //self::Debug("setting state of layer to " . $state);
-        return $this->getAsyncDatabase()->update(
-            'plan_layer',
-            [
-                'plan_layer_id' => $planLayer['plan_layer_id']
-            ],
-            [
-                'plan_layer_state' => $state
-            ]
-        )
-        ->then(function (/*Result $result*/) use ($state, $planLayer) {
-            switch ($state) {
-                case 'ASSEMBLY':
-                    //if the state of the layer is set to assembly, notify MEL that the assembly has started
-                    return $this->getAsyncDatabase()->update(
-                        'layer',
-                        [
-                            'layer_id' => $planLayer['oldid']
-                        ],
-                        [
-                            'layer_melupdate' => 1
-                        ]
-                    );
-                case 'ACTIVE':
-                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    return $this->getAsyncDatabase()->query(
-                        $qb
-                            ->update('geometry', 'g')
-                            ->set('g.geometry_active', 0)
-
-                            // since it is not possible to use this innerJoin with an update with DBAL,
-                            //   use a sub query instead:
-                            // ->innerJoin(
-                            //     'g',
-                            //     'plan_delete',
-                            //     'p',
-                            //     $qb->expr()->and(
-                            //         $qb->expr()->or(
-                            //             'g.geometry_persistent=p.plan_delete_geometry_persistent',
-                            //             'g.geometry_subtractive=p.plan_delete_geometry_persistent'
-                            //         ),
-                            //         'p.plan_delete_plan_id=' . $qb->createPositionalParameter($planLayer['plan_id'])
-                            //     )
-                            //)
-                            ->where(
-                                $qb->expr()->in(
-                                    'g.geometry_id',
-                                    '
-                                    SELECT geometry_id
-                                    FROM geometry
-                                    INNER JOIN plan_delete p ON (
-                                        (
-                                            geometry.geometry_persistent=p.plan_delete_geometry_persistent OR
-                                            geometry.geometry_subtractive=p.plan_delete_geometry_persistent
-                                        ) AND
-                                        p.plan_delete_plan_id= ?
-                                    )
-                                    '
-                                )
-                            )
-                            ->setParameters([$planLayer['plan_id']])
-                    )
-                    ->then(function (/*Result $result*/) use ($planLayer) {
-                        // we don't have to do anything here except make sure the parent layer is set to be updated in
-                        //   MEL, the merging of geometry is done while getting the layer data in
-                        //   Layer->GeometryExportName()
+        return tpf(function () use ($planLayer, $state) {
+            return $this->getAsyncDatabase()->update(
+                'plan_layer',
+                [
+                    'plan_layer_id' => $planLayer['plan_layer_id']
+                ],
+                [
+                    'plan_layer_state' => $state
+                ]
+            )
+            ->then(function (/*Result $result*/) use ($state, $planLayer) {
+                switch ($state) {
+                    case 'ASSEMBLY':
+                        //if the state of the layer is set to assembly, notify MEL that the assembly has started
                         return $this->getAsyncDatabase()->update(
                             'layer',
                             [
@@ -715,10 +671,64 @@ class Plan extends Base
                                 'layer_melupdate' => 1
                             ]
                         );
-                    });
-                default:
-                    return null;
-            }
+                    case 'ACTIVE':
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        return $this->getAsyncDatabase()->query(
+                            $qb
+                                ->update('geometry', 'g')
+                                ->set('g.geometry_active', 0)
+
+                                // since it is not possible to use this innerJoin with an update with DBAL,
+                                //   use a sub query instead:
+                                // ->innerJoin(
+                                //     'g',
+                                //     'plan_delete',
+                                //     'p',
+                                //     $qb->expr()->and(
+                                //         $qb->expr()->or(
+                                //             'g.geometry_persistent=p.plan_delete_geometry_persistent',
+                                //             'g.geometry_subtractive=p.plan_delete_geometry_persistent'
+                                //         ),
+                                //         'p.plan_delete_plan_id=' .
+                                //         $qb->createPositionalParameter($planLayer['plan_id'])
+                                //     )
+                                //)
+                                ->where(
+                                    $qb->expr()->in(
+                                        'g.geometry_id',
+                                        '
+                                        SELECT geometry_id
+                                        FROM geometry
+                                        INNER JOIN plan_delete p ON (
+                                            (
+                                                geometry.geometry_persistent=p.plan_delete_geometry_persistent OR
+                                                geometry.geometry_subtractive=p.plan_delete_geometry_persistent
+                                            ) AND
+                                            p.plan_delete_plan_id= ?
+                                        )
+                                        '
+                                    )
+                                )
+                                ->setParameters([$planLayer['plan_id']])
+                        )
+                        ->then(function (/*Result $result*/) use ($planLayer) {
+                            // we don't have to do anything here except make sure the parent layer is set to be
+                            //   updated in MEL, the merging of geometry is done while getting the layer data in
+                            //   Layer->GeometryExportName()
+                            return $this->getAsyncDatabase()->update(
+                                'layer',
+                                [
+                                    'layer_id' => $planLayer['oldid']
+                                ],
+                                [
+                                    'layer_melupdate' => 1
+                                ]
+                            );
+                        });
+                    default:
+                        return null;
+                }
+            });
         });
     }
 
@@ -748,14 +758,14 @@ class Plan extends Base
         )
         ->then(function (Result $result) use ($currentGameTime) {
             $planLayers = $result->fetchAllRows();
-            $promises = [];
+            $toPromiseFunctions = [];
             foreach ($planLayers as $planLayer) {
-                if (null === $promise = $this->updatePlanLayerState($planLayer, $currentGameTime)) {
+                if (null === $toPromiseFunction = $this->updatePlanLayerState($planLayer, $currentGameTime)) {
                     continue;
                 }
-                $promises[] = $promise;
+                $toPromiseFunctions[] = $toPromiseFunction;
             }
-            return parallel($promises, 1); // todo: if performance allows, increase threads
+            return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
         });
     }
 
@@ -851,30 +861,63 @@ class Plan extends Base
         )
         ->then(function (Result $result) use ($planId) {
             $fishing = $result->fetchAllRows();
-            $promises = [];
+            $toPromiseFunctions = [];
             foreach ($fishing as $fish) {
-                $promises[] = $this->getAsyncDatabase()->update(
+                $toPromiseFunctions[] = tpf(function () use ($fish) {
+                    return $this->getAsyncDatabase()->update(
+                        'fishing',
+                        [
+                            'fishing_type' => $fish['fishing_type'],
+                            'fishing_country_id' => $fish['fishing_country_id']
+                        ],
+                        [
+                            'fishing_active' => 0
+                        ]
+                    );
+                });
+            }
+            $toPromiseFunctions[] = tpf(function () use ($planId) {
+                return $this->getAsyncDatabase()->update(
                     'fishing',
                     [
-                        'fishing_type' => $fish['fishing_type'],
-                        'fishing_country_id' => $fish['fishing_country_id']
+                        'fishing_plan_id' => $planId
                     ],
                     [
-                        'fishing_active' => 0
+                        'fishing_active' => 1
                     ]
                 );
-            }
-            $promises[] = $this->getAsyncDatabase()->update(
-                'fishing',
-                [
-                    'fishing_plan_id' => $planId
-                ],
-                [
-                    'fishing_active' => 1
-                ]
-            );
-            return parallel($promises, 1); // todo: if performance allows, increase threads
+            });
+            return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
         });
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function addApprovalAsync(int $id, array $countries = []): PromiseInterface
+    {
+        $deferred = new Deferred();
+        $this->deleteApprovalAsync($id)
+            ->then(function (/* Result $result */) use ($id, $countries) {
+                $promises = [];
+                foreach ($countries as $country) {
+                    $promises[] = $this->getAsyncDatabase()->insert('approval', [
+                        'approval_plan_id' => $id,
+                        'approval_country_id' => $country
+                    ]);
+                }
+                return all($promises);
+            })
+            ->done(
+                /** @var Result[] $results */
+                function (/* array $results */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
+            );
+        return $deferred->promise();
     }
 
     /**
@@ -889,13 +932,7 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AddApproval(int $id, array $countries = []): void
     {
-        $this->DeleteApproval($id);
-        foreach ($countries as $country) {
-            Database::GetInstance()->query(
-                "INSERT INTO approval (approval_plan_id, approval_country_id) VALUES (?, ?)",
-                array($id, $country)
-            );
-        }
+        await($this->addApprovalAsync($id, $countries));
     }
 
     /**
@@ -922,6 +959,24 @@ class Plan extends Base
     }
 
     /**
+     * @throws Exception
+     */
+    public function deleteApprovalAsync(int $id): PromiseInterface
+    {
+        $deferred = new Deferred();
+        $this->getAsyncDatabase()->delete('approval', ['approval_plan_id' => $id])
+            ->done(
+                function (/* Result $result */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
+            );
+        return $deferred->promise();
+    }
+
+    /**
      * @apiGroup Plan
      * @apiDescription Delete all required approvals for a plan, either when it's not necessary anymore or when you
      *   need to submit a new list
@@ -932,9 +987,12 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function DeleteApproval(int $id): void
     {
-        Database::GetInstance()->query("DELETE FROM approval WHERE approval_plan_id=?", array($id));
+        await($this->deleteApprovalAsync($id));
     }
 
+    /**
+     * @throws Exception
+     */
     public function latestAsync(int $lastUpdate): PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -963,120 +1021,137 @@ class Plan extends Base
         )
         ->then(function (Result $result) {
             $plans = $result->fetchAllRows();
-            $promises = [];
+            $toPromiseFunctions = [];
             foreach ($plans as $key => &$d) {
-                $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 //all layers, this is needed to merge them with geometry later
-                $promises['layers' . $key] = $this->getAsyncDatabase()->query(
-                    $qb
-                        ->select(
-                            'pl.plan_layer_layer_id as layerid',
-                            'l.layer_original_id as original',
-                            'pl.plan_layer_state as state'
-                        )
-                        ->from('plan_layer', 'pl')
-                        ->leftJoin('pl', 'layer', 'l', 'pl.plan_layer_layer_id=l.layer_id')
-                        ->where('pl.plan_layer_plan_id = ' . $qb->createPositionalParameter($d['id']))
-                );
+                $toPromiseFunctions['layers' . $key] = tpf(function () use ($d) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select(
+                                'pl.plan_layer_layer_id as layerid',
+                                'l.layer_original_id as original',
+                                'pl.plan_layer_state as state'
+                            )
+                            ->from('plan_layer', 'pl')
+                            ->leftJoin('pl', 'layer', 'l', 'pl.plan_layer_layer_id=l.layer_id')
+                            ->where('pl.plan_layer_plan_id = ' . $qb->createPositionalParameter($d['id']))
+                    );
+                });
 
-                $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 //energy grids
-                $promises['grids' . $key] = $this->getAsyncDatabase()->query(
-                    $qb
-                        ->select(
-                            'grid_id as id',
-                            'grid_name as name',
-                            'grid_active as active',
-                            'grid_persistent as persistent',
-                            'grid_distribution_only as distribution_only',
-                        )
-                        ->from('grid')
-                        ->where('grid_plan_id = ' . $qb->createPositionalParameter($d['id']))
-                );
-
+                $toPromiseFunctions['grids' . $key] = tpf(function () use ($d) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select(
+                                'grid_id as id',
+                                'grid_name as name',
+                                'grid_active as active',
+                                'grid_persistent as persistent',
+                                'grid_distribution_only as distribution_only',
+                            )
+                            ->from('grid')
+                            ->where('grid_plan_id = ' . $qb->createPositionalParameter($d['id']))
+                    );
+                });
 
                 //load deleted grid ids here TODO
-                $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                $promises['deleted' . $key] = $this->getAsyncDatabase()->query(
-                    $qb
-                        ->select('grid_removed_grid_persistent as grid_persistent')
-                        ->from('grid_removed')
-                        ->where('grid_removed_plan_id = ' . $qb->createPositionalParameter($d['id']))
-                );
+                $toPromiseFunctions['deleted' . $key] = tpf(function () use ($d) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select('grid_removed_grid_persistent as grid_persistent')
+                            ->from('grid_removed')
+                            ->where('grid_removed_plan_id = ' . $qb->createPositionalParameter($d['id']))
+                    );
+                });
 
                 //fishing - Return NULL in the 'fishing' values when there's no values available.
-                $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                $promises['fishing' . $key] = $this->getAsyncDatabase()->query(
-                    $qb
-                        ->select(
-                            'fishing_country_id as country_id',
-                            'fishing_type as type',
-                            'fishing_amount as amount'
-                        )
-                        ->from('fishing')
-                        ->where('fishing_plan_id = ' . $qb->createPositionalParameter($d['id']))
-                );
+                $toPromiseFunctions['fishing' . $key] = tpf(function () use ($d) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select(
+                                'fishing_country_id as country_id',
+                                'fishing_type as type',
+                                'fishing_amount as amount'
+                            )
+                            ->from('fishing')
+                            ->where('fishing_plan_id = ' . $qb->createPositionalParameter($d['id']))
+                    );
+                });
 
-                $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                $promises['votes' . $key] = $this->getAsyncDatabase()->query(
-                    $qb
-                        ->select(
-                            'approval_country_id as country',
-                            'approval_vote as vote'
-                        )
-                        ->from('approval')
-                        ->where('approval_plan_id = ' . $qb->createPositionalParameter($d['id']))
-                );
+                $toPromiseFunctions['votes' . $key] = tpf(function () use ($d) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select(
+                                'approval_country_id as country',
+                                'approval_vote as vote'
+                            )
+                            ->from('approval')
+                            ->where('approval_plan_id = ' . $qb->createPositionalParameter($d['id']))
+                    );
+                });
 
                 //Restriction area settings that have changed in this plan.
-                $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                $promises['restriction_settings' . $key] = $this->getAsyncDatabase()->query(
-                    $qb
-                        ->select(
-                            'plan_restriction_area_layer_id as layer_id',
-                            'plan_restriction_area_country_id as team_id',
-                            'plan_restriction_area_entity_type as entity_type_id',
-                            'plan_restriction_area_size as restriction_size',
-                        )
-                        ->from('plan_restriction_area')
-                        ->where('plan_restriction_area_plan_id = ' . $qb->createPositionalParameter($d['id']))
-                );
+                $toPromiseFunctions['restriction_settings' . $key] = tpf(function () use ($d) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select(
+                                'plan_restriction_area_layer_id as layer_id',
+                                'plan_restriction_area_country_id as team_id',
+                                'plan_restriction_area_entity_type as entity_type_id',
+                                'plan_restriction_area_size as restriction_size',
+                            )
+                            ->from('plan_restriction_area')
+                            ->where('plan_restriction_area_plan_id = ' . $qb->createPositionalParameter($d['id']))
+                    );
+                });
             }
             unset($d);
-            return parallel($promises, 1) // todo: if performance allows, increase threads
+            return parallel($toPromiseFunctions, 1) // todo: if performance allows, increase threads
                 ->then(function (array $results) use (&$plans) {
                     /** @var Result[] $results */
-                    $promises = [];
+                    $toPromiseFunctions = [];
                     foreach ($plans as $pKey => &$d) {
                         $d['layers'] = $results['layers' . $pKey]->fetchAllRows();
                         $d['grids'] = $results['grids' . $pKey]->fetchAllRows();
                         foreach ($d['grids'] as $gKey => &$g) {
-                            $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                            $promises['energy' . $gKey] = $this->getAsyncDatabase()->query(
-                                $qb
-                                    ->select(
-                                        'grid_energy_country_id as country_id',
-                                        'grid_energy_expected as expected'
-                                    )
-                                    ->from('grid_energy')
-                                    ->where('grid_energy_grid_id = ' . $qb->createPositionalParameter($g['id']))
-                            );
-                            $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                            $promises['sources' . $gKey] = $this->getAsyncDatabase()->query(
-                                $qb
-                                    ->select('grid_source_geometry_id as geometry_id')
-                                    ->from('grid_source')
-                                    ->where('grid_source_grid_id = ' . $qb->createPositionalParameter($g['id']))
-                            );
-                            $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                            $promises['sockets' . $gKey] = $this->getAsyncDatabase()->query(
-                                $qb
-                                    ->select(
-                                        'grid_socket_geometry_id as geometry_id'
-                                    )
-                                    ->from('grid_socket')
-                                    ->where('grid_socket_grid_id = ' . $qb->createPositionalParameter($g['id']))
-                            );
+                            $toPromiseFunctions['energy' . $gKey] = tpf(function () use ($g) {
+                                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                                return $this->getAsyncDatabase()->query(
+                                    $qb
+                                        ->select(
+                                            'grid_energy_country_id as country_id',
+                                            'grid_energy_expected as expected'
+                                        )
+                                        ->from('grid_energy')
+                                        ->where('grid_energy_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                );
+                            });
+                            $toPromiseFunctions['sources' . $gKey] = tpf(function () use ($g) {
+                                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                                return $this->getAsyncDatabase()->query(
+                                    $qb
+                                        ->select('grid_source_geometry_id as geometry_id')
+                                        ->from('grid_source')
+                                        ->where('grid_source_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                );
+                            });
+                            $toPromiseFunctions['sockets' . $gKey] = tpf(function () use ($g) {
+                                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                                return $this->getAsyncDatabase()->query(
+                                    $qb
+                                        ->select(
+                                            'grid_socket_geometry_id as geometry_id'
+                                        )
+                                        ->from('grid_socket')
+                                        ->where('grid_socket_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                );
+                            });
                         }
                         unset($g);
 
@@ -1095,7 +1170,7 @@ class Plan extends Base
                         $d['restriction_settings'] = $results['restriction_settings' . $pKey]->fetchAllRows();
                     }
                     unset($d);
-                    return parallel($promises, 1) // todo: if performance allows, increase threads
+                    return parallel($toPromiseFunctions, 1) // todo: if performance allows, increase threads
                         ->then(function (array $results) use (&$plans) {
                             /** @var Result[] $results */
                             foreach ($plans as &$d) {
@@ -1862,6 +1937,9 @@ class Plan extends Base
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function getMessagesAsync(float $time): PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -2091,6 +2169,33 @@ class Plan extends Base
     }
 
     /**
+     * @throws Exception
+     */
+    public function descriptionAsync(int $id, string $description = ''): PromiseInterface
+    {
+        $deferred = new Deferred();
+
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->update('plan')
+                ->set('plan_description', $qb->createPositionalParameter($description))
+                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
+        )
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
+        );
+
+        return $deferred->promise();
+    }
+
+    /**
      * @apiGroup Plan
      * @apiDescription Update the description
      * @throws Exception
@@ -2102,21 +2207,6 @@ class Plan extends Base
     public function Description(int $id, string $description = ""): void
     {
         await($this->descriptionAsync($id, $description));
-    }
-
-    public function descriptionAsync(int $id, string $description = ''): PromiseInterface
-    {
-        $deferred = new Deferred();
-
-        $this->getAsyncDatabase()->update('plan', ['plan_id' => $id], [
-            'plan_description' => $description,
-            'plan_lastupdate' => microtime(true)
-        ])
-        ->then(function (Result $result) use ($deferred) {
-            $deferred->resolve(); // return void, we do not care about the result
-        });
-
-        return $deferred->promise();
     }
 
     /**
@@ -2171,20 +2261,8 @@ class Plan extends Base
     }
 
     /**
-     * @apiGroup Plan
-     * @apiDescription Unlock a plan
      * @throws Exception
-     * @api {POST} /plan/unlock Unlock
-     * @apiParam {int} plan plan id
-     * @apiParam {int} force_unlock (0|1) Force unlock a plan. Don't check for the correct user, just do it.
-     * @noinspection PhpUnused
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Unlock(int $id, int $user, int $force_unlock = 0): void
-    {
-        await($this->unlockAsync($id, $user, $force_unlock));
-    }
-
     public function unlockAsync(int $id, int $user, int $force_unlock = 0): PromiseInterface
     {
         $deferred = new Deferred();
@@ -2201,20 +2279,43 @@ class Plan extends Base
             if (empty($row['plan_lock_user_id'])) {
                 return null; // no need to return an exception or do anything, the plan is just already unlocked.
             }
-            $where = ['plan_id' => $id];
+
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            $qb->update('plan')
+                ->set('plan_lock_user_id', $qb->createPositionalParameter(null))
+                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)));
+            $where = $qb->expr()->and($qb->expr()->eq('plan_id', $id));
             if ($force_unlock == 0) {
-                $where['plan_lock_user_id'] = $user;
+                $where = $where->with($qb->expr()->eq('plan_lock_user_id', $qb->createPositionalParameter($user)));
             }
-            return $this->getAsyncDatabase()->update('plan', $where, [
-                'plan_lock_user_id' => null,
-                'plan_lastupdate' => microtime(true)
-            ]);
+            $qb->where($where);
+            return $this->getAsyncDatabase()->query($qb);
         })
-        ->then(function (?Result $result) use ($deferred) {
-            $deferred->resolve(); // return void, we do not care about the result
-        });
+        ->done(
+            function (/* ?Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
+        );
 
         return $deferred->promise();
+    }
+
+    /**
+     * @apiGroup Plan
+     * @apiDescription Unlock a plan
+     * @throws Exception
+     * @api {POST} /plan/unlock Unlock
+     * @apiParam {int} plan plan id
+     * @apiParam {int} force_unlock (0|1) Force unlock a plan. Don't check for the correct user, just do it.
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Unlock(int $id, int $user, int $force_unlock = 0): void
+    {
+        await($this->unlockAsync($id, $user, $force_unlock));
     }
 
     /**
@@ -2360,7 +2461,7 @@ class Plan extends Base
             array($error, microtime(true), $id)
         );
         if ($error == 1 && $check_dependent_plans == 1) {
-            await($this->setAllDependentEnergyPlansToError($id, $planData[0]["plan_name"]));
+            await(($this->setAllDependentEnergyPlansToError($id, $planData[0]["plan_name"])()));
         }
     }
 

@@ -357,7 +357,8 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                     $this->clientInfoContainer[$connResourceId]['prev_payload'] = $payload;
                     $this->clientInfoContainer[$connResourceId]['last_update_time'] = $payload['update_time'];
                     $json = json_encode([
-                        'type' => 'Game/Latest',
+                        'header_type' => 'Game/Latest',
+                        'header_data' => null,
                         'success' => true,
                         'message' => null,
                         'payload' => $payload
@@ -396,33 +397,56 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $timeStart = microtime(true);
                 wdo('Starting "executeBatches" for: ' . $connResourceId);
-                $promises[$connResourceId] = $this->getBatch($connResourceId)->executeQueuedBatchesFor(
+                $promises[$connResourceId] = $this->getBatch($connResourceId)->executeNextQueuedBatchFor(
                     $clientInfo['team_id'],
                     $clientInfo['user']
                 )
-                ->then(function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
-                    wdo('Created "executeBatches" payload for: ' . $connResourceId);
-                    $this->statsLoopRegister('executeBatches', $connResourceId, microtime(true) - $timeStart);
-                    if (empty($batchResultContainer)) {
-                        return [];
-                    }
-                    if (!array_key_exists($connResourceId, $this->clients)) {
-                        // disconnected while running this async code, nothing was sent
-                        wdo('disconnected while running this async code, nothing was sent');
-                        $e = new ClientDisconnectedException();
-                        $e->setConnResourceId($connResourceId);
-                        throw $e;
-                    }
+                ->then(
+                    function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
+                        wdo('Created "executeBatches" payload for: ' . $connResourceId);
+                        $this->statsLoopRegister('executeBatches', $connResourceId, microtime(true) - $timeStart);
+                        if (empty($batchResultContainer)) {
+                            return [];
+                        }
+                        if (!array_key_exists($connResourceId, $this->clients)) {
+                            // disconnected while running this async code, nothing was sent
+                            wdo('disconnected while running this async code, nothing was sent');
+                            $e = new ClientDisconnectedException();
+                            $e->setConnResourceId($connResourceId);
+                            throw $e;
+                        }
 
-                    $json = json_encode([
-                        'type' => 'Batch/ExecuteBatch',
-                        'success' => true,
-                        'message' => null,
-                        'payload' => $batchResultContainer
-                    ]);
-                    $this->clients[$connResourceId]->send($json);
-                    return $batchResultContainer;
-                });
+                        $batchId = key($batchResultContainer);
+                        $batchResult = current($batchResultContainer);
+
+                        $json = json_encode([
+                            'header_type' => 'Batch/ExecuteBatch',
+                            'header_data' => [
+                                'batch_id' => $batchId,
+                            ],
+                            'success' => true,
+                            'message' => null,
+                            'payload' => $batchResult
+                        ]);
+                        $this->clients[$connResourceId]->send($json);
+                        return $batchResultContainer;
+                    },
+                    function (array $reasonContainer) use ($connResourceId) {
+                        $batchId = key($reasonContainer);
+                        $reason = current($reasonContainer);
+                        $json = json_encode([
+                            'header_type' => 'Batch/ExecuteBatch',
+                            'header_data' => [
+                                'batch_id' => $batchId,
+                            ],
+                            'success' => false,
+                            'message' => $reason,
+                            'payload' => null
+                        ]);
+                        $this->clients[$connResourceId]->send($json);
+                        return reject($reason);
+                    }
+                );
             }
         }
         return all($promises);

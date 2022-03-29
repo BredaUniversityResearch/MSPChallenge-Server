@@ -4,11 +4,10 @@ namespace App\Domain\API\v1;
 
 use Drift\DBAL\Result;
 use Exception;
-use Illuminate\Support\Collection;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\chain;
-use function App\resolveOnFutureTick;
+use function App\tpf;
 use function React\Promise\reject;
 
 class Batch extends Base
@@ -178,11 +177,13 @@ class Batch extends Base
         return $batchResult;
     }
 
-    public function executeQueuedBatchesFor(int $teamId, int $userId): PromiseInterface
+    public function executeNextQueuedBatchFor(int $teamId, int $userId): PromiseInterface
     {
+        $deferred = new Deferred();
+
         // get batches to execute
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return $this->getAsyncDatabase()->query(
+        $this->getAsyncDatabase()->query(
             $qb
                 ->select('b.api_batch_id')
                 ->from('api_batch', 'b')
@@ -193,26 +194,31 @@ class Batch extends Base
                         'b.api_batch_user_id = ' . $qb->createPositionalParameter($userId)
                     )
                 )
+                ->orderBy('api_batch_id') // first in, first out
+                ->setMaxResults(1)
         )
         ->then(function (Result $result) {
-            $batchIds = collect($result->fetchAllRows() ?: [])
-                ->keyBy('api_batch_id')
-                ->keys()
-                ->all();
-            return $this->executeQueuedBatches($batchIds);
-        });
+            if (null === $row = $result->fetchFirstRow()) {
+                return [];
+            }
+            return $this->executeQueuedBatch($row['api_batch_id']);
+        })
+        ->done(
+            function (array $batchResultContainer) use ($deferred) {
+                $deferred->resolve($batchResultContainer);
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
+        );
+
+        return $deferred->promise();
     }
 
-    public function executeQueuedBatches(array $batchIds): PromiseInterface
+    public function executeQueuedBatch(int $batchId): PromiseInterface
     {
-        if (empty($batchIds)) {
-            return resolveOnFutureTick(new Deferred(), [])->promise();
-        }
-
         // get batch tasks to execute
-        foreach ($batchIds as $batchId) {
-            $this->cachedBatchResults[$batchId] = [];
-        }
+        $this->cachedBatchResults[$batchId] = [];
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
             $qb
@@ -225,11 +231,11 @@ class Batch extends Base
                     $qb->expr()->and(
                         'b.api_batch_id = t.api_batch_task_batch_id',
                         'b.api_batch_state = "Queued"',
-                        $qb->expr()->in('b.api_batch_id', $batchIds)
+                        $qb->expr()->eq('b.api_batch_id', $batchId)
                     )
                 )
         )
-        ->then(function (Result $result) use ($batchIds) {
+        ->then(function (Result $result) use ($batchId) {
             $deferred = new Deferred();
             // first set the state to "Executing" before continuing
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -237,103 +243,99 @@ class Batch extends Base
                 $qb
                     ->update('api_batch')
                     ->set('api_batch_state', $qb->createPositionalParameter('Executing'))
-                    ->where($qb->expr()->in('api_batch_id', $batchIds))
+                    ->where($qb->expr()->eq('api_batch_id', $batchId))
             )
             ->done(
                 function (Result $dummy) use ($deferred, $result) {
                     // just pass the original result.
                     $deferred->resolve($result);
                 },
-                function () use ($deferred, $batchIds) {
-                    $deferred->reject('Could not set to status "Executing" for batch ids: ' . implode(', ', $batchIds));
+                function () use ($deferred, $batchId) {
+                    $deferred->reject('Could not set to status "Executing" for batch id: ' . $batchId);
                 }
             );
             return $deferred->promise();
         })
-        ->then(function (Result $result) use (&$promises, $batchIds) {
-            $batchTasksContainer = collect($result->fetchAllRows() ?: [])
-                ->groupBy('api_batch_task_batch_id')
-                ->map(function (Collection $batchTasks, $batchId) {
-                     return $batchTasks->sortBy('api_batch_task_group')->all();
-                })
+        ->then(function (Result $result) use ($batchId) {
+            $batchTasks = collect($result->fetchAllRows() ?: [])
+                ->sortBy('api_batch_task_group')
                 ->all();
 
-            $promises = [];
-            /** @var array $batchTasks */
-            foreach ($batchTasksContainer as $batchId => $batchTasks) {
-                if (empty($batchTasks)) {
-                    continue;
-                }
-                foreach ($batchTasks as $task) {
-                    $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
-                    $endpoint = $task['api_batch_task_api_endpoint'];
+            $toPromiseFunctions = [];
+            /** @var array $task */
+            foreach ($batchTasks as $task) {
+                $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
+                $endpoint = $task['api_batch_task_api_endpoint'];
 
-                    // create ObjectMethod and inject game session id, and async database into the instance.
-                    $objectMethod = Router::createObjectMethodFromEndpoint($endpoint);
-                    /** @var Base $instance */
-                    $instance = $objectMethod->getInstance();
-                    $this->asyncDataTransferTo($instance);
+                // create ObjectMethod and inject game session id, and async database into the instance.
+                $objectMethod = Router::createObjectMethodFromEndpoint($endpoint);
+                /** @var Base $instance */
+                $instance = $objectMethod->getInstance();
+                $this->asyncDataTransferTo($instance);
 
-                    $promises[$batchId.'-'.$task['api_batch_task_reference_identifier']] = Router::executeCallAsync(
+                $toPromiseFunctions[$task['api_batch_task_reference_identifier']] = tpf(
+                    function () use (
                         $objectMethod,
                         $callData,
-                        function (array &$callData) use ($batchId) {
-                            // fix references in call data using batch cache results
-                            array_walk_recursive(
-                                $callData,
-                                function (&$value, $key, array $presentResults) {
-                                    self::fixupReferences($value, $key, $presentResults);
-                                },
-                                $this->cachedBatchResults[$batchId]
-                            );
-                        },
-                        function (&$payload) use ($batchId, $task) {
-                            // fill batch cache results
-                            $this->cachedBatchResults[$batchId][$task['api_batch_task_reference_identifier']] =
-                                $payload;
-                        }
-                    );
-                }
+                        $batchId,
+                        $task
+                    ) {
+                        return Router::executeCallAsync(
+                            $objectMethod,
+                            $callData,
+                            function (array &$callData) use ($batchId) {
+                                // fix references in call data using batch cache results
+                                array_walk_recursive(
+                                    $callData,
+                                    function (&$value, $key, array $presentResults) {
+                                        self::fixupReferences($value, $key, $presentResults);
+                                    },
+                                    $this->cachedBatchResults[$batchId]
+                                );
+                            },
+                            function (&$payload) use ($batchId, $task) {
+                                // fill batch cache results
+                                $this->cachedBatchResults[$batchId][$task['api_batch_task_reference_identifier']] =
+                                    $payload;
+                            }
+                        );
+                    }
+                );
             }
-            return chain($promises)
-                ->then(function (array $taskResultsContainer) use ($batchIds) {
+            return chain($toPromiseFunctions)
+                ->then(function (array $taskResultsContainer) use ($batchId) {
                     $batchResult = [];
-                    foreach ($taskResultsContainer as $batchTaskIdentifier => $taskResult) {
-                        list($batchId, $taskId) = explode('-', $batchTaskIdentifier);
-
+                    foreach ($taskResultsContainer as $taskId => $taskResult) {
                         // run async query to set batches to success, no need to wait for the result.
                         $qb = $this->getAsyncDatabase()->createQueryBuilder();
                         $this->getAsyncDatabase()->query(
                             $qb
                                 ->update('api_batch')
                                 ->set('api_batch_state', $qb->createPositionalParameter('Success'))
-                                ->where($qb->expr()->in('api_batch_id', $batchIds))
+                                ->where($qb->expr()->eq('api_batch_id', $batchId))
                         );
-
                         $batchResult[$batchId]['results'][] = [
                             'call_id' => $taskId,
-                            'payload' => $taskResult['payload']
+                            'payload' => $taskResult
                         ];
                     }
                     return $batchResult;
                 })
-                ->otherwise(function ($reason) use ($batchIds) {
+                ->otherwise(function ($reason) use ($batchId) {
                     // run async query to set batches to failed, no need to wait for the result.
                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
                     $this->getAsyncDatabase()->query(
                         $qb
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
-                            ->where($qb->expr()->in('api_batch_id', $batchIds))
+                            ->where($qb->expr()->eq('api_batch_id', $batchId))
                     );
                     // Propagate by returning rejection
-                    return reject($reason);
+                    return reject([$batchId => $reason]);
                 })
-                ->always(function () use ($batchIds) {
-                    foreach ($batchIds as $batchId) {
-                        // clean up batch cache results
-                        unset($this->cachedBatchResults[$batchId]);
-                    }
+                ->always(function () use ($batchId) {
+                    // clean up batch cache results
+                    unset($this->cachedBatchResults[$batchId]);
                 });
         });
     }

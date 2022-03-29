@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Domain\Common\ToPromiseFunction;
 use Closure;
 use Doctrine\DBAL\Exception\DriverException;
 use React\EventLoop\Loop;
@@ -28,44 +29,49 @@ function assertFulfilled(PromiseInterface $promise, ?Closure $onFullfulled = nul
     $promise->done(
         $onFullfulled,
         function ($reason) {
-            // we are going to bail! no exception catches possible
-            assert_options(ASSERT_BAIL | ASSERT_ACTIVE);
             if (is_string($reason)) {
-                assert(false, $reason);
-                exit(1); // hard-exit, needed somehow.... ?
+                die($reason);
             }
             if ($reason instanceof \Throwable) {
-                assert(
-                    false,
+                die(
                     $reason->getMessage() . PHP_EOL . 'in ' .
                     $reason->getFile() . '@' . $reason->getLine() . PHP_EOL .
                     $reason->getTraceAsString()
                 );
-                exit(1); // hard-exit
             }
-            assert(false, 'error, reason: ' . print_r($reason, true));
-            exit(1); // hard-exit
+            die('error, reason: ' . print_r($reason, true));
         }
     );
 }
 
+function tpf(Closure $function): ToPromiseFunction
+{
+    return new ToPromiseFunction($function);
+}
+
 /**
- * @param PromiseInterface[] $promises
+ * @param ToPromiseFunction[] $toPromiseFunctions
  */
-function chain(array $promises): ?PromiseInterface
+function chain(array $toPromiseFunctions): ?PromiseInterface
 {
     $deferred = new Deferred();
-    if (false === $promise = reset($promises)) {
+    if (false === $toPromiseFunction = reset($toPromiseFunctions)) {
         return resolveOnFutureTick($deferred, [])->promise();
     }
     $results = [];
-    $nextKey = key($promises);
-    while ($next = next($promises)) {
-        $promise = $promise->then(function ($result) use ($next, &$results, $nextKey) {
+
+    // execute first promise
+    $promise = $toPromiseFunction();
+
+    $nextKey = key($toPromiseFunctions);
+    while ($nextToPromiseFunction = next($toPromiseFunctions)) {
+        $promise = $promise->then(function ($result) use ($nextToPromiseFunction, &$results, $nextKey) {
              $results[$nextKey] = $result;
-             return $next;
+
+             // execute next promise
+             return $nextToPromiseFunction();
         });
-        $nextKey = key($promises);
+        $nextKey = key($toPromiseFunctions);
     }
     $promise
         ->then(
@@ -90,18 +96,21 @@ function chain(array $promises): ?PromiseInterface
     return $deferred->promise();
 }
 
-function parallel(array $promises, int $numThreads)
+/**
+ * @param ToPromiseFunction[] $toPromiseFunctions
+ */
+function parallel(array $toPromiseFunctions, int $numThreads)
 {
     $numThreads = max(1, $numThreads); // should be at least one
-    if (empty($promises)) {
+    if (empty($toPromiseFunctions)) {
         return resolveOnFutureTick(new Deferred(), [])->promise();
     }
 
-    $numPromisesPerThread = count($promises) / $numThreads;
-    $threads = array_chunk($promises, $numPromisesPerThread, true);
+    $numPromisesPerThread = count($toPromiseFunctions) / $numThreads;
+    $threads = array_chunk($toPromiseFunctions, $numPromisesPerThread, true);
     $newPromises = [];
-    foreach ($threads as $threadPromises) {
-        $newPromises[] = chain($threadPromises);
+    foreach ($threads as $toPromiseFunctionsPerThread) {
+        $newPromises[] = chain($toPromiseFunctionsPerThread);
     }
     return all($newPromises)
         ->then(function (array $chainResultsContainer) {

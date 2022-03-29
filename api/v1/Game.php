@@ -477,7 +477,7 @@ class Game extends Base
      */
     private function calculateUpdatedTime(bool $showDebug = false): PromiseInterface
     {
-        return  $this->getAsyncDatabase()->query(
+        return $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
                     'game_state as state',
@@ -508,10 +508,15 @@ class Game extends Base
                         ->update('game')
                         ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
                 )
-                ->done(function (Result $result) use (&$tick, $assureGameLatestUpdate) {
-                    $tick['lastupdate'] = microtime(true);
-                    $assureGameLatestUpdate->resolve();
-                });
+                ->done(
+                    function (Result $result) use (&$tick, $assureGameLatestUpdate) {
+                        $tick['lastupdate'] = microtime(true);
+                        $assureGameLatestUpdate->resolve();
+                    },
+                    function ($reason) use ($assureGameLatestUpdate) {
+                        $assureGameLatestUpdate->reject($reason);
+                    }
+                );
             } else {
                 $assureGameLatestUpdate->resolve();
             }
