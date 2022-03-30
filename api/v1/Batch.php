@@ -7,6 +7,7 @@ use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\chain;
+use function App\parallel;
 use function App\tpf;
 use function React\Promise\reject;
 
@@ -257,52 +258,59 @@ class Batch extends Base
             return $deferred->promise();
         })
         ->then(function (Result $result) use ($batchId) {
-            $batchTasks = collect($result->fetchAllRows() ?: [])
-                ->sortBy('api_batch_task_group')
+            $groupToBatchTasks = collect($result->fetchAllRows() ?: [])
+                ->groupBy('api_batch_task_group')
                 ->all();
 
-            $toPromiseFunctions = [];
-            /** @var array $task */
-            foreach ($batchTasks as $task) {
-                $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
-                $endpoint = $task['api_batch_task_api_endpoint'];
+            $chain = [];
+            foreach ($groupToBatchTasks as $groupId => $batchTasks) {
+                $parallel = [];
+                /** @var array $task */
+                foreach ($batchTasks as $task) {
+                    $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
+                    $endpoint = $task['api_batch_task_api_endpoint'];
 
-                // create ObjectMethod and inject game session id, and async database into the instance.
-                $objectMethod = Router::createObjectMethodFromEndpoint($endpoint);
-                /** @var Base $instance */
-                $instance = $objectMethod->getInstance();
-                $this->asyncDataTransferTo($instance);
+                    // create ObjectMethod and inject game session id, and async database into the instance.
+                    $objectMethod = Router::createObjectMethodFromEndpoint($endpoint);
+                    /** @var Base $instance */
+                    $instance = $objectMethod->getInstance();
+                    $this->asyncDataTransferTo($instance);
 
-                $toPromiseFunctions[$task['api_batch_task_reference_identifier']] = tpf(
-                    function () use (
-                        $objectMethod,
-                        $callData,
-                        $batchId,
-                        $task
-                    ) {
-                        return Router::executeCallAsync(
+                    $parallel[$task['api_batch_task_reference_identifier']] = tpf(
+                        function () use (
                             $objectMethod,
                             $callData,
-                            function (array &$callData) use ($batchId) {
-                                // fix references in call data using batch cache results
-                                array_walk_recursive(
-                                    $callData,
-                                    function (&$value, $key, array $presentResults) {
-                                        self::fixupReferences($value, $key, $presentResults);
-                                    },
-                                    $this->cachedBatchResults[$batchId]
-                                );
-                            },
-                            function (&$payload) use ($batchId, $task) {
-                                // fill batch cache results
-                                $this->cachedBatchResults[$batchId][$task['api_batch_task_reference_identifier']] =
-                                    $payload;
-                            }
-                        );
-                    }
-                );
+                            $batchId,
+                            $task
+                        ) {
+                            return Router::executeCallAsync(
+                                $objectMethod,
+                                $callData,
+                                function (array &$callData) use ($batchId) {
+                                    // fix references in call data using batch cache results
+                                    array_walk_recursive(
+                                        $callData,
+                                        function (&$value, $key, array $presentResults) {
+                                            self::fixupReferences($value, $key, $presentResults);
+                                        },
+                                        $this->cachedBatchResults[$batchId]
+                                    );
+                                },
+                                function (&$payload) use ($batchId, $task) {
+                                    // fill batch cache results
+                                    $this->cachedBatchResults[$batchId][$task['api_batch_task_reference_identifier']] =
+                                        $payload;
+                                }
+                            );
+                        }
+                    );
+                }
+                $chain[$groupId][] = tpf(function () use ($parallel) {
+                    return parallel($parallel);
+                });
             }
-            return chain($toPromiseFunctions)
+
+            return chain($chain)
                 ->then(function (array $taskResultsContainer) use ($batchId) {
                     // run async query to set batches to success, no need to wait for the result.
                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -314,11 +322,13 @@ class Batch extends Base
                     );
 
                     $batchResult = [];
-                    foreach ($taskResultsContainer as $taskId => $taskResult) {
-                        $batchResult[$batchId]['results'][] = [
-                            'call_id' => $taskId,
-                            'payload' => $taskResult
-                        ];
+                    foreach ($taskResultsContainer as $groupId => $taskResults) {
+                        foreach ($taskResults as $taskId => $taskResult) {
+                            $batchResult[$batchId]['results'][] = [
+                                'call_id' => $taskId,
+                                'payload' => $taskResult
+                            ];
+                        }
                     }
                     return $batchResult;
                 })
