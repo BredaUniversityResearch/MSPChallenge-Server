@@ -123,7 +123,7 @@ class Batch extends Base
 
             // queue it
             Database::GetInstance()->query(
-                'UPDATE api_batch SET api_batch_state="Queued" WHERE api_batch_id = ?',
+                'UPDATE api_batch SET api_batch_state=\'Queued\' WHERE api_batch_id = ?',
                 array($batch_id)
             );
 
@@ -304,16 +304,17 @@ class Batch extends Base
             }
             return chain($toPromiseFunctions)
                 ->then(function (array $taskResultsContainer) use ($batchId) {
+                    // run async query to set batches to success, no need to wait for the result.
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    $this->getAsyncDatabase()->query(
+                        $qb
+                            ->update('api_batch')
+                            ->set('api_batch_state', $qb->createPositionalParameter('Success'))
+                            ->where($qb->expr()->eq('api_batch_id', $batchId))
+                    );
+
                     $batchResult = [];
                     foreach ($taskResultsContainer as $taskId => $taskResult) {
-                        // run async query to set batches to success, no need to wait for the result.
-                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                        $this->getAsyncDatabase()->query(
-                            $qb
-                                ->update('api_batch')
-                                ->set('api_batch_state', $qb->createPositionalParameter('Success'))
-                                ->where($qb->expr()->eq('api_batch_id', $batchId))
-                        );
                         $batchResult[$batchId]['results'][] = [
                             'call_id' => $taskId,
                             'payload' => $taskResult
@@ -360,7 +361,7 @@ class Batch extends Base
         $childSpecifiers = null;
         if ($firstArrayAccessor !== false) {
             $firstArrayAccessor -= $refSpecifierLength;
-            $matches = preg_match_all("/\[(?<Accessor>[a-zA-Z0-9]+)\]*/", $value);
+            $matches = preg_match_all("/\[(?<Accessor>[a-zA-Z0-9]+)]*/", $value);
             $childSpecifiers = $matches["Accessor"];
         } else {
             $firstArrayAccessor = PHP_INT_MAX;
