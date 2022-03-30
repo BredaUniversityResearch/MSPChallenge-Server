@@ -99,8 +99,12 @@ function chain(array $toPromiseFunctions): ?PromiseInterface
 /**
  * @param ToPromiseFunction[] $toPromiseFunctions
  */
-function parallel(array $toPromiseFunctions, int $numThreads)
+function parallel(array $toPromiseFunctions, ?int $numThreads = null)
 {
+    // default is a thread per task
+    if (null === $numThreads) {
+        $numThreads = count($toPromiseFunctions);
+    }
     $numThreads = max(1, $numThreads); // should be at least one
     if (empty($toPromiseFunctions)) {
         return resolveOnFutureTick(new Deferred(), [])->promise();
