@@ -187,7 +187,7 @@ class Plan extends Base
         //   1.
         // This should ofc be done before energy elements are removed from the plan.
         $planData = Database::GetInstance()->query("SELECT plan_name FROM plan WHERE plan_id = ?", array($plan));
-        await(($this->setAllDependentEnergyPlansToError($plan, $planData[0]["plan_name"]))());
+        await($this->setAllDependentEnergyPlansToError($plan, $planData[0]["plan_name"]));
 
         Database::GetInstance()->query("DELETE FROM grid WHERE grid_plan_id=?", array($plan));
         // Set the target plans energy error to 0
@@ -355,7 +355,7 @@ class Plan extends Base
             $erroringEnergyPlans = array();
             $energy = new Energy();
             if ($performEnergyDependencyCheck) {
-                await(($energy->findDependentEnergyPlans($id, $erroringEnergyPlans))());
+                await($energy->findDependentEnergyPlans($id, $erroringEnergyPlans));
             }
             if ($performEnergyOverlapCheck) {
                 $energy->FindOverlappingEnergyPlans($id, $erroringEnergyPlans);
@@ -456,38 +456,44 @@ class Plan extends Base
      */
     private function archivePlan(int $planId, string $planName, string $message): ToPromiseFunction
     {
-        $toPromiseFunctions[] = $this->messageAsync($planId, 1, 'SYSTEM', $message);
+        /** @var ToPromiseFunction[] $toPromiseFunctions */
+        $toPromiseFunctions[] = tpf(function () use ($planId, $message) {
+            return $this->messageAsync($planId, 1, 'SYSTEM', $message);
+        });
         // set all plans to deleted when it has not been approved or implemented yet and the start construction date has
         //   already passed
-        $toPromiseFunctions[] = $this->getAsyncDatabase()->update(
-            'plan',
-            [
-                'plan_id' => $planId
-            ],
-            [
-                'plan_lastupdate' => microtime(true),
-                'plan_state' => 'DELETED'
-            ]
-        );
-        $toPromiseFunctions[] = $this->setAllDependentEnergyPlansToError($planId, $planName);
+        $toPromiseFunctions[] = tpf(function () use ($planId) {
+            return $this->getAsyncDatabase()->update(
+                'plan',
+                [
+                    'plan_id' => $planId
+                ],
+                [
+                    'plan_lastupdate' => microtime(true),
+                    'plan_state' => 'DELETED'
+                ]
+            );
+        });
+        $toPromiseFunctions[] = tpf(function () use ($planId, $planName) {
+            return $this->setAllDependentEnergyPlansToError($planId, $planName);
+        });
         return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
     }
 
     /**
      * @throws Exception
      */
-    private function setAllDependentEnergyPlansToError(int $planId, string $planName): ToPromiseFunction
+    private function setAllDependentEnergyPlansToError(int $planId, string $planName): PromiseInterface
     {
+        $deferred = new Deferred();
         $dependentPlans = [];
         $energy = new Energy();
         $this->asyncDataTransferTo($energy);
-        $tpf = $energy->findDependentEnergyPlans($planId, $dependentPlans);
-        $promise = $tpf();
-        return $promise
+        $energy->findDependentEnergyPlans($planId, $dependentPlans)
             ->then(function () use ($planName, &$dependentPlans) {
                 $toPromiseFunctions = [];
                 foreach ($dependentPlans as $erroredPlanId) {
-                    $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, $planName) {
+                    $toPromiseFunctions[$erroredPlanId] = tpf(function () use ($erroredPlanId, $planName) {
                         $qb = $this->getAsyncDatabase()->createQueryBuilder();
                         return $this->getAsyncDatabase()->query(
                             $qb
@@ -510,7 +516,16 @@ class Plan extends Base
                     });
                 }
                 return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
-            });
+            })
+            ->done(
+                function (/* array $results */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
+            );
+        return $deferred->promise();
     }
 
     /**
