@@ -11,6 +11,7 @@
         "ext-iconv": "*",
         "ext-zip": "*",
         "ext-json": "*",
+        "ext-curl": "*",
         "cboden/ratchet": "^0.4",
         "clue/block-react": "^1.5",
         "clue/http-proxy-react": "^1.7",
