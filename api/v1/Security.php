@@ -305,4 +305,19 @@ class Security extends Base
         }
         return true;
     }
+
+    public static function findAuthenticationHeaderValue(): ?string
+    {
+        $requestHeaders = [];
+        // is only available in the Apache, FastCGI, CLI, and FPM webservers.
+        if (function_exists('apache_request_headers')) {
+            $requestHeaders = apache_request_headers();
+        }
+        $requestHeaders = array_change_key_case($requestHeaders, CASE_LOWER);
+
+        if (isset($requestHeaders["mspapitoken"])) {
+            return $requestHeaders["mspapitoken"];
+        }
+        return null;
+    }
 }
