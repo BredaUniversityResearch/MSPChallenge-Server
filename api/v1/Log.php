@@ -3,7 +3,9 @@
 namespace App\Domain\API\v1;
 
 use Exception;
+use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use function Clue\React\Block\await;
 
 class Log extends Base
 {
@@ -38,19 +40,16 @@ class Log extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Event(string $source, string $severity, string $message, string $stack_trace = ""): void
     {
-        self::PostEvent($source, $severity, $message, $stack_trace);
+        $this->postEvent($source, $severity, $message, $stack_trace);
     }
 
     /**
      * @throws Exception
      */
-    public function postEventAsync(
-        string $source,
-        string $severity,
-        string $message,
-        string $stackTrace
-    ): PromiseInterface {
-        return $this->getAsyncDatabase()->insert(
+    public function postEvent(string $source, string $severity, string $message, string $stackTrace): ?PromiseInterface
+    {
+        $deferred = new Deferred();
+        $this->getAsyncDatabase()->insert(
             'event_log',
             [
                 'event_log_source' => $source,
@@ -58,33 +57,26 @@ class Log extends Base
                 'event_log_message' => $message,
                 'event_log_stack_trace' => $stackTrace
             ]
+        )
+        ->done(
+            function () use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function PostEvent(string $source, string $severity, string $message, string $stackTrace): void
-    {
-        Database::GetInstance()->query(
-            "
-            INSERT INTO event_log (
-                event_log_source, event_log_severity, event_log_message, event_log_stack_trace
-            ) VALUES (?, ?, ?, ?)
-            ",
-            array($source, $severity, $message, $stackTrace)
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function ServerEvent(string $source, string $severity, string $message): void
+    public function serverEvent(string $source, string $severity, string $message): void
     {
         $e = new Exception();
-        self::PostEvent($source, $severity, $message, $e->getTraceAsString());
+        $this->postEvent($source, $severity, $message, $e->getTraceAsString());
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

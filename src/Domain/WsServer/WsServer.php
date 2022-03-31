@@ -119,6 +119,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     public function onOpen(ConnectionInterface $conn)
     {
+        $conn = new WsServerConnection($conn);
         $httpRequest = $conn->httpRequest;
         /** @var Request $httpRequest */
         $headers = collect($httpRequest->getHeaders())
@@ -163,6 +164,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     public function onMessage(ConnectionInterface $from, $msg)
     {
+        $from = new WsServerConnection($from);
         if (!array_key_exists($from->resourceId, $this->clientHeaders)) {
             wdo('received message, although no connection headers were registered... ignoring...');
             return;
@@ -175,6 +177,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     public function onClose(ConnectionInterface $conn)
     {
+        $conn = new WsServerConnection($conn);
         unset($this->clients[$conn->resourceId]);
         unset($this->clientInfoContainer[$conn->resourceId]);
         unset($this->clientHeaders[$conn->resourceId]);
@@ -194,6 +197,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 
     public function onError(ConnectionInterface $conn, Exception $e)
     {
+        $conn = new WsServerConnection($conn);
         // detect PDOException, could also be a previous exception
         while (true) {
             if ($e instanceof PDOException) {
@@ -617,6 +621,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         $gameSessionId = $this->clientHeaders[$connResourceId][self::HEADER_GAME_SESSION_ID];
         if (!array_key_exists($connResourceId, $this->gameInstances)) {
             $game = new Game();
+            $game->setAsync(true);
             $game->setGameSessionId($gameSessionId);
             $game->setAsyncDatabase($this->getAsyncDatabase($gameSessionId));
             $game->setToken($this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]);
@@ -635,6 +640,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         $gameSessionId = $this->clientHeaders[$connResourceId][self::HEADER_GAME_SESSION_ID];
         if (!array_key_exists($connResourceId, $this->securityInstances)) {
             $security = new Security();
+            $security->setAsync(true);
             $security->setGameSessionId($gameSessionId);
             $security->setAsyncDatabase($this->getAsyncDatabase($gameSessionId));
             $security->setToken($this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]);
@@ -648,6 +654,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
         $gameSessionId = $this->clientHeaders[$connResourceId][self::HEADER_GAME_SESSION_ID];
         if (!array_key_exists($connResourceId, $this->batchesInstances)) {
             $batch = new Batch();
+            $batch->setAsync(true);
             $batch->setGameSessionId($gameSessionId);
             $batch->setAsyncDatabase($this->getAsyncDatabase($gameSessionId));
             $batch->setToken($this->clientHeaders[$connResourceId][self::HEADER_MSP_API_TOKEN]);

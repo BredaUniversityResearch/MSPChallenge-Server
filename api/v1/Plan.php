@@ -3,7 +3,6 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\ToPromiseFunction;
-use Doctrine\DBAL\Exception\InvalidArgumentException;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -907,12 +906,19 @@ class Plan extends Base
     }
 
     /**
+     * @apiGroup Plan
+     * @apiDescription Add a new list of countries that require approval for a plan
      * @throws Exception
+     * @api {POST} /plan/AddApproval Add Approval
+     * @apiParam {int} id id of the plan
+     * @apiParam {array} countries json array of country ids
+     * @noinspection PhpUnused
      */
-    public function addApprovalAsync(int $id, array $countries = []): PromiseInterface
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function AddApproval(int $id, array $countries = []): ?PromiseInterface
     {
         $deferred = new Deferred();
-        $this->deleteApprovalAsync($id)
+        $this->DeleteApproval($id)
             ->then(function (/* Result $result */) use ($id, $countries) {
                 $promises = [];
                 foreach ($countries as $country) {
@@ -932,22 +938,8 @@ class Plan extends Base
                     $deferred->reject($reason);
                 }
             );
-        return $deferred->promise();
-    }
-
-    /**
-     * @apiGroup Plan
-     * @apiDescription Add a new list of countries that require approval for a plan
-     * @throws Exception
-     * @api {POST} /plan/AddApproval Add Approval
-     * @apiParam {int} id id of the plan
-     * @apiParam {array} countries json array of country ids
-     * @noinspection PhpUnused
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function AddApproval(int $id, array $countries = []): void
-    {
-        await($this->addApprovalAsync($id, $countries));
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -974,9 +966,15 @@ class Plan extends Base
     }
 
     /**
+     * @apiGroup Plan
+     * @apiDescription Delete all required approvals for a plan, either when it's not necessary anymore or when you
+     *   need to submit a new list
      * @throws Exception
+     * @api {POST} /plan/DeleteApproval Delete Approval
+     * @apiParam {int} id id of the plan
      */
-    public function deleteApprovalAsync(int $id): PromiseInterface
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function DeleteApproval(int $id): ?PromiseInterface
     {
         $deferred = new Deferred();
         $this->getAsyncDatabase()->delete('approval', ['approval_plan_id' => $id])
@@ -988,31 +986,23 @@ class Plan extends Base
                     $deferred->reject($reason);
                 }
             );
-        return $deferred->promise();
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
-     * @apiGroup Plan
-     * @apiDescription Delete all required approvals for a plan, either when it's not necessary anymore or when you
-     *   need to submit a new list
+     * initially, ask for all from time 0 to load in all user created data
+     *
      * @throws Exception
-     * @api {POST} /plan/DeleteApproval Delete Approval
-     * @apiParam {int} id id of the plan
+     * @noinspection SpellCheckingInspection
+     * @return array|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteApproval(int $id): void
-    {
-        await($this->deleteApprovalAsync($id));
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function latestAsync(int $lastUpdate): PromiseInterface
+    public function Latest(int $lastupdate)/*: array|PromiseInterface // <-- php 8 */
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         //get all plans that have changed
-        return $this->getAsyncDatabase()->query(
+        $promise = $this->getAsyncDatabase()->query(
             $qb
                 ->select(
                     'plan_id as id',
@@ -1031,7 +1021,7 @@ class Plan extends Base
                     'plan_alters_energy_distribution as alters_energy_distribution'
                 )
                 ->from('plan')
-                ->where('plan_lastupdate >= ' . $qb->createPositionalParameter($lastUpdate))
+                ->where('plan_lastupdate >= ' . $qb->createPositionalParameter($lastupdate))
                 ->andWhere('plan_active = ' . $qb->createPositionalParameter(1))
         )
         ->then(function (Result $result) {
@@ -1173,7 +1163,7 @@ class Plan extends Base
                         $deleted = $results['deleted' . $pKey]->fetchAllRows();
                         $d['deleted_grids'] = array();
                         foreach ($deleted as $del) {
-                            array_push($d['deleted_grids'], $del['grid_persistent']);
+                            $d['deleted_grids'][] = $del['grid_persistent'];
                         }
 
                         $fishingValues = $results['fishing' . $pKey]->fetchAllRows();
@@ -1201,18 +1191,7 @@ class Plan extends Base
                         });
                 });
         });
-    }
-
-    /**
-     * initially, ask for all from time 0 to load in all user created data
-     *
-     * @throws Exception
-     * @noinspection SpellCheckingInspection
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $lastupdate): array
-    {
-        return await($this->latestAsync($lastupdate));
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -1954,11 +1933,13 @@ class Plan extends Base
 
     /**
      * @throws Exception
+     * @return array|PromiseInterface
      */
-    public function getMessagesAsync(float $time): PromiseInterface
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetMessages(float $time)/*: array|PromiseInterface // <-- php 8 */
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return $this->getAsyncDatabase()->query(
+        $promise = $this->getAsyncDatabase()->query(
             $qb
                 ->select(
                     'plan_message_id as message_id',
@@ -1971,18 +1952,11 @@ class Plan extends Base
                 ->from('plan_message')
                 ->where('plan_message_time>' . $qb->createPositionalParameter($time))
                 ->orderBy('plan_message_time')
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetMessages(float $time): array
-    {
-        /** @var Result $result */
-        $result = await($this->getMessagesAsync($time));
-        return $result->fetchAllRows();
+        )
+        ->then(function (Result $result) {
+            return $result->fetchAllRows();
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -2184,12 +2158,17 @@ class Plan extends Base
     }
 
     /**
+     * @apiGroup Plan
+     * @apiDescription Update the description
      * @throws Exception
+     * @api {POST} /plan/description Description
+     * @apiParam {int} id plan id
+     * @apiParam {string} description new plan description
      */
-    public function descriptionAsync(int $id, string $description = ''): PromiseInterface
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Description(int $id, string $description = ""): ?PromiseInterface
     {
         $deferred = new Deferred();
-
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $this->getAsyncDatabase()->query(
             $qb
@@ -2206,22 +2185,8 @@ class Plan extends Base
                 $deferred->reject($reason);
             }
         );
-
-        return $deferred->promise();
-    }
-
-    /**
-     * @apiGroup Plan
-     * @apiDescription Update the description
-     * @throws Exception
-     * @api {POST} /plan/description Description
-     * @apiParam {int} id plan id
-     * @apiParam {string} description new plan description
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Description(int $id, string $description = ""): void
-    {
-        await($this->descriptionAsync($id, $description));
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -2276,12 +2241,18 @@ class Plan extends Base
     }
 
     /**
+     * @apiGroup Plan
+     * @apiDescription Unlock a plan
      * @throws Exception
+     * @api {POST} /plan/unlock Unlock
+     * @apiParam {int} plan plan id
+     * @apiParam {int} force_unlock (0|1) Force unlock a plan. Don't check for the correct user, just do it.
+     * @noinspection PhpUnused
      */
-    public function unlockAsync(int $id, int $user, int $force_unlock = 0): PromiseInterface
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Unlock(int $id, int $user, int $force_unlock = 0): ?PromiseInterface
     {
         $deferred = new Deferred();
-
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $this->getAsyncDatabase()->query(
             $qb
@@ -2314,23 +2285,8 @@ class Plan extends Base
                 $deferred->reject($reason);
             }
         );
-
-        return $deferred->promise();
-    }
-
-    /**
-     * @apiGroup Plan
-     * @apiDescription Unlock a plan
-     * @throws Exception
-     * @api {POST} /plan/unlock Unlock
-     * @apiParam {int} plan plan id
-     * @apiParam {int} force_unlock (0|1) Force unlock a plan. Don't check for the correct user, just do it.
-     * @noinspection PhpUnused
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Unlock(int $id, int $user, int $force_unlock = 0): void
-    {
-        await($this->unlockAsync($id, $user, $force_unlock));
+        $promise =  $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -2467,17 +2423,45 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetEnergyError(int $id, int $error, int $check_dependent_plans = 0): void
+    public function SetEnergyError(int $id, int $error, int $check_dependent_plans = 0): ?PromiseInterface
     {
-        $planData = Database::GetInstance()->query("SELECT plan_name FROM plan WHERE plan_id = ?", array($id));
-
-        Database::GetInstance()->query(
-            "UPDATE plan SET plan_energy_error=?, plan_lastupdate=? WHERE plan_id=?",
-            array($error, microtime(true), $id)
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->select('plan_name')
+                ->from('plan')
+                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
+        )
+        ->then(function (Result $result) use ($error, $id, $check_dependent_plans) {
+            $planData = $result->fetchFirstRow();
+            $planName = $planData['plan_name'] ?? 'UNKNOWN';
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->update('plan')
+                    ->set('plan_energy_error', $qb->createPositionalParameter($error))
+                    ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                    ->where($qb->expr()->eq('plan_id', $id))
+            )
+            ->then(function (/* Result $result */) use ($error, $id, $planName, $check_dependent_plans) {
+                if ($error == 1 && $check_dependent_plans == 1) {
+                    $this->setAllDependentEnergyPlansToError($id, $planName);
+                }
+                return null;
+            });
+        })
+        ->done(
+            /** @var null $dummy */
+            function (/* $dummy */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
-        if ($error == 1 && $check_dependent_plans == 1) {
-            await(($this->setAllDependentEnergyPlansToError($id, $planData[0]["plan_name"])()));
-        }
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**

@@ -347,6 +347,7 @@ class Update extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function ApplyGameConfig(): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game SET game_autosave_month_interval = ?",
             array(Config::GetInstance()->GetGameAutosaveInterval())
@@ -405,8 +406,8 @@ class Update extends Base
     {
         Log::LogInfo("SetupSecurityToken -> Generating new access tokens");
         $security = new Security();
-        $security->GenerateToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN, Security::TOKEN_LIFETIME_INFINITE);
-        $security->GenerateToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER, Security::TOKEN_LIFETIME_INFINITE);
+        $security->generateToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN, Security::TOKEN_LIFETIME_INFINITE);
+        $security->generateToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER, Security::TOKEN_LIFETIME_INFINITE);
         Log::LogInfo("SetupSecurityToken -> Done");
     }
 

@@ -108,6 +108,7 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateFinished(int $month): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_cel_lastmonth = ?", array($month));
     }
 

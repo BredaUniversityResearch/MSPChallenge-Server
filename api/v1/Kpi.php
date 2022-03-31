@@ -91,7 +91,12 @@ class Kpi extends Base
         );
     }
 
-    public function latestAsync(int $time, int $country): PromiseInterface
+    /**
+     * @throws Exception
+     * @return array|PromiseInterface
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Latest(int $time, int $country)/*: array|PromiseInterface // <-- php 8 */
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
 
@@ -148,22 +153,16 @@ class Kpi extends Base
             );
         });
 
-        return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
-    }
+        $promise = parallel($toPromiseFunctions, 1) // todo: if performance allows, increase threads
+            /** @var Result[] $results */
+            ->then(function (array $results) {
+                //should probably be renamed to be something other than ecology
+                $data['ecology'] = $results[0]->fetchAllRows();
+                $data['shipping'] = $results[1]->fetchAllRows();
+                $data['energy'] = $results[2]->fetchAllRows();
+                return $data;
+            });
 
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $time, int $country): array
-    {
-        $data = array();
-        /** @var Result[] $results */
-        $results = await($this->latestAsync($time, $country));
-        //should probably be renamed to be something other than ecology
-        $data['ecology'] = $results[0]->fetchAllRows();
-        $data['shipping'] = $results[1]->fetchAllRows();
-        $data['energy'] = $results[2]->fetchAllRows();
-        return $data;
+        return $this->isAsync() ? $promise : await($promise);
     }
 }

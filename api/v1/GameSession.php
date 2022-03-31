@@ -278,7 +278,7 @@ class GameSession extends Base
         // get ready for an optional callback
         $postValues = (new Game())->GetGameDetails();
         $postValues["session_id"] = self::GetGameSessionIdForCurrentRequest();
-        $token = (new Security())->GetServerManagerToken()["token"];
+        $token = (new Security())->getServerManagerToken();
         $postValues["token"] = $token; // to pass ServerManager security
         $postValues["api_access_token"] = $token; // to store in ServerManager
 
@@ -326,6 +326,7 @@ class GameSession extends Base
         if (empty($watchdog_address)) {
             throw new Exception("Watchdog address cannot be empty.");
         }
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT();",
             array($watchdog_address)
@@ -499,7 +500,7 @@ class GameSession extends Base
         unlink($sqlDumpPath);
         // callback if requested
         if (!empty($response_url)) {
-            $token = (new Security())->GetServerManagerToken()["token"];
+            $token = (new Security())->getServerManagerToken();
             $postValues = array(
                 "token" => $token,
                 "session_id" => $sessionId,
@@ -561,7 +562,7 @@ class GameSession extends Base
 
         // callback if requested
         if (!empty($response_url)) {
-            $token = (new Security())->GetServerManagerToken()["token"];
+            $token = (new Security())->getServerManagerToken();
             $postValues = array(
                 "token" => $token, "save_id" => $save_id, "session_id" => $sessionId,
                 "zippath" => $zippath, "action" => "processZip"
@@ -578,6 +579,7 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetUserAccess(string $password_admin, string $password_player): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game_session SET game_session_password_admin = ?, game_session_password_player = ?;",
             array($password_admin, $password_player)
@@ -742,7 +744,7 @@ class GameSession extends Base
         $result = $update->ReloadAdvanced($new_config_file_name, $dbase_file_path, $raster_files_path);
 
         $postValues["session_id"] = self::GetGameSessionIdForCurrentRequest();
-        $postValues["token"] = (new Security())->GetServerManagerToken()["token"]; // to pass ServerManager security
+        $postValues["token"] = (new Security())->getServerManagerToken(); // to pass ServerManager security
             
         if (!$result) {
             if (!empty($response_address)) {

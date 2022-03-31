@@ -26,7 +26,23 @@ class Geometry extends Base
         parent::__construct($method, self::ALLOWED);
     }
 
-    public function postAsync(
+    /**
+     * @apiGroup Geometry
+     * @throws Exception
+     * @api {post} /geometry/post Post
+     * @apiDescription Create a new geometry entry in a plan
+     * @apiParam {int} layer id of layer to post in
+     * @apiParam {string} geometry string of geometry to post
+     * @apiParam {int} plan id of the plan
+     * @apiParam {string} FID (optional) FID of geometry
+     * @apiParam {int} persistent (optional) persistent ID of geometry
+     * @apiParam {string} data (optional) meta data string of geometry object
+     * @apiParam {int} country (optional) The owning country id. NULL or -1 if no country is set.
+     * @apiSuccess {int} id of the newly created geometry
+     * @return int|PromiseInterface
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Post(
         int $layer,
         string $geometry,
         string $FID = "",
@@ -34,7 +50,7 @@ class Geometry extends Base
         string $data = "",
         int $country = null,
         int $plan = -1
-    ): PromiseInterface {
+    )/*: int|PromiseInterface // <-- php 8 */ {
         if ($country == -1) {
             $country = null;
         }
@@ -100,34 +116,8 @@ class Geometry extends Base
             }
         );
 
-        return $deferred->promise();
-    }
-
-    /**
-     * @apiGroup Geometry
-     * @throws Exception
-     * @api {post} /geometry/post Post
-     * @apiDescription Create a new geometry entry in a plan
-     * @apiParam {int} layer id of layer to post in
-     * @apiParam {string} geometry string of geometry to post
-     * @apiParam {int} plan id of the plan
-     * @apiParam {string} FID (optional) FID of geometry
-     * @apiParam {int} persistent (optional) persistent ID of geometry
-     * @apiParam {string} data (optional) meta data string of geometry object
-     * @apiParam {int} country (optional) The owning country id. NULL or -1 if no country is set.
-     * @apiSuccess {int} id of the newly created geometry
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Post(
-        int $layer,
-        string $geometry,
-        string $FID = "",
-        int $persistent = null,
-        string $data = "",
-        int $country = null,
-        int $plan = -1
-    ): int {
-        return await($this->postAsync($layer, $geometry, $FID, $persistent, $data, $country, $plan));
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -167,7 +157,18 @@ class Geometry extends Base
         }
     }
 
-    public function updateAsync(int $id, int $country, string $geometry): PromiseInterface
+    /**
+     * @apiGroup Geometry
+     * @throws Exception
+     * @api {POST} /geometry/update Update
+     * @apiParam {int} id geometry id to update
+     * @apiParam {string} geometry string of geometry json to post
+     * @apiParam {int} country country id to set as geometry's owner
+     * @apiSuccess {int} id same geometry id
+     * @return int|PromiseInterface
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Update(int $id, int $country, string $geometry)/*: int|PromiseInterface // <-- php 8 */
     {
         $deferred = new Deferred();
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -186,25 +187,21 @@ class Geometry extends Base
                 $deferred->reject($reason);
             }
         );
-        return $deferred->promise();
+        $promise =  $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
      * @apiGroup Geometry
      * @throws Exception
-     * @api {POST} /geometry/update Update
+     * @api {POST} /geometry/Data Data
+     * @apiDescription Adjust geometry metadata and type
      * @apiParam {int} id geometry id to update
-     * @apiParam {string} geometry string of geometry json to post
-     * @apiParam {int} country country id to set as geometry's owner
-     * @apiSuccess {int} id same geometry id
+     * @apiParam {string} data metadata of the geometry to set
+     * @apiParam {string} type type value, either single integer or comma-separated multiple integers
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Update(int $id, int $country, string $geometry): int
-    {
-        return await($this->updateAsync($id, $country, $geometry));
-    }
-
-    public function dataAsync(string $data, string $type, int $id): PromiseInterface
+    public function Data(string $data, string $type, int $id): ?PromiseInterface
     {
         $deferred = new Deferred();
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -223,23 +220,10 @@ class Geometry extends Base
                 $deferred->reject($reason);
             }
         );
-        return $deferred->promise();
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
-    /**
-     * @apiGroup Geometry
-     * @throws Exception
-     * @api {POST} /geometry/Data Data
-     * @apiDescription Adjust geometry metadata and type
-     * @apiParam {int} id geometry id to update
-     * @apiParam {string} data metadata of the geometry to set
-     * @apiParam {string} type type value, either single integer or comma-separated multiple integers
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Data(string $data, string $type, int $id): void
-    {
-        await($this->dataAsync($data, $type, $id));
-    }
 
     /**
      * @apiGroup Geometry
@@ -249,15 +233,32 @@ class Geometry extends Base
      * @apiParam {int} id geometry id to delete, marks a row as inactive
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Delete(int $id): void
+    public function Delete(int $id): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "
-            UPDATE geometry SET geometry_active = 0, geometry_deleted = 1
-            WHERE (geometry_id=? OR geometry_subtractive=?)
-            ",
-            array($id, $id)
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->update('geometry')
+                ->set('geometry_active', 0)
+                ->set('geometry_deleted', 1)
+                ->where(
+                    $qb->expr()->or(
+                        $qb->expr()->eq('geometry_id', $qb->createPositionalParameter($id))
+                    )
+                    ->with($qb->expr()->eq('geometry_subtractive', $qb->createPositionalParameter($id)))
+                )
+        )
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**

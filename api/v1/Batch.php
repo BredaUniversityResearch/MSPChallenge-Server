@@ -106,6 +106,7 @@ class Batch extends Base
      * When failed this object contains failed_task_id which references the execution_task_id returned in the
      *   AddToBatch.
      * @noinspection PhpUnused
+     * @return array|string
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ExecuteBatch(int $batch_id, bool $async = false)/*: array|string // <-- php 8 */

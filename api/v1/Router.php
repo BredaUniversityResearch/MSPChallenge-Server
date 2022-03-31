@@ -116,13 +116,8 @@ class Router
         // everything ok, try to actually call the class method and catch any exceptions thrown
         $arguments = self::resolveArguments($classData, $methodData, $data);
 
-        $asyncMethod = $method . 'Async';
-        if (!method_exists($class, $asyncMethod)) {
-            $asyncMethod = null;
-        }
-        $methodToUse = $asyncMethod ?? $method;
         try {
-            $promise = $class->$methodToUse(...$arguments);
+            $promise = $class->$method(...$arguments);
         } catch (Throwable $e) {
             // execution failed, perhaps because of database connection failure or PHP warning, or because
             //   endpoint threw exception
@@ -133,7 +128,7 @@ class Router
         }
 
         if (!($promise instanceof PromiseInterface)) {
-            throw new Exception('This method is not asynchronous: ' . $className . ':' . $methodToUse);
+            throw new Exception('This method is not asynchronous: ' . $className . ':' . $method);
         }
 
         return $promise

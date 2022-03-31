@@ -261,6 +261,7 @@ class MEL extends Base
             // }
         }
 
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE layer SET layer_melupdate=0");
 
         return $layers;
@@ -294,6 +295,7 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function TickDone(): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_mel_lastmonth=game_currentmonth");
     }
 

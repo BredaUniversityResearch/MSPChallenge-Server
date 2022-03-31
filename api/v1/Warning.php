@@ -24,7 +24,7 @@ class Warning extends Base
         parent::__construct($method, self::ALLOWED);
     }
 
-    private function postAsyncHandleRemovals(array $removed): ?PromiseInterface
+    private function postHandleRemovals(array $removed): ?PromiseInterface
     {
         if (empty($removed)) {
             return null;
@@ -47,7 +47,7 @@ class Warning extends Base
         );
     }
 
-    private function postAsyncHandleAdditions(array $added): PromiseInterface
+    private function postHandleAdditions(array $added): PromiseInterface
     {
         $promises = [];
         foreach ($added as $addedIssue) {
@@ -125,11 +125,20 @@ class Warning extends Base
         return all($promises);
     }
 
-    public function postAsync(array $added, array $removed): PromiseInterface
+    /**
+     * @apiGroup Warning
+     * @throws Exception
+     * @api {POST} /warning/post Post
+     * @apiParam {added} Json array of IssueObjects that are added.
+     * @apiParam {removed} Json array of IssueObjects that are removed.
+     * @apiDescription Add or update a warning message on the server
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Post(array $added, array $removed): ?PromiseInterface
     {
         $deferred = new Deferred();
-        $promises[] = $this->postAsyncHandleAdditions($added);
-        if (null !== $promise = $this->postAsyncHandleRemovals($removed)) {
+        $promises[] = $this->postHandleAdditions($added);
+        if (null !== $promise = $this->postHandleRemovals($removed)) {
             $promises[] = $promise;
         }
         all($promises)
@@ -141,22 +150,8 @@ class Warning extends Base
                     $deferred->reject($reason);
                 }
             );
-        return $deferred->promise();
-    }
-
-
-    /**
-     * @apiGroup Warning
-     * @throws Exception
-     * @api {POST} /warning/post Post
-     * @apiParam {added} Json array of IssueObjects that are added.
-     * @apiParam {removed} Json array of IssueObjects that are removed.
-     * @apiDescription Add or update a warning message on the server
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Post(array $added, array $removed): void
-    {
-        await($this->postAsync($added, $removed));
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**

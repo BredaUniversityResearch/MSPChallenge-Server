@@ -30,6 +30,9 @@ class Base
 
     private ?int $gameSessionId = null;
     private ?string $token = null;
+    private bool $async = false;
+
+    private ?Log $logger = null;
 
     /**
      * @throws Exception
@@ -368,6 +371,16 @@ class Base
         $this->token = $token;
     }
 
+    public function isAsync(): bool
+    {
+        return $this->async;
+    }
+
+    public function setAsync(bool $async): void
+    {
+        $this->async = $async;
+    }
+
     /**
      * @throws Exception
      */
@@ -376,5 +389,18 @@ class Base
         $other->setGameSessionId($this->getGameSessionId());
         $other->setAsyncDatabase($this->getAsyncDatabase());
         $other->setToken($this->getToken());
+        $other->setAsync($this->isAsync());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getLogger(): Log
+    {
+        if (null == $this->logger) {
+            $this->logger = new Log();
+            $this->asyncDataTransferTo($this->logger);
+        }
+        return $this->logger;
     }
 }
