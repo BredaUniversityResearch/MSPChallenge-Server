@@ -2,12 +2,11 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Common\ToPromiseFunction;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Drift\DBAL\Result;
 use Exception;
+use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
-use function App\chain;
 use function App\parallel;
 use function App\tpf;
 use function Clue\React\Block\await;
@@ -64,16 +63,32 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateGridSockets(int $id, array $sockets): void
+    public function UpdateGridSockets(int $id, array $sockets): ?PromiseInterface
     {
-        Database::GetInstance()->query("DELETE FROM grid_socket WHERE grid_socket_grid_id=?", array($id));
-
-        foreach ($sockets as $str) {
-            Database::GetInstance()->query(
-                "INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES (?, ?)",
-                array($id, $str)
+        $deferred = new Deferred();
+        $this->getAsyncDatabase()->delete('grid_socket', ['grid_socket_grid_id' => $id])
+            ->then(function (/* Result $result */) use ($id, $sockets) {
+                $toPromiseFunctions = [];
+                foreach ($sockets as $socketId) {
+                    $toPromiseFunctions[$socketId] = tpf(function () use ($id, $socketId) {
+                        return $this->getAsyncDatabase()->insert('grid_socket', [
+                            'grid_socket_grid_id' => $id,
+                            'grid_socket_geometry_id' => $socketId
+                        ]);
+                    });
+                }
+                return parallel($toPromiseFunctions);
+            })
+            ->done(
+                function (/* array $results */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
             );
-        }
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -89,16 +104,32 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateGridSources(int $id, array $sources = array()): void
+    public function UpdateGridSources(int $id, array $sources = array()): ?PromiseInterface
     {
-        Database::GetInstance()->query("DELETE FROM grid_source WHERE grid_source_grid_id=?", array($id));
-        //throw new Exception("Sources looks like this now: ".var_export($sources, true));
-        foreach ($sources as $str) {
-            Database::GetInstance()->query(
-                "INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES (?, ?)",
-                array($id, $str)
+        $deferred = new Deferred();
+        $this->getAsyncDatabase()->delete('grid_source', ['grid_source_grid_id' => $id])
+            ->then(function (/* Result $result */) use ($id, $sources) {
+                $toPromiseFunctions = [];
+                foreach ($sources as $sourceId) {
+                    $toPromiseFunctions[$sourceId] = tpf(function () use ($id, $sourceId) {
+                        return $this->getAsyncDatabase()->insert('grid_source', [
+                            'grid_source_grid_id' => $id,
+                            'grid_source_geometry_id' => $sourceId
+                        ]);
+                    });
+                }
+                return parallel($toPromiseFunctions);
+            })
+            ->done(
+                function (/* array $results */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
             );
-        }
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -112,22 +143,41 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateGridEnergy(int $id, array $expected): void
+    public function UpdateGridEnergy(int $id, array $expected): ?PromiseInterface
     {
-        Database::GetInstance()->query("DELETE FROM grid_energy WHERE grid_energy_grid_id=?", array($id));
+        $expected = collect($expected)
+            ->filter(function ($country, $key) {
+                return ctype_digit((string)$country['country_id'] ?? null) &&
+                    ctype_digit((string)$country['energy_expected'] ?? null);
+            })
+            ->all();
 
-        foreach ($expected as $country) {
-            Database::GetInstance()->query(
-                "
-                INSERT INTO grid_energy (grid_energy_grid_id, grid_energy_country_id, grid_energy_expected)
-                VALUES (?, ?, ?)
-                ",
-                array($id, $country["country_id"], $country["energy_expected"])
+        $deferred = new Deferred();
+        $this->getAsyncDatabase()->delete('grid_energy', ['grid_energy_grid_id' => $id])
+            ->then(function (/* Result $result */) use ($id, $expected) {
+                $toPromiseFunctions = [];
+                foreach ($expected as $country) {
+                    $toPromiseFunctions[$country['country_id']] = tpf(function () use ($id, $country) {
+                        return $this->getAsyncDatabase()->insert('grid_energy', [
+                            'grid_energy_grid_id' => $id,
+                            'grid_energy_country_id' => $country['country_id'],
+                            'grid_energy_expected' => $country['energy_expected']
+                        ]);
+                    });
+                }
+                return parallel($toPromiseFunctions);
+            })
+            ->done(
+                function (/* array $results */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
             );
-        }
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
-
-
 
     /**
      * @apiGroup Energy
@@ -177,15 +227,27 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteOutput(int $id): void
+    public function DeleteOutput(int $id): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "
-            UPDATE energy_output SET energy_output_active=?, energy_output_lastupdate=?
-            WHERE energy_output_geometry_id=?
-            ",
-            array(0, microtime(true), $id)
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->update('energy_output')
+                ->set('energy_output_active', $qb->createPositionalParameter(0))
+                ->set('energy_output_lastupdate', microtime(true))
+                ->where($qb->expr()->eq('energy_output_geometry_id', $id))
+        )
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -215,20 +277,41 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteGrid(int $id): void
+    public function DeleteGrid(int $id): ?PromiseInterface
     {
-        Database::GetInstance()->query("DELETE FROM grid_socket WHERE grid_socket_grid_id=?", array($id));
-        Database::GetInstance()->query("DELETE FROM grid_source WHERE grid_source_grid_id=?", array($id));
-        Database::GetInstance()->query("DELETE FROM grid_energy WHERE grid_energy_grid_id=?", array($id));
-            
-        Database::GetInstance()->query(
-            "
-            UPDATE plan INNER JOIN grid ON grid.grid_plan_id = plan.plan_id SET plan.plan_lastupdate = ?
-            WHERE grid.grid_id = ?
-            ",
-            array(microtime(true), $id)
-        );
-        Database::GetInstance()->query("DELETE FROM grid WHERE grid_id=?", array($id));
+        $deferred = new Deferred();
+        $toPromiseFunctions[] = tpf(function () use ($id) {
+            return $this->getAsyncDatabase()->delete('grid_socket', ['grid_socket_grid_id' => $id]);
+        });
+        $toPromiseFunctions[] = tpf(function () use ($id) {
+            return $this->getAsyncDatabase()->delete('grid_source', ['grid_source_grid_id' => $id]);
+        });
+        $toPromiseFunctions[] = tpf(function () use ($id) {
+            return $this->getAsyncDatabase()->delete('grid_energy', ['grid_energy_grid_id' => $id]);
+        });
+        $toPromiseFunctions[] = tpf(function () use ($id) {
+             $qb = $this->getAsyncDatabase()->createQueryBuilder();
+             $this->getAsyncDatabase()->query(
+                 $qb
+                     ->update('plan', 'p')
+                     ->innerJoin('p', 'grid', 'g', 'g.grid_plan_id = p.plan_id')
+                     ->set('p.plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                     ->where($qb->expr()->eq('g.grid_id', $qb->createPositionalParameter($id)))
+             );
+        });
+        $promise = parallel($toPromiseFunctions)
+            ->then(function (/* array $results */) use ($id) {
+                return $this->getAsyncDatabase()->delete('grid', ['grid_id' => $id]);
+            })
+            ->done(
+                function (/* Result $result */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
+            );
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -242,20 +325,49 @@ class Energy extends Base
      * @apiDescription Add a new grid
      * @apiSuccess {int} success grid id
      * @noinspection PhpUnused
+     * @return int|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function AddGrid(string $name, int $plan, bool $distribution_only, int $persistent = -1): string
-    {
-        $id = Database::GetInstance()->query(
-            "INSERT INTO grid (grid_name, grid_lastupdate, grid_plan_id, grid_distribution_only) VALUES (?, ?, ?, ?)",
-            array($name, microtime(true), $plan, $distribution_only),
-            true
+    public function AddGrid(
+        string $name,
+        int $plan,
+        bool $distribution_only,
+        int $persistent = -1
+    ) {/*: int|PromiseInterface // <-- php 8 */
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->insert('grid')
+                ->values([
+                    'grid_name' => $qb->createPositionalParameter($name),
+                    'grid_lastupdate' => $qb->createPositionalParameter(microtime()),
+                    'grid_plan_id' => $qb->createPositionalParameter($plan),
+                    'grid_distribution_only' => $qb->createPositionalParameter($distribution_only)
+                ])
+        )
+        ->then(function (Result $result) use ($persistent) {
+            if (null === $id = $result->getLastInsertedId()) {
+                throw new Exception('Could not retrieve last inserted id');
+            }
+            $this->getAsyncDatabase()->update('grid', ['grid_id', $id], [
+                'grid_persistent' => $persistent == -1 ? $id : $persistent
+            ])
+            // todo: do we actually need to wait for the result?
+            ->then(function (/* Result $result */) use ($id) {
+                 return $id;
+            });
+        })
+        ->done(
+            function (int $insertedId) use ($deferred) {
+                $deferred->resolve($insertedId);
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
-        Database::GetInstance()->query(
-            "UPDATE grid SET grid_persistent=? WHERE grid_id=?",
-            array(($persistent == -1) ? $id : $persistent, $id)
-        );
-        return $id;
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -270,16 +382,32 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetDeleted(int $plan, array $delete = array())
+    public function SetDeleted(int $plan, array $delete = array()): ?PromiseInterface
     {
-        Database::GetInstance()->query("DELETE FROM grid_removed WHERE grid_removed_plan_id=?", array($plan));
-
-        foreach ($delete as $remove) {
-            Database::GetInstance()->query(
-                "INSERT INTO grid_removed (grid_removed_plan_id, grid_removed_grid_persistent) VALUES (?, ?)",
-                array($plan, $remove)
+        $deferred = new Deferred();
+        $this->getAsyncDatabase()->delete('grid_removed', ['grid_removed_plan_id' => $plan])
+            ->then(function (/* Result $result */) use ($plan, $delete) {
+                $toPromiseFunctions = [];
+                foreach ($delete as $deleteId) {
+                    $toPromiseFunctions[] = tpf(function () use ($plan, $deleteId) {
+                        return $this->getAsyncDatabase()->insert('grid_removed', [
+                            'grid_removed_plan_id' => $plan,
+                            'grid_removed_grid_persistent' => $deleteId
+                        ]);
+                    });
+                }
+                return parallel($toPromiseFunctions);
+            })
+            ->done(
+                function (/* array $results */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
             );
-        }
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -358,17 +486,31 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function CreateConnection(int $start, int $end, int $cable, string $coords): void
+    public function CreateConnection(int $start, int $end, int $cable, string $coords): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "
-            INSERT INTO energy_connection (
-                energy_connection_start_id, energy_connection_end_id, energy_connection_cable_id,
-                energy_connection_start_coordinates, energy_connection_lastupdate
-            ) VALUES (?, ?, ?, ?, ?)
-            ",
-            array($start, $end, $cable, $coords, microtime(true))
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->insert('energy_connection')
+                ->values([
+                    'energy_connection_start_id' => $qb->createPositionalParameter($start),
+                    'energy_connection_end_id' => $qb->createPositionalParameter($end),
+                    'energy_connection_cable_id' => $qb->createPositionalParameter($cable),
+                    'energy_connection_start_coordinates' => $qb->createPositionalParameter($coords),
+                    'energy_connection_lastupdate' => $qb->createPositionalParameter(microtime(true))
+                ])
+        )
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -383,16 +525,29 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateConnection(int $start, int $end, int $cable, string $coords): void
+    public function UpdateConnection(int $start, int $end, int $cable, string $coords): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "UPDATE energy_connection SET energy_connection_start_id = ?, 
-																		 energy_connection_end_id = ?, 
-																		 energy_connection_start_coordinates = ?, 
-																		 energy_connection_lastupdate = ?
-																		WHERE energy_connection_cable_id = ?;",
-            array($start, $end, $coords, microtime(true), $cable)
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->update('energy_connection')
+                ->set('energy_connection_start_id', $qb->createPositionalParameter($start))
+                ->set('energy_connection_end_id', $qb->createPositionalParameter($end))
+                ->set('energy_connection_start_coordinates', $qb->createPositionalParameter($coords))
+                ->set('energy_connection_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->where($qb->expr()->eq('energy_connection_cable_id', $qb->createPositionalParameter($cable)))
+        )
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -404,15 +559,32 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteConnection(int $cable): void
+    public function DeleteConnection(int $cable): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "
-            UPDATE energy_connection SET energy_connection_lastupdate=?, energy_connection_active=?
-            WHERE energy_connection_cable_id=? AND energy_connection_active=?
-            ",
-            array(microtime(true), 0, $cable, 1)
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->update('energy_connection')
+                ->set('energy_connection_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->set('energy_connection_active', 0)
+                ->where(
+                    $qb->expr()->and(
+                        $qb->expr()->eq('energy_connection_cable_id', $qb->createPositionalParameter($cable))
+                    )
+                    ->with($qb->expr()->eq('energy_connection_active', 1))
+                )
+        )
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**

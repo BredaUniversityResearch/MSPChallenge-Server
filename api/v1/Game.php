@@ -4,15 +4,15 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowser;
 use App\SilentFailException;
-use Doctrine\DBAL\Exception\InvalidArgumentException;
 use Drift\DBAL\Result;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use function App\parallel;
 use function App\resolveOnFutureTick;
+use function App\tpf;
 use function Clue\React\Block\await;
-use function React\Promise\all;
 
 class Game extends Base
 {
@@ -660,7 +660,7 @@ class Game extends Base
             $plan = new Plan();
             $this->asyncDataTransferTo($plan);
             return $plan->updateLayerState($currentMonth)
-                ->then(function () use ($currentMonth, $monthsDone, $state, $tick) {
+                ->then(function (/* array $results */) use ($currentMonth, $monthsDone, $state, $tick) {
                     return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
                 })
                 ->then(function () use ($tick) {
@@ -993,12 +993,14 @@ class Game extends Base
 
         $layer = new Layer();
         $this->asyncDataTransferTo($layer);
-        $promises = [];
+        $toPromiseFunctions = [];
         foreach ($data['plan'] as $p) {
-            $promises[] = $layer->latest($p['layers'], $lastUpdateTime, $p['id']);
+            $toPromiseFunctions[] = tpf(function () use ($layer, $p, $lastUpdateTime) {
+                return $layer->latest($p['layers'], $lastUpdateTime, $p['id']);
+            });
         }
-        return all(
-            $promises
+        return parallel(
+            $toPromiseFunctions
         );
     }
 

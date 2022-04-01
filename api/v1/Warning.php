@@ -7,9 +7,9 @@ use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\parallel;
+use function App\resolveOnFutureTick;
 use function App\tpf;
 use function Clue\React\Block\await;
-use function React\Promise\all;
 
 class Warning extends Base
 {
@@ -24,10 +24,10 @@ class Warning extends Base
         parent::__construct($method, self::ALLOWED);
     }
 
-    private function postHandleRemovals(array $removed): ?PromiseInterface
+    private function postHandleRemovals(array $removed): PromiseInterface
     {
         if (empty($removed)) {
-            return null;
+            return resolveOnFutureTick(new Deferred())->promise();
         }
 
         // $removed can be simplified to only hold the issue_database_id,
@@ -47,52 +47,51 @@ class Warning extends Base
         );
     }
 
-    private function postHandleAdditions(array $added): PromiseInterface
+    private function postHandleAddition(array $addedIssue): PromiseInterface
     {
-        $promises = [];
-        foreach ($added as $addedIssue) {
-            $qb = $this->getAsyncDatabase()->createQueryBuilder();
-            $promises[] = $this->getAsyncDatabase()->query(
-                $qb
-                    ->select('warning_id')
-                    ->from('warning')
-                    ->where('warning_active = 1')
-                    ->andWhere('warning_layer_id = ?')
-                    ->andWhere('warning_issue_type = ?')
-                    ->andWhere('abs(warning_x - ?) <= 1e-6')
-                    ->andWhere('abs(warning_y - ?) <= 1e-6')
-                    ->andWhere('warning_source_plan_id = ?')
-                    ->andWhere('warning_restriction_id = ?')
-                    ->setParameters([
-                        $addedIssue['plan_layer_id'], $addedIssue['type'], $addedIssue['x'], $addedIssue['y'],
-                        $addedIssue['source_plan_id'], $addedIssue['restriction_id']
-                    ])
-            )
-            ->then(function (Result $result) use ($addedIssue) {
-                $existingIssues = $result->fetchAllRows();
-                if (empty($existingIssues)) {
-                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    return $this->getAsyncDatabase()->query(
-                        $qb
-                            ->insert('warning')
-                            ->values([
-                                'warning_last_update' => $qb->createPositionalParameter(microtime(true)),
-                                'warning_active' => 1,
-                                'warning_layer_id' => $qb->createPositionalParameter($addedIssue['plan_layer_id']),
-                                'warning_issue_type' => $qb->createPositionalParameter($addedIssue['type']),
-                                'warning_x' => $qb->createPositionalParameter($addedIssue['x']),
-                                'warning_y' => $qb->createPositionalParameter($addedIssue['y']),
-                                'warning_source_plan_id' => $qb->createPositionalParameter(
-                                    $addedIssue['source_plan_id']
-                                ),
-                                'warning_restriction_id' => $addedIssue['restriction_id']
-                            ])
-                    );
-                }
-
-                $existingIssue = current($existingIssues);
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->select('warning_id')
+                ->from('warning')
+                ->where('warning_active = 1')
+                ->andWhere('warning_layer_id = ?')
+                ->andWhere('warning_issue_type = ?')
+                ->andWhere('abs(warning_x - ?) <= 1e-6')
+                ->andWhere('abs(warning_y - ?) <= 1e-6')
+                ->andWhere('warning_source_plan_id = ?')
+                ->andWhere('warning_restriction_id = ?')
+                ->setParameters([
+                    $addedIssue['plan_layer_id'], $addedIssue['type'], $addedIssue['x'], $addedIssue['y'],
+                    $addedIssue['source_plan_id'], $addedIssue['restriction_id']
+                ])
+        )
+        ->then(function (Result $result) use ($addedIssue) {
+            $existingIssues = $result->fetchAllRows();
+            if (empty($existingIssues)) {
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                $promises[$existingIssue['warning_id']] = $this->getAsyncDatabase()->query(
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->insert('warning')
+                        ->values([
+                            'warning_last_update' => $qb->createPositionalParameter(microtime(true)),
+                            'warning_active' => 1,
+                            'warning_layer_id' => $qb->createPositionalParameter($addedIssue['plan_layer_id']),
+                            'warning_issue_type' => $qb->createPositionalParameter($addedIssue['type']),
+                            'warning_x' => $qb->createPositionalParameter($addedIssue['x']),
+                            'warning_y' => $qb->createPositionalParameter($addedIssue['y']),
+                            'warning_source_plan_id' => $qb->createPositionalParameter(
+                                $addedIssue['source_plan_id']
+                            ),
+                            'warning_restriction_id' => $addedIssue['restriction_id']
+                        ])
+                );
+            }
+
+            $existingIssue = current($existingIssues);
+            $toPromiseFunctions[$existingIssue['warning_id']] = tpf(function () use ($existingIssue) {
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
                     $qb
                         ->update('warning')
                         ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
@@ -102,13 +101,15 @@ class Warning extends Base
                             $qb->createPositionalParameter($existingIssue['warning_id'])
                         ))
                 );
+            });
 
-                // if (count($existingIssue) > 1)
-                // Something has already gone horribly wrong, try to save it by disabling all the other issues that
-                //   we found that match our data.
-                while ($existingIssue = next($existingIssues)) {
+            // if (count($existingIssue) > 1)
+            // Something has already gone horribly wrong, try to save it by disabling all the other issues that
+            //   we found that match our data.
+            while ($existingIssue = next($existingIssues)) {
+                $toPromiseFunctions[$existingIssue['warning_id']] = tpf(function () use ($existingIssue) {
                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    $promises[$existingIssue['warning_id']] = $this->getAsyncDatabase()->query(
+                    return $this->getAsyncDatabase()->query(
                         $qb
                             ->update('warning')
                             ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
@@ -118,11 +119,21 @@ class Warning extends Base
                                 $qb->createPositionalParameter($existingIssue['warning_id'])
                             ))
                     );
-                }
-                return all($promises);
+                });
+            }
+            return parallel($toPromiseFunctions);
+        });
+    }
+
+    private function postHandleAdditions(array $added): PromiseInterface
+    {
+        $toPromiseFunctions = [];
+        foreach ($added as $addedIssue) {
+            $toPromiseFunctions[] = tpf(function () use ($addedIssue) {
+                return $this->postHandleAddition($addedIssue);
             });
         }
-        return all($promises);
+        return parallel($toPromiseFunctions);
     }
 
     /**
@@ -137,13 +148,15 @@ class Warning extends Base
     public function Post(array $added, array $removed): ?PromiseInterface
     {
         $deferred = new Deferred();
-        $promises[] = $this->postHandleAdditions($added);
-        if (null !== $promise = $this->postHandleRemovals($removed)) {
-            $promises[] = $promise;
-        }
-        all($promises)
+        $toPromiseFunctions[] = tpf(function () use ($added) {
+            return $this->postHandleAdditions($added);
+        });
+        $toPromiseFunctions[] = tpf(function () use ($removed) {
+            return $this->postHandleRemovals($removed);
+        });
+        parallel($toPromiseFunctions)
             ->done(
-                function () use ($deferred) {
+                function (/* array $results */) use ($deferred) {
                     $deferred->resolve(); // return void, we do not care about the result
                 },
                 function ($reason) use ($deferred) {

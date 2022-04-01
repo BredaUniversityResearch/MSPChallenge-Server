@@ -52,7 +52,7 @@ function tpf(Closure $function): ToPromiseFunction
 /**
  * @param ToPromiseFunction[] $toPromiseFunctions
  */
-function chain(array $toPromiseFunctions): ?PromiseInterface
+function chain(array $toPromiseFunctions): PromiseInterface
 {
     $deferred = new Deferred();
     if (false === $toPromiseFunction = reset($toPromiseFunctions)) {
@@ -99,7 +99,7 @@ function chain(array $toPromiseFunctions): ?PromiseInterface
 /**
  * @param ToPromiseFunction[] $toPromiseFunctions
  */
-function parallel(array $toPromiseFunctions, ?int $numThreads = null)
+function parallel(array $toPromiseFunctions, ?int $numThreads = null): PromiseInterface
 {
     // default is a thread per task
     if (null === $numThreads) {

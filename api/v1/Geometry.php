@@ -6,8 +6,9 @@ use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use function App\parallel;
+use function App\tpf;
 use function Clue\React\Block\await;
-use function React\Promise\all;
 
 class Geometry extends Base
 {
@@ -76,32 +77,36 @@ class Geometry extends Base
                     return null;
                 }
 
-                $promises = [];
+                $toPromiseFunctions = [];
                 if ($plan != -1) {
-                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    $promises = $this->getAsyncDatabase()->query(
-                        $qb
-                            ->update('plan')
-                            ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
-                            ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
-                    );
+                    $toPromiseFunctions = tpf(function () use ($plan) {
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        return $this->getAsyncDatabase()->query(
+                            $qb
+                                ->update('plan')
+                                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
+                        );
+                    });
                 }
                 if (null == $persistent) {
-                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    $promises = $this->getAsyncDatabase()->query(
-                        $qb
-                            ->update('geometry')
-                            ->set('geometry_persistent', $qb->createPositionalParameter($newId))
-                            ->where($qb->expr()->eq('geometry_id', $qb->createPositionalParameter($newId)))
-                    );
+                    $toPromiseFunctions = tpf(function () use ($newId) {
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        return $this->getAsyncDatabase()->query(
+                            $qb
+                                ->update('geometry')
+                                ->set('geometry_persistent', $qb->createPositionalParameter($newId))
+                                ->where($qb->expr()->eq('geometry_id', $qb->createPositionalParameter($newId)))
+                        );
+                    });
                 }
 
-                if (empty($promises)) {
+                if (empty($toPromiseFunctions)) {
                     $deferred->resolve($newId);
                     return null;
                 }
 
-                return all($promises)
+                return parallel($toPromiseFunctions)
                     ->done(
                         function () use ($deferred, $newId) {
                             $deferred->resolve($newId);
@@ -213,7 +218,7 @@ class Geometry extends Base
                 $deferred->reject($reason);
             }
         );
-        $promise =  $deferred->promise();
+        $promise = $deferred->promise();
         return $this->isAsync() ? $promise : await($promise);
     }
 
@@ -332,7 +337,7 @@ class Geometry extends Base
     {
         $deferred = new Deferred();
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        $promise = $this->getAsyncDatabase()->query(
+        $this->getAsyncDatabase()->query(
             $qb
                 ->delete('plan_delete')
                 ->where(
@@ -350,6 +355,7 @@ class Geometry extends Base
                 $deferred->reject($reason);
             }
         );
+        $promise = $deferred->promise();
         return $this->isAsync() ? $promise : await($promise);
     }
 }

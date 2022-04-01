@@ -8,9 +8,9 @@ use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\parallel;
+use function App\resolveOnFutureTick;
 use function App\tpf;
 use function Clue\React\Block\await;
-use function React\Promise\all;
 
 class Plan extends Base
 {
@@ -453,7 +453,7 @@ class Plan extends Base
     /**
      * @throws Exception
      */
-    private function archivePlan(int $planId, string $planName, string $message): ToPromiseFunction
+    private function archivePlan(int $planId, string $planName, string $message): PromiseInterface
     {
         /** @var ToPromiseFunction[] $toPromiseFunctions */
         $toPromiseFunctions[] = tpf(function () use ($planId, $message) {
@@ -530,7 +530,7 @@ class Plan extends Base
     /**
      * @throws Exception
      */
-    private function updatePlanState(int $currentGametime, array $planObject): ?ToPromiseFunction
+    private function updatePlanState(int $currentGametime, array $planObject): PromiseInterface
     {
         if ($currentGametime == $planObject['plan_constructionstart']) {
             if ($planObject['plan_state'] != "APPROVED") {
@@ -548,7 +548,7 @@ class Plan extends Base
             }
         }
         if ($currentGametime < $planObject['plan_gametime']) {
-            return null;
+            return resolveOnFutureTick(new Deferred(), [])->promise();
         }
         if ($planObject['plan_state'] != "APPROVED") {
             return $this->archivePlan(
@@ -567,66 +567,67 @@ class Plan extends Base
         }
         
         //plan is implemented, set plan to IMPLEMENTED and handle energy grid
-        return tpf(function () use ($planObject) {
-            return $this->getAsyncDatabase()->update(
-                'plan',
-                [
-                    'plan_id' => $planObject['plan_id']
-                ],
-                [
-                    'plan_lastupdate' => microtime(true),
-                    'plan_state' => 'IMPLEMENTED'
-                ]
-            )
-            // todo: find out if we can do some of this in parallel and not sequential ???
-            ->then(function (/*Result $result*/) use ($planObject) {
-                // Disable all geometry that we reference in previous plans.
-                return $this->disableReferencedGeometryFromPreviousPlans($planObject['plan_id']);
-            })
-            ->then(function (/*Result $result*/) use ($planObject) {
-                return $this->updateFishing($planObject['plan_id']);
-            })
-            ->then(function (/*Result $result*/) use ($planObject) {
-                return $this->messageAsync($planObject['plan_id'], 1, "SYSTEM", "Plan was implemented.");
-            })
-            ->then(function (/*Result $result*/) use ($planObject) {
-                // Update energy grid states, disable all grids that have been deleted and have been reimplemented
-                //   in this plan.
-                $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                /** @noinspection SqlResolve */
-                return $this->getAsyncDatabase()->query(
-                    $qb
-                        ->update('grid')
-                        ->set('grid_active', 0)
-                        ->where($qb->expr()->or(
-                            $qb->expr()->in(
-                                'grid_persistent',
-                                '
-                                SELECT grid_removed_grid_persistent
-                                FROM grid_removed
-                                WHERE grid_removed_plan_id = ' . $qb->createPositionalParameter($planObject['plan_id'])
-                            ),
-                            $qb->expr()->in(
-                                'grid_persistent',
-                                'SELECT g.grid_persistent FROM grid g WHERE g.grid_plan_id = ' .
-                                    $qb->createPositionalParameter($planObject['plan_id'])
-                            )
-                        ))
-
-                        // since it is not possible to use this innerJoin with an update with DBAL,
-                        //  use a sub query instead:
-                        //  ->innerJoin('grid', 'plan', 'plan', 'grid.grid_plan_id = plan.plan_id')
-                        ->andWhere(
-                            $qb->expr()->in(
-                                'grid.grid_plan_id',
-                                '
-                                SELECT plan_id
-                                FROM plan p
-                                WHERE p.plan_id = grid.grid_plan_id AND p.plan_gametime < ' .
-                                    $qb->createPositionalParameter($planObject['plan_gametime'])
-                            )
+        return $this->getAsyncDatabase()->update(
+            'plan',
+            [
+                'plan_id' => $planObject['plan_id']
+            ],
+            [
+                'plan_lastupdate' => microtime(true),
+                'plan_state' => 'IMPLEMENTED'
+            ]
+        )
+        // todo: find out if we can do some of this in parallel and not sequential ???
+        ->then(function (/*Result $result*/) use ($planObject) {
+            // Disable all geometry that we reference in previous plans.
+            return $this->disableReferencedGeometryFromPreviousPlans($planObject['plan_id']);
+        })
+        ->then(function (/*Result $result*/) use ($planObject) {
+            return $this->updateFishing($planObject['plan_id']);
+        })
+        ->then(function (/*Result $result*/) use ($planObject) {
+            return $this->messageAsync($planObject['plan_id'], 1, "SYSTEM", "Plan was implemented.");
+        })
+        ->then(function (/*Result $result*/) use ($planObject) {
+            // Update energy grid states, disable all grids that have been deleted and have been reimplemented
+            //   in this plan.
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            /** @noinspection SqlResolve */
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->update('grid')
+                    ->set('grid_active', 0)
+                    ->where($qb->expr()->or(
+                        $qb->expr()->in(
+                            'grid_persistent',
+                            '
+                            SELECT grid_removed_grid_persistent
+                            FROM grid_removed
+                            WHERE grid_removed_plan_id = ' . $qb->createPositionalParameter($planObject['plan_id'])
+                        ),
+                        $qb->expr()->in(
+                            'grid_persistent',
+                            'SELECT g.grid_persistent FROM grid g WHERE g.grid_plan_id = ' .
+                                $qb->createPositionalParameter($planObject['plan_id'])
                         )
-                );
+                    ))
+
+                    // since it is not possible to use this innerJoin with an update with DBAL,
+                    //  use a sub query instead:
+                    //  ->innerJoin('grid', 'plan', 'plan', 'grid.grid_plan_id = plan.plan_id')
+                    ->andWhere(
+                        $qb->expr()->in(
+                            'grid.grid_plan_id',
+                            '
+                            SELECT plan_id
+                            FROM plan p
+                            WHERE p.plan_id = grid.grid_plan_id AND p.plan_gametime < ' .
+                                $qb->createPositionalParameter($planObject['plan_gametime'])
+                        )
+                    )
+            )
+            ->then(function (Result $result) {
+                return $result->fetchAllRows();
             });
         });
     }
@@ -920,14 +921,16 @@ class Plan extends Base
         $deferred = new Deferred();
         $this->DeleteApproval($id)
             ->then(function (/* Result $result */) use ($id, $countries) {
-                $promises = [];
+                $toPromiseFunctions = [];
                 foreach ($countries as $country) {
-                    $promises[] = $this->getAsyncDatabase()->insert('approval', [
-                        'approval_plan_id' => $id,
-                        'approval_country_id' => $country
-                    ]);
+                    $toPromiseFunctions[] = tpf(function () use ($id, $country) {
+                        return $this->getAsyncDatabase()->insert('approval', [
+                            'approval_plan_id' => $id,
+                            'approval_country_id' => $country
+                        ]);
+                    });
                 }
-                return all($promises);
+                return parallel($toPromiseFunctions);
             })
             ->done(
                 /** @var Result[] $results */
