@@ -743,14 +743,17 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `msp`.`api_batch`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `msp`.`api_batch` (
-  `api_batch_id` INT NOT NULL AUTO_INCREMENT,
-  `api_batch_state` ENUM('Setup', 'Queued', 'Executing', 'Success', 'Failed') NOT NULL DEFAULT 'Setup',
-  `api_batch_country_id` int(10) unsigned,
-  `api_batch_user_id` int(10) unsigned,
-  PRIMARY KEY (`api_batch_id`))
-ENGINE = InnoDB;
-
+CREATE TABLE `api_batch` (
+  `api_batch_id` int(11) NOT NULL AUTO_INCREMENT,
+  `api_batch_state` enum('Setup','Queued','Executing','Success','Failed') NOT NULL DEFAULT 'Setup',
+  `api_batch_country_id` int(11) NOT NULL,
+  `api_batch_user_id` int(11) NOT NULL,
+  PRIMARY KEY (`api_batch_id`),
+  KEY `api_batch_country_id` (`api_batch_country_id`),
+  KEY `api_batch_user_id` (`api_batch_user_id`),
+  CONSTRAINT `api_batch_ibfk_1` FOREIGN KEY (`api_batch_country_id`) REFERENCES `country` (`country_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `api_batch_ibfk_2` FOREIGN KEY (`api_batch_user_id`) REFERENCES `user` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
 -- Table `msp`.`api_batch_task`
