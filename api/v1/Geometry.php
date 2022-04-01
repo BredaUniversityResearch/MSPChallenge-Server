@@ -139,22 +139,48 @@ class Geometry extends Base
         int $subtractive,
         int $persistent = null,
         string $FID = ""
-    ): void {
-        $data = Database::GetInstance()->query(
-            "INSERT INTO geometry 
-				(geometry_layer_id, geometry_geometry, geometry_FID, geometry_persistent, geometry_subtractive) 
-				VALUES (?, ?, ?, ?, ?)",
-            array($layer, $geometry, $FID, $persistent, $subtractive),
-            true
+    ): ?PromiseInterface {
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->insert('geometry')
+                ->values([
+                    'geometry_layer_id' => $qb->createPositionalParameter($layer),
+                    'geometry_geometry' => $qb->createPositionalParameter($geometry),
+                    'geometry_FID' => $qb->createPositionalParameter($FID),
+                    'geometry_persistent' => $qb->createPositionalParameter($persistent),
+                    'geometry_subtractive' => $qb->createPositionalParameter($subtractive)
+                ])
+        )
+        ->then(function (Result $result) use ($persistent) {
+            if (null === $id = $result->getLastInsertedId()) {
+                throw new Exception('Could not retrieve last inserted id');
+            }
+            //set the persistent id if it's new geometry
+            if (null === $persistent) {
+                return $this->getAsyncDatabase()->update(
+                    'geometry',
+                    [
+                        'geometry_id' => $id
+                    ],
+                    [
+                        'geometry_persistent' => $id
+                    ]
+                );
+            }
+            return null; // nothing to do.
+        })
+        ->done(
+            function (/* ?Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
-
-        //set the persistent id if it's new geometry
-        if (is_null($persistent)) {
-            Database::GetInstance()->query(
-                "UPDATE geometry SET geometry_persistent=? WHERE geometry_id=?",
-                array($data, $data)
-            );
-        }
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -272,16 +298,24 @@ class Geometry extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function MarkForDelete(int $plan, int $id, int $layer): void
+    public function MarkForDelete(int $plan, int $id, int $layer): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "
-            INSERT INTO plan_delete (
-                plan_delete_plan_id, plan_delete_geometry_persistent, plan_delete_layer_id
-            ) VALUES (?, ?, ?)
-            ",
-            array($plan, $id, $layer)
+        $deferred = new Deferred();
+        $this->getAsyncDatabase()->insert('plan_delete', [
+            'plan_delete_plan_id' => $plan,
+            'plan_delete_geometry_persistent' => $id,
+            'plan_delete_layer_id' => $layer
+        ])
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -294,11 +328,28 @@ class Geometry extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UnmarkForDelete(int $plan, int $id): void
+    public function UnmarkForDelete(int $plan, int $id): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "DELETE FROM plan_delete WHERE plan_delete_plan_id=? AND plan_delete_geometry_persistent=?",
-            array($plan, $id)
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->delete('plan_delete')
+                ->where(
+                    $qb->expr()->and(
+                        $qb->expr()->eq('plan_delete_plan_id', $qb->createPositionalParameter($plan))
+                    )
+                    ->with($qb->expr()->eq('plan_delete_geometry_persistent', $qb->createPositionalParameter($id)))
+                )
+        )
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
+        return $this->isAsync() ? $promise : await($promise);
     }
 }
