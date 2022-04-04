@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Domain\Helper;
-
-use App\Domain\Common\GetConstantsTrait;
+namespace App\Domain\Common;
 
 abstract class Enum
 {

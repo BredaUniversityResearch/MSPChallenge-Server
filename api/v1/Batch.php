@@ -261,6 +261,7 @@ class Batch extends Base
         ->then(function (Result $result) use ($batchId) {
             $groupToBatchTasks = collect($result->fetchAllRows() ?: [])
                 ->groupBy('api_batch_task_group')
+                ->sortKeys()
                 ->all();
 
             $chain = [];
@@ -306,7 +307,7 @@ class Batch extends Base
                         }
                     );
                 }
-                $chain[$groupId][] = tpf(function () use ($parallel) {
+                $chain[$groupId] = tpf(function () use ($parallel) {
                     return parallel($parallel);
                 });
             }

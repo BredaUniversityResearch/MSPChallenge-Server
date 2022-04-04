@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Helper\AsyncDatabase;
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;
@@ -11,6 +12,7 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use ZipArchive;
 use function App\resolveOnFutureTick;
 use function Clue\React\Block\await;
@@ -46,14 +48,8 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function GetGameSessionIdForCurrentRequest(): int
     {
-        $sessionId = self::INVALID_SESSION_ID;
-        if (isset($_GET['session'])) {
-            $sessionId = intval($_GET['session']);
-            if ($sessionId <= 0) {
-                $sessionId = self::INVALID_SESSION_ID;
-            }
-        }
-        return $sessionId;
+        $sessionId = $_POST['game_id'] ?? $_GET['session'] ?? self::INVALID_SESSION_ID;
+        return intval($sessionId) < 1 ? self::INVALID_SESSION_ID : (int)$sessionId;
     }
 
     /**
@@ -216,7 +212,7 @@ class GameSession extends Base
         // don't wait or feed back the return of the following new request - if things went well so far, then we can
         //   just feed back success
         // this is because any failures of the following new request are stored in the session log
-        $this->LocalApiRequest("api/GameSession/CreateGameSessionAndSignal", $game_id, $postValues, true);
+        $this->LocalApiRequest("GameSession/CreateGameSessionAndSignal", $game_id, $postValues, true);
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -352,7 +348,7 @@ class GameSession extends Base
         }
     
         $this->LocalApiRequest(
-            "api/GameSession/ArchiveGameSessionInternal",
+            "GameSession/ArchiveGameSessionInternal",
             $sessionId,
             array("response_url" => $response_url),
             true
@@ -418,7 +414,7 @@ class GameSession extends Base
 
         if ($type == "full") {
             $this->LocalApiRequest(
-                "api/GameSession/CreateGameSessionZip",
+                "GameSession/CreateGameSessionZip",
                 $sessionId,
                 array(
                     "save_id" => $save_id, "response_url" => $response_url, "preferredfolder" => $preferredfolder,
@@ -428,7 +424,7 @@ class GameSession extends Base
             );
         } elseif ($type == "layers") {
             $this->LocalApiRequest(
-                "api/GameSession/CreateGameSessionLayersZip",
+                "GameSession/CreateGameSessionLayersZip",
                 $sessionId,
                 array(
                     "save_id" => $save_id, "response_url" => $response_url, "preferredfolder" => $preferredfolder,
@@ -652,11 +648,10 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function LocalApiRequest(string $apiUrl, int $sessionId, array $postValues, bool $async = false): void
     {
-        if (self::GetGameSessionIdForCurrentRequest() != self::INVALID_SESSION_ID) {
-            $baseUrl = str_replace(self::GetGameSessionIdForCurrentRequest(), $sessionId, self::GetRequestApiRoot());
-        } else {
-            $baseUrl = self::GetRequestApiRoot().$sessionId."/";
-        }
+        $baseUrl = SymfonyToLegacyHelper::getInstance()->getUrlGenerator()->generate('legacy_api_session', [
+            'session' => $sessionId,
+            'query' => ''
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
         
         $requestHeader = apache_request_headers();
         $headers = array();
@@ -718,7 +713,7 @@ class GameSession extends Base
             "watchdog_address" => $watchdog_address,
             "response_address" => $response_address
         );
-        $this->LocalApiRequest("api/GameSession/LoadGameSaveAndSignal", $sessionId, $postValues, true);
+        $this->LocalApiRequest("GameSession/LoadGameSaveAndSignal", $sessionId, $postValues, true);
     }
 
     /**

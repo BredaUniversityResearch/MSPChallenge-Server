@@ -79,7 +79,7 @@ class Geometry extends Base
 
                 $toPromiseFunctions = [];
                 if ($plan != -1) {
-                    $toPromiseFunctions = tpf(function () use ($plan) {
+                    $toPromiseFunctions[] = tpf(function () use ($plan) {
                         $qb = $this->getAsyncDatabase()->createQueryBuilder();
                         return $this->getAsyncDatabase()->query(
                             $qb
@@ -90,7 +90,7 @@ class Geometry extends Base
                     });
                 }
                 if (null == $persistent) {
-                    $toPromiseFunctions = tpf(function () use ($newId) {
+                    $toPromiseFunctions[] = tpf(function () use ($newId) {
                         $qb = $this->getAsyncDatabase()->createQueryBuilder();
                         return $this->getAsyncDatabase()->query(
                             $qb

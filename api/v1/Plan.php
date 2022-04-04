@@ -441,10 +441,9 @@ class Plan extends Base
                 $plansToUpdate = $result->fetchAllRows();
                 $toPromiseFunctions = [];
                 foreach ($plansToUpdate as $plan) {
-                    if (null === $toPromiseFunction = $this->updatePlanState($currentGameTime, $plan)) {
-                        continue;
-                    }
-                    $toPromiseFunctions[] = $toPromiseFunction;
+                    $toPromiseFunctions[] = tpf(function () use ($currentGameTime, $plan) {
+                        return $this->updatePlanState($currentGameTime, $plan);
+                    });
                 }
                 return parallel($toPromiseFunctions, 1);// todo: if performance allows, increase threads
             });

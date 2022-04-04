@@ -1,6 +1,8 @@
 <?php
 //functions that help things along. by definition functions that are so common or fundamental, require limited and diverse arguments, it makes no sense to turn them into classes
 
+use App\Domain\Helper\SymfonyToLegacyHelper;
+
 function getPublicObjectVars($obj) {
   return get_object_vars($obj);
 }
@@ -842,7 +844,7 @@ if(!function_exists('getUSPageFiles')) {
             if(!function_exists('currentPageStrict')) {
               function currentPageStrict() {
                 $uri=$_SERVER['PHP_SELF'];
-                $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
+                $abs_us_root= SymfonyToLegacyHelper::getInstance()->getProjectDir();
 
                 $self_path=explode("/", $_SERVER['PHP_SELF']);
                 $self_path_length=count($self_path);
@@ -1010,7 +1012,7 @@ if(!function_exists('getUSPageFiles')) {
 
             if(!function_exists('currentFile')) {
               function currentFile() {
-                $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
+                $abs_us_root=SymfonyToLegacyHelper::getInstance()->getProjectDir();
 
                 $self_path=explode("/", $_SERVER['PHP_SELF']);
                 $self_path_length=count($self_path);

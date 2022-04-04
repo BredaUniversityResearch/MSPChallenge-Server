@@ -886,6 +886,7 @@ class Game extends Base
                 $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
                 $security = new Security();
                 $this->asyncDataTransferTo($security);
+                $security->setAsync(true); // force async
                 return $security->generateToken()
                     ->then(function (array $result) use (
                         $security,

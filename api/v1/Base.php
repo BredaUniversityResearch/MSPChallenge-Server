@@ -4,11 +4,11 @@ namespace App\Domain\API\v1;
 
 use App\Domain\API\APIHelper;
 use App\Domain\Helper\AsyncDatabase;
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use Drift\DBAL\Connection;
 use Exception;
 use React\EventLoop\Loop;
 use TypeError;
-use function Clue\React\Block\await;
 
 function IsFeatureFlagEnabled(string $featureName): bool
 {
@@ -216,10 +216,13 @@ class Base
         return $calledFunctionAllowed && $security->validateAccess($accessFlagsRequired);
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function Dir(): string
     {
-        $abs_app_root = $_SERVER['DOCUMENT_ROOT'];
+        $abs_app_root = SymfonyToLegacyHelper::getInstance()->getProjectDir();
         $url_app_root = '';
         $self_path = explode("/", $_SERVER['PHP_SELF']);
         $self_path_length = count($self_path);
