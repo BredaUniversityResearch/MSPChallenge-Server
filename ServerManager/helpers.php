@@ -841,33 +841,6 @@ if(!function_exists('getUSPageFiles')) {
               }
             }
 
-            if(!function_exists('currentPageStrict')) {
-              function currentPageStrict() {
-                $uri=$_SERVER['PHP_SELF'];
-                $abs_us_root= SymfonyToLegacyHelper::getInstance()->getProjectDir();
-
-                $self_path=explode("/", $_SERVER['PHP_SELF']);
-                $self_path_length=count($self_path);
-                $file_found=FALSE;
-
-                for($i = 1; $i < $self_path_length; $i++){
-                  array_splice($self_path, $self_path_length-$i, $i);
-                  $us_url_root=implode("/",$self_path)."/";
-
-                  if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')){
-                    $file_found=TRUE;
-                    break;
-                  }else{
-                    $file_found=FALSE;
-                  }
-                }
-
-                $urlRootLength=strlen($us_url_root);
-                $page=substr($uri,$urlRootLength,strlen($uri)-$urlRootLength);
-                return $page;
-              }
-            }
-
             if(!function_exists('UserSessionCount')) {
               function UserSessionCount() {
                 global $user;
@@ -1007,31 +980,6 @@ if(!function_exists('getUSPageFiles')) {
                   }
                 }
                 return $msg;
-              }
-            }
-
-            if(!function_exists('currentFile')) {
-              function currentFile() {
-                $abs_us_root=SymfonyToLegacyHelper::getInstance()->getProjectDir();
-
-                $self_path=explode("/", $_SERVER['PHP_SELF']);
-                $self_path_length=count($self_path);
-                $file_found=FALSE;
-
-                for($i = 1; $i < $self_path_length; $i++){
-                  array_splice($self_path, $self_path_length-$i, $i);
-                  $us_url_root=implode("/",$self_path)."/";
-
-                  if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')){
-                    $file_found=TRUE;
-                    break;
-                  }else{
-                    $file_found=FALSE;
-                  }
-                }
-
-                $urlRootLength=strlen($us_url_root);
-                return substr($_SERVER['PHP_SELF'],$urlRootLength,strlen($_SERVER['PHP_SELF'])-$urlRootLength);
               }
             }
 

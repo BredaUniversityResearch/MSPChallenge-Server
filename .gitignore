@@ -94,13 +94,8 @@ symfony.lock
 .php-cs-fixer.cache
 
 # skip adminer/
-/adminer/
+/public/adminer/
 
 # github hooks lock file
 cghooks.lock
 
-# Tools incl. Symfony CLI -- just run tools/install-tools.sh
-/tools/
-!/tools/install-tools.sh
-!/tools/cghooks-fresh-install.sh
-!/tools/Win/nssm/

@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use Exception;
 use Generator;
 use RecursiveDirectoryIterator;
@@ -79,10 +80,13 @@ class Store extends Base
         }
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function GetRasterStoreFolder(int $gameSessionId): string
     {
-        $storeFolder = "raster/";
+        $storeFolder = SymfonyToLegacyHelper::getInstance()->getProjectDir() . "/raster/";
         $storeFolder .= ($gameSessionId != GameSession::INVALID_SESSION_ID) ? $gameSessionId . "/" : "default/";
         return $storeFolder;
     }

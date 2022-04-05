@@ -15,6 +15,7 @@ class LegacyController extends MSPControllerBase
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         SymfonyToLegacyHelper $helper
     ) {
+        set_include_path(get_include_path() . PATH_SEPARATOR . SymfonyToLegacyHelper::getInstance()->getProjectDir());
         parent::__construct();
     }
 

@@ -12,7 +12,7 @@ require_once 'config.php';
 require_once 'classes/class.autoloader.php';
 
 // all the helper functions
-require_once 'helpers.php';
+require_once 'ServerManager/helpers.php';
 
 // let's get going!
 session_start();

@@ -10,7 +10,6 @@ class APIHelper
 {
     public const API_LATEST_VERSION = "v1";
     private const INVALID_SESSION_ID = -1;
-    public const DEFAULT_BASE_FOLDER = "";
     private string $currentBaseFolder;
     private static ?APIHelper $instance = null;
 
@@ -55,8 +54,11 @@ class APIHelper
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetCurrentSessionServerApiVersion($baseFolder = self::DEFAULT_BASE_FOLDER): string
+    public function GetCurrentSessionServerApiVersion(?string $baseFolder = null): string
     {
+        if (null === $baseFolder) {
+            $baseFolder = $this->currentBaseFolder;
+        }
         require_once($baseFolder."api_config.php");
 
         if (!empty($_POST["use_server_api_version"])) {
@@ -99,8 +101,11 @@ class APIHelper
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetCurrentSessionServerApiFolder(string $baseFolder = self::DEFAULT_BASE_FOLDER): string
+    public function GetCurrentSessionServerApiFolder(?string $baseFolder = null): string
     {
+        if (null === $baseFolder) {
+            $baseFolder = $this->currentBaseFolder;
+        }
         $apiVersion = $this->GetCurrentSessionServerApiVersion();
         return $this->GetApiFolder($baseFolder, $apiVersion);
     }

@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowser;
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
@@ -139,9 +140,9 @@ class Game extends Base
         if ($filename == "") {    //if there's no file given, use the one in the database
             $data = Database::GetInstance($this->getGameSessionId())->query("SELECT game_configfile FROM game");
 
-            $path = GameSession::CONFIG_DIRECTORY . $data[0]['game_configfile'];
+            $path = GameSession::getConfigDirectory() . $data[0]['game_configfile'];
         } else {
-            $path = GameSession::CONFIG_DIRECTORY . $filename;
+            $path = GameSession::getConfigDirectory() . $filename;
         }
 
         // 5 min cache. why 5min? Such that the websocket server will refresh the config once in a while
@@ -813,7 +814,10 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
     {
-        self::StartSimulationExe(array("exe" => "MSW.exe", "working_directory" => "simulations/MSW/"));
+        self::StartSimulationExe([
+            'exe' => 'MSW.exe',
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/MSW/'
+        ]);
     }
 
     /**

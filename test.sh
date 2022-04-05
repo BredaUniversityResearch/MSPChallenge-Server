@@ -2,19 +2,19 @@
 set -e
 
 function summary() {
-  ./tools/phpcs --standard=PSR2 --report=summary "$1"
+  ./var/tools/phpcs --standard=PSR2 --report=summary "$1"
 }
 
 function lint() {
-  ./tools/phpcs --standard=PSR2 "$1" -s
+  ./var/tools/phpcs --standard=PSR2 "$1" -s
 }
 
 function detectMess() {
-  ./tools/phpmd "$1" text cleancode,codesize,controversial
+./var/tools/phpmd "$1" text cleancode,codesize,controversial
 }
 
 function fix() {
-  ./tools/phpcbf --standard=PSR2 "$1"
+  ./var/tools/phpcbf --standard=PSR2 "$1"
 }
 
 PATHS="

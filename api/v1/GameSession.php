@@ -35,7 +35,7 @@ class GameSession extends Base
 
     const INVALID_SESSION_ID = -1;
     const ARCHIVE_DIRECTORY = "session_archive/";
-    const CONFIG_DIRECTORY = "running_session_config/";
+    private const CONFIG_DIRECTORY = "running_session_config/";
     const EXPORT_DIRECTORY = "export/";
     const SECONDS_PER_MINUTE = 60;
     const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE * 60;
@@ -43,6 +43,11 @@ class GameSession extends Base
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
+    }
+
+    public static function getConfigDirectory(): string
+    {
+        return SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/' . self::CONFIG_DIRECTORY;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -188,14 +193,15 @@ class GameSession extends Base
 
         $configFilePath = self::GetConfigFilePathForSession($game_id);
 
-        if (!is_dir(self::CONFIG_DIRECTORY)) {
-            mkdir(self::CONFIG_DIRECTORY);
+        $configDir = self::getConfigDirectory();
+        if (!is_dir($configDir)) {
+            mkdir($configDir);
         }
         if (!file_exists($config_file)) {
             throw new Exception("Could not read config file");
         }
         $config_file_content = file_get_contents($config_file);
-        file_put_contents(self::CONFIG_DIRECTORY.$configFilePath, $config_file_content);
+        file_put_contents($configDir.$configFilePath, $config_file_content);
 
         $postValues = array(
             "config_file_path" => $configFilePath,
@@ -377,7 +383,7 @@ class GameSession extends Base
             // ok, delete everything!
             $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
             if (count($gameData) > 0) {
-                $configFilePath = self::CONFIG_DIRECTORY.$gameData[0]['game_configfile'];
+                $configFilePath = self::getConfigDirectory().$gameData[0]['game_configfile'];
                 unlink($configFilePath);
             }
             
@@ -467,7 +473,7 @@ class GameSession extends Base
         $configFilePath = null;
         $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
         if (count($gameData) > 0) {
-            $configFilePath = self::CONFIG_DIRECTORY.$gameData[0]['game_configfile'];
+            $configFilePath = self::getConfigDirectory().$gameData[0]['game_configfile'];
         }
 
         $sessionFiles = array($sqlDumpPath, $configFilePath);
@@ -728,12 +734,13 @@ class GameSession extends Base
         string $watchdog_address,
         string $response_address
     ): void {
-        if (!is_dir(self::CONFIG_DIRECTORY)) {
-            mkdir(self::CONFIG_DIRECTORY);
+        $configDir = self::getConfigDirectory();
+        if (!is_dir($configDir)) {
+            mkdir($configDir);
         }
         $zipped_config_file_content = file_get_contents($config_file_path);
         $new_config_file_name = self::GetConfigFilePathForSession(self::GetGameSessionIdForCurrentRequest());
-        file_put_contents(self::CONFIG_DIRECTORY.$new_config_file_name, $zipped_config_file_content);
+        file_put_contents($configDir.$new_config_file_name, $zipped_config_file_content);
 
         $update = new Update();
         $result = $update->ReloadAdvanced($new_config_file_name, $dbase_file_path, $raster_files_path);

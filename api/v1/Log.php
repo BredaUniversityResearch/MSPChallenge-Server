@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
@@ -79,14 +80,16 @@ class Log extends Base
         $this->postEvent($source, $severity, $message, $e->getTraceAsString());
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetRecreateLogPath(): string
+    /**
+     * @throws Exception
+     */
+    public static function getRecreateLogPath(): string
     {
-        $rootPath = getcwd();
+        $rootPath = SymfonyToLegacyHelper::getInstance()->getProjectDir();
         $logPrefix = 'log_session_';
         $sessionId = $_REQUEST['session'];
 
-        $log_dir = $rootPath."/ServerManager"."/log";
+        $log_dir = $rootPath.'/ServerManager/log';
         if (!file_exists($log_dir)) {
             mkdir($log_dir, 0777, true);
         }
@@ -160,7 +163,7 @@ class Log extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function RecreateLoggingHandler(string $message, int $phase): string
     {
-        file_put_contents(self::GetRecreateLogPath(), $message . PHP_EOL, FILE_APPEND);
+        file_put_contents(self::getRecreateLogPath(), $message . PHP_EOL, FILE_APPEND);
         return ""; //Swallow all logging after this has been written to the log file.
     }
 }
