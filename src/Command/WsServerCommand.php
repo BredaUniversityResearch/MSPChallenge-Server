@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
 use Ratchet\Http\HttpServer;
@@ -27,8 +28,12 @@ class WsServerCommand extends Command
     private WsServer $wsServer;
     private string $projectDir;
 
-    public function __construct(WsServer $wsServer, string $projectDir)
-    {
+    public function __construct(
+        WsServer $wsServer,
+        string $projectDir,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $helper
+    ) {
         $this->wsServer = $wsServer;
         $this->projectDir = $projectDir;
         parent::__construct();
