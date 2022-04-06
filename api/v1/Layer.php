@@ -619,7 +619,8 @@ class Layer extends Base
             $layerPathInfo = pathinfo($rasterData['url']);
             $layerFileName = $layerPathInfo["filename"];
             $layerFileExt = $layerPathInfo["extension"];
-            $newFileName = $layerFileName."_".$gameData['game_currentmonth'].".".$layerFileExt;
+            $prevMonth = intval($gameData['game_currentmonth']) - 1;
+            $newFileName = $layerFileName."_".$prevMonth.".".$layerFileExt;
 
             file_put_contents(
                 Store::GetRasterArchiveFolder($this->getGameSessionId()).$newFileName,
