@@ -11,6 +11,7 @@ class TestBase
 
     public function __construct($securityToken)
     {
+        set_time_limit(600);
         $this->m_securityToken = $securityToken;
     }
 

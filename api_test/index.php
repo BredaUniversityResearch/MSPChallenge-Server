@@ -40,9 +40,9 @@ ob_flush();
 
 $testClasses = [
 //  new TestBatch($tokenId),
-  new TestCEL($tokenId),
+//  new TestCEL($tokenId),
 //  new TestRecreate($tokenId)
-//  new TestLoggedCalls($tokenId)
+  new TestLoggedCalls($tokenId)
 ];
 foreach ($testClasses as $test) {
     $test->RunAll();
