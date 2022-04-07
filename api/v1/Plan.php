@@ -926,7 +926,10 @@ class Plan extends Base
     public function AddApproval(int $id, array $countries = []): ?PromiseInterface
     {
         $deferred = new Deferred();
-        $this->DeleteApproval($id)
+        $plan = new Plan();
+        $this->asyncDataTransferTo($plan);
+        $plan->setAsync(true);
+        $plan->DeleteApproval($id)
             ->then(function (/* Result $result */) use ($id, $countries) {
                 $toPromiseFunctions = [];
                 foreach ($countries as $country) {

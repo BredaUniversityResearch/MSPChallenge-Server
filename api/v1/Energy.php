@@ -350,7 +350,7 @@ class Energy extends Base
             if (null === $id = $result->getLastInsertedId()) {
                 throw new Exception('Could not retrieve last inserted id');
             }
-            $this->getAsyncDatabase()->update('grid', ['grid_id', $id], [
+            return $this->getAsyncDatabase()->update('grid', ['grid_id', $id], [
                 'grid_persistent' => $persistent == -1 ? $id : $persistent
             ])
             // todo: do we actually need to wait for the result?
