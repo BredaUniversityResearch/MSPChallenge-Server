@@ -660,7 +660,7 @@ class Layer extends Base
     public function latest(array $layers, float $time, int $planId): PromiseInterface
     {
         // get all the geometry of a plan, excluding the geometry that has been deleted in the current plan, or has
-        //   been replaced by a newer generation (so highest geometry_id of any persistent ID)
+        //   been replaced by a newer generation (so the highest geometry_id of any persistent ID)
         $toPromiseFunctions = [];
         foreach ($layers as $key => $layer) {
             $toPromiseFunctions[$key] = tpf(function () use ($layer) {
@@ -723,7 +723,7 @@ class Layer extends Base
                     ->orderBy('pd.plan_delete_layer_id')
             );
         });
-        return parallel($toPromiseFunctions, 1) // todo: if performance allows, increase threads
+        return parallel($toPromiseFunctions)
             ->then(function (array $results) use ($layers) {
                 /** @var Result[] $results */
                 foreach ($layers as $key => $layer) {
@@ -739,7 +739,7 @@ class Layer extends Base
                             if (!isset($layer['deleted'])) {
                                 $layer['deleted'] = array();
                             }
-                            array_push($layer['deleted'], $del['geometry']);
+                            $layer['deleted'][] = $del['geometry'];
                             $found = true;
                             break;
                         }
@@ -747,8 +747,7 @@ class Layer extends Base
                     unset($layer);
 
                     if (!$found) {
-                        array_push($layers, array());
-
+                        $layers[] = [];
                         $layers[sizeof($layers)-1]['deleted'] = array(
                             'layerid' => $del['layerid'],
                             'original' => $del['original'],

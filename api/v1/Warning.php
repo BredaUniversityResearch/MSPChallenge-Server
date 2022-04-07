@@ -253,6 +253,6 @@ class Warning extends Base
                     ->where('shipping_warning_lastupdate > ' . $qb->createPositionalParameter($time))
             );
         });
-        return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
+        return parallel($toPromiseFunctions);
     }
 }

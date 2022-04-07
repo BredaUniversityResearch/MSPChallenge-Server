@@ -445,7 +445,7 @@ class Plan extends Base
                         return $this->updatePlanState($currentGameTime, $plan);
                     });
                 }
-                return parallel($toPromiseFunctions, 1);// todo: if performance allows, increase threads
+                return parallel($toPromiseFunctions);
             });
     }
 
@@ -475,7 +475,7 @@ class Plan extends Base
         $toPromiseFunctions[] = tpf(function () use ($planId, $planName) {
             return $this->setAllDependentEnergyPlansToError($planId, $planName);
         });
-        return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
+        return parallel($toPromiseFunctions);
     }
 
     /**
@@ -513,7 +513,9 @@ class Plan extends Base
                         });
                     });
                 }
-                return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
+                // might cause db locks if the energy grids are shared between plans
+                //  let db handle it and see
+                return parallel($toPromiseFunctions);
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
@@ -576,15 +578,17 @@ class Plan extends Base
                 'plan_state' => 'IMPLEMENTED'
             ]
         )
-        // todo: find out if we can do some of this in parallel and not sequential ???
         ->then(function (/*Result $result*/) use ($planObject) {
-            // Disable all geometry that we reference in previous plans.
-            return $this->disableReferencedGeometryFromPreviousPlans($planObject['plan_id']);
+            $toPromiseFunctions[] = tpf(function () use ($planObject) {
+                // Disable all geometry that we reference in previous plans.
+                return $this->disableReferencedGeometryFromPreviousPlans($planObject['plan_id']);
+            });
+            $toPromiseFunctions[] = tpf(function () use ($planObject) {
+                return $this->updateFishing($planObject['plan_id']);
+            });
+            return parallel($toPromiseFunctions);
         })
-        ->then(function (/*Result $result*/) use ($planObject) {
-            return $this->updateFishing($planObject['plan_id']);
-        })
-        ->then(function (/*Result $result*/) use ($planObject) {
+        ->then(function (/*array $results*/) use ($planObject) {
             return $this->messageAsync($planObject['plan_id'], 1, "SYSTEM", "Plan was implemented.");
         })
         ->then(function (/*Result $result*/) use ($planObject) {
@@ -779,7 +783,7 @@ class Plan extends Base
                 }
                 $toPromiseFunctions[] = $toPromiseFunction;
             }
-            return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
+            return parallel($toPromiseFunctions);
         });
     }
 
@@ -877,6 +881,10 @@ class Plan extends Base
             $fishing = $result->fetchAllRows();
             $toPromiseFunctions = [];
             foreach ($fishing as $fish) {
+                // skip setting the fish record to inactive for this plan
+                if ($fish['fishing_plan_id'] == $planId) {
+                    continue;
+                }
                 $toPromiseFunctions[] = tpf(function () use ($fish) {
                     return $this->getAsyncDatabase()->update(
                         'fishing',
@@ -901,7 +909,7 @@ class Plan extends Base
                     ]
                 );
             });
-            return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
+            return parallel($toPromiseFunctions);
         });
     }
 
@@ -1119,7 +1127,7 @@ class Plan extends Base
                 });
             }
             unset($d);
-            return parallel($toPromiseFunctions, 1) // todo: if performance allows, increase threads
+            return parallel($toPromiseFunctions)
                 ->then(function (array $results) use (&$plans) {
                     /** @var Result[] $results */
                     $toPromiseFunctions = [];
@@ -1177,7 +1185,7 @@ class Plan extends Base
                         $d['restriction_settings'] = $results['restriction_settings' . $pKey]->fetchAllRows();
                     }
                     unset($d);
-                    return parallel($toPromiseFunctions, 1) // todo: if performance allows, increase threads
+                    return parallel($toPromiseFunctions)
                         ->then(function (array $results) use (&$plans) {
                             /** @var Result[] $results */
                             foreach ($plans as &$d) {

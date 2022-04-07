@@ -723,7 +723,7 @@ class Energy extends Base
                     ->where('energy_output_lastupdate > ' . $qb->createPositionalParameter($time))
             );
         });
-        return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
+        return parallel($toPromiseFunctions);
     }
 
     /**
@@ -942,13 +942,13 @@ class Energy extends Base
                         $toPromiseFunctions = [];
                         foreach ($planIdsDependentOnThisPlan as $erroredPlanId) {
                             if (!in_array($erroredPlanId, $result)) {
-                                array_push($result, $erroredPlanId);
+                                $result[] = $erroredPlanId;
                                 $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, $result) {
                                     return $this->findDependentEnergyPlans($erroredPlanId, $result);
                                 });
                             }
                         }
-                        return parallel($toPromiseFunctions, 1); // todo: if performance allows, increase threads
+                        return parallel($toPromiseFunctions);
                     });
                 });
             });

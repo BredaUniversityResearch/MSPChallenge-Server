@@ -153,7 +153,7 @@ class Kpi extends Base
             );
         });
 
-        $promise = parallel($toPromiseFunctions, 1) // todo: if performance allows, increase threads
+        $promise = parallel($toPromiseFunctions)
             /** @var Result[] $results */
             ->then(function (array $results) {
                 //should probably be renamed to be something other than ecology
