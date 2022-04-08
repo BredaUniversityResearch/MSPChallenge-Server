@@ -168,7 +168,7 @@ class Database
                 "Query exception: ".$e->getMessage()." Query: ".
                 str_replace(array("\n", "\r", "\t"), " ", var_export($statement, true)).
                 " Vars: ".str_replace(array("\n", "\r"), "", var_export($vars, true)),
-                $e->getCode(), // just pass the original exception code
+                (int)$e->getCode(), // just pass the original exception code
                 $e // pass previous such that it is possible to debug back to the original exception
             );
         }

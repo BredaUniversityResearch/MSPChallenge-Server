@@ -610,7 +610,13 @@ class Plan extends Base
                         ),
                         $qb->expr()->in(
                             'grid_persistent',
-                            'SELECT g.grid_persistent FROM grid g WHERE g.grid_plan_id = ' .
+                            // !!! important !!! we are doing a (SELECT * FROM grid) WHY ?
+                            //   To prevent error: "You can't specify target table '...' for update in FROM clause"
+                            //   The MySQL query optimizer does a derived merge optimization for the first query
+                            //   (which causes it to fail with the error), but the second query doesn't qualify
+                            //   for the derived merge optimization.
+                            //   Hence, the optimizer is forced to execute the sub query first.
+                            'SELECT g.grid_persistent FROM (SELECT * FROM grid) g WHERE g.grid_plan_id = ' .
                                 $qb->createPositionalParameter($planObject['plan_id'])
                         )
                     ))
@@ -714,13 +720,19 @@ class Plan extends Base
                                 ->where(
                                     $qb->expr()->in(
                                         'g.geometry_id',
+                                // !!! important !!! we are doing a (SELECT * FROM geometry) WHY ?
+                                //   To prevent error: "You can't specify target table '...' for update in FROM clause"
+                                //   The MySQL query optimizer does a derived merge optimization for the first query
+                                //   (which causes it to fail with the error), but the second query doesn't qualify
+                                //   for the derived merge optimization.
+                                //   Hence, the optimizer is forced to execute the sub query first.
                                         '
                                         SELECT geometry_id
-                                        FROM geometry
+                                        FROM (SELECT * FROM geometry) g2
                                         INNER JOIN plan_delete p ON (
                                             (
-                                                geometry.geometry_persistent=p.plan_delete_geometry_persistent OR
-                                                geometry.geometry_subtractive=p.plan_delete_geometry_persistent
+                                                g2.geometry_persistent=p.plan_delete_geometry_persistent OR
+                                                g2.geometry_subtractive=p.plan_delete_geometry_persistent
                                             ) AND
                                             p.plan_delete_plan_id= ?
                                         )
