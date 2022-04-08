@@ -717,15 +717,16 @@ class Plan extends Base
                                 //         $qb->createPositionalParameter($planLayer['plan_id'])
                                 //     )
                                 //)
-                                ->where(
-                                    $qb->expr()->in(
-                                        'g.geometry_id',
+
                                 // !!! important !!! we are doing a (SELECT * FROM geometry) WHY ?
                                 //   To prevent error: "You can't specify target table '...' for update in FROM clause"
                                 //   The MySQL query optimizer does a derived merge optimization for the first query
                                 //   (which causes it to fail with the error), but the second query doesn't qualify
                                 //   for the derived merge optimization.
                                 //   Hence, the optimizer is forced to execute the sub query first.
+                                ->where(
+                                    $qb->expr()->in(
+                                        'g.geometry_id',
                                         '
                                         SELECT geometry_id
                                         FROM (SELECT * FROM geometry) g2
