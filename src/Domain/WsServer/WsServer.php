@@ -370,9 +370,11 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             $p1['prev_update_time'],
             $p1['update_time'],
             $p1TickEraTimeleft,
+            $p1['tick']['era_timeleft'],
             $p2['prev_update_time'],
             $p2['update_time'],
-            $p2TickEraTimeleft
+            $p2TickEraTimeleft,
+            $p2['tick']['era_timeleft']
         );
         if (0 != strcmp(json_encode($p1), json_encode($p2))) {
             return new EPayloadDifferenceType(EPayloadDifferenceType::ESSENTIAL_DIFFERENCES);
