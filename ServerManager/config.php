@@ -18,8 +18,7 @@ $GLOBALS['config'] = array(
         'username' => 'root',
         'password' => '',
         'db' => 'msp_server_manager',
-        'multisession_database_prefix' => 'msp_session_',
-        'num_pool_connections' => 20
+        'multisession_database_prefix' => 'msp_session_'
     ),
     'remember' => array(
       'cookie_name' => 'pmqesoxiw318374csb',
