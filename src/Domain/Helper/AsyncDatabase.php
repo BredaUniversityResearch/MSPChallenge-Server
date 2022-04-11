@@ -48,7 +48,7 @@ class AsyncDatabase
             $dbConfig['password'],
             $dbConfig['multisession_database_prefix'].$gameSessionId,
             [],
-            $dbConfig['num_pool_connections'] ?: 10
+            $dbConfig['num_pool_connections'] ?: 20
         );
         return ConnectionPool::createConnected($mysqlDriver, $credentials, $mysqlPlatform);
     }
