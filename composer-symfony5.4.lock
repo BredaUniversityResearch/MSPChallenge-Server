@@ -557,12 +557,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/marinhekman/reactphp-dbal.git",
-                "reference": "eaa905fa522d84f0b8cc5c70a2f828733e4393f7"
+                "reference": "c4f1a4059e48eac0b8508394da5c1d7d4929c7e9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/eaa905fa522d84f0b8cc5c70a2f828733e4393f7",
-                "reference": "eaa905fa522d84f0b8cc5c70a2f828733e4393f7",
+                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/c4f1a4059e48eac0b8508394da5c1d7d4929c7e9",
+                "reference": "c4f1a4059e48eac0b8508394da5c1d7d4929c7e9",
                 "shasum": ""
             },
             "require": {
@@ -606,7 +606,7 @@
             "support": {
                 "source": "https://github.com/marinhekman/reactphp-dbal/tree/feature/added-connection-pool"
             },
-            "time": "2021-12-10T16:01:34+00:00"
+            "time": "2022-04-12T11:48:13+00:00"
         },
         {
             "name": "evenement/evenement",

@@ -5,7 +5,10 @@ namespace App\Domain\API\v1;
 use App\Domain\Common\MSPBrowser;
 use App\Domain\Helper\SymfonyToLegacyHelper;
 use App\SilentFailException;
+use Drift\DBAL\ConnectionPool;
+use Drift\DBAL\ConnectionWorker;
 use Drift\DBAL\Result;
+use Drift\DBAL\SingleConnection;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use React\Promise\Deferred;
@@ -47,10 +50,27 @@ class Game extends Base
 
     public function doDummyQuery(): PromiseInterface
     {
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return $this->getAsyncDatabase()->query(
-            $qb->select('1')
-        );
+        $connection = $this->getAsyncDatabase();
+        if ($connection instanceof ConnectionPool) {
+            $connections = collect($connection->getWorkers())
+                ->map(function(ConnectionWorker $worker) {
+                    return $worker->getConnection();
+                })
+                ->all();
+        } else { // if ($connection is SingleConnection)
+            $connections[] = $connection;
+        }
+        $toPromiseFunctions = [];
+        /** @var SingleConnection $connection */
+        foreach ($connections as $connection) {
+            $toPromiseFunctions[] = tpf(function() use ($connection) {
+                $qb = $connection->createQueryBuilder();
+                return $connection->query(
+                    $qb->select('1')
+                );
+            });
+        }
+        return parallel($toPromiseFunctions);
     }
 
     /**
