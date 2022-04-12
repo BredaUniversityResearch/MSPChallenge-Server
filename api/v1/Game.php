@@ -53,7 +53,7 @@ class Game extends Base
         $connection = $this->getAsyncDatabase();
         if ($connection instanceof ConnectionPool) {
             $connections = collect($connection->getWorkers())
-                ->map(function(ConnectionWorker $worker) {
+                ->map(function (ConnectionWorker $worker) {
                     return $worker->getConnection();
                 })
                 ->all();
@@ -63,7 +63,7 @@ class Game extends Base
         $toPromiseFunctions = [];
         /** @var SingleConnection $connection */
         foreach ($connections as $connection) {
-            $toPromiseFunctions[] = tpf(function() use ($connection) {
+            $toPromiseFunctions[] = tpf(function () use ($connection) {
                 $qb = $connection->createQueryBuilder();
                 return $connection->query(
                     $qb->select('1')
