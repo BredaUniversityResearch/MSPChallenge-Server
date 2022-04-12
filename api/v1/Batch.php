@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\WsServer\ExecuteBatchRejection;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -203,7 +204,11 @@ class Batch extends Base
             if (null === $row = $result->fetchFirstRow()) {
                 return [];
             }
-            return $this->executeQueuedBatch($row['api_batch_id']);
+            $batchId = $row['api_batch_id'];
+            return $this->executeQueuedBatch($batchId)
+                ->otherwise(function ($reason) use ($batchId) {
+                    return reject(new ExecuteBatchRejection($batchId, $reason));
+                });
         })
         ->done(
             function (array $batchResultContainer) use ($deferred) {
@@ -344,7 +349,7 @@ class Batch extends Base
                             ->where($qb->expr()->eq('api_batch_id', $batchId))
                     );
                     // Propagate by returning rejection
-                    return reject([$batchId => $reason]);
+                    return reject($reason);
                 })
                 ->always(function () use ($batchId) {
                     // clean up batch cache results

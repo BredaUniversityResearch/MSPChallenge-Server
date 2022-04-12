@@ -435,19 +435,22 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         $this->clients[$connResourceId]->send($json);
                         return $batchResultContainer;
                     },
-                    function (array $reasonContainer) use ($connResourceId) {
-                        $batchId = key($reasonContainer);
-                        $reason = current($reasonContainer);
-                        $json = json_encode([
-                            'header_type' => 'Batch/ExecuteBatch',
-                            'header_data' => [
-                                'batch_id' => $batchId,
-                            ],
-                            'success' => false,
-                            'message' => $reason,
-                            'payload' => null
-                        ]);
-                        $this->clients[$connResourceId]->send($json);
+                    function ($rejection) use ($connResourceId) {
+                        $reason = $rejection;
+                        if ($rejection instanceof ExecuteBatchRejection) {
+                            $batchId = $rejection->getBatchId();
+                            $reason = $rejection->getReason();
+                            $json = json_encode([
+                                'header_type' => 'Batch/ExecuteBatch',
+                                'header_data' => [
+                                    'batch_id' => $batchId,
+                                ],
+                                'success' => false,
+                                'message' => $reason,
+                                'payload' => null
+                            ]);
+                            $this->clients[$connResourceId]->send($json);
+                        }
                         return reject($reason);
                     }
                 );
