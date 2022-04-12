@@ -31,10 +31,10 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
 {
     const HEADER_GAME_SESSION_ID = 'GameSessionId';
     const HEADER_MSP_API_TOKEN = 'MSPAPIToken';
-    const LATEST_CLIENT_UPDATE_SPEED = 1.0;
+    const LATEST_CLIENT_UPDATE_SPEED = 60.0;
 
     const EVENT_ON_CLIENT_CONNECTED = 'EVENT_ON_CLIENT_CONNECTED';
-    const EVENT_ON_CLIENT_DISCONNNECTED = 'EVENT_ON_CLIENT_DISCONNNECTED';
+    const EVENT_ON_CLIENT_DISCONNECTED = 'EVENT_ON_CLIENT_DISCONNECTED';
     const EVENT_ON_CLIENT_ERROR = 'EVENT_ON_CLIENT_ERROR';
     const EVENT_ON_CLIENT_MESSAGE_RECEIVED = 'EVENT_ON_CLIENT_MESSAGE_RECEIVED';
     const EVENT_ON_CLIENT_MESSAGE_SENT = 'EVENT_ON_CLIENT_MESSAGE_SENT';
@@ -177,7 +177,7 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             $clientInfoPerSessionContainer
         );
 
-        $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_DISCONNNECTED, $conn->resourceId));
+        $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_DISCONNECTED, $conn->resourceId));
     }
 
     public function onError(ConnectionInterface $conn, Exception $e)

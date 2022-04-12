@@ -64,7 +64,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             $clientIds = [$clientIds];
         }
         foreach ($clientIds as $clientId) {
-            if ($event->getEventName() == WsServer::EVENT_ON_CLIENT_DISCONNNECTED) {
+            if ($event->getEventName() == WsServer::EVENT_ON_CLIENT_DISCONNECTED) {
                 unset($this->tableInput[$clientId]);
                 continue;
             }
@@ -185,7 +185,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
     {
         return [
             WsServer::EVENT_ON_CLIENT_CONNECTED => 'notifyWsServerDataChange',
-            WsServer::EVENT_ON_CLIENT_DISCONNNECTED => 'notifyWsServerDataChange',
+            WsServer::EVENT_ON_CLIENT_DISCONNECTED => 'notifyWsServerDataChange',
             WsServer::EVENT_ON_CLIENT_ERROR => 'notifyWsServerDataChange',
             WsServer::EVENT_ON_CLIENT_MESSAGE_RECEIVED => 'notifyWsServerDataChange',
             WsServer::EVENT_ON_CLIENT_MESSAGE_SENT => 'notifyWsServerDataChange',
