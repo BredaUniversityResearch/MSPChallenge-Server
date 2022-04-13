@@ -625,34 +625,52 @@ class Energy extends Base
      * @noinspection SpellCheckingInspection
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetOutput(int $id, float $capacity, float $maxcapacity): void
+    public function SetOutput(int $id, float $capacity, float $maxcapacity): ?PromiseInterface
     {
-        $data = Database::GetInstance()->query(
-            "SELECT energy_output_id FROM energy_output WHERE energy_output_geometry_id=?",
-            array($id)
+        $deferred = new Deferred();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->getAsyncDatabase()->query(
+            $qb
+                ->select('energy_output_id')
+                ->from('energy_output')
+                ->where($qb->expr()->eq('energy_output_geometry_id', $qb->createPositionalParameter($id)))
+        )
+        ->then(function(Result $result) use ($id, $capacity, $maxcapacity) {
+             $rows = $result->fetchAllRows();
+             if (empty($rows)) {
+                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                 return $this->getAsyncDatabase()->query(
+                     $qb
+                        ->insert('energy_output')
+                        ->values([
+                            'energy_output_geometry_id' => $qb->createPositionalParameter($id),
+                            'energy_output_capacity' => $qb->createPositionalParameter($capacity),
+                            'energy_output_maxcapacity' => $qb->createPositionalParameter($maxcapacity),
+                            'energy_output_lastupdate' => $qb->createPositionalParameter(microtime(true))
+                        ])
+                 );
+             }
+             $qb = $this->getAsyncDatabase()->createQueryBuilder();
+             return $this->getAsyncDatabase()->query(
+                 $qb
+                    ->update('energy_output')
+                    ->set('energy_output_capacity', $qb->createPositionalParameter($capacity))
+                    ->set('energy_output_maxcapacity', $qb->createPositionalParameter($maxcapacity))
+                    ->set('energy_output_active', 1)
+                    ->set('energy_output_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                    ->where($qb->expr()->eq('energy_output_geometry_id', $qb->createPositionalParameter($id)))
+             );
+        })
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // return void, we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
-
-        if (empty($data)) {
-            Database::GetInstance()->query(
-                "
-                INSERT INTO energy_output (
-                    energy_output_geometry_id, energy_output_capacity, energy_output_maxcapacity,
-                    energy_output_lastupdate
-                ) VALUES (?, ?, ?, ?)
-                ",
-                array($id, $capacity, $maxcapacity, microtime(true))
-            );
-        } else {
-            Database::GetInstance()->query(
-                "UPDATE energy_output SET 
-					energy_output_capacity=?,
-					energy_output_maxcapacity=?,
-					energy_output_active=?,
-					energy_output_lastupdate=?
-					WHERE energy_output_geometry_id=?",
-                array($capacity, $maxcapacity, 1, microtime(true), $id)
-            );
-        }
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
