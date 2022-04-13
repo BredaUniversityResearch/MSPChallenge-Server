@@ -7,7 +7,7 @@ use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\resolveOnFutureTick;
-use function Clue\React\Block\await;
+use function App\await;
 
 class Security extends Base
 {

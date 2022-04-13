@@ -10,7 +10,7 @@ use React\Promise\PromiseInterface;
 use function App\parallel;
 use function App\resolveOnFutureTick;
 use function App\tpf;
-use function Clue\React\Block\await;
+use function App\await;
 
 class Plan extends Base
 {
@@ -1149,7 +1149,13 @@ class Plan extends Base
                     $toPromiseFunctions = [];
                     foreach ($plans as $pKey => &$d) {
                         $d['layers'] = $results['layers' . $pKey]->fetchAllRows();
-                        $d['grids'] = $results['grids' . $pKey]->fetchAllRows();
+                        $d['grids'] = collect($results['grids' . $pKey]->fetchAllRows())
+                            // fail-safe. grid persistent field should be int. If not, remove the grid.
+                            ->filter(function($value, $key) {
+                                return ctype_digit((string)$value['persistent']);
+                            })
+                            ->all();
+
                         foreach ($d['grids'] as $gKey => &$g) {
                             $toPromiseFunctions['energy' . $gKey] = tpf(function () use ($g) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();

@@ -6,7 +6,7 @@ use App\Domain\Helper\SymfonyToLegacyHelper;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
-use function Clue\React\Block\await;
+use function App\await;
 
 class Log extends Base
 {

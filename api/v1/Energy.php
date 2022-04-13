@@ -9,7 +9,7 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\parallel;
 use function App\tpf;
-use function Clue\React\Block\await;
+use function App\await;
 
 class Energy extends Base
 {

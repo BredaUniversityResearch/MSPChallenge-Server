@@ -18,6 +18,7 @@ use Ratchet\ConnectionInterface;
 use React\EventLoop\LoopInterface;
 use React\Promise\PromiseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Throwable;
 use function App\assertFulfilled;
 use function React\Promise\all;
 use function React\Promise\reject;
@@ -440,16 +441,25 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
                         if ($rejection instanceof ExecuteBatchRejection) {
                             $batchId = $rejection->getBatchId();
                             $reason = $rejection->getReason();
+                            $message = '';
+                            if (is_string($reason)) {
+                                $message = $reason;
+                            }
+                            while ($reason instanceof Throwable) {
+                                $message .= $reason->getMessage() . PHP_EOL;
+                                $reason = $reason->getPrevious();
+                            }
                             $json = json_encode([
                                 'header_type' => 'Batch/ExecuteBatch',
                                 'header_data' => [
                                     'batch_id' => $batchId,
                                 ],
                                 'success' => false,
-                                'message' => $reason,
+                                'message' => $message ?: 'Unknown reason',
                                 'payload' => null
                             ]);
                             $this->clients[$connResourceId]->send($json);
+                            return []; // do not propagate rejection, just resolve to empty batch results
                         }
                         return reject($reason);
                     }

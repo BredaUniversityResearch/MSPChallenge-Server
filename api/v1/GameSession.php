@@ -15,7 +15,7 @@ use RecursiveIteratorIterator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use ZipArchive;
 use function App\resolveOnFutureTick;
-use function Clue\React\Block\await;
+use function App\await;
 
 class GameSession extends Base
 {
