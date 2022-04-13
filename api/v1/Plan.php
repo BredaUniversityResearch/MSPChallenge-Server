@@ -1151,7 +1151,7 @@ class Plan extends Base
                         $d['layers'] = $results['layers' . $pKey]->fetchAllRows();
                         $d['grids'] = collect($results['grids' . $pKey]->fetchAllRows())
                             // fail-safe. grid persistent field should be int. If not, remove the grid.
-                            ->filter(function($value, $key) {
+                            ->filter(function ($value, $key) {
                                 return ctype_digit((string)$value['persistent']);
                             })
                             ->all();
