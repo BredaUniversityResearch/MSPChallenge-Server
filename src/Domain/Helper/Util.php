@@ -16,7 +16,7 @@ class Util
         $minutes = floor($seconds / 60);
 
         $format = '%ums';
-        $milliseconds = $milliseconds % 1000;
+        $milliseconds = (int)$milliseconds % 1000;
         $args[] = $milliseconds;
 
         $seconds = $seconds % 60;

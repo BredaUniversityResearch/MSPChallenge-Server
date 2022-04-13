@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
 use Ratchet\Http\HttpServer;
@@ -19,14 +20,20 @@ class WsServerCommand extends Command
     const OPTION_GAME_SESSION_ID = 'game-session-id';
     const OPTION_FIXED_TERMINAL_HEIGHT = 'fixed-terminal-height';
     const OPTION_TABLE_OUTPUT = 'table-output';
+    const OPTION_MESSAGE_MAX_LINES = 'message-max-lines';
+    const OPTION_MESSAGE_FILTER = 'message-filter';
 
     protected static $defaultName = 'app:ws-server';
 
     private WsServer $wsServer;
     private string $projectDir;
 
-    public function __construct(WsServer $wsServer, string $projectDir)
-    {
+    public function __construct(
+        WsServer $wsServer,
+        string $projectDir,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $helper
+    ) {
         $this->wsServer = $wsServer;
         $this->projectDir = $projectDir;
         parent::__construct();
@@ -59,7 +66,7 @@ class WsServerCommand extends Command
             )
             ->addOption(
                 self::OPTION_FIXED_TERMINAL_HEIGHT,
-                'f',
+                null,
                 InputOption::VALUE_REQUIRED,
                 'fixed terminal height, the number of rows allowed'
             )
@@ -68,11 +75,38 @@ class WsServerCommand extends Command
                 't',
                 InputOption::VALUE_NONE,
                 'enable client connections table output with statistics'
+            )
+            ->addOption(
+                self::OPTION_MESSAGE_MAX_LINES,
+                'l',
+                InputOption::VALUE_REQUIRED,
+                'the maximum number of lines for each message'
+            )
+            ->addOption(
+                self::OPTION_MESSAGE_FILTER,
+                'f',
+                InputOption::VALUE_REQUIRED,
+                'only show messages containing this text'
             );
     }
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
+        define('WSS', 1); // to identify that we are in a websocket server instance. Value is not important.
+//        // note (MH): handy, enable to catch deprecations/notices/warnings/errors to log
+//        set_error_handler(function (
+//            int $errno,
+//            string $errstr,
+//            string $errfile,
+//            int $errline
+//        ) {
+//            file_put_contents(
+//                $this->projectDir . '/var/log/deprecations.log',
+//                $errstr . PHP_EOL . $errfile . '@' . $errline . PHP_EOL . PHP_EOL,
+//                FILE_APPEND
+//            );
+//        });
+
         if (null != $input->getOption(self::OPTION_GAME_SESSION_ID)) {
             $this->wsServer->setGameSessionId($input->getOption(self::OPTION_GAME_SESSION_ID));
         }
@@ -82,7 +116,9 @@ class WsServerCommand extends Command
         $consoleHelper = new WsServerConsoleHelper(
             $this->wsServer,
             $output,
-            $input->getOption(self::OPTION_TABLE_OUTPUT)
+            $input->getOption(self::OPTION_TABLE_OUTPUT),
+            $input->getOption(self::OPTION_MESSAGE_MAX_LINES),
+            $input->getOption(self::OPTION_MESSAGE_FILTER),
         );
         $consoleHelper->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
 

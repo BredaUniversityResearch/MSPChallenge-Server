@@ -2,19 +2,20 @@
 
 namespace App\Controller;
 
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class LegacyController
+class LegacyController extends MSPControllerBase
 {
     public function __construct(
-        string $projectDir,
-        // below is required by legacy to be auto-wired
-        \App\Domain\API\APIHelper $apiHelper
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $helper
     ) {
-        set_include_path(get_include_path() . PATH_SEPARATOR . $projectDir);
+        set_include_path(get_include_path() . PATH_SEPARATOR . SymfonyToLegacyHelper::getInstance()->getProjectDir());
+        parent::__construct();
     }
 
     public function __invoke(Request $request, $query, $session = -1, $debug = 0): JsonResponse

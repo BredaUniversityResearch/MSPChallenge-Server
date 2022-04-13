@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use Exception;
+use InvalidArgumentException;
 use stdClass;
 
 class SEL extends Base
@@ -82,7 +83,7 @@ class SEL extends Base
             "
             SELECT geometry.geometry_geometry as geometry FROM geometry
 			LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
-			WHERE layer.layer_name LIKE \"_PLAYAREA%\"
+			WHERE layer.layer_name LIKE '_PLAYAREA%'
 			"
         );
         if (empty($data)) {
@@ -239,7 +240,7 @@ class SEL extends Base
                 LEFT JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
                 WHERE (layer.layer_id = ? OR (
                     layer.layer_original_id = ? AND layer.layer_original_id IS NOT null)
-                ) AND (plan.plan_state = \"IMPLEMENTED\" OR plan.plan_state IS NULL) AND geometry.geometry_active = 1
+                ) AND (plan.plan_state = 'IMPLEMENTED' OR plan.plan_state IS NULL) AND geometry.geometry_active = 1
                 ",
                 array($restrictionLayerId, $restrictionLayerId)
             );
@@ -338,7 +339,7 @@ class SEL extends Base
                 LEFT JOIN plan_layer ON layer.layer_id = plan_layer.plan_layer_layer_id
                 LEFT JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
 				WHERE geometry.geometry_active = 1 AND (
-				    plan.plan_state = \"IMPLEMENTED\" OR plan.plan_state IS NULL)
+				    plan.plan_state = 'IMPLEMENTED' OR plan.plan_state IS NULL)
 				  AND (layer.layer_id = ? OR layer.layer_original_id = ?)
                 ",
                 array($layerId["layer_id"], $layerId["layer_id"])
@@ -426,7 +427,7 @@ class SEL extends Base
 				LEFT JOIN plan_layer ON layer.layer_id = plan_layer.plan_layer_layer_id
 				LEFT JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
                 WHERE (layer.layer_id = ? OR layer.layer_original_id = ?) AND (
-                    plan.plan_state = \"IMPLEMENTED\" OR plan.plan_state = \"APPROVED\" OR plan.plan_state IS NULL
+                    plan.plan_state = 'IMPLEMENTED' OR plan.plan_state = 'APPROVED' OR plan.plan_state IS NULL
                 ) AND geometry.geometry_active = 1
                 ",
                 array($layerId[0]['layer_id'], $layerId[0]['layer_id'])
@@ -536,13 +537,15 @@ class SEL extends Base
     }
 
     /**
-    * @apiGroup SEL
-    * @api {POST} /sel/GetShipRestrictionGroupExceptions GetShipRestrictionGroupExceptions
-    * @apiDescription Returns all restriction group exceptions configured in the configuration file. Returns the data in
-    *   the format of { "layer_id": [int layerId], "layer_type":
-    *   [string layerType], "allowed_restriction_groups": [int[] shipRestrictionGroups] }
-    * @noinspection PhpUnused
-    */
+     * @apiGroup SEL
+     * @throws Exception
+     * @api {POST} /sel/GetShipRestrictionGroupExceptions GetShipRestrictionGroupExceptions
+     * @apiDescription Returns all restriction group exceptions configured in the configuration file.
+     *   Returns the data in the format of
+     *     { "layer_id": [int layerId], "layer_type":
+     *     [string layerType], "allowed_restriction_groups": [int[] shipRestrictionGroups] }
+     * @noinspection PhpUnused
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetShipRestrictionGroupExceptions(): array
     {
@@ -571,12 +574,12 @@ class SEL extends Base
                     foreach ($layerTypeData as $key => $layerType) {
                         $arrayIndex = array_search($layerType["displayName"], $layerTypesToMatch);
                         if ($arrayIndex !== false) {
-                            array_push($result, array(
+                            $result[] = array(
                                 "layer_id" => $layerIdData[0]["layer_id"],
                                 "layer_type_id" => $key,
                                 "allowed_ship_type_ids" => $allowedShipIds,
                                 "cost_multipliers" => $multipliers
-                            ));
+                            );
                             array_splice($layerTypesToMatch, $arrayIndex, 1);
                         }
                     }
@@ -586,7 +589,7 @@ class SEL extends Base
                         foreach ($layerTypeData as $layerType) {
                             $layerTypes[] = $layerType["displayName"];
                         }
-                        Log::ServerEvent(
+                        $this->getLogger()->serverEvent(
                             "SEL_API",
                             Log::WARNING,
                             "Could not find layer type(s) ".implode(",", $layerTypesToMatch).
@@ -596,7 +599,7 @@ class SEL extends Base
                     }
                 }
             } else {
-                Log::ServerEvent(
+                $this->getLogger()->serverEvent(
                     "SEL_API",
                     Log::ERROR,
                     "Malformed config file. Could not find layer id for layer with name \"".
@@ -635,39 +638,40 @@ class SEL extends Base
     }
 
     /**
-    * @apiGroup SEL
-    * @api {POST} /sel/GetHeatmapSettings GetHeatmapSettings
-    * @apiDescription Gets the persistent riskmap settings.
-    * @noinspection PhpUnused
-    */
+     * @apiGroup SEL
+     * @throws Exception
+     * @api {POST} /sel/GetHeatmapSettings GetHeatmapSettings
+     * @apiDescription Gets the persistent riskmap settings.
+     * @noinspection PhpUnused
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetHeatmapSettings(): array
     {
         $configValues = $this->GetSELConfigInternal();
 
-        $riskmapSettings = $configValues["risk_heatmap_settings"];
+        $riskMapSettings = $configValues["risk_heatmap_settings"];
 
         $restrictionLayerExceptions = array();
-        foreach ($riskmapSettings["restriction_layer_exceptions"] as $data) {
+        foreach ($riskMapSettings["restriction_layer_exceptions"] as $data) {
             $layerData = Database::GetInstance()->query(
                 "SELECT layer_id FROM layer WHERE layer_name = ?",
                 array($data)
             );
             if (count($layerData) > 0) {
-                array_push($restrictionLayerExceptions, $layerData[0]["layer_id"]);
+                $restrictionLayerExceptions[] = $layerData[0]["layer_id"];
             } else {
-                Log::ServerEvent(
+                $this->getLogger()->serverEvent(
                     "SEL_API",
                     Log::WARNING,
                     "Unknown layer with name ".$data." found in SEL Configuration file"
                 );
             }
         }
-        $riskmapSettings["restriction_layer_exceptions"] = $restrictionLayerExceptions;
+        $riskMapSettings["restriction_layer_exceptions"] = $restrictionLayerExceptions;
         
         $bleedConfig = $configValues["heatmap_bleed_config"];
 
-        return array("riskmap_settings" => $riskmapSettings, "bleed_config" => $bleedConfig);
+        return array("riskmap_settings" => $riskMapSettings, "bleed_config" => $bleedConfig);
     }
 
     /**
@@ -941,6 +945,7 @@ class SEL extends Base
 
     /**
      * @apiGroup SEL
+     * @throws Exception
      * @api {POST} /sel/NotifyUpdateFinished Notify Update Finished
      * @apiParam month The month this update was completed for.
      * @apiDescription Notifies the server that SEL has finished the update for this month.
@@ -949,6 +954,7 @@ class SEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function NotifyUpdateFinished(int $month): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_sel_lastmonth = ?", array($month));
     }
 
@@ -1003,7 +1009,7 @@ class SEL extends Base
 				FROM plan
 				INNER JOIN plan_layer ON plan.plan_id = plan_layer.plan_layer_plan_id
 				INNER JOIN layer ON plan_layer.plan_layer_layer_id = layer.layer_id
-				WHERE layer.layer_original_id = ? AND plan.plan_state = \"IMPLEMENTED\" AND plan.plan_gametime = ?",
+				WHERE layer.layer_original_id = ? AND plan.plan_state = 'IMPLEMENTED' AND plan.plan_gametime = ?",
                 array($layerId, $month)
             );
 

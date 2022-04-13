@@ -27,7 +27,8 @@ $GLOBALS['api_config'] = array(
         "database" => "msp_server_manager",
         "multisession_database_prefix" => "msp_session_",
         "multisession_create_user" => "root",
-        "multisession_create_password" => ""
+        "multisession_create_password" => "",
+        'num_pool_connections' => 20
     ),
     "wiki" => array(
         "game_base_url" => "https://knowledge.mspchallenge.info/wiki/",

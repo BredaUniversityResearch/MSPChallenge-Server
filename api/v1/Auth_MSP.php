@@ -32,7 +32,7 @@ class Auth_MSP extends Auths
                 $this->CallBack(
                     GameSession::GetServerManagerApiRoot()."readServerManager.php",
                     array(
-                        "token" => (new Security())->GetServerManagerToken()["token"],
+                        "token" => (new Security())->getServerManagerToken(),
                         "session_id" => $this->getGameSessionId()
                     )
                 )

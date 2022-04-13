@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `game_saves` (
   `demo_session` tinyint(1) NOT NULL DEFAULT 0,
   `api_access_token` varchar(32) NOT NULL DEFAULT '',
   `save_type` enum('full','layers') NOT NULL DEFAULT 'full',
-  `save_notes` longtext NOT NULL DEFAULT '',
+  `save_notes` longtext NOT NULL,
   `save_visibility` enum('active','archived') NOT NULL DEFAULT 'active',
   `save_timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
   `server_version` varchar(45) NOT NULL

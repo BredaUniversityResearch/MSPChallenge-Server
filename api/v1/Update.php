@@ -96,10 +96,13 @@ class Update extends Base
         return $this->Reload($new_config_file_name, $dbase_file_path, $raster_files_path);
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Reload(string $new_config_file_name, string $dbase_file_path, string $raster_files_path): bool
     {
-        Log::SetupFileLogger(Log::GetRecreateLogPath());
+        Log::SetupFileLogger(Log::getRecreateLogPath());
         Log::LogInfo("Reload -> Starting game session reload process...");
         try {
             $this->EmptyDatabase();
@@ -125,6 +128,7 @@ class Update extends Base
 
     /**
      * @apiGroup Update
+     * @throws Exception
      * @api {POST} /update/Reimport Reimport
      * @apiDescription Performs a full reimport of the database with the set filename in $configFilename.
      */
@@ -135,7 +139,7 @@ class Update extends Base
         string $geoserver_username = '',
         string $geoserver_password = ''
     ): bool {
-        Log::SetupFileLogger(Log::GetRecreateLogPath());
+        Log::SetupFileLogger(Log::getRecreateLogPath());
         Log::LogInfo("Reimport -> Starting game session creation process...");
         try {
             $this->EmptyDatabase();
@@ -347,6 +351,7 @@ class Update extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function ApplyGameConfig(): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game SET game_autosave_month_interval = ?",
             array(Config::GetInstance()->GetGameAutosaveInterval())
@@ -405,8 +410,8 @@ class Update extends Base
     {
         Log::LogInfo("SetupSecurityToken -> Generating new access tokens");
         $security = new Security();
-        $security->GenerateToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN, Security::TOKEN_LIFETIME_INFINITE);
-        $security->GenerateToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER, Security::TOKEN_LIFETIME_INFINITE);
+        $security->generateToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN, Security::TOKEN_LIFETIME_INFINITE);
+        $security->generateToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER, Security::TOKEN_LIFETIME_INFINITE);
         Log::LogInfo("SetupSecurityToken -> Done");
     }
 

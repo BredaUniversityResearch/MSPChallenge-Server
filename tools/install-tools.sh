@@ -2,27 +2,81 @@
 
 CWD="$(pwd)"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd "${SCRIPT_DIR}"
+cd "${SCRIPT_DIR}" || exit 4
+
+DOWNLOAD_DIR="../var/tools/"
+DOTENV_FILE="../.env"
+if [[ ! -f $DOTENV_FILE ]]; then
+  echo "Could not find file ${DOTENV_FILE}"
+  exit 1
+fi
+
+# export all .env variables as environmental variables, e.g. APP_ENV
+set -o allexport; source ../.env; set +o allexport
+
+FORCE=0
+while getopts ":fe:" opt; do
+  case $opt in
+    f) FORCE=1
+    ;;
+    e) APP_ENV="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    exit 2
+    ;;
+  esac
+
+  case $OPTARG in
+    -*) echo "Option $opt needs a valid argument"
+    exit 3
+    ;;
+  esac
+done
+
+case $APP_ENV in
+    prod|dev) echo "Environment: ${APP_ENV}" ;;
+    *) echo "Encountered invalid environment: ${APP_ENV}" ;;
+esac
+
+if [[ $FORCE == 1 ]]; then
+  echo 'Forcing download to latest versions...'
+fi
 
 function download() {
-  FORCE=0
-  if [[ "$1" == "force" ]]; then
-    FORCE=1
+  # install platform independent tools -- runs on both Linux unbuntu or Windows Git bash
+  if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}phpcs.phar" ]]; then
+    curl --create-dirs -Lso "${DOWNLOAD_DIR}phpcs.phar" https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+  fi
+  if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}phpmd.phar" ]]; then
+   curl --create-dirs -Lso "${DOWNLOAD_DIR}phpmd.phar" https://phpmd.org/static/latest/phpmd.phar
+  fi
+  if [[ $FORCE == 1|| ! -f "${DOWNLOAD_DIR}phpcbf.phar" ]]; then
+    curl --create-dirs -Lso "${DOWNLOAD_DIR}phpcbf.phar" https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar
   fi
 
-  # install platform independent tools -- runs on both Linux unbuntu or Windows Git bash
-  if [[ $FORCE == 1 || ! -f phpcs.phar ]]; then
-    curl -OLs https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+  # install Windows tools
+  if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+    # install Symfony cli
+    if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}Win/symfony-cli/symfony.exe" ]]; then
+      if [[ ! -d "${DOWNLOAD_DIR}Win/symfony-cli/" ]]; then
+        mkdir -p "${DOWNLOAD_DIR}Win/symfony-cli/"
+      fi
+      curl -Lso /tmp/symfony-cli_windows_386.zip https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_windows_386.zip && unzip -qqo /tmp/symfony-cli_windows_386.zip -d "${DOWNLOAD_DIR}Win/symfony-cli/" && rm /tmp/symfony-cli_windows_386.zip
+    fi
   fi
-  if [[ $FORCE == 1 || ! -f phpmd.phar ]]; then
-    curl -OLs https://phpmd.org/static/latest/phpmd.phar
+
+  downloadDevTools
+}
+
+function downloadDevTools() {
+  if [[ $APP_ENV != "dev" ]]; then
+    echo "Skipping download of development tools"
+    return
   fi
-  if [[ $FORCE == 1 || ! -f phpcbf.phar ]]; then
-    curl -OLs https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar
-  fi
-  if [[ $FORCE == 1 || ! -f ./adminer/index.php ]]; then
-    curl --create-dirs -Lso ./adminer/adminer.php https://www.adminer.org/latest-mysql-en.php
-    cat > ./adminer/index.php <<- CONTENT
+
+  if [[ $FORCE == 1 || ! -f ./../public/adminer/index.php ]]; then
+    curl --create-dirs -Lso ./../public/adminer/adminer.php https://www.adminer.org/latest-mysql-en.php
+    cat > ./../public/adminer/index.php <<- CONTENT
 <?php
 function adminer_object() {
     class MyAdminer extends Adminer {
@@ -39,31 +93,19 @@ function adminer_object() {
 include "./adminer.php";
 CONTENT
   fi
-
-  # install Windows tools
-  if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-    # install Symfony cli
-    if [[ $FORCE == 1 || ! -f ./Win/symfony-cli/symfony.exe ]]; then
-      curl -Lso /tmp/symfony-cli_windows_386.zip https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_windows_386.zip && unzip -qqo /tmp/symfony-cli_windows_386.zip -d ./Win/symfony-cli/ && rm /tmp/symfony-cli_windows_386.zip
-    fi
-  fi
 }
 
 function makeExecutable() {
-  cat > "$1" <<- CONTENT
+  TARGET_FILE="${DOWNLOAD_DIR}${1}"
+  cat > "${TARGET_FILE}" <<- CONTENT
 #!/bin/bash
 SCRIPT_DIR="\$( cd -- "\$( dirname -- "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 php "\${SCRIPT_DIR}/$1.phar" "\$@"
 CONTENT
-  chmod u+x "$1"
+  chmod u+x "${TARGET_FILE}"
 }
 
 function makeExecutables() {
-  FORCE=0
-  if [[ "$1" == "force" ]]; then
-    FORCE=1
-  fi
-
   if [[ $FORCE == 1 || ! -f phpcs ]]; then
     makeExecutable phpcs
   fi
@@ -77,4 +119,4 @@ function makeExecutables() {
 
 download
 makeExecutables
-cd "${CWD}"
+cd "${CWD}" || exit 5

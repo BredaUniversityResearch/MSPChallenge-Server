@@ -6,7 +6,8 @@ use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
 use function App\parallel;
-use function Clue\React\Block\await;
+use function App\tpf;
+use function App\await;
 
 class Kpi extends Base
 {
@@ -90,7 +91,12 @@ class Kpi extends Base
         );
     }
 
-    public function latestAsync(int $time, int $country): PromiseInterface
+    /**
+     * @throws Exception
+     * @return array|PromiseInterface
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Latest(int $time, int $country)/*: array|PromiseInterface // <-- php 8 */
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
 
@@ -117,46 +123,46 @@ class Kpi extends Base
             );
 
         // ecology
-        $promises[] = $this->getAsyncDatabase()->query(
-            $qb
-                ->setParameters([$time, $country, 'ECOLOGY'])
-        );
+        $toPromiseFunctions[] = tpf(function () use ($qb, $time, $country) {
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->setParameters([$time, $country, 'ECOLOGY'])
+            );
+        });
         // shipping
-        $promises[] = $this->getAsyncDatabase()->query(
-            $qb
-                ->setParameters([$time, $country, 'SHIPPING'])
-        );
+        $toPromiseFunctions[] = tpf(function () use ($qb, $time, $country) {
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->setParameters([$time, $country, 'SHIPPING'])
+            );
+        });
 
         // energy
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        $promises[] = $this->getAsyncDatabase()->query(
-            $qb
-                ->select(
-                    'energy_kpi_grid_id as grid',
-                    'energy_kpi_month as month',
-                    'energy_kpi_country_id as country',
-                    'energy_kpi_actual as actual',
-                )
-                ->from('energy_kpi')
-                ->where('energy_kpi_lastupdate > ' . $qb->createPositionalParameter($time))
-        );
+        $toPromiseFunctions[] = tpf(function () use ($qb, $time) {
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->select(
+                        'energy_kpi_grid_id as grid',
+                        'energy_kpi_month as month',
+                        'energy_kpi_country_id as country',
+                        'energy_kpi_actual as actual',
+                    )
+                    ->from('energy_kpi')
+                    ->where('energy_kpi_lastupdate > ' . $qb->createPositionalParameter($time))
+            );
+        });
 
-        return parallel($promises, 1); // todo: if performance allows, increase threads
-    }
+        $promise = parallel($toPromiseFunctions)
+            /** @var Result[] $results */
+            ->then(function (array $results) {
+                //should probably be renamed to be something other than ecology
+                $data['ecology'] = $results[0]->fetchAllRows();
+                $data['shipping'] = $results[1]->fetchAllRows();
+                $data['energy'] = $results[2]->fetchAllRows();
+                return $data;
+            });
 
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $time, int $country): array
-    {
-        $data = array();
-        /** @var Result[] $results */
-        $results = await($this->latestAsync($time, $country));
-        //should probably be renamed to be something other than ecology
-        $data['ecology'] = $results[0]->fetchAllRows();
-        $data['shipping'] = $results[1]->fetchAllRows();
-        $data['energy'] = $results[2]->fetchAllRows();
-        return $data;
+        return $this->isAsync() ? $promise : await($promise);
     }
 }

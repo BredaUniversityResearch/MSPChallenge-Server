@@ -4,11 +4,11 @@ namespace App\Domain\API\v1;
 
 use App\Domain\API\APIHelper;
 use App\Domain\Helper\AsyncDatabase;
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use Drift\DBAL\Connection;
 use Exception;
 use React\EventLoop\Loop;
 use TypeError;
-use function Clue\React\Block\await;
 
 function IsFeatureFlagEnabled(string $featureName): bool
 {
@@ -23,25 +23,34 @@ class Base
 
     public static string $public = "dbfc9c465c3ed8394049f848344f4ab8";
 
-    private bool $isValid = false;
+    private string $method = '';
+    private ?bool $isValid = null;
     private array $allowed;
     private ?Connection $asyncDatabase = null;
 
     private ?int $gameSessionId = null;
+    private ?string $token = null;
+    private bool $async = false;
+
+    private ?Log $logger = null;
 
     /**
      * @throws Exception
      */
     public function __construct(string $method = '', array $allowed = [])
     {
+        $this->method = $method;
         $this->allowed = $allowed;
-        if ($method !== '') {
-            $this->isValid = $this->Validate($this->allowed, $method);
-        }
     }
 
     public function isValid(): bool
     {
+        if (null === $this->isValid) {
+            $this->isValid = false;
+            if ($this->method !== '') {
+                $this->isValid = $this->Validate($this->allowed, $this->method);
+            }
+        }
         return $this->isValid;
     }
 
@@ -172,7 +181,7 @@ class Base
             if ($d['data'] == "[]") {
                 $arr[sizeof($arr) - 1]['data'] = "";
             } else {
-                $arr[sizeof($arr) - 1]['data'] = json_decode($d['data']);
+                $arr[sizeof($arr) - 1]['data'] = json_decode($d['data'] ?? '');
             }
         }
 
@@ -203,13 +212,17 @@ class Base
         }
 
         $security = new Security();
+        $this->asyncDataTransferTo($security);
         return $calledFunctionAllowed && $security->validateAccess($accessFlagsRequired);
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function Dir(): string
     {
-        $abs_app_root = $_SERVER['DOCUMENT_ROOT'];
+        $abs_app_root = SymfonyToLegacyHelper::getInstance()->getProjectDir();
         $url_app_root = '';
         $self_path = explode("/", $_SERVER['PHP_SELF']);
         $self_path_length = count($self_path);
@@ -344,5 +357,53 @@ class Base
     public function setGameSessionId(?int $gameSessionId): void
     {
         $this->gameSessionId = $gameSessionId;
+    }
+
+    public function getToken(): ?string
+    {
+        // Use the token that was "set" to this instance
+        if ($this->token != null) {
+            return $this->token;
+        }
+        // Otherwise, try to retrieve the token from the request
+        return Security::findAuthenticationHeaderValue();
+    }
+
+    public function setToken(?string $token): void
+    {
+        $this->token = $token;
+    }
+
+    public function isAsync(): bool
+    {
+        return $this->async;
+    }
+
+    public function setAsync(bool $async): void
+    {
+        $this->async = $async;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function asyncDataTransferTo(Base $other)
+    {
+        $other->setGameSessionId($this->getGameSessionId());
+        $other->setAsyncDatabase($this->getAsyncDatabase());
+        $other->setToken($this->getToken());
+        $other->setAsync($this->isAsync());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getLogger(): Log
+    {
+        if (null == $this->logger) {
+            $this->logger = new Log();
+            $this->asyncDataTransferTo($this->logger);
+        }
+        return $this->logger;
     }
 }

@@ -102,8 +102,8 @@ class User extends Base
                 true
             );
             $security = new Security();
-            $response["api_access_token"] = $security->GenerateToken()["token"];
-            $response["api_access_recovery_token"] = $security->GetRecoveryToken()["token"];
+            $response["api_access_token"] = $security->generateToken()["token"];
+            $response["api_access_recovery_token"] = $security->getRecoveryToken();
         }
         return $response;
     }
@@ -136,8 +136,8 @@ class User extends Base
                     true
                 );
                 $security = new Security();
-                $response["api_access_token"] = $security->GenerateToken()["token"];
-                $response["api_access_recovery_token"] = $security->GetRecoveryToken()["token"];
+                $response["api_access_token"] = $security->generateToken()["token"];
+                $response["api_access_recovery_token"] = $security->getRecoveryToken();
             } catch (Exception $e) {
                 throw new Exception(
                     "Could not log you in. Please check with your session administrator." .

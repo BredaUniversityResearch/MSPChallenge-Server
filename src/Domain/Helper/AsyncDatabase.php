@@ -5,8 +5,10 @@ namespace App\Domain\Helper;
 use App\Domain\API\v1\Config;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Drift\DBAL\Connection;
+use Drift\DBAL\ConnectionPool;
 use Drift\DBAL\Credentials;
 use Drift\DBAL\Driver\Mysql\MysqlDriver;
+use Drift\DBAL\SingleConnection;
 use React\EventLoop\LoopInterface;
 
 class AsyncDatabase
@@ -31,7 +33,7 @@ class AsyncDatabase
             $dbConfig['password'],
             $dbConfig['database']
         );
-        return Connection::createConnected($mysqlDriver, $credentials, $mysqlPlatform);
+        return SingleConnection::createConnected($mysqlDriver, $credentials, $mysqlPlatform);
     }
 
     public static function createGameSessionConnection(LoopInterface $loop, int $gameSessionId): Connection
@@ -44,8 +46,10 @@ class AsyncDatabase
             $dbConfig['port'] ?? '3306',
             $dbConfig['user'],
             $dbConfig['password'],
-            $dbConfig['multisession_database_prefix'].$gameSessionId
+            $dbConfig['multisession_database_prefix'].$gameSessionId,
+            [],
+            $dbConfig['num_pool_connections'] ?: 20
         );
-        return Connection::createConnected($mysqlDriver, $credentials, $mysqlPlatform);
+        return ConnectionPool::createConnected($mysqlDriver, $credentials, $mysqlPlatform);
     }
 }

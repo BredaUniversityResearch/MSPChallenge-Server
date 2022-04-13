@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Common\GetConstantsTrait;
+use App\Domain\Helper\SymfonyToLegacyHelper;
 
 class ServerManager extends Base
 {
@@ -30,7 +31,7 @@ class ServerManager extends Base
           "From40beta7To40beta8",
           "From40beta7To40beta9"
         );
-        $this->SetRootVars();
+        $this->setRootVars();
         $this->_msp_auth_url = "https://auth.mspchallenge.info";
         $this->_msp_auth_api = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/";
     }
@@ -46,9 +47,12 @@ class ServerManager extends Base
         $this->_old = clone $this;
     }
 
-    private function SetRootVars()
+    /**
+     * @throws Exception
+     */
+    private function setRootVars()
     {
-        $server_root = $_SERVER['DOCUMENT_ROOT'];
+        $server_root = SymfonyToLegacyHelper::getInstance()->getProjectDir();
         $server_manager_root = '';
         $self_path = explode("/", $_SERVER['PHP_SELF']);
         $self_path_length = count($self_path);

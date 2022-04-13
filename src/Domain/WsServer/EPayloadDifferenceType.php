@@ -2,7 +2,7 @@
 
 namespace App\Domain\WsServer;
 
-use App\Domain\Helper\Enum;
+use App\Domain\Common\Enum;
 
 class EPayloadDifferenceType extends Enum
 {

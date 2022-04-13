@@ -7,7 +7,7 @@ use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\resolveOnFutureTick;
-use function Clue\React\Block\await;
+use function App\await;
 
 class Security extends Base
 {
@@ -78,12 +78,12 @@ class Security extends Base
         $requestToken = $this->getCurrentRequestTokenDetails();
         if ($requestToken != null) {
             if ($this->TokenHasAccess($requestToken, self::ACCESS_LEVEL_FLAG_FULL)) {
-                $token = $this->GenerateToken();
+                $token = $this->generateToken();
             } else {
                 if (!empty($expired_token)) {
                     $expiredTokenDetails = $this->getTokenDetails($expired_token);
                     if ($expiredTokenDetails != null) {
-                        $token = $this->GenerateToken($expiredTokenDetails['api_token_scope']);
+                        $token = $this->generateToken($expiredTokenDetails['api_token_scope']);
                     }
                 }
             }
@@ -96,14 +96,16 @@ class Security extends Base
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
+     * Returns array of [token => TokenValue, valid_until => UnixTimestamp]
+     *
      * @throws Exception
+     * @return array|PromiseInterface
      */
-    public function generateTokenAsync(
+    public function generateToken(
         int $accessLevel = self::ACCESS_LEVEL_FLAG_FULL,
         int $lifetimeSeconds = self::DEFAULT_TOKEN_LIFETIME_SECONDS
-    ): PromiseInterface {
-        return $this->getAsyncDatabase()->query(
+    )/*: array|PromiseInterface // <-- php 8 */ {
+        $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->delete('api_token')
                 ->where('api_token_valid_until != 0')
@@ -151,48 +153,30 @@ class Security extends Base
                 'valid_until' => $row['api_token_valid_until'] ?? null
             ];
         });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
-     * Returns array of [token => TokenValue, valid_until => UnixTimestamp]
-     *
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GenerateToken(
-        int $accessLevel = self::ACCESS_LEVEL_FLAG_FULL,
-        int $lifetimeSeconds = self::DEFAULT_TOKEN_LIFETIME_SECONDS
-    ): array {
-        return await($this->generateTokenAsync($accessLevel, $lifetimeSeconds));
-    }
-
-    /**
-     * Returns array of [token => TokenValue]
-     *
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetRecoveryToken(): array
+    public function getRecoveryToken(): string
     {
-        return $this->GetSpecialToken(self::ACCESS_LEVEL_FLAG_REQUEST_TOKEN);
+        return $this->getSpecialToken(self::ACCESS_LEVEL_FLAG_REQUEST_TOKEN);
     }
 
     /**
-     * Returns array of [token => TokenValue]
-     *
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerManagerToken(): array
+    public function getServerManagerToken(): string
     {
-        return $this->GetSpecialToken(self::ACCESS_LEVEL_FLAG_SERVER_MANAGER);
+        return $this->getSpecialToken(self::ACCESS_LEVEL_FLAG_SERVER_MANAGER);
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
      * @throws Exception
+     * @return string|PromiseInterface
      */
-    public function getSpecialTokenAsync(int $accessLevel): PromiseInterface
+    public function getSpecialToken(int $accessLevel)/*: string|PromiseInterface // <-- php 8 */
     {
         $deferred = new Deferred();
         if ($accessLevel == self::ACCESS_LEVEL_FLAG_REQUEST_TOKEN ||
@@ -215,19 +199,11 @@ class Security extends Base
                     $deferred->resolve('');
                 }
             );
-            return $deferred->promise();
+            $promise = $deferred->promise();
+            return $this->isAsync() ? $promise : await($promise);
         }
-        return resolveOnFutureTick($deferred, '')->promise();
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetSpecialToken(int $accessLevel): array
-    {
-        $result['token'] = await($this->getSpecialTokenAsync($accessLevel));
-        return $result;
+        $promise = resolveOnFutureTick($deferred, '')->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -235,7 +211,7 @@ class Security extends Base
      */
     private function getCurrentRequestTokenDetails(): ?array
     {
-        $token = $this->FindAuthenticationHeaderValue();
+        $token = $this->getToken();
         if ($token == null) {
             return null;
         }
@@ -306,10 +282,13 @@ class Security extends Base
         return true;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function FindAuthenticationHeaderValue(): ?string
+    public static function findAuthenticationHeaderValue(): ?string
     {
-        $requestHeaders = apache_request_headers();
+        $requestHeaders = [];
+        // is only available in the Apache, FastCGI, CLI, and FPM webservers.
+        if (function_exists('apache_request_headers')) {
+            $requestHeaders = apache_request_headers();
+        }
         $requestHeaders = array_change_key_case($requestHeaders, CASE_LOWER);
 
         if (isset($requestHeaders["mspapitoken"])) {

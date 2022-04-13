@@ -3,16 +3,20 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowser;
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use App\SilentFailException;
-use Doctrine\DBAL\Exception\InvalidArgumentException;
+use Drift\DBAL\ConnectionPool;
+use Drift\DBAL\ConnectionWorker;
 use Drift\DBAL\Result;
+use Drift\DBAL\SingleConnection;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use function App\parallel;
 use function App\resolveOnFutureTick;
-use function Clue\React\Block\await;
-use function React\Promise\all;
+use function App\tpf;
+use function App\await;
 
 class Game extends Base
 {
@@ -46,10 +50,27 @@ class Game extends Base
 
     public function doDummyQuery(): PromiseInterface
     {
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return $this->getAsyncDatabase()->query(
-            $qb->select('1')
-        );
+        $connection = $this->getAsyncDatabase();
+        if ($connection instanceof ConnectionPool) {
+            $connections = collect($connection->getWorkers())
+                ->map(function (ConnectionWorker $worker) {
+                    return $worker->getConnection();
+                })
+                ->all();
+        } else { // if ($connection is SingleConnection)
+            $connections[] = $connection;
+        }
+        $toPromiseFunctions = [];
+        /** @var SingleConnection $connection */
+        foreach ($connections as $connection) {
+            $toPromiseFunctions[] = tpf(function () use ($connection) {
+                $qb = $connection->createQueryBuilder();
+                return $connection->query(
+                    $qb->select('1')
+                );
+            });
+        }
+        return parallel($toPromiseFunctions);
     }
 
     /**
@@ -126,6 +147,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function NextMonth(): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
     }
 
@@ -138,9 +160,9 @@ class Game extends Base
         if ($filename == "") {    //if there's no file given, use the one in the database
             $data = Database::GetInstance($this->getGameSessionId())->query("SELECT game_configfile FROM game");
 
-            $path = GameSession::CONFIG_DIRECTORY . $data[0]['game_configfile'];
+            $path = GameSession::getConfigDirectory() . $data[0]['game_configfile'];
         } else {
-            $path = GameSession::CONFIG_DIRECTORY . $filename;
+            $path = GameSession::getConfigDirectory() . $filename;
         }
 
         // 5 min cache. why 5min? Such that the websocket server will refresh the config once in a while
@@ -201,6 +223,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Setupfilename(string $configFilename): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_configfile=?", array($configFilename));
     }
 
@@ -270,6 +293,7 @@ class Game extends Base
 
         $str = substr($str, 0, -1);
 
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game SET game_planning_era_realtime=?, game_eratime=?",
             array($str, $data['era_total_months'])
@@ -338,8 +362,7 @@ class Game extends Base
     public function Tick(bool $showDebug = false): PromiseInterface
     {
         $plan = new Plan();
-        $plan->setGameSessionId($this->getGameSessionId());
-        $plan->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($plan);
         // Plan tick first: to clean up plans
         return $plan->Tick()
             // fetch game information, incl. state name
@@ -434,12 +457,11 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function UpdateGameDetailsAtServerManager(): PromiseInterface
     {
-        return $this->getGameDetailsAsync()
+        return $this->getGameDetails()
             ->then(function (array $postValues) {
                 $security = new Security();
-                $security->setGameSessionId($this->getGameSessionId());
-                $security->setAsyncDatabase($this->getAsyncDatabase());
-                return $security->getSpecialTokenAsync(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
+                $this->asyncDataTransferTo($security);
+                return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
                     ->then(function (string $token) use ($postValues) {
                         $postValues['token'] = $token;
                         $postValues['session_id'] = $this->getGameSessionId();
@@ -479,7 +501,7 @@ class Game extends Base
      */
     private function calculateUpdatedTime(bool $showDebug = false): PromiseInterface
     {
-        return  $this->getAsyncDatabase()->query(
+        return $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
                     'game_state as state',
@@ -510,10 +532,15 @@ class Game extends Base
                         ->update('game')
                         ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
                 )
-                ->done(function (Result $result) use (&$tick, $assureGameLatestUpdate) {
-                    $tick['lastupdate'] = microtime(true);
-                    $assureGameLatestUpdate->resolve();
-                });
+                ->done(
+                    function (Result $result) use (&$tick, $assureGameLatestUpdate) {
+                        $tick['lastupdate'] = microtime(true);
+                        $assureGameLatestUpdate->resolve();
+                    },
+                    function ($reason) use ($assureGameLatestUpdate) {
+                        $assureGameLatestUpdate->reject($reason);
+                    }
+                );
             } else {
                 $assureGameLatestUpdate->resolve();
             }
@@ -652,10 +679,9 @@ class Game extends Base
 
             //update all the plans which ticks the server.
             $plan = new Plan();
-            $plan->setGameSessionId($this->getGameSessionId());
-            $plan->setAsyncDatabase($this->getAsyncDatabase());
+            $this->asyncDataTransferTo($plan);
             return $plan->updateLayerState($currentMonth)
-                ->then(function () use ($currentMonth, $monthsDone, $state, $tick) {
+                ->then(function (/* array $results */) use ($currentMonth, $monthsDone, $state, $tick) {
                     return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
                 })
                 ->then(function () use ($tick) {
@@ -676,6 +702,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Planning(int $months): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_planning_gametime=?", array($months));
     }
 
@@ -689,6 +716,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Realtime(int $realtime): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
     }
 
@@ -698,6 +726,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function SetStartDate(int $a_startYear): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_start=?", array($a_startYear));
     }
 
@@ -712,6 +741,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function FutureRealtime(string $realtime): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
     }
 
@@ -736,6 +766,7 @@ class Game extends Base
             await($plan->updateLayerState(0));
         }
 
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game SET game_lastupdate = ?, game_state=?",
             array(microtime(true), $state)
@@ -803,7 +834,10 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
     {
-        self::StartSimulationExe(array("exe" => "MSW.exe", "working_directory" => "simulations/MSW/"));
+        self::StartSimulationExe([
+            'exe' => 'MSW.exe',
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/MSW/'
+        ]);
     }
 
     /**
@@ -872,13 +906,12 @@ class Game extends Base
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
                 $simulationsHelper = new Simulations();
-                $simulationsHelper->setGameSessionId($this->getGameSessionId());
-                $simulationsHelper->setAsyncDatabase($this->getAsyncDatabase());
+                $this->asyncDataTransferTo($simulationsHelper);
                 $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
                 $security = new Security();
-                $security->setGameSessionId($this->getGameSessionId());
-                $security->setAsyncDatabase($this->getAsyncDatabase());
-                return $security->generateTokenAsync()
+                $this->asyncDataTransferTo($security);
+                $security->setAsync(true); // force async
+                return $security->generateToken()
                     ->then(function (array $result) use (
                         $security,
                         $simulations,
@@ -886,7 +919,7 @@ class Game extends Base
                         $newWatchdogGameState
                     ) {
                         $newAccessToken = json_encode($result);
-                        return $security->getSpecialTokenAsync(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
+                        return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
                             ->then(function (string $token) use (
                                 $security,
                                 $simulations,
@@ -929,13 +962,12 @@ class Game extends Base
             })
             ->then(function (ResponseInterface $response) {
                 $log = new Log();
-                $log->setGameSessionId($this->getGameSessionId());
-                $log->setAsyncDatabase($this->getAsyncDatabase());
+                $this->asyncDataTransferTo($log);
 
                 $responseContent = $response->getBody()->getContents();
                 $decodedResponse = json_decode($responseContent, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    return $log->postEventAsync(
+                    return $log->postEvent(
                         "Watchdog",
                         Log::ERROR,
                         "Received invalid response from watchdog. Response: \"".$responseContent."\"",
@@ -944,7 +976,7 @@ class Game extends Base
                 }
 
                 if ($decodedResponse["success"] != 1) {
-                    return $log->postEventAsync(
+                    return $log->postEvent(
                         "Watchdog",
                         Log::ERROR,
                         "Watchdog responded with failure to change game state request. Response: \"".
@@ -956,6 +988,9 @@ class Game extends Base
             });
     }
 
+    /**
+     * @throws Exception
+     */
     private function latestLevel2(array $tick, float $lastUpdateTime, float $newTime, array &$data): PromiseInterface
     {
         $data['tick'] = $tick;
@@ -963,9 +998,8 @@ class Game extends Base
             echo (microtime(true) - $newTime) . " elapsed after tick<br />";
         }
         $plan = new Plan();
-        $plan->setGameSessionId($this->getGameSessionId());
-        $plan->setAsyncDatabase($this->getAsyncDatabase());
-        return $plan->latestAsync($lastUpdateTime);
+        $this->asyncDataTransferTo($plan);
+        return $plan->Latest((int)$lastUpdateTime);
     }
 
     /**
@@ -983,17 +1017,21 @@ class Game extends Base
         }
 
         $layer = new Layer();
-        $layer->setGameSessionId($this->getGameSessionId());
-        $layer->setAsyncDatabase($this->getAsyncDatabase());
-        $promises = [];
+        $this->asyncDataTransferTo($layer);
+        $toPromiseFunctions = [];
         foreach ($data['plan'] as $p) {
-            $promises[] = $layer->latest($p['layers'], $lastUpdateTime, $p['id']);
+            $toPromiseFunctions[] = tpf(function () use ($layer, $p, $lastUpdateTime) {
+                return $layer->latest($p['layers'], $lastUpdateTime, $p['id']);
+            });
         }
-        return all(
-            $promises
+        return parallel(
+            $toPromiseFunctions
         );
     }
 
+    /**
+     * @throws Exception
+     */
     private function latestLevel4(
         array $layersContainer,
         int $teamId,
@@ -1018,28 +1056,26 @@ class Game extends Base
         unset($p);
 
         $plan = new Plan();
-        $plan->setGameSessionId($this->getGameSessionId());
-        $plan->setAsyncDatabase($this->getAsyncDatabase());
-        return $plan->getMessagesAsync(
+        $this->asyncDataTransferTo($plan);
+        return $plan->GetMessages(
             $lastUpdateTime
         );
     }
 
     private function latestLevel5(
-        Result $queryResult,
+        array $queryResultRows,
         float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['planmessages'] = $queryResult->fetchAllRows();
+        $data['planmessages'] = $queryResultRows;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after plan messages<br />";
         }
 
         //return any raster layers that need to be updated
         $layer = new Layer();
-        $layer->setGameSessionId($this->getGameSessionId());
-        $layer->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($layer);
         return $layer->latestRaster(
             $lastUpdateTime
         );
@@ -1057,8 +1093,7 @@ class Game extends Base
         }
 
         $energy = new Energy();
-        $energy->setGameSessionId($this->getGameSessionId());
-        $energy->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($energy);
         return $energy->latest(
             $lastUpdateTime
         );
@@ -1088,31 +1123,27 @@ class Game extends Base
         }
 
         $kpi = new Kpi();
-        $kpi->setGameSessionId($this->getGameSessionId());
-        $kpi->setAsyncDatabase($this->getAsyncDatabase());
-        return $kpi->latestAsync(
-            $lastUpdateTime,
+        $this->asyncDataTransferTo($kpi);
+        return $kpi->Latest(
+            (int)$lastUpdateTime,
             $teamId
         );
     }
 
     private function latestLevel8(
-        array $queryResults,
+        array $queryResultRows,
         float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['kpi']['ecology'] = $queryResults[0]->fetchAllRows();
-        $data['kpi']['shipping'] = $queryResults[1]->fetchAllRows();
-        $data['kpi']['energy'] = $queryResults[2]->fetchAllRows();
+        $data['kpi'] = $queryResultRows;
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             echo (microtime(true) - $newTime) . " elapsed after kpi<br />";
         }
 
         $warning = new Warning();
-        $warning->setGameSessionId($this->getGameSessionId());
-        $warning->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($warning);
         return $warning->latest(
             $lastUpdateTime
         );
@@ -1132,8 +1163,7 @@ class Game extends Base
         }
 
         $objective = new Objective();
-        $objective->setGameSessionId($this->getGameSessionId());
-        $objective->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($objective);
         return $objective->latest(
             $lastUpdateTime
         );
@@ -1231,7 +1261,7 @@ class Game extends Base
                         $newTime,
                         $data
                     )
-                    ->then(function (Result $result) use (
+                    ->then(function (array $result) use (
                         $teamId,
                         $lastUpdateTime,
                         $user,
@@ -1339,12 +1369,13 @@ class Game extends Base
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
      * @throws Exception
+     * @return array|PromiseInterface
      */
-    public function getGameDetailsAsync(): PromiseInterface
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetGameDetails()/*: array|PromiseInterface // <-- php 8 */
     {
-        return $this->getAsyncDatabase()->query(
+        $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
                     'g.game_start',
@@ -1395,15 +1426,7 @@ class Game extends Base
                 "game_running_til_time" => $runningTilTime
             ];
         });
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetGameDetails(): array
-    {
-        return await($this->getGameDetailsAsync());
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**

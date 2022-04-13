@@ -11,10 +11,10 @@
         "ext-iconv": "*",
         "ext-zip": "*",
         "ext-json": "*",
+        "ext-curl": "*",
         "cboden/ratchet": "^0.4",
-        "clue/block-react": "^1.5",
         "clue/http-proxy-react": "^1.7",
-        "drift/dbal": "^0.1.4",
+        "drift/dbal": "dev-feature/added-connection-pool",
         "gasparesganga/php-shapefile": "3.3.3",
         "illuminate/collections": "^8.73.2",
         "react/http": "^1.5",
@@ -96,5 +96,11 @@
         "brainmaestro/composer-git-hooks": "^2.8",
         "symfony/stopwatch": "5.4.*",
         "symfony/web-profiler-bundle": "5.4.*"
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:marinhekman/reactphp-dbal.git"
+        }
+    ]
 }

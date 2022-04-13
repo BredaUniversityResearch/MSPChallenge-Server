@@ -2,11 +2,14 @@
 
 namespace App\Domain\API\v1;
 
+use Drift\DBAL\Result;
 use Exception;
+use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
-use function App\chain;
 use function App\parallel;
-use function React\Promise\all;
+use function App\resolveOnFutureTick;
+use function App\tpf;
+use function App\await;
 
 class Warning extends Base
 {
@@ -21,6 +24,118 @@ class Warning extends Base
         parent::__construct($method, self::ALLOWED);
     }
 
+    private function postHandleRemovals(array $removed): PromiseInterface
+    {
+        if (empty($removed)) {
+            return resolveOnFutureTick(new Deferred())->promise();
+        }
+
+        // $removed can be simplified to only hold the issue_database_id,
+        //   also key on issue_database_id, removing duplicates
+        $removed = collect($removed)
+            ->keyBy('issue_database_id')
+            ->keys()
+            ->all();
+
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->update('warning')
+                ->set('warning_active', 0)
+                ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
+                ->where($qb->expr()->in('warning_id', $removed))
+        );
+    }
+
+    private function postHandleAddition(array $addedIssue): PromiseInterface
+    {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->select('warning_id')
+                ->from('warning')
+                ->where('warning_active = 1')
+                ->andWhere('warning_layer_id = ?')
+                ->andWhere('warning_issue_type = ?')
+                ->andWhere('abs(warning_x - ?) <= 1e-6')
+                ->andWhere('abs(warning_y - ?) <= 1e-6')
+                ->andWhere('warning_source_plan_id = ?')
+                ->andWhere('warning_restriction_id = ?')
+                ->setParameters([
+                    $addedIssue['plan_layer_id'], $addedIssue['type'], $addedIssue['x'], $addedIssue['y'],
+                    $addedIssue['source_plan_id'], $addedIssue['restriction_id']
+                ])
+        )
+        ->then(function (Result $result) use ($addedIssue) {
+            $existingIssues = $result->fetchAllRows();
+            if (empty($existingIssues)) {
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->insert('warning')
+                        ->values([
+                            'warning_last_update' => $qb->createPositionalParameter(microtime(true)),
+                            'warning_active' => 1,
+                            'warning_layer_id' => $qb->createPositionalParameter($addedIssue['plan_layer_id']),
+                            'warning_issue_type' => $qb->createPositionalParameter($addedIssue['type']),
+                            'warning_x' => $qb->createPositionalParameter($addedIssue['x']),
+                            'warning_y' => $qb->createPositionalParameter($addedIssue['y']),
+                            'warning_source_plan_id' => $qb->createPositionalParameter(
+                                $addedIssue['source_plan_id']
+                            ),
+                            'warning_restriction_id' => $addedIssue['restriction_id']
+                        ])
+                );
+            }
+
+            $existingIssue = current($existingIssues);
+            $toPromiseFunctions[$existingIssue['warning_id']] = tpf(function () use ($existingIssue) {
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->update('warning')
+                        ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
+                        ->set('warning_active', 1)
+                        ->where($qb->expr()->eq(
+                            'warning_id',
+                            $qb->createPositionalParameter($existingIssue['warning_id'])
+                        ))
+                );
+            });
+
+            // if (count($existingIssue) > 1)
+            // Something has already gone horribly wrong, try to save it by disabling all the other issues that
+            //   we found that match our data.
+            while ($existingIssue = next($existingIssues)) {
+                $toPromiseFunctions[$existingIssue['warning_id']] = tpf(function () use ($existingIssue) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->update('warning')
+                            ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
+                            ->set('warning_active', 0)
+                            ->where($qb->expr()->eq(
+                                'warning_id',
+                                $qb->createPositionalParameter($existingIssue['warning_id'])
+                            ))
+                    );
+                });
+            }
+            return parallel($toPromiseFunctions);
+        });
+    }
+
+    private function postHandleAdditions(array $added): PromiseInterface
+    {
+        $toPromiseFunctions = [];
+        foreach ($added as $addedIssue) {
+            $toPromiseFunctions[] = tpf(function () use ($addedIssue) {
+                return $this->postHandleAddition($addedIssue);
+            });
+        }
+        return parallel($toPromiseFunctions);
+    }
+
     /**
      * @apiGroup Warning
      * @throws Exception
@@ -30,60 +145,26 @@ class Warning extends Base
      * @apiDescription Add or update a warning message on the server
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Post(array $added, array $removed): void
+    public function Post(array $added, array $removed): ?PromiseInterface
     {
-        foreach ($added as $addedIssue) {
-            $existingIssue = Database::GetInstance()->query(
-                "
-                SELECT warning_id
-                FROM warning
-                WHERE warning_active = 1 AND warning_layer_id = ? AND warning_issue_type = ?
-                  AND abs(warning_x - ?) <= 1e-6 AND abs(warning_y - ?) <= 1e-6 AND warning_source_plan_id = ?
-                  AND warning_restriction_id = ?
-                ",
-                array(
-                    $addedIssue['plan_layer_id'], $addedIssue['type'], $addedIssue['x'], $addedIssue['y'],
-                    $addedIssue['source_plan_id'], $addedIssue['restriction_id']
-                )
-            );
-            
-            if (count($existingIssue) == 0) {
-                Database::GetInstance()->query(
-                    "
-                    INSERT INTO warning (
-                        warning_last_update, warning_active, warning_layer_id, warning_issue_type, warning_x, warning_y,
-                        warning_source_plan_id, warning_restriction_id
-                    ) VALUES(?, 1, ?, ?, ?, ?, ?, ?)
-                    ",
-                    array(
-                        microtime(true), $addedIssue['plan_layer_id'], $addedIssue['type'], $addedIssue['x'],
-                        $addedIssue['y'], $addedIssue['source_plan_id'], $addedIssue['restriction_id']
-                    )
-                );
-            } else {
-                Database::GetInstance()->query(
-                    "UPDATE warning SET warning_last_update = ?, warning_active = 1 WHERE warning_id = ?",
-                    array(microtime(true), $existingIssue[0]["warning_id"])
-                );
-                if (count($existingIssue) > 1) {
-                    // Something has already gone horribly wrong, try to save it by disabling all the other issues that
-                    //   we found that match our data.
-                    for ($i = 1; $i < count($existingIssue); ++$i) {
-                        Database::GetInstance()->query(
-                            "UPDATE warning SET warning_last_update = ?, warning_active = 0 WHERE warning_id = ?",
-                            array(microtime(true), $existingIssue[$i]["warning_id"])
-                        );
-                    }
+        $deferred = new Deferred();
+        $toPromiseFunctions[] = tpf(function () use ($added) {
+            return $this->postHandleAdditions($added);
+        });
+        $toPromiseFunctions[] = tpf(function () use ($removed) {
+            return $this->postHandleRemovals($removed);
+        });
+        parallel($toPromiseFunctions)
+            ->done(
+                function (/* array $results */) use ($deferred) {
+                    $deferred->resolve(); // return void, we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
                 }
-            }
-        }
-
-        foreach ($removed as $removedIssue) {
-            Database::GetInstance()->query(
-                "UPDATE warning SET warning_active = 0, warning_last_update = ? WHERE warning_id = ?",
-                array(microtime(true), $removedIssue['issue_database_id'])
             );
-        }
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -139,35 +220,39 @@ class Warning extends Base
      */
     public function latest(float $time): PromiseInterface
     {
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        $promises[] = $this->getAsyncDatabase()->query(
-            $qb
-                ->select(
-                    'warning_id as issue_database_id',
-                    'warning_active as active',
-                    'warning_layer_id as plan_layer_id',
-                    'warning_issue_type as type',
-                    'warning_x as x',
-                    'warning_y as y',
-                    'warning_source_plan_id as source_plan_id',
-                    'warning_restriction_id as restriction_id'
-                )
-                ->from('warning')
-                ->where('warning_last_update > ' . $qb->createPositionalParameter($time))
-        );
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        $promises[] = $this->getAsyncDatabase()->query(
-            $qb
-                ->select(
-                    'shipping_warning_id as warning_id',
-                    'shipping_warning_source_geometry_persistent_id as source_geometry_persistent_id',
-                    'shipping_warning_destination_geometry_persistent_id as destination_geometry_persistent_id',
-                    'shipping_warning_message as message',
-                    'shipping_warning_active as active'
-                )
-                ->from('shipping_warning')
-                ->where('shipping_warning_lastupdate > ' . $qb->createPositionalParameter($time))
-        );
-        return parallel($promises, 1); // todo: if performance allows, increase threads
+        $toPromiseFunctions[] = tpf(function () use ($time) {
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->select(
+                        'warning_id as issue_database_id',
+                        'warning_active as active',
+                        'warning_layer_id as plan_layer_id',
+                        'warning_issue_type as type',
+                        'warning_x as x',
+                        'warning_y as y',
+                        'warning_source_plan_id as source_plan_id',
+                        'warning_restriction_id as restriction_id'
+                    )
+                    ->from('warning')
+                    ->where('warning_last_update > ' . $qb->createPositionalParameter($time))
+            );
+        });
+        $toPromiseFunctions[] = tpf(function () use ($time) {
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->select(
+                        'shipping_warning_id as warning_id',
+                        'shipping_warning_source_geometry_persistent_id as source_geometry_persistent_id',
+                        'shipping_warning_destination_geometry_persistent_id as destination_geometry_persistent_id',
+                        'shipping_warning_message as message',
+                        'shipping_warning_active as active'
+                    )
+                    ->from('shipping_warning')
+                    ->where('shipping_warning_lastupdate > ' . $qb->createPositionalParameter($time))
+            );
+        });
+        return parallel($toPromiseFunctions);
     }
 }

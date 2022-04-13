@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Helper\AsyncDatabase;
+use App\Domain\Helper\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;
@@ -11,9 +12,10 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use ZipArchive;
 use function App\resolveOnFutureTick;
-use function Clue\React\Block\await;
+use function App\await;
 
 class GameSession extends Base
 {
@@ -33,7 +35,7 @@ class GameSession extends Base
 
     const INVALID_SESSION_ID = -1;
     const ARCHIVE_DIRECTORY = "session_archive/";
-    const CONFIG_DIRECTORY = "running_session_config/";
+    private const CONFIG_DIRECTORY = "running_session_config/";
     const EXPORT_DIRECTORY = "export/";
     const SECONDS_PER_MINUTE = 60;
     const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE * 60;
@@ -43,17 +45,16 @@ class GameSession extends Base
         parent::__construct($method, self::ALLOWED);
     }
 
+    public static function getConfigDirectory(): string
+    {
+        return SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/' . self::CONFIG_DIRECTORY;
+    }
+
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function GetGameSessionIdForCurrentRequest(): int
     {
-        $sessionId = self::INVALID_SESSION_ID;
-        if (isset($_GET['session'])) {
-            $sessionId = intval($_GET['session']);
-            if ($sessionId <= 0) {
-                $sessionId = self::INVALID_SESSION_ID;
-            }
-        }
-        return $sessionId;
+        $sessionId = $_POST['game_id'] ?? $_GET['session'] ?? self::INVALID_SESSION_ID;
+        return intval($sessionId) < 1 ? self::INVALID_SESSION_ID : (int)$sessionId;
     }
 
     /**
@@ -192,14 +193,15 @@ class GameSession extends Base
 
         $configFilePath = self::GetConfigFilePathForSession($game_id);
 
-        if (!is_dir(self::CONFIG_DIRECTORY)) {
-            mkdir(self::CONFIG_DIRECTORY);
+        $configDir = self::getConfigDirectory();
+        if (!is_dir($configDir)) {
+            mkdir($configDir);
         }
         if (!file_exists($config_file)) {
             throw new Exception("Could not read config file");
         }
         $config_file_content = file_get_contents($config_file);
-        file_put_contents(self::CONFIG_DIRECTORY.$configFilePath, $config_file_content);
+        file_put_contents($configDir.$configFilePath, $config_file_content);
 
         $postValues = array(
             "config_file_path" => $configFilePath,
@@ -216,7 +218,7 @@ class GameSession extends Base
         // don't wait or feed back the return of the following new request - if things went well so far, then we can
         //   just feed back success
         // this is because any failures of the following new request are stored in the session log
-        $this->LocalApiRequest("api/GameSession/CreateGameSessionAndSignal", $game_id, $postValues, true);
+        $this->LocalApiRequest("GameSession/CreateGameSessionAndSignal", $game_id, $postValues, true);
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -278,7 +280,7 @@ class GameSession extends Base
         // get ready for an optional callback
         $postValues = (new Game())->GetGameDetails();
         $postValues["session_id"] = self::GetGameSessionIdForCurrentRequest();
-        $token = (new Security())->GetServerManagerToken()["token"];
+        $token = (new Security())->getServerManagerToken();
         $postValues["token"] = $token; // to pass ServerManager security
         $postValues["api_access_token"] = $token; // to store in ServerManager
 
@@ -304,8 +306,7 @@ class GameSession extends Base
         //Notify the simulation that the game has been setup so we start the simulations.
         //This is needed because MEL needs to be run before the game to setup the initial fishing values.
         $game = new Game();
-        $game->setGameSessionId($this->getGameSessionId());
-        $game->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($game);
         $watchdogSuccess = false;
         if (null !== $promise = $game->changeWatchdogState("SETUP")) {
             await($promise);
@@ -327,6 +328,7 @@ class GameSession extends Base
         if (empty($watchdog_address)) {
             throw new Exception("Watchdog address cannot be empty.");
         }
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT();",
             array($watchdog_address)
@@ -352,7 +354,7 @@ class GameSession extends Base
         }
     
         $this->LocalApiRequest(
-            "api/GameSession/ArchiveGameSessionInternal",
+            "GameSession/ArchiveGameSessionInternal",
             $sessionId,
             array("response_url" => $response_url),
             true
@@ -372,8 +374,7 @@ class GameSession extends Base
     public function ArchiveGameSessionInternal(string $response_url): void
     {
         $game = new Game();
-        $game->setGameSessionId($this->getGameSessionId());
-        $game->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($game);
         await($game->changeWatchdogState('end'));
         
         $zippath = $this->CreateGameSessionZip($response_url);
@@ -382,7 +383,7 @@ class GameSession extends Base
             // ok, delete everything!
             $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
             if (count($gameData) > 0) {
-                $configFilePath = self::CONFIG_DIRECTORY.$gameData[0]['game_configfile'];
+                $configFilePath = self::getConfigDirectory().$gameData[0]['game_configfile'];
                 unlink($configFilePath);
             }
             
@@ -419,7 +420,7 @@ class GameSession extends Base
 
         if ($type == "full") {
             $this->LocalApiRequest(
-                "api/GameSession/CreateGameSessionZip",
+                "GameSession/CreateGameSessionZip",
                 $sessionId,
                 array(
                     "save_id" => $save_id, "response_url" => $response_url, "preferredfolder" => $preferredfolder,
@@ -429,7 +430,7 @@ class GameSession extends Base
             );
         } elseif ($type == "layers") {
             $this->LocalApiRequest(
-                "api/GameSession/CreateGameSessionLayersZip",
+                "GameSession/CreateGameSessionLayersZip",
                 $sessionId,
                 array(
                     "save_id" => $save_id, "response_url" => $response_url, "preferredfolder" => $preferredfolder,
@@ -472,7 +473,7 @@ class GameSession extends Base
         $configFilePath = null;
         $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
         if (count($gameData) > 0) {
-            $configFilePath = self::CONFIG_DIRECTORY.$gameData[0]['game_configfile'];
+            $configFilePath = self::getConfigDirectory().$gameData[0]['game_configfile'];
         }
 
         $sessionFiles = array($sqlDumpPath, $configFilePath);
@@ -501,7 +502,7 @@ class GameSession extends Base
         unlink($sqlDumpPath);
         // callback if requested
         if (!empty($response_url)) {
-            $token = (new Security())->GetServerManagerToken()["token"];
+            $token = (new Security())->getServerManagerToken();
             $postValues = array(
                 "token" => $token,
                 "session_id" => $sessionId,
@@ -563,7 +564,7 @@ class GameSession extends Base
 
         // callback if requested
         if (!empty($response_url)) {
-            $token = (new Security())->GetServerManagerToken()["token"];
+            $token = (new Security())->getServerManagerToken();
             $postValues = array(
                 "token" => $token, "save_id" => $save_id, "session_id" => $sessionId,
                 "zippath" => $zippath, "action" => "processZip"
@@ -580,6 +581,7 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetUserAccess(string $password_admin, string $password_player): void
     {
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game_session SET game_session_password_admin = ?, game_session_password_player = ?;",
             array($password_admin, $password_player)
@@ -652,11 +654,10 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function LocalApiRequest(string $apiUrl, int $sessionId, array $postValues, bool $async = false): void
     {
-        if (self::GetGameSessionIdForCurrentRequest() != self::INVALID_SESSION_ID) {
-            $baseUrl = str_replace(self::GetGameSessionIdForCurrentRequest(), $sessionId, self::GetRequestApiRoot());
-        } else {
-            $baseUrl = self::GetRequestApiRoot().$sessionId."/";
-        }
+        $baseUrl = SymfonyToLegacyHelper::getInstance()->getUrlGenerator()->generate('legacy_api_session', [
+            'session' => $sessionId,
+            'query' => ''
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
         
         $requestHeader = apache_request_headers();
         $headers = array();
@@ -718,7 +719,7 @@ class GameSession extends Base
             "watchdog_address" => $watchdog_address,
             "response_address" => $response_address
         );
-        $this->LocalApiRequest("api/GameSession/LoadGameSaveAndSignal", $sessionId, $postValues, true);
+        $this->LocalApiRequest("GameSession/LoadGameSaveAndSignal", $sessionId, $postValues, true);
     }
 
     /**
@@ -733,18 +734,19 @@ class GameSession extends Base
         string $watchdog_address,
         string $response_address
     ): void {
-        if (!is_dir(self::CONFIG_DIRECTORY)) {
-            mkdir(self::CONFIG_DIRECTORY);
+        $configDir = self::getConfigDirectory();
+        if (!is_dir($configDir)) {
+            mkdir($configDir);
         }
         $zipped_config_file_content = file_get_contents($config_file_path);
         $new_config_file_name = self::GetConfigFilePathForSession(self::GetGameSessionIdForCurrentRequest());
-        file_put_contents(self::CONFIG_DIRECTORY.$new_config_file_name, $zipped_config_file_content);
+        file_put_contents($configDir.$new_config_file_name, $zipped_config_file_content);
 
         $update = new Update();
         $result = $update->ReloadAdvanced($new_config_file_name, $dbase_file_path, $raster_files_path);
 
         $postValues["session_id"] = self::GetGameSessionIdForCurrentRequest();
-        $postValues["token"] = (new Security())->GetServerManagerToken()["token"]; // to pass ServerManager security
+        $postValues["token"] = (new Security())->getServerManagerToken(); // to pass ServerManager security
             
         if (!$result) {
             if (!empty($response_address)) {
@@ -757,8 +759,7 @@ class GameSession extends Base
         $this->ResetWatchdogAddress($watchdog_address);
 
         $game = new Game();
-        $game->setGameSessionId($this->getGameSessionId());
-        $game->setAsyncDatabase($this->getAsyncDatabase());
+        $this->asyncDataTransferTo($game);
         await($game->changeWatchdogState("PAUSE")); // reloaded saves always start paused
         
         if (!empty($response_address)) {
