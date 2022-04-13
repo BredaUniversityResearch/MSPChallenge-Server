@@ -635,12 +635,12 @@ class Energy extends Base
                 ->from('energy_output')
                 ->where($qb->expr()->eq('energy_output_geometry_id', $qb->createPositionalParameter($id)))
         )
-        ->then(function(Result $result) use ($id, $capacity, $maxcapacity) {
-             $rows = $result->fetchAllRows();
-             if (empty($rows)) {
-                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                 return $this->getAsyncDatabase()->query(
-                     $qb
+        ->then(function (Result $result) use ($id, $capacity, $maxcapacity) {
+            $rows = $result->fetchAllRows();
+            if (empty($rows)) {
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
                         ->insert('energy_output')
                         ->values([
                             'energy_output_geometry_id' => $qb->createPositionalParameter($id),
@@ -648,18 +648,18 @@ class Energy extends Base
                             'energy_output_maxcapacity' => $qb->createPositionalParameter($maxcapacity),
                             'energy_output_lastupdate' => $qb->createPositionalParameter(microtime(true))
                         ])
-                 );
-             }
-             $qb = $this->getAsyncDatabase()->createQueryBuilder();
-             return $this->getAsyncDatabase()->query(
-                 $qb
+                );
+            }
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
                     ->update('energy_output')
                     ->set('energy_output_capacity', $qb->createPositionalParameter($capacity))
                     ->set('energy_output_maxcapacity', $qb->createPositionalParameter($maxcapacity))
                     ->set('energy_output_active', 1)
                     ->set('energy_output_lastupdate', $qb->createPositionalParameter(microtime(true)))
                     ->where($qb->expr()->eq('energy_output_geometry_id', $qb->createPositionalParameter($id)))
-             );
+            );
         })
         ->done(
             function (/* Result $result */) use ($deferred) {
