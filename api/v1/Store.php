@@ -474,7 +474,9 @@ class Store extends Base
                         $filename
                     );
                 }
-            } elseif (strcasecmp($geometryData["type"], "MultiPoint") == 0) {
+                continue;
+            }
+            if (strcasecmp($geometryData["type"], "MultiPoint") == 0) {
                 $this->InsertGeometry(
                     $layerId,
                     json_encode($geometryData["coordinates"]),
@@ -485,7 +487,9 @@ class Store extends Base
                     0,
                     $filename
                 );
-            } elseif (strcasecmp($geometryData["type"], "MultiLineString") == 0) {
+                continue;
+            }
+            if (strcasecmp($geometryData["type"], "MultiLineString") == 0) {
                 foreach ($geometryData["coordinates"] as $line) {
                     $this->InsertGeometry(
                         $layerId,
@@ -498,11 +502,11 @@ class Store extends Base
                         $filename
                     );
                 }
-            } else {
-                throw new Exception(
-                    "Encountered unknown feature type ".$geometryData["type"]." in layer ".$filename
-                );
+                continue;
             }
+            throw new Exception(
+                "Encountered unknown feature type ".$geometryData["type"]." in layer ".$filename
+            );
         }
     }
 
@@ -518,10 +522,7 @@ class Store extends Base
             "SELECT layer_id FROM layer WHERE layer_name = ?",
             array($layerName)
         );
-        if (!empty($checkExists) && isset($checkExists[0]["layer_id"])) {
-            return $checkExists[0]["layer_id"];
-        }
-        return Database::GetInstance()->query(
+        return $checkExists[0]["layer_id"] ?? Database::GetInstance()->query(
             "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
             array($layerName, $layerGeoType, $layerGroup),
             true
