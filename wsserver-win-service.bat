@@ -97,7 +97,7 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 exit /b 0
 
-rem ======= all funtions below =======
+rem ======= all functions below =======
 :FirewallAddRule
 netsh advfirewall firewall add rule name="MSP Websocket server" dir=in action=allow protocol=TCP localport=45001
 exit /b 0
