@@ -1,6 +1,7 @@
 @echo OFF
 setlocal
 
+set php=C:\xampp\php\php.exe
 set service=MSPWsServer
 reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
 set exe=tools\Win\nssm\nssm-win64.exe
@@ -18,12 +19,19 @@ if "%~1"=="firewall_remove" goto firewall_remove
 goto default
 
 :install
+if not exist %php% (
+    echo Could not find php.exe file location at %php%
+    set ERRORLEVEL=1
+    goto eof
+)
 %exe% status %service% 1>NUL 2>NUL
 IF %ERRORLEVEL% NEQ 0 (
-    %exe% install %service% C:\xampp\php\php.exe bin/console app:ws-server --env=prod %2 %3 %4 %5 %6 %7 %8 %9
+    %exe% install %service% %php% bin/console app:ws-server %2 %3 %4 %5 %6 %7 %8 %9
 )
 %exe% set %service% AppDirectory %~dp0
-%exe% restart %service%
+%exe% stop %service%
+%php% bin/console cache:clear
+%exe% start %service%
 %exe% status %service%
 call :FirewallAddRule
 goto get
