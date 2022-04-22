@@ -2,19 +2,15 @@
 set -e
 
 function summary() {
-  ./var/tools/phpcs --standard=PSR2 --report=summary "$1"
+  ./vendor/bin/phpcs --standard=PSR2 --report=summary "$1"
 }
 
 function lint() {
-  ./var/tools/phpcs --standard=PSR2 "$1" -s
-}
-
-function detectMess() {
-./var/tools/phpmd "$1" text cleancode,codesize,controversial
+  ./vendor/bin/phpcs --standard=PSR2 "$1" -s
 }
 
 function fix() {
-  ./var/tools/phpcbf --standard=PSR2 "$1"
+  ./vendor/bin/phpcbf --standard=PSR2 "$1"
 }
 
 PATHS="
@@ -33,7 +29,6 @@ ServerManager/logout.php
 ServerManager/manager.php
 "
 
-bash ./tools/install-tools.sh
 for p in $PATHS
 do
   if [[ "$1" == "--fix" ]]; then
