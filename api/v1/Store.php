@@ -522,7 +522,7 @@ class Store extends Base
             "SELECT layer_id FROM layer WHERE layer_name = ?",
             array($layerName)
         );
-        return $checkExists[0]["layer_id"] ?? Database::GetInstance()->query(
+        return $checkExists[0]["layer_id"] ?: Database::GetInstance()->query(
             "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
             array($layerName, $layerGeoType, $layerGroup),
             true
