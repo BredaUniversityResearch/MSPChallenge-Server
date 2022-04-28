@@ -9,10 +9,6 @@ function lint() {
   ./var/tools/phpcs --standard=PSR2 "$1" -s
 }
 
-function detectMess() {
-./var/tools/phpmd "$1" text cleancode,codesize,controversial
-}
-
 function fix() {
   ./var/tools/phpcbf --standard=PSR2 "$1"
 }

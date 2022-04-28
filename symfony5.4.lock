@@ -104,6 +104,15 @@
     "ringcentral/psr7": {
         "version": "1.3.0"
     },
+    "squizlabs/php_codesniffer": {
+        "version": "3.6",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "3.6",
+            "ref": "1019e5c08d4821cb9b77f4891f8e9c31ff20ac6f"
+        }
+    },
     "symfony/cache": {
         "version": "v5.4.0"
     },
