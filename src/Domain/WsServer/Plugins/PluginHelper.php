@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Domain\WsServer\Plugins;
+
+use Closure;
+use React\EventLoop\LoopInterface;
+use function App\assertFulfilled;
+
+class PluginHelper
+{
+    public static function createRepeatedFunction(
+        PluginInterface $plugin,
+        LoopInterface $loop,
+        Closure $promiseFunction
+    ): Closure {
+        return function () use ($plugin, $loop, $promiseFunction) {
+            $startTime = microtime(true);
+            $promise = $promiseFunction()
+                ->then(function () use ($plugin) {
+                    $plugin->getMeasurementCollectionManager()->endMeasurementCollection($plugin->getName());
+                    $plugin->getMeasurementCollectionManager()->startMeasurementCollection($plugin->getName());
+                });
+            assertFulfilled(
+                $promise,
+                self::createRepeatedOnFulfilledFunction(
+                    $plugin,
+                    $loop,
+                    $startTime,
+                    self::createRepeatedFunction($plugin, $loop, $promiseFunction)
+                )
+            );
+        };
+    }
+
+    private static function createRepeatedOnFulfilledFunction(
+        PluginInterface $plugin,
+        LoopInterface $loop,
+        float $startTime,
+        Closure $repeatedFunction
+    ): Closure {
+        return function () use ($plugin, $loop, $startTime, $repeatedFunction) {
+            $elapsedSec = (microtime(true) - $startTime) * 0.000001;
+            if ($elapsedSec > $plugin->getMinIntervalSec()) {
+                wdo('starting new future "' . $plugin->getName() .'"');
+                $loop->futureTick($repeatedFunction);
+                return;
+            }
+            $waitingSec = $plugin->getMinIntervalSec() - $elapsedSec;
+            wdo('awaiting new future "' . $plugin->getName() . '" for ' . $waitingSec . ' sec');
+            $loop->addTimer($waitingSec, function () use ($plugin, $loop, $repeatedFunction) {
+                wdo('starting new future "' . $plugin->getName() . '"');
+                $loop->futureTick($repeatedFunction);
+            });
+        };
+    }
+}

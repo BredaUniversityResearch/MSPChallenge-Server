@@ -23,7 +23,7 @@ $allowed_actions = array(
     "changeGameState", // called in JS functions startSession, pauseSession
     "processZip", // called by server API gamesession/ArchiveGameSessionInternal
     "recreate", // called by JS function RecreateSession
-    // called by server API game/Tick >> UpdateGameDetailsAtServerManager and by JS function toggleDemoSession
+    // called by websocket server GameTick >> UpdateGameDetailsAtServerManager and by JS function toggleDemoSession
     "demoCheck"
 );
 $action = $_POST["action"] ?? "";
