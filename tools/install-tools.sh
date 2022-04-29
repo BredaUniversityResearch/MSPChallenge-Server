@@ -43,12 +43,9 @@ if [[ $FORCE == 1 ]]; then
 fi
 
 function download() {
-  # install platform independent tools -- runs on both Linux unbuntu or Windows Git bash
+  # install platform independent tools -- runs on both Linux Ubuntu or Windows Git bash
   if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}phpcs.phar" ]]; then
     curl --create-dirs -Lso "${DOWNLOAD_DIR}phpcs.phar" https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
-  fi
-  if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}phpmd.phar" ]]; then
-   curl --create-dirs -Lso "${DOWNLOAD_DIR}phpmd.phar" https://phpmd.org/static/latest/phpmd.phar
   fi
   if [[ $FORCE == 1|| ! -f "${DOWNLOAD_DIR}phpcbf.phar" ]]; then
     curl --create-dirs -Lso "${DOWNLOAD_DIR}phpcbf.phar" https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar
@@ -111,9 +108,6 @@ function makeExecutables() {
   fi
   if [[ $FORCE == 1 || ! -f phpcbf ]]; then
     makeExecutable phpcbf
-  fi
-  if [[ $FORCE == 1 || ! -f phpmd ]]; then
-    makeExecutable phpmd
   fi
 }
 
