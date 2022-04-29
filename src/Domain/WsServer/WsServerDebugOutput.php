@@ -12,6 +12,6 @@ class WsServerDebugOutput
         if (empty($_ENV['WS_SERVER_DEBUG_OUTPUT'])) {
             return;
         }
-        echo $message . PHP_EOL;
+        echo '[' . date('H:i:s.') . explode('.', microtime(true))[1] . '] ' . $message . PHP_EOL;
     }
 }

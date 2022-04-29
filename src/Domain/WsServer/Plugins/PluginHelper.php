@@ -36,14 +36,20 @@ class PluginHelper
         return function () use ($plugin, $loop, $startTime, $repeatedFunction) {
             $elapsedSec = (microtime(true) - $startTime) * 0.000001;
             if ($elapsedSec > $plugin->getMinIntervalSec()) {
-                wdo('starting new future "' . $plugin->getName() .'"');
+                if ($plugin->isDebugOutputEnabled()) {
+                    wdo('starting new future "' . $plugin->getName() .'"');
+                }
                 $loop->futureTick($repeatedFunction);
                 return;
             }
             $waitingSec = $plugin->getMinIntervalSec() - $elapsedSec;
-            wdo('awaiting new future "' . $plugin->getName() . '" for ' . $waitingSec . ' sec');
+            if ($plugin->isDebugOutputEnabled()) {
+                wdo('awaiting new future "' . $plugin->getName() . '" for ' . $waitingSec . ' sec');
+            }
             $loop->addTimer($waitingSec, function () use ($plugin, $loop, $repeatedFunction) {
-                wdo('starting new future "' . $plugin->getName() . '"');
+                if ($plugin->isDebugOutputEnabled()) {
+                    wdo('starting new future "' . $plugin->getName() . '"');
+                }
                 $loop->futureTick($repeatedFunction);
             });
         };

@@ -55,7 +55,6 @@ class ExecuteBatchesWsServerPlugin extends Plugin
      */
     private function executeBatches(): PromiseInterface
     {
-        wdo('starting "executeBatches"');
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
         $gameSessionId = $this->getGameSessionId();

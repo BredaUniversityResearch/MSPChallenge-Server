@@ -12,7 +12,7 @@ class LoopStatsWsServerPlugin extends Plugin
 
     public function __construct()
     {
-        parent::__construct('loop', 0);
+        parent::__construct('loop', 0, false);
     }
 
     protected function onCreatePromiseFunction(): Closure

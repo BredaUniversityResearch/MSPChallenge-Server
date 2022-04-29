@@ -38,7 +38,6 @@ class TickWsServerPlugin extends Plugin
      */
     private function tick(): PromiseInterface
     {
-        wdo('starting "tick"');
         return $this->getServerManager()->getGameSessionIds()
             ->then(function (Result $result) {
                 $gameSessionIds = collect($result->fetchAllRows() ?? [])

@@ -105,28 +105,6 @@ class Objective extends Base
     }
 
     /**
-     * @throws Exception
-     */
-    public function latest(float $time): PromiseInterface
-    {
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return $this->getAsyncDatabase()->query(
-            $qb
-                ->select(
-                    'objective_id',
-                    'objective_country_id as country_id',
-                    'objective_title as title',
-                    'objective_description as description',
-                    'objective_deadline as deadline',
-                    'objective_active as active',
-                    'objective_complete as complete',
-                )
-                ->from('objective')
-                ->where('objective_lastupdate > ' . $qb->createPositionalParameter($time))
-        );
-    }
-
-    /**
      * @apiGroup Objective
      * @throws Exception
      * @api {POST} /objective/SetCompleted SetCompleted

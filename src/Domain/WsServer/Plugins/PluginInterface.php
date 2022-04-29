@@ -12,6 +12,8 @@ interface PluginInterface
 {
     public function getName(): string;
     public function getMinIntervalSec(): float;
+    public function isDebugOutputEnabled(): bool;
+    public function setDebugOutputEnabled(bool $debugOutputEnabled): void;
 
     public function registerLoop(LoopInterface $loop);
 

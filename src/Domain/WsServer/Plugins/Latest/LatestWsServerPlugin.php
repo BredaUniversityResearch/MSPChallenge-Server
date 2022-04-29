@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Domain\WsServer\Plugins;
+namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Security;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ClientHeaderKeys;
 use App\Domain\WsServer\EPayloadDifferenceType;
+use App\Domain\WsServer\Plugins\Plugin;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
 use Closure;
 use Exception;
@@ -21,9 +21,9 @@ class LatestWsServerPlugin extends Plugin
     private const LATEST_CLIENT_UPDATE_SPEED = 60.0;
 
     /**
-     * @var Game[]
+     * @var GameLatest[]
      */
-    private array $gameInstances = [];
+    private array $gameLatestInstances = [];
 
     public function __construct()
     {
@@ -53,7 +53,6 @@ class LatestWsServerPlugin extends Plugin
      */
     private function latest(): PromiseInterface
     {
-        wdo('starting "latest"');
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
         $gameSessionId = $this->getGameSessionId();
@@ -78,7 +77,7 @@ class LatestWsServerPlugin extends Plugin
                 }
                 $latestTimeStart = microtime(true);
                 wdo('Starting "latest" for: ' . $connResourceId);
-                $promises[$connResourceId] = $this->getGame($connResourceId)->Latest(
+                $promises[$connResourceId] = $this->getGameLatest($connResourceId)->Latest(
                     $clientInfo['team_id'],
                     $clientInfo['last_update_time'],
                     $clientInfo['user']
@@ -198,30 +197,26 @@ class LatestWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function getGame(int $connResourceId): Game
+    private function getGameLatest(int $connResourceId): GameLatest
     {
         $clientHeaders = $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId);
         $gameSessionId = $clientHeaders[ClientHeaderKeys::HEADER_KEY_GAME_SESSION_ID];
-        if (!array_key_exists($connResourceId, $this->gameInstances)) {
-            $game = new Game();
-            $game->setAsync(true);
-            $game->setGameSessionId($gameSessionId);
-            $game->setAsyncDatabase($this->getServerManager()->getAsyncDatabase($gameSessionId));
-            $game->setToken($clientHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN]);
+        if (!array_key_exists($connResourceId, $this->gameLatestInstances)) {
+            $gameLatest = new GameLatest();
+            $gameLatest->setAsync(true);
+            $gameLatest->setGameSessionId($gameSessionId);
+            $gameLatest->setAsyncDatabase($this->getServerManager()->getAsyncDatabase($gameSessionId));
+            $gameLatest->setToken($clientHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN]);
 
-            // do some PRE CACHING calls
-            $game->GetWatchdogAddress(true);
-            $game->LoadConfigFile();
-
-            $this->gameInstances[$connResourceId] = $game;
+            $this->gameLatestInstances[$connResourceId] = $gameLatest;
         }
-        return $this->gameInstances[$connResourceId];
+        return $this->gameLatestInstances[$connResourceId];
     }
 
     public function onWsServerEventDispatched(NameAwareEvent $event): void
     {
         if ($event->getEventName() == WsServerEventDispatcherInterface::EVENT_ON_CLIENT_DISCONNECTED) {
-            unset($this->gameInstances[$event->getSubject()]);
+            unset($this->gameLatestInstances[$event->getSubject()]);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Domain\Helper\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\ExecuteBatchesWsServerPlugin;
-use App\Domain\WsServer\Plugins\LatestWsServerPlugin;
+use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
 use App\Domain\WsServer\Plugins\LoopStatsWsServerPlugin;
 use App\Domain\WsServer\Plugins\Tick\TickWsServerPlugin;
 use App\Domain\WsServer\WsServer;

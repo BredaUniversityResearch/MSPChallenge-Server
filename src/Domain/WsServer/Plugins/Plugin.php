@@ -6,7 +6,6 @@ use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
 use App\Domain\WsServer\MeasurementCollectionManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
 use Exception;
-use MongoDB\Driver\Server;
 use React\EventLoop\LoopInterface;
 use Closure;
 use App\Domain\Event\NameAwareEvent;
@@ -15,6 +14,7 @@ abstract class Plugin implements PluginInterface
 {
     private string $name;
     private float $minIntervalSec;
+    private bool $debugOutputEnabled;
     private ?int $gameSessionId = null;
 
     private ?LoopInterface $loop = null;
@@ -24,10 +24,12 @@ abstract class Plugin implements PluginInterface
 
     public function __construct(
         string $name,
-        float $minIntervalSec
+        float $minIntervalSec,
+        bool $debugOutputEnabled = true
     ) {
         $this->name = $name;
         $this->minIntervalSec = $minIntervalSec;
+        $this->debugOutputEnabled = $debugOutputEnabled;
     }
 
     public function getName(): string
@@ -40,13 +42,24 @@ abstract class Plugin implements PluginInterface
         return $this->minIntervalSec;
     }
 
+    public function isDebugOutputEnabled(): bool
+    {
+        return $this->debugOutputEnabled;
+    }
+
+    public function setDebugOutputEnabled(bool $debugOutputEnabled): void
+    {
+        $this->debugOutputEnabled = $debugOutputEnabled;
+    }
+
     public function registerLoop(LoopInterface $loop)
     {
         $this->loop = $loop;
         $loop->futureTick(PluginHelper::createRepeatedFunction(
             $this,
             $loop,
-            $this->onCreatePromiseFunction()
+            $this->onCreatePromiseFunction(),
+            $this->debugOutputEnabled
         ));
     }
 
