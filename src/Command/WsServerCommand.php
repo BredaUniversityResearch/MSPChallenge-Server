@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Domain\Helper\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\ExecuteBatchesWsServerPlugin;
 use App\Domain\WsServer\Plugins\LatestWsServerPlugin;
+use App\Domain\WsServer\Plugins\LoopStatsWsServerPlugin;
 use App\Domain\WsServer\Plugins\Tick\TickWsServerPlugin;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
@@ -134,6 +135,7 @@ class WsServerCommand extends Command
         $this->wsServer->registerLoop($server->loop);
 
         // plugins
+        $this->wsServer->registerPlugin(new LoopStatsWsServerPlugin());
         $this->wsServer->registerPlugin(new TickWsServerPlugin());
         $this->wsServer->registerPlugin(new LatestWsServerPlugin());
         $this->wsServer->registerPlugin(new ExecuteBatchesWsServerPlugin());

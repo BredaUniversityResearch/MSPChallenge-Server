@@ -15,13 +15,8 @@ class PluginHelper
     ): Closure {
         return function () use ($plugin, $loop, $promiseFunction) {
             $startTime = microtime(true);
-            $promise = $promiseFunction()
-                ->then(function () use ($plugin) {
-                    $plugin->getMeasurementCollectionManager()->endMeasurementCollection($plugin->getName());
-                    $plugin->getMeasurementCollectionManager()->startMeasurementCollection($plugin->getName());
-                });
             assertFulfilled(
-                $promise,
+                $promiseFunction(),
                 self::createRepeatedOnFulfilledFunction(
                     $plugin,
                     $loop,

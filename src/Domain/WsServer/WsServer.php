@@ -189,31 +189,35 @@ class WsServer extends EventDispatcher implements
         $conn->close();
     }
 
-    public function startMeasurementCollection(string $name)
-    {
-        // reset
-        $this->stats[$name.'.worst_of_prev_tick'] = 0;
-    }
-
     public function addToMeasurementCollection(string $name, string $measurementId, float $measurementTime)
     {
         // init
-        $this->stats[$name.'.worst_of_prev_tick'] ??= 0;
+        $this->stats[$name.'.worst'] ??= 0;
         $this->stats[$name.'.median'] ??= 0;
 
         $this->medianValues[$name][$measurementId] = $measurementTime;
-        $this->stats[$name.'.worst_of_prev_tick'] = max(
-            $this->stats[$name.'.worst_of_prev_tick'] ?? 0,
+        // only keep the last 20 measures
+        foreach ($this->medianValues as &$medianValues) {
+            $medianValues = array_slice($medianValues, -20, null, true);
+        }
+        unset($medianValues);
+
+        // reset "worst" after 10 s
+        static $startTime = null;
+        if ($startTime == null) {
+            $startTime = microtime(true);
+        }
+        if (microtime(true) - $startTime > 10) {
+            $startTime = microtime(true);
+            $this->stats[$name.'.worst'] = 0;
+        }
+
+        // update measurements
+        $this->stats[$name.'.worst'] = max(
+            $this->stats[$name.'.worst'] ?? 0,
             $measurementTime
         );
         $this->stats[$name.'.worst_ever'] = max($this->stats[$name.'.worst_ever'] ?? 0, $measurementTime);
-    }
-
-    public function endMeasurementCollection(string $name)
-    {
-        if (!array_key_exists($name.'.median', $this->stats)) {
-            return;
-        }
         $this->stats[$name.'.median'] = Util::getMedian($this->medianValues[$name]);
     }
 

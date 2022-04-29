@@ -38,7 +38,6 @@ class LatestWsServerPlugin extends Plugin
                     wdo('just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer)));
                     $payloadContainer = array_filter($payloadContainer);
                     wdo(json_encode($payloadContainer));
-                    $this->getMeasurementCollectionManager()->endMeasurementCollection('latest');
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -62,7 +61,6 @@ class LatestWsServerPlugin extends Plugin
             $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
         }
         $promises = [];
-        $this->getMeasurementCollectionManager()->startMeasurementCollection('latest');
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $accessTimeRemaining = 0; // not used
@@ -88,7 +86,7 @@ class LatestWsServerPlugin extends Plugin
                 ->then(function ($payload) use ($connResourceId, $latestTimeStart, $clientInfo) {
                     wdo('Created "latest" payload for: ' . $connResourceId);
                     $this->getMeasurementCollectionManager()->addToMeasurementCollection(
-                        'latest',
+                        $this->getName(),
                         $connResourceId,
                         microtime(true) - $latestTimeStart
                     );
@@ -143,15 +141,14 @@ class LatestWsServerPlugin extends Plugin
                         $payload['update_time']
                     );
 
-                    $json = json_encode([
+                    wdo('send payload to: ' . $connResourceId);
+                    $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson([
                         'header_type' => 'Game/Latest',
                         'header_data' => null,
                         'success' => true,
                         'message' => null,
                         'payload' => $payload
                     ]);
-                    wdo('send payload to: ' . $connResourceId);
-                    $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->send($json);
                     return $payload;
                 });
             }

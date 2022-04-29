@@ -40,7 +40,6 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     );
                     $clientToBatchResultContainer = array_filter($clientToBatchResultContainer);
                     wdo(json_encode($clientToBatchResultContainer));
-                    $this->getMeasurementCollectionManager()->endMeasurementCollection('executeBatches');
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -64,7 +63,6 @@ class ExecuteBatchesWsServerPlugin extends Plugin
             $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
         }
         $promises = [];
-        $this->getMeasurementCollectionManager()->startMeasurementCollection('executeBatches');
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $timeStart = microtime(true);
@@ -78,7 +76,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
                         wdo('Created "executeBatches" payload for: ' . $connResourceId);
                         $this->getClientConnectionResourceManager()->addToMeasurementCollection(
-                            'executeBatches',
+                            $this->getName(),
                             $connResourceId,
                             microtime(true) - $timeStart
                         );
@@ -98,7 +96,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                         $batchId = key($batchResultContainer);
                         $batchResult = current($batchResultContainer);
 
-                        $json = json_encode([
+                        $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson([
                             'header_type' => 'Batch/ExecuteBatch',
                             'header_data' => [
                                 'batch_id' => $batchId,
@@ -107,7 +105,6 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             'message' => null,
                             'payload' => $batchResult
                         ]);
-                        $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->send($json);
                         return $batchResultContainer;
                     },
                     function ($rejection) use ($connResourceId) {
@@ -123,18 +120,16 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                                 $message .= $reason->getMessage() . PHP_EOL;
                                 $reason = $reason->getPrevious();
                             }
-                            $json = json_encode([
-                                'header_type' => 'Batch/ExecuteBatch',
-                                'header_data' => [
-                                    'batch_id' => $batchId,
-                                ],
-                                'success' => false,
-                                'message' => $message ?: 'Unknown reason',
-                                'payload' => null
-                            ]);
-                            $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->send(
-                                $json
-                            );
+                            $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)
+                                ->sendAsJson([
+                                    'header_type' => 'Batch/ExecuteBatch',
+                                    'header_data' => [
+                                        'batch_id' => $batchId,
+                                    ],
+                                    'success' => false,
+                                    'message' => $message ?: 'Unknown reason',
+                                    'payload' => null
+                                ]);
                             return []; // do not propagate rejection, just resolve to empty batch results
                         }
                         return reject($reason);

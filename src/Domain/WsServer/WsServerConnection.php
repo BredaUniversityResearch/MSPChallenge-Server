@@ -6,7 +6,7 @@ use App\Domain\Event\NameAwareEvent;
 use Psr\Http\Message\RequestInterface;
 use Ratchet\ConnectionInterface;
 
-class WsServerConnection
+class WsServerConnection implements ConnectionInterface
 {
     private ConnectionInterface $conn;
     public RequestInterface $httpRequest;
@@ -33,7 +33,7 @@ class WsServerConnection
         $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function send($data): ConnectionInterface
+    public function sendAsJson(array $data): ConnectionInterface
     {
         if (null !== $this->eventDispatcher) {
             $this->eventDispatcher->dispatch(
@@ -44,11 +44,20 @@ class WsServerConnection
                 )
             );
         }
-        return $this->conn->send($data);
+        return $this->send(json_encode($data));
     }
 
     public function close(): void
     {
         $this->conn->close();
+    }
+
+    /**
+     * @param string $data
+     * @return ConnectionInterface
+     */
+    public function send($data): ConnectionInterface
+    {
+        return $this->conn->send($data);
     }
 }
