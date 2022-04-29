@@ -98,19 +98,19 @@ class WsServerCommand extends Command
     {
         define('WSS', 1); // to identify that we are in a websocket server instance. Value is not important.
 
-        // note (MH): handy, enable to catch deprecations/notices/warnings/errors to log
-        set_error_handler(function (
-            int $errno,
-            string $errstr,
-            string $errfile,
-            int $errline
-        ) {
-            file_put_contents(
-                $this->projectDir . '/var/log/deprecations.log',
-                $errstr . PHP_EOL . $errfile . '@' . $errline . PHP_EOL . PHP_EOL,
-                FILE_APPEND
-            );
-        });
+//        // note (MH): handy, enable to catch deprecations/notices/warnings/errors to log
+//        set_error_handler(function (
+//            int $errno,
+//            string $errstr,
+//            string $errfile,
+//            int $errline
+//        ) {
+//            file_put_contents(
+//                $this->projectDir . '/var/log/deprecations.log',
+//                $errstr . PHP_EOL . $errfile . '@' . $errline . PHP_EOL . PHP_EOL,
+//                FILE_APPEND
+//            );
+//        });
 
         if (null != $input->getOption(self::OPTION_GAME_SESSION_ID)) {
             $this->wsServer->setGameSessionId($input->getOption(self::OPTION_GAME_SESSION_ID));
