@@ -285,7 +285,7 @@ class WsServer extends EventDispatcher implements
             assertFulfilled($this->doDummyQuery());
         });
 
-        $loop->addPeriodicTimer(2, function() {
+        $loop->addPeriodicTimer(2, function () {
             $this->dispatch(new NameAwareEvent(WsServerEventDispatcherInterface::EVENT_ON_STATS_UPDATE));
         });
     }
@@ -299,7 +299,7 @@ class WsServer extends EventDispatcher implements
             ->then(function (Result $result) {
                 $gameSessionIds = collect($result->fetchAllRows() ?? [])
                     ->keyBy('id')
-                    ->map(function($row) {
+                    ->map(function ($row) {
                         return $row['id'];
                     });
                 $promises = [];

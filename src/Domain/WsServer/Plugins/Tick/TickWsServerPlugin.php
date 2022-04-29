@@ -43,7 +43,7 @@ class TickWsServerPlugin extends Plugin
             ->then(function (Result $result) {
                 $gameSessionIds = collect($result->fetchAllRows() ?? [])
                     ->keyBy('id')
-                    ->map(function($row) {
+                    ->map(function ($row) {
                         return $row['id'];
                     });
                 $gameSessionId = $this->getGameSessionId();
