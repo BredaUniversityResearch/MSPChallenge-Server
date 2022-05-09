@@ -49,6 +49,7 @@ class ToolsController extends AbstractController
             ])
             ->add('skip_preview', CheckboxType::class, [
                 'required' => false,
+                'help' => 'Skipping preview will automatically create an index of type INDEX where it is missing'
             ])
             ->add('go', SubmitType::class)
             ->getForm();
