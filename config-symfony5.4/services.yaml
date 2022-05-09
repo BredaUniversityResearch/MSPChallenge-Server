@@ -18,8 +18,11 @@ services:
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/{Command,Controller}'
+        public: true
     App\Domain\:
-        resource: '../src/Domain/{Command,Controller,Services}'
+        resource: '../src/Domain/{Services}'
         public: true
 
     # add more service definitions when explicit configuration is needed
