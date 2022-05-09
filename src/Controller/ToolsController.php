@@ -108,7 +108,6 @@ class ToolsController extends AbstractController
                     continue;
                 }
                 unset($pregMatches);
-                $messages[] = $column->getType()->getName();
                 if (!empty($data['regexp_type']) &&
                     preg_match($data['regexp_type'], $column->getType()->getName(), $pregMatches) !== 1
                 ) {
