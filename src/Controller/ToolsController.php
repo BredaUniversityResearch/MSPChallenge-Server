@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use App\Domain\Helper\Util;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\TableDiff;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,23 +21,31 @@ class ToolsController extends AbstractController
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DBALException
      */
     public function checkMissingIndices(Request $request, Connection $connection): Response
     {
         $form = $this->createFormBuilder()
+            ->add('regexp_type', TextareaType::class, [
+                'required' => false,
+                'label' => 'Enter regexp to match field type or leave empty: ',
+                'help' => 'Leave empty to traverse all types, or use parentheses and pipelines to add multiple ' .
+                    'regexp, e.g. /(integer|string|text|bigint|datetime|boolean|float)/'
+            ])
             ->add('regexp', TextareaType::class, [
                 'required' => false,
-                'data' => '/\S+_id/'
+                'data' => '/\S+_id/',
+                'label' => 'Enter regexp to match field or leave empty: ',
+                'help' => 'Default is /\S+_id/, which means one of more non-whitespace characters followed by _id'
             ])
             ->add('regexp_exclude', TextareaType::class, [
                 'required' => false,
-            ])
-            ->add('type_prefix', TextareaType::class, [
-                'required' => false,
+                'label' => 'Enter regexp to match field to exclude or leave empty to not exclude anything: '
             ])
             ->add('regexp_tables', TextareaType::class, [
                 'required' => false,
+                'label' => 'Enter tables prefix to match tables or leave empty: ',
+                'help' => 'Leave empty to traverse all tables'
             ])
             ->add('skip_preview', CheckboxType::class, [
                 'required' => false,
@@ -62,6 +70,9 @@ class ToolsController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws DBALException
+     */
     private function processCheckMissingIndicesFormData(Connection $connection, array $data, array &$messages)
     {
         $sm = $connection->createSchemaManager();
@@ -87,19 +98,19 @@ class ToolsController extends AbstractController
                     ) === 1 && $pregMatches[0] === $column->getName()) {
                     continue;
                 }
+                unset($pregMatches);
                 if (!empty($data['regexp']) &&
-                    preg_match($data['regexp'], $column->getName(), $pregMatches) !== 1) {
+                    preg_match($data['regexp'], $column->getName(), $pregMatches) !== 1
+                ) {
                     continue;
                 }
-                if (!empty($pregMatches) &&
-                    $pregMatches[0] !== $column->getName()) {
+                if (!empty($pregMatches) && $pregMatches[0] !== $column->getName()) {
                     continue;
                 }
-                if (!empty($data['type_prefix']) &&
-                    !Util::hasPrefix(
-                        $column->getType()->getName(),
-                        array_map('trim', explode(',', $data['type_prefix']))
-                    )
+                unset($pregMatches);
+                $messages[] = $column->getType()->getName();
+                if (!empty($data['regexp_type']) &&
+                    preg_match($data['regexp_type'], $column->getType()->getName(), $pregMatches) !== 1
                 ) {
                     continue;
                 }
@@ -131,7 +142,6 @@ class ToolsController extends AbstractController
             }
         }
 
-        $messages = [];
         $missingIndices = array();
         foreach ($tablesToTraverse as $table) {
             $tableName = $table->getName();
@@ -160,8 +170,8 @@ class ToolsController extends AbstractController
                 }
 
                 $missingIndices[$tableName][$column->getName()] = $column->getName();
-                $messages[] = '<span style="color: red;">Missing index for table "' . $tableName . '" and field ' .
-                    $column->getName() . '</span>...';
+                $messages[] = '<span style="color: red;">Missing index for table ' . $tableName . ' and field ' .
+                    $column->getName() . ' of type ' . $column->getType()->getName() . '</span>...';
             }
         }
 
