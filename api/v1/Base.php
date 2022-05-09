@@ -4,7 +4,7 @@ namespace App\Domain\API\v1;
 
 use App\Domain\API\APIHelper;
 use App\Domain\Helper\AsyncDatabase;
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Connection;
 use Exception;
 use React\EventLoop\Loop;

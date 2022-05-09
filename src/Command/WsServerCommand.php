@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
 use Ratchet\Http\HttpServer;
