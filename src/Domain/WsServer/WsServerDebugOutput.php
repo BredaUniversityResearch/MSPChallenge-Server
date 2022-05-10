@@ -12,6 +12,10 @@ class WsServerDebugOutput
         if (empty($_ENV['WS_SERVER_DEBUG_OUTPUT'])) {
             return;
         }
-        echo '[' . date('H:i:s.') . explode('.', microtime(true))[1] . '] ' . $message . PHP_EOL;
+        $mSec = '0000';
+        if (false !== $parts = explode('.', microtime(true))) {
+            $mSec = $parts[1];
+        }
+        echo '[' . date('H:i:s.') . sprintf("%'.04d", $mSec) . '] ' . $message . PHP_EOL;
     }
 }
