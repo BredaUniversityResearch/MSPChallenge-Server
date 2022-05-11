@@ -489,12 +489,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/marinhekman/reactphp-dbal.git",
-                "reference": "228f41494469e01ba89af4f91ebb8a3ee73b9ddb"
+                "reference": "9dd55a81898ff086cb15a37b2e07969a6c6e07d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/228f41494469e01ba89af4f91ebb8a3ee73b9ddb",
-                "reference": "228f41494469e01ba89af4f91ebb8a3ee73b9ddb",
+                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/9dd55a81898ff086cb15a37b2e07969a6c6e07d1",
+                "reference": "9dd55a81898ff086cb15a37b2e07969a6c6e07d1",
                 "shasum": ""
             },
             "require": {
@@ -538,7 +538,7 @@
             "support": {
                 "source": "https://github.com/marinhekman/reactphp-dbal/tree/feature/connection-keep-alive"
             },
-            "time": "2022-05-09T21:31:40+00:00"
+            "time": "2022-05-11T12:58:03+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -812,7 +812,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v8.83.11",
+            "version": "v8.83.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -866,7 +866,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v8.83.11",
+            "version": "v8.83.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -914,7 +914,7 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v8.83.11",
+            "version": "v8.83.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
