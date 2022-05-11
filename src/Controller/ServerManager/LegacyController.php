@@ -3,7 +3,7 @@
 namespace App\Controller\ServerManager;
 
 use App\Controller\MSPControllerBase;
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

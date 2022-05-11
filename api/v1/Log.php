@@ -2,7 +2,7 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;

@@ -3,7 +3,7 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowser;
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\SilentFailException;
 use Drift\DBAL\ConnectionPool;
 use Drift\DBAL\ConnectionWorker;
