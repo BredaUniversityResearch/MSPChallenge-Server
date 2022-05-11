@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0a3526068f1f96d2217da072857666b7",
+    "content-hash": "61914abe608254a2e51348ed5a0f29da",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -6529,26 +6529,26 @@
     "packages-dev": [
         {
             "name": "brainmaestro/composer-git-hooks",
-            "version": "v2.8.5",
+            "version": "dev-handle-file-permission-denied",
             "source": {
                 "type": "git",
-                "url": "https://github.com/BrainMaestro/composer-git-hooks.git",
-                "reference": "ffed8803690ac12214082120eee3441b00aa390e"
+                "url": "https://github.com/marinhekman/composer-git-hooks.git",
+                "reference": "ade182e9186d191b7a2cc3d4ce5284dc7b2a7111"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BrainMaestro/composer-git-hooks/zipball/ffed8803690ac12214082120eee3441b00aa390e",
-                "reference": "ffed8803690ac12214082120eee3441b00aa390e",
+                "url": "https://api.github.com/repos/marinhekman/composer-git-hooks/zipball/ade182e9186d191b7a2cc3d4ce5284dc7b2a7111",
+                "reference": "ade182e9186d191b7a2cc3d4ce5284dc7b2a7111",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.6 || >=7.0",
-                "symfony/console": "^3.2 || ^4.0 || ^5.0"
+                "php": ">=7.3",
+                "symfony/console": "^5.0"
             },
             "require-dev": {
                 "ext-json": "*",
-                "friendsofphp/php-cs-fixer": "^2.9",
-                "phpunit/phpunit": "^5.7 || ^7.0"
+                "friendsofphp/php-cs-fixer": "^2.18",
+                "phpunit/phpunit": "^7.0"
             },
             "bin": [
                 "cghooks"
@@ -6571,14 +6571,35 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "src/helpers.php"
-                ],
                 "psr-4": {
                     "BrainMaestro\\GitHooks\\": "src/"
+                },
+                "files": [
+                    "src/helpers.php"
+                ]
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "BrainMaestro\\GitHooks\\Tests\\": "tests/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "scripts": {
+                "test": [
+                    "vendor/bin/phpunit"
+                ],
+                "post-install-cmd": [
+                    "./cghooks add --ignore-lock"
+                ],
+                "post-update-cmd": [
+                    "./cghooks update"
+                ],
+                "check-style": [
+                    "php-cs-fixer fix --using-cache=no --diff --dry-run ."
+                ],
+                "fix-style": [
+                    "php-cs-fixer fix --using-cache=no ."
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -6590,15 +6611,14 @@
             ],
             "description": "Easily manage git hooks in your composer config",
             "keywords": [
-                "HOOK",
                 "composer",
-                "git"
+                "git",
+                "hook"
             ],
             "support": {
-                "issues": "https://github.com/BrainMaestro/composer-git-hooks/issues",
-                "source": "https://github.com/BrainMaestro/composer-git-hooks/tree/v2.8.5"
+                "source": "https://github.com/marinhekman/composer-git-hooks/tree/handle-file-permission-denied"
             },
-            "time": "2021-02-08T15:59:11+00:00"
+            "time": "2021-03-02T19:03:47+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
@@ -7104,7 +7124,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "drift/dbal": 20
+        "drift/dbal": 20,
+        "brainmaestro/composer-git-hooks": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
