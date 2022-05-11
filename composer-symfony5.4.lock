@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1148df1eb572cc7a3f039cb35fbb60cb",
+    "content-hash": "0a3526068f1f96d2217da072857666b7",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -1513,16 +1513,16 @@
         },
         {
             "name": "drift/dbal",
-            "version": "0.1.5",
+            "version": "dev-feature/connection-keep-alive",
             "source": {
                 "type": "git",
                 "url": "https://github.com/marinhekman/reactphp-dbal.git",
-                "reference": "fd55f3a16d4b526dcbcc525407089d3d500179a9"
+                "reference": "9dd55a81898ff086cb15a37b2e07969a6c6e07d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/fd55f3a16d4b526dcbcc525407089d3d500179a9",
-                "reference": "fd55f3a16d4b526dcbcc525407089d3d500179a9",
+                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/9dd55a81898ff086cb15a37b2e07969a6c6e07d1",
+                "reference": "9dd55a81898ff086cb15a37b2e07969a6c6e07d1",
                 "shasum": ""
             },
             "require": {
@@ -1564,9 +1564,9 @@
             ],
             "description": "DBAL for ReactPHP on top of Doctrine",
             "support": {
-                "source": "https://github.com/marinhekman/reactphp-dbal/tree/0.1.5"
+                "source": "https://github.com/marinhekman/reactphp-dbal/tree/feature/connection-keep-alive"
             },
-            "time": "2022-04-14T16:36:48+00:00"
+            "time": "2022-05-11T12:58:03+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -7103,7 +7103,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "drift/dbal": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
