@@ -416,7 +416,8 @@ class Layer extends Base
             "layer_raster_color_interpolation",
             "layer_raster_filter_mode",
             "approval",
-            "layer_download_from_geoserver"
+            "layer_download_from_geoserver",
+            "layer_property_as_type"
         );
 
         $inserts = "";
@@ -653,6 +654,34 @@ class Layer extends Base
     /**
      * @throws Exception
      */
+    public function getExportLayerDescriptions(
+        string $workspace,
+        string $layer
+    ): array {
+        $response = $this->geoserver->ows(
+            $workspace
+            . "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers="
+            . urlencode($workspace)
+            . ":"
+            . urlencode($layer)
+            . "&outputFormat=application/json"
+        );
+        $data = json_decode($response, true, 512, JSON_BIGINT_AS_STRING);
+        if (json_last_error() != JSON_ERROR_NONE) {
+            $data = [];
+            $data["layerDescriptions"] = [];
+            $data["error"] = "Failed to decode JSON response from Geoserver. Error: "
+                .json_last_error_msg()
+                .". Response: "
+                .PHP_EOL
+                .$response;
+        }
+        return $data;
+    }
+
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetExport(
         string $workspace,
@@ -666,20 +695,14 @@ class Layer extends Base
         $layer = str_replace(" ", "%20", $layer);
             
         if ($format == "GML") {
-            return $this->geoserver->ows(
-                $workspace . "/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" . urlencode($workspace) .
-                ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures
-            );
+            $url = $workspace . "/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" . urlencode($workspace) .
+                ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures;
         } elseif ($format == "CSV") {
-            return $this->geoserver->ows(
-                $workspace . "/ows?service=WFS&version=1.0.0&outputFormat=csv&request=GetFeature&typeName=" .
-                urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures
-            );
+            $url = $workspace . "/ows?service=WFS&version=1.0.0&outputFormat=csv&request=GetFeature&typeName=" .
+                urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures;
         } elseif ($format == "JSON") {
-            return $this->geoserver->ows(
-                $workspace . "/ows?service=WFS&version=1.0.0&outputFormat=json&request=GetFeature&typeName=" .
-                urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures
-            );
+            $url = $workspace . "/ows?service=WFS&version=1.0.0&outputFormat=json&request=GetFeature&typeName=" .
+                urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures;
         } elseif ($format == "PNG") {
             if ($rasterMeta === null) {
                 throw new Exception("Tried to export ".$layer." from geoserver in format ".$format.
@@ -697,12 +720,13 @@ class Layer extends Base
             $width = $height * $widthRatioMultiplier;
             $bounds = $rasterMeta["boundingbox"][0][0].",".$rasterMeta["boundingbox"][0][1].",".
                 $rasterMeta["boundingbox"][1][0].",".$rasterMeta["boundingbox"][1][1];
-            return $this->geoserver->ows($workspace . "/wms/reflect?layers=" . urlencode($workspace) . ":" .
+            $url = $workspace . "/wms/reflect?layers=" . urlencode($workspace) . ":" .
                 urlencode($layer) . "&format=image/png&transparent=FALSE&width=" . round($width) . "&height=" .
-                $height . "&bbox=".$bounds);
+                $height . "&bbox=".$bounds;
         } else {
             throw new Exception("Incorrect format, use GML, CSV, JSON or PNG");
         }
+        return $this->geoserver->ows($url);
     }
 
     /**

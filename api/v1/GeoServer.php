@@ -82,31 +82,20 @@ class GeoServer extends Base
 
     public function ows(string $url): ?string
     {
-        $customOpt = array(
-            CURLOPT_USERPWD => $this->username . ":" . $this->password,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_HEADER => false
+        Log::LogInfo("Calling geoserver: ".$this->baseurl.$url);
+
+        return $this->CallBack(
+            $this->baseurl . $url,
+            array(),                // no content to send
+            array(),                // no headers to send
+            false,                  // sync request, so wait for it
+            false,                  // no content, so no json encoding of it required either
+            array(
+                CURLOPT_USERPWD => $this->username . ":" . $this->password,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_HEADER => false
+            )
         );
-
-        try {
-            $result = $this->CallBack(
-                $this->baseurl . $url,
-                array(),                // no content to send
-                array(),                // no headers to send
-                false,                  // sync request, so wait for it
-                false,                  // no content, so no json encoding of it required either
-                $customOpt
-            ); // see above additional curl opts for this request
-        } catch (Throwable $e) {
-            print("Geoserver request failed to url ".$url.". Exception: ".$e->getMessage().PHP_EOL);
-            return null;
-        }
-
-        if (false === $result) {
-            return null;
-        }
-
-        return $result;
     }
 
     /**
