@@ -606,6 +606,17 @@ class WsServer extends EventDispatcher implements MessageComponentInterface
             $this->createExecuteBatchesPromiseFunction(),
             self::EXECUTE_BATCHES_MIN_INTERVAL_SEC
         ));
+
+        // do a dummy SELECT 1 query every 4 hours to prevent the "wait_timeout" of mysql (Default is 8 hours).
+        //  if the wait timeout would go off, the database connection will be broken, and the error
+        //  "2006 MySQL server has gone away" will appear.
+        $loop->addPeriodicTimer(14400, function () {
+            $promises = [];
+            foreach ($this->gameInstances as $gameSessionId => $game) {
+                $promises[$gameSessionId] = $game->doDummyQuery();
+            }
+            assertFulfilled(all($promises));
+        });
     }
 
     private function getAsyncDatabase(int $gameSessionId): Connection

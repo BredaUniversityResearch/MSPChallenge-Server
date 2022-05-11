@@ -48,6 +48,31 @@ class Game extends Base
         parent::__construct($method, self::ALLOWED);
     }
 
+    public function doDummyQuery(): PromiseInterface
+    {
+        $connection = $this->getAsyncDatabase();
+        if ($connection instanceof ConnectionPool) {
+            $connections = collect($connection->getWorkers())
+                ->map(function (ConnectionWorker $worker) {
+                    return $worker->getConnection();
+                })
+                ->all();
+        } else { // if ($connection is SingleConnection)
+            $connections[] = $connection;
+        }
+        $toPromiseFunctions = [];
+        /** @var SingleConnection $connection */
+        foreach ($connections as $connection) {
+            $toPromiseFunctions[] = tpf(function () use ($connection) {
+                $qb = $connection->createQueryBuilder();
+                return $connection->query(
+                    $qb->select('1')
+                );
+            });
+        }
+        return parallel($toPromiseFunctions);
+    }
+
     /**
      * @apiGroup Game
      * @throws Exception
