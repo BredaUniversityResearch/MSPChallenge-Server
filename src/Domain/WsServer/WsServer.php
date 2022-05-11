@@ -7,9 +7,6 @@ use App\Domain\Helper\AsyncDatabase;
 use App\Domain\Helper\Util;
 use App\Domain\WsServer\Plugins\PluginInterface;
 use Drift\DBAL\Connection;
-use Drift\DBAL\ConnectionPool;
-use Drift\DBAL\ConnectionWorker;
-use Drift\DBAL\Result;
 use Exception;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Collection;
@@ -21,9 +18,6 @@ use React\EventLoop\LoopInterface;
 use React\Promise\PromiseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use function App\assertFulfilled;
-use function App\parallel;
-use function App\tpf;
-use function React\Promise\all;
 
 class WsServer extends EventDispatcher implements
     WsServerEventDispatcherInterface,
@@ -292,46 +286,6 @@ class WsServer extends EventDispatcher implements
         $loop->addPeriodicTimer(2, function () {
             $this->dispatch(new NameAwareEvent(WsServerEventDispatcherInterface::EVENT_ON_STATS_UPDATE));
         });
-    }
-
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     */
-    private function doDummyQuery(): PromiseInterface
-    {
-        return $this->getGameSessionIds()
-            ->then(function (Result $result) {
-                $gameSessionIds = collect($result->fetchAllRows() ?? [])
-                    ->keyBy('id')
-                    ->map(function ($row) {
-                        return $row['id'];
-                    });
-                $promises = [];
-                foreach ($gameSessionIds as $gameSessionId) {
-                    $connection = $this->getAsyncDatabase($gameSessionId);
-                    $connections = [];
-                    if ($connection instanceof ConnectionPool) {
-                        $connections = collect($connection->getWorkers())
-                            ->map(function (ConnectionWorker $worker) {
-                                return $worker->getConnection();
-                            })
-                            ->all();
-                    } else { // if ($connection is SingleConnection)
-                        $connections[] = $connection;
-                    }
-                    $toPromiseFunctions = [];
-                    foreach ($connections as $connection) {
-                        $toPromiseFunctions[] = tpf(function () use ($connection) {
-                            $qb = $connection->createQueryBuilder();
-                            return $connection->query(
-                                $qb->select('1')
-                            );
-                        });
-                    }
-                    $promises[$gameSessionId] = parallel($toPromiseFunctions);
-                }
-                return all($promises);
-            });
     }
 
     public function getAsyncDatabase(int $gameSessionId): Connection

@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\ExecuteBatchesWsServerPlugin;
 use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
 use App\Domain\WsServer\Plugins\LoopStatsWsServerPlugin;

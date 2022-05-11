@@ -1,7 +1,7 @@
 <?php
 
 use App\Domain\Common\GetConstantsTrait;
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 
 class ServerManager extends Base
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Helper;
+namespace App\Domain\Services;
 
 use App\Domain\API\APIHelper;
 use Closure;

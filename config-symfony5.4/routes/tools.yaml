@@ -1,0 +1,7 @@
+_tools_index:
+    path: /
+    controller: App\Controller\ToolsController
+
+_tools_check_missing_indices:
+    path: /check_missing_indices
+    controller: App\Controller\ToolsController::checkMissingIndices

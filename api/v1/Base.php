@@ -3,8 +3,8 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\API\APIHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\Common\CommonBase;
-use App\Domain\Helper\SymfonyToLegacyHelper;
 use Exception;
 use TypeError;
 

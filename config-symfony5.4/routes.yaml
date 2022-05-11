@@ -2,6 +2,11 @@ server_manager:
   resource: 'ServerManager/routes.yaml'
   prefix: '/ServerManager'
 
+when@dev:
+  _tools:
+    resource: 'routes/tools.yaml'
+    prefix: '/_tools'
+
 # fall-back: should be handled by nginx or apache rules!
 apidoc:
   path: '/Documentation/{anything}'

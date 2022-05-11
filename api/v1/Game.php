@@ -3,20 +3,13 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowser;
-use App\Domain\Helper\SymfonyToLegacyHelper;
-use App\Domain\WsServer\Plugins\Tick\GameTick;
-use App\SilentFailException;
-use Drift\DBAL\ConnectionPool;
-use Drift\DBAL\ConnectionWorker;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
-use Drift\DBAL\SingleConnection;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
-use function App\parallel;
 use function App\resolveOnFutureTick;
-use function App\tpf;
 use function App\await;
 
 class Game extends Base
