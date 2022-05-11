@@ -6,6 +6,7 @@ use App\Domain\API\v1\Config;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Drift\DBAL\Connection;
 use Drift\DBAL\ConnectionPool;
+use Drift\DBAL\ConnectionPoolOptions;
 use Drift\DBAL\Credentials;
 use Drift\DBAL\Driver\Mysql\MysqlDriver;
 use Drift\DBAL\SingleConnection;
@@ -46,10 +47,18 @@ class AsyncDatabase
             $dbConfig['port'] ?? '3306',
             $dbConfig['user'],
             $dbConfig['password'],
-            $dbConfig['multisession_database_prefix'].$gameSessionId,
-            [],
-            $dbConfig['num_pool_connections'] ?: 20
+            $dbConfig['multisession_database_prefix'].$gameSessionId
         );
-        return ConnectionPool::createConnected($mysqlDriver, $credentials, $mysqlPlatform);
+
+        return ConnectionPool::createConnected(
+            $mysqlDriver,
+            $credentials,
+            $mysqlPlatform,
+            // Set $keepAliveIntervalSec to 14400 = 4 hours
+            // This will do a SELECT 1 query every 4 hours to prevent the "wait_timeout" of mysql (Default is 8 hours).
+            // If the wait timeout would go off, the database connection will be broken, and the error
+            //   "2006 MySQL server has gone away" will appear.
+            new ConnectionPoolOptions(20, 14400)
+        );
     }
 }
