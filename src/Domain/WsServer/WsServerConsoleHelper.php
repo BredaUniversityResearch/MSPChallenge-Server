@@ -73,7 +73,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             $clientIds = [$clientIds];
         }
         foreach ($clientIds as $clientId) {
-            if ($event->getEventName() == WsServer::EVENT_ON_CLIENT_DISCONNECTED) {
+            if ($event->getEventName() == WsServerEventDispatcherInterface::EVENT_ON_CLIENT_DISCONNECTED) {
                 unset($this->tableInput[$clientId]);
                 continue;
             }
@@ -117,7 +117,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         if (!$this->tableOutput) {
             // skip output on stats update event to reduce the output frequency, just output any other event along with
             //   the latest stats
-            if ($event->getEventName() != WsServer::EVENT_ON_STATS_UPDATE) {
+            if ($event->getEventName() != WsServerEventDispatcherInterface::EVENT_ON_STATS_UPDATE) {
                 $this->outputEvent($event);
                 $this->output->writeln(Yaml::dump($wsServerStats));
             }
@@ -136,7 +136,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
                 Util::getHumanReadableSize(memory_get_usage()))
             ->setFooterTitle(implode(' / ', $wsServerStats))
         ;
-        if ($event->getEventName() == WsServer::EVENT_ON_STATS_UPDATE) {
+        if ($event->getEventName() == WsServerEventDispatcherInterface::EVENT_ON_STATS_UPDATE) {
             $this->output->write(sprintf("\033\143"));
             $this->table->render();
         }
@@ -149,7 +149,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
         int $allowedDataCharsWidth
     ): ?string {
         $numClients = count($this->tableInput);
-        if ($eventName == WsServer::EVENT_ON_CLIENT_CONNECTED) {
+        if ($eventName == WsServerEventDispatcherInterface::EVENT_ON_CLIENT_CONNECTED) {
             $numClients += 1;
         }
         $numClients = max(1, $numClients);
@@ -206,7 +206,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
             sprintf(
                 '%1$04d g%2$02d t%3$02d u%4$03d',
                 $clientId,
-                $clientHeaders[WsServer::HEADER_GAME_SESSION_ID] ?? '',
+                $clientHeaders[ClientHeaderKeys::HEADER_KEY_GAME_SESSION_ID] ?? '',
                 $clientInfo['team_id'] ?? '',
                 $clientInfo['user'] ?? ''
             ),
@@ -219,12 +219,12 @@ class WsServerConsoleHelper implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            WsServer::EVENT_ON_CLIENT_CONNECTED => 'notifyWsServerDataChange',
-            WsServer::EVENT_ON_CLIENT_DISCONNECTED => 'notifyWsServerDataChange',
-            WsServer::EVENT_ON_CLIENT_ERROR => 'notifyWsServerDataChange',
-            WsServer::EVENT_ON_CLIENT_MESSAGE_RECEIVED => 'notifyWsServerDataChange',
-            WsServer::EVENT_ON_CLIENT_MESSAGE_SENT => 'notifyWsServerDataChange',
-            WsServer::EVENT_ON_STATS_UPDATE => 'notifyWsServerDataChange'
+            WsServerEventDispatcherInterface::EVENT_ON_CLIENT_CONNECTED => 'notifyWsServerDataChange',
+            WsServerEventDispatcherInterface::EVENT_ON_CLIENT_DISCONNECTED => 'notifyWsServerDataChange',
+            WsServerEventDispatcherInterface::EVENT_ON_CLIENT_ERROR => 'notifyWsServerDataChange',
+            WsServerEventDispatcherInterface::EVENT_ON_CLIENT_MESSAGE_RECEIVED => 'notifyWsServerDataChange',
+            WsServerEventDispatcherInterface::EVENT_ON_CLIENT_MESSAGE_SENT => 'notifyWsServerDataChange',
+            WsServerEventDispatcherInterface::EVENT_ON_STATS_UPDATE => 'notifyWsServerDataChange'
         ];
     }
 }

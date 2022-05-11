@@ -50,7 +50,10 @@
         "psr-4": {
             "App\\": "src/"
         },
-        "files": [ "src/functions.php" ]
+        "files": [
+            "src/functions.php",
+            "src/Domain/WsServer/functions.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

@@ -3,6 +3,10 @@
 namespace App\Command;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Domain\WsServer\Plugins\ExecuteBatchesWsServerPlugin;
+use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
+use App\Domain\WsServer\Plugins\LoopStatsWsServerPlugin;
+use App\Domain\WsServer\Plugins\Tick\TickWsServerPlugin;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
 use Ratchet\Http\HttpServer;
@@ -93,6 +97,7 @@ class WsServerCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         define('WSS', 1); // to identify that we are in a websocket server instance. Value is not important.
+
 //        // note (MH): handy, enable to catch deprecations/notices/warnings/errors to log
 //        set_error_handler(function (
 //            int $errno,
@@ -128,6 +133,13 @@ class WsServerCommand extends Command
             $input->getOption(self::OPTION_ADDRESS)
         );
         $this->wsServer->registerLoop($server->loop);
+
+        // plugins
+        $this->wsServer->registerPlugin(new LoopStatsWsServerPlugin());
+        $this->wsServer->registerPlugin(new TickWsServerPlugin());
+        $this->wsServer->registerPlugin(new LatestWsServerPlugin());
+        $this->wsServer->registerPlugin(new ExecuteBatchesWsServerPlugin());
+
         sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
             switch ($event) {
                 case PHP_WINDOWS_EVENT_CTRL_C:
