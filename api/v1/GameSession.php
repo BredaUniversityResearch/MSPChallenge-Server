@@ -3,7 +3,7 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Helper\AsyncDatabase;
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;

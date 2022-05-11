@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Domain\Helper\SymfonyToLegacyHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 

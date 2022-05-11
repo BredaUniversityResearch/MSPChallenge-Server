@@ -50,4 +50,42 @@ class Util
         }
         return ($values[$half - 1] + $values[$half]) / 2.0;
     }
+
+    public static function hasPrefix($strHaystack, $mixPrefixes): ?string
+    {
+        // @note (MH) : one or more prefixes
+        if (!is_array($mixPrefixes)) {
+            $mixPrefixes = array($mixPrefixes);
+        }
+
+        foreach ($mixPrefixes as $strPrefix) {
+            $strHaystackPrefix = substr($strHaystack, 0, strlen($strPrefix));
+            if ($strPrefix === $strHaystackPrefix) {
+                return $strPrefix;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $strHaystack
+     * @param string|array $mixPostfixes
+     * @return null|string
+     */
+    public static function hasPostfix(string $strHaystack, $mixPostfixes): ?string
+    {
+        if (!is_array($mixPostfixes)) {
+            $mixPostfixes = array($mixPostfixes);
+        }
+
+        foreach ($mixPostfixes as $strPostfix) {
+            $strHaystackPostfix = substr($strHaystack, -strlen($strPostfix));
+            if ($strPostfix === $strHaystackPostfix) {
+                return $strPostfix;
+            }
+        }
+
+        return null;
+    }
 }
