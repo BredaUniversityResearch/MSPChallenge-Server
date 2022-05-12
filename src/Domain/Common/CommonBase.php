@@ -23,6 +23,10 @@ abstract class CommonBase
      */
     protected function getAsyncDatabase(): Connection
     {
+        if ($this->async === false) {
+            throw new Exception('Attempt to retrieve async database although async is disabled');
+        }
+
         if (null === $this->asyncDatabase) {
             // fail-safe: try to create an async database from current request information if there is no instance set.
             if (GameSession::INVALID_SESSION_ID === $gameSessionId = $this->getGameSessionId()) {
@@ -84,7 +88,9 @@ abstract class CommonBase
     public function asyncDataTransferTo(CommonBase $other)
     {
         $other->setGameSessionId($this->getGameSessionId());
-        $other->setAsyncDatabase($this->getAsyncDatabase());
+        if ($this->isAsync()) {
+            $other->setAsyncDatabase($this->getAsyncDatabase());
+        }
         $other->setToken($this->getToken());
         $other->setAsync($this->isAsync());
     }

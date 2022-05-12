@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
+use React\EventLoop\Loop;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
