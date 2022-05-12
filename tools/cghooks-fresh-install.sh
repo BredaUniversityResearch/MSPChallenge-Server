@@ -26,8 +26,12 @@ then
     exit 4
 fi
 
-./vendor/bin/cghooks remove -f post-merge pre-push
+# remove hooks here that we did use, but do not want to use anymore, e.g.
+# ./vendor/bin/cghooks remove -f post-merge pre-push
+
+# this will add hooks that need updating
 ./vendor/bin/cghooks add --ignore-lock
+
 result=$?
 if [ $result -ne 0 ]
 then
