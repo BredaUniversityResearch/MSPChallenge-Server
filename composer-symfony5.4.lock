@@ -1517,12 +1517,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/marinhekman/reactphp-dbal.git",
-                "reference": "9dd55a81898ff086cb15a37b2e07969a6c6e07d1"
+                "reference": "e649787b1b8c4cc3321d79d22a7f310159c2d36c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/9dd55a81898ff086cb15a37b2e07969a6c6e07d1",
-                "reference": "9dd55a81898ff086cb15a37b2e07969a6c6e07d1",
+                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/e649787b1b8c4cc3321d79d22a7f310159c2d36c",
+                "reference": "e649787b1b8c4cc3321d79d22a7f310159c2d36c",
                 "shasum": ""
             },
             "require": {
@@ -1566,7 +1566,7 @@
             "support": {
                 "source": "https://github.com/marinhekman/reactphp-dbal/tree/feature/connection-keep-alive"
             },
-            "time": "2022-05-11T12:58:03+00:00"
+            "time": "2022-05-12T14:47:06+00:00"
         },
         {
             "name": "evenement/evenement",
