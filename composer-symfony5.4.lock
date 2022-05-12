@@ -6533,12 +6533,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/marinhekman/composer-git-hooks.git",
-                "reference": "7d86c1d216362f21e568644c9f7b18038d6343f4"
+                "reference": "f7bc0f64ef64cdc22e8169286b97760d2fc7bfd8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marinhekman/composer-git-hooks/zipball/7d86c1d216362f21e568644c9f7b18038d6343f4",
-                "reference": "7d86c1d216362f21e568644c9f7b18038d6343f4",
+                "url": "https://api.github.com/repos/marinhekman/composer-git-hooks/zipball/f7bc0f64ef64cdc22e8169286b97760d2fc7bfd8",
+                "reference": "f7bc0f64ef64cdc22e8169286b97760d2fc7bfd8",
                 "shasum": ""
             },
             "require": {
@@ -6618,7 +6618,7 @@
             "support": {
                 "source": "https://github.com/marinhekman/composer-git-hooks/tree/handle-file-permission-denied"
             },
-            "time": "2022-05-11T14:16:57+00:00"
+            "time": "2022-05-12T11:54:48+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",
