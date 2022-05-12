@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "61914abe608254a2e51348ed5a0f29da",
+    "content-hash": "62b9f7428e5c403b2c684370479e6850",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -1513,16 +1513,16 @@
         },
         {
             "name": "drift/dbal",
-            "version": "dev-feature/connection-keep-alive",
+            "version": "dev-fix/deprecations",
             "source": {
                 "type": "git",
                 "url": "https://github.com/marinhekman/reactphp-dbal.git",
-                "reference": "9dd55a81898ff086cb15a37b2e07969a6c6e07d1"
+                "reference": "6867652489e9caed15f91e9848fcd4cf54ac80fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/9dd55a81898ff086cb15a37b2e07969a6c6e07d1",
-                "reference": "9dd55a81898ff086cb15a37b2e07969a6c6e07d1",
+                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/6867652489e9caed15f91e9848fcd4cf54ac80fd",
+                "reference": "6867652489e9caed15f91e9848fcd4cf54ac80fd",
                 "shasum": ""
             },
             "require": {
@@ -1564,9 +1564,9 @@
             ],
             "description": "DBAL for ReactPHP on top of Doctrine",
             "support": {
-                "source": "https://github.com/marinhekman/reactphp-dbal/tree/feature/connection-keep-alive"
+                "source": "https://github.com/marinhekman/reactphp-dbal/tree/fix/deprecations"
             },
-            "time": "2022-05-11T12:58:03+00:00"
+            "time": "2022-05-12T13:54:24+00:00"
         },
         {
             "name": "evenement/evenement",
