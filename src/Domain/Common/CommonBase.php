@@ -9,6 +9,9 @@ use App\Domain\Helper\AsyncDatabase;
 use Drift\DBAL\Connection;
 use Exception;
 use React\EventLoop\Loop;
+use React\Promise\Deferred;
+use function App\await;
+use function App\resolveOnFutureTick;
 
 abstract class CommonBase
 {
@@ -29,6 +32,12 @@ abstract class CommonBase
                 throw new Exception('Missing required async database connection.');
             }
             $this->asyncDatabase = AsyncDatabase::createGameSessionConnection(Loop::get(), $gameSessionId);
+            // another fail-safe:
+            // once a loop is created, ReactPHP expects it to be been run at least once before exiting the script,
+            //  otherwise it will assume it still needs to be run, causing an api web request to end in an endless loop.
+            // So, to prevent this, and in case "await" is not called elsewhere,
+            //   just run an "empty" async task to be resolved in a single tick, and await it, before continuing
+            await(resolveOnFutureTick(new Deferred())->promise());
         }
         return $this->asyncDatabase;
     }
