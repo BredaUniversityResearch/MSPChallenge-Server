@@ -39,12 +39,12 @@ class TickWsServerPlugin extends Plugin
      */
     private function tick(): PromiseInterface
     {
-        // fail-safe. Should not happen since the tick plugin will be automatically unregistered from the loop,
-        //   once the game session is not active
         $gameSessionIdFilter = $this->getGameSessionIdFilter();
         if ($gameSessionIdFilter != null && $gameSessionIdFilter !== $this->gameSessionId) {
-            // do not do anything.
-            return resolveOnFutureTick(new Deferred(), $gameSessionIdFilter)->promise();
+            // fail-safe. Should not happen since the tick plugin will be automatically unregistered from the loop
+            //   by TicksHandlerWsServerPlugin. But if the tick plugin is called for a game session *not* filtered,
+            //   just resolve, and do not do anything.
+            return resolveOnFutureTick(new Deferred(), $this->gameSessionId)->promise();
         }
 
         $this->addDebugOutput('starting "tick" for game session: ' . $this->gameSessionId);
