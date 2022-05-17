@@ -254,15 +254,23 @@ class WsServer extends EventDispatcher implements
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getGameSessionIds(): PromiseInterface
+    public function getGameSessionIds(bool $onlyPlaying = false): PromiseInterface
     {
         $connection = AsyncDatabase::createServerManagerConnection(Loop::get());
         $qb = $connection->createQueryBuilder();
-        return $connection->query(
-            $qb
-                ->select('id')
-                ->from('game_list')
-        );
+        $qb
+            ->select('id')
+            ->from('game_list')
+            ->where($qb->expr()->eq('session_state', $qb->createPositionalParameter('healthy')));
+        if ($onlyPlaying) {
+            $qb->andWhere($qb->expr()->in(
+                'game_state',
+                $qb->createPositionalParameter([
+                    'play', 'fastforward' ,'simulation'
+                ])
+            ));
+        }
+        return $connection->query($qb);
     }
 
     public function registerLoop(LoopInterface $loop)
@@ -275,13 +283,6 @@ class WsServer extends EventDispatcher implements
             $plugin->registerLoop($this->loop);
             $this->plugins[$plugin->getName()] = $plugin;
         }
-
-        // do a dummy SELECT 1 query every 4 hours to prevent the "wait_timeout" of mysql (Default is 8 hours).
-        //  if the wait timeout would go off, the database connection will be broken, and the error
-        //  "2006 MySQL server has gone away" will appear.
-        $loop->addPeriodicTimer(14400, function () {
-            assertFulfilled($this->doDummyQuery());
-        });
 
         $loop->addPeriodicTimer(2, function () {
             $this->dispatch(new NameAwareEvent(WsServerEventDispatcherInterface::EVENT_ON_STATS_UPDATE));
