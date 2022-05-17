@@ -7,6 +7,6 @@ use React\Promise\PromiseInterface;
 
 interface ServerManagerInterface
 {
-    public function getGameSessionIds(): PromiseInterface;
+    public function getGameSessionIds(bool $onlyPlaying = false): PromiseInterface;
     public function getAsyncDatabase(int $gameSessionId): Connection;
 }
