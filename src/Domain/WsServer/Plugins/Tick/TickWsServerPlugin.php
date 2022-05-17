@@ -4,31 +4,32 @@ namespace App\Domain\WsServer\Plugins\Tick;
 
 use App\Domain\WsServer\Plugins\Plugin;
 use Closure;
-use Drift\DBAL\Result;
 use Exception;
+use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
-use function React\Promise\all;
+use function App\resolveOnFutureTick;
 
 class TickWsServerPlugin extends Plugin
 {
     private const TICK_MIN_INTERVAL_SEC = 2;
 
-    /**
-     * @var GameTick[]
-     */
-    private array $gameTicks = [];
+    private int $gameSessionId;
+    private ?GameTick $gameTick = null;
 
-    public function __construct()
+    public function __construct(int $gameSessionId)
     {
-        parent::__construct('tick', self::TICK_MIN_INTERVAL_SEC);
+        $this->gameSessionId = $gameSessionId;
+        parent::__construct('tick' . $gameSessionId, self::TICK_MIN_INTERVAL_SEC);
     }
 
     protected function onCreatePromiseFunction(): Closure
     {
         return function () {
             return $this->tick()
-                ->then(function (array $tickGameSessionIds) {
-                    wdo('just finished tick for game session ids: ' . implode(', ', $tickGameSessionIds));
+                ->then(function (int $gameSessionId) {
+                    $this->addDebugOutput(
+                        'just finished tick for game session id: ' . $gameSessionId
+                    );
                 });
         };
     }
@@ -38,37 +39,29 @@ class TickWsServerPlugin extends Plugin
      */
     private function tick(): PromiseInterface
     {
-        return $this->getServerManager()->getGameSessionIds(true)
-            ->then(function (Result $result) {
-                $gameSessionIds = collect($result->fetchAllRows() ?? [])
-                    ->keyBy('id')
-                    ->map(function ($row) {
-                        return $row['id'];
-                    });
-                $gameSessionId = $this->getGameSessionId();
-                if ($gameSessionId != null) {
-                    $gameSessionIds = $gameSessionIds->only($gameSessionId);
-                }
-                $promises = [];
-                foreach ($gameSessionIds as $gameSessionId) {
-                    wdo('starting "tick" for game session: ' . $gameSessionId);
-                    $tickTimeStart = microtime(true);
-                    $promises[$gameSessionId] = $this->getGameTick($gameSessionId)->Tick(
-                        !empty($_ENV['WS_SERVER_DEBUG_OUTPUT'])
-                    )
-                    ->then(
-                        function () use ($tickTimeStart, $gameSessionId) {
-                            $this->getMeasurementCollectionManager()->addToMeasurementCollection(
-                                $this->getName(),
-                                $gameSessionId,
-                                microtime(true) - $tickTimeStart
-                            );
-                            return $gameSessionId; // just to identify this tick
-                        }
-                    );
-                }
-                return all($promises);
-            });
+        // fail-safe. Should not happen since the tick plugin will be automatically unregistered from the loop,
+        //   once the game session is not active
+        $gameSessionIdFilter = $this->getGameSessionIdFilter();
+        if ($gameSessionIdFilter != null && $gameSessionIdFilter !== $this->gameSessionId) {
+            // do not do anything.
+            return resolveOnFutureTick(new Deferred(), $gameSessionIdFilter)->promise();
+        }
+
+        $this->addDebugOutput('starting "tick" for game session: ' . $this->gameSessionId);
+        $tickTimeStart = microtime(true);
+        return $this->getGameTick($this->gameSessionId)->Tick(
+            $this->isDebugOutputEnabled()
+        )
+        ->then(
+            function () use ($tickTimeStart) {
+                $this->getMeasurementCollectionManager()->addToMeasurementCollection(
+                    $this->getName(),
+                    $this->gameSessionId,
+                    microtime(true) - $tickTimeStart
+                );
+                return $this->gameSessionId; // just to identify this tick
+            }
+        );
     }
 
     /**
@@ -76,13 +69,13 @@ class TickWsServerPlugin extends Plugin
      */
     private function getGameTick(int $gameSessionId): GameTick
     {
-        if (!array_key_exists($gameSessionId, $this->gameTicks)) {
+        if ($this->gameTick === null) {
             $gameTick = new GameTick();
             $gameTick->setAsync(true);
             $gameTick->setGameSessionId($gameSessionId);
-            $gameTick->setAsyncDatabase($this->getServerManager()->getAsyncDatabase($gameSessionId));
-            $this->gameTicks[$gameSessionId] = $gameTick;
+            $gameTick->setAsyncDatabase($this->getServerManager()->getGameSessionDbConnection($gameSessionId));
+            $this->gameTick = $gameTick;
         }
-        return $this->gameTicks[$gameSessionId];
+        return $this->gameTick;
     }
 }

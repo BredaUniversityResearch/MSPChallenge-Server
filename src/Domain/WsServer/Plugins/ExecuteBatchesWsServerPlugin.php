@@ -34,12 +34,12 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         return function () {
             return $this->executeBatches()
                 ->then(function (array $clientToBatchResultContainer) {
-                    wdo(
+                    $this->addDebugOutput(
                         'just finished "executeBatches" for connections: ' .
                         implode(', ', array_keys($clientToBatchResultContainer))
                     );
                     $clientToBatchResultContainer = array_filter($clientToBatchResultContainer);
-                    wdo(json_encode($clientToBatchResultContainer));
+                    $this->addDebugOutput(json_encode($clientToBatchResultContainer));
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -57,7 +57,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
-        $gameSessionId = $this->getGameSessionId();
+        $gameSessionId = $this->getGameSessionIdFilter();
         if ($gameSessionId != null) {
             $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
         }
@@ -65,7 +65,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $timeStart = microtime(true);
-                wdo('Starting "executeBatches" for: ' . $connResourceId);
+                $this->addDebugOutput('Starting "executeBatches" for: ' . $connResourceId);
                 $promises[$connResourceId] = $this->getBatch($connResourceId)
                     ->executeNextQueuedBatchFor(
                         $clientInfo['team_id'],
@@ -73,7 +73,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     )
                 ->then(
                     function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
-                        wdo('Created "executeBatches" payload for: ' . $connResourceId);
+                        $this->addDebugOutput('Created "executeBatches" payload for: ' . $connResourceId);
                         $this->getClientConnectionResourceManager()->addToMeasurementCollection(
                             $this->getName(),
                             $connResourceId,
@@ -86,7 +86,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             $connResourceId
                         )) {
                             // disconnected while running this async code, nothing was sent
-                            wdo('disconnected while running this async code, nothing was sent');
+                            $this->addDebugOutput('disconnected while running this async code, nothing was sent');
                             $e = new ClientDisconnectedException();
                             $e->setConnResourceId($connResourceId);
                             throw $e;
@@ -150,7 +150,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
             $batch = new Batch();
             $batch->setAsync(true);
             $batch->setGameSessionId($gameSessionId);
-            $batch->setAsyncDatabase($this->getServerManager()->getAsyncDatabase($gameSessionId));
+            $batch->setAsyncDatabase($this->getServerManager()->getGameSessionDbConnection($gameSessionId));
             $batch->setToken($clientHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN]);
             $this->batchesInstances[$connResourceId] = $batch;
         }
