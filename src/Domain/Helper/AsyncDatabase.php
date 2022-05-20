@@ -14,12 +14,29 @@ use React\EventLoop\LoopInterface;
 
 class AsyncDatabase
 {
+    private static ?Connection $serverManagerDbConnection = null;
+
+    /**
+     * @var Connection[]
+     */
+    private static array $gameSessionDbConnections = [];
+
     public static function getConfig(): array
     {
         // if there will be multiple version of the api, e.g. v1/Config.php, v2/Config.php, we can just pick one since
         //   currently all will read from the same api_config.php file.
         // @todo: Config class should not be part of api versioning? Or, load the class with a dynamic class path?
         return Config::getInstance()->DatabaseConfig();
+    }
+
+    public static function getCachedServerManagerDbConnection(
+        LoopInterface $loop,
+        bool $cacheRefresh = false
+    ): Connection {
+        if (self::$serverManagerDbConnection === null || $cacheRefresh) {
+            self::$serverManagerDbConnection = AsyncDatabase::createServerManagerConnection($loop);
+        }
+        return self::$serverManagerDbConnection;
     }
 
     public static function createServerManagerConnection(LoopInterface $loop): Connection
@@ -35,6 +52,18 @@ class AsyncDatabase
             $dbConfig['database']
         );
         return SingleConnection::createConnected($mysqlDriver, $credentials, $mysqlPlatform);
+    }
+
+    public static function getCachedGameSessionDbConnection(
+        LoopInterface $loop,
+        int $gameSessionId,
+        bool $cacheRefresh = false
+    ): Connection {
+        if (!array_key_exists($gameSessionId, self::$gameSessionDbConnections) || $cacheRefresh) {
+            self::$gameSessionDbConnections[$gameSessionId] =
+                self::createGameSessionConnection($loop, $gameSessionId);
+        }
+        return self::$gameSessionDbConnections[$gameSessionId];
     }
 
     public static function createGameSessionConnection(LoopInterface $loop, int $gameSessionId): Connection

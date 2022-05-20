@@ -13,11 +13,9 @@ use Illuminate\Support\Collection;
 use PDOException;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
-use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 use React\Promise\PromiseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use function App\assertFulfilled;
 
 class WsServer extends EventDispatcher implements
     WsServerEventDispatcherInterface,
@@ -25,9 +23,10 @@ class WsServer extends EventDispatcher implements
     MessageComponentInterface,
     MeasurementCollectionManagerInterface,
     ClientConnectionResourceManagerInterface,
-    ServerManagerInterface
+    ServerManagerInterface,
+    WsServerInterface
 {
-    private ?int $gameSessionId = null;
+    private ?int $gameSessionIdFilter = null;
     private array $stats = [];
     private array $medianValues = [];
 
@@ -39,11 +38,6 @@ class WsServer extends EventDispatcher implements
     private array $clients = [];
     private array $clientInfoContainer = [];
     private array $clientHeaders = [];
-
-    /**
-     * @var Connection[]
-     */
-    private array $databaseInstances = [];
 
     /**
      * @var Security[]
@@ -75,9 +69,10 @@ class WsServer extends EventDispatcher implements
         parent::__construct();
     }
 
-    public function setGameSessionId(int $gameSessionId): void
+    public function setGameSessionIdFilter(int $gameSessionIdFilter): self
     {
-        $this->gameSessionId = $gameSessionId;
+        $this->gameSessionIdFilter = $gameSessionIdFilter;
+        return $this;
     }
 
     public function getClientHeaders(int $connResourceId): ?array
@@ -116,7 +111,7 @@ class WsServer extends EventDispatcher implements
             return;
         }
         $gameSessionId = $headers[self::HEADER_KEY_GAME_SESSION_ID];
-        if (null != $this->gameSessionId && $this->gameSessionId != $gameSessionId) {
+        if (null != $this->gameSessionIdFilter && $this->gameSessionIdFilter != $gameSessionId) {
             // do not connect this client, client is from another game session
             wdo('do not connect this client, client is from another game session');
             $conn->close();
@@ -215,27 +210,34 @@ class WsServer extends EventDispatcher implements
         $this->stats[$name.'.median'] = Util::getMedian($this->medianValues[$name]);
     }
 
-    public function registerPlugin(PluginInterface $plugin)
+    public function registerPlugin(PluginInterface $plugin): self
     {
         $plugin
-            ->setGameSessionId($this->gameSessionId)
+            ->setGameSessionIdFilter($this->gameSessionIdFilter)
             ->setMeasurementCollectionManager($this)
             ->setClientConnectionResourceManager($this)
-            ->setServerManager($this);
-
-        $this->pluginsUnregistered[$plugin->getName()] = $plugin;
+            ->setServerManager($this)
+            ->setWsServer($this);
 
         // wait for loop to be registered
         if (null === $this->loop) {
-            return;
+            $this->pluginsUnregistered[$plugin->getName()] = $plugin;
+            return $this;
         }
 
-        // register plugins to loop
-        while (!empty($this->pluginsUnregistered)) {
-            $plugin = array_pop($this->pluginsUnregistered);
-            $plugin->registerLoop($this->loop);
-            $this->plugins[$plugin->getName()] = $plugin;
+        $plugin->registerToLoop($this->loop);
+        $this->plugins[$plugin->getName()] = $plugin;
+        return $this;
+    }
+
+    public function unregisterPlugin(PluginInterface $plugin)
+    {
+        unset($this->plugins[$plugin->getName()]);
+        unset($this->pluginsUnregistered[$plugin->getName()]);
+        if (null === $this->loop) {
+            return;
         }
+        $plugin->unregisterFromLoop($this->loop);
     }
 
     public function getClientInfoPerSessionCollection(): Collection
@@ -256,7 +258,7 @@ class WsServer extends EventDispatcher implements
      */
     public function getGameSessionIds(bool $onlyPlaying = false): PromiseInterface
     {
-        $connection = AsyncDatabase::createServerManagerConnection(Loop::get());
+        $connection = $this->getServerManagerDbConnection();
         $qb = $connection->createQueryBuilder();
         $qb
             ->select('id')
@@ -273,29 +275,32 @@ class WsServer extends EventDispatcher implements
         return $connection->query($qb);
     }
 
-    public function registerLoop(LoopInterface $loop)
+    public function registerLoop(LoopInterface $loop): self
     {
         $this->loop = $loop;
 
         // register plugins to loop
         while (!empty($this->pluginsUnregistered)) {
             $plugin = array_pop($this->pluginsUnregistered);
-            $plugin->registerLoop($this->loop);
+            $plugin->registerToLoop($this->loop);
             $this->plugins[$plugin->getName()] = $plugin;
         }
 
         $loop->addPeriodicTimer(2, function () {
             $this->dispatch(new NameAwareEvent(WsServerEventDispatcherInterface::EVENT_ON_STATS_UPDATE));
         });
+
+        return $this;
     }
 
-    public function getAsyncDatabase(int $gameSessionId): Connection
+    public function getGameSessionDbConnection(int $gameSessionId): Connection
     {
-        if (!array_key_exists($gameSessionId, $this->databaseInstances)) {
-            $this->databaseInstances[$gameSessionId] =
-                AsyncDatabase::createGameSessionConnection($this->loop, $gameSessionId);
-        }
-        return $this->databaseInstances[$gameSessionId];
+        return AsyncDatabase::getCachedGameSessionDbConnection($this->loop, $gameSessionId);
+    }
+
+    public function getServerManagerDbConnection(): Connection
+    {
+        return AsyncDatabase::getCachedServerManagerDbConnection($this->loop);
     }
 
     public function getSecurity(int $connResourceId): Security
@@ -305,7 +310,7 @@ class WsServer extends EventDispatcher implements
             $security = new Security();
             $security->setAsync(true);
             $security->setGameSessionId($gameSessionId);
-            $security->setAsyncDatabase($this->getAsyncDatabase($gameSessionId));
+            $security->setAsyncDatabase($this->getGameSessionDbConnection($gameSessionId));
             $security->setToken($this->clientHeaders[$connResourceId][self::HEADER_KEY_MSP_API_TOKEN]);
             $this->securityInstances[$connResourceId] = $security;
         }

@@ -34,22 +34,21 @@ class PluginHelper
         Closure $repeatedFunction
     ): Closure {
         return function () use ($plugin, $loop, $startTime, $repeatedFunction) {
+            // plugin should be unregistered from loop
+            if (!$plugin->isRegisteredToLoop()) {
+                $plugin->addDebugOutput('Unregistered from loop: "' . $plugin->getName() .'"');
+                return;
+            }
             $elapsedSec = (microtime(true) - $startTime) * 0.000001;
             if ($elapsedSec > $plugin->getMinIntervalSec()) {
-                if ($plugin->isDebugOutputEnabled()) {
-                    wdo('starting new future "' . $plugin->getName() .'"');
-                }
+                $plugin->addDebugOutput('starting new future "' . $plugin->getName() .'"');
                 $loop->futureTick($repeatedFunction);
                 return;
             }
             $waitingSec = $plugin->getMinIntervalSec() - $elapsedSec;
-            if ($plugin->isDebugOutputEnabled()) {
-                wdo('awaiting new future "' . $plugin->getName() . '" for ' . $waitingSec . ' sec');
-            }
+            $plugin->addDebugOutput('awaiting new future "' . $plugin->getName() . '" for ' . $waitingSec . ' sec');
             $loop->addTimer($waitingSec, function () use ($plugin, $loop, $repeatedFunction) {
-                if ($plugin->isDebugOutputEnabled()) {
-                    wdo('starting new future "' . $plugin->getName() . '"');
-                }
+                $plugin->addDebugOutput('starting new future "' . $plugin->getName() . '"');
                 $loop->futureTick($repeatedFunction);
             });
         };

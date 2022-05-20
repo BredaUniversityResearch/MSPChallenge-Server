@@ -5,6 +5,7 @@ namespace App\Domain\WsServer\Plugins;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
 use App\Domain\WsServer\MeasurementCollectionManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
+use App\Domain\WsServer\WsServerInterface;
 use Exception;
 use React\EventLoop\LoopInterface;
 use Closure;
@@ -15,12 +16,14 @@ abstract class Plugin implements PluginInterface
     private string $name;
     private float $minIntervalSec;
     private bool $debugOutputEnabled;
-    private ?int $gameSessionId = null;
+    private ?int $gameSessionIdFilter = null;
+    private bool $registeredToLoop = false;
 
     private ?LoopInterface $loop = null;
     private ?MeasurementCollectionManagerInterface $measurementCollectionManager = null;
     private ?ClientConnectionResourceManagerInterface $clientConnectionResourceManager = null;
     private ?ServerManagerInterface $serverManager = null;
+    private ?WsServerInterface $wsServer = null;
 
     public function __construct(
         string $name,
@@ -52,25 +55,42 @@ abstract class Plugin implements PluginInterface
         $this->debugOutputEnabled = $debugOutputEnabled;
     }
 
-    public function registerLoop(LoopInterface $loop)
+    public function addDebugOutput(string $output): self
     {
+        if ($this->isDebugOutputEnabled()) {
+            wdo($output);
+        }
+        return $this;
+    }
+
+    final public function isRegisteredToLoop(): bool
+    {
+        return $this->registeredToLoop;
+    }
+
+    final public function registerToLoop(LoopInterface $loop)
+    {
+        $this->registeredToLoop = true;
         $this->loop = $loop;
-        $loop->futureTick(PluginHelper::createRepeatedFunction(
+        $loop->addTimer(mt_rand() * $this->getMinIntervalSec() / mt_getrandmax(), PluginHelper::createRepeatedFunction(
             $this,
             $loop,
-            $this->onCreatePromiseFunction(),
-            $this->debugOutputEnabled
+            $this->onCreatePromiseFunction()
         ));
     }
 
-    public function getGameSessionId(): ?int
+    final public function unregisterFromLoop(LoopInterface $loop)
     {
-        return $this->gameSessionId;
+        $this->registeredToLoop = false; // Note that PluginHelper will take care of the rest.
+    }
+    public function getGameSessionIdFilter(): ?int
+    {
+        return $this->gameSessionIdFilter;
     }
 
-    public function setGameSessionId(?int $gameSessionId): self
+    public function setGameSessionIdFilter(?int $gameSessionIdFilter): self
     {
-        $this->gameSessionId = $gameSessionId;
+        $this->gameSessionIdFilter = $gameSessionIdFilter;
         return $this;
     }
 
@@ -91,7 +111,7 @@ abstract class Plugin implements PluginInterface
     public function getMeasurementCollectionManager(): MeasurementCollectionManagerInterface
     {
         if (null === $this->measurementCollectionManager) {
-            throw new Exception('Attempt to retrieve unknown measurement collection manager');
+            throw new Exception('Attempt to retrieve unknown MeasurementCollectionManagerInterface');
         }
         return $this->measurementCollectionManager;
     }
@@ -109,7 +129,7 @@ abstract class Plugin implements PluginInterface
     public function getClientConnectionResourceManager(): ClientConnectionResourceManagerInterface
     {
         if (null === $this->clientConnectionResourceManager) {
-            throw new Exception('Attempt to retrieve unknown client connection resource manager');
+            throw new Exception('Attempt to retrieve unknown ClientConnectionResourceManagerInterface');
         }
         return $this->clientConnectionResourceManager;
     }
@@ -124,7 +144,7 @@ abstract class Plugin implements PluginInterface
     public function getServerManager(): ServerManagerInterface
     {
         if (null === $this->serverManager) {
-            throw new Exception('Attempt to retrieve unknown server manager');
+            throw new Exception('Attempt to retrieve unknown ServerManagerInterface');
         }
         return $this->serverManager;
     }
@@ -132,6 +152,23 @@ abstract class Plugin implements PluginInterface
     public function setServerManager(ServerManagerInterface $serverManager): self
     {
         $this->serverManager = $serverManager;
+        return $this;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getWsServer(): WsServerInterface
+    {
+        if (null === $this->wsServer) {
+            throw new Exception('Attempt to retrieve unknown WsServerInterface');
+        }
+        return $this->wsServer;
+    }
+
+    public function setWsServer(WsServerInterface $wsServer): self
+    {
+        $this->wsServer = $wsServer;
         return $this;
     }
 

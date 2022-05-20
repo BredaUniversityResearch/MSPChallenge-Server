@@ -6,9 +6,10 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\ExecuteBatchesWsServerPlugin;
 use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
 use App\Domain\WsServer\Plugins\LoopStatsWsServerPlugin;
-use App\Domain\WsServer\Plugins\Tick\TickWsServerPlugin;
+use App\Domain\WsServer\Plugins\Tick\TicksHandlerWsServerPlugin;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
+use App\Domain\WsServer\WsServerDebugOutput;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Symfony\Component\Console\Command\Command;
@@ -96,8 +97,6 @@ class WsServerCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        define('WSS', 1); // to identify that we are in a websocket server instance. Value is not important.
-
 //        // note (MH): handy, enable to catch deprecations/notices/warnings/errors to log
 //        set_error_handler(function (
 //            int $errno,
@@ -112,8 +111,10 @@ class WsServerCommand extends Command
 //            );
 //        });
 
+        define('WSS', 1); // to identify that we are in a websocket server instance. Value is not important.
+        WsServerDebugOutput::setMessageFilter($input->getOption(self::OPTION_MESSAGE_FILTER));
         if (null != $input->getOption(self::OPTION_GAME_SESSION_ID)) {
-            $this->wsServer->setGameSessionId($input->getOption(self::OPTION_GAME_SESSION_ID));
+            $this->wsServer->setGameSessionIdFilter($input->getOption(self::OPTION_GAME_SESSION_ID));
         }
 
         // the console helper will handle console output using events dispatched by the wsServer
@@ -136,7 +137,7 @@ class WsServerCommand extends Command
 
         // plugins
         $this->wsServer->registerPlugin(new LoopStatsWsServerPlugin());
-        $this->wsServer->registerPlugin(new TickWsServerPlugin());
+        $this->wsServer->registerPlugin(new TicksHandlerWsServerPlugin());
         $this->wsServer->registerPlugin(new LatestWsServerPlugin());
         $this->wsServer->registerPlugin(new ExecuteBatchesWsServerPlugin());
 

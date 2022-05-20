@@ -18,13 +18,15 @@ class GameLatest extends CommonBase
      * @param int $teamId
      * @param float $lastUpdateTime
      * @param int $user
+     * @param bool $showDebug
      * @return PromiseInterface
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $teamId, float $lastUpdateTime, int $user): PromiseInterface
+    public function Latest(int $teamId, float $lastUpdateTime, int $user, bool $showDebug = false): PromiseInterface
     {
         return $this->calculateUpdatedTime(
+            $showDebug
         )
         ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
             $newTime = microtime(true);
@@ -150,7 +152,6 @@ class GameLatest extends CommonBase
 
     /**
      * @throws Exception
-     * @noinspection PhpSameParameterValueInspection
      */
     private function calculateUpdatedTime(bool $showDebug = false): PromiseInterface
     {
@@ -238,7 +239,7 @@ class GameLatest extends CommonBase
                     }
 
                     if ($showDebug) {
-                        wdo($tick);
+                        wdo(json_encode($tick));
                     }
 
                     return $tick;

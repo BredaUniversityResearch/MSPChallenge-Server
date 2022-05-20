@@ -35,9 +35,11 @@ class LatestWsServerPlugin extends Plugin
         return function () {
             return $this->latest()
                 ->then(function (array $payloadContainer) {
-                    wdo('just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer)));
+                    $this->addDebugOutput(
+                        'just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer))
+                    );
                     $payloadContainer = array_filter($payloadContainer);
-                    wdo(json_encode($payloadContainer));
+                    $this->addDebugOutput(json_encode($payloadContainer));
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -55,7 +57,7 @@ class LatestWsServerPlugin extends Plugin
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
-        $gameSessionId = $this->getGameSessionId();
+        $gameSessionId = $this->getGameSessionIdFilter();
         if ($gameSessionId != null) {
             $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
         }
@@ -71,31 +73,34 @@ class LatestWsServerPlugin extends Plugin
                     ]
                 )) {
                     // Client's token has been expired, let the client re-connected with a new token
-                    wdo('Client\'s token has been expired, let the client re-connected with a new token');
+                    $this->addDebugOutput(
+                        'Client\'s token has been expired, let the client re-connected with a new token'
+                    );
                     $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->close();
                     continue;
                 }
                 $latestTimeStart = microtime(true);
-                wdo('Starting "latest" for: ' . $connResourceId);
+                $this->addDebugOutput('Starting "latest" for: ' . $connResourceId);
                 $promises[$connResourceId] = $this->getGameLatest($connResourceId)->Latest(
                     $clientInfo['team_id'],
                     $clientInfo['last_update_time'],
-                    $clientInfo['user']
+                    $clientInfo['user'],
+                    $this->isDebugOutputEnabled()
                 )
                 ->then(function ($payload) use ($connResourceId, $latestTimeStart, $clientInfo) {
-                    wdo('Created "latest" payload for: ' . $connResourceId);
+                    $this->addDebugOutput('Created "latest" payload for: ' . $connResourceId);
                     $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                         $this->getName(),
                         $connResourceId,
                         microtime(true) - $latestTimeStart
                     );
                     if (empty($payload)) {
-                        wdo('empty payload');
+                        $this->addDebugOutput('empty payload');
                         return [];
                     }
                     if (null === $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)) {
                         // disconnected while running this async code, nothing was sent
-                        wdo('disconnected while running this async code, nothing was sent');
+                        $this->addDebugOutput('disconnected while running this async code, nothing was sent');
                         $e = new ClientDisconnectedException();
                         $e->setConnResourceId($connResourceId);
                         throw $e;
@@ -104,7 +109,9 @@ class LatestWsServerPlugin extends Plugin
                     if ($clientInfo['last_update_time'] != $clientInfoContainer['last_update_time']) {
                         // encountered another issue: mismatch between the "used" client info's last_update_time
                         //   and the "latest", so this payload will not be accepted, and should not be sent anymore...
-                        wdo('mismatch between the "used" client info\'s last_update_time and the "latest"');
+                        $this->addDebugOutput(
+                            'mismatch between the "used" client info\'s last_update_time and the "latest"'
+                        );
                         // just return empty payload, nothing was sent...
                         return [];
                     }
@@ -122,7 +129,7 @@ class LatestWsServerPlugin extends Plugin
                         )
                     ) {
                         // no essential payload differences compared to the previous one, no need to send it now
-                        wdo(
+                        $this->addDebugOutput(
                             'no essential payload differences compared to the previous one, ' .
                             'no need to send it now'
                         );
@@ -140,7 +147,7 @@ class LatestWsServerPlugin extends Plugin
                         $payload['update_time']
                     );
 
-                    wdo('send payload to: ' . $connResourceId);
+                    $this->addDebugOutput('send payload to: ' . $connResourceId);
                     $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson([
                         'header_type' => 'Game/Latest',
                         'header_data' => null,
@@ -205,7 +212,7 @@ class LatestWsServerPlugin extends Plugin
             $gameLatest = new GameLatest();
             $gameLatest->setAsync(true);
             $gameLatest->setGameSessionId($gameSessionId);
-            $gameLatest->setAsyncDatabase($this->getServerManager()->getAsyncDatabase($gameSessionId));
+            $gameLatest->setAsyncDatabase($this->getServerManager()->getGameSessionDbConnection($gameSessionId));
             $gameLatest->setToken($clientHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN]);
 
             $this->gameLatestInstances[$connResourceId] = $gameLatest;
