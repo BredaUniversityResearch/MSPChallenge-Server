@@ -14,7 +14,7 @@
         "ext-zip": "*",
         "cboden/ratchet": "^0.4",
         "clue/http-proxy-react": "^1.7",
-        "drift/dbal": "dev-feature/connection-keep-alive",
+        "drift/dbal": "dev-buas",
         "doctrine/doctrine-bundle": "^2.6",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.12",
