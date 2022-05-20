@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "61914abe608254a2e51348ed5a0f29da",
+    "content-hash": "3d0da2b27e6a19f76ce9b0adf72aadd9",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -1513,16 +1513,16 @@
         },
         {
             "name": "drift/dbal",
-            "version": "dev-feature/connection-keep-alive",
+            "version": "dev-buas",
             "source": {
                 "type": "git",
                 "url": "https://github.com/marinhekman/reactphp-dbal.git",
-                "reference": "e649787b1b8c4cc3321d79d22a7f310159c2d36c"
+                "reference": "98423fd4d38e945433f4f155583ce8c9a9fa0573"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/e649787b1b8c4cc3321d79d22a7f310159c2d36c",
-                "reference": "e649787b1b8c4cc3321d79d22a7f310159c2d36c",
+                "url": "https://api.github.com/repos/marinhekman/reactphp-dbal/zipball/98423fd4d38e945433f4f155583ce8c9a9fa0573",
+                "reference": "98423fd4d38e945433f4f155583ce8c9a9fa0573",
                 "shasum": ""
             },
             "require": {
@@ -1564,9 +1564,9 @@
             ],
             "description": "DBAL for ReactPHP on top of Doctrine",
             "support": {
-                "source": "https://github.com/marinhekman/reactphp-dbal/tree/feature/connection-keep-alive"
+                "source": "https://github.com/marinhekman/reactphp-dbal/tree/buas"
             },
-            "time": "2022-05-12T14:47:06+00:00"
+            "time": "2022-05-20T10:26:07+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -1922,7 +1922,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v8.83.12",
+            "version": "v8.83.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -1976,7 +1976,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v8.83.12",
+            "version": "v8.83.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -2024,7 +2024,7 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v8.83.12",
+            "version": "v8.83.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
@@ -7046,16 +7046,16 @@
         },
         {
             "name": "twig/twig",
-            "version": "v3.3.10",
+            "version": "v3.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "8442df056c51b706793adf80a9fd363406dd3674"
+                "reference": "e939eae92386b69b49cfa4599dd9bead6bf4a342"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/8442df056c51b706793adf80a9fd363406dd3674",
-                "reference": "8442df056c51b706793adf80a9fd363406dd3674",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/e939eae92386b69b49cfa4599dd9bead6bf4a342",
+                "reference": "e939eae92386b69b49cfa4599dd9bead6bf4a342",
                 "shasum": ""
             },
             "require": {
@@ -7070,7 +7070,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.3-dev"
+                    "dev-master": "3.4-dev"
                 }
             },
             "autoload": {
@@ -7106,7 +7106,7 @@
             ],
             "support": {
                 "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.3.10"
+                "source": "https://github.com/twigphp/Twig/tree/v3.4.1"
             },
             "funding": [
                 {
@@ -7118,7 +7118,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-04-06T06:47:41+00:00"
+            "time": "2022-05-17T05:48:52+00:00"
         }
     ],
     "aliases": [],
