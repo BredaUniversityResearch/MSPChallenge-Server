@@ -1,6 +1,7 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
+        wrapper_class: App\DBAL\MultiDbConnectionWrapper
         mapping_types:
             enum: string
 

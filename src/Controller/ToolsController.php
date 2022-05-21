@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DBAL\MultiDbConnectionWrapper;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Schema\Index;
@@ -10,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -26,6 +28,12 @@ class ToolsController extends AbstractController
     public function checkMissingIndices(Request $request, Connection $connection): Response
     {
         $form = $this->createFormBuilder()
+            ->add('regexp_database', TextType::class, [
+                'required' => false,
+                'label' => 'Enter regexp to match database or leave empty: ',
+                'help' => 'Leave empty to traverse all dbs',
+                'data' => '/msp_session_\d+/'
+            ])
             ->add('regexp_type', TextareaType::class, [
                 'required' => false,
                 'label' => 'Enter regexp to match field type or leave empty: ',
@@ -76,6 +84,37 @@ class ToolsController extends AbstractController
      */
     private function processCheckMissingIndicesFormData(Connection $connection, array $data, array &$messages)
     {
+        $sm = $connection->createSchemaManager();
+        $databases = $sm->listDatabases();
+
+        foreach ($databases as $databaseName) {
+            if (in_array($databaseName, [
+                'information_schema', 'test', 'phpmyadmin', 'performance_schema', 'mysql'
+            ])) {
+                continue;
+            }
+            if (!empty($data['regexp_database']) &&
+                preg_match($data['regexp_database'], $databaseName, $pregMatches) !== 1) {
+                continue;
+            }
+
+            /** @var MultiDbConnectionWrapper $connection */
+            $connection->selectDatabase($databaseName);
+
+            $messages[] = '<h3>Database ' . $databaseName . '</h3>';
+
+            $this->processCheckMissingIndicesFormDataForSelectedDatabase($connection, $data, $messages);
+        }
+    }
+
+    /**
+     * @throws DBALException
+     */
+    private function processCheckMissingIndicesFormDataForSelectedDatabase(
+        Connection $connection,
+        array $data,
+        array &$messages
+    ) {
         $sm = $connection->createSchemaManager();
         $tables = $sm->listTables();
         $tablesToTraverse = [];
