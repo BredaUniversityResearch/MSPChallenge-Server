@@ -27,7 +27,8 @@ class SymfonyToLegacyHelper
         UrlMatcherInterface $urlMatcher,
         RequestStack $requestStack,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
-        APIHelper $apiHelper
+        APIHelper $apiHelper,
+        ConnectionManager $connectionManager
     ) {
         $this->projectDir = $projectDir;
         $this->urlGenerator = $urlGenerator;
@@ -44,7 +45,7 @@ class SymfonyToLegacyHelper
     /**
      * @throws Exception
      */
-    public static function getInstance(): SymfonyToLegacyHelper
+    public static function getInstance(): self
     {
         if (null === self::$instance) {
             throw new Exception(

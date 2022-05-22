@@ -3,8 +3,8 @@ namespace App\Domain\WsServer;
 
 use App\Domain\API\v1\Security;
 use App\Domain\Event\NameAwareEvent;
-use App\Domain\Helper\AsyncDatabase;
 use App\Domain\Helper\Util;
+use App\Domain\Services\ConnectionManager;
 use App\Domain\WsServer\Plugins\PluginInterface;
 use Drift\DBAL\Connection;
 use Exception;
@@ -293,14 +293,20 @@ class WsServer extends EventDispatcher implements
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function getGameSessionDbConnection(int $gameSessionId): Connection
     {
-        return AsyncDatabase::getCachedGameSessionDbConnection($this->loop, $gameSessionId);
+        return ConnectionManager::getInstance()->getCachedAsyncGameSessionDbConnection($this->loop, $gameSessionId);
     }
 
+    /**
+     * @throws Exception
+     */
     public function getServerManagerDbConnection(): Connection
     {
-        return AsyncDatabase::getCachedServerManagerDbConnection($this->loop);
+        return ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection($this->loop);
     }
 
     public function getSecurity(int $connResourceId): Security

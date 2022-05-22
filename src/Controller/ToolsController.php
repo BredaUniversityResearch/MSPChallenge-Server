@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\DBAL\MultiDbConnectionWrapper;
+use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Schema\Index;
@@ -25,8 +26,12 @@ class ToolsController extends AbstractController
     /**
      * @throws DBALException
      */
-    public function checkMissingIndices(Request $request, Connection $connection): Response
-    {
+    public function checkMissingIndices(
+        Request $request,
+        ConnectionManager $connectionManager,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $helper
+    ): Response {
         $form = $this->createFormBuilder()
             ->add('regexp_database', TextType::class, [
                 'required' => false,
@@ -67,7 +72,7 @@ class ToolsController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $this->processCheckMissingIndicesFormData(
-                $connection,
+                $connectionManager,
                 $data,
                 $messages
             );
@@ -82,11 +87,14 @@ class ToolsController extends AbstractController
     /**
      * @throws DBALException
      */
-    private function processCheckMissingIndicesFormData(Connection $connection, array $data, array &$messages)
-    {
+    private function processCheckMissingIndicesFormData(
+        ConnectionManager $connectionManager,
+        array $data,
+        array &$messages
+    ) {
+        $connection = $connectionManager->getCachedServerManagerDbConnection();
         $sm = $connection->createSchemaManager();
         $databases = $sm->listDatabases();
-
         foreach ($databases as $databaseName) {
             if (in_array($databaseName, [
                 'information_schema', 'test', 'phpmyadmin', 'performance_schema', 'mysql'
@@ -98,12 +106,12 @@ class ToolsController extends AbstractController
                 continue;
             }
 
-            /** @var MultiDbConnectionWrapper $connection */
-            $connection->selectDatabase($databaseName);
-
             $messages[] = '<h3>Database ' . $databaseName . '</h3>';
-
-            $this->processCheckMissingIndicesFormDataForSelectedDatabase($connection, $data, $messages);
+            $this->processCheckMissingIndicesFormDataForSelectedDatabase(
+                $connectionManager->getCachedDbConnection($databaseName),
+                $data,
+                $messages
+            );
         }
     }
 
