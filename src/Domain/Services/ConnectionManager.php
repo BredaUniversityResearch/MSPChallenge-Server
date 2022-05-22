@@ -47,6 +47,19 @@ class ConnectionManager
         return self::$instance;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getDbNames(): array
+    {
+        $connection = $this->getCachedServerManagerDbConnection();
+        $sm = $connection->createSchemaManager();
+        $dbNames = $sm->listDatabases();
+        return array_diff($dbNames, [
+            'information_schema', 'test', 'phpmyadmin', 'performance_schema', 'mysql'
+        ]);
+    }
+
     public function getConfig(): array
     {
         // if there will be multiple version of the api, e.g. v1/Config.php, v2/Config.php, we can just pick one since
@@ -96,7 +109,7 @@ class ConnectionManager
             'password' => $dbConfig['password'],
             'dbname' => $dbName,
             'charset' => 'utf8mb4',
-            'serverVersion' => '5.5.5-10.4.22'
+            'serverVersion' => 'mariadb-10.4.22'
         ]);
         $platform = $connection->getDatabasePlatform();
         $platform->registerDoctrineTypeMapping('enum', 'string');
@@ -146,7 +159,7 @@ class ConnectionManager
         return $this->getCachedAsyncDbConnection($loop, $this->getServerManagerDbName(), null, $cacheRefresh);
     }
 
-    private function getServerManagerDbName(): string
+    public function getServerManagerDbName(): string
     {
         $dbConfig = $this->getConfig();
         return $dbConfig['database'];
@@ -165,7 +178,7 @@ class ConnectionManager
         return $this->createAsyncDbConnection($loop, $this->getServerManagerDbName());
     }
 
-    private function getGameSessionDbName(int $gameSessionId): string
+    public function getGameSessionDbName(int $gameSessionId): string
     {
         $dbConfig = $this->getConfig();
         return $dbConfig['multisession_database_prefix'].$gameSessionId;

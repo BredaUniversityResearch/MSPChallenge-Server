@@ -92,23 +92,16 @@ class ToolsController extends AbstractController
         array $data,
         array &$messages
     ) {
-        $connection = $connectionManager->getCachedServerManagerDbConnection();
-        $sm = $connection->createSchemaManager();
-        $databases = $sm->listDatabases();
-        foreach ($databases as $databaseName) {
-            if (in_array($databaseName, [
-                'information_schema', 'test', 'phpmyadmin', 'performance_schema', 'mysql'
-            ])) {
-                continue;
-            }
+        $dbNames = $connectionManager->getDbNames();
+        foreach ($dbNames as $dbName) {
             if (!empty($data['regexp_database']) &&
-                preg_match($data['regexp_database'], $databaseName, $pregMatches) !== 1) {
+                preg_match($data['regexp_database'], $dbName, $pregMatches) !== 1) {
                 continue;
             }
 
-            $messages[] = '<h3>Database ' . $databaseName . '</h3>';
+            $messages[] = '<h3>Database ' . $dbName . '</h3>';
             $this->processCheckMissingIndicesFormDataForSelectedDatabase(
-                $connectionManager->getCachedDbConnection($databaseName),
+                $connectionManager->getCachedDbConnection($dbName),
                 $data,
                 $messages
             );
