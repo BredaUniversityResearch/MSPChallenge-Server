@@ -3,7 +3,8 @@
 // This is a "custom integrations" based on Doctrine migrations.
 // see: https://www.doctrine-project.org/projects/doctrine-migrations/en/current/reference/custom-configuration.html#custom-configuration
 
-require_once __DIR__.'/../vendor/autoload.php';
+$projectDir = __DIR__ . '/..';
+require_once $projectDir . '/vendor/autoload.php';
 
 use App\Domain\Services\ConnectionManager;
 use Doctrine\Migrations\Configuration\Configuration;
@@ -12,23 +13,13 @@ use Doctrine\Migrations\Configuration\Migration\ExistingConfiguration;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Metadata\Storage\TableMetadataStorageConfiguration;
 use Doctrine\Migrations\Tools\Console\Command;
+use Doctrine\Migrations\Tools\Console\ConsoleLogger;
 use Doctrine\Persistence\AbstractManagerRegistry;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
-$dbParams = [
-    'dbname' => 'migrations_docs_example',
-    'user' => 'root',
-    'password' => '',
-    'host' => 'localhost',
-    'driver' => 'pdo_mysql',
-];
-
-$projectDir = __DIR__ . '/..';
-
-// to fix legacy issues
-$apiHelper = new \App\Domain\API\APIHelper($projectDir);
-$connectionManager = new \App\Domain\Services\ConnectionManager();
-
+$connectionManager = new ConnectionManager();
 $dbNames = $connectionManager->getDbNames();
 $configuration = new Configuration();
 $connectionRegistry = new class(
@@ -51,9 +42,11 @@ $connectionRegistry = new class(
     }
 };
 
-$configuration->addMigrationsDirectory('DoctrineMigrations', $projectDir . '/migrations');
+$migrationsDir = $projectDir . '/migrations';
+$configuration->addMigrationsDirectory('DoctrineMigrations', $migrationsDir);
 $configuration->setAllOrNothing(true);
 $configuration->setCheckDatabasePlatform(false);
+$configuration->setCustomTemplate($migrationsDir . '/template/template.tpl');
 
 $storageConfiguration = new TableMetadataStorageConfiguration();
 $storageConfiguration->setTableName('doctrine_migration_versions');
@@ -67,10 +60,15 @@ $dependencyFactory = DependencyFactory::fromConnection(
     $connectionLoader
 );
 
+// set logger
+$output = new ConsoleOutput();
+$logger = new ConsoleLogger($output);
+$dependencyFactory->setService(LoggerInterface::class, $logger);
+
 $cli = new Application(
     'Doctrine Migrations for MSP Challenge' . PHP_EOL .
-    'Use any of below connections using --conn=' . PHP_EOL .
-    implode(PHP_EOL, $dbNames)
+    'Please note that you can set a connection using "--conn". E.g. --conn=msp_session_1' . PHP_EOL .
+    'Use any of these connections: ' . implode(', ', $dbNames)
 );
 $cli->setCatchExceptions(true);
 $cli->addCommands(array(

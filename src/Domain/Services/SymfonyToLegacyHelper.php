@@ -3,6 +3,7 @@
 namespace App\Domain\Services;
 
 use App\Domain\API\APIHelper;
+use App\Kernel;
 use Closure;
 use Exception;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -19,6 +20,7 @@ class SymfonyToLegacyHelper
     private UrlGeneratorInterface $urlGenerator;
     private UrlMatcherInterface $urlMatcher;
     private RequestStack $requestStack;
+    private Kernel $kernel;
     private ?Closure $fnControllerForwarder = null;
 
     public function __construct(
@@ -26,6 +28,7 @@ class SymfonyToLegacyHelper
         UrlGeneratorInterface $urlGenerator,
         UrlMatcherInterface $urlMatcher,
         RequestStack $requestStack,
+        Kernel $kernel,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
         ConnectionManager $connectionManager
@@ -34,12 +37,18 @@ class SymfonyToLegacyHelper
         $this->urlGenerator = $urlGenerator;
         $this->urlMatcher = $urlMatcher;
         $this->requestStack = $requestStack;
+        $this->kernel = $kernel;
         self::$instance = $this;
     }
 
     public function getProjectDir(): string
     {
         return $this->projectDir;
+    }
+
+    public function getKernel(): Kernel
+    {
+        return $this->kernel;
     }
 
     /**

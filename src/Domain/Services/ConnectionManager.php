@@ -2,7 +2,7 @@
 
 namespace App\Domain\Services;
 
-use App\Domain\API\v1\Config;
+use App\Domain\Common\DatabaseDefaults;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
@@ -16,7 +16,7 @@ use Drift\DBAL\SingleConnection;
 use Exception;
 use React\EventLoop\LoopInterface;
 
-class ConnectionManager
+class ConnectionManager extends DatabaseDefaults
 {
     private static ?ConnectionManager $instance = null;
 
@@ -40,9 +40,7 @@ class ConnectionManager
     public static function getInstance(): self
     {
         if (null === self::$instance) {
-            throw new Exception(
-                'Instance is unavailable. It should be set by first constructor call, using Symfony services.'
-            );
+            self::$instance = new self();
         }
         return self::$instance;
     }
@@ -60,12 +58,22 @@ class ConnectionManager
         ]);
     }
 
-    public function getConfig(): array
+    public function getConnectionConfig(?string $dbName = null): array
     {
-        // if there will be multiple version of the api, e.g. v1/Config.php, v2/Config.php, we can just pick one since
-        //   currently all will read from the same api_config.php file.
-        // @todo: Config class should not be part of api versioning? Or, load the class with a dynamic class path?
-        return Config::getInstance()->DatabaseConfig();
+        $config = [
+            'driver' => 'pdo_mysql',
+            'host' => $_ENV['DATABASE_HOST'] ?? self::DEFAULT_DATABASE_HOST,
+            'port' => $_ENV['DATABASE_PORT'] ?? self::DEFAULT_DATABASE_PORT,
+            'user' => $_ENV['DATABASE_USER'] ?? self::DEFAULT_DATABASE_USER,
+            'password' => $_ENV['DATABASE_PASSWORD'] ?? self::DEFAULT_DATABASE_PASSWORD,
+            'server_version' => $_ENV['DATABASE_SERVER_VERSION'] ?? self::DEFAULT_DATABASE_SERVER_VERSION,
+            'charset' => $_ENV['DATABASE_CHARSET'] ?? self::DEFAULT_DATABASE_CHARSET,
+            'mapping_types' => ['enum' => 'string']
+        ];
+        if ($dbName !== null) {
+            $config['dbname'] = $dbName;
+        }
+        return $config;
     }
 
     /**
@@ -100,17 +108,7 @@ class ConnectionManager
      */
     public function createDbConnection(string $dbName): Connection
     {
-        $dbConfig = $this->getConfig();
-        $connection = DriverManager::getConnection([
-            'driver' => 'pdo_mysql',
-            'host' => $dbConfig['host'],
-            'port' => $dbConfig['port'] ?? '3306',
-            'user' => $dbConfig['user'],
-            'password' => $dbConfig['password'],
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-            'serverVersion' => 'mariadb-10.4.22'
-        ]);
+        $connection = DriverManager::getConnection($this->getConnectionConfig($dbName));
         $platform = $connection->getDatabasePlatform();
         $platform->registerDoctrineTypeMapping('enum', 'string');
         return $connection;
@@ -121,14 +119,13 @@ class ConnectionManager
         string $dbName,
         ?ConnectionOptions $options = null
     ): DriftConnection {
-        $dbConfig = $this->getConfig();
         $mysqlPlatform = new MySqlPlatform();
         $mysqlDriver = new MysqlDriver($loop);
         $credentials = new Credentials(
-            $dbConfig['host'],
-            $dbConfig['port'] ?? '3306',
-            $dbConfig['user'],
-            $dbConfig['password'],
+            $_ENV['DATABASE_HOST'] ?? self::DEFAULT_DATABASE_HOST,
+            $_ENV['DATABASE_PORT'] ?? self::DEFAULT_DATABASE_PORT,
+            $_ENV['DATABASE_USER'] ?? self::DEFAULT_DATABASE_USER,
+            $_ENV['DATABASE_PASSWORD'] ?? self::DEFAULT_DATABASE_PASSWORD,
             $dbName
         );
 
@@ -161,8 +158,7 @@ class ConnectionManager
 
     public function getServerManagerDbName(): string
     {
-        $dbConfig = $this->getConfig();
-        return $dbConfig['database'];
+        return $_ENV['DBNAME_SERVER_MANAGER'] ?? self::DEFAULT_DBNAME_SERVER_MANAGER;
     }
 
     /**
@@ -180,8 +176,7 @@ class ConnectionManager
 
     public function getGameSessionDbName(int $gameSessionId): string
     {
-        $dbConfig = $this->getConfig();
-        return $dbConfig['multisession_database_prefix'].$gameSessionId;
+        return ($_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX) . $gameSessionId;
     }
 
     /**
@@ -200,7 +195,7 @@ class ConnectionManager
         // This will do a SELECT 1 query every 4 hours to prevent the "wait_timeout" of mysql (Default is 8 hours).
         // If the wait timeout would go off, the database connection will be broken, and the error
         //   "2006 MySQL server has gone away" will appear.
-        return new ConnectionPoolOptions(20, 14400);
+        return new ConnectionPoolOptions($_ENV['DATABASE_POOL_NUM_CONNECTIONS'] ?? 20, 14400);
     }
 
     public function getCachedAsyncGameSessionDbConnection(

@@ -3,7 +3,12 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\API\APIHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\VarDumper\Cloner\Data;
 use Throwable;
 
 class Update extends Base
@@ -453,5 +458,24 @@ class Update extends Base
     public function From40beta7To40beta9(): void
     {
         $this->From40beta7To40beta8();
+    }
+
+    /**
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function From40beta7To40beta10(): void
+    {
+        $this->From40beta7To40beta8();
+
+        // Run doctrine migrations.
+        $application = new Application(SymfonyToLegacyHelper::getInstance()->getKernel());
+        $application->setAutoExit(false);
+        $input = new ArrayInput([
+            'command' => 'doctrine:migrations:migrate',
+            '--conn' => Database::GetInstance()->GetDatabaseName()
+        ]);
+        $application->run($input, new NullOutput());
     }
 }

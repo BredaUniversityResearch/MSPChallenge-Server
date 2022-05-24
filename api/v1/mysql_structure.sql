@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`plan` (
   `plan_id` INT NOT NULL AUTO_INCREMENT,
   `plan_country_id` INT NOT NULL,
   `plan_name` VARCHAR(75) NOT NULL,
-  `plan_description` TEXT NOT NULL,
+  `plan_description` TEXT NOT NULL DEFAULT '',
   `plan_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `plan_gametime` INT NOT NULL,
   `plan_state` ENUM('DESIGN', 'CONSULTATION', 'APPROVAL', 'APPROVED', 'IMPLEMENTED', 'DELETED') NOT NULL DEFAULT 'DESIGN',
@@ -743,7 +743,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `msp`.`api_batch`
 -- -----------------------------------------------------
-CREATE TABLE `api_batch` (
+CREATE TABLE IF NOT EXISTS `msp`.`api_batch` (
   `api_batch_id` int NOT NULL AUTO_INCREMENT,
   `api_batch_state` enum('Setup','Queued','Executing','Success','Failed') NOT NULL DEFAULT 'Setup',
   `api_batch_country_id` int NOT NULL,
