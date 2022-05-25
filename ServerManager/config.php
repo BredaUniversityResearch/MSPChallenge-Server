@@ -19,6 +19,7 @@ $GLOBALS['config'] = array(
     'code_branch' => $codeBranch,
     'mysql' => array_merge($connectionConfig, [
         'db' => $_ENV['DBNAME_SERVER_MANAGER'] ?? DatabaseDefaults::DEFAULT_DBNAME_SERVER_MANAGER,
+        'username' => $connectionConfig['user'],
         'multisession_database_prefix' =>
             $_ENV['DBNAME_SESSION_PREFIX'] ?? DatabaseDefaults::DEFAULT_DBNAME_SESSION_PREFIX
     ]),
