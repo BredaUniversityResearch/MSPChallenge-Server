@@ -6,13 +6,21 @@ cd "${SCRIPT_DIR}" || exit 4
 
 DOWNLOAD_DIR="../var/tools/"
 DOTENV_FILE="../.env"
+DOTENV_LOCAL_FILE="../.env.local"
 if [[ ! -f $DOTENV_FILE ]]; then
   echo "Could not find file ${DOTENV_FILE}"
   exit 1
 fi
 
 # export all .env variables as environmental variables, e.g. APP_ENV
-set -o allexport; source ../.env; set +o allexport
+if [[ -z "${APP_ENV}" ]]; then
+  echo "No APP_ENV enviromental variable found, checking .env file"
+  set -o allexport; source "${DOTENV_FILE}"; set +o allexport
+  if [[ -f $DOTENV_LOCAL_FILE ]]; then
+    echo "Checking .env.local file"
+    set -o allexport; source "${DOTENV_LOCAL_FILE}"; set +o allexport
+  fi
+fi
 
 FORCE=0
 while getopts ":fe:" opt; do

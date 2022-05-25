@@ -62,8 +62,8 @@ if [[ -z $COMPOSER_BINARY ]]; then
    COMPOSER_BINARY=$(which composer)
 fi
 
-"$COMPOSER_BINARY" install
-"$COMPOSER_BINARY" dump-autoload -o $COMPOSER_ARGS
+eval "${COMPOSER_BINARY} install"
+eval "${COMPOSER_BINARY} dump-autoload -o ${COMPOSER_ARGS}"
 bash tools/install-tools.sh
 
 exit 0
