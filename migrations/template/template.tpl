@@ -9,7 +9,7 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class <className> extends MSPGameSessionMigration
+final class <className> extends MSPMigration
 {
     public function getDescription(): string
     {
