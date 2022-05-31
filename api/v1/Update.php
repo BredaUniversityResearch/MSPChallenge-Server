@@ -31,7 +31,8 @@ class Update extends Base
         "ImportScenario",
         "ManualExportDatabase",
         ["From40beta7To40beta8", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+        ["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        ["From40beta7To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
     );
 
     public function __construct(string $method = '')
@@ -475,6 +476,7 @@ class Update extends Base
         $input = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
             '--conn' => Database::GetInstance()->GetDatabaseName()
+            // --no-interaction
         ]);
         $application->run($input, new NullOutput());
     }
