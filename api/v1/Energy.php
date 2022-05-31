@@ -290,16 +290,32 @@ class Energy extends Base
             return $this->getAsyncDatabase()->delete('grid_energy', ['grid_energy_grid_id' => $id]);
         });
         $toPromiseFunctions[] = tpf(function () use ($id) {
-             $qb = $this->getAsyncDatabase()->createQueryBuilder();
-             $this->getAsyncDatabase()->query(
-                 $qb
-                     ->update('plan', 'p')
-                     ->innerJoin('p', 'grid', 'g', 'g.grid_plan_id = p.plan_id')
-                     ->set('p.plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
-                     ->where($qb->expr()->eq('g.grid_id', $qb->createPositionalParameter($id)))
-             );
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                     ->select('p.plan_id')
+                     ->from('plan', 'p')
+                     ->innerJoin(
+                         'p',
+                         'grid',
+                         'g',
+                         'g.grid_plan_id = p.plan_id AND g.grid_id = ' . $qb->createPositionalParameter($id)
+                     )
+            )
+            ->then(function (Result $result) {
+                $planIds = collect($result->fetchAllRows() ?? [])
+                    ->keyBy('plan_id')
+                    ->map(function ($row) {
+                        return $row['plan_id'];
+                    });
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $qb
+                    ->update('plan', 'p')
+                    ->set('p.plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                    ->where($qb->expr()->in('p.plan_id', $planIds));
+            });
         });
-        $promise = parallel($toPromiseFunctions)
+        parallel($toPromiseFunctions)
             ->then(function (/* array $results */) use ($id) {
                 return $this->getAsyncDatabase()->delete('grid', ['grid_id' => $id]);
             })
@@ -311,6 +327,7 @@ class Energy extends Base
                     $deferred->reject($reason);
                 }
             );
+        $promise = $deferred->promise();
         return $this->isAsync() ? $promise : await($promise);
     }
 

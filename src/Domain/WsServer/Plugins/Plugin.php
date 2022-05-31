@@ -28,7 +28,7 @@ abstract class Plugin implements PluginInterface
     public function __construct(
         string $name,
         float $minIntervalSec,
-        bool $debugOutputEnabled = true
+        bool $debugOutputEnabled = false
     ) {
         $this->name = $name;
         $this->minIntervalSec = $minIntervalSec;
