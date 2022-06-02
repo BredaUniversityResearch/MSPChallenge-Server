@@ -5,7 +5,7 @@ namespace App\Domain\Common;
 use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Log;
 use App\Domain\API\v1\Security;
-use App\Domain\Helper\AsyncDatabase;
+use App\Domain\Services\ConnectionManager;
 use Drift\DBAL\Connection;
 use Exception;
 use React\EventLoop\Loop;
@@ -31,7 +31,10 @@ abstract class CommonBase
             if (GameSession::INVALID_SESSION_ID === $gameSessionId = $this->getGameSessionId()) {
                 throw new Exception('Missing required async database connection.');
             }
-            $this->asyncDatabase = AsyncDatabase::createGameSessionConnection(Loop::get(), $gameSessionId);
+            $this->asyncDatabase = ConnectionManager::getInstance()->getCachedAsyncGameSessionDbConnection(
+                Loop::get(),
+                $gameSessionId
+            );
             // another fail-safe:
             // once a loop is created, ReactPHP expects it to be been run at least once before exiting the script,
             //  otherwise it will assume it still needs to be run, causing an api web request to end in an endless loop.

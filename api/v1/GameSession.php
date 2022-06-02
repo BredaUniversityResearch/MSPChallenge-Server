@@ -2,7 +2,7 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Helper\AsyncDatabase;
+use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
@@ -59,6 +59,7 @@ class GameSession extends Base
 
     /**
      * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public static function getRequestApiRootAsync(): PromiseInterface
     {
@@ -72,7 +73,7 @@ class GameSession extends Base
         /** @noinspection HttpUrlsUsage */
         $protocol = (($_SERVER['HTTPS'] ?: 'off') == 'on') ? "https://" : "http://";
 
-        $connection = AsyncDatabase::createServerManagerConnection(Loop::get());
+        $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
         return $connection->query(
             $connection->createQueryBuilder()
                 ->select('address')

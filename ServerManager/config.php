@@ -1,5 +1,9 @@
 <?php
 
+use App\Domain\Common\DatabaseDefaults;
+use App\Domain\Services\ConnectionManager;
+
+$connectionConfig = ConnectionManager::getInstance()->getConnectionConfig();
 $codeBranch = '/';
 
 $GLOBALS['config'] = array(
@@ -13,13 +17,12 @@ $GLOBALS['config'] = array(
         'address_modification' => 'none' // none, add_game_session_id_to_port, add_game_session_id_to_uri
     ],
     'code_branch' => $codeBranch,
-    'mysql' => array(
-        'host' => 'localhost',
-        'username' => 'root',
-        'password' => '',
-        'db' => 'msp_server_manager',
-        'multisession_database_prefix' => 'msp_session_'
-    ),
+    'mysql' => array_merge($connectionConfig, [
+        'db' => $_ENV['DBNAME_SERVER_MANAGER'] ?? DatabaseDefaults::DEFAULT_DBNAME_SERVER_MANAGER,
+        'username' => $connectionConfig['user'],
+        'multisession_database_prefix' =>
+            $_ENV['DBNAME_SESSION_PREFIX'] ?? DatabaseDefaults::DEFAULT_DBNAME_SESSION_PREFIX
+    ]),
     'remember' => array(
       'cookie_name' => 'pmqesoxiw318374csb',
       'cookie_expiry' => 604800

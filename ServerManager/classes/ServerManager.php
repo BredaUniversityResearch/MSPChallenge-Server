@@ -20,16 +20,19 @@ class ServerManager extends Base
         $this->_server_versions = array(
           "4.0-beta7",
           "4.0-beta8",
-          "4.0-beta9"
+          "4.0-beta9",
+          "4.0-beta10"
         );
         $this->_server_accepted_clients = array(
           "4.0-beta8" => "2021-04-20 13:54:41Z",
-          "4.0-beta9" => "2021-11-08 08:13:08Z"
+          "4.0-beta9" => "2021-11-08 08:13:08Z",
+          "4.0-beta10" => "2022-05-24 00:00:00Z"
         );
         $this->_server_current_version = end($this->_server_versions);
         $this->_server_upgrades = array( // make sure these functions exist in server API update class and is actually callable - just letters and numbers of course
           "From40beta7To40beta8",
-          "From40beta7To40beta9"
+          "From40beta7To40beta9",
+          "From40beta7To40beta10"
         );
         $this->setRootVars();
         $this->_msp_auth_url = "https://auth.mspchallenge.info";

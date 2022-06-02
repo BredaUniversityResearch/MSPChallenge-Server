@@ -3,7 +3,11 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\API\APIHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\NullOutput;
 use Throwable;
 
 class Update extends Base
@@ -26,7 +30,8 @@ class Update extends Base
         "ImportScenario",
         "ManualExportDatabase",
         ["From40beta7To40beta8", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+        ["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        ["From40beta7To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
     );
 
     public function __construct(string $method = '')
@@ -453,5 +458,29 @@ class Update extends Base
     public function From40beta7To40beta9(): void
     {
         $this->From40beta7To40beta8();
+    }
+
+    /**
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function From40beta7To40beta10(): void
+    {
+        $this->From40beta7To40beta8();
+
+        // Run doctrine migrations.
+        $application = new Application(SymfonyToLegacyHelper::getInstance()->getKernel());
+        $application->setAutoExit(false);
+
+        // if you need string output, use this instead:
+        //   $output = new BufferedOutput();
+        // And then use $output->fetch(); to get the actual output string
+        $output = new NullOutput();
+
+        $application->run(
+            new StringInput('doctrine:migrations:migrate -vvv -n --conn=msp_session_1'),
+            $output
+        );
     }
 }

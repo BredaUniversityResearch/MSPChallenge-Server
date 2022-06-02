@@ -1,0 +1,86 @@
+#!/usr/bin/env php
+<?php
+// This is a "custom integrations" based on Doctrine migrations.
+// see: https://www.doctrine-project.org/projects/doctrine-migrations/en/current/reference/custom-configuration.html#custom-configuration
+
+$projectDir = __DIR__ . '/..';
+require_once $projectDir . '/vendor/autoload.php';
+
+use App\Domain\Services\ConnectionManager;
+use Doctrine\Migrations\Configuration\Configuration;
+use Doctrine\Migrations\Configuration\Connection\ConnectionRegistryConnection;
+use Doctrine\Migrations\Configuration\Migration\ExistingConfiguration;
+use Doctrine\Migrations\DependencyFactory;
+use Doctrine\Migrations\Metadata\Storage\TableMetadataStorageConfiguration;
+use Doctrine\Migrations\Tools\Console\Command;
+use Doctrine\Migrations\Tools\Console\ConsoleLogger;
+use Doctrine\Persistence\AbstractManagerRegistry;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Output\ConsoleOutput;
+
+$connectionManager = new ConnectionManager();
+$dbNames = $connectionManager->getDbNames();
+$configuration = new Configuration();
+$connectionRegistry = new class(
+    'msp_connection_registry',
+    array_combine($dbNames, $dbNames),
+    [], // entity managers
+    $connectionManager->getServerManagerDbName(), // default connection
+    'default', // default entity manager
+    'Doctrine\Persistence\Proxy' // proxy class
+) extends AbstractManagerRegistry {
+    // implement abstract methods here
+    protected function getService(string $name)
+    {
+        return ConnectionManager::getInstance()->getCachedDbConnection($name);
+    }
+
+    protected function resetService(string $name)
+    {
+        return ConnectionManager::getInstance()->getCachedDbConnection($name);
+    }
+};
+
+$migrationsDir = $projectDir . '/migrations';
+$configuration->addMigrationsDirectory('DoctrineMigrations', $migrationsDir);
+$configuration->setAllOrNothing(true);
+$configuration->setCheckDatabasePlatform(false);
+$configuration->setCustomTemplate($migrationsDir . '/template/template.tpl');
+
+$storageConfiguration = new TableMetadataStorageConfiguration();
+$storageConfiguration->setTableName('doctrine_migration_versions');
+
+$configuration->setMetadataStorageConfiguration($storageConfiguration);
+
+$configurationLoader = new ExistingConfiguration($configuration);
+$connectionLoader = ConnectionRegistryConnection::withSimpleDefault($connectionRegistry);
+$dependencyFactory = DependencyFactory::fromConnection(
+    $configurationLoader,
+    $connectionLoader
+);
+
+// set logger
+$output = new ConsoleOutput();
+$logger = new ConsoleLogger($output);
+$dependencyFactory->setService(LoggerInterface::class, $logger);
+
+$cli = new Application(
+    'Doctrine Migrations for MSP Challenge' . PHP_EOL .
+    'Please note that you can set a connection using "--conn". E.g. --conn=msp_session_1' . PHP_EOL .
+    'Use any of these connections: ' . implode(', ', $dbNames)
+);
+$cli->setCatchExceptions(true);
+$cli->addCommands(array(
+    new Command\DumpSchemaCommand($dependencyFactory),
+    new Command\ExecuteCommand($dependencyFactory),
+    new Command\GenerateCommand($dependencyFactory),
+    new Command\LatestCommand($dependencyFactory),
+    new Command\ListCommand($dependencyFactory),
+    new Command\MigrateCommand($dependencyFactory),
+    new Command\RollupCommand($dependencyFactory),
+    new Command\StatusCommand($dependencyFactory),
+    new Command\SyncMetadataCommand($dependencyFactory),
+    new Command\VersionCommand($dependencyFactory),
+));
+$cli->run();

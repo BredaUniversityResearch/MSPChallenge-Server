@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Schema\Index;
@@ -10,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -23,9 +26,19 @@ class ToolsController extends AbstractController
     /**
      * @throws DBALException
      */
-    public function checkMissingIndices(Request $request, Connection $connection): Response
-    {
+    public function checkMissingIndices(
+        Request $request,
+        ConnectionManager $connectionManager,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $helper
+    ): Response {
         $form = $this->createFormBuilder()
+            ->add('regexp_database', TextType::class, [
+                'required' => false,
+                'label' => 'Enter regexp to match database or leave empty: ',
+                'help' => 'Leave empty to traverse all dbs',
+                'data' => '/msp_session_\d+/'
+            ])
             ->add('regexp_type', TextareaType::class, [
                 'required' => false,
                 'label' => 'Enter regexp to match field type or leave empty: ',
@@ -59,7 +72,7 @@ class ToolsController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $this->processCheckMissingIndicesFormData(
-                $connection,
+                $connectionManager,
                 $data,
                 $messages
             );
@@ -74,8 +87,35 @@ class ToolsController extends AbstractController
     /**
      * @throws DBALException
      */
-    private function processCheckMissingIndicesFormData(Connection $connection, array $data, array &$messages)
-    {
+    private function processCheckMissingIndicesFormData(
+        ConnectionManager $connectionManager,
+        array $data,
+        array &$messages
+    ) {
+        $dbNames = $connectionManager->getDbNames();
+        foreach ($dbNames as $dbName) {
+            if (!empty($data['regexp_database']) &&
+                preg_match($data['regexp_database'], $dbName, $pregMatches) !== 1) {
+                continue;
+            }
+
+            $messages[] = '<h3>Database ' . $dbName . '</h3>';
+            $this->processCheckMissingIndicesFormDataForSelectedDatabase(
+                $connectionManager->getCachedDbConnection($dbName),
+                $data,
+                $messages
+            );
+        }
+    }
+
+    /**
+     * @throws DBALException
+     */
+    private function processCheckMissingIndicesFormDataForSelectedDatabase(
+        Connection $connection,
+        array $data,
+        array &$messages
+    ) {
         $sm = $connection->createSchemaManager();
         $tables = $sm->listTables();
         $tablesToTraverse = [];

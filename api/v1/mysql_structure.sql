@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`country` (
   `country_id` INT NOT NULL AUTO_INCREMENT,
   `country_name` VARCHAR(45) NULL,
   `country_colour` VARCHAR(45) NULL,
-  `country_is_manager` TINYINT NULL DEFAULT 0,
+  `country_is_manager` TINYINT(1) NULL DEFAULT 0,
   PRIMARY KEY (`country_id`))
 ENGINE = InnoDB;
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`user` (
   `user_name` VARCHAR(45) NULL,
   `user_lastupdate` DOUBLE NOT NULL,
   `user_country_id` INT NOT NULL,
-  `user_loggedoff` TINYINT NOT NULL DEFAULT 0,
+  `user_loggedoff` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`user_id`),
   INDEX `fk_user_country1_idx` (`user_country_id` ASC),
   CONSTRAINT `fk_user_country1`
@@ -55,9 +55,9 @@ CREATE TABLE IF NOT EXISTS `msp`.`plan` (
   `plan_id` INT NOT NULL AUTO_INCREMENT,
   `plan_country_id` INT NOT NULL,
   `plan_name` VARCHAR(75) NOT NULL,
-  `plan_description` TEXT NOT NULL,
+  `plan_description` TEXT NOT NULL DEFAULT '',
   `plan_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `plan_gametime` INT NOT NULL,
+  `plan_gametime` INT(5) NOT NULL,
   `plan_state` ENUM('DESIGN', 'CONSULTATION', 'APPROVAL', 'APPROVED', 'IMPLEMENTED', 'DELETED') NOT NULL DEFAULT 'DESIGN',
   `plan_lock_user_id` INT NULL,
   `plan_lastupdate` DOUBLE NOT NULL DEFAULT 0,
@@ -65,8 +65,8 @@ CREATE TABLE IF NOT EXISTS `msp`.`plan` (
   `plan_active` TINYINT NOT NULL DEFAULT 1,
   `plan_constructionstart` INT NULL,
   `plan_type` VARCHAR(75) NOT NULL COMMENT 'If a plan is energy/ecology/shipping. Comma separated value',
-  `plan_energy_error` TINYINT NOT NULL DEFAULT 0,
-  `plan_alters_energy_distribution` TINYINT NOT NULL DEFAULT 0,
+  `plan_energy_error` TINYINT(1) NOT NULL DEFAULT 0,
+  `plan_alters_energy_distribution` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`plan_id`),
   INDEX `fk_plan_user2_idx` (`plan_lock_user_id` ASC),
   INDEX `fk_plan_country1_idx` (`plan_country_id` ASC),
@@ -89,11 +89,11 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `msp`.`layer` (
   `layer_id` INT NOT NULL AUTO_INCREMENT,
   `layer_original_id` INT NULL,
-  `layer_active` TINYINT NOT NULL DEFAULT 1,
-  `layer_selectable` TINYINT NOT NULL DEFAULT 1,
-  `layer_active_on_start` TINYINT NOT NULL DEFAULT 0,
-  `layer_toggleable` TINYINT NOT NULL DEFAULT 1,
-  `layer_editable` TINYINT NOT NULL DEFAULT 1,
+  `layer_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `layer_selectable` TINYINT(1) NOT NULL DEFAULT 1,
+  `layer_active_on_start` TINYINT(1) NOT NULL DEFAULT 0,
+  `layer_toggleable` TINYINT(1) NOT NULL DEFAULT 1,
+  `layer_editable` TINYINT(1) NOT NULL DEFAULT 1,
   `layer_name` VARCHAR(125) NOT NULL DEFAULT '',
   `layer_geotype` VARCHAR(75) NOT NULL DEFAULT '',
   `layer_short` VARCHAR(75) NOT NULL DEFAULT '',
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`layer` (
   `layer_subcategory` ENUM('aquaculture', 'birds', 'birds_and_mammals', 'biodiversity_indicator', 'cables_and_pipelines', 'dredging', 'energy', 'environmental_conditions', 'fish', 'fishing', 'governance', 'habitats', 'macrobenthos', 'mammals', 'natural_resources', 'pressure', 'protected_areas', 'recreational', 'restricted_zones', 'sensitive_areas', 'shipping', 'shipping_activity', 'shipping_infrastructure', 'telecommunications', 'temporary_restricted_areas', 'transportation_infrastructure') NOT NULL DEFAULT 'aquaculture',
   `layer_kpi_category` ENUM('Energy', 'Ecology', 'Shipping', 'Miscellaneous') NOT NULL DEFAULT 'Miscellaneous',
   `layer_type` TEXT NULL,
-  `layer_depth` INT NOT NULL DEFAULT 1,
+  `layer_depth` INT(3) NOT NULL DEFAULT 1,
   `layer_info_properties` TEXT NULL,
   `layer_information` VARCHAR(1024) NULL,
   `layer_text_info` VARCHAR(1024) NOT NULL DEFAULT '{}',
@@ -113,8 +113,8 @@ CREATE TABLE IF NOT EXISTS `msp`.`layer` (
   `layer_melupdate` TINYINT NOT NULL DEFAULT 0,
   `layer_editing_type` ENUM('cable', 'transformer', 'socket', 'sourcepoint', 'sourcepolygon', 'sourcepolygonpoint', 'multitype', 'protection') NULL,
   `layer_special_entity_type` ENUM('Default', 'ShippingLine') NOT NULL DEFAULT 'Default',
-  `layer_green` TINYINT NOT NULL DEFAULT 0,
-  `layer_melupdate_construction` TINYINT NOT NULL DEFAULT 0,
+  `layer_green` TINYINT(1) NOT NULL DEFAULT 0,
+  `layer_melupdate_construction` TINYINT(1) NOT NULL DEFAULT 0,
   `layer_filecreationtime` DOUBLE NOT NULL DEFAULT 0,
   `layer_media` VARCHAR(255) NULL,
   `layer_entity_value_max` FLOAT NULL,
@@ -139,10 +139,10 @@ CREATE TABLE IF NOT EXISTS `msp`.`geometry` (
   `geometry_geometry` MEDIUMTEXT CHARACTER SET 'latin1' NULL,
   `geometry_data` TEXT CHARACTER SET 'latin1' NULL COMMENT 'is this format long enough?',
   `geometry_country_id` INT NULL,
-  `geometry_active` TINYINT NOT NULL DEFAULT 1 COMMENT 'Is this geometry active or still valid to become active. This is set to 0 when it is replaced by a new geometry with the same persistent ID when plans are implemented.',
-  `geometry_subtractive` INT NOT NULL DEFAULT 0,
+  `geometry_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Is this geometry active or still valid to become active. This is set to 0 when it is replaced by a new geometry with the same persistent ID when plans are implemented.',
+  `geometry_subtractive` INT(11) NOT NULL DEFAULT 0,
   `geometry_type` VARCHAR(75) NOT NULL DEFAULT 0,
-  `geometry_deleted` TINYINT NOT NULL DEFAULT 0 COMMENT 'Has this geometry been deleted by a user? This only applies to geometry inside a plan that hasn\'t become active. E.g. geometry is created in plan, plan is submitted to server, user deletes geometry from said plan, geometry_deleted = 1.',
+  `geometry_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Has this geometry been deleted by a user? This only applies to geometry inside a plan that hasn\'t become active. E.g. geometry is created in plan, plan is submitted to server, user deletes geometry from said plan, geometry_deleted = 1.',
   `geometry_mspid` VARCHAR(16) NULL,
   PRIMARY KEY (`geometry_id`, `geometry_layer_id`),
   INDEX `fk_gis_layer1_idx` (`geometry_layer_id` ASC),
@@ -166,7 +166,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `msp`.`game` (
   `game_id` INT NOT NULL AUTO_INCREMENT,
-  `game_start` INT NULL DEFAULT 2010 COMMENT 'starting year',
+  `game_start` INT(5) NULL DEFAULT 2010 COMMENT 'starting year',
   `game_state` ENUM('SETUP', 'PLAY', 'SIMULATION', 'FASTFORWARD', 'PAUSE', 'END') NULL DEFAULT 'SETUP',
   `game_lastupdate` DOUBLE NULL DEFAULT 0,
   `game_currentmonth` INT NULL DEFAULT 0,
@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`game` (
   `game_sel_lastmonth` INT NULL DEFAULT -1,
   `game_configfile` VARCHAR(128) NULL,
   `game_autosave_month_interval` INT NULL DEFAULT 120,
-  `game_is_running_update` TINYINT NOT NULL DEFAULT 0,
+  `game_is_running_update` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`game_id`))
 ENGINE = InnoDB;
 
@@ -314,7 +314,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`grid` (
   `grid_active` TINYINT NULL DEFAULT 1,
   `grid_plan_id` INT NOT NULL,
   `grid_persistent` INT NULL,
-  `grid_distribution_only` TINYINT NOT NULL DEFAULT 0,
+  `grid_distribution_only` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`grid_id`),
   INDEX `fk_grid_plan1_idx` (`grid_plan_id` ASC),
   INDEX `fk_grid_persistent_index` (`grid_persistent` ASC),
@@ -400,7 +400,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`fishing` (
   `fishing_plan_id` INT NOT NULL,
   `fishing_type` VARCHAR(75) NULL,
   `fishing_amount` FLOAT NULL,
-  `fishing_active` TINYINT NULL DEFAULT 0 COMMENT 'this is set to active when the plan is implemented',
+  `fishing_active` TINYINT(1) NULL DEFAULT 0 COMMENT 'this is set to active when the plan is implemented',
   INDEX `fk_fishing_plan1_idx` (`fishing_plan_id` ASC),
   PRIMARY KEY (`fishing_id`),
   CONSTRAINT `fk_fishing_country1`
@@ -470,7 +470,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `msp`.`warning` (
   `warning_id` INT NOT NULL AUTO_INCREMENT,
   `warning_last_update` DOUBLE NULL,
-  `warning_active` TINYINT NULL DEFAULT 1,
+  `warning_active` TINYINT(1) NULL DEFAULT 1,
   `warning_layer_id` INT NOT NULL,
   `warning_issue_type` ENUM('Error', 'Warning', 'Info', 'None') NULL,
   `warning_x` FLOAT NULL,
@@ -566,8 +566,8 @@ CREATE TABLE IF NOT EXISTS `msp`.`objective` (
   `objective_description` VARCHAR(1024) NOT NULL,
   `objective_deadline` INT NOT NULL COMMENT 'always the in-game month',
   `objective_lastupdate` DOUBLE NOT NULL,
-  `objective_active` TINYINT NOT NULL DEFAULT 1,
-  `objective_complete` TINYINT NOT NULL DEFAULT 0,
+  `objective_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `objective_complete` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`objective_id`),
   INDEX `fk_objective_country1_idx` (`objective_country_id` ASC),
   CONSTRAINT `fk_objective_country1`
@@ -689,7 +689,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`shipping_warning` (
   `shipping_warning_source_geometry_persistent_id` INT NOT NULL,
   `shipping_warning_destination_geometry_persistent_id` INT NOT NULL,
   `shipping_warning_message` VARCHAR(128) NULL,
-  `shipping_warning_active` TINYINT NOT NULL DEFAULT 1,
+  `shipping_warning_active` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`shipping_warning_id`),
   INDEX `fk_source_geometry_idx` (`shipping_warning_source_geometry_persistent_id` ASC),
   INDEX `fk_destination_geometry_idx` (`shipping_warning_destination_geometry_persistent_id` ASC),
@@ -743,7 +743,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `msp`.`api_batch`
 -- -----------------------------------------------------
-CREATE TABLE `api_batch` (
+CREATE TABLE IF NOT EXISTS `msp`.`api_batch` (
   `api_batch_id` int NOT NULL AUTO_INCREMENT,
   `api_batch_state` enum('Setup','Queued','Executing','Success','Failed') NOT NULL DEFAULT 'Setup',
   `api_batch_country_id` int NOT NULL,
