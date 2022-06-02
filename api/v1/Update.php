@@ -479,7 +479,7 @@ class Update extends Base
         $output = new NullOutput();
 
         $application->run(
-            new StringInput('doctrine:migrations:migrate -vvv -n --conn=msp_session_1'),
+            new StringInput('doctrine:migrations:migrate -vvv -n --conn=' . Database::GetInstance()->GetDatabaseName()),
             $output
         );
     }
