@@ -29,7 +29,7 @@ abstract class CommonBase
         if (null === $this->asyncDatabase) {
             // fail-safe: try to create an async database from current request information if there is no instance set.
             if (GameSession::INVALID_SESSION_ID === $gameSessionId = $this->getGameSessionId()) {
-                throw new Exception('Missing required async database connection.');
+                throw new Exception('Missing required game session id for creating an async database connection');
             }
             $this->asyncDatabase = ConnectionManager::getInstance()->getCachedAsyncGameSessionDbConnection(
                 Loop::get(),
