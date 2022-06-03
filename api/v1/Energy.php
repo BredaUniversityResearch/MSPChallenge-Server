@@ -147,8 +147,8 @@ class Energy extends Base
     {
         $expected = collect($expected)
             ->filter(function ($country, $key) {
-                return ctype_digit((string)$country['country_id'] ?? null) &&
-                    ctype_digit((string)$country['energy_expected'] ?? null);
+                return ctype_digit((string)($country['country_id'] ?? null)) &&
+                    ctype_digit((string)($country['energy_expected'] ?? null));
             })
             ->all();
 
@@ -157,7 +157,7 @@ class Energy extends Base
             ->then(function (/* Result $result */) use ($id, $expected) {
                 $toPromiseFunctions = [];
                 foreach ($expected as $country) {
-                    $toPromiseFunctions[$country['country_id']] = tpf(function () use ($id, $country) {
+                    $toPromiseFunctions[] = tpf(function () use ($id, $country) {
                         return $this->getAsyncDatabase()->insert('grid_energy', [
                             'grid_energy_grid_id' => $id,
                             'grid_energy_country_id' => $country['country_id'],
