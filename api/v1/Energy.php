@@ -145,19 +145,25 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateGridEnergy(int $id, array $expected): ?PromiseInterface
     {
-        $expected = collect($expected)
-            ->filter(function ($country, $key) {
-                return ctype_digit((string)$country['country_id'] ?? null) &&
-                    ctype_digit((string)$country['energy_expected'] ?? null);
-            })
-            ->all();
+        foreach ($expected as $country) {
+            if ((false === $int = filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT)) && $int > 0) {
+                throw new Exception(
+                    'Encountered invalid integer country_id value (should be 1+): ' . $country['country_id']
+                );
+            }
+            if (false === filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT)) {
+                throw new Exception(
+                    'Encountered invalid non integer energy_expected value: ' . $country['energy_expected']
+                );
+            }
+        }
 
         $deferred = new Deferred();
         $this->getAsyncDatabase()->delete('grid_energy', ['grid_energy_grid_id' => $id])
             ->then(function (/* Result $result */) use ($id, $expected) {
                 $toPromiseFunctions = [];
                 foreach ($expected as $country) {
-                    $toPromiseFunctions[$country['country_id']] = tpf(function () use ($id, $country) {
+                    $toPromiseFunctions[] = tpf(function () use ($id, $country) {
                         return $this->getAsyncDatabase()->insert('grid_energy', [
                             'grid_energy_grid_id' => $id,
                             'grid_energy_country_id' => $country['country_id'],
