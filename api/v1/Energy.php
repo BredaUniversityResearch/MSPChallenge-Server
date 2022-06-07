@@ -145,12 +145,16 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateGridEnergy(int $id, array $expected): ?PromiseInterface
     {
-        $expected = collect($expected)
-            ->filter(function ($country, $key) {
-                return ctype_digit((string)($country['country_id'] ?? null)) &&
-                    ctype_digit((string)($country['energy_expected'] ?? null));
-            })
-            ->all();
+        foreach ($expected as $country) {
+            if (false === filter_var($country['country_id'] ?? null, FILTER_VALIDATE_INT)) {
+                throw new Exception('Encountered invalid non integer country_id value: ' . $country['country_id']);
+            }
+            if (false === filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT)) {
+                throw new Exception(
+                    'Encountered invalid non integer energy_expected value: ' . $country['energy_expected']
+                );
+            }
+        }
 
         $deferred = new Deferred();
         $this->getAsyncDatabase()->delete('grid_energy', ['grid_energy_grid_id' => $id])
