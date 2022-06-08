@@ -17,8 +17,8 @@ abstract class Enum
     public function __construct($value)
     {
         assert(
-            in_array($value, $this->getConstants()),
-            'invalid value: ' . $value . ', possible values: ' . implode(',', $this->getConstants())
+            in_array($value, self::getConstants()),
+            'invalid value: ' . $value . ', possible values: ' . implode(',', self::getConstants())
         );
         $this->value = $value;
     }

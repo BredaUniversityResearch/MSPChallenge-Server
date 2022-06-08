@@ -2,7 +2,9 @@
 namespace App\Domain\WsServer;
 
 use App\Domain\API\v1\Security;
+use App\Domain\Common\GetConstantsTrait;
 use App\Domain\Event\NameAwareEvent;
+use App\Domain\Helper\Config;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\WsServer\Plugins\PluginInterface;
@@ -26,6 +28,13 @@ class WsServer extends EventDispatcher implements
     ServerManagerInterface,
     WsServerInterface
 {
+    use GetConstantsTrait;
+
+    const WS_SERVER_ADDRESS_MODIFICATION_NONE = 'none';
+    const WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT = 'add_game_session_id_to_port';
+    const WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_URI = 'add_game_session_id_to_uri';
+
+    private ?string $id = null;
     private ?int $gameSessionIdFilter = null;
     private array $stats = [];
     private array $medianValues = [];
@@ -69,9 +78,20 @@ class WsServer extends EventDispatcher implements
         parent::__construct();
     }
 
-    public function setGameSessionIdFilter(int $gameSessionIdFilter): self
+    public function setGameSessionIdFilter(?int $gameSessionIdFilter): self
     {
         $this->gameSessionIdFilter = $gameSessionIdFilter;
+        return $this;
+    }
+
+    public function getId(): string
+    {
+        return $this->id ?? self::getWsServerURLBySessionId($this->gameSessionIdFilter ?? 0);
+    }
+
+    public function setId(?string $id): self
+    {
+        $this->id = $id;
         return $this;
     }
 
@@ -356,5 +376,37 @@ class WsServer extends EventDispatcher implements
     public function setClientInfo(int $connResourceId, string $clientInfoKey, $clientInfoValue): void
     {
         $this->clientInfoContainer[$connResourceId][$clientInfoKey] = $clientInfoValue;
+    }
+
+    public static function getWsServerURLBySessionId(
+        int $sessionId = 0,
+        string $hostDefaultValue = 'localhost'
+    ): string {
+        $addressModificationKey = 'ws_server/address_modification';
+        $addressModificationValue = Config::get($addressModificationKey) ?? 'none';
+        $port = Config::get('ws_server/port') ?: 45001;
+        $uri = Config::get('ws_server/uri');
+        switch ($addressModificationValue) {
+            case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT:
+                $port += $sessionId;
+                break;
+            case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_URI:
+                $uri = rtrim($uri, '/') . '/' . $sessionId . '/';
+                break;
+            case self::WS_SERVER_ADDRESS_MODIFICATION_NONE:
+                break;
+            default:
+                throw new \http\Exception\UnexpectedValueException(
+                    sprintf(
+                        'Encountered unexpected value for config %s: %s. Value must be: %s',
+                        $addressModificationKey,
+                        $addressModificationValue,
+                        implode(', ', self::getConstants())
+                    )
+                );
+        }
+        return Config::get('ws_server/scheme') .
+            (Config::get('ws_server/host') ?: $hostDefaultValue) .
+            ':' . $port . $uri;
     }
 }

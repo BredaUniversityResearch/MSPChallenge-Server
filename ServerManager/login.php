@@ -1,4 +1,7 @@
 <?php
+
+use App\Domain\Helper\Config;
+
 if (isset($_SESSION)) {
     session_destroy();
 }

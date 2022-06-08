@@ -9,14 +9,19 @@ use App\Domain\WsServer\ClientHeaderKeys;
 use App\Domain\WsServer\ExecuteBatchRejection;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
 use Closure;
+use Drift\DBAL\Result;
 use Exception;
+use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use Throwable;
+use function App\parallel;
+use function App\tpf;
 use function React\Promise\all;
 use function React\Promise\reject;
 
 class ExecuteBatchesWsServerPlugin extends Plugin
 {
+    private bool $firstStart = true;
     private const EXECUTE_BATCHES_MIN_INTERVAL_SEC = 1;
 
     /**
@@ -32,6 +37,14 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     protected function onCreatePromiseFunction(): Closure
     {
         return function () {
+            if ($this->firstStart) {
+                // allow clients to connect in the next 10 sec. todo: can we improve this?
+                $this->getLoop()->addTimer(10, function () {
+                    return $this->failExecutingBatchesOnStart();
+                });
+                $this->firstStart = false;
+            }
+
             return $this->executeBatches()
                 ->then(function (array $clientToBatchResultContainer) {
                     $this->addDebugOutput(
@@ -53,6 +66,33 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
+    private function failExecutingBatchesOnStart(): PromiseInterface
+    {
+        return $this->getServerManager()->getGameSessionIds()
+            ->then(function (Result $result) {
+                $gameSessionIds = collect($result->fetchAllRows() ?? [])
+                    ->keyBy('id')
+                    ->map(function ($row) {
+                        return $row['id'];
+                    });
+                $gameSessionId = $this->getGameSessionIdFilter();
+                if ($gameSessionId != null) {
+                    $gameSessionIds = $gameSessionIds->only($gameSessionId);
+                }
+                $gameSessionIds = $gameSessionIds->all(); // to raw array
+                $toPromiseFunctions = [];
+                foreach ($gameSessionIds as $gameSessionId) {
+                    $toPromiseFunctions[] = tpf(function () use ($gameSessionId) {
+                        return $this->failExecutingBatchesOnStartForGameSession($gameSessionId);
+                    });
+                }
+                return parallel($toPromiseFunctions);
+            });
+    }
+
+    /**
+     * @throws Exception
+     */
     private function executeBatches(): PromiseInterface
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
@@ -69,7 +109,8 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                 $promises[$connResourceId] = $this->getBatch($connResourceId)
                     ->executeNextQueuedBatchFor(
                         $clientInfo['team_id'],
-                        $clientInfo['user']
+                        $clientInfo['user'],
+                        $this->getWsServer()->getId()
                     )
                 ->then(
                     function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
@@ -104,7 +145,8 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             'message' => null,
                             'payload' => $batchResult
                         ]);
-                        return $batchResultContainer;
+
+                        return $this->setBatchToCommunicated($connResourceId, $batchId, $batchResultContainer);
                     },
                     function ($rejection) use ($connResourceId) {
                         $reason = $rejection;
@@ -129,7 +171,12 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                                     'message' => $message ?: 'Unknown reason',
                                     'payload' => null
                                 ]);
-                            return []; // do not propagate rejection, just resolve to empty batch results
+
+                            return $this->setBatchToCommunicated(
+                                $connResourceId,
+                                $batchId,
+                                [] // do not propagate rejection, just resolve to empty batch results
+                            );
                         }
                         return reject($reason);
                     }
@@ -137,6 +184,25 @@ class ExecuteBatchesWsServerPlugin extends Plugin
             }
         }
         return all($promises);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function setBatchToCommunicated(int $connResourceId, int $batchId, $value = null): PromiseInterface
+    {
+        // set batch as "communicated"
+        $deferred = new Deferred();
+        $this->getBatch($connResourceId)->setCommunicated($batchId)
+            ->done(
+                function (/* Result $result */) use ($deferred, $value) {
+                    $deferred->resolve($value);
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
+            );
+        return $deferred->promise();
     }
 
     /**
@@ -162,5 +228,72 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         if ($event->getEventName() == WsServerEventDispatcherInterface::EVENT_ON_CLIENT_DISCONNECTED) {
             unset($this->batchesInstances[$event->getSubject()]);
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function failExecutingBatchesOnStartForGameSession(int $gameSessionId): PromiseInterface
+    {
+        $connection = $this->getServerManager()->getGameSessionDbConnection($gameSessionId);
+        $qb = $connection->createQueryBuilder();
+        return $connection->query(
+            $qb
+                ->select('b.api_batch_id, b.api_batch_user_id, b.api_batch_country_id')
+                ->from('api_batch', 'b')
+                ->where(
+                    $qb->expr()->and(
+                        'b.api_batch_state = "Executing"',
+                        'b.api_batch_server_id = ' .
+                        $qb->createPositionalParameter($this->getWsServer()->getId())
+                    )
+                )
+        )
+        ->then(function (Result $result) use ($connection) {
+            $batches = collect($result->fetchAllRows() ?? [])
+                ->keyBy('api_batch_id')
+                ->all();
+            if (empty($batches)) {
+                return [];
+            }
+            $qb = $connection->createQueryBuilder();
+            return $connection->query(
+                $qb
+                    ->update('api_batch', 'b')
+                    ->set('b.api_batch_state', $qb->createPositionalParameter('Failed'))
+                    ->where($qb->expr()->in('b.api_batch_id', array_keys($batches)))
+            )
+            ->then(function (/* Result $result */) use ($connection, $batches) {
+                // find client connections matching these batches if any
+                $clientInfoContainer = $this->getClientConnectionResourceManager()
+                    ->getClientInfoContainer();
+
+                $toPromiseFunctions = [];
+                foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
+                    foreach ($batches as $batchId => $batch) {
+                        if ($batch['api_batch_user_id'] != $clientInfo['user'] ||
+                            $batch['api_batch_country_id'] != $clientInfo['team_id']
+                        ) {
+                            continue;
+                        }
+                        $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)
+                            ->sendAsJson([
+                                'header_type' => 'Batch/ExecuteBatch',
+                                'header_data' => [
+                                    'batch_id' => $batchId,
+                                ],
+                                'success' => false,
+                                'message' => 'Unknown reason',
+                                'payload' => null
+                            ]);
+
+                        $toPromiseFunctions[] = tpf(function () use ($connResourceId, $batchId) {
+                            return $this->setBatchToCommunicated($connResourceId, $batchId, $batchId);
+                        });
+                    }
+                }
+                return parallel($toPromiseFunctions);
+            });
+        });
     }
 }

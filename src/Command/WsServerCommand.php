@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Domain\Helper\Config;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\ExecuteBatchesWsServerPlugin;
 use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
@@ -27,6 +28,7 @@ class WsServerCommand extends Command
     const OPTION_TABLE_OUTPUT = 'table-output';
     const OPTION_MESSAGE_MAX_LINES = 'message-max-lines';
     const OPTION_MESSAGE_FILTER = 'message-filter';
+    const OPTION_SERVER_ID = 'server-id';
 
     protected static $defaultName = 'app:ws-server';
 
@@ -46,7 +48,7 @@ class WsServerCommand extends Command
 
     protected function configure(): void
     {
-        require($this->projectDir . '/ServerManager/config.php');
+        require($this->projectDir . '/ServerManager/config.php'); // todo: move server manager config to .env
         $this
             ->setDescription('Run the websocket server for MSP Challenge')
             ->addOption(
@@ -54,7 +56,7 @@ class WsServerCommand extends Command
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'the server port to use',
-                $GLOBALS['config']['ws_server']['port'] ?: 45001
+                Config::get('ws_server/port') ?: 45001
             )
             ->addOption(
                 self::OPTION_ADDRESS,
@@ -92,6 +94,12 @@ class WsServerCommand extends Command
                 'f',
                 InputOption::VALUE_REQUIRED,
                 'only show messages containing this text'
+            )
+            ->addOption(
+                self::OPTION_SERVER_ID,
+                'i',
+                InputOption::VALUE_REQUIRED,
+                'the server identifier'
             );
     }
 
@@ -113,8 +121,11 @@ class WsServerCommand extends Command
 
         define('WSS', 1); // to identify that we are in a websocket server instance. Value is not important.
         WsServerDebugOutput::setMessageFilter($input->getOption(self::OPTION_MESSAGE_FILTER));
-        if (null != $input->getOption(self::OPTION_GAME_SESSION_ID)) {
-            $this->wsServer->setGameSessionIdFilter($input->getOption(self::OPTION_GAME_SESSION_ID));
+        if (null !== $gameSessionId = $input->getOption(self::OPTION_GAME_SESSION_ID)) {
+            $this->wsServer->setGameSessionIdFilter($gameSessionId);
+        }
+        if (null !== $serverId = $input->getOption(self::OPTION_SERVER_ID)) {
+            $this->wsServer->setId($serverId);
         }
 
         // the console helper will handle console output using events dispatched by the wsServer
