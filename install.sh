@@ -6,7 +6,7 @@ VERSION_DEFAULT="5.4"
 
 setSymfonyVersion() {
   VERSION=$1
-  if [[ -z $1 ]]; then
+  if [[ -z $1 || "$1" == "default" ]]; then
     VERSION="$VERSION_DEFAULT"
   fi
   COMPOSER_ARGS="${@:2}"
