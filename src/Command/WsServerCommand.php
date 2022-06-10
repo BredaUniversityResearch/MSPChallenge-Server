@@ -3,10 +3,7 @@
 namespace App\Command;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Domain\WsServer\Plugins\ExecuteBatchesWsServerPlugin;
-use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
-use App\Domain\WsServer\Plugins\LoopStatsWsServerPlugin;
-use App\Domain\WsServer\Plugins\Tick\TicksHandlerWsServerPlugin;
+use App\Domain\WsServer\Plugins\BootstrapWsServerPlugin;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
 use App\Domain\WsServer\WsServerDebugOutput;
@@ -136,10 +133,7 @@ class WsServerCommand extends Command
         $this->wsServer->registerLoop($server->loop);
 
         // plugins
-        $this->wsServer->registerPlugin(new LoopStatsWsServerPlugin());
-        $this->wsServer->registerPlugin(new TicksHandlerWsServerPlugin());
-        $this->wsServer->registerPlugin(new LatestWsServerPlugin());
-        $this->wsServer->registerPlugin(new ExecuteBatchesWsServerPlugin());
+        $this->wsServer->registerPlugin(new BootstrapWsServerPlugin());
 
         sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
             switch ($event) {
