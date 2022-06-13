@@ -48,6 +48,7 @@ class BootstrapWsServerPlugin extends Plugin
      */
     private function migrations(array $gameSessionIds): void
     {
+        echo 'Please do not shut down the websocket server now, until migrations are finished...' . PHP_EOL;
         // Run doctrine migrations.
         foreach ($gameSessionIds as $gameSessionId) {
             $dbName = ConnectionManager::getInstance()->getGameSessionDbName($gameSessionId);
@@ -69,7 +70,9 @@ class BootstrapWsServerPlugin extends Plugin
                     $returnCode
                 );
             }
+            echo $output->fetch();
         }
+        echo 'Finished migrations' . PHP_EOL;
     }
 
     private function registerPlugins(): void

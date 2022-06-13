@@ -34,7 +34,10 @@ class DoctrineMigrationsDependencyFactoryHelper
             }
             $dbNames = [$dbNameFilter];
         }
-        $defaultDbName = $dbNameFilter ?? $this->connectionManager->getServerManagerDbName();
+        $defaultDbName = $dbNameFilter ??
+            // try to use a msp_session_X database if any
+            (current(array_diff($dbNames, [$this->connectionManager->getServerManagerDbName()])) ?:
+            $this->connectionManager->getServerManagerDbName());
         $configuration = new Configuration();
         $connectionRegistry = new class(
             'msp_connection_registry',
