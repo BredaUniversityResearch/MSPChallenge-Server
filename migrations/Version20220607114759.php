@@ -29,7 +29,7 @@ final class Version20220607114759 extends MSPMigration
     protected function onUp(Schema $schema): void
     {
         $table = $schema->getTable('api_batch');
-        $this->addIndexedColumn($table, 'api_batch_server_id', Types::STRING);
+        $this->addIndexedColumn($table, 'api_batch_server_id', Types::STRING)->setNotnull(false);
         $this->addColumn($table, 'api_batch_communicated', Types::BOOLEAN)->setDefault(false);
     }
 
