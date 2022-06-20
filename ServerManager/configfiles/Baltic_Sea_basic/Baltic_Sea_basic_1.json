@@ -19611,8 +19611,8 @@
       "cellsize": 15000,
       "x_min": 4294450,
       "y_min": 3442827,
-      "x_max": 5419450,
       "y_max": 4807827,
+      "x_max": 5419450,
       "initialFishingMapping": 0.5,
       "fishingDisplayScale": 100,
       "pressures": [
@@ -23260,7 +23260,7 @@
       {
         "layer_name": "BS_Topography",
         "layer_geotype": "raster",
-        "layer_entity_value_max": null,
+        "layer_entity_value_max": 1000,
         "layer_short": "Topography",
         "layer_category": "management",
         "layer_subcategory": "governance",
@@ -23271,7 +23271,7 @@
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_raster_minimum_value_cutoff": 0.0,
         "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
@@ -23302,21 +23302,21 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "0 m",
+            "displayName": "0 - 180 m",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#CEEBCDFF",
+            "polygonColor": "#EAFEBC00",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#CEEBCDFF",
-            "lineWidth": 1.0,
+            "displayLines": 0,
+            "lineColor": "#EAFEBC00",
+            "lineWidth": 0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -23330,7 +23330,7 @@
             "media": ""
           },
           "1": {
-            "displayName": "180 m",
+            "displayName": "180 -360 m",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -23358,7 +23358,7 @@
             "media": ""
           },
           "2": {
-            "displayName": "360 m",
+            "displayName": "360 - 540 m",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -23386,7 +23386,7 @@
             "media": ""
           },
           "3": {
-            "displayName": "540 m",
+            "displayName": "540 - 720 m",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -23414,7 +23414,7 @@
             "media": ""
           },
           "4": {
-            "displayName": "720 m",
+            "displayName": "720 - 900 m",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -23442,7 +23442,7 @@
             "media": ""
           },
           "5": {
-            "displayName": "900 m",
+            "displayName": "> 900 m",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -28567,7 +28567,7 @@
             "capacity": 25000000,
             "investmentCost": 200000.0,
             "availability": -12,
-            "media": "wiki://BalticSea:Energy_Cables"
+            "media": "wiki://Energy_Cables"
           },
           "1": {
             "displayName": "50MW",
@@ -28595,7 +28595,7 @@
             "capacity": 50000000,
             "investmentCost": 200000.0,
             "availability": -12,
-            "media": "wiki://BalticSea:Energy_Cables"
+            "media": "wiki:/Energy_Cables"
           },
           "2": {
             "displayName": "80MW",
@@ -28623,7 +28623,7 @@
             "capacity": 80000000,
             "investmentCost": 200000.0,
             "availability": -12,
-            "media": "wiki://BalticSea:Energy_Cables"
+            "media": "wiki://Energy_Cables"
           },
           "3": {
             "displayName": "150MW",
@@ -28651,7 +28651,7 @@
             "capacity": 150000000,
             "investmentCost": 200000.0,
             "availability": -12,
-            "media": "wiki://BalticSea:Energy_Cables"
+            "media": "wiki://Energy_Cables"
           },
           "4": {
             "displayName": "300MW",
@@ -28679,7 +28679,7 @@
             "capacity": 300000000,
             "investmentCost": 200000.0,
             "availability": -12,
-            "media": "wiki://BalticSea:Energy_Cables"
+            "media": "wiki://Energy_Cables"
           },
           "5": {
             "displayName": "460MW",
@@ -28707,7 +28707,7 @@
             "capacity": 460000000,
             "investmentCost": 200000.0,
             "availability": -12,
-            "media": "wiki://BalticSea:Energy_Cables"
+            "media": "wiki://Energy_Cables"
           },
           "6": {
             "displayName": "10GW Corridor",
@@ -28735,7 +28735,7 @@
             "capacity": 10000000000,
             "investmentCost": 2E+07,
             "availability": -12,
-            "media": "wiki://BalticSea:Energy_Cables"
+            "media": "wiki://Energy_Cables"
           }
         },
         "layer_info_properties": [
