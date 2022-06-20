@@ -5,7 +5,7 @@ namespace App\Domain\Common;
 class DatabaseDefaults
 {
     const DEFAULT_DATABASE_HOST = 'localhost';
-    const DEFAULT_DATABASE_PORT = 3306;
+    const DEFAULT_DATABASE_PORT = 45003;
     const DEFAULT_DATABASE_USER = 'root';
     const DEFAULT_DATABASE_PASSWORD = '';
     const DEFAULT_DATABASE_SERVER_VERSION = 'mariadb-10.4.22';

@@ -2,6 +2,7 @@
 
 namespace App\Domain\API;
 
+use App\Domain\Common\DatabaseDefaults;
 use Exception;
 use PDO;
 use PDOException;
@@ -76,7 +77,9 @@ class APIHelper
             $dbName = $dbConfig["multisession_database_prefix"] . $sessionId;
 
             try {
-                $db = new PDO("mysql:host=" . $dbHost . ";dbname=" . $dbName, $dbUser, $dbPass, array(
+                $dsn = "mysql:host=" . $dbHost . ";dbname=" . $dbName .
+                    ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
+                $db = new PDO($dsn, $dbUser, $dbPass, array(
                     PDO::MYSQL_ATTR_LOCAL_INFILE => true
                 ));
 

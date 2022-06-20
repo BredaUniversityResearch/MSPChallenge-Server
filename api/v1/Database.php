@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\DatabaseDefaults;
 use Exception;
 use PDO;
 use PDOException;
@@ -107,8 +108,10 @@ class Database
                 return false;
             }
             try {
+                $dsn = 'mysql:host='.$this->db_host.';dbname='.$this->db_name .
+                    ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
                 $this->conn = new PDO(
-                    'mysql:host='.$this->db_host.';dbname='.$this->db_name,
+                    $dsn,
                     $this->db_user,
                     $this->db_pass,
                     self::$PDOArgs
@@ -124,7 +127,9 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function CreateNewConnectionToConfiguredHost(string $user, string $password): PDO
     {
-        return new PDO("mysql:host=".$this->db_host, $user, $password, self::$PDOArgs);
+        $dsn = "mysql:host=".$this->db_host .
+            ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
+        return new PDO($dsn, $user, $password, self::$PDOArgs);
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -134,7 +139,9 @@ class Database
         string $password,
         string $dbName
     ): PDO {
-        $connection = new PDO("mysql:host=".$dbHost, $user, $password, self::$PDOArgs);
+        $dsn = "mysql:host=".$dbHost .
+            ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
+        $connection = new PDO($dsn, $user, $password, self::$PDOArgs);
         $connection->query("USE ".$dbName);
         return $connection;
     }
