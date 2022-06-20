@@ -748,6 +748,8 @@ CREATE TABLE IF NOT EXISTS `msp`.`api_batch` (
   `api_batch_state` enum('Setup','Queued','Executing','Success','Failed') NOT NULL DEFAULT 'Setup',
   `api_batch_country_id` int NOT NULL,
   `api_batch_user_id` int NOT NULL,
+  `api_batch_server_id` varchar(255) NULL,
+  `api_batch_communicated` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`api_batch_id`),
   KEY `api_batch_country_id` (`api_batch_country_id`),
   KEY `api_batch_user_id` (`api_batch_user_id`),

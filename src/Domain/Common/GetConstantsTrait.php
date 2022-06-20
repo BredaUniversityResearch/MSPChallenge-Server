@@ -6,7 +6,7 @@ use ReflectionClass;
 
 trait GetConstantsTrait
 {
-    public function getConstants()
+    public static function getConstants(): array
     {
         $class = new ReflectionClass(get_called_class());
         return $class->getConstants();
