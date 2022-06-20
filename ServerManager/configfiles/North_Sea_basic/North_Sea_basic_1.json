@@ -23922,7 +23922,7 @@
       {
         "layer_name": "NS_Topography_raster",
         "layer_geotype": "raster",
-        "layer_entity_value_max": null,
+        "layer_entity_value_max": 1000,
         "layer_short": "Topography",
         "layer_category": "management",
         "layer_subcategory": "environmental_conditions",
@@ -23933,7 +23933,7 @@
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_raster_minimum_value_cutoff": 0.0,
         "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
@@ -23963,20 +23963,20 @@
         "layer_depth": 0,
         "layer_type": {
           "0": {
-            "displayName": "0 m",
+            "displayName": "0 - 180 m",
             "approval": "EEZ",
             "value": 0,
             "displayPolygon": 1,
-            "polygonColor": "#EAFEBCC9",
+            "polygonColor": "#EAFEBC00",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#EDF8E9FF",
-            "lineWidth": 1.0,
+            "displayLines": 0,
+            "lineColor": "#EAFEBC00",
+            "lineWidth": 0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -23990,7 +23990,7 @@
             "media": ""
           },
           "1": {
-            "displayName": "180 m",
+            "displayName": "180 - 360 m",
             "approval": "EEZ",
             "value": 200,
             "displayPolygon": 1,
@@ -24017,7 +24017,7 @@
             "media": ""
           },
           "2": {
-            "displayName": "360 m",
+            "displayName": "360 -540 m",
             "approval": "EEZ",
             "value": 400,
             "displayPolygon": 1,
@@ -24044,7 +24044,7 @@
             "media": ""
           },
           "3": {
-            "displayName": "540 m",
+            "displayName": "540 -720 m",
             "approval": "EEZ",
             "value": 600,
             "displayPolygon": 1,
@@ -24071,7 +24071,7 @@
             "media": ""
           },
           "4": {
-            "displayName": "720 m",
+            "displayName": "720 -900 m",
             "approval": "EEZ",
             "value": 800,
             "displayPolygon": 1,
@@ -24098,7 +24098,7 @@
             "media": ""
           },
           "5": {
-            "displayName": "900 m",
+            "displayName": "> 900 m",
             "approval": "EEZ",
             "value": 1000,
             "displayPolygon": 1,
@@ -24570,7 +24570,7 @@
         "layer_active_on_start": 1,
         "layer_green": 0,
         "layer_tooltip": "Exclusive Economic Zone (EEZ)",
-        "layer_information": "wiki://(NS)EEZ",
+        "layer_information": "wiki://EEZ",
         "layer_media": "wiki://EEZ",
         "layer_text_info": null,
         "layer_states": [
@@ -24880,7 +24880,7 @@
         ],
         "layer_editing_type": "",
         "layer_special_entity_type": "Default",
-        "layer_depth": 5,
+        "layer_depth": -2,
         "layer_type": {
           "0": {
             "displayName": "default",
@@ -28020,7 +28020,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Areas designated for depositing dredged materials",
-        "layer_information": "wiki://(NS)Dredging_Dumping_Areas",
+        "layer_information": "wiki://Dumping_areas",
         "layer_media": "wiki://Dumping_areas",
         "layer_text_info": null,
         "layer_states": [
@@ -28219,7 +28219,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Areas used for recreational purposes, both sea or shore focused.",
-        "layer_information": "wiki://(NS)Recreational_Interest",
+        "layer_information": "wiki://Recreational_Interest",
         "layer_media": "wiki://Recreational_Interest",
         "layer_text_info": null,
         "layer_states": [
@@ -29899,7 +29899,7 @@
         "layer_short": "Cable Corridors",
         "layer_category": "activities",
         "layer_subcategory": "cables_and_pipelines",
-        "layer_download_from_geoserver": 1,
+        "layer_download_from_geoserver": 0,
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELNew",
@@ -30313,7 +30313,7 @@
         "layer_green": 0,
         "layer_tooltip": "These are installations pumping up Oil & Gas, they increase the Grey Energy Indicator",
         "layer_information": "",
-        "layer_media": "wiki://Oil_%26_Gas_Installations",
+        "layer_media": "wiki://Oil_&_Gas_Installations",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -31076,7 +31076,7 @@
         "layer_green": 0,
         "layer_tooltip": "Areas specified for use by Oil & Gas Offshore Installations",
         "layer_information": "",
-        "layer_media": "wiki://Oil_%26_Gas_Licensed_Areas",
+        "layer_media": "wiki://Oil_&_Gas_Licensed_Areas",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -31304,7 +31304,7 @@
         "layer_green": 0,
         "layer_tooltip": "Areas used for extracting sand and gravel",
         "layer_information": "",
-        "layer_media": "wiki://Sand_%26_Gravel_Extraction",
+        "layer_media": "wiki://Sand_&_Gravel_Extraction",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -32519,7 +32519,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
+        "layer_information": "wiki://Shipping_Intensity",
         "layer_media": "wiki://Shipping_Intensity",
         "layer_text_info": null,
         "layer_states": [
@@ -32700,7 +32700,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
+        "layer_information": "wiki://Shipping_Intensity",
         "layer_media": "wiki://Ferry_Intensity",
         "layer_text_info": null,
         "layer_states": [
@@ -33062,7 +33062,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
+        "layer_information": "wiki://Shipping_Intensity",
         "layer_media": "wiki://Tanker_Intensity",
         "layer_text_info": null,
         "layer_states": [
@@ -33243,7 +33243,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
+        "layer_information": "wiki://Maintenance_Intensity",
         "layer_media": "wiki://Maintenance_Intensity",
         "layer_text_info": null,
         "layer_states": [
@@ -33424,7 +33424,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
+        "layer_information": "wiki://Cargo_Intensity",
         "layer_media": "wiki://Cargo_Intensity",
         "layer_text_info": null,
         "layer_states": [
@@ -33605,8 +33605,8 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
-        "layer_media": null,
+        "layer_information": "wiki://Shipping_Intensity",
+        "layer_media": "wiki://Shipping_Intensity",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -34763,7 +34763,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Shipping Intensity in hours per square kilometer per month",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
+        "layer_information": "wiki://Shipping_Intensity_Passenger_(static)",
         "layer_media": "wiki://Shipping_Intensity_Passenger_(static)",
         "layer_text_info": null,
         "layer_states": [
@@ -34998,7 +34998,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Shipping Intensity in hours per square kilometer per month",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
+        "layer_information": "wiki://Shipping_Intensity_Tanker(static)",
         "layer_media": "wiki://Shipping_Intensity_Tanker(static)",
         "layer_text_info": null,
         "layer_states": [
@@ -35233,7 +35233,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Shipping Intensity in hours per square kilometer per month",
-        "layer_information": "wiki://(NS)Shipping_Intensity",
+        "layer_information": "wiki://Shipping_Intensity_Cargo(static)",
         "layer_media": "wiki://Shipping_Intensity_Cargo(static)",
         "layer_text_info": null,
         "layer_states": [
@@ -36341,7 +36341,7 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Areas protecting specific ecological elements of the sea basin. ",
-        "layer_information": "wiki://(NS)Natura_2000",
+        "layer_information": "wiki://Natura_2000",
         "layer_media": "wiki://Natura_2000",
         "layer_text_info": null,
         "layer_states": [
@@ -40371,7 +40371,7 @@
         "layer_short": "Fishing Priority Areas",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
-        "layer_download_from_geoserver": 1,
+        "layer_download_from_geoserver": 0,
         "layer_width": 0,
         "layer_height": 0,
         "layer_raster_material": "RasterMELCustomizable",
