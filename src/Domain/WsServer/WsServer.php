@@ -5,6 +5,7 @@ use App\Domain\API\v1\Security;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\DoctrineMigrationsDependencyFactoryHelper;
 use App\Domain\WsServer\Plugins\PluginInterface;
 use Drift\DBAL\Connection;
 use Exception;
@@ -54,15 +55,25 @@ class WsServer extends EventDispatcher implements
      */
     private array $pluginsUnregistered = [];
 
+    private DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper;
+
+    public function getDoctrineMigrationsDependencyFactoryHelper(): DoctrineMigrationsDependencyFactoryHelper
+    {
+        return $this->doctrineMigrationsDependencyFactoryHelper;
+    }
+
     public function getStats(): array
     {
         return $this->stats;
     }
 
     public function __construct(
+        DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper,
         // below is required by legacy to be auto-wired
         \App\Domain\API\APIHelper $apiHelper
     ) {
+        $this->doctrineMigrationsDependencyFactoryHelper = $doctrineMigrationsDependencyFactoryHelper;
+
         // for backwards compatibility, to prevent missing request data errors
         $_SERVER['REQUEST_URI'] = '';
 

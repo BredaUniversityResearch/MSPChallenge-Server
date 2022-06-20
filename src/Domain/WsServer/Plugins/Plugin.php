@@ -72,6 +72,12 @@ abstract class Plugin implements PluginInterface
     {
         $this->registeredToLoop = true;
         $this->loop = $loop;
+
+        // interval sec is zero, so no interval, no repeating
+        if ($this->getMinIntervalSec() < PHP_FLOAT_EPSILON) {
+            $loop->futureTick($this->onCreatePromiseFunction());
+            return;
+        }
         $loop->addTimer(mt_rand() * $this->getMinIntervalSec() / mt_getrandmax(), PluginHelper::createRepeatedFunction(
             $this,
             $loop,
