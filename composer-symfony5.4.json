@@ -104,7 +104,7 @@
         }
     },
     "require-dev": {
-        "brainmaestro/composer-git-hooks": "dev-handle-file-permission-denied",
+        "brainmaestro/composer-git-hooks": "dev-master",
         "symfony/stopwatch": "5.4.*",
         "symfony/web-profiler-bundle": "5.4.*",
         "squizlabs/php_codesniffer": "3.*"
@@ -112,7 +112,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:marinhekman/composer-git-hooks.git"
+            "url": "git@github.com:BredaUniversityResearch/composer-git-hooks.git"
         }
     ]
 }
