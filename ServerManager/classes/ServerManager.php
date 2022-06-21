@@ -274,10 +274,10 @@ class ServerManager extends Base
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
             if ($_SERVER['SERVER_NAME'] != $this->server_address) {
-                return $_SERVER['SERVER_NAME'] . ':' . ($_ENV['WEB_SERVER_PORT'] ?? 45080);
+                return $_SERVER['SERVER_NAME'] . ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
             }
         }
-        return $this->server_address . ':' . ($_ENV['WEB_SERVER_PORT'] ?? 45080);
+        return $this->server_address . ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
     }
 
     public function GetServerRoot()
