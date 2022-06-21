@@ -1,16 +1,11 @@
 <?php
 
-use App\Domain\Common\GetConstantsTrait;
+use App\Domain\Helper\Config;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Domain\WsServer\WsServer;
 
 class ServerManager extends Base
 {
-    use GetConstantsTrait;
-
-    const WS_SERVER_ADDRESS_MODIFICATION_NONE = 'none';
-    const WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT = 'add_game_session_id_to_port';
-    const WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_URI = 'add_game_session_id_to_uri';
-
     private static $_instance = null;
     private $_old, $_db, $_server_versions, $_server_accepted_clients, $_server_current_version, $_server_root, $_server_manager_root, $_server_upgrades, $_msp_auth_url, $_msp_auth_api;
     public $server_id, $server_name, $server_address, $server_description;
@@ -225,32 +220,7 @@ class ServerManager extends Base
 
     public function getWsServerURLBySessionId(int $sessionId = 0): string
     {
-        $addressModificationKey = 'ws_server/address_modification';
-        $addressModificationValue = Config::get($addressModificationKey) ?? 'none';
-        $port = Config::get('ws_server/port') ?: 80;
-        $uri = Config::get('ws_server/uri');
-        switch ($addressModificationValue) {
-            case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT:
-                $port += $sessionId;
-                break;
-            case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_URI:
-                $uri = rtrim($uri, '/') . '/' . $sessionId . '/';
-                break;
-            case self::WS_SERVER_ADDRESS_MODIFICATION_NONE:
-                break;
-            default:
-                throw new \http\Exception\UnexpectedValueException(
-                    sprintf(
-                        'Encountered unexpected value for config %s: %s. Value must be: %s',
-                        $addressModificationKey,
-                        $addressModificationValue,
-                        implode(', ', self::getConstants())
-                    )
-                );
-        }
-        return Config::get('ws_server/scheme') .
-            (Config::get('ws_server/host') ?: ServerManager::getInstance()->GetTranslatedServerURL()) .
-            ':' . $port . $uri;
+        return WsServer::getWsServerURLBySessionId($sessionId, $this->GetTranslatedServerURL());
     }
 
     public function GetFullSelfAddress()

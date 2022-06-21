@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\WsServer\ExecuteBatchRejection;
+use Doctrine\DBAL\Types\Types;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -180,7 +181,7 @@ class Batch extends Base
         return $batchResult;
     }
 
-    public function executeNextQueuedBatchFor(int $teamId, int $userId): PromiseInterface
+    public function executeNextQueuedBatchFor(int $teamId, int $userId, string $serverId): PromiseInterface
     {
         $deferred = new Deferred();
 
@@ -200,12 +201,12 @@ class Batch extends Base
                 ->orderBy('api_batch_id') // first in, first out
                 ->setMaxResults(1)
         )
-        ->then(function (Result $result) {
+        ->then(function (Result $result) use ($serverId) {
             if (null === $row = $result->fetchFirstRow()) {
                 return [];
             }
             $batchId = $row['api_batch_id'];
-            return $this->executeQueuedBatch($batchId)
+            return $this->executeQueuedBatch($batchId, $serverId)
                 ->otherwise(function ($reason) use ($batchId) {
                     return reject(new ExecuteBatchRejection($batchId, $reason));
                 });
@@ -222,7 +223,21 @@ class Batch extends Base
         return $deferred->promise();
     }
 
-    public function executeQueuedBatch(int $batchId): PromiseInterface
+    /**
+     * @throws Exception
+     */
+    public function setCommunicated(int $batchId): PromiseInterface
+    {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->update('api_batch')
+                ->set('api_batch_communicated', $qb->createPositionalParameter(true, Types::BOOLEAN))
+                ->where($qb->expr()->eq('api_batch_id', $batchId))
+        );
+    }
+
+    public function executeQueuedBatch(int $batchId, string $serverId): PromiseInterface
     {
         // get batch tasks to execute
         $this->cachedBatchResults[$batchId] = [];
@@ -242,13 +257,14 @@ class Batch extends Base
                     )
                 )
         )
-        ->then(function (Result $result) use ($batchId) {
+        ->then(function (Result $result) use ($batchId, $serverId) {
             $deferred = new Deferred();
             // first set the state to "Executing" before continuing
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             $this->getAsyncDatabase()->query(
                 $qb
                     ->update('api_batch')
+                    ->set('api_batch_server_id', $qb->createPositionalParameter($serverId))
                     ->set('api_batch_state', $qb->createPositionalParameter('Executing'))
                     ->where($qb->expr()->eq('api_batch_id', $batchId))
             )

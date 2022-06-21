@@ -12,6 +12,7 @@
         "ext-json": "*",
         "ext-pdo": "*",
         "ext-zip": "*",
+        "ext-intl": "*",
         "cboden/ratchet": "^0.4",
         "clue/http-proxy-react": "^1.7",
         "drift/dbal": "dev-master",
@@ -49,7 +50,8 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/",
-            "DoctrineMigrations\\": "migrations/src/"
+            "DoctrineMigrations\\": "migrations/src/",
+            "ServerManager\\": "ServerManager/classes/"
         },
         "files": [
             "src/functions.php",
@@ -102,7 +104,7 @@
         }
     },
     "require-dev": {
-        "brainmaestro/composer-git-hooks": "dev-handle-file-permission-denied",
+        "brainmaestro/composer-git-hooks": "dev-master",
         "symfony/stopwatch": "5.4.*",
         "symfony/web-profiler-bundle": "5.4.*",
         "squizlabs/php_codesniffer": "3.*"
@@ -110,7 +112,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:marinhekman/composer-git-hooks.git"
+            "url": "git@github.com:BredaUniversityResearch/composer-git-hooks.git"
         }
     ]
 }

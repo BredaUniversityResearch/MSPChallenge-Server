@@ -1,6 +1,8 @@
 <?php
 //functions that help things along. by definition functions that are so common or fundamental, require limited and diverse arguments, it makes no sense to turn them into classes
 
+use App\Domain\Helper\Config;
+
 function getPublicObjectVars($obj) {
   return get_object_vars($obj);
 }

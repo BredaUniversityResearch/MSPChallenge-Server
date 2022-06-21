@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use App\Domain\Helper\Config;
 use App\Domain\Common\DatabaseDefaults;
 
 class DB {
