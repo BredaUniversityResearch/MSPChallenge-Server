@@ -30,8 +30,8 @@ class ServerManager extends Base
           "From40beta7To40beta10"
         );
         $this->setRootVars();
-        $this->_msp_auth_url = "https://auth.mspchallenge.info";
-        $this->_msp_auth_api = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/";
+        $this->_msp_auth_url = $this->GetMSPAuthURL();
+        $this->_msp_auth_api = $this->GetMSPAuthAPI();
     }
 
     private function CompletePropertiesFromDB()
@@ -102,12 +102,12 @@ class ServerManager extends Base
 
     public function GetMSPAuthAPI()
     {
-        return $this->_msp_auth_api;
+        return $this->GetMSPAuthURL() . '/usersc/plugins/apibuilder/authmsp/';
     }
 
     public function GetMSPAuthURL()
     {
-        return $this->_msp_auth_url;
+        return \App\Domain\API\v1\Config::GetInstance()->getMSPAuthBaseURL();
     }
 
     public function GetAllVersions()
