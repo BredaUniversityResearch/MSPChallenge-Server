@@ -1,12 +1,7 @@
 @echo OFF
 setlocal
 
-rem try default MSP xampp location
 if "%PHP_PATH%"=="" (
-  set PHP_PATH=C:\Program Files\MSP Challenge\xampp\php\php.exe
-)
-rem try default xampp location
-if not exist %PHP_PATH% (
   set PHP_PATH=C:\xampp\php\php.exe
 )
 set php="%PHP_PATH%"
