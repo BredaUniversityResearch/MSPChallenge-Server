@@ -633,9 +633,6 @@ class GameSession extends Base
             case 'end':
                 throw new Exception("The session has already ended, so can't change its state.");
                 break;
-            case 'setup':
-                if ($this->game_state != "pause") throw new Exception("The session is in setup, so only pause is available at this time.");
-                break;
             case 'simulation':
                 throw new Exception("The session is simulating, so cannot change its state at this time.");
                 break;
