@@ -71,9 +71,9 @@ class GameSession extends Base
         $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
         /**
-* 
+*
          *
- * @noinspection HttpUrlsUsage 
+ * @noinspection HttpUrlsUsage
 */
         $protocol = (($_SERVER['HTTPS'] ?: 'off') == 'on') ? "https://" : "http://";
 
@@ -114,9 +114,9 @@ class GameSession extends Base
 
         $server_name = $_SERVER["SERVER_NAME"] ?? gethostname();
         /**
-* 
+*
          *
- * @noinspection HttpUrlsUsage 
+ * @noinspection HttpUrlsUsage
 */
         $protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
         $apiFolder = "/ServerManager/api/";
@@ -340,9 +340,9 @@ class GameSession extends Base
             throw new Exception("Watchdog address cannot be empty.");
         }
         /**
-* 
+*
          *
- * @noinspection SqlWithoutWhere 
+ * @noinspection SqlWithoutWhere
 */
         Database::GetInstance()->query(
             "UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT();",
@@ -409,7 +409,7 @@ class GameSession extends Base
     }
 
     /**
-     * 
+     *
      *
      * @noinspection PhpUnused
      * @noinspection SpellCheckingInspection
@@ -600,9 +600,9 @@ class GameSession extends Base
     public function SetUserAccess(string $password_admin, string $password_player): void
     {
         /**
-* 
+*
          *
- * @noinspection SqlWithoutWhere 
+ * @noinspection SqlWithoutWhere
 */
         Database::GetInstance()->query(
             "UPDATE game_session SET game_session_password_admin = ?, game_session_password_player = ?;",
@@ -622,7 +622,7 @@ class GameSession extends Base
             "SELECT game_session_password_admin, game_session_password_player FROM game_session"
         );
         if (count($passwordData) > 0) {
-            if (!parent::isNewPasswordFormat($passwordData[0]["game_session_password_admin"]) 
+            if (!parent::isNewPasswordFormat($passwordData[0]["game_session_password_admin"])
                 || !parent::isNewPasswordFormat($passwordData[0]["game_session_password_player"])
             ) {
                 $adminHasPassword = !empty($passwordData[0]["game_session_password_admin"]);
@@ -677,10 +677,12 @@ class GameSession extends Base
     private function LocalApiRequest(string $apiUrl, int $sessionId, array $postValues, bool $async = false): void
     {
         $baseUrl = SymfonyToLegacyHelper::getInstance()->getUrlGenerator()->generate(
-            'legacy_api_session', [
+            'legacy_api_session',
+            [
             'session' => $sessionId,
             'query' => ''
-            ], UrlGeneratorInterface::ABSOLUTE_URL
+            ],
+            UrlGeneratorInterface::ABSOLUTE_URL
         );
         
         $requestHeader = apache_request_headers();
