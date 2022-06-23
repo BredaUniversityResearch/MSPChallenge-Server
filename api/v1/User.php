@@ -225,7 +225,10 @@ class User extends Base
         self::AutoloadAllClasses();
         foreach (get_declared_classes() as $class) {
             if ($this->checkProviderExists($class)) {
-                $return[] = ["id" => str_replace("App\\Domain\\API\\v1\\", "", $class), "name" => (new $class)->getName()];
+                $return[] = [
+                    "id" => str_replace("App\\Domain\\API\\v1\\", "", $class),
+                    "name" => (new $class)->getName()
+                ];
             }
         }
         return $return;
