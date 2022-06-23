@@ -297,8 +297,7 @@ abstract class Base extends CommonBase
     {
         $apifolder = APIHelper::getInstance()->GetCurrentSessionServerApiFolder();
         foreach (array_diff(scandir($apifolder), array('..', '.')) as $file) {
-            $file = strtolower($file);
-            if (substr($file, 0, 6) == "class.") {
+            if (substr($file, 0, 4) == "Auth") {
                 $includeFileName = $apifolder . $file;
                 include_once($includeFileName); // won't include the same file twice
             }
