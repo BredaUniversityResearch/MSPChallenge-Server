@@ -1,7 +1,10 @@
 @echo OFF
 setlocal
 
-set php=C:\xampp\php\php.exe
+if "%PHP_PATH%"=="" (
+  set PHP_PATH=C:\xampp\php\php.exe
+)
+set php="%PHP_PATH%"
 set service=MSPWsServer
 reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
 set exe=tools\Win\nssm\nssm-win64.exe
