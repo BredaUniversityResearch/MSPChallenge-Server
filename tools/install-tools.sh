@@ -90,23 +90,23 @@ function adminer_object()
 {
     class MyAdminer extends Adminer
     {
-        public function login($login, $password)
+        public function login(\$login, \$password)
         {
             return true;
         }
         public function credentials()
         {
-            $baseDir = __DIR__ . '/../../';
-            require_once $baseDir.'vendor/autoload.php';
-            $dotenv = new Dotenv();
-            call_user_func_array([$dotenv, 'load'], glob($baseDir . '.env*') ?: []);
+            \$baseDir = __DIR__ . '/../../';
+            require_once \$baseDir.'vendor/autoload.php';
+            \$dotenv = new Dotenv();
+            call_user_func_array([\$dotenv, 'load'], glob(\$baseDir . '.env*') ?: []);
             // server, username and password for connecting to database
             return array(
                 (
-                    $_ENV['DATABASE_HOST'] ?? DatabaseDefaults::DEFAULT_DATABASE_HOST) . ':' .
-                    ($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT
+                    \$_ENV['DATABASE_HOST'] ?? DatabaseDefaults::DEFAULT_DATABASE_HOST) . ':' .
+                    (\$_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT
                 ),
-                ($_ENV['DATABASE_USER'] ?? DatabaseDefaults::DEFAULT_DATABASE_USER),
+                (\$_ENV['DATABASE_USER'] ?? DatabaseDefaults::DEFAULT_DATABASE_USER),
                 ''
             );
         }
