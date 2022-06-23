@@ -678,9 +678,10 @@ class GameSession extends Base
         string $save_path,
         string $watchdog_address,
         string $response_address,
-        int $sessionId,
+        int $game_id,
         bool $allow_recreate = false
     ): void {
+        $sessionId = $game_id;
         if ($this->DoesSessionExist($sessionId)) {
             if (empty($allow_recreate) || $allow_recreate == false) {
                 throw new Exception("Session already exists.");
