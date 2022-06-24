@@ -109,11 +109,7 @@ class GameSession extends Base
         }
 
         $server_name = $_SERVER["SERVER_NAME"] ?? gethostname();
-        /**
-*
-         *
- * @noinspection HttpUrlsUsage
-*/
+        /** @noinspection HttpUrlsUsage */
         $protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
         $apiFolder = "/ServerManager/api/";
         
