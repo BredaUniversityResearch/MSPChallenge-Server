@@ -19,6 +19,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+use App\Domain\API\v1\Config;
+
 require 'init.php';
 $user = new User();
 if (!$user->isAuthorised()) {
@@ -224,7 +227,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                             <p class="card-text">The other users that should have access to this MSP Challenge server. Note that only this server's administrator(s) can change this.</p>
                         </div>
                         <div class="card-footer">
-                            <a href="https://auth.mspchallenge.info/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
+                            <a href="<a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
                         </div>
                     </div>
                     <div class="card">

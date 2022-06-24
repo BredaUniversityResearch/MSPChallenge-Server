@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\Helper\Config;
+use App\Domain\Common\DatabaseDefaults;
 
 class DB {
 	private static $_instance = null;
@@ -54,7 +55,10 @@ class DB {
 		}
 		
 		try {
-			$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
+            $dsn = 'mysql:host='.$this->_host.
+                    ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT).
+                    ';dbname='.$this->_dbname;
+			$this->_pdo = new PDO($dsn, $this->_user, $this->_pass, self::$PDOArgs);
 			// XAMPP doesn't seem to remove databases when it uninstalls MySQL (which means a reinstall could lead to problems because the dbase will still be there but maybe empty/outdated)
 			// so check if the server_id is available in the settings table - caught below if it doesn't
 			$server_id_attempt = $this->cell("settings.value", array("name", "=", "server_id"));
@@ -381,10 +385,13 @@ class DB {
 	public function attempt_dbase_install() {
 		try {
 			$this->_pdo = null;
-			$this->_pdo = new PDO('mysql:host='.$this->_host.';', $this->_user, $this->_pass, self::$PDOArgs);
+            $dsn = 'mysql:host='.$this->_host.
+                ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
+			$this->_pdo = new PDO($dsn, $this->_user, $this->_pass, self::$PDOArgs);
 			$this->_pdo->exec("CREATE DATABASE IF NOT EXISTS `".$this->_dbname."` DEFAULT CHARACTER SET utf8;");
 			$this->_pdo = null;
-			$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
+            $dsn .= ';dbname='.$this->_dbname;
+			$this->_pdo = new PDO($dsn, $this->_user, $this->_pass, self::$PDOArgs);
 			require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/mysql_structure.php");
 			$this->query($sqls);
 		}

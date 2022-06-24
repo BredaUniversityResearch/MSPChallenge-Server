@@ -32,8 +32,8 @@ class ServerManager extends Base
           "From40beta9To40beta10"
         );
         $this->setRootVars();
-        $this->_msp_auth_url = "https://auth.mspchallenge.info";
-        $this->_msp_auth_api = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/";
+        $this->_msp_auth_url = $this->GetMSPAuthURL();
+        $this->_msp_auth_api = $this->GetMSPAuthAPI();
     }
 
     private function CompletePropertiesFromDB()
@@ -104,12 +104,12 @@ class ServerManager extends Base
 
     public function GetMSPAuthAPI()
     {
-        return $this->_msp_auth_api;
+        return $this->GetMSPAuthURL() . '/usersc/plugins/apibuilder/authmsp/';
     }
 
     public function GetMSPAuthURL()
     {
-        return $this->_msp_auth_url;
+        return \App\Domain\API\v1\Config::GetInstance()->getMSPAuthBaseURL();
     }
 
     public function GetAllVersions()
@@ -246,10 +246,10 @@ class ServerManager extends Base
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
             if ($_SERVER['SERVER_NAME'] != $this->server_address) {
-                return $_SERVER['SERVER_NAME'];
+                return $_SERVER['SERVER_NAME'] . ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
             }
         }
-        return $this->server_address;
+        return $this->server_address . ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
     }
 
     public function GetServerRoot()
