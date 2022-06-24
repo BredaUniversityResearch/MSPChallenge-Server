@@ -287,7 +287,7 @@ class WsServer extends EventDispatcher implements
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getGameSessionIds(bool $onlyPlaying = false): PromiseInterface
+    public function getGameSessionIds(bool $onlySimulable = false): PromiseInterface
     {
         $connection = $this->getServerManagerDbConnection();
         $qb = $connection->createQueryBuilder();
@@ -295,16 +295,12 @@ class WsServer extends EventDispatcher implements
             ->select('id')
             ->from('game_list')
             ->where($qb->expr()->eq('session_state', $qb->createPositionalParameter('healthy')));
-        if ($onlyPlaying) {
+        if ($onlySimulable) {
             $qb->andWhere(
                 $qb->expr()->or(
                     $qb->expr()->in(
                         'game_state',
-                        $qb->createPositionalParameter(['play', 'fastforward' ,'simulation'])
-                    ),
-                    $qb->expr()->and(
-                        $qb->expr()->eq('demo_session', $qb->createPositionalParameter(1)),
-                        $qb->expr()->eq('game_state', $qb->createPositionalParameter('setup'))
+                        $qb->createPositionalParameter(['play', 'fastforward' ,'simulation', 'pause', 'setup'])
                     )
                 )
             );
