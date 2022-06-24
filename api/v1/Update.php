@@ -31,7 +31,9 @@ class Update extends Base
         "ManualExportDatabase",
         ["From40beta7To40beta8", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
         ["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["From40beta7To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+        ["From40beta7To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        ["From40beta8To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        ["From40beta9To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
     );
 
     public function __construct(string $method = '')
@@ -457,6 +459,7 @@ class Update extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function From40beta7To40beta9(): void
     {
+        //there was no difference in db structure between beta8 and beta9
         $this->From40beta7To40beta8();
     }
 
@@ -465,7 +468,7 @@ class Update extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function From40beta7To40beta10(): string
+    public function From40beta7To40beta10(): void
     {
         try {
             $this->From40beta7To40beta9();
@@ -483,6 +486,26 @@ class Update extends Base
             }
         }
 
+        $this->From40beta9To40beta10();
+    }
+
+    /**
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function From40beta8To40beta10(): void
+    {
+        $this->From40beta9To40beta10();
+    }
+
+    /**
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function From40beta9To40beta10(): string
+    {
         // Run doctrine migrations.
         $application = new Application(SymfonyToLegacyHelper::getInstance()->getKernel());
         $application->setAutoExit(false);

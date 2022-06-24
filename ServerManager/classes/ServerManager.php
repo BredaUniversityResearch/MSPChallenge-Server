@@ -27,7 +27,9 @@ class ServerManager extends Base
         $this->_server_upgrades = array( // make sure these functions exist in server API update class and is actually callable - just letters and numbers of course
           "From40beta7To40beta8",
           "From40beta7To40beta9",
-          "From40beta7To40beta10"
+          "From40beta7To40beta10",
+          "From40beta8To40beta10",
+          "From40beta9To40beta10"
         );
         $this->setRootVars();
         $this->_msp_auth_url = "https://auth.mspchallenge.info";
