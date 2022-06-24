@@ -296,12 +296,18 @@ class WsServer extends EventDispatcher implements
             ->from('game_list')
             ->where($qb->expr()->eq('session_state', $qb->createPositionalParameter('healthy')));
         if ($onlyPlaying) {
-            $qb->andWhere($qb->expr()->in(
-                'game_state',
-                $qb->createPositionalParameter([
-                    'play', 'fastforward' ,'simulation'
-                ])
-            ));
+            $qb->andWhere(
+                $qb->expr()->or(
+                    $qb->expr()->in(
+                        'game_state',
+                        $qb->createPositionalParameter(['play', 'fastforward' ,'simulation'])
+                    ),
+                    $qb->expr()->and(
+                        $qb->expr()->eq('demo_session', $qb->createPositionalParameter(1)),
+                        $qb->expr()->eq('game_state', $qb->createPositionalParameter('setup'))
+                    )
+                )
+            );
         }
         return $connection->query($qb);
     }
