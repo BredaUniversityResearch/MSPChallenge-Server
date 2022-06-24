@@ -15440,45 +15440,6 @@
         "fishing": [],
         "messages": [],
         "restriction_settings": []
-      },
-      {
-        "plan_id": 5,
-        "plan_country_id": 1,
-        "plan_name": "Fishing plan",
-        "plan_gametime": -1,
-        "plan_type": "0,0,0",
-        "plan_alters_energy_distribution": 0,
-        "layers": [
-          {
-            "layer_id": 101,
-            "name": "NS_Fishing_Priority_Areas",
-            "layer_editing_type": "",
-            "geometry": [],
-            "warnings": [],
-            "deleted": [
-              {
-                "geometry_id": 9126,
-                "geometry_mspid": 0,
-                "base_geometry_info": {
-                  "geometry_id": 9126,
-                  "geometry_mspid": 21824,
-                  "geometry_persistent": 9126
-                }
-              }
-            ]
-          }
-        ],
-        "grids": [],
-        "fishing": [],
-        "messages": [
-          {
-            "country_id": 1,
-            "user_name": "Magali",
-            "text": "Changed the plans status to: Approved",
-            "time": 1652733183.702
-          }
-        ],
-        "restriction_settings": []
       }
     ],
     "dependencies": {
