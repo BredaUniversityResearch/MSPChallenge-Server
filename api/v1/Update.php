@@ -294,7 +294,7 @@ class Update extends Base
     public function RebuildDatabaseByDumpImport(string $dbase_file_path, string $new_config_file_name): void
     {
         Log::LogInfo("RebuildDatabaseByDumpImport -> Recreating database from save's dump file ...");
-        $outputDirectory = "export/DatabaseDumps/";
+        $outputDirectory = SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/export/DatabaseDumps/';
         if (!is_dir($outputDirectory)) {
             mkdir($outputDirectory);
         }
