@@ -331,11 +331,7 @@ class GameSession extends Base
         if (empty($watchdog_address)) {
             throw new Exception("Watchdog address cannot be empty.");
         }
-        /**
-*
-         *
- * @noinspection SqlWithoutWhere
-*/
+        /** @noinspection SqlWithoutWhere */
         Database::GetInstance()->query(
             "UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT();",
             array($watchdog_address)
