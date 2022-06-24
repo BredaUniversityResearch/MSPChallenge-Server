@@ -210,13 +210,7 @@ class User extends Base
 
     private function checkProviderExists($provider): bool
     {
-        if (strstr($provider, "App\\Domain\\API\\v1\\") === false) {
-            $provider = "App\\Domain\\API\\v1\\".$provider;
-        }
-        if (class_exists($provider) && is_subclass_of($provider, "\\App\\Domain\\API\\v1\\Auths")) {
-            return true;
-        }
-        return false;
+        return is_subclass_of($provider, Auths::class);
     }
     
     public function getProviders(): array
@@ -226,7 +220,7 @@ class User extends Base
         foreach (get_declared_classes() as $class) {
             if ($this->checkProviderExists($class)) {
                 $return[] = [
-                    "id" => str_replace("App\\Domain\\API\\v1\\", "", $class),
+                    "id" => $class,
                     "name" => (new $class)->getName()
                 ];
             }
@@ -240,9 +234,6 @@ class User extends Base
     public function checkExists(string $provider, string $users)
     {
         if ($this->checkProviderExists($provider)) {
-            if (strstr($provider, "App\\Domain\\API\\v1\\") === false) {
-                $provider = "App\\Domain\\API\\v1\\".$provider;
-            }
             $call_provider = new $provider;
             return $call_provider->checkuser($users);
         }
@@ -255,9 +246,6 @@ class User extends Base
     private function callProvidersAuthentication(string $provider, string $username, string $password)
     {
         if ($this->checkProviderExists($provider)) {
-            if (strstr($provider, "App\\Domain\\API\\v1\\") === false) {
-                $provider = "App\\Domain\\API\\v1\\".$provider;
-            }
             $call_provider = new $provider;
             return $call_provider->authenticate($username, $password);
         }

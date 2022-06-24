@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Helper\Util;
 use App\Domain\API\APIHelper;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\Common\CommonBase;
@@ -295,12 +296,17 @@ abstract class Base extends CommonBase
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AutoloadAllClasses(): void
     {
-        $apifolder = APIHelper::getInstance()->GetCurrentSessionServerApiFolder();
-        foreach (array_diff(scandir($apifolder), array('..', '.')) as $file) {
-            if (substr($file, 0, 4) == "Auth") {
-                $includeFileName = $apifolder . $file;
-                include_once($includeFileName); // won't include the same file twice
+        $classmap = require(APIHelper::getInstance()->GetBaseFolder() . 'vendor/composer/autoload_classmap.php');
+        foreach ($classmap as $class => $file) {
+            $refClass = new \ReflectionClass(__CLASS__);
+            if (!Util::hasPrefix($class, str_replace($refClass->getShortName(), '', __CLASS__))) {
+                continue;
             }
+            $refClass = new \ReflectionClass($class);
+            if (!$refClass->isSubclassOf(Auths::class)) {
+                continue;
+            }
+            require_once($file);
         }
     }
 
