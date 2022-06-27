@@ -435,7 +435,7 @@ class Database
         string $dbPassword,
         string $databaseName
     ): void {
-        $dumpCommand = $this->GetMysqlExecutableDirectory()."/bin/mysqldump --user=\"".$databaseUser."\" --password=\"".
+        $dumpCommand = "\"".$this->GetMysqlExecutableDirectory()."/bin/mysqldump\" --user=\"".$databaseUser."\" --password=\"".
             $dbPassword."\" --host=\"".$databaseHost."\" \"".$databaseName."\" > \"".$outputFilePath."\"";
         if ($blockUntilComplete == true) {
             exec($dumpCommand);
@@ -473,7 +473,7 @@ class Database
         string $dbPassword,
         string $databaseName
     ): void {
-        $dumpCommand = $this->GetMysqlExecutableDirectory()."/bin/mysql --user=\"".$databaseUser."\" --password=\"".
+        $dumpCommand = "\"".$this->GetMysqlExecutableDirectory()."/bin/mysql\" --user=\"".$databaseUser."\" --password=\"".
             $dbPassword."\" --host=\"".$databaseHost."\" \"".$databaseName."\" < \"".$importFilePath."\"";
         if ($blockUntilComplete == true) {
             exec($dumpCommand);
