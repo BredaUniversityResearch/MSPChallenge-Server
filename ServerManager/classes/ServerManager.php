@@ -222,7 +222,8 @@ class ServerManager extends Base
 
     public function getWsServerURLBySessionId(int $sessionId = 0): string
     {
-        return WsServer::getWsServerURLBySessionId($sessionId, $this->GetTranslatedServerURL());
+        $urlParts = parse_url($this->GetTranslatedServerURL());
+        return WsServer::getWsServerURLBySessionId($sessionId, $urlParts['host'] ?: 'localhost');
     }
 
     public function GetFullSelfAddress()

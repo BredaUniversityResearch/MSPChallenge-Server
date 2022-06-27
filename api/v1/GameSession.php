@@ -120,12 +120,13 @@ class GameSession extends Base
             $dbConfig["password"],
             $dbConfig["database"]
         );
+        $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
             $server_name = $row["address"];
             //if ($server_name == "localhost") $server_name = getHostByName(getHostName());
-            $GLOBALS['ServerManagerApiRoot'] = $protocol.$server_name.$apiFolder;
+            $GLOBALS['ServerManagerApiRoot'] = $protocol.$server_name.$port.$apiFolder;
         }
-        return $protocol.$server_name.$apiFolder;
+        return $protocol.$server_name.$port.$apiFolder;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
