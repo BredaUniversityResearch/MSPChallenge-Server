@@ -18,16 +18,22 @@ class AwaitPrerequisitesWsServerPlugin extends Plugin
     private function checkServerManagerDbConnection(): PromiseInterface
     {
         $connection = $this->getServerManager()->getServerManagerDbConnection();
-        return $connection->queryBySQL('SELECT 1')
-            ->then(function (/* Result $resul t*/) {
-                wdo('Found msp_server_manager database');
-                $this->dispatch(new NameAwareEvent(self::EVENT_PREREQUISITES_MET), self::EVENT_PREREQUISITES_MET);
-            })
-            ->otherwise(function ($reason) {
-                // Handle the rejection, and don't propagate. This is like catch without a rethrow
-                wdo('Awaiting creation of msp_server_manager database');
-                return null;
-            });
+        $qb = $connection->createQueryBuilder();
+        return $connection->query(
+            $qb
+                ->select('name')
+                ->from('settings')
+                ->setMaxResults(1)
+        )
+        ->then(function (/* Result $resul t*/) {
+            wdo('Found msp_server_manager database');
+            $this->dispatch(new NameAwareEvent(self::EVENT_PREREQUISITES_MET), self::EVENT_PREREQUISITES_MET);
+        })
+        ->otherwise(function ($reason) {
+            // Handle the rejection, and don't propagate. This is like catch without a rethrow
+            wdo('Awaiting creation of msp_server_manager database');
+            return null;
+        });
     }
 
     protected function onCreatePromiseFunction(): Closure
