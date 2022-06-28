@@ -100,7 +100,7 @@ goto eof
 cd "%cwd"
 endlocal
 IF %ERRORLEVEL% NEQ 0 (
-  exit /b %ERRORLEVEL%
+    exit /b %ERRORLEVEL%
 )
 exit /b 0
 
