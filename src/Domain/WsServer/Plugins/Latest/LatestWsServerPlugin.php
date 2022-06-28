@@ -12,6 +12,7 @@ use App\Domain\WsServer\WsServerEventDispatcherInterface;
 use Closure;
 use Exception;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use function React\Promise\all;
 use function React\Promise\reject;
 
@@ -35,11 +36,15 @@ class LatestWsServerPlugin extends Plugin
         return function () {
             return $this->latest()
                 ->then(function (array $payloadContainer) {
-                    $this->addDebugOutput(
-                        'just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer))
+                    $this->addOutput(
+                        'just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer)),
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
                     );
                     $payloadContainer = array_filter($payloadContainer);
-                    $this->addDebugOutput(json_encode($payloadContainer));
+                    if (empty($payloadContainer)) {
+                        return;
+                    }
+                    $this->addOutput(json_encode($payloadContainer), OutputInterface::VERBOSITY_VERY_VERBOSE);
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -73,14 +78,14 @@ class LatestWsServerPlugin extends Plugin
                     ]
                 )) {
                     // Client's token has been expired, let the client re-connected with a new token
-                    $this->addDebugOutput(
+                    $this->addOutput(
                         'Client\'s token has been expired, let the client re-connected with a new token'
                     );
                     $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->close();
                     continue;
                 }
                 $latestTimeStart = microtime(true);
-                $this->addDebugOutput('Starting "latest" for: ' . $connResourceId);
+                $this->addOutput('Starting "latest" for: ' . $connResourceId);
                 $promises[$connResourceId] = $this->getGameLatest($connResourceId)->Latest(
                     $clientInfo['team_id'],
                     $clientInfo['last_update_time'],
@@ -88,19 +93,19 @@ class LatestWsServerPlugin extends Plugin
                     $this->isDebugOutputEnabled()
                 )
                 ->then(function ($payload) use ($connResourceId, $latestTimeStart, $clientInfo) {
-                    $this->addDebugOutput('Created "latest" payload for: ' . $connResourceId);
+                    $this->addOutput('Created "latest" payload for: ' . $connResourceId);
                     $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                         $this->getName(),
                         $connResourceId,
                         microtime(true) - $latestTimeStart
                     );
                     if (empty($payload)) {
-                        $this->addDebugOutput('empty payload');
+                        $this->addOutput('empty payload');
                         return [];
                     }
                     if (null === $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)) {
                         // disconnected while running this async code, nothing was sent
-                        $this->addDebugOutput('disconnected while running this async code, nothing was sent');
+                        $this->addOutput('disconnected while running this async code, nothing was sent');
                         $e = new ClientDisconnectedException();
                         $e->setConnResourceId($connResourceId);
                         throw $e;
@@ -109,7 +114,7 @@ class LatestWsServerPlugin extends Plugin
                     if ($clientInfo['last_update_time'] != $clientInfoContainer['last_update_time']) {
                         // encountered another issue: mismatch between the "used" client info's last_update_time
                         //   and the "latest", so this payload will not be accepted, and should not be sent anymore...
-                        $this->addDebugOutput(
+                        $this->addOutput(
                             'mismatch between the "used" client info\'s last_update_time and the "latest"'
                         );
                         // just return empty payload, nothing was sent...
@@ -129,7 +134,7 @@ class LatestWsServerPlugin extends Plugin
                         )
                     ) {
                         // no essential payload differences compared to the previous one, no need to send it now
-                        $this->addDebugOutput(
+                        $this->addOutput(
                             'no essential payload differences compared to the previous one, ' .
                             'no need to send it now'
                         );
@@ -147,7 +152,7 @@ class LatestWsServerPlugin extends Plugin
                         $payload['update_time']
                     );
 
-                    $this->addDebugOutput('send payload to: ' . $connResourceId);
+                    $this->addOutput('send payload to: ' . $connResourceId);
                     $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson([
                         'header_type' => 'Game/Latest',
                         'header_data' => null,
