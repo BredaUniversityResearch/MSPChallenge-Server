@@ -354,11 +354,12 @@ class Store extends Base
             if ($type == -1) {
                 $type = $typeOther ?? 0;
             }
-        } elseif (isset($featureProperties['type'])
-        ) {
-            $type = $featureProperties['type'];
+        } else
+        {
+            $type = $featureProperties['type'] ?: 0;
             unset($featureProperties['type']);
         }
+
 
         if (isset($featureProperties['mspid'])
             && is_numeric($featureProperties['mspid'])
