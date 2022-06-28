@@ -354,8 +354,7 @@ class Store extends Base
             if ($type == -1) {
                 $type = $typeOther ?? 0;
             }
-        } else
-        {
+        } else {
             $type = $featureProperties['type'] ?: 0;
             unset($featureProperties['type']);
         }
