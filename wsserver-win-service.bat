@@ -1,5 +1,8 @@
 @echo OFF
 setlocal
+set cwd=%cd%
+set scriptpath=%~dp0
+cd "%scriptpath%"
 
 if "%PHP_PATH%"=="" (
   set PHP_PATH=C:\xampp\php\php.exe
@@ -94,9 +97,10 @@ if not "%~2"=="" (
 goto eof
 
 :eof
+cd "%cwd"
 endlocal
 IF %ERRORLEVEL% NEQ 0 (
-    exit /b %ERRORLEVEL%
+  exit /b %ERRORLEVEL%
 )
 exit /b 0
 
