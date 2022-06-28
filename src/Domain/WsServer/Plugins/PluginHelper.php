@@ -4,6 +4,7 @@ namespace App\Domain\WsServer\Plugins;
 
 use Closure;
 use React\EventLoop\LoopInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use function App\assertFulfilled;
 
 class PluginHelper
@@ -36,19 +37,31 @@ class PluginHelper
         return function () use ($plugin, $loop, $startTime, $repeatedFunction) {
             // plugin should be unregistered from loop
             if (!$plugin->isRegisteredToLoop()) {
-                $plugin->addDebugOutput('Unregistered from loop: "' . $plugin->getName() .'"');
+                $plugin->addOutput(
+                    'Unregistered from loop: "' . $plugin->getName() .'"',
+                    OutputInterface::VERBOSITY_VERBOSE
+                );
                 return;
             }
             $elapsedSec = (microtime(true) - $startTime) * 0.000001;
             if ($elapsedSec > $plugin->getMinIntervalSec()) {
-                $plugin->addDebugOutput('starting new future "' . $plugin->getName() .'"');
+                $plugin->addOutput(
+                    'starting new future "' . $plugin->getName() .'"',
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
                 $loop->futureTick($repeatedFunction);
                 return;
             }
             $waitingSec = $plugin->getMinIntervalSec() - $elapsedSec;
-            $plugin->addDebugOutput('awaiting new future "' . $plugin->getName() . '" for ' . $waitingSec . ' sec');
+            $plugin->addOutput(
+                'awaiting new future "' . $plugin->getName() . '" for ' . $waitingSec . ' sec',
+                OutputInterface::VERBOSITY_VERY_VERBOSE
+            );
             $loop->addTimer($waitingSec, function () use ($plugin, $loop, $repeatedFunction) {
-                $plugin->addDebugOutput('starting new future "' . $plugin->getName() . '"');
+                $plugin->addOutput(
+                    'starting new future "' . $plugin->getName() . '"',
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
                 $loop->futureTick($repeatedFunction);
             });
         };

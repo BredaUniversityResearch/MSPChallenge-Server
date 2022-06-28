@@ -7,7 +7,7 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\BootstrapWsServerPlugin;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
-use App\Domain\WsServer\WsServerDebugOutput;
+use App\Domain\WsServer\WsServerOutput;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Symfony\Component\Console\Command\Command;
@@ -117,7 +117,9 @@ class WsServerCommand extends Command
 //        });
 
         define('WSS', 1); // to identify that we are in a websocket server instance. Value is not important.
-        WsServerDebugOutput::setMessageFilter($input->getOption(self::OPTION_MESSAGE_FILTER));
+
+        WsServerOutput::setVerbosity($output->getVerbosity());
+        WsServerOutput::setMessageFilter($input->getOption(self::OPTION_MESSAGE_FILTER));
         if (null !== $gameSessionId = $input->getOption(self::OPTION_GAME_SESSION_ID)) {
             $this->wsServer->setGameSessionIdFilter($gameSessionId);
         }

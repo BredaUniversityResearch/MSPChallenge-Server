@@ -13,6 +13,7 @@ use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use function App\parallel;
 use function App\tpf;
@@ -47,12 +48,19 @@ class ExecuteBatchesWsServerPlugin extends Plugin
 
             return $this->executeBatches()
                 ->then(function (array $clientToBatchResultContainer) {
-                    $this->addDebugOutput(
+                    $this->addOutput(
                         'just finished "executeBatches" for connections: ' .
-                        implode(', ', array_keys($clientToBatchResultContainer))
+                            implode(', ', array_keys($clientToBatchResultContainer)),
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
                     );
                     $clientToBatchResultContainer = array_filter($clientToBatchResultContainer);
-                    $this->addDebugOutput(json_encode($clientToBatchResultContainer));
+                    if (empty($clientToBatchResultContainer)) {
+                        return;
+                    }
+                    $this->addOutput(
+                        json_encode($clientToBatchResultContainer),
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
+                    );
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -105,7 +113,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $timeStart = microtime(true);
-                $this->addDebugOutput('Starting "executeBatches" for: ' . $connResourceId);
+                $this->addOutput('Starting "executeBatches" for: ' . $connResourceId);
                 $promises[$connResourceId] = $this->getBatch($connResourceId)
                     ->executeNextQueuedBatchFor(
                         $clientInfo['team_id'],
@@ -114,7 +122,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     )
                 ->then(
                     function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
-                        $this->addDebugOutput('Created "executeBatches" payload for: ' . $connResourceId);
+                        $this->addOutput('Created "executeBatches" payload for: ' . $connResourceId);
                         $this->getClientConnectionResourceManager()->addToMeasurementCollection(
                             $this->getName(),
                             $connResourceId,
@@ -127,7 +135,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             $connResourceId
                         )) {
                             // disconnected while running this async code, nothing was sent
-                            $this->addDebugOutput('disconnected while running this async code, nothing was sent');
+                            $this->addOutput('disconnected while running this async code, nothing was sent');
                             $e = new ClientDisconnectedException();
                             $e->setConnResourceId($connResourceId);
                             throw $e;

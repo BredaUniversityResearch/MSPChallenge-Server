@@ -7,6 +7,7 @@ use Closure;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use function App\resolveOnFutureTick;
 
 class TickWsServerPlugin extends Plugin
@@ -27,8 +28,9 @@ class TickWsServerPlugin extends Plugin
         return function () {
             return $this->tick()
                 ->then(function (int $gameSessionId) {
-                    $this->addDebugOutput(
-                        'just finished tick for game session id: ' . $gameSessionId
+                    $this->addOutput(
+                        'just finished tick for game session id: ' . $gameSessionId,
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
                     );
                 });
         };
@@ -47,7 +49,7 @@ class TickWsServerPlugin extends Plugin
             return resolveOnFutureTick(new Deferred(), $this->gameSessionId)->promise();
         }
 
-        $this->addDebugOutput('starting "tick" for game session: ' . $this->gameSessionId);
+        $this->addOutput('starting "tick" for game session: ' . $this->gameSessionId);
         $tickTimeStart = microtime(true);
         return $this->getGameTick($this->gameSessionId)->Tick(
             $this->isDebugOutputEnabled()

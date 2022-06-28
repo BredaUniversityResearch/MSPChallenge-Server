@@ -10,8 +10,10 @@ use Exception;
 use React\EventLoop\LoopInterface;
 use Closure;
 use App\Domain\Event\NameAwareEvent;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
-abstract class Plugin implements PluginInterface
+abstract class Plugin extends EventDispatcher implements PluginInterface
 {
     private string $name;
     private float $minIntervalSec;
@@ -28,11 +30,12 @@ abstract class Plugin implements PluginInterface
     public function __construct(
         string $name,
         float $minIntervalSec,
-        bool $debugOutputEnabled = false
+        bool $debugOutputEnabled = true
     ) {
         $this->name = $name;
         $this->minIntervalSec = $minIntervalSec;
         $this->debugOutputEnabled = $debugOutputEnabled;
+        parent::__construct();
     }
 
     public function getName(): string
@@ -55,10 +58,10 @@ abstract class Plugin implements PluginInterface
         $this->debugOutputEnabled = $debugOutputEnabled;
     }
 
-    public function addDebugOutput(string $output): self
+    public function addOutput(string $output, int $verbosity = OutputInterface::VERBOSITY_NORMAL): self
     {
         if ($this->isDebugOutputEnabled()) {
-            wdo($output);
+            wdo($output, $verbosity);
         }
         return $this;
     }

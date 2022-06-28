@@ -230,11 +230,11 @@ class GameLatest extends CommonBase
                         //[MSP-1116] Seems sensible?
                         $tick['era_timeleft'] = $tick['era_realtime'] - ($tick['era_monthsdone'] * $secondsPerMonth);
                         if ($showDebug) {
-                            echo "GAME PAUSED";
+                            wdo('GAME PAUSED');
                         }
                     } else {
                         if ($showDebug) {
-                            echo "GAME ENDED";
+                            wdo('GAME ENDED');
                         }
                     }
 
@@ -254,7 +254,7 @@ class GameLatest extends CommonBase
     {
         $data['tick'] = $tick;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after tick<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after tick');
         }
         $plan = new PlanLatest();
         $this->asyncDataTransferTo($plan);
@@ -272,7 +272,7 @@ class GameLatest extends CommonBase
     ): PromiseInterface {
         $data['plan'] = $planData;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after plan<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after plan');
         }
 
         $layer = new LayerLatest();
@@ -302,7 +302,7 @@ class GameLatest extends CommonBase
             //only send the geometry when it's required
             $p['layers'] = $layersContainer[$key];
             if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-                echo (microtime(true) - $newTime) . " elapsed after layers<br />";
+                wdo((microtime(true) - $newTime) . ' elapsed after layers<br />');
             }
 
             if ((
@@ -332,7 +332,7 @@ class GameLatest extends CommonBase
     ): PromiseInterface {
         $data['planmessages'] = $queryResultRows;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after plan messages<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after plan messages');
         }
 
         //return any raster layers that need to be updated
@@ -354,7 +354,7 @@ class GameLatest extends CommonBase
     ): PromiseInterface {
         $data['raster'] = $queryResult->fetchAllRows();
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after raster<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after raster<br />');
         }
 
         $energy = new EnergyLatest();
@@ -384,7 +384,7 @@ class GameLatest extends CommonBase
         $data['energy']['output'] = $queryResults[1]->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after energy<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after energy');
         }
 
         $kpi = new KpiLatest();
@@ -407,7 +407,7 @@ class GameLatest extends CommonBase
         $data['kpi'] = $queryResultRows;
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after kpi<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after kpi<br />');
         }
 
         $warning = new WarningLatest();
@@ -430,7 +430,7 @@ class GameLatest extends CommonBase
         $data['warning']['shipping_issues'] = $queryResults[1]->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after warning<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after warning<br />');
         }
 
         $objective = new ObjectiveLatest();
@@ -452,7 +452,7 @@ class GameLatest extends CommonBase
         $data['objectives'] = $result->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after objective<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after objective<br />');
         }
 
         //Add a slight fudge of 1ms to the update times to avoid rounding issues.
