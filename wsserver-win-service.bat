@@ -97,7 +97,7 @@ if not "%~2"=="" (
 goto eof
 
 :eof
-cd "%cwd"
+cd "%cwd%"
 endlocal
 IF %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
