@@ -84,7 +84,8 @@ class GameSession extends Base
                 function (Result $result) use ($protocol, $apiRoot) {
                     $row = $result->fetchFirstRow() ?? [];
                     $serverName = $row['address'] ?? $_SERVER["SERVER_NAME"] ?? gethostname();
-                    $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$apiRoot;
+                    $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
+                    $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$port.$apiRoot;
                     return $GLOBALS['RequestApiRoot'];
                 }
             );
