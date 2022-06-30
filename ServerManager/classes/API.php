@@ -7,28 +7,19 @@ class API extends Base
 
     public function __construct()
     {
-        // This captures all PHP errors and warnings to ensure the standard return format 
-        set_exception_handler(array($this, 'exceptions_handler'));
-        set_error_handler(array($this, 'error_handler'));
-        
         $this->setStatusFailure();
 
         // test database connection
         $this->_db = DB::getInstance();
-        if ($this->_db->error()) throw new Exception($this->_db->errorString());
+        if ($this->_db->error()) throw new ServerManagerAPIException($this->_db->errorString());
     }
 
     public function exceptions_handler($e) 
     {
         $message = $e->getMessage();
-        if (is_a($e, "ErrorException") || is_a($e, "ParseError")) $message = $message." - on line ".$e->getLine()." of file ".$e->getFile();
+        if ($e instanceof ErrorException || $e instanceof ParseError) $message = $message." - on line ".$e->getLine()." of file ".$e->getFile();
         $this->setMessage($message); 
         $this->Return();
-    }
-
-    public function error_handler($errno, $errstr, $errfile, $errline )
-    {
-        throw new ErrorException($errstr, 0, $errno, $errfile, $errline); 
     }
 
     public function setStatusSuccess()
