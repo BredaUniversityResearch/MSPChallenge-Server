@@ -2,16 +2,21 @@
 
 namespace App\EventListener;
 
+use API;
+use ServerManagerAPIException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 class ExceptionListener
 {
     public function onKernelException(ExceptionEvent $event)
     {
-        $exception =  $event->getThrowable();
-        if ($exception instanceof \ServerManagerAPIException) {
-            $api = new \API;
-            $api->exceptions_handler($exception);
+        $e = $event->getThrowable();
+        if ($e instanceof ServerManagerAPIException) {
+            $api = new API;
+            $api->setMessage($e->getMessage());
+            $payload = $api->prepareReturn();
+            $event->setResponse(new JsonResponse($payload));
         }
     }
 }

@@ -50,11 +50,13 @@ class API extends Base
         return false;
     }
 
-    private function prepareReturn()
+    // needs to be public now, it is used by ExceptionListener
+    public function prepareReturn(): array
     {
         $this->count = (is_array($this->_payload) && is_array(current($this->_payload))) ? count(current($this->_payload)) : 0;
         $this->_return = getPublicObjectVars($this);
         $this->_return += $this->_payload;
+        return $this->_return;
     }
 
     public function printReturn()
