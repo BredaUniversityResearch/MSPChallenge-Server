@@ -390,7 +390,7 @@ class Database
     public static function execInBackground(string $cmd): void
     {
         if (substr(php_uname(), 0, 7) == "Windows") {
-            pclose(popen("start /B \"random\" ". $cmd, "r"));
+            pclose(popen("start /B \"msp background task\" ". $cmd, "r"));
         } else {
             exec($cmd . " > /dev/null &");
         }
