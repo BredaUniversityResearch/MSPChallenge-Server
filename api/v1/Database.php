@@ -314,9 +314,6 @@ class Database
             $dbConfig["multisession_create_password"]
         );
         $temporaryConnection->query("CREATE DATABASE IF NOT EXISTS ".$this->db_name);
-        $temporaryConnection->query(
-            "GRANT ALL PRIVILEGES ON `".str_replace("_", "\_", $this->db_name)."`.* TO ".$this->db_user."@localhost"
-        );
         $temporaryConnection = null;
 
         $this->connectToDatabase();
@@ -487,7 +484,7 @@ class Database
         $dumpCommand = "\"".$this->GetMysqlExecutableDirectory()."/bin/mysql\" --user=\"".
             $databaseUser."\" --password=\"".$dbPassword."\" --host=\"".
             $databaseHost."\" \"".$databaseName."\" < \"".$importFilePath."\"";
-        if ($blockUntilComplete == true) {
+        if ($blockUntilComplete) {
             exec($dumpCommand);
         } else {
             self::execInBackground($dumpCommand);
