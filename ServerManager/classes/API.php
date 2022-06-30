@@ -14,14 +14,6 @@ class API extends Base
         if ($this->_db->error()) throw new ServerManagerAPIException($this->_db->errorString());
     }
 
-    public function exceptions_handler($e) 
-    {
-        $message = $e->getMessage();
-        if ($e instanceof ErrorException || $e instanceof ParseError) $message = $message." - on line ".$e->getLine()." of file ".$e->getFile();
-        $this->setMessage($message); 
-        $this->Return();
-    }
-
     public function setStatusSuccess()
     {
         $this->success = true;
