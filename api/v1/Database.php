@@ -390,7 +390,7 @@ class Database
     public static function execInBackground(string $cmd): void
     {
         if (substr(php_uname(), 0, 7) == "Windows") {
-            pclose(popen("start /B ". $cmd, "r"));
+            pclose(popen("start /B \"msp background task\" ". $cmd, "r"));
         } else {
             exec($cmd . " > /dev/null &");
         }
@@ -402,8 +402,18 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function GetMysqlExecutableDirectory(): string
     {
-        $mysqlDir = Database::GetInstance()->query("SELECT @@basedir as mysql_home");
-        return $mysqlDir[0]["mysql_home"] ?? '';
+        $dbConfig = Config::GetInstance()->DatabaseConfig();
+        // todo: improve this by using ConnectionManager?
+        $temporaryConnection = Database::CreateTemporaryDBConnection(
+            $dbConfig["host"],
+            $dbConfig["user"],
+            $dbConfig["password"],
+            $dbConfig["database"]
+        );
+        $result = $temporaryConnection->query("SELECT @@basedir as mysql_home");
+        $mysqlDir = $result->fetch(PDO::FETCH_ASSOC);
+        $temporaryConnection = null;
+        return $mysqlDir["mysql_home"] ?? '';
     }
 
     /**
@@ -438,7 +448,7 @@ class Database
         $dumpCommand = "\"".$this->GetMysqlExecutableDirectory()."/bin/mysqldump\" --user=\"".
             $databaseUser."\" --password=\"".$dbPassword."\" --host=\"".
             $databaseHost."\" \"".$databaseName."\" > \"".$outputFilePath."\"";
-        if ($blockUntilComplete == true) {
+        if ($blockUntilComplete) {
             exec($dumpCommand);
         } else {
             self::execInBackground($dumpCommand);
