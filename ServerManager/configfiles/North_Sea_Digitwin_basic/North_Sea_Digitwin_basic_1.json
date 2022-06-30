@@ -37689,7 +37689,7 @@
                 "layer_short": "Fishing Priority Areas",
                 "layer_category": "activities",
                 "layer_subcategory": "fishing",
-                "layer_download_from_geoserver": 1,
+                "layer_download_from_geoserver": 0,
                 "layer_width": 0,
                 "layer_height": 0,
                 "layer_raster_material": "RasterMELCustomizable",
