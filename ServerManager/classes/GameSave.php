@@ -71,10 +71,10 @@ class GameSave extends Base
 
     public function get()
     {
-        if (empty($this->id)) throw new Exception("Cannot obtain GameSave without a valid id.");
+        if (empty($this->id)) throw new ServerManagerAPIException("Cannot obtain GameSave without a valid id.");
         if (!$this->_db->query("SELECT * FROM game_saves WHERE id = ?", array($this->id))) 
-            throw new Exception($this->_db->errorString());
-        if ($this->_db->count() == 0) throw new Exception("Save ".$this->id." not found.");
+            throw new ServerManagerAPIException($this->_db->errorString());
+        if ($this->_db->count() == 0) throw new ServerManagerAPIException("Save ".$this->id." not found.");
         foreach ($this->_db->first(true) as $varname => $varvalue)
         {
             if (property_exists($this, $varname)) $this->$varname = $varvalue;
@@ -88,12 +88,12 @@ class GameSave extends Base
         $original_session_id = $this->getContentsGameList()["id"];
         $file = $this->getFullZipPath();
         $zip = new ZipArchive;
-        if ($zip->open($file) !== true) throw new Exception("Couldn't open the uploaded file. Are you sure it's a ZIP file?");
+        if ($zip->open($file) !== true) throw new ServerManagerAPIException("Couldn't open the uploaded file. Are you sure it's a ZIP file?");
         $config_content = $zip->getFromName('session_config_'.$original_session_id.'.json');
-        if ($config_content === false) throw new Exception("Couldn't find the session config file in the save ZIP.");
+        if ($config_content === false) throw new ServerManagerAPIException("Couldn't find the session config file in the save ZIP.");
         $zip->close();
         $content = json_decode($config_content, true);
-        if (is_null($content) || !is_array($content)) throw new Exception(json_last_error_msg());
+        if (is_null($content) || !is_array($content)) throw new ServerManagerAPIException(json_last_error_msg());
         return $content;
     }
 
@@ -101,12 +101,12 @@ class GameSave extends Base
     {
         if (is_null($file)) $file = $this->getFullZipPath();
         $zip = new ZipArchive;
-        if ($zip->open($file) !== true) throw new Exception("Couldn't open the uploaded file. Are you sure it's a ZIP file?");
+        if ($zip->open($file) !== true) throw new ServerManagerAPIException("Couldn't open the uploaded file. Are you sure it's a ZIP file?");
         $game_list_json = $zip->getFromName('game_list.json');
-        if ($game_list_json === false) throw new Exception("Couldn't find the game_list.json file in the save ZIP.");
+        if ($game_list_json === false) throw new ServerManagerAPIException("Couldn't find the game_list.json file in the save ZIP.");
         $zip->close();
         $content = json_decode($game_list_json, true);
-        if (is_null($content) || !is_array($content)) throw new Exception(json_last_error_msg());
+        if (is_null($content) || !is_array($content)) throw new ServerManagerAPIException(json_last_error_msg());
         return $content;
     }
 
@@ -116,7 +116,7 @@ class GameSave extends Base
                                 DATE_FORMAT(DATE_ADD(str_to_date(CONCAT(cast(gs.game_start_year as char),'-01-01') , '%Y-%m-%d') , INTERVAL + gs.game_current_month MONTH),'%M %Y' ) as game_current_month",
                                 "game_saves gs",
                                 $where_array
-            )) throw new Exception($this->_db->errorString());
+            )) throw new ServerManagerAPIException($this->_db->errorString());
         $return_array = $this->_db->results(true);
         foreach ($return_array as $row => $gamesave)
         {
@@ -137,7 +137,7 @@ class GameSave extends Base
 
     public function createZip($gamesession)
     {
-        if (!is_a($gamesession, "GameSession")) throw new Exception("Can't continue because the passed-on variable is not a Game Session object.");
+        if (!is_a($gamesession, "GameSession")) throw new ServerManagerAPIException("Can't continue because the passed-on variable is not a Game Session object.");
         $server_call = self::callServer(
             "GameSession/SaveSession", 
             array(
@@ -151,7 +151,7 @@ class GameSave extends Base
             $gamesession->id,
             $gamesession->api_access_token
         );
-        if (!$server_call["success"]) throw new Exception($server_call["message"]);
+        if (!$server_call["success"]) throw new ServerManagerAPIException($server_call["message"]);
         return true;
     }
 
@@ -171,7 +171,7 @@ class GameSave extends Base
     {
         // need to add one more file to the zip: game_list.json (which is the game_list record of the original session)
         $zippath = $_POST["zippath"] ?? "";
-        if (!file_exists($zippath)) throw new Exception("Could not find the file with path: ".$zippath);
+        if (!file_exists($zippath)) throw new ServerManagerAPIException("Could not find the file with path: ".$zippath);
         $gamesession = new GameSession;
         $gamesession->id = $_POST["session_id"] ?? 0;
         $gamesession->get();
@@ -200,8 +200,8 @@ class GameSave extends Base
             $game_list_contents["game_config_versions_region"] = $gameconfig->region;
         }
         $zip = new ZipArchive();
-        if ($zip->open($zippath) !== true) throw new Exception("Could not open the file. Are you sure it's a ZIP?");
-        if (!$zip->addFromString('game_list.json', json_encode($game_list_contents))) throw new Exception("Failed to add game_list.json file to the ZIP.");
+        if ($zip->open($zippath) !== true) throw new ServerManagerAPIException("Could not open the file. Are you sure it's a ZIP?");
+        if (!$zip->addFromString('game_list.json', json_encode($game_list_contents))) throw new ServerManagerAPIException("Failed to add game_list.json file to the ZIP.");
         $zip->close();
     }
 
@@ -213,13 +213,13 @@ class GameSave extends Base
         $zippath = $_POST["zippath"] ?? "";
         $def_zippath = str_replace("temp_", "", $zippath);
 
-        if ($zip->open($zippath) !== true) throw new Exception("Could not open the temporary ZIP file, so cannot continue.");
-        if ($def_zip->open($def_zippath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) throw new Exception("Could not create definitive ZIP file, so cannot continue.");
+        if ($zip->open($zippath) !== true) throw new ServerManagerAPIException("Could not open the temporary ZIP file, so cannot continue.");
+        if ($def_zip->open($def_zippath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) throw new ServerManagerAPIException("Could not create definitive ZIP file, so cannot continue.");
         do {
             $random = rand(0, 1000);
             $templocation = $this->getStore()."temp_".$random."/";
         } while (is_dir($templocation));
-        if (!mkdir($templocation)) throw new Exception("Could not create temporary folder to put files in, so cannot continue.");
+        if (!mkdir($templocation)) throw new ServerManagerAPIException("Could not create temporary folder to put files in, so cannot continue.");
 
         for($i = 0; $i < $zip->numFiles; $i++) {
             $filename = $zip->getNameIndex($i);
@@ -323,7 +323,7 @@ class GameSave extends Base
 
     public function addFromUpload($file)
     {
-        if (empty($file)) throw new Exception("Didn't get an uploaded file, so can't continue.");
+        if (empty($file)) throw new ServerManagerAPIException("Didn't get an uploaded file, so can't continue.");
         $savevars = $this->getContentsGameList($file);
         $this->server_version = $savevars["server_version"] ?? "4.0-beta7"; // since this var was first added with beta8
         $this->name = DB::getInstance()->ensure_unique_name($savevars['name'], "name", "game_saves");
@@ -352,7 +352,7 @@ class GameSave extends Base
         $this->id = -1;
         $this->add();
         if (!move_uploaded_file($file, $this->getStore().$this->getPrefix().$this->id.".zip")) 
-            throw new Exception("Couldn't store the uploaded ZIP file in its proper place.");
+            throw new ServerManagerAPIException("Couldn't store the uploaded ZIP file in its proper place.");
     }
 
     public function add() 
@@ -389,13 +389,13 @@ class GameSave extends Base
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $args = getPublicObjectVars($this);
         unset($args["id"]);
-        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
+        if (!$this->_db->query($sql, $args)) throw new ServerManagerAPIException($this->_db->errorString());
         $this->id = $this->_db->lastId();
     }
 
     public function edit()
     {
-        if (empty($this->id)) throw new Exception("Cannot update without knowing which id to use.");
+        if (empty($this->id)) throw new ServerManagerAPIException("Cannot update without knowing which id to use.");
         $this->validateVars();
         $args = getPublicObjectVars($this);
         $sql = "UPDATE game_saves SET 
@@ -425,7 +425,7 @@ class GameSave extends Base
                     save_timestamp = ?,
                     server_version = ?
                 WHERE id = ?";
-        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
+        if (!$this->_db->query($sql, $args)) throw new ServerManagerAPIException($this->_db->errorString());
     }
 
     public function delete()

@@ -45,25 +45,25 @@ class GameSession extends Base
                     break;
                 case "name":
                     if (self::HasSpecialChars($this->name)) {
-                        throw new Exception("Session name cannot contain special characters.");
+                        throw new ServerManagerAPIException("Session name cannot contain special characters.");
                     }
                     break;
                 case "session_state":
                     if (!in_array($this->session_state, array("request", "initializing", "healthy", "failed", "archived"))) {
-                        throw new Exception("That session state is not allowed.");
+                        throw new ServerManagerAPIException("That session state is not allowed.");
                     }
                     break;
                 case "game_state":
                     $this->game_state = strtolower($this->game_state);
                     if (!in_array($this->game_state, array("setup", "simulation", "play", "pause", "end", "fastforward"))) {
-                        throw new Exception("That game state is not allowed.");
+                        throw new ServerManagerAPIException("That game state is not allowed.");
                     }
                     break;
                 case "log":
                     break; // ignoring, because not stored in dbase
                 default:
                     if (strlen($this->$varname) == 0) {
-                        throw new Exception("Missing value for ".$varname);
+                        throw new ServerManagerAPIException("Missing value for ".$varname);
                     }
             }
         }
@@ -72,13 +72,13 @@ class GameSession extends Base
     public function get()
     {
         if (empty($this->id)) {
-            throw new Exception("Cannot obtain GameSession without a valid id.");
+            throw new ServerManagerAPIException("Cannot obtain GameSession without a valid id.");
         }
         if (!$this->_db->query("SELECT * FROM game_list WHERE id = ?", array($this->id))) {
-            throw new Exception($this->_db->errorString());
+            throw new ServerManagerAPIException($this->_db->errorString());
         }
         if ($this->_db->count() == 0) {
-            throw new Exception("Session not found.");
+            throw new ServerManagerAPIException("Session not found.");
         }
         foreach ($this->_db->first(true) as $varname => $varvalue) {
             if (property_exists($this, $varname)) {
@@ -143,7 +143,7 @@ class GameSession extends Base
         unset($args["id"]);
         unset($args["log"]);
         if (!$this->_db->query($sql, $args)) {
-            throw new Exception($this->_db->errorString());
+            throw new ServerManagerAPIException($this->_db->errorString());
         }
         $this->id = $this->_db->lastId();
     }
@@ -168,7 +168,7 @@ class GameSession extends Base
             )
         );
         if (!$server_call["success"]) {
-            throw new Exception($server_call["message"]);
+            throw new ServerManagerAPIException($server_call["message"]);
         }
     }
 
@@ -206,7 +206,7 @@ class GameSession extends Base
             if ($allow_recreate == 0) {
                 $this->revert();
             }
-            throw new Exception($server_call["message"]);
+            throw new ServerManagerAPIException($server_call["message"]);
         }
 
         $gameconfig->last_played_time = time();
@@ -285,7 +285,7 @@ class GameSession extends Base
     public function demoCheck()
     {
         if (!is_a($this->_old, "GameSession")) {
-            throw new Exception("Cannot continue as I don't have original GameSession object.");
+            throw new ServerManagerAPIException("Cannot continue as I don't have original GameSession object.");
         }
 
         if ($this->demo_session == 1) {
@@ -304,7 +304,7 @@ class GameSession extends Base
     public function edit()
     {
         if (empty($this->id)) {
-            throw new Exception("Cannot update without knowing which id to use.");
+            throw new ServerManagerAPIException("Cannot update without knowing which id to use.");
         }
         $this->validateVars();
         $args = getPublicObjectVars($this);
@@ -335,7 +335,7 @@ class GameSession extends Base
                     server_version = ?
                 WHERE id = ?";
         if (!$this->_db->query($sql, $args)) {
-            throw new Exception($this->_db->errorString());
+            throw new ServerManagerAPIException($this->_db->errorString());
         }
     }
 
@@ -407,7 +407,7 @@ class GameSession extends Base
         } else // session eminates from a config file, so from scratch
         {
             if (empty($this->game_config_version_id)) {
-                throw new Exception("Cannot obtain GameConfig without a valid id.");
+                throw new ServerManagerAPIException("Cannot obtain GameConfig without a valid id.");
             }
             $gameconfig = new GameConfig;
             $gameconfig->id = $this->game_config_version_id;
@@ -446,7 +446,7 @@ class GameSession extends Base
             $this->api_access_token
         );
         if (!$server_call["success"]) {
-            throw new Exception($server_call["message"]);
+            throw new ServerManagerAPIException($server_call["message"]);
         }
         return true;
     }
@@ -494,7 +494,7 @@ class GameSession extends Base
             LEFT JOIN game_saves AS saves ON saves.id = games.save_id",
             $where_array
         )) {
-            throw new Exception($this->_db->errorString());
+            throw new ServerManagerAPIException($this->_db->errorString());
         }
         return $this->_db->results(true);
     }
@@ -550,12 +550,12 @@ class GameSession extends Base
                 $this->api_access_token
             );
             if (!$server_call["success"]) {
-                throw new Exception($server_call["message"]);
+                throw new ServerManagerAPIException($server_call["message"]);
             }
             $this->server_version = ServerManager::getInstance()->GetCurrentVersion();
             return true;
         }
-        throw new Exception("No upgrade available.");
+        throw new ServerManagerAPIException("No upgrade available.");
     }
 
     public function delete()
@@ -563,13 +563,13 @@ class GameSession extends Base
         // really a soft delete   // revert() is a hard delete
         $this->get();
         if ($this->session_state == "archived") {
-            throw new Exception("The session is already archived.");
+            throw new ServerManagerAPIException("The session is already archived.");
         }
         if ($this->session_state == "request") {
-            throw new Exception("The session is being set up, so cannot archive at this time.");
+            throw new ServerManagerAPIException("The session is being set up, so cannot archive at this time.");
         }
         if ($this->game_state == "simulation") {
-            throw new Exception("The session is simulating, so cannot archive it at this time.");
+            throw new ServerManagerAPIException("The session is simulating, so cannot archive it at this time.");
         }
         $server_call = self::callServer(
             "gamesession/ArchiveGameSession",
@@ -578,7 +578,7 @@ class GameSession extends Base
             $this->api_access_token
         );
         if (!$server_call["success"]) {
-            throw new Exception($server_call["message"]);
+            throw new ServerManagerAPIException($server_call["message"]);
         }
         $this->session_state = "archived";
         $this->edit();
@@ -594,7 +594,7 @@ class GameSession extends Base
             $this->api_access_token
         );
         if (!$server_call["success"]) {
-            throw new Exception($server_call["message"]);
+            throw new ServerManagerAPIException($server_call["message"]);
         }
 
         $gameconfig = new GameConfig;
@@ -624,17 +624,17 @@ class GameSession extends Base
     public function changeGameState()
     {
         if (!is_a($this->_old, "GameSession")) {
-            throw new Exception("Can't continue as I don't have the old GameSession object.");
+            throw new ServerManagerAPIException("Can't continue as I don't have the old GameSession object.");
         }
         if (strcasecmp($this->_old->game_state, $this->game_state) == 0) {
-            throw new Exception("The session is already in state " . $this->game_state . ".");
+            throw new ServerManagerAPIException("The session is already in state " . $this->game_state . ".");
         }
         switch ($this->_old->game_state) {
             case 'end':
-                throw new Exception("The session has already ended, so can't change its state.");
+                throw new ServerManagerAPIException("The session has already ended, so can't change its state.");
                 break;
             case 'simulation':
-                throw new Exception("The session is simulating, so cannot change its state at this time.");
+                throw new ServerManagerAPIException("The session is simulating, so cannot change its state at this time.");
                 break;
         }
         $server_call = self::callServer(
@@ -644,7 +644,7 @@ class GameSession extends Base
             $this->api_access_token
         );
         if (empty($server_call["success"])) {
-            throw new Exception($server_call["message"] ?? '');
+            throw new ServerManagerAPIException($server_call["message"] ?? '');
         }
         return true;
     }
