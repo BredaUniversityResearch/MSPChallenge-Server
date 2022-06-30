@@ -44,7 +44,7 @@ class LatestWsServerPlugin extends Plugin
                     if (empty($payloadContainer)) {
                         return;
                     }
-                    $this->addOutput(json_encode($payloadContainer), OutputInterface::VERBOSITY_VERY_VERBOSE);
+                    $this->addOutput(json_encode($payloadContainer));
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -78,14 +78,12 @@ class LatestWsServerPlugin extends Plugin
                     ]
                 )) {
                     // Client's token has been expired, let the client re-connected with a new token
-                    $this->addOutput(
-                        'Client\'s token has been expired, let the client re-connected with a new token'
-                    );
+                    $this->addOutput('Client\'s token has been expired, let the client re-connected with a new token');
                     $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->close();
                     continue;
                 }
                 $latestTimeStart = microtime(true);
-                $this->addOutput('Starting "latest" for: ' . $connResourceId);
+                $this->addOutput('Starting "latest" for: ' . $connResourceId, OutputInterface::VERBOSITY_VERY_VERBOSE);
                 $promises[$connResourceId] = $this->getGameLatest($connResourceId)->Latest(
                     $clientInfo['team_id'],
                     $clientInfo['last_update_time'],
@@ -93,14 +91,17 @@ class LatestWsServerPlugin extends Plugin
                     $this->isDebugOutputEnabled()
                 )
                 ->then(function ($payload) use ($connResourceId, $latestTimeStart, $clientInfo) {
-                    $this->addOutput('Created "latest" payload for: ' . $connResourceId);
+                    $this->addOutput(
+                        'Created "latest" payload for: ' . $connResourceId,
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
+                    );
                     $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                         $this->getName(),
                         $connResourceId,
                         microtime(true) - $latestTimeStart
                     );
                     if (empty($payload)) {
-                        $this->addOutput('empty payload');
+                        $this->addOutput('empty payload', OutputInterface::VERBOSITY_VERY_VERBOSE);
                         return [];
                     }
                     if (null === $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)) {
@@ -136,7 +137,8 @@ class LatestWsServerPlugin extends Plugin
                         // no essential payload differences compared to the previous one, no need to send it now
                         $this->addOutput(
                             'no essential payload differences compared to the previous one, ' .
-                            'no need to send it now'
+                                'no need to send it now',
+                            OutputInterface::VERBOSITY_VERY_VERBOSE
                         );
                         return []; // no need to send
                     }

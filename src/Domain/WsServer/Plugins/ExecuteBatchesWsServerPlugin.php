@@ -57,10 +57,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     if (empty($clientToBatchResultContainer)) {
                         return;
                     }
-                    $this->addOutput(
-                        json_encode($clientToBatchResultContainer),
-                        OutputInterface::VERBOSITY_VERY_VERBOSE
-                    );
+                    $this->addOutput(json_encode($clientToBatchResultContainer));
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -113,7 +110,10 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $timeStart = microtime(true);
-                $this->addOutput('Starting "executeBatches" for: ' . $connResourceId);
+                $this->addOutput(
+                    'Starting "executeBatches" for: ' . $connResourceId,
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
                 $promises[$connResourceId] = $this->getBatch($connResourceId)
                     ->executeNextQueuedBatchFor(
                         $clientInfo['team_id'],
@@ -122,7 +122,10 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     )
                 ->then(
                     function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
-                        $this->addOutput('Created "executeBatches" payload for: ' . $connResourceId);
+                        $this->addOutput(
+                            'Created "executeBatches" payload for: ' . $connResourceId,
+                            OutputInterface::VERBOSITY_VERY_VERBOSE
+                        );
                         $this->getClientConnectionResourceManager()->addToMeasurementCollection(
                             $this->getName(),
                             $connResourceId,

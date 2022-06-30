@@ -11,6 +11,7 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class DatabaseMigrationsWsServerPlugin extends Plugin
 {
@@ -19,6 +20,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
     public function __construct()
     {
         parent::__construct('migrations', 0);
+        $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
     }
 
     protected function onCreatePromiseFunction(): Closure
@@ -52,7 +54,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
      */
     private function migrations(array $gameSessionIds): void
     {
-        wdo('Please do not shut down the websocket server now, until migrations are finished...');
+        $this->addOutput('Please do not shut down the websocket server now, until migrations are finished...');
         // Run doctrine migrations.
         foreach ($gameSessionIds as $gameSessionId) {
             $dbName = ConnectionManager::getInstance()->getGameSessionDbName($gameSessionId);
@@ -74,8 +76,8 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
                     $returnCode
                 );
             }
-            wdo($output->fetch());
+            $this->addOutput($output->fetch());
         }
-        wdo('Finished migrations');
+        $this->addOutput('Finished migrations');
     }
 }

@@ -49,7 +49,10 @@ class TickWsServerPlugin extends Plugin
             return resolveOnFutureTick(new Deferred(), $this->gameSessionId)->promise();
         }
 
-        $this->addOutput('starting "tick" for game session: ' . $this->gameSessionId);
+        $this->addOutput(
+            'starting "tick" for game session: ' . $this->gameSessionId,
+            OutputInterface::VERBOSITY_VERY_VERBOSE
+        );
         $tickTimeStart = microtime(true);
         return $this->getGameTick($this->gameSessionId)->Tick(
             $this->isDebugOutputEnabled()

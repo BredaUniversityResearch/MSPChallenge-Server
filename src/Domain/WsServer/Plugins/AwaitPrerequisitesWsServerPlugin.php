@@ -5,6 +5,7 @@ namespace App\Domain\WsServer\Plugins;
 use App\Domain\Event\NameAwareEvent;
 use Closure;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class AwaitPrerequisitesWsServerPlugin extends Plugin
 {
@@ -13,6 +14,7 @@ class AwaitPrerequisitesWsServerPlugin extends Plugin
     public function __construct()
     {
         parent::__construct('bootstrap', 10);
+        $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
     }
 
     private function checkServerManagerDbConnection(): PromiseInterface
@@ -26,12 +28,12 @@ class AwaitPrerequisitesWsServerPlugin extends Plugin
                 ->setMaxResults(1)
         )
         ->then(function (/* Result $resul t*/) {
-            wdo('Found msp_server_manager database');
+            $this->addOutput('Found msp_server_manager database');
             $this->dispatch(new NameAwareEvent(self::EVENT_PREREQUISITES_MET), self::EVENT_PREREQUISITES_MET);
         })
         ->otherwise(function ($reason) {
             // Handle the rejection, and don't propagate. This is like catch without a rethrow
-            wdo('Awaiting creation of msp_server_manager database');
+            $this->addOutput('Awaiting creation of msp_server_manager database');
             return null;
         });
     }
