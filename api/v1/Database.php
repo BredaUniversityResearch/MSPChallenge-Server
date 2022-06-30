@@ -403,6 +403,7 @@ class Database
     private function GetMysqlExecutableDirectory(): string
     {
         $dbConfig = Config::GetInstance()->DatabaseConfig();
+        // todo: improve this by using ConnectionManager?
         $temporaryConnection = Database::CreateTemporaryDBConnection(
             $dbConfig["host"],
             $dbConfig["user"],
