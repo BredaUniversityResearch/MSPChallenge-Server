@@ -39,7 +39,7 @@ class PluginHelper
             if (!$plugin->isRegisteredToLoop()) {
                 $plugin->addOutput(
                     'Unregistered from loop: "' . $plugin->getName() .'"',
-                    OutputInterface::VERBOSITY_VERBOSE
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
                 );
                 return;
             }

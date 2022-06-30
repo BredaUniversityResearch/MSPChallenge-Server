@@ -6,7 +6,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class WsServerOutput
 {
-    private const VERBOSITY_DEFAULT = OutputInterface::VERBOSITY_NORMAL;
+    public const VERBOSITY_DEFAULT_MESSAGE = OutputInterface::VERBOSITY_VERBOSE;
+    private const VERBOSITY_DEFAULT_OUTPUT = OutputInterface::VERBOSITY_NORMAL;
 
     private static ?int $verbosity = null;
     private static ?string $messageFilter = null;
@@ -16,12 +17,12 @@ class WsServerOutput
         if (self::$verbosity === null && array_key_exists('WS_SERVER_OUTPUT_VERBOSITY', $_ENV)) {
             self::$verbosity = (int)$_ENV['WS_SERVER_OUTPUT_VERBOSITY'];
         }
-        return self::$verbosity ?? self::VERBOSITY_DEFAULT;
+        return self::$verbosity ?? self::VERBOSITY_DEFAULT_OUTPUT;
     }
 
     public static function setVerbosity(int $verbosity): void
     {
-        if ($verbosity == self::VERBOSITY_DEFAULT) {
+        if ($verbosity == self::VERBOSITY_DEFAULT_OUTPUT) {
             return;
         }
         self::$verbosity = $verbosity;
@@ -32,7 +33,7 @@ class WsServerOutput
         self::$messageFilter = $messageFilter;
     }
 
-    public static function output(string $message, int $verbosity = OutputInterface::VERBOSITY_NORMAL): void
+    public static function output(string $message, int $verbosity = self::VERBOSITY_DEFAULT_MESSAGE): void
     {
         if ($verbosity > self::getVerbosity()) {
             return;

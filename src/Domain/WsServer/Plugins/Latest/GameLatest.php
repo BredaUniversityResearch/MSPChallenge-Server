@@ -7,6 +7,7 @@ use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use function App\parallel;
 use function App\tpf;
 
@@ -220,26 +221,26 @@ class GameLatest extends CommonBase
                         }
 
                         if ($showDebug) {
-                            wdo("diff: " . $diff);
+                            wdo("diff: " . $diff, OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
 
                         if ($showDebug) {
-                            wdo("timeleft: " . $tick['era_timeleft']);
+                            wdo("timeleft: " . $tick['era_timeleft'], OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     } elseif ($state == "PAUSE" || $state == "SETUP") {
                         //[MSP-1116] Seems sensible?
                         $tick['era_timeleft'] = $tick['era_realtime'] - ($tick['era_monthsdone'] * $secondsPerMonth);
                         if ($showDebug) {
-                            wdo('GAME PAUSED');
+                            wdo('GAME PAUSED', OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     } else {
                         if ($showDebug) {
-                            wdo('GAME ENDED');
+                            wdo('GAME ENDED', OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     }
 
                     if ($showDebug) {
-                        wdo(json_encode($tick));
+                        wdo('Tick: ' . PHP_EOL . json_encode($tick));
                     }
 
                     return $tick;

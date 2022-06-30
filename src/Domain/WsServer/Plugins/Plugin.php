@@ -6,11 +6,11 @@ use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
 use App\Domain\WsServer\MeasurementCollectionManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
+use App\Domain\WsServer\WsServerOutput;
 use Exception;
 use React\EventLoop\LoopInterface;
 use Closure;
 use App\Domain\Event\NameAwareEvent;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 abstract class Plugin extends EventDispatcher implements PluginInterface
@@ -18,6 +18,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     private string $name;
     private float $minIntervalSec;
     private bool $debugOutputEnabled;
+    private int $messageVerbosity = WsServerOutput::VERBOSITY_DEFAULT_MESSAGE;
     private ?int $gameSessionIdFilter = null;
     private bool $registeredToLoop = false;
 
@@ -58,8 +59,19 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         $this->debugOutputEnabled = $debugOutputEnabled;
     }
 
-    public function addOutput(string $output, int $verbosity = OutputInterface::VERBOSITY_NORMAL): self
+    public function getMessageVerbosity(): int
     {
+        return $this->messageVerbosity;
+    }
+
+    public function setMessageVerbosity(int $messageVerbosity): void
+    {
+        $this->messageVerbosity = $messageVerbosity;
+    }
+
+    public function addOutput(string $output, ?int $verbosity = null): self
+    {
+        $verbosity ??= $this->messageVerbosity;
         if ($this->isDebugOutputEnabled()) {
             wdo($output, $verbosity);
         }

@@ -1,11 +1,10 @@
 <?php
 
 use App\Domain\WsServer\WsServerOutput;
-use Symfony\Component\Console\Output\OutputInterface;
 
 function wdo(
     string $message,
-    int $verbosity = OutputInterface::VERBOSITY_NORMAL
+    int $verbosity = WsServerOutput::VERBOSITY_DEFAULT_MESSAGE
 ) {
     WsServerOutput::output($message, $verbosity);
 }

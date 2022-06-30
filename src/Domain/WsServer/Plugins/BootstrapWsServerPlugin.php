@@ -7,6 +7,7 @@ use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
 use App\Domain\WsServer\Plugins\Tick\TicksHandlerWsServerPlugin;
 use Closure;
 use Exception;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
@@ -24,6 +25,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     public function __construct()
     {
         parent::__construct('bootstrap', 0); // 0 meaning no interval, no repeating
+        $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
         $this->awaitPrerequisitesPlugin = $this->createAwaitPrerequisitesPlugin();
         $this->databaseMigrationsPlugin = $this->createDatabaseMigrationsPlugin();
     }
@@ -64,7 +66,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
                 $this->startStateRegisterPlugins();
                 break;
             case self::STATE_READY:
-                wdo('Websocket server is ready');
+                $this->addOutput('Websocket server is ready');
                 break;
         }
     }
