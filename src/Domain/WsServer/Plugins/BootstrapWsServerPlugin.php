@@ -21,9 +21,11 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     private AwaitPrerequisitesWsServerPlugin $awaitPrerequisitesPlugin;
     private DatabaseMigrationsWsServerPlugin $databaseMigrationsPlugin;
     private int $state = self::STATE_NONE;
+    private string $projectDir;
 
-    public function __construct()
+    public function __construct(string $projectDir)
     {
+        $this->projectDir = $projectDir;
         parent::__construct('bootstrap', 0); // 0 meaning no interval, no repeating
         $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
         $this->awaitPrerequisitesPlugin = $this->createAwaitPrerequisitesPlugin();
@@ -93,7 +95,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     {
         $this->getWsServer()->registerPlugin(new LoopStatsWsServerPlugin());
         $this->getWsServer()->registerPlugin(new TicksHandlerWsServerPlugin());
-        $this->getWsServer()->registerPlugin(new LatestWsServerPlugin());
+        $this->getWsServer()->registerPlugin(new LatestWsServerPlugin($this->projectDir));
         $this->getWsServer()->registerPlugin(new ExecuteBatchesWsServerPlugin());
 
         // set state ready on next tick

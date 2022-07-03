@@ -146,7 +146,7 @@ class WsServerCommand extends Command
         $this->wsServer->registerLoop($server->loop);
 
         // plugins
-        $this->wsServer->registerPlugin(new BootstrapWsServerPlugin());
+        $this->wsServer->registerPlugin(new BootstrapWsServerPlugin($this->projectDir));
 
         sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
             switch ($event) {
