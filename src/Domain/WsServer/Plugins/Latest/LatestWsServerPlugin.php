@@ -2,7 +2,6 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Security;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientDisconnectedException;
@@ -11,9 +10,7 @@ use App\Domain\WsServer\EPayloadDifferenceType;
 use App\Domain\WsServer\Plugins\Plugin;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
 use Closure;
-use Drift\DBAL\Result;
 use Exception;
-use Illuminate\Support\Collection;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use function React\Promise\all;
@@ -169,60 +166,26 @@ class LatestWsServerPlugin extends Plugin
             $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
         }
         $promises = [];
-        foreach ($clientInfoPerSessionContainer as $gameSessionId => $clientInfoContainer) {
-            $game = new Game();
-            $game->setGameSessionId($gameSessionId);
-            $gameConfigValues = $game->GetGameConfigValues();
-            $andExpr = [];
-            $dbConnection = $this->getServerManager()->getGameSessionDbConnection($gameSessionId);
-            $qb = $dbConnection->createQueryBuilder();
-            if (isset($gameConfigValues['MEL'])) {
-                $andExpr[] = $qb->expr()->eq('game_currentmonth', 'game_mel_lastmonth');
-            }
-            if (isset($gameConfigValues['SEL'])) {
-                $andExpr[] = $qb->expr()->eq('game_currentmonth', 'game_sel_lastmonth');
-            }
-            if (isset($gameConfigValues['CEL'])) {
-                $andExpr[] = $qb->expr()->eq('game_currentmonth', 'game_cel_lastmonth');
-            }
-            $qb
-                ->select('game_id')
-                ->from('game');
-            if (!empty($andExpr)) {
-                $qb->where($qb->expr()->and(...$andExpr));
-            }
-            $dbConnection->query($qb)->then(function (Result $result) use ($clientInfoContainer, &$promises) {
-                // if the simulations are not ready yet (or if state = setup),
-                //   then only update clients for a first update only (last_update_time will be zero)
-                if ($result->fetchCount() === 0) {
-                    /** @var Collection $clientInfoContainer */
-                    $clientInfoContainer = $clientInfoContainer->filter(function ($clientInfo) {
-                        return $clientInfo['last_update_time'] < PHP_FLOAT_EPSILON;
-                    });
+        foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
+            foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
+                $accessTimeRemaining = 0; // not used
+                if (false === $this->getClientConnectionResourceManager()->getSecurity($connResourceId)
+                    ->validateAccess(
+                        Security::ACCESS_LEVEL_FLAG_FULL,
+                        $accessTimeRemaining,
+                        $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
+                        ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
+                        ]
+                    )) {
+                    // Client's token has been expired, let the client re-connected with a new token
+                    $this->addOutput(
+                        'Client\'s token has been expired, let the client re-connected with a new token'
+                    );
+                    $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->close();
+                    continue;
                 }
-                foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
-                    if ($result->fetchCount() === 0 && $clientInfo['last_update_time'] > PHP_FLOAT_EPSILON) {
-                        continue;
-                    }
-                    $accessTimeRemaining = 0; // not used
-                    if (false === $this->getClientConnectionResourceManager()->getSecurity($connResourceId)
-                        ->validateAccess(
-                            Security::ACCESS_LEVEL_FLAG_FULL,
-                            $accessTimeRemaining,
-                            $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
-                            ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
-                            ]
-                        )) {
-                        // Client's token has been expired, let the client re-connected with a new token
-                        $this->addOutput(
-                            'Client\'s token has been expired, let the client re-connected with a new token'
-                        );
-                        $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->close();
-                        continue;
-                    }
-                    $promises[$connResourceId] = $this->latestForClient($connResourceId, $clientInfo);
-                }
-            });
+                $promises[$connResourceId] = $this->latestForClient($connResourceId, $clientInfo);
+            }
         }
         return all($promises);
     }
