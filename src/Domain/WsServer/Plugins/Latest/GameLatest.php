@@ -2,7 +2,9 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
+use App\Domain\API\v1\Game;
 use App\Domain\Common\CommonBase;
+use App\Domain\WsServer\Plugins\Tick\GameTick;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -30,6 +32,11 @@ class GameLatest extends CommonBase
             $showDebug
         )
         ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
+            $game = new Game();
+            $this->asyncDataTransferTo($game);
+            if (!($game->areSimulationsUpToDate($tick) || $lastUpdateTime < PHP_FLOAT_EPSILON)) {
+                return [];
+            }
             $newTime = microtime(true);
             $data = array();
             $data['prev_update_time'] = $lastUpdateTime;

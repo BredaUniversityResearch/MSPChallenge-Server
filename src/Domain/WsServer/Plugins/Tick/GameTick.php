@@ -103,7 +103,9 @@ class GameTick extends TickBase
         }
 
         if (!strstr($_SERVER['REQUEST_URI'], 'dev') || Config::GetInstance()->ShouldWaitForSimulationsInDev()) {
-            if (!$this->AreSimulationsUpToDate($tickData)) {
+            $game = new Game();
+            $this->asyncDataTransferTo($game);
+            if (!$game->areSimulationsUpToDate($tickData)) {
                 if ($showDebug) {
                     wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
                 }
@@ -147,23 +149,6 @@ class GameTick extends TickBase
                             );
                     });
             });
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function AreSimulationsUpToDate(array $tickData): bool
-    {
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
-        $config = $game->GetGameConfigValues();
-        if ((isset($config["MEL"]) && $tickData['month'] > $tickData['mel_lastmonth']) ||
-            (isset($config["CEL"]) && $tickData['month'] > $tickData['cel_lastmonth']) ||
-            (isset($config["SEL"]) && $tickData['month'] > $tickData['sel_lastmonth'])) {
-            return false;
-        }
-        return true;
     }
 
     /**
