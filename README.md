@@ -10,3 +10,9 @@
 ```sh
  git config commit.template .gitmessage
 ```
+
+## Sponsors
+
+Thanks to all of them for their great support:
+
+- Blackfire.io, the profiling and monitoring service for PHP
