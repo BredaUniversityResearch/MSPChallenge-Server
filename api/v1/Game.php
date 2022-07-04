@@ -708,4 +708,18 @@ class Game extends Base
     {
         return Database::GetInstance()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
     }
+
+    /**
+     * @throws Exception
+     */
+    public function areSimulationsUpToDate(array $tickData): bool
+    {
+        $config = $this->GetGameConfigValues();
+        if ((isset($config["MEL"]) && $tickData['month'] > $tickData['mel_lastmonth']) ||
+            (isset($config["CEL"]) && $tickData['month'] > $tickData['cel_lastmonth']) ||
+            (isset($config["SEL"]) && $tickData['month'] > $tickData['sel_lastmonth'])) {
+            return false;
+        }
+        return true;
+    }
 }

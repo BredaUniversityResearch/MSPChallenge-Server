@@ -61,7 +61,7 @@ if ($servermanager->install($user)) {
           <h1>New installation</h1>
           <p>This is a new installation of the Server Manager application.</p>
           <p>You, <strong><?=$user->data()->username;?></strong>, are now the primary user of this Server Manager. This means that you can not only use this application,
-           but you can also add other users to it through the <a href="<a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>">MSP Challenge Authoriser</a> application. You don't have to do this
+           but you can also add other users to it through the <a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>">MSP Challenge Authoriser</a> application. You don't have to do this
            right now of course, or at all for that matter.</p>
           <p>You can go ahead and <a href="<?php echo ServerManager::getInstance()->GetServerManagerFolder();?>manager.php">set up your first MSP Challenge server</a>.</p>
           <p>We also recommend you enter your computer's proper IP address or full-qualified domain name under Settings.</p>
