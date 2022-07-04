@@ -674,6 +674,7 @@ class Game extends Base
             }
 
             $realtimePerEra = explode(",", $state["game_planning_era_realtime"]);
+            // todo: division by zero.
             $currentEra = intval(floor($state["game_currentmonth"] / $state["game_planning_gametime"]));
             $realtimePerEra[$currentEra] = $state["game_planning_realtime"];
             $secondsPerMonthCurrentEra = round($state["game_planning_realtime"] / $state["game_eratime"]);
