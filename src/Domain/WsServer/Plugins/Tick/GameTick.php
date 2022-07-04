@@ -102,7 +102,7 @@ class GameTick extends TickBase
             wdo("Trying to tick the server", OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
 
-        if (!strstr($_SERVER['REQUEST_URI'], 'dev') || Config::GetInstance()->ShouldWaitForSimulationsInDev()) {
+        if (Config::GetInstance()->ShouldWaitForSimulationsInDev()) {
             $game = new Game();
             $this->asyncDataTransferTo($game);
             if (!$game->areSimulationsUpToDate($tickData)) {
