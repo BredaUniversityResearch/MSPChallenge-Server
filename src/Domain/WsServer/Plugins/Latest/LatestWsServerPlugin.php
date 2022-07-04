@@ -169,14 +169,13 @@ class LatestWsServerPlugin extends Plugin
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $accessTimeRemaining = 0; // not used
-                if (false === $this->getClientConnectionResourceManager()->getSecurity($connResourceId)
-                    ->validateAccess(
-                        Security::ACCESS_LEVEL_FLAG_FULL,
-                        $accessTimeRemaining,
-                        $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
-                        ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
-                        ]
-                    )) {
+                if (false === $this->getClientConnectionResourceManager()->getSecurity($connResourceId)->validateAccess(
+                    Security::ACCESS_LEVEL_FLAG_FULL,
+                    $accessTimeRemaining,
+                    $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
+                    ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
+                    ]
+                )) {
                     // Client's token has been expired, let the client re-connected with a new token
                     $this->addOutput(
                         'Client\'s token has been expired, let the client re-connected with a new token'
