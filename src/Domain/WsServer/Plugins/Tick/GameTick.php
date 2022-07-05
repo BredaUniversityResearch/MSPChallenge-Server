@@ -102,16 +102,16 @@ class GameTick extends TickBase
             wdo("Trying to tick the server", OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
 
-        if (Config::GetInstance()->ShouldWaitForSimulationsInDev()) {
-            $game = new Game();
-            $this->asyncDataTransferTo($game);
-            if (!$game->areSimulationsUpToDate($tickData)) {
-                if ($showDebug) {
-                    wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
-                }
-                return null;
+
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        if (!$game->areSimulationsUpToDate($tickData)) {
+            if ($showDebug) {
+                wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
+            return null;
         }
+
 
         return $this->serverTickInternal($showDebug)
             ->otherwise(function (SilentFailException $e) {
