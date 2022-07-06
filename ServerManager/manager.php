@@ -227,7 +227,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                             <p class="card-text">The other users that should have access to this MSP Challenge server. Note that only this server's administrator(s) can change this.</p>
                         </div>
                         <div class="card-footer">
-                            <a href="<a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
+                            <a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
                         </div>
                     </div>
                     <div class="card">
