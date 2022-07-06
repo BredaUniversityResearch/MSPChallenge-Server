@@ -151,8 +151,9 @@ class PlanLatest extends CommonBase
                             })
                             ->all();
 
-                        foreach ($d['grids'] as $gKey => &$g) {
-                            $toPromiseFunctions['energy' . $gKey] = tpf(function () use ($g) {
+                        foreach ($d['grids'] as $gKey => $g) {
+                            $gridId = $g['id'];
+                            $toPromiseFunctions['energy'.$pKey.'-' .$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
@@ -161,19 +162,19 @@ class PlanLatest extends CommonBase
                                             'grid_energy_expected as expected'
                                         )
                                         ->from('grid_energy')
-                                        ->where('grid_energy_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                        ->where('grid_energy_grid_id = ' . $qb->createPositionalParameter($gridId))
                                 );
                             });
-                            $toPromiseFunctions['sources' . $gKey] = tpf(function () use ($g) {
+                            $toPromiseFunctions['sources'.$pKey.'-' .$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
                                         ->select('grid_source_geometry_id as geometry_id')
                                         ->from('grid_source')
-                                        ->where('grid_source_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                        ->where('grid_source_grid_id = ' . $qb->createPositionalParameter($gridId))
                                 );
                             });
-                            $toPromiseFunctions['sockets' . $gKey] = tpf(function () use ($g) {
+                            $toPromiseFunctions['sockets'.$pKey.'-' .$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
@@ -181,7 +182,7 @@ class PlanLatest extends CommonBase
                                             'grid_socket_geometry_id as geometry_id'
                                         )
                                         ->from('grid_socket')
-                                        ->where('grid_socket_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                        ->where('grid_socket_grid_id = ' . $qb->createPositionalParameter($gridId))
                                 );
                             });
                         }
@@ -205,11 +206,11 @@ class PlanLatest extends CommonBase
                     return parallel($toPromiseFunctions)
                         ->then(function (array $results) use (&$plans) {
                             /** @var Result[] $results */
-                            foreach ($plans as &$d) {
+                            foreach ($plans as $pKey => &$d) {
                                 foreach ($d['grids'] as $gKey => &$g) {
-                                    $g['energy'] = $results['energy' . $gKey]->fetchAllRows();
-                                    $g['sources'] = $results['sources' . $gKey]->fetchAllRows();
-                                    $g['sockets'] = $results['sockets' . $gKey]->fetchAllRows();
+                                    $g['energy'] = $results['energy'.$pKey.'-' .$gKey]->fetchAllRows();
+                                    $g['sources'] = $results['sources'.$pKey.'-' .$gKey]->fetchAllRows();
+                                    $g['sockets'] = $results['sockets'.$pKey.'-' .$gKey]->fetchAllRows();
                                 }
                                 unset($g);
                             }
