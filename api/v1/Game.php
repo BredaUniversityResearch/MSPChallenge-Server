@@ -61,7 +61,7 @@ class Game extends Base
         }
 
         $outputFile = $outputDirectory."AutoDump_".date("Y-m-d_H-i").".sql";
-        Database::GetInstance($this->getGameSessionId())->CreateMspDatabaseDump($outputFile, false);
+        Database::GetInstance($this->getGameSessionId())->createMspDatabaseDump($outputFile, false);
     }
 
     /**

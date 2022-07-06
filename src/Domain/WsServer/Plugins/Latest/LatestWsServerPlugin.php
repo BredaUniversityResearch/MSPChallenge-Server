@@ -32,7 +32,7 @@ class LatestWsServerPlugin extends Plugin
     public function __construct(string $projectDir)
     {
         parent::__construct('latest', self::LATEST_MIN_INTERVAL_SEC);
-        $this->dumpDir = $projectDir . '\\var\\dump\\' . date('YmdHis') . '\\';
+        $this->dumpDir = $projectDir . '\\var\\log\\dump\\' . date('YmdHis') . '\\';
     }
 
     protected function onCreatePromiseFunction(): Closure
@@ -136,7 +136,7 @@ class LatestWsServerPlugin extends Plugin
             $this->addOutput('send payload to: ' . $connResourceId);
 
             if (array_key_exists('WS_SERVER_PAYLOAD_DUMP', $_ENV) && $_ENV['WS_SERVER_PAYLOAD_DUMP']) {
-                file_exists($this->dumpDir) or mkdir($this->dumpDir);
+                @mkdir($this->dumpDir, 0777, true);
                 file_put_contents(
                     $this->dumpDir . date('YmdHis') . 'payload' . ($this->nextDumpNo++) . '.log',
                     json_encode($payload, JSON_PRETTY_PRINT)

@@ -416,11 +416,10 @@ class Database
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function CreateMspDatabaseDump(string $outputFilePath, bool $blockUntilComplete): void
+    public function createMspDatabaseDump(string $outputFilePath, bool $blockUntilComplete): void
     {
         //Creates a database dump at the given path blocks until it's done.
-        $this->CreateDatabaseDump(
+        $this->createDatabaseDump(
             $outputFilePath,
             $blockUntilComplete,
             $this->db_host,
@@ -433,8 +432,7 @@ class Database
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function CreateDatabaseDump(
+    public function createDatabaseDump(
         string $outputFilePath,
         bool $blockUntilComplete,
         string $databaseHost,
@@ -442,9 +440,16 @@ class Database
         string $dbPassword,
         string $databaseName
     ): void {
-        $dumpCommand = "\"".$this->GetMysqlExecutableDirectory()."/bin/mysqldump\" --user=\"".
-            $databaseUser."\" --password=\"".$dbPassword."\" --host=\"".
-            $databaseHost."\" \"".$databaseName."\" > \"".$outputFilePath."\"";
+        $dumpCommand = sprintf(
+            '"%s" --user="%s" --password="%s" --host="%s" --port="%d" "%s" > "%s"',
+            $this->GetMysqlExecutableDirectory().'/bin/mysqldump',
+            $databaseUser,
+            $dbPassword,
+            $databaseHost,
+            ($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT),
+            $databaseName,
+            $outputFilePath
+        );
         if ($blockUntilComplete) {
             exec($dumpCommand);
         } else {

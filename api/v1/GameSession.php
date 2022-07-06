@@ -476,7 +476,7 @@ class GameSession extends Base
 
         Store::EnsureFolderExists($preferredfolder);
         
-        Database::GetInstance($this->getGameSessionId())->CreateMspDatabaseDump($sqlDumpPath, true);
+        Database::GetInstance($this->getGameSessionId())->createMspDatabaseDump($sqlDumpPath, true);
     
         $configFilePath = null;
         $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
