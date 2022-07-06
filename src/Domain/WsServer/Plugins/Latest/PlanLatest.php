@@ -153,7 +153,7 @@ class PlanLatest extends CommonBase
 
                         foreach ($d['grids'] as $gKey => $g) {
                             $gridId = $g['id'];
-                            $toPromiseFunctions['energy'.$pKey.'-' .$gKey] = tpf(function () use ($gridId) {
+                            $toPromiseFunctions['energy'.$pKey.'-'.$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
@@ -165,7 +165,7 @@ class PlanLatest extends CommonBase
                                         ->where('grid_energy_grid_id = ' . $qb->createPositionalParameter($gridId))
                                 );
                             });
-                            $toPromiseFunctions['sources'.$pKey.'-' .$gKey] = tpf(function () use ($gridId) {
+                            $toPromiseFunctions['sources'.$pKey.'-'.$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
@@ -174,7 +174,7 @@ class PlanLatest extends CommonBase
                                         ->where('grid_source_grid_id = ' . $qb->createPositionalParameter($gridId))
                                 );
                             });
-                            $toPromiseFunctions['sockets'.$pKey.'-' .$gKey] = tpf(function () use ($gridId) {
+                            $toPromiseFunctions['sockets'.$pKey.'-'.$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
@@ -208,9 +208,9 @@ class PlanLatest extends CommonBase
                             /** @var Result[] $results */
                             foreach ($plans as $pKey => &$d) {
                                 foreach ($d['grids'] as $gKey => &$g) {
-                                    $g['energy'] = $results['energy'.$pKey.'-' .$gKey]->fetchAllRows();
-                                    $g['sources'] = $results['sources'.$pKey.'-' .$gKey]->fetchAllRows();
-                                    $g['sockets'] = $results['sockets'.$pKey.'-' .$gKey]->fetchAllRows();
+                                    $g['energy'] = $results['energy'.$pKey.'-'.$gKey]->fetchAllRows();
+                                    $g['sources'] = $results['sources'.$pKey.'-'.$gKey]->fetchAllRows();
+                                    $g['sockets'] = $results['sockets'.$pKey.'-'.$gKey]->fetchAllRows();
                                 }
                                 unset($g);
                             }
