@@ -4,17 +4,19 @@ namespace App\Domain\WsServer\Plugins\Latest;
 
 use App\Domain\API\v1\Game;
 use App\Domain\Common\CommonBase;
-use App\Domain\WsServer\Plugins\Tick\GameTick;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use function App\parallel;
+use function App\resolveOnFutureTick;
 use function App\tpf;
 
 class GameLatest extends CommonBase
 {
+    private bool $allowEnergyKpiUpdate = true;
+
     /**
      * Gets the latest plans & messages from the server
      *
@@ -34,9 +36,8 @@ class GameLatest extends CommonBase
         ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
             $game = new Game();
             $this->asyncDataTransferTo($game);
-            if (!($game->areSimulationsUpToDate($tick) || $lastUpdateTime < PHP_FLOAT_EPSILON)) {
-                return [];
-            }
+            $this->allowEnergyKpiUpdate = $game->areSimulationsUpToDate($tick) ||
+                $lastUpdateTime < PHP_FLOAT_EPSILON;
             $newTime = microtime(true);
             $data = array();
             $data['prev_update_time'] = $lastUpdateTime;
@@ -367,40 +368,55 @@ class GameLatest extends CommonBase
 
         $energy = new EnergyLatest();
         $this->asyncDataTransferTo($energy);
-        return $energy->latest(
-            $lastUpdateTime
-        );
+        $deferred = new Deferred();
+        $energyData = [
+            'connections' => [],
+            'output' => []
+        ];
+        $this->allowEnergyKpiUpdate ?
+            $energy->latest($lastUpdateTime)->then(function (array $queryResults) use ($deferred, $energyData) {
+                $energyData['connections'] = $queryResults[0]->fetchAllRows();
+                $energyData['output'] = $queryResults[1]->fetchAllRows();
+                $deferred->resolve($energyData);
+            }) :
+            resolveOnFutureTick($deferred, $energyData);
+        return $deferred->promise();
     }
 
     /**
-     * @param Result[] $queryResults
-     * @param float $lastUpdateTime
+     * @param array $energyData
      * @param int $teamId
+     * @param float $lastUpdateTime
      * @param float $newTime
      * @param array $data
      * @return PromiseInterface
      * @throws Exception
      */
     private function latestLevel7(
-        array $queryResults,
+        array $energyData,
         int $teamId,
         float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['energy']['connections'] = $queryResults[0]->fetchAllRows();
-        $data['energy']['output'] = $queryResults[1]->fetchAllRows();
-
+        $data['energy'] = $energyData;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             wdo((microtime(true) - $newTime) . ' elapsed after energy');
         }
 
         $kpi = new KpiLatest();
         $this->asyncDataTransferTo($kpi);
-        return $kpi->latest(
-            (int)$lastUpdateTime,
-            $teamId
-        );
+        $deferred = new Deferred();
+        $this->allowEnergyKpiUpdate ?
+            $kpi->latest((int)$lastUpdateTime, $teamId)->then(function (array $queryResultRows) use ($deferred) {
+                $deferred->resolve($queryResultRows);
+            }) :
+            resolveOnFutureTick($deferred, [
+                'ecology' => [],
+                'shipping' => [],
+                'energy' => []
+            ]);
+        return $deferred->promise();
     }
 
     /**
