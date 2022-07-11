@@ -88,9 +88,9 @@ class GameConfig extends Base
     private function getValuesFromConfigContents()
     {
         $config_contents = $this->getContents();
-        $this->region = $configFileValues["datamodel"]["region"] ?? "Unknown";
-        $min = $config_contents["metadata"]["min_supported_client"] ?? "Any";
-        $max = $config_contents["metadata"]["max_supported_client"] ?? "Any";
+        $this->region = $config_contents["datamodel"]["region"] ?: "Unknown";
+        $min = $config_contents["metadata"]["min_supported_client"] ?: "Any";
+        $max = $config_contents["metadata"]["max_supported_client"] ?: "Any";
 		$this->client_versions = ($min != "Any" || $max != "Any") ? $min." - ".$max : "Any";
     }
 
