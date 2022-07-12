@@ -1303,12 +1303,6 @@
                             "id": 42,
                             "multiline": false,
                             "link": "IMO_Routes"
-                        },
-                        {
-                            "name": "National Shipping Lanes",
-                            "id": 43,
-                            "multiline": true,
-                            "link": "National_Shipping_Lanes"
                         }
                     ]
                 },
@@ -1574,24 +1568,6 @@
                     "toId": 16,
                     "severity": 2,
                     "description": "Passenger vessels prefer IMO Routes "
-                },
-                {
-                    "fromId": 43,
-                    "toId": 13,
-                    "severity": 2,
-                    "description": "Cargo vessels prefer national shipping lanes "
-                },
-                {
-                    "fromId": 43,
-                    "toId": 17,
-                    "severity": 2,
-                    "description": "Tanker vessels prefer national shipping lanes "
-                },
-                {
-                    "fromId": 43,
-                    "toId": 16,
-                    "severity": 2,
-                    "description": "Passenger vessels prefer national shipping lanes "
                 }
             ]
         },

@@ -623,7 +623,7 @@
       ],
       "NS_IMO_Routes|NS_Wave_Farms": [
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
@@ -633,7 +633,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
@@ -643,7 +643,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
@@ -653,7 +653,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
@@ -665,7 +665,7 @@
       ],
       "NS_National_shipping_lanes|NS_Wave_Farms": [
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_National_shipping_lanes",
@@ -675,7 +675,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_National_shipping_lanes",
@@ -685,7 +685,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_National_shipping_lanes",
@@ -695,7 +695,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_National_shipping_lanes",
@@ -707,7 +707,7 @@
       ],
       "NS_IMO_Routes|NS_Tidal_Farms": [
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
@@ -717,7 +717,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
@@ -727,7 +727,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
@@ -737,7 +737,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
@@ -749,7 +749,7 @@
       ],
       "NS_National_shipping_lanes|NS_Tidal_Farms": [
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_National_shipping_lanes",
@@ -759,7 +759,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_National_shipping_lanes",
@@ -769,7 +769,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_National_shipping_lanes",
@@ -779,7 +779,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_National_shipping_lanes",
