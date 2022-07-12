@@ -1,5 +1,7 @@
-
 <?php
+
+use App\Domain\API\v1\Config;
+
 $url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
 ?>
 
@@ -23,7 +25,7 @@ $url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
           <li id="user-menu-item">
             <div id="user-menu-icon"></div> </a>
             <ul id="user-menu">
-              <li><a href="https://auth.mspchallenge.info/users/account.php">My user details</a></li>
+              <li><a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL() ?>/users/account.php">My user details</a></li>
               <li><a href="https://community.mspchallenge.info/wiki/Special:Preferences">Community Wiki preferences</a></li>
               <li><a href="<?=$url_app_root?>logout.php">Logout</a></li>
             </ul>
@@ -33,8 +35,8 @@ $url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
             <div id="user-menu-icon"></div> </a>
             <ul id="user-menu">
               <li><a href="<?=$url_app_root?>login.php">Log in</a></li>
-              <li><a href="https://auth.mspchallenge.info/users/forgot_password.php">Reset password</a></li>
-              <li><a href="https://auth.mspchallenge.info/users/join.php">Create an account</a></li>
+              <li><a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL() ?>/users/forgot_password.php">Reset password</a></li>
+              <li><a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL() ?>/users/join.php">Create an account</a></li>
             </ul>
           </li>
           <?php } ?>

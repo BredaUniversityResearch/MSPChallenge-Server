@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+// This is a "custom integrations" based on Doctrine migrations.
+// see: https://www.doctrine-project.org/projects/doctrine-migrations/en/current/reference/custom-configuration.html#custom-configuration
+
+$projectDir = __DIR__ . '/..';
+require_once $projectDir . '/vendor/autoload.php';
+
+use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\DoctrineMigrationsDependencyFactoryHelper;
+use Doctrine\Migrations\Tools\Console\Command;
+use Doctrine\Migrations\Tools\Console\ConsoleLogger;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Output\ConsoleOutput;
+
+$connectionManager = new ConnectionManager();
+$dependencyFactoryHelper = new DoctrineMigrationsDependencyFactoryHelper($projectDir, $connectionManager);
+$dependencyFactory = $dependencyFactoryHelper->getDependencyFactory();
+
+// set logger
+$output = new ConsoleOutput();
+$logger = new ConsoleLogger($output);
+$dependencyFactory->setService(LoggerInterface::class, $logger);
+
+$cli = new Application(
+    'Doctrine Migrations for MSP Challenge' . PHP_EOL .
+    'Please note that you can set a connection using "--conn". E.g. --conn=msp_session_1' . PHP_EOL .
+    'Use any of these connections: ' . implode(', ', $connectionManager->getDbNames())
+);
+$cli->setCatchExceptions(true);
+$cli->addCommands(array(
+    new Command\DumpSchemaCommand($dependencyFactory),
+    new Command\ExecuteCommand($dependencyFactory),
+    new Command\GenerateCommand($dependencyFactory),
+    new Command\LatestCommand($dependencyFactory),
+    new Command\ListCommand($dependencyFactory),
+    new Command\MigrateCommand($dependencyFactory),
+    new Command\RollupCommand($dependencyFactory),
+    new Command\StatusCommand($dependencyFactory),
+    new Command\SyncMetadataCommand($dependencyFactory),
+    new Command\VersionCommand($dependencyFactory),
+));
+$cli->run();

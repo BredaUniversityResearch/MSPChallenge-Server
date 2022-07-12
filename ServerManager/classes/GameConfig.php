@@ -27,14 +27,14 @@ class GameConfig extends Base
 
     private function validateVars()
     {
-        if (strlen($this->filename) == 0) throw new Exception("Filename cannot be empty.");
+        if (strlen($this->filename) == 0) throw new ServerManagerAPIException("Filename cannot be empty.");
         $this->filename = strip_tags($this->filename);
 		$this->filename = str_replace(" ", "_", $this->filename);
 		$this->filename = preg_replace( '/[^a-zA-Z0-9\_]+/', '-', $this->filename);
-        if (strlen($this->description) == 0) throw new Exception("Description cannot be empty.");
+        if (strlen($this->description) == 0) throw new ServerManagerAPIException("Description cannot be empty.");
         $this->version = intval($this->version);
-        if (strlen($this->version_message) == 0) throw new Exception("Version message cannot be empty.");
-        if ($this->visibility != "active" && $this->visibility != "archived") throw new Exception("Visibility needs to be active or archived only.");
+        if (strlen($this->version_message) == 0) throw new ServerManagerAPIException("Version message cannot be empty.");
+        if ($this->visibility != "active" && $this->visibility != "archived") throw new ServerManagerAPIException("Visibility needs to be active or archived only.");
         $this->upload_user = intval($this->upload_user);
         $this->upload_time = intval($this->upload_time);
         $this->last_played_time = intval($this->last_played_time);
@@ -46,8 +46,8 @@ class GameConfig extends Base
             if (!$this->_db->query("SELECT gcv.*, gcf.filename, gcf.description 
                                     FROM game_config_version gcv 
                                     INNER JOIN game_config_files gcf ON gcv.game_config_files_id = gcf.id 
-                                    WHERE gcv.id = ?;", array($this->id))) throw new Exception($this->_db->errorString());
-            if ($this->_db->count() == 0) throw new Exception("Config file not found.");
+                                    WHERE gcv.id = ?;", array($this->id))) throw new ServerManagerAPIException($this->_db->errorString());
+            if ($this->_db->count() == 0) throw new ServerManagerAPIException("Config file not found.");
         }
         elseif (!empty($this->game_config_files_id)) {
             if (!$this->_db->query("SELECT gcv.*, gcf.filename, gcf.description 
@@ -55,10 +55,10 @@ class GameConfig extends Base
                                     INNER JOIN game_config_version gcv ON gcv.game_config_files_id = gcf.id 
                                     WHERE gcf.id = ?
                                     ORDER BY gcv.version DESC
-                                    LIMIT 1;", array($this->game_config_files_id))) throw new Exception($this->_db->errorString());
-            if ($this->_db->count() == 0) throw new Exception("Config file not found.");
+                                    LIMIT 1;", array($this->game_config_files_id))) throw new ServerManagerAPIException($this->_db->errorString());
+            if ($this->_db->count() == 0) throw new ServerManagerAPIException("Config file not found.");
         }
-        else throw new Exception("Cannot obtain GameConfig without a valid id.");
+        else throw new ServerManagerAPIException("Cannot obtain GameConfig without a valid id.");
         foreach ($this->_db->first(true) as $varname => $varvalue)
         {
             if (property_exists($this, $varname)) $this->$varname = $varvalue;
@@ -88,9 +88,9 @@ class GameConfig extends Base
     private function getValuesFromConfigContents()
     {
         $config_contents = $this->getContents();
-        $this->region = $configFileValues["datamodel"]["region"] ?? "Unknown";
-        $min = $config_contents["metadata"]["min_supported_client"] ?? "Any";
-        $max = $config_contents["metadata"]["max_supported_client"] ?? "Any";
+        $this->region = $config_contents["datamodel"]["region"] ?: "Unknown";
+        $min = $config_contents["metadata"]["min_supported_client"] ?: "Any";
+        $max = $config_contents["metadata"]["max_supported_client"] ?: "Any";
 		$this->client_versions = ($min != "Any" || $max != "Any") ? $min." - ".$max : "Any";
     }
 
@@ -100,11 +100,11 @@ class GameConfig extends Base
 
         $this->file_path = $this->filename."/".$this->filename."_".$this->version.".json";
         if (is_file(ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path)) 
-            throw new Exception("Cannot store that file as it already exists.");
+            throw new ServerManagerAPIException("Cannot store that file as it already exists.");
         $outputDirectory = pathinfo(ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path, PATHINFO_DIRNAME);
         if (!is_dir($outputDirectory)) mkdir($outputDirectory, 0777); 
         if (!move_uploaded_file($this->_upload_temp_path, ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path))
-            throw new Exception("Could not put the config file in its proper place.");
+            throw new ServerManagerAPIException("Could not put the config file in its proper place.");
 
         $this->getValuesFromConfigContents();
 
@@ -127,26 +127,26 @@ class GameConfig extends Base
         unset($args["id"]);
         unset($args["filename"]);
         unset($args["description"]);
-        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
+        if (!$this->_db->query($sql, $args)) throw new ServerManagerAPIException($this->_db->errorString());
         $this->id = $this->_db->lastId();        
     }
 
     public function uploadTemp($path)
     {
-        if (!is_file($path)) throw new Exception("Nothing seems to have been uploaded.");
+        if (!is_file($path)) throw new ServerManagerAPIException("Nothing seems to have been uploaded.");
         $this->_upload_temp_path = $path;
     }
     
     private function addFirstFile()
     {
         if (!$this->_db->query("INSERT INTO game_config_files (filename, description) VALUES(?, ?)", array($this->filename, $this->description)))
-            throw new Exception($this->_db->errorString());
+            throw new ServerManagerAPIException($this->_db->errorString());
         $this->game_config_files_id = $this->_db->lastId();
     }
 
     public function edit()
     {
-        if (empty($this->id)) throw new Exception("Cannot update with knowing which id to use.");
+        if (empty($this->id)) throw new ServerManagerAPIException("Cannot update with knowing which id to use.");
         $this->validateVars();
         $args = getPublicObjectVars($this);
         $sql = "UPDATE game_config_files gcf, game_config_version gcv SET 
@@ -163,7 +163,7 @@ class GameConfig extends Base
                     gcv.client_versions = ?
                 WHERE gcf.id = ?
                 AND gcv.id = ?";
-        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
+        if (!$this->_db->query($sql, $args)) throw new ServerManagerAPIException($this->_db->errorString());
         return true;
     }
 
@@ -177,7 +177,7 @@ class GameConfig extends Base
 
     public function getList($where_array)
     {
-        if (!$this->_db->get("game_config_files", array(), "filename ASC"))throw new Exception($this->_db->errorString());
+        if (!$this->_db->get("game_config_files", array(), "filename ASC"))throw new ServerManagerAPIException($this->_db->errorString());
         $return_array = $this->_db->results(true);
         foreach ($return_array as $row => $gameconfig) {
             $total_where_array = array("AND", $where_array, array("game_config_files_id", "=", $gameconfig["id"]));

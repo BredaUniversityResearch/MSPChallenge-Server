@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`plan` (
   `plan_id` INT NOT NULL AUTO_INCREMENT,
   `plan_country_id` INT NOT NULL,
   `plan_name` VARCHAR(75) NOT NULL,
-  `plan_description` TEXT NOT NULL,
+  `plan_description` TEXT NOT NULL DEFAULT '',
   `plan_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `plan_gametime` INT(5) NOT NULL,
   `plan_state` ENUM('DESIGN', 'CONSULTATION', 'APPROVAL', 'APPROVED', 'IMPLEMENTED', 'DELETED') NOT NULL DEFAULT 'DESIGN',
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`layer` (
   `layer_active_on_start` TINYINT(1) NOT NULL DEFAULT 0,
   `layer_toggleable` TINYINT(1) NOT NULL DEFAULT 1,
   `layer_editable` TINYINT(1) NOT NULL DEFAULT 1,
-  `layer_name` VARCHAR(125) NOT NULL,
+  `layer_name` VARCHAR(125) NOT NULL DEFAULT '',
   `layer_geotype` VARCHAR(75) NOT NULL DEFAULT '',
   `layer_short` VARCHAR(75) NOT NULL DEFAULT '',
   `layer_group` VARCHAR(75) NOT NULL DEFAULT '',
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`geometry` (
   `geometry_subtractive` INT(11) NOT NULL DEFAULT 0,
   `geometry_type` VARCHAR(75) NOT NULL DEFAULT 0,
   `geometry_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Has this geometry been deleted by a user? This only applies to geometry inside a plan that hasn\'t become active. E.g. geometry is created in plan, plan is submitted to server, user deletes geometry from said plan, geometry_deleted = 1.',
-  `geometry_mspid` INT NULL,
+  `geometry_mspid` VARCHAR(16) NULL,
   PRIMARY KEY (`geometry_id`, `geometry_layer_id`),
   INDEX `fk_gis_layer1_idx` (`geometry_layer_id` ASC),
   INDEX `geometry_persistent` (`geometry_persistent` ASC),
@@ -314,7 +314,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`grid` (
   `grid_active` TINYINT NULL DEFAULT 1,
   `grid_plan_id` INT NOT NULL,
   `grid_persistent` INT NULL,
-  `grid_distribution_only` TINYINT(1) NOT NULL,
+  `grid_distribution_only` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`grid_id`),
   INDEX `fk_grid_plan1_idx` (`grid_plan_id` ASC),
   INDEX `fk_grid_persistent_index` (`grid_persistent` ASC),
@@ -744,11 +744,18 @@ ENGINE = InnoDB;
 -- Table `msp`.`api_batch`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `msp`.`api_batch` (
-  `api_batch_id` INT NOT NULL AUTO_INCREMENT,
-  `api_batch_state` ENUM('Setup', 'Success', 'Failed') NOT NULL DEFAULT 'Setup',
-  PRIMARY KEY (`api_batch_id`))
-ENGINE = InnoDB;
-
+  `api_batch_id` int NOT NULL AUTO_INCREMENT,
+  `api_batch_state` enum('Setup','Queued','Executing','Success','Failed') NOT NULL DEFAULT 'Setup',
+  `api_batch_country_id` int NOT NULL,
+  `api_batch_user_id` int NOT NULL,
+  `api_batch_server_id` varchar(255) NULL,
+  `api_batch_communicated` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`api_batch_id`),
+  KEY `api_batch_country_id` (`api_batch_country_id`),
+  KEY `api_batch_user_id` (`api_batch_user_id`),
+  CONSTRAINT `api_batch_ibfk_1` FOREIGN KEY (`api_batch_country_id`) REFERENCES `country` (`country_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `api_batch_ibfk_2` FOREIGN KEY (`api_batch_user_id`) REFERENCES `user` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
 -- Table `msp`.`api_batch_task`

@@ -1,0 +1,16 @@
+name: php
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['7.4']
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: MSPChallenge-Server
+      - name: run linters
+        run: cd MSPChallenge-Server && ./test.sh

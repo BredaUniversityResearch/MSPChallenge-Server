@@ -1,6 +1,8 @@
 <?php
 
-class Base 
+use App\Domain\Helper\Config;
+
+class Base
 {
     protected $_jwt;
 

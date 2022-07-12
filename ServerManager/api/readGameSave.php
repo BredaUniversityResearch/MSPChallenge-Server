@@ -1,6 +1,6 @@
 <?php
 
-require_once '../init.php'; 
+require __DIR__ . '/../init.php';
 
 $api = new API;
 $gamesave = new GameSave;
@@ -18,8 +18,7 @@ $allowed_actions = array(
     "load", // called in JS function submitLoadSave
 );
 $action = $_POST["action"] ?? "";
-if (method_exists($gamesave, $action) && in_array($action, $allowed_actions)) 
-{
+if (method_exists($gamesave, $action) && in_array($action, $allowed_actions)) {
     $api->setPayload([$action => $gamesave->$action()]);
 }
 
@@ -32,5 +31,3 @@ $api->setPayload(["gamesave" => get_object_vars($gamesave)]);
 $api->setPayload(["gamesave_pretty" => $gamesave->getPrettyVars()]);
 $api->setPayload(["gamesessions" => $gamesessions]);
 $api->Return();
-
-?>

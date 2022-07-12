@@ -1,6 +1,8 @@
 <?php
 //functions that help things along. by definition functions that are so common or fundamental, require limited and diverse arguments, it makes no sense to turn them into classes
 
+use App\Domain\Helper\Config;
+
 function getPublicObjectVars($obj) {
   return get_object_vars($obj);
 }
@@ -103,30 +105,6 @@ function display_successes($successes = array()){
 	}
 	$html .= '</ul>';
 	return $html;
-}
-
-//preformatted var_dump function
-function dump($var,$adminOnly=false,$localhostOnly=false){
-    if($adminOnly && isAdmin() && !$localhostOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
-    if($localhostOnly && isLocalhost() && !$adminOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
-    if($localhostOnly && isLocalhost() && $adminOnly && isAdmin()){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
-    if(!$localhostOnly && !$adminOnly){
-        echo "<pre>";
-        var_dump($var);
-        echo "</pre>";
-    }
 }
 
 //preformatted dump and die function
@@ -335,6 +313,7 @@ if(!function_exists('usernameExists')) {
 //Retrieve a list of all .php files in root files folder
 if(!function_exists('getPageFiles')) {
   function getPageFiles() {
+    global $us_url_root;
     $directory = "../";
     $pages = glob($directory . "*.php");
     foreach ($pages as $page){
@@ -348,6 +327,7 @@ if(!function_exists('getPageFiles')) {
 //Retrive a list of all .php files in users/ folder
 if(!function_exists('getUSPageFiles')) {
   function getUSPageFiles() {
+    global $us_url_root;
     $directory = "../users/";
     $pages = glob($directory . "*.php");
     foreach ($pages as $page){
@@ -610,36 +590,6 @@ if(!function_exists('getUSPageFiles')) {
             }
           }
 
-
-          if(!function_exists('mqtt')) {
-            function mqtt($id,$topic,$message){
-              //id is the server id in the mqtt_settings.php
-              $db = DB::getInstance();
-              $query = $db->query("SELECT * FROM mqtt WHERE id = ?",array($id));
-              $count=$query->count();
-              if($count > 0){
-                $server = $query->first();
-
-                $host = $server->server;
-                $port = $server->port;
-                $username = $server->username;
-                $password = $server->password;
-
-                $mqtt = new phpMQTT($host, $port, "ClientID".rand());
-
-                if ($mqtt->connect(true,NULL,$username,$password)) {
-                  $mqtt->publish($topic,$message, 0);
-                  $mqtt->close();
-                }else{
-                  echo "Fail or time out";
-                }
-              }else{
-                echo "Server not found. Please check your id.";
-              }
-            }
-          }
-
-
           if(!function_exists('clean')) {
             //Cleaning function
             function clean($string) {
@@ -891,33 +841,6 @@ if(!function_exists('getUSPageFiles')) {
               }
             }
 
-            if(!function_exists('currentPageStrict')) {
-              function currentPageStrict() {
-                $uri=$_SERVER['PHP_SELF'];
-                $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
-
-                $self_path=explode("/", $_SERVER['PHP_SELF']);
-                $self_path_length=count($self_path);
-                $file_found=FALSE;
-
-                for($i = 1; $i < $self_path_length; $i++){
-                  array_splice($self_path, $self_path_length-$i, $i);
-                  $us_url_root=implode("/",$self_path)."/";
-
-                  if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')){
-                    $file_found=TRUE;
-                    break;
-                  }else{
-                    $file_found=FALSE;
-                  }
-                }
-
-                $urlRootLength=strlen($us_url_root);
-                $page=substr($uri,$urlRootLength,strlen($uri)-$urlRootLength);
-                return $page;
-              }
-            }
-
             if(!function_exists('UserSessionCount')) {
               function UserSessionCount() {
                 global $user;
@@ -1057,31 +980,6 @@ if(!function_exists('getUSPageFiles')) {
                   }
                 }
                 return $msg;
-              }
-            }
-
-            if(!function_exists('currentFile')) {
-              function currentFile() {
-                $abs_us_root=$_SERVER['DOCUMENT_ROOT'];
-
-                $self_path=explode("/", $_SERVER['PHP_SELF']);
-                $self_path_length=count($self_path);
-                $file_found=FALSE;
-
-                for($i = 1; $i < $self_path_length; $i++){
-                  array_splice($self_path, $self_path_length-$i, $i);
-                  $us_url_root=implode("/",$self_path)."/";
-
-                  if (file_exists($abs_us_root.$us_url_root.'z_us_root.php')){
-                    $file_found=TRUE;
-                    break;
-                  }else{
-                    $file_found=FALSE;
-                  }
-                }
-
-                $urlRootLength=strlen($us_url_root);
-                return substr($_SERVER['PHP_SELF'],$urlRootLength,strlen($_SERVER['PHP_SELF'])-$urlRootLength);
               }
             }
 
