@@ -71,7 +71,8 @@ class GameSession extends Base
         $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
         /** @noinspection HttpUrlsUsage */
-        $protocol = (($_SERVER['HTTPS'] ?: 'off') == 'on') ? "https://" : "http://";
+        $_SERVER['HTTPS'] ??= 'off';
+        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : "http://";
 
         $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
         return $connection->query(
