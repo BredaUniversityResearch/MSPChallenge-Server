@@ -70,7 +70,6 @@ class GameSession extends Base
 
         $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
-        /** @noinspection HttpUrlsUsage */
         $_SERVER['HTTPS'] ??= 'off';
         /** @noinspection HttpUrlsUsage */
         $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : "http://";
