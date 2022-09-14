@@ -36200,6 +36200,9 @@
         "deadline": 192
       }
     ],
+    "edition_name": "Baltic Sea edition",
+    "edition_colour": "#ff797900",
+    "edition_letter": "B",
     "region": "balticline",
     "start": 2018,
     "end": 2050,
@@ -36213,7 +36216,7 @@
     "user_region_manager_name": "Region Manager",
     "user_admin_color": "#FF00FFFF",
     "user_region_manager_color": "#00FFFFFF",
-    "region_base_url": "https://wiki.msp.guraas.com/index.php?title=Main_Page",
+    "region_base_url": "https://knowledge.mspchallenge.info/wiki/EEZ",
     "restriction_point_size": 5.0,
     "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "windfarm_data_api_url": null

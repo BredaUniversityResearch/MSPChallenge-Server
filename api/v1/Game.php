@@ -96,7 +96,17 @@ class Game extends Base
 
         $data['configured_simulations'] = $configuredSimulations;
         if (!isset($data['wiki_base_url'])) {
-            $data['wiki_base_url'] = Config::GetInstance()->WikiConfig()['game_base_url'];
+            $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
+        }
+
+        if (!isset($data['edition_name'])) {
+            $data['edition_name'] = $_ENV['DEFAULT_EDITION_NAME'];
+        }
+        if (!isset($data['edition_colour'])) {
+            $data['edition_colour'] = $_ENV['DEFAULT_EDITION_COLOUR'];
+        }
+        if (!isset($data['edition_letter'])) {
+            $data['edition_letter'] = $_ENV['DEFAULT_EDITION_LETTER'];
         }
 
         $passwordchecks = (new GameSession)->CheckGameSessionPasswords();

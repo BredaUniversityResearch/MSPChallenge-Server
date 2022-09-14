@@ -43709,6 +43709,9 @@
         "oceanview": [],
         "objectives": [],
         "region": "adriatic",
+        "edition_name": "Adriatic Sea edition",
+        "edition_colour": "#5c67b000",
+        "edition_letter": "A",
         "start": 2020,
         "end": 2060,
         "era_total_months": 120,
@@ -43721,9 +43724,9 @@
         "user_region_manager_name": "Region Manager",
         "user_admin_color": "#FF00FFFF",
         "user_region_manager_color": "#00FFFFFF",
-        "region_base_url": "https://knowledge.mspchallenge.info\/wiki\/Main_Page",
+        "region_base_url": "https://knowledge.mspchallenge.info/wiki/EEZ",
         "restriction_point_size": 1,
-        "wiki_base_url": "https://knowledge.mspchallenge.info\/wiki\/",
+        "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
         "windfarm_data_api_url": null
     }
 }
