@@ -8060,7 +8060,7 @@
                 "layer_green": 1,
                 "layer_tooltip": "Indicative location of submerged cables",
                 "layer_information": "",
-                "layer_media": "wiki://Cables_(non-editable)",
+                "layer_media": "wiki://Telecom_Cables",
                 "layer_text_info": null,
                 "layer_states": [
                     {
@@ -8105,7 +8105,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://ClydeRegion:Energy_Cables"
+                        "media": "wiki://Telecom_Cables"
                     }
                 ],
                 "layer_info_properties": [
@@ -18941,7 +18941,7 @@
                         "capacity": 150000000,
                         "investmentCost": 200000,
                         "availability": -12,
-                        "media": "wiki://ClydeRegion:Energy_Cables"
+                        "media": "wiki://Energy_Cables"
                     }
                 ],
                 "layer_info_properties": []
@@ -19202,6 +19202,9 @@
         "expertise_definitions": [],
         "oceanview": null,
         "objectives": [],
+        "edition_name": "Clyde marine region edition",
+        "edition_colour": "#00b8ab00",
+        "edition_letter": "C",
         "region": "simcelt",
         "start": 2010,
         "end": 2050,
@@ -19215,9 +19218,9 @@
         "user_region_manager_name": "Minister",
         "user_admin_color": "#8D8D8DFF",
         "user_region_manager_color": "#00FFFFFF",
-        "region_base_url": "https://knowledge.mspchallenge.info\/wiki\/Main_Page",
+        "region_base_url": "https://knowledge.mspchallenge.info/wiki/EEZ",
         "restriction_point_size": 0.125,
-        "wiki_base_url": "https://knowledge.mspchallenge.info\/wiki\/",
+        "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
         "windfarm_data_api_url": null
     }
 }

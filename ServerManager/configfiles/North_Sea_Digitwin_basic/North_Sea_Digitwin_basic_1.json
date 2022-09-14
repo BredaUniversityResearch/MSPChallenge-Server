@@ -37898,6 +37898,9 @@
                 "deadline": 360
             }
         ],
+        "edition_name": "North Sea Digitwin edition",
+        "edition_colour": "#7ecefd00",
+        "edition_letter": "N",
         "region": "northsee",
         "start": 2020,
         "end": 2050,
@@ -37911,9 +37914,9 @@
         "user_region_manager_name": "Region Manager",
         "user_admin_color": "#FF00FFFF",
         "user_region_manager_color": "#00FFFFFF",
-        "region_base_url": "https://knowledge.mspchallenge.info\/wiki\/Main_Page",
+        "region_base_url": "https://knowledge.mspchallenge.info/wiki/EEZ",
         "restriction_point_size": 1,
-        "wiki_base_url": "https://knowledge.mspchallenge.info\/wiki\/",
+        "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
         "windfarm_data_api_url": "https://hydro-engine.appspot.com\/get_windfarm_data"
     }
 }

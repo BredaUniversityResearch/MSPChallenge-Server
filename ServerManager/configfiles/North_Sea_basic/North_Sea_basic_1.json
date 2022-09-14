@@ -28441,7 +28441,7 @@
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
-            "displayPoints": 1,
+            "displayPoints": 0,
             "pointColor": "#000000FF",
             "pointSize": 0.2,
             "pointSpriteName": "None",
@@ -28827,7 +28827,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 1,
-        "layer_tooltip": "Locationdata we received on the usage of tidal farms in the north sea, must be converted to layers with the special editing types.",
+        "layer_tooltip": "Location data we received on the usage of tidal farms in the north sea, must be converted to layers with the special editing types.",
         "layer_information": "",
         "layer_media": "wiki://Tidal_Farms",
         "layer_text_info": {
@@ -29008,7 +29008,7 @@
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
-            "displayPoints": 1,
+            "displayPoints": 0,
             "pointColor": "#000000FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
@@ -41439,6 +41439,9 @@
         "deadline": 192
       }
     ],
+    "edition_name": "North Sea edition",
+    "edition_colour": "#7ecefd00",
+    "edition_letter": "N",
     "region": "northsee",
     "start": 2018,
     "end": 2050,
@@ -41452,7 +41455,7 @@
     "user_region_manager_name": "Region Manager",
     "user_admin_color": "#FF00FFFF",
     "user_region_manager_color": "#00FFFFFF",
-    "region_base_url": "https://knowledge.mspchallenge.info/wiki/(NS/EEZ)",
+    "region_base_url": "https://knowledge.mspchallenge.info/wiki/EEZ",
     "restriction_point_size": 1.0,
     "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "windfarm_data_api_url": null
