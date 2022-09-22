@@ -501,9 +501,9 @@ class GameSession extends Base
             $game = new \App\Domain\API\v1\Game();
             $game->setGameSessionId($result['id']);
             $gameConfig = $game->Config();
-            $results[$row]['edition_name'] = $gameConfig['edition_name'] ?? $_ENV['DEFAULT_EDITION_NAME'];
-            $results[$row]['edition_colour'] = $gameConfig['edition_colour'] ?? $_ENV['DEFAULT_EDITION_COLOUR'];
-            $results[$row]['edition_letter'] = $gameConfig['edition_letter'] ?? $_ENV['DEFAULT_EDITION_LETTER'];
+            $results[$row]['edition_name'] = $gameConfig['edition_name'];
+            $results[$row]['edition_colour'] = $gameConfig['edition_colour'];
+            $results[$row]['edition_letter'] = $gameConfig['edition_letter'];
         }
         return $results;
     }
