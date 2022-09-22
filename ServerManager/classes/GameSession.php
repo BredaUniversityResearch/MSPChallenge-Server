@@ -496,7 +496,16 @@ class GameSession extends Base
         )) {
             throw new ServerManagerAPIException($this->_db->errorString());
         }
-        return $this->_db->results(true);
+        $results = $this->_db->results(true);
+        foreach ($results as $row => $result) {
+            $game = new \App\Domain\API\v1\Game();
+            $game->setGameSessionId($result['id']);
+            $gameConfig = $game->Config();
+            $results[$row]['edition_name'] = $gameConfig['edition_name'];
+            $results[$row]['edition_colour'] = $gameConfig['edition_colour'];
+            $results[$row]['edition_letter'] = $gameConfig['edition_letter'];
+        }
+        return $results;
     }
 
     private function mustUpdateBogusList()
