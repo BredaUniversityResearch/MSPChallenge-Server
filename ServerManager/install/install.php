@@ -50,7 +50,7 @@ if ($servermanager->install($user)) {
         "server_name" => $servermanager->GetServerName(),
         "audience" => $servermanager->GetBareHost()
     );
-    $freshinstall = Base::callAuthoriser("freshinstalljwt.php", $params);
+    $freshinstall = Base::postCallAuthoriser("freshinstalljwt.php", $params);
     if ($freshinstall["success"]) {
         // @codingStandardsIgnoreStart
         //echo 'settings sent <br/>';

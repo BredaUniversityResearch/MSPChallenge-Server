@@ -212,7 +212,7 @@ class GameSession extends Base
         $gameconfig->last_played_time = time();
         $gameconfig->edit();
 
-        $authoriser_call = self::callAuthoriser(
+        $authoriser_call = self::postCallAuthoriser(
             "logcreatejwt.php",
             array(
                 "jwt" => $this->getJWT(),

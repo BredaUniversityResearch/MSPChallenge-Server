@@ -11,7 +11,7 @@ if (empty($_POST['token'])) {
 }
 
 // check the old token and get the new token in one go
-$checkoldgetnew = Base::callAuthoriser(
+$checkoldgetnew = Base::postCallAuthoriser(
     'checkjwt.php',
     array(
         "jwt" => $_POST['token'],

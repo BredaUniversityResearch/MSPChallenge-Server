@@ -32,7 +32,7 @@ class ServerManager extends Base
           "From40beta9To40beta10"
         );
         $this->setRootVars();
-        $this->_msp_auth_url = $this->GetMSPAuthURL();
+        $this->_msp_auth_url = $this->GetMSPAuthBaseURL();
         $this->_msp_auth_api = $this->GetMSPAuthAPI();
     }
 
@@ -104,10 +104,10 @@ class ServerManager extends Base
 
     public function GetMSPAuthAPI()
     {
-        return $this->GetMSPAuthURL() . '/usersc/plugins/apibuilder/authmsp/';
+        return $this->GetMSPAuthBaseURL().($_ENV['AUTH_SERVER_API_BASE_PATH'] ?? '/api/');
     }
 
-    public function GetMSPAuthURL()
+    public function GetMSPAuthBaseURL()
     {
         return \App\Domain\API\v1\Config::GetInstance()->getMSPAuthBaseURL();
     }
@@ -138,10 +138,14 @@ class ServerManager extends Base
         return $this->server_name;
     }
 
-    public function freshinstall()
+    public function freshinstall(): bool
     {
         if (empty($this->server_id)) {
-            $this->CompletePropertiesFromDB();
+            try {
+                $this->CompletePropertiesFromDB();
+            } catch (\Exception $e) {
+                return true;
+            }
         }
         return (empty($this->server_id));
     }
@@ -242,7 +246,11 @@ class ServerManager extends Base
     public function GetTranslatedServerURL()
     {
         if (empty($this->server_address)) {
-            $this->CompletePropertiesFromDB();
+            try {
+                $this->CompletePropertiesFromDB();
+            } catch (\Exception $e) {
+                // silent fail.
+            }
         }
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
@@ -357,7 +365,7 @@ class ServerManager extends Base
         $this->SetServerAddress();
         $this->SetServerDescription();
 
-        $updateservername = Base::callAuthoriser( // doing this here because JWT won't be available elsewhere
+        $updateservername = Base::postCallAuthoriser( // doing this here because JWT won't be available elsewhere
             'updateservernamejwt.php',
             array(
             "jwt" => $this->getJWT(),
