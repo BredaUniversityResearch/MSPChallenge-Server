@@ -53,7 +53,7 @@ class User extends Base
         }
     }
 
-    public function resolveByRequest(Request $request): ?int
+    public function importTokenFields(array $tokenFields): ?int
     {
         // @note(MH)
         // vendor/lexik/jwt-authentication-bundle/Encoder/LcobucciJWTEncoder.php says:
@@ -62,7 +62,7 @@ class User extends Base
         // see: https://lcobucci-jwt.readthedocs.io/en/latest/parsing-tokens/
         $parser = new Parser(new JoseEncoder());
         try {
-            $unencryptedToken = $parser->parse($request->get('token'));
+            $unencryptedToken = $parser->parse($tokenFields['token']);
         } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
             return null;
         }
@@ -71,12 +71,12 @@ class User extends Base
             'username' => $username,
             // for backwards compatibility
             'account_owner' => 0, // what is this? Used by User::find()
-        ], $request->query->all());
+        ], $tokenFields);
         if (array_key_exists('refresh_token_expiration', $fields)) {
             // unix timestamp to datetime conversion
             $fields['refresh_token_expiration'] = date('Y-m-d H:i:s', $fields['refresh_token_expiration']);
         }
-        $data = $this->_db->get('users', array("username", '=', $username));
+        $data = $this->_db->get('users', array('username', '=', $username));
         if ($data->count()) {
             $this->_db->update('users', $data->first()->id, $fields);
             return $data->first()->id;

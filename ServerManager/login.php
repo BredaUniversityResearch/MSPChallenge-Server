@@ -15,7 +15,7 @@ $successes = [];
 
 $request = SymfonyToLegacyHelper::getInstance()->getRequest();
 if (null !== $request->get('token')) {
-    $userId = $user->resolveByRequest($request);
+    $userId = $user->importTokenFields($request->query->all());
     // user was found through the local database, so we are ready to finalise
     if ($user->find($userId)) {
         // set up local php session

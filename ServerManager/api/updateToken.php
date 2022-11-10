@@ -1,29 +1,30 @@
 <?php
+
+use App\Domain\Services\SymfonyToLegacyHelper;
+
 require __DIR__ . '/../init.php';
 $api = new API;
 $user = new User();
 
 $user->hastobeLoggedIn();
 
-if (empty($_POST['token'])) {
+$request = SymfonyToLegacyHelper::getInstance()->getRequest();
+if (null === $request->get('token')) {
     $api->setMessage("Cannot do anything without a token.");
     $api->Return();
 }
 
 // check the old token and get the new token in one go
-$checkoldgetnew = Base::postCallAuthoriser(
-    'checkjwt.php',
-    array(
-        "jwt" => $_POST['token'],
-        "audience" => ServerManager::getInstance()->GetBareHost()
-    )
-);
+$response = Base::postCallAuthoriser('token/refresh', [
+    'refresh_token' => $user->data()->refresh_token
+]);
 
 // if old accepted and new returned
-if ($checkoldgetnew["success"] && !empty($checkoldgetnew["jwt"])) {
-    Session::put("currentToken", $checkoldgetnew["jwt"]);
+if (!empty($response['token'])) {
+    Session::put('currentToken', $response['token']);
+    $user->importTokenFields($response);
     $api->setStatusSuccess();
-    $api->setPayload(['jwt' => $checkoldgetnew["jwt"]]);
+    $api->setPayload(['jwt' => $response["token"]]);
     $api->Return();
 }
 
