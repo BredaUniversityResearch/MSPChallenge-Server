@@ -9,7 +9,6 @@ defined('APP_RAN') or die();
 
 $sql = "ALTER TABLE `users`
 CHANGE `id` `id` int(11) NOT NULL AUTO_INCREMENT,
-DROP `email`,
 DROP `email_new`,
 ADD `token` text COLLATE 'utf8_general_ci' NOT NULL AFTER `username`,
 ADD `refresh_token` text COLLATE 'utf8_general_ci' NOT NULL AFTER `token`,
@@ -54,4 +53,6 @@ DROP `apibld_key`,
 DROP `apibld_ip`,
 DROP `apibld_blocked`,
 DROP `plg_sl_opt_out`,
-DROP `ldap`;";
+DROP `ldap`;
+ALTER TABLE `users`
+ADD UNIQUE `username` (`username`);";

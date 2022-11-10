@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
 
 
 CREATE TABLE IF NOT EXISTS `users` (
-`id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(255) NOT NULL,
   `token` text COLLATE 'utf8_general_ci' NOT NULL,
   `refresh_token` text COLLATE 'utf8_general_ci' NOT NULL,
@@ -153,6 +153,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `pin` varchar(255) DEFAULT NULL,
   `account_owner` tinyint(4) NOT NULL DEFAULT '0',
   `account_id` int(11) NOT NULL DEFAULT '0',
+  UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
