@@ -129,11 +129,15 @@ class Base
                     $url = sprintf("%s?%s", $url, http_build_query($data2send));
                 }
         }
+        if ($asjson) {
+            $headers[] = 'Content-Type: application/json';
+        }
         if (!empty($headers) && is_array($headers)) {
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         }
   
-      // any proxy required for the external calls to the MSP Authoriser? (which are the only kind of external calls done by ServerManager)
+        // any proxy required for the external calls to the MSP Authoriser? (which are the only kind of external calls
+        //   done by ServerManager)
         $proxy = Config::get('msp_auth/with_proxy');
         if (!empty($proxy) && strstr($url, ServerManager::getInstance()->GetMSPAuthAPI()) !== false && PHPCanProxy()) {
             curl_setopt($curl, CURLOPT_PROXY, $proxy);
