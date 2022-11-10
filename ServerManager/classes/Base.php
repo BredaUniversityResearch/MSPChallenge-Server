@@ -81,11 +81,17 @@ class Base
     }
 
     // needs a function to call Authoriser API
+    /**
+     * @throws HydraErrorException
+     */
     public static function postCallAuthoriser(string $endpoint, array $data2send = [])
     {
         return self::callAuthoriser('POST', $endpoint, $data2send);
     }
 
+    /**
+     * @throws HydraErrorException
+     */
     public static function callAuthoriser(string $method, string $endpoint, array $data2send = [])
     {
         $headers = [
