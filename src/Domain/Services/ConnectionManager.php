@@ -87,11 +87,11 @@ class ConnectionManager extends DatabaseDefaults
         $config['connection'] = $dbName;
         $config['mappings']['App'] = [
             'is_bundle' => false,
-            'type' => 'annotation',
             'dir' => '%kernel.project_dir%/src/Entity',
             'prefix' => 'App\Entity',
             'alias' => 'App'
         ];
+        $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore';
         if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
             return $config;
         }

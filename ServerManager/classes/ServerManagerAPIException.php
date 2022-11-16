@@ -1,5 +1,7 @@
 <?php
 
+namespace ServerManager;
+
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ServerManagerAPIException extends HttpException

@@ -1,4 +1,7 @@
 <?php
+
+namespace ServerManager;
+
 /*
 UserSpice 5
 An Open Source PHP User Management System
@@ -17,17 +20,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class Hash{
+class Hash
+{
 
-	public static function make($string, $salt = ''){
-		return hash('sha256', $string . $salt);
-	}
+    public static function make($string, $salt = ''): bool|string
+    {
+        return hash('sha256', $string . $salt);
+    }
 
-	public static function salt($length){
-		return mcrypt_create_iv($length);
-	}
+    public static function salt($length): bool|string
+    {
+        return mcrypt_create_iv($length);
+    }
 
-	public static function unique(){
-		return self::make(uniqid());
-	}
+    public static function unique(): bool|string
+    {
+        return self::make(uniqid());
+    }
 }

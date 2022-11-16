@@ -1,11 +1,16 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\GameSave;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $gamesave = new GameSave;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 $visibility = $_POST['visibility'] ?? 'active';
 $visibility_where_array = array("save_visibility", "=", $visibility);

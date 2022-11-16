@@ -1,11 +1,16 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\GeoServer;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $geoserver = new GeoServer;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 // first check if the geoserver_id referred to can even be obtained
 $geoserver->id = $_POST["geoserver_id"] ?? "";

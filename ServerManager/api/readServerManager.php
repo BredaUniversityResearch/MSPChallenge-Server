@@ -1,11 +1,16 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\ServerManager;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $servermanager = ServerManager::getInstance();
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 $servermanager->get();
 

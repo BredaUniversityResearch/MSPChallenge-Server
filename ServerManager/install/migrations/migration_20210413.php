@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -19,5 +20,3 @@ ALTER TABLE `game_saves`
     CHANGE `password_admin` `password_admin` TEXT NOT NULL, 
     CHANGE `password_player` `password_player` TEXT NOT NULL,
     ADD `server_version` VARCHAR(45) NOT NULL DEFAULT '4.0-beta7';";
-
-?>

@@ -1,4 +1,7 @@
 <?php
+
+namespace ServerManager;
+
 /*
 UserSpice 5
 An Open Source PHP User Management System
@@ -17,23 +20,27 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class Redirect {
-  public static function to($location = null, $args=''){
-    #die("Redirecting to $location<br />\n");
-    if ($location) {
-      if ($args) $location .= $args; // allows 'login.php?err=Error+Message' or the like
-      if (!headers_sent()){
-        header('Location: '.$location);
-        exit();
-      } else {
-        echo '<script type="text/javascript">';
-        echo 'window.location.href="'.$location.'";';
-        echo '</script>';
-        echo '<noscript>';
-        echo '<meta http-equiv="refresh" content="0;url='.$location.'" />';
-        echo '</noscript>'; exit;
-      }
+class Redirect
+{
+    public static function to($location = null, $args = ''): void
+    {
+      #die("Redirecting to $location<br />\n");
+        if ($location) {
+            if ($args) {
+                $location .= $args; // allows 'login.php?err=Error+Message' or the like
+            }
+            if (!headers_sent()) {
+                header('Location: '.$location);
+                exit();
+            } else {
+                echo '<script type="text/javascript">';
+                echo 'window.location.href="'.$location.'";';
+                echo '</script>';
+                echo '<noscript>';
+                echo '<meta http-equiv="refresh" content="0;url='.$location.'" />';
+                echo '</noscript>';
+                exit;
+            }
+        }
     }
-  }
-
 }

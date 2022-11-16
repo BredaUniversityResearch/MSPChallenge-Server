@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -25,5 +26,3 @@ $sql = "CREATE TABLE `game_geoservers` (
   ALTER TABLE `game_list` 
     CHANGE `password_admin` `password_admin` TEXT NOT NULL, 
     CHANGE `password_player` `password_player` TEXT NOT NULL; ";
-
-?>
