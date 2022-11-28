@@ -72,9 +72,9 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Post(
         int $country,
-        string $name,
-        int $time,
-        string $type,
+        string $name = '',
+        int $time = -1,
+        string $type = '0,0,0',
         array $layers = [],
         bool $alters_energy_distribution = false
     ): int {
@@ -215,14 +215,14 @@ class Plan extends Base
             true
         );
 
-        Database::GetInstance()->query(
+        $rid = Database::GetInstance()->query(
             "INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)",
             array($id, $lid)
         );
 
         $this->UpdatePlanConstructionTime($id);
 
-        return $lid;
+        return $rid;
     }
 
     /**
@@ -289,7 +289,7 @@ class Plan extends Base
 
         //Invalidate all warnings from this plan layer
         $warning = new Warning();
-        $warning->RemoveAllWarningsForLayer($planid[0]['id']);
+        $warning->RemoveAllWarningsForLayer($planid[0]['id'], true); // hard-delete
 
         // @todo: also delete everything to do with energy connected to this
 
@@ -1000,7 +1000,52 @@ class Plan extends Base
     {
         $planLatest = new PlanLatest();
         $this->asyncDataTransferTo($planLatest);
-        return $planLatest->latest($lastupdate);
+        return $planLatest->latest($lastupdate)
+            ->then(function (array &$planData) {
+                $this->formatPlanData($planData);
+                return $planData;
+            });
+    }
+
+    /**
+     * new format since new UI style (2022-11-24), see MSP-4142
+     *
+     * @param array $planData
+     * @return void
+     */
+    private function formatPlanData(array &$planData): void
+    {
+        $planData = collect($planData)
+            ->map(function ($plan) {
+                unset($plan['type']);
+                // PolicyUpdateEnergyPlan
+                $plan['policies'][] = [
+                    'policy_type' => 'energy',
+                    'alters_energy_distribution' => $plan['alters_energy_distribution'],
+                    'grids' => $plan['grids'],
+                    'deleted_grids' => $plan['deleted_grids'],
+                    'energy_error' => $plan['energy_error']
+                ];
+                unset(
+                    $plan['alters_energy_distribution'],
+                    $plan['grids'],
+                    $plan['deleted_grids'],
+                    $plan['energy_error']
+                );
+                // PolicyUpdateFishingPlan
+                $plan['policies'][] = [
+                    'policy_type' => 'fishing',
+                    'fishing' => $plan['fishing']
+                ];
+                unset($plan['fishing']);
+                // PolicyUpdateShippingPlan
+                $plan['policies'][] = [
+                    'policy_type' => 'shipping',
+                    'restriction_settings' => $plan['restriction_settings']
+                ];
+                unset($plan['restriction_settings']);
+                return $plan;
+            });
     }
 
     /**

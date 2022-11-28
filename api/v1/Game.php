@@ -34,7 +34,8 @@ class Game extends Base
         ["Setupfilename", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], // nominated for full security
         "Speed",
         ["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
-        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        "PolicySimSettings"
     );
 
     public function __construct(string $method = '')
@@ -75,17 +76,6 @@ class Game extends Base
     {
         $data = $this->GetGameConfigValues();
 
-        $configuredSimulations = array();
-        if (isset($data['MEL'])) {
-            $configuredSimulations[] = "MEL";
-        }
-        if (isset($data['SEL'])) {
-            $configuredSimulations[] = "SEL";
-        }
-        if (isset($data['CEL'])) {
-            $configuredSimulations[] = "CEL";
-        }
-
         foreach ($data as $key => $d) {
             if ((is_object($d) || is_array($d)) && $key != "expertise_definitions" &&
                 $key != "dependencies"
@@ -94,7 +84,6 @@ class Game extends Base
             }
         }
 
-        $data['configured_simulations'] = $configuredSimulations;
         if (!isset($data['wiki_base_url'])) {
             $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
         }
@@ -326,8 +315,52 @@ class Game extends Base
         for ($i = 0; $i < sizeof($data); $i++) {
             Layer::FixupLayerMetaData($data[$i]);
         }
+        $this->addLayerDependenciesToMetaData($data);
 
         return $data;
+    }
+
+    /**
+     * This method adds "layer_dependencies" int[] field to a layer which holds all layer ids the layer depends on for
+     *   editing.
+     * Currently, that is, all the grey energy layers depend on the grey cable layer and all the green energy layers
+     *   on the green cable layer.
+     *
+     * @param array $meta input meta data from Meta()
+     * @return void
+     */
+    private function addLayerDependenciesToMetaData(array &$meta): void
+    {
+        // find cable layers
+        $cableLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'cable')->keyBy('layer_id');
+        if (empty($cableLayers)) {
+            return;
+        }
+        // if cable layers exists, go through all layers
+        foreach ($meta as &$layer) {
+            $layer['layer_dependencies'] = [];
+
+            // has to be a non-cable
+            if ($cableLayers->has($layer['layer_id'])) {
+                continue;
+            }
+            // if they have the required energy editing type: "transformer", "socket", "sourcepoint" or "sourcepolygon"
+            if (!in_array(
+                $layer['layer_editing_type'],
+                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
+            )) {
+                continue;
+            }
+
+            // find the corresponding green or grey cable layer
+            if (null === $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])) {
+                continue;
+            }
+
+            // add the associated cable layer id to their dependency
+            $layer['layer_dependencies'][] = $cableLayer['layer_id'];
+        }
+        unset($layer);
     }
 
     /**
@@ -410,6 +443,65 @@ class Game extends Base
             array(microtime(true), $state)
         );
         await($this->onGameStateUpdated($state));
+    }
+
+    /**
+     * @apiGroup Game
+     * @throws Exception
+     * @api {POST} /game/PolicySimSettings PolicySimSettings
+     * @apiDescription Get policy and simulation settings
+     * @apiSuccess {string} JSON object
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function PolicySimSettings()
+    {
+        // just enable all policy types?
+        $policySettings[] = [
+            'policy_type' => 'fishing'
+        ];
+        $policySettings[] = [
+            'policy_type' => 'shipping'
+        ];
+        $policySettings[] = [
+            'policy_type' => 'energy'
+        ];
+
+        $simulationSettings = [];
+        $data = $this->GetGameConfigValues();
+        if (isset($data['MEL'])) {
+            $mel = new MEL();
+            $simulationSettings[] = [
+                'policy_type' => 'MEL',
+                'content' => $mel->Config()
+            ];
+        }
+        if (isset($data['SEL'])) {
+            $sel = new SEL();
+            $selGameClientConfig = $sel->GetSELGameClientConfig();
+            if (is_object($selGameClientConfig)) {
+                $selGameClientConfig = get_object_vars($selGameClientConfig);
+            }
+            $simulationSettings[] = array_merge(
+                [
+                    'policy_type' => 'SEL',
+                    'kpis' => $sel->GetKPIDefinition()
+                ],
+                // E.g. returns key directionality_icon_color
+                $selGameClientConfig
+            );
+        }
+        if (isset($data['CEL'])) {
+            $cel = new CEL();
+            $simulationSettings[] = array_merge([
+                'policy_type' => 'CEL'
+            ], $cel->GetCELConfig());
+        }
+
+        return [
+            'policy_settings' => $policySettings,
+            'simulation_settings' => $simulationSettings
+        ];
     }
 
     /**
