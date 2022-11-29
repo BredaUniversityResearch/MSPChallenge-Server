@@ -2,20 +2,13 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\WsServer\Plugins\Latest\KpiLatest;
-use Drift\DBAL\Result;
 use Exception;
-use React\Promise\PromiseInterface;
-use function App\parallel;
-use function App\tpf;
-use function App\await;
 
 class Kpi extends Base
 {
     private const ALLOWED = array(
         "Post",
         "BatchPost",
-        "Latest"
     );
 
     public function __construct(string $method = '')
@@ -90,17 +83,5 @@ class Kpi extends Base
             ),
             true
         );
-    }
-
-    /**
-     * @throws Exception
-     * @return array|PromiseInterface
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $time, int $country)/*: array|PromiseInterface // <-- php 8 */
-    {
-        $kpiLatest = new KpiLatest();
-        $this->asyncDataTransferTo($kpiLatest);
-        return $kpiLatest->latest($time, $country);
     }
 }

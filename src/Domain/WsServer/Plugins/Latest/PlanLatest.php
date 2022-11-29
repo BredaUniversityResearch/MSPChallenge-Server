@@ -215,11 +215,57 @@ class PlanLatest extends CommonBase
                                 unset($g);
                             }
                             unset($d);
+                            $this->formatPlans($plans);
                             return $plans;
                         });
                 });
         });
         return $this->isAsync() ? $promise : await($promise);
+    }
+
+    /**
+     * new format since new UI style (2022-11-24), see MSP-4142
+     *
+     * @param array $plans
+     * @return void
+     */
+    private function formatPlans(array &$plans): void
+    {
+        $plans = collect($plans)
+            ->map(function ($plan) {
+                unset($plan['type']);
+                // PolicyUpdateEnergyPlan
+                $plan['policies'][] = [
+                    'policy_type' => 'energy',
+                    'alters_energy_distribution' => $plan['alters_energy_distribution'],
+                    'grids' => $plan['grids'],
+                    'deleted_grids' => $plan['deleted_grids'],
+                    'energy_error' => $plan['energy_error']
+                ];
+                unset(
+                    $plan['alters_energy_distribution'],
+                    $plan['grids'],
+                    $plan['deleted_grids'],
+                    $plan['energy_error']
+                );
+                // PolicyUpdateFishingPlan
+                $fishingPolicy = [
+                    'policy_type' => 'fishing',
+                ];
+                if (array_key_exists('fishing', $plan)) {
+                    $fishingPolicy['fishing'] = $plan['fishing'];
+                }
+                $plan['policies'][] = $fishingPolicy;
+                unset($plan['fishing']);
+                // PolicyUpdateShippingPlan
+                $plan['policies'][] = [
+                    'policy_type' => 'shipping',
+                    'restriction_settings' => $plan['restriction_settings']
+                ];
+                unset($plan['restriction_settings']);
+                return $plan;
+            })
+            ->all();
     }
 
     /**

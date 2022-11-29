@@ -13,7 +13,6 @@ use Throwable;
 class Update extends Base
 {
     private const ALLOWED = array(
-        "Latest",
         "Meta",
         "Reimport",
         "ImportMeta",

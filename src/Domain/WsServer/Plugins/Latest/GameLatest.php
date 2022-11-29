@@ -431,15 +431,15 @@ class GameLatest extends CommonBase
         array &$data
     ): PromiseInterface {
         $data['simulation_updates'][0] = [
-            'policy_type' => 'CEL',
+            'simulation_type' => 'CEL',
             'kpi' => $queryResultRows['energy']
         ];
         $data['simulation_updates'][1] = [
-            'policy_type' => 'MEL',
+            'simulation_type' => 'MEL',
             'kpi' => $queryResultRows['ecology']
         ];
         $data['simulation_updates'][2] = [
-            'policy_type' => 'SEL',
+            'simulation_type' => 'SEL',
             'kpi' => $queryResultRows['shipping']
         ];
 
@@ -484,7 +484,7 @@ class GameLatest extends CommonBase
         int $user,
         float $newTime,
         array &$data
-    ): ?PromiseInterface {
+    ): PromiseInterface {
         $data['objectives'] = $result->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
@@ -505,8 +505,7 @@ class GameLatest extends CommonBase
             empty($data['warning']) &&
             empty($data['raster']) &&
             empty($data['objectives'])) {
-            $data = '';
-            return null;
+            return resolveOnFutureTick(new Deferred(), '')->promise();
         }
 
         return $this->getAsyncDatabase()->update(

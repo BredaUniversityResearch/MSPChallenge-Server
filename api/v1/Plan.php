@@ -3,7 +3,6 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\ToPromiseFunction;
-use App\Domain\WsServer\Plugins\Latest\PlanLatest;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -19,7 +18,6 @@ class Plan extends Base
         "Get",
         "All",
         "Post",
-        "Latest",
         "Message",
         "GetMessages",
         "DeleteLayer",
@@ -986,66 +984,6 @@ class Plan extends Base
             );
         $promise = $deferred->promise();
         return $this->isAsync() ? $promise : await($promise);
-    }
-
-    /**
-     * initially, ask for all from time 0 to load in all user created data
-     *
-     * @throws Exception
-     * @noinspection SpellCheckingInspection
-     * @return array|PromiseInterface
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $lastupdate)/*: array|PromiseInterface // <-- php 8 */
-    {
-        $planLatest = new PlanLatest();
-        $this->asyncDataTransferTo($planLatest);
-        return $planLatest->latest($lastupdate)
-            ->then(function (array &$planData) {
-                $this->formatPlanData($planData);
-                return $planData;
-            });
-    }
-
-    /**
-     * new format since new UI style (2022-11-24), see MSP-4142
-     *
-     * @param array $planData
-     * @return void
-     */
-    private function formatPlanData(array &$planData): void
-    {
-        $planData = collect($planData)
-            ->map(function ($plan) {
-                unset($plan['type']);
-                // PolicyUpdateEnergyPlan
-                $plan['policies'][] = [
-                    'policy_type' => 'energy',
-                    'alters_energy_distribution' => $plan['alters_energy_distribution'],
-                    'grids' => $plan['grids'],
-                    'deleted_grids' => $plan['deleted_grids'],
-                    'energy_error' => $plan['energy_error']
-                ];
-                unset(
-                    $plan['alters_energy_distribution'],
-                    $plan['grids'],
-                    $plan['deleted_grids'],
-                    $plan['energy_error']
-                );
-                // PolicyUpdateFishingPlan
-                $plan['policies'][] = [
-                    'policy_type' => 'fishing',
-                    'fishing' => $plan['fishing']
-                ];
-                unset($plan['fishing']);
-                // PolicyUpdateShippingPlan
-                $plan['policies'][] = [
-                    'policy_type' => 'shipping',
-                    'restriction_settings' => $plan['restriction_settings']
-                ];
-                unset($plan['restriction_settings']);
-                return $plan;
-            });
     }
 
     /**

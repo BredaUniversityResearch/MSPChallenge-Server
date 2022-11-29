@@ -472,7 +472,7 @@ class Game extends Base
         if (isset($data['MEL'])) {
             $mel = new MEL();
             $simulationSettings[] = [
-                'policy_type' => 'MEL',
+                'simulation_type' => 'MEL',
                 'content' => $mel->Config()
             ];
         }
@@ -484,7 +484,7 @@ class Game extends Base
             }
             $simulationSettings[] = array_merge(
                 [
-                    'policy_type' => 'SEL',
+                    'simulation_type' => 'SEL',
                     'kpis' => $sel->GetKPIDefinition()
                 ],
                 // E.g. returns key directionality_icon_color
@@ -494,7 +494,7 @@ class Game extends Base
         if (isset($data['CEL'])) {
             $cel = new CEL();
             $simulationSettings[] = array_merge([
-                'policy_type' => 'CEL'
+                'simulation_type' => 'CEL'
             ], $cel->GetCELConfig());
         }
 
