@@ -19,7 +19,7 @@ api/
 api_test/
 legacy.php
 ServerManager/
-Migrations/
+migrations/
 "
 
 bash ./tools/install-tools.sh
