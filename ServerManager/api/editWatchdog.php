@@ -1,11 +1,16 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\User;
+use ServerManager\Watchdog;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $watchdog = new Watchdog;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 // first check if the watchdog id referred to can even be obtained
 $watchdog->id = $_POST["watchdog_id"] ?? "";

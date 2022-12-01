@@ -67,7 +67,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
             $application->setAutoExit(false);
             $output = new BufferedOutput();
             $returnCode = $application->run(
-                new StringInput('doctrine:migrations:migrate -vvv -n --conn=' . $dbName),
+                new StringInput('doctrine:migrations:migrate -vvv -n --em=' . $dbName),
                 $output
             );
             if (0 !== $returnCode) {

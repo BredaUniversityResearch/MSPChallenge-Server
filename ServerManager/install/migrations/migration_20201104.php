@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -29,5 +30,3 @@ $sql = "ALTER TABLE `game_saves`
 			ADD `game_config_filename` VARCHAR(45) NOT NULL  AFTER `game_config_version_id`,
 			DROP `game_id`;
 		ALTER TABLE `game_list` ADD `save_id` INT(11) NOT NULL DEFAULT '0' AFTER `api_access_token`;";
-
-?>

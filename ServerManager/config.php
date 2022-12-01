@@ -6,6 +6,7 @@ use App\Domain\Services\ConnectionManager;
 $connectionConfig = ConnectionManager::getInstance()->getConnectionConfig();
 $codeBranch = '/';
 
+/** @noinspection HttpUrlsUsage */
 $GLOBALS['config'] = array(
     'ws_server' => [
         'scheme' => 'ws://',

@@ -1,42 +1,51 @@
 <?php
 
+namespace ServerManager;
+
+use JetBrains\PhpStorm\NoReturn;
+
 class API extends Base
 {
-    private $_db, $_payload = array(), $_return;
-    public $success, $message, $count;
+    private ?DB $db = null;
+    private array $payload = [];
+    private array $return = [];
+    public bool $success = false;
+    public string $message = '';
+    public int $count = 0;
 
     public function __construct()
     {
         $this->setStatusFailure();
 
         // test database connection
-        $this->_db = DB::getInstance();
-        if ($this->_db->error()) throw new ServerManagerAPIException($this->_db->errorString());
+        $this->db = DB::getInstance();
+        if ($this->db->error()) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
     }
 
-    public function setStatusSuccess()
+    public function setStatusSuccess(): bool
     {
         $this->success = true;
         return true;
     }
 
-    public function setStatusFailure()
+    public function setStatusFailure(): bool
     {
         $this->success = false;
         return true;
     }
 
-    public function setMessage($message)
+    public function setMessage(string $message): bool
     {
         $this->message = $message;
         return true;
     }
 
-    public function setPayload($payload)
+    public function setPayload($payload): bool
     {
-        if (is_array($payload)) 
-        {
-            $this->_payload = $this->_payload + $payload;
+        if (is_array($payload)) {
+            $this->payload = $this->payload + $payload;
             return true;
         }
         return false;
@@ -45,20 +54,22 @@ class API extends Base
     // needs to be public now, it is used by ExceptionListener
     public function prepareReturn(): array
     {
-        $this->count = (is_array($this->_payload) && is_array(current($this->_payload))) ? count(current($this->_payload)) : 0;
-        $this->_return = getPublicObjectVars($this);
-        $this->_return += $this->_payload;
-        return $this->_return;
+        $this->count = (is_array(current($this->payload))) ?
+            count(current($this->payload)) : 0;
+        $this->return = getPublicObjectVars($this);
+        $this->return += $this->payload;
+        return $this->return;
     }
 
     public function printReturn()
     {
         header('Content-type: application/json');
         $this->prepareReturn();
-        echo json_encode($this->_return);
+        echo json_encode($this->return);
     }
 
-    public function Return()
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    #[NoReturn] public function Return(): void
     {
         $this->printReturn();
         die();

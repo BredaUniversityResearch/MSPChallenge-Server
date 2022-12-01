@@ -1,8 +1,12 @@
 <?php
+
+use ServerManager\FileDownloader;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 $fileDownloader = new FileDownloader;
 $user = new User();
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 $allowed = array(
     // to extend this, just create a method that returns either a file path or an array of two values:
@@ -30,5 +34,5 @@ $object->id = $id;
 $object->get();
 $method = $request_array[1];
 
-$fileDownloader->file_var = $object->$method();
+$fileDownloader->fileVar = $object->$method();
 $fileDownloader->Return();

@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -11,4 +12,3 @@ defined('APP_RAN') or die();
    $sql = "UPDATE `game_servers` SET `name` = 'Default: the server machine' WHERE `id` = 1;
            UPDATE `game_watchdog_servers` SET `name` = 'Default: the same server machine' WHERE `id` = 1;
            ";
-?>

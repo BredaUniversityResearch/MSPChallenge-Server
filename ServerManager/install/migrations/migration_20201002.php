@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -10,5 +11,3 @@ defined('APP_RAN') or die();
 
 $sql = "ALTER TABLE `game_list` 
 		ADD `api_access_token` varchar(32) NOT NULL DEFAULT '';";
-
-?>

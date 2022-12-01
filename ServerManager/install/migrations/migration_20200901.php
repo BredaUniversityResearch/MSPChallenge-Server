@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -15,5 +16,3 @@ $sql =
    UPDATE game_config_version SET region = 'balticline' WHERE region = 'Baltic';
    UPDATE game_config_version SET region = 'simcelt' WHERE region = 'Clyde Region';
    UPDATE game_config_version SET region = 'adriatic' WHERE region = 'Unknown';";
-
-?>
