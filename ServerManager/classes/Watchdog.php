@@ -1,76 +1,98 @@
 <?php
 
+namespace ServerManager;
+
 class Watchdog extends Base
 {
-    private $_db;
-    private $_old;
+    private ?DB $db = null;
+    private $old;
 
     public $name;
     public $address;
     public $available;
     public $id;
     
-    public function __construct() 
+    public function __construct()
     {
-        $this->_db = DB::getInstance();
+        $this->db = DB::getInstance();
     }
 
     private function validateVars()
     {
-        if (self::HasSpecialChars($this->name)) 
+        if (self::HasSpecialChars($this->name)) {
             throw new ServerManagerAPIException("Watchdog name cannot contain special characters.");
-        if (!filter_var(gethostbyname($this->address), FILTER_VALIDATE_IP)) 
+        }
+        if (!filter_var(gethostbyname($this->address), FILTER_VALIDATE_IP)) {
             throw new ServerManagerAPIException("Watchdog address is not a valid domain name or IP address.");
-        if (intval($this->available) !== 0 && intval($this->available) !== 1) 
+        }
+        if (intval($this->available) !== 0 && intval($this->available) !== 1) {
             throw new ServerManagerAPIException("Watchdog available should be 0 or 1.");
+        }
     }
 
     public function get()
     {
-        if (empty($this->id)) throw new ServerManagerAPIException("Cannot obtain Watchdog without a valid id.");
-        if (!$this->_db->query("SELECT * FROM game_watchdog_servers WHERE id = ?;", array($this->id))) throw new ServerManagerAPIException($this->_db->errorString());
-        if ($this->_db->count() == 0) throw new ServerManagerAPIException("Watchdog server not found.");
-        foreach ($this->_db->first(true) as $varname => $varvalue)
-        {
-            if (property_exists($this, $varname)) $this->$varname = $varvalue;
+        if (empty($this->id)) {
+            throw new ServerManagerAPIException("Cannot obtain Watchdog without a valid id.");
+        }
+        if (!$this->db->query("SELECT * FROM game_watchdog_servers WHERE id = ?;", array($this->id))) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
+        if ($this->db->count() == 0) {
+            throw new ServerManagerAPIException("Watchdog server not found.");
+        }
+        foreach ($this->db->first(true) as $varname => $varvalue) {
+            if (property_exists($this, $varname)) {
+                $this->$varname = $varvalue;
+            }
         }
 
-        $this->_old = clone $this;
+        $this->old = clone $this;
     }
 
-    public function getList()
+    public function getList(): array
     {
-        if (!$this->_db->query("SELECT id, name, address, available FROM game_watchdog_servers")) throw new ServerManagerAPIException($this->_db->errorString());
-        return $this->_db->results(true);
+        if (!$this->db->query("SELECT id, name, address, available FROM game_watchdog_servers")) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
+        return $this->db->results(true);
     }
 
-    public function add() 
+    public function add()
     {
         $this->validateVars();
-        if (!$this->_db->query("INSERT INTO game_watchdog_servers (
+        if (!$this->db->query(
+            "INSERT INTO game_watchdog_servers (
                                     name, 
                                     address, 
                                     available
-                                    ) VALUES (?, ?, ?)", 
-                                array(
-                                    $this->name, 
-                                    $this->address, 
+                                    ) VALUES (?, ?, ?)",
+            array(
+                                    $this->name,
+                                    $this->address,
                                     $this->available
-                                ))) throw new ServerManagerAPIException($this->_db->errorString());
-        $this->id = $this->_db->lastId();
+            )
+        )) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
+        $this->id = $this->db->lastId();
     }
 
     public function edit()
     {
         $this->validateVars();
-        if (empty($this->id)) throw new ServerManagerAPIException("Cannot update without knowing which id to use.");
+        if (empty($this->id)) {
+            throw new ServerManagerAPIException("Cannot update without knowing which id to use.");
+        }
         $args = getPublicObjectVars($this);
         $sql = "UPDATE game_watchdog_servers SET 
                     name = ?,
                     address = ?,
                     available = ?
                 WHERE id = ?;";
-        if (!$this->_db->query($sql, $args)) throw new ServerManagerAPIException($this->_db->errorString());
+        if (!$this->db->query($sql, $args)) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
     }
 
     public function delete()
@@ -80,6 +102,4 @@ class Watchdog extends Base
         $this->available = ($this->available == 1) ? 0 : 1;
         $this->edit();
     }
-
-
 }

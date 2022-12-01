@@ -1,4 +1,7 @@
 <?php
+
+namespace ServerManager;
+
 /*
 UserSpice 5
 An Open Source PHP User Management System
@@ -20,18 +23,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use App\Domain\Helper\Config;
 
-class Token {
-	public static function generate(){
-		return Session::put(Config::get('session/token_name'), md5(uniqid()));
-	}
+class Token
+{
+    public static function generate()
+    {
+        return Session::put(Config::get('session/token_name'), md5(uniqid()));
+    }
 
-	public static function check($token){
-		$tokenName = Config::get('session/token_name');
+    public static function check($token): bool
+    {
+        $tokenName = Config::get('session/token_name');
 
-		if (Session::exists($tokenName) && $token === Session::get($tokenName)) {
-			Session::delete($tokenName);
-			return true;
-		}
-		return false;
-	}
+        if (Session::exists($tokenName) && $token === Session::get($tokenName)) {
+            Session::delete($tokenName);
+            return true;
+        }
+        return false;
+    }
 }

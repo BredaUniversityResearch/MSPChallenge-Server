@@ -1,5 +1,10 @@
 <?php
 
+namespace ServerManager;
+
+use Exception;
+use Throwable;
+
 class HydraErrorException extends Exception
 {
     public string $context;

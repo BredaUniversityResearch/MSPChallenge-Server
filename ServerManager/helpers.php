@@ -2,12 +2,15 @@
 //functions that help things along. by definition functions that are so common or fundamental,
 //require limited and diverse arguments, it makes no sense to turn them into classes
 
-function getPublicObjectVars($obj)
+use ServerManager\DB;
+use ServerManager\Input;
+
+function getPublicObjectVars($obj): array
 {
     return get_object_vars($obj);
 }
 
-function PHPCanProxy()
+function PHPCanProxy(): bool
 {
     if (!empty(ini_get('open_basedir')) || ini_get('safe_mode')) {
         return false;
@@ -15,18 +18,18 @@ function PHPCanProxy()
     return true;
 }
 
-function isJsonObject($string)
+function isJsonObject($string): bool
 {
     return is_object(json_decode($string));
 }
 
-function isJsonArray($string)
+function isJsonArray($string): bool
 {
     return is_array(json_decode($string, true));
 }
 
 // Readeable file size
-function size($path)
+function size($path): string
 {
     $bytes = sprintf('%u', filesize($path));
 
@@ -42,45 +45,32 @@ function size($path)
     return $bytes;
 }
 
-function bold($text)
+function bold($text): void
 {
     echo "<span><ext padding='1em' align='center'><h4><span style='background:white'>";
     echo $text;
     echo "</h4></span></text>";
 }
 
-function err($text)
+function err($text): void
 {
+    /** @noinspection XmlDeprecatedElement */
+    /** @noinspection HtmlUnknownAttribute */
+    /** @noinspection HtmlDeprecatedAttribute */
+    /** @noinspection HtmlDeprecatedTag */
     echo "<span><text padding='1em' align='center'><font color='red'><h4></span>";
     echo $text;
     echo "</h4></span></font></text>";
 }
 
-function redirect($location)
+function redirect($location): void
 {
-    header("Location: {$location}");
-}
-
-function rrmdir($src)
-{
-    $dir = opendir($src);
-    while (false !== ( $file = readdir($dir))) {
-        if (( $file != '.' ) && ( $file != '..' )) {
-            $full = $src . '/' . $file;
-            if (is_dir($full)) {
-                rrmdir($full);
-            } else {
-                unlink($full);
-            }
-        }
-    }
-    closedir($dir);
-    rmdir($src);
+    header("Location: $location");
 }
 
 //Displays error and success messages
 if (!function_exists('resultBlock')) {
-    function resultBlock($errors, $successes)
+    function resultBlock($errors, $successes): void
     {
       //Error block
         if (count($errors) > 0) {
@@ -109,94 +99,69 @@ if (!function_exists('resultBlock')) {
 }
 
 //Inputs language strings from selected language.
-if (!function_exists('lang')) {
-    function lang($key, $markers = null)
-    {
-        global $lang, $us_url_root, $abs_us_root;
+
+
+
+function lang($key, $markers = null)
+{
+    global $lang, $us_url_root, $abs_us_root;
+
+    $fnHandleMarkers = function () use ($markers, $lang, $key) {
         if ($markers == null) {
-            if (isset($lang[$key])) {
-                $str = $lang[$key];
-            } else {
-                $str = "";
-            }
-        } else {
-          //Replace any dyamic markers
-            if (isset($lang[$key])) {
-                $str = $lang[$key];
-                $iteration = 1;
-                foreach ($markers as $marker) {
-                    $str = str_replace("%m".$iteration."%", $marker, $str);
-                    $iteration++;
-                }
-            } else {
-                $str = "";
-            }
+            return $lang[$key] ?? "";
         }
-
-
-      //Ensure we have something to return
-      // dump($key);
-        if ($str == "") {
-            if (isset($lang["MISSING_TEXT"])) {
-                $missing = $lang["MISSING_TEXT"];
-            } else {
-                $missing = "Missing Text";
+        //Replace any dyamic markers
+        if (isset($lang[$key])) {
+            $str = $lang[$key];
+            $iteration = 1;
+            foreach ($markers as $marker) {
+                $str = str_replace("%m".$iteration."%", $marker, $str);
+                $iteration++;
             }
-          //if nothing is found, let's check to see if the language is English.
-            if (isset($lang['THIS_CODE']) && $lang['THIS_CODE'] != "en-US") {
-                $save = $lang['THIS_CODE'];
-                if ($save == '') {
-                    $save = 'en-US';
-                }
-            //if it is NOT English, we are going to try to grab the key from the English translation
-                include("lang/en-US.php");
-                if ($markers == null) {
-                    if (isset($lang[$key])) {
-                        $str = $lang[$key];
-                    } else {
-                        $str = "";
-                    }
-                } else {
-                  //Replace any dyamic markers
-                    if (isset($lang[$key])) {
-                        $str = $lang[$key];
-                        $iteration = 1;
-                        foreach ($markers as $marker) {
-                            $str = str_replace("%m".$iteration."%", $marker, $str);
-                            $iteration++;
-                        }
-                    } else {
-                        $str = "";
-                    }
-                }
-                $lang = [];
-                include("lang/$save.php");
-                if ($str == "") {
-                  //This means that we went to the English file and STILL did not find the language key, so...
-                    $str = "{ $missing }";
-                    return $str;
-                } else {
-                  //falling back to English
-                    return $str;
-                }
+            return $str;
+        }
+        return '';
+    };
+    $str = $fnHandleMarkers();
+
+  //Ensure we have something to return
+  // dump($key);
+    if ($str == "") {
+        $missing = $lang["MISSING_TEXT"] ?? "Missing Text";
+      //if nothing is found, let's check to see if the language is English.
+        if (isset($lang['THIS_CODE']) && $lang['THIS_CODE'] != "en-US") {
+            $save = $lang['THIS_CODE'];
+            if ($save == '') {
+                $save = 'en-US';
+            }
+        //if it is NOT English, we are going to try to grab the key from the English translation
+            include("lang/en-US.php");
+            $str = $fnHandleMarkers();
+            $lang = [];
+            include("lang/$save.php");
+            if ($str == "") {
+              //This means that we went to the English file and STILL did not find the language key, so...
+                return "{ $missing }";
             } else {
-              //the language is already English but the code is not found so...
-                $str = "{ $missing }";
+              //falling back to English
                 return $str;
             }
         } else {
-            return $str;
+          //the language is already English but the code is not found so...
+            return "{ $missing }";
         }
+    } else {
+        return $str;
     }
 }
 
 
 if (!function_exists('clean')) {
     //Cleaning function
-    function clean($string)
+    function clean($string): array|string|null
     {
         $string = str_replace(' ', '-', $string); // Replaces all spaces with hyphens.
-        $string = preg_replace('/[^A-Za-z0-9]/', '', $string); // Removes special chars.
+        $string = preg_replace('/[^A-Za-z\d]/', '', $string); // Removes special chars.
 
         return preg_replace('/-+/', '-', $string); // Replaces multiple hyphens with single one.
     }
@@ -204,7 +169,7 @@ if (!function_exists('clean')) {
 
 
 if (!function_exists('encodeURIComponent')) {
-    function encodeURIComponent($str)
+    function encodeURIComponent($str): string
     {
         $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
         return strtr(rawurlencode($str), $revert);
@@ -224,13 +189,12 @@ if (!function_exists('logger')) {
         'ip'            => $_SERVER['REMOTE_ADDR'],
         );
         $db->insert('logs', $fields);
-        $lastId = $db->lastId();
-        return $lastId;
+        return $db->lastId();
     }
 }
 
 if (!function_exists('isLocalhost')) {
-    function isLocalhost()
+    function isLocalhost(): bool
     {
         if ($_SERVER["REMOTE_ADDR"]=="127.0.0.1" || $_SERVER["REMOTE_ADDR"]=="::1" ||
             $_SERVER["REMOTE_ADDR"]=="localhost") {
@@ -241,7 +205,7 @@ if (!function_exists('isLocalhost')) {
     }
 }
 
-function checklanguage()
+function checklanguage(): bool
 {
     $your_token = $_SERVER['REMOTE_ADDR'];
     if (!empty($_POST['language_selector'])) {
@@ -274,5 +238,5 @@ function checklanguage()
     if (!isset($_SESSION['us_lang'])) {
             $_SESSION['us_lang'] = 'en-US';
     }
+    return true;
 }
-

@@ -511,7 +511,7 @@ class Update extends Base
         $application->setAutoExit(false);
         $output = new BufferedOutput();
         $application->run(
-            new StringInput('doctrine:migrations:migrate -vvv -n --conn=' . Database::GetInstance()->GetDatabaseName()),
+            new StringInput('doctrine:migrations:migrate -vvv -n --em=' . Database::GetInstance()->GetDatabaseName()),
             $output
         );
         return $output->fetch();

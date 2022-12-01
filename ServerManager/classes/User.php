@@ -1,4 +1,7 @@
 <?php
+
+namespace ServerManager;
+
 /*
 UserSpice 5
 An Open Source PHP User Management System
@@ -19,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\Helper\Config;
+use Exception;
+use JetBrains\PhpStorm\NoReturn;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token\InvalidTokenStructure;
@@ -28,24 +33,25 @@ use Symfony\Component\HttpFoundation\Request;
 
 class User extends Base
 {
-    private $_db, $_data, $_sessionName, $_isLoggedIn, $_cookieName;
-    public $tableName = 'users';
+    private ?DB $db = null;
+    private $data;
+    private $sessionName;
+    private bool $isLoggedIn = false;
+    private $cookieName;
+    public string $tableName = 'users';
 
     public function __construct($user = null)
     {
-        $this->_db = DB::getInstance();
-        $this->_sessionName = Config::get('session/session_name');
-        $this->_cookieName = Config::get('remember/cookie_name');
+        $this->db = DB::getInstance();
+        $this->sessionName = Config::get('session/session_name');
+        $this->cookieName = Config::get('remember/cookie_name');
 
 
         if (!$user) {
-            if (Session::exists($this->_sessionName)) {
-                $user = Session::get($this->_sessionName);
-
+            if (Session::exists($this->sessionName)) {
+                $user = Session::get($this->sessionName);
                 if ($this->find($user)) {
-                    $this->_isLoggedIn = true;
-                } else {
-                    //process Logout
+                    $this->isLoggedIn = true;
                 }
             }
         } else {
@@ -53,39 +59,7 @@ class User extends Base
         }
     }
 
-    public function importTokenFields(array $tokenFields): ?int
-    {
-        // @note(MH)
-        // vendor/lexik/jwt-authentication-bundle/Encoder/LcobucciJWTEncoder.php says:
-        //   "Json Web Token encoder/decoder based on the lcobucci/jwt library."
-        // so instead of using lexik's, we directly use the smaller lcobucci/jwt library
-        // see: https://lcobucci-jwt.readthedocs.io/en/latest/parsing-tokens/
-        $parser = new Parser(new JoseEncoder());
-        try {
-            $unencryptedToken = $parser->parse($tokenFields['token']);
-        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
-            return null;
-        }
-        $username = $unencryptedToken->claims()->get('username');
-        $fields = array_merge([
-            'username' => $username,
-            // for backwards compatibility
-            'account_owner' => 0, // what is this? Used by User::find()
-        ], $tokenFields);
-        if (array_key_exists('refresh_token_expiration', $fields)) {
-            // unix timestamp to datetime conversion
-            $fields['refresh_token_expiration'] = date('Y-m-d H:i:s', $fields['refresh_token_expiration']);
-        }
-        $data = $this->_db->get('users', array('username', '=', $username));
-        if ($data->count()) {
-            $this->_db->update('users', $data->first()->id, $fields);
-            return $data->first()->id;
-        }
-        $this->_db->insert('users', $fields);
-        return $this->_db->lastId();
-    }
-
-    public function isAuthorised()
+    public function isAuthorised(): bool
     {
         if (!$this->exists()) {
             return false;
@@ -107,7 +81,7 @@ class User extends Base
 //            return !empty($response);
 
             // not finding the user will trigger a HydraErrorException
-            Base::getCallAuthoriser(sprintf('users/%s', $this->_data->username));
+            Base::getCallAuthoriser(sprintf('users/%s', $this->data->username));
         } catch (Exception $e) {
             return false;
         }
@@ -116,31 +90,17 @@ class User extends Base
         return true;
     }
 
-    public function find($user = null, $loginHandler = null)
+    public function find($user = null, $loginHandler = null): bool
     {
-
         if ($user) {
-            if ($loginHandler!==null) {
-                if (!filter_var($user, FILTER_VALIDATE_EMAIL) === false) {
-                    $field = 'email';
-                } else {
-                    $field = 'username';
-                }
-            } else {
-                if (is_numeric($user)) {
-                    $field = 'id';
-                } elseif (!filter_var($user, FILTER_VALIDATE_EMAIL) === false) {
-                    $field = 'email';
-                } else {
-                    $field = 'username';
-                }
-            }
-            $data = $this->_db->get('users', array($field, '=', $user));
-
+            $field = $loginHandler!==null ? 'username' : (
+                is_numeric($user) ? 'id' : 'username'
+            );
+            $data = $this->db->get('users', array($field, '=', $user));
             if ($data->count()) {
-                $this->_data = $data->first();
+                $this->data = $data->first();
                 if ($this->data()->account_id == 0 && $this->data()->account_owner == 1) {
-                    $this->_data->account_id = $this->_data->id;
+                    $this->data->account_id = $this->data->id;
                 }
                 return true;
             }
@@ -148,33 +108,24 @@ class User extends Base
         return false;
     }
 
-    public function exists()
+    public function exists(): bool
     {
-        return !empty($this->_data);
+        return !empty($this->data);
     }
 
     public function data()
     {
-        return $this->_data;
+        return $this->data;
     }
 
-    public function isLoggedIn()
+    public function isLoggedIn(): bool
     {
-        return $this->_isLoggedIn;
+        return $this->isLoggedIn;
     }
 
-    public function notLoggedInRedirect($location)
+    public function hasToBeLoggedIn()
     {
-        if ($this->_isLoggedIn) {
-            return true;
-        } else {
-            Redirect::to($location);
-        }
-    }
-
-    public function hastobeLoggedIn()
-    {
-        if ($this->_isLoggedIn) {
+        if ($this->isLoggedIn) {
             return;
         }
         if (isset($_POST['session_id']) && isset($_POST['token'])) {
@@ -203,7 +154,7 @@ class User extends Base
         $this->forbidden();
     }
 
-    public function forbidden()
+    #[NoReturn] public function forbidden()
     {
         http_response_code(404);
         die();
@@ -213,5 +164,37 @@ class User extends Base
     {
         session_unset();
         session_destroy();
+    }
+
+    public function importTokenFields(array $tokenFields): ?int
+    {
+        // @note(MH)
+        // vendor/lexik/jwt-authentication-bundle/Encoder/LcobucciJWTEncoder.php says:
+        //   "Json Web Token encoder/decoder based on the lcobucci/jwt library."
+        // so instead of using lexik's, we directly use the smaller lcobucci/jwt library
+        // see: https://lcobucci-jwt.readthedocs.io/en/latest/parsing-tokens/
+        $parser = new Parser(new JoseEncoder());
+        try {
+            $unencryptedToken = $parser->parse($tokenFields['token']);
+        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
+            return null;
+        }
+        $username = $unencryptedToken->claims()->get('username');
+        $fields = array_merge([
+            'username' => $username,
+            // for backwards compatibility
+            'account_owner' => 0, // what is this? Used by User::find()
+        ], $tokenFields);
+        if (array_key_exists('refresh_token_expiration', $fields)) {
+            // unix timestamp to datetime conversion
+            $fields['refresh_token_expiration'] = date('Y-m-d H:i:s', $fields['refresh_token_expiration']);
+        }
+        $data = $this->db->get('users', array('username', '=', $username));
+        if ($data->count()) {
+            $this->db->update('users', $data->first()->id, $fields);
+            return $data->first()->id;
+        }
+        $this->db->insert('users', $fields);
+        return $this->db->lastId();
     }
 }

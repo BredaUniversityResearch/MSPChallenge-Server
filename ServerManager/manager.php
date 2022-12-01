@@ -21,6 +21,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\API\v1\Config;
+use ServerManager\Redirect;
+use ServerManager\ServerManager;
+use ServerManager\Session;
+use ServerManager\User;
 
 require 'init.php';
 $user = new User();

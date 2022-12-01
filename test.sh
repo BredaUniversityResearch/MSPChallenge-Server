@@ -18,15 +18,8 @@ src/
 api/
 api_test/
 legacy.php
-ServerManager/api/
-ServerManager/install/install.php
-ServerManager/bootstrap.php
-ServerManager/config.php
-ServerManager/index.php
-ServerManager/init.php
-ServerManager/login.php
-ServerManager/logout.php
-ServerManager/manager.php
+ServerManager/
+Migrations/
 "
 
 bash ./tools/install-tools.sh

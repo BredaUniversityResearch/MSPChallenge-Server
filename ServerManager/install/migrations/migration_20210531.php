@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -15,5 +16,3 @@ $sql = "UPDATE game_geoservers SET address = 'https://geo.mspchallenge.info/geos
         ALTER TABLE `game_geoservers` ADD UNIQUE(`name`); 
         ALTER TABLE `game_geoservers` ADD UNIQUE(`address`); 
         ALTER TABLE `settings` CHANGE `value` `value` LONGTEXT NOT NULL; ";
-
-?>

@@ -1,4 +1,7 @@
 <?php
+
+namespace ServerManager;
+
 /*
 UserSpice 5
 An Open Source PHP User Management System
@@ -20,51 +23,63 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class Notification
 {
-    public function __construct() {
+    public function __construct()
+    {
         return false;
     }
 
-    private function getAllNotifications($all) {
+    private function getAllNotifications($all): bool
+    {
         return false;
     }
 
-    public function archiveOldNotifications($user_id) {
+    public function archiveOldNotifications($user_id): bool
+    {
         return false;
     }
 
-    public function addNotification($message, $user_id = -1) {
+    public function addNotification($message, $user_id = -1): bool
+    {
         return false;
     }
 
-    public function setRead($notification_id, $read = true) {
+    public function setRead($notification_id, $read = true): bool
+    {
         return false;
     }
 
-    public function setReadAll($read = true) {
+    public function setReadAll($read = true): bool
+    {
         return false;
     }
 
-    public function getError() {
+    public function getError(): bool
+    {
         return false;
     }
 
-    public function getNotifications() {
-          return false;
+    public function getNotifications(): bool
+    {
+        return false;
     }
 
-    public function getCount() {
-          return false;
+    public function getCount(): bool
+    {
+        return false;
     }
 
-    public function getUnreadCount() {
-          return false;
+    public function getUnreadCount(): bool
+    {
+        return false;
     }
 
-    public function getLiveUnreadCount() {
-	         return false;
+    public function getLiveUnreadCount(): bool
+    {
+        return false;
     }
 
-    public function getUnreadNotifications() {
-          return false;
+    public function getUnreadNotifications(): bool
+    {
+        return false;
     }
 }

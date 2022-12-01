@@ -25,7 +25,7 @@ $dependencyFactory->setService(LoggerInterface::class, $logger);
 
 $cli = new Application(
     'Doctrine Migrations for MSP Challenge' . PHP_EOL .
-    'Please note that you can set a connection using "--conn". E.g. --conn=msp_session_1' . PHP_EOL .
+    'Please note that you can set the entity manager using "--em". E.g. --em=msp_session_1' . PHP_EOL .
     'Use any of these connections: ' . implode(', ', $connectionManager->getDbNames())
 );
 $cli->setCatchExceptions(true);

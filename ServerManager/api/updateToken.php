@@ -1,12 +1,17 @@
 <?php
 
+use ServerManager\API;
+use ServerManager\Base;
+use ServerManager\ServerManager;
+use ServerManager\Session;
+use ServerManager\User;
 use App\Domain\Services\SymfonyToLegacyHelper;
 
 require __DIR__ . '/../init.php';
 $api = new API;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 $request = SymfonyToLegacyHelper::getInstance()->getRequest();
 if (null === $request->get('token')) {
