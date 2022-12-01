@@ -9,6 +9,7 @@ defined('APP_RAN') or die();
 
 $sql = "ALTER TABLE `users`
 CHANGE `id` `id` int(11) NOT NULL AUTO_INCREMENT,
+DROP `email`,
 DROP `email_new`,
 ADD `token` text COLLATE 'utf8_general_ci' NOT NULL AFTER `username`,
 ADD `refresh_token` text COLLATE 'utf8_general_ci' NOT NULL AFTER `token`,
