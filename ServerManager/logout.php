@@ -1,6 +1,8 @@
 <?php
 
 use App\Domain\API\v1\Config;
+use ServerManager\Redirect;
+use ServerManager\User;
 
 require 'init.php';
 $user = new User();

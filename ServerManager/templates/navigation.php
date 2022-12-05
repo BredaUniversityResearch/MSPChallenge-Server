@@ -1,14 +1,18 @@
 <?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 
 use App\Domain\API\v1\Config;
+use ServerManager\ServerManager;
 
 $url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
-?>
 
+$userLoggedIn = isset($user) && $user->isLoggedIn();
+$authBaseUrl = Config::GetInstance()->getMSPAuthBaseURL();
+$html =<<<"HTML"
 <div id="header-wrapper" >
 
     <nav class="navbar">
-      <a class="title" href="<?php echo $url_app_root;?>index.php"> MSP Challenge Server Manager</a>
+      <a class="title" href="${url_app_root}index.php"> MSP Challenge Server Manager</a>
       <div id="header-menu-wrapper">
         <ul id="header-menu">
           <li id="main-menu-item">
@@ -27,14 +31,15 @@ $url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
     </nav>
 
 </div>
+HTML;
 
-<?php
+echo $html;
 
-    if(isset($_GET['err'])){
-      err("<font color='red'>".$err."</font>");
-    }
+if (isset($_GET['err'])) {
+    err("<font color='red'>".($_GET['err'] ?? '')."</font>");
+}
 
-    if(isset($_GET['msg'])){
-      err($msg);
-    }
-?>
+if (isset($_GET['msg'])) {
+    err($_GET['msg'] ?? '');
+}
+

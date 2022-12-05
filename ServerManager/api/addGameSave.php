@@ -1,4 +1,12 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\DB;
+use ServerManager\GameConfig;
+use ServerManager\GameSave;
+use ServerManager\GameSession;
+use ServerManager\User;
+
 ini_set('upload_max_filesize', '200M');
 ini_set('post_max_size', '200M');
 
@@ -10,7 +18,7 @@ $gamesave = new GameSave;
 $gameconfig = new GameConfig;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 $gamesession->id = $_POST["session_id"] ?? 0;
 if ($gamesession->id == 0 && isset($_FILES['uploadedSaveFile']['tmp_name'])) {
@@ -22,7 +30,7 @@ if ($gamesession->id == 0 && isset($_FILES['uploadedSaveFile']['tmp_name'])) {
     $gameconfig->get();
 
     $gamesave->name = DB::getInstance()->ensure_unique_name($gamesession->name, "name", "game_saves");
-    $gamesave->game_config_version_id = $gamesession->game_config_version_id;
+    $gamesave->game_config_files_id = $gamesession->game_config_version_id;
     $gamesave->game_config_files_filename = $gameconfig->filename;
     $gamesave->game_config_versions_region = $gameconfig->region;
     $gamesave->game_server_id = $gamesession->game_server_id;

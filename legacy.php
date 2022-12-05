@@ -1,6 +1,5 @@
 <?php
 
-use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Router;
 
 header('Content-Type: application/json');

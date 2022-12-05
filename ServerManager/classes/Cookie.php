@@ -1,4 +1,7 @@
 <?php
+
+namespace ServerManager;
+
 /*
 UserSpice 5
 An Open Source PHP User Management System
@@ -17,23 +20,35 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class Cookie {
-	public static function exists($name){
-		return (isset($_COOKIE[$name])) ? true : false;
-	}
+class Cookie
+{
+    public static function exists($name): bool
+    {
+        return isset($_COOKIE[$name]);
+    }
 
-	public static function get($name){
-		return $_COOKIE[$name];
-	}
+    public static function get($name)
+    {
+        return $_COOKIE[$name];
+    }
 
-	public static function put($name, $value, $expiry, $path="/", $domain="", $secure=true, $httponly=true){
-		if (setcookie($name, $value, time() + $expiry, $path, $domain, $secure, $httponly)) {
-			return true;
-		}
-		return false;
-	}
+    public static function put(
+        $name,
+        $value,
+        $expiry,
+        $path = "/",
+        $domain = "",
+        $secure = true,
+        $httponly = true
+    ): bool {
+        if (setcookie($name, $value, time() + $expiry, $path, $domain, $secure, $httponly)) {
+            return true;
+        }
+        return false;
+    }
 
-	public static function delete($name){
-		self::put($name, '', time() - 1);
-	}
+    public static function delete($name): void
+    {
+        self::put($name, '', time() - 1);
+    }
 }

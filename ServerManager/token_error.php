@@ -5,13 +5,15 @@
 // 2. Something accidentally causing the page to partially reload
 //
 // You can decide what you want for that error message here.
-if(!isset($lang) || !in_array("MAINT_TOK",$lang)){
-  $lang = [
-    		"MAINT_TOK"			=> "There was an error with your form. Please go back and try again. Please note that submitting the form by refreshing the page will cause an error. If this continues to happen, please contact the administrator.",
-        "GEN_BACK"				=> "Back",
-  ];
+if (!isset($lang) || !in_array("MAINT_TOK", $lang)) {
+    $lang = [
+        "MAINT_TOK" => "There was an error with your form. Please go back and try again. Please note that submitting ".
+            "the form by refreshing the page will cause an error. If this continues to happen, please contact the ".
+            "administrator.",
+        "GEN_BACK" => "Back",
+    ];
 }
- ?>
+?>
 <style>
 body {
     background-color: white;
