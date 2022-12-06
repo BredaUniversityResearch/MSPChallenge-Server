@@ -2,6 +2,9 @@
 
 namespace ServerManager;
 
+use DateInterval;
+use DateTime;
+
 class GameSession extends Base
 {
     private ?DB $db = null;
@@ -671,7 +674,6 @@ class GameSession extends Base
         switch ($this->old->game_state) {
             case 'end':
                 throw new ServerManagerAPIException("The session has already ended, so can't change its state.");
-                break;
             case 'simulation':
                 throw new ServerManagerAPIException(
                     'The session is simulating, so cannot change its state at this time.'

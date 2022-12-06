@@ -8,6 +8,7 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\Common\CommonBase;
 use Exception;
 use TypeError;
+use function App\isJsonObject;
 
 function IsFeatureFlagEnabled(string $featureName): bool
 {

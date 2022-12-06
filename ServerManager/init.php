@@ -1,6 +1,7 @@
 <?php
 // phpcs:disable PSR1.Files.SideEffects
 use ServerManager\ServerManager;
+use function ServerManager\checklanguage;
 
 if (1 === $return = require_once('bootstrap.php')) {
     return;
@@ -18,4 +19,4 @@ session_start();
 
 // language setting
 checklanguage();
-require ServerManager::getInstance()->GetServerManagerRoot().'lang/'.$_SESSION['us_lang'].".php";
+

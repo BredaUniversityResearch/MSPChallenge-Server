@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\Helper\Config;
-use JetBrains\PhpStorm\NoReturn;
+use Exception;
 
 class User extends Base
 {
@@ -46,8 +46,6 @@ class User extends Base
 
                 if ($this->find($user)) {
                     $this->isLoggedIn = true;
-                } else {
-                    //process Logout
                 }
             }
         } else {
@@ -147,7 +145,7 @@ class User extends Base
         $this->forbidden();
     }
 
-    #[NoReturn] public function forbidden()
+    public function forbidden(): never
     {
         http_response_code(404);
         die();

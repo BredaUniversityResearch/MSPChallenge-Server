@@ -1,4 +1,7 @@
 <?php
+
+use function ServerManager\lang;
+
 //this is a user-facing page
 // Token errors are generally caused by 1 of 2 things.
 // 1. Someone trying to perform a man-in-the-middle attack on a form on the site.

@@ -3,7 +3,6 @@
 namespace ServerManager;
 
 use ErrorException;
-use JetBrains\PhpStorm\NoReturn;
 
 class FileDownloader
 {
@@ -18,7 +17,7 @@ class FileDownloader
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    #[NoReturn] public function exceptions_handler($e): void
+    public function exceptions_handler($e): never
     {
         $this->message = $e->getMessage();
         if (is_a($e, "ErrorException")) {
@@ -55,7 +54,7 @@ class FileDownloader
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    #[NoReturn] public function Return(): void
+    public function Return(): never
     {
         $this->printReturn();
         die();
