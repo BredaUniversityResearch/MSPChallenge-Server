@@ -1577,6 +1577,7 @@ class Plan extends Base
         array &$remappedGeometryIds,
         array &$remappedPersistentGeometryIds
     ): array {
+        /** @var array{geometry_id: int, geometry_FID: int, geometry_persistent: int, geometry: string, data: string, country: int, type: string, deleted: bool} $geometryData */
         $geometryData = Database::GetInstance()->query(
             "SELECT
 				geometry.geometry_id,

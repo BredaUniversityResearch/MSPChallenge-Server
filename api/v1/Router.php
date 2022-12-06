@@ -132,7 +132,7 @@ class Router
         }
 
         return $promise
-            ->then(function ($payload) use ($className, $method, $data, $postExecuteCallback) {
+            ->then(function ($payload) use ($postExecuteCallback) {
                 if (null !== $postExecuteCallback) {
                     $postExecuteCallback($payload);
                 }

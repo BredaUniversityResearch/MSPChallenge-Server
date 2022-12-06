@@ -558,7 +558,6 @@ class Game extends Base
                         $newAccessToken = json_encode($result);
                         return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
                             ->then(function (string $token) use (
-                                $security,
                                 $simulations,
                                 $apiRoot,
                                 $newWatchdogGameState,
@@ -567,7 +566,6 @@ class Game extends Base
                                 $recoveryToken = json_encode(['token' => $token]);
                                 return $this->getWatchdogSessionUniqueToken()
                                     ->then(function (string $watchdogSessionUniqueToken) use (
-                                        $security,
                                         $simulations,
                                         $apiRoot,
                                         $newWatchdogGameState,

@@ -288,7 +288,7 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SwitchToSessionDatabase(int $sessionId): void
     {
-        $this->SetupConfiguration($sessionId);
+        $this->SetupConfiguration();
         $this->SwitchDatabase($this->GetDatabaseName());
     }
 
