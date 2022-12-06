@@ -614,7 +614,7 @@ function wrapWords(str, tmpl) {
 
 function setServerAuthProviders(sessionId) {
     var url = 'api/user/getProviders';
-	$.when(CallServerAPI(url)).done(function(results) {
+	$.when(CallServerAPI(url, {}, sessionId, '0')).done(function(results) {
         if (results.success && results.payload) {
             $.each(results.payload, function(count, provider) {
                 var newprovideroption = addAuthProvider(provider);

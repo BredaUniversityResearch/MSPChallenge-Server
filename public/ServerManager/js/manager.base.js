@@ -117,7 +117,8 @@ function copyToClipboard(text) {
 	window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
 }
 
-var log_concise_old, regularLogToastAutoCloseCheck, regularLogToastBodyUpdate;
+var log_concise_old, regularLogToastAutoCloseCheck, regularLogToastBodyUpdate,
+	logUpdateIntervalSec = 3, logCleanupIntervalSec = 60, logElapsedSec = 0;
 function ShowLogToast(session_id) {
 	// first cancel any previous logtoast updates that might still be running
 	clearInterval(regularLogToastBodyUpdate);
@@ -128,8 +129,9 @@ function ShowLogToast(session_id) {
 	UpdateLogToastContents(session_id);
 	regularLogToastBodyUpdate = setInterval(function() {
 		UpdateLogToastContents(session_id);
-	}, 3000);
+	}, logUpdateIntervalSec * 1000);
 
+	$('#LogToast').prop('data-autoclose', false);
 	$('#LogToast').toast('show');
 }
 
@@ -139,20 +141,23 @@ function UpdateLogToastContents(session_id) {
 	var data = {
 		session_id: session_id
 	}
+	logElapsedSec += logUpdateIntervalSec;
 	$.when(CallAPI(url, data)).done(function(results) {
 		log_array = results.gamesession.log.slice(-5);			
 		log_array.forEach(LogToastContentItemCleanUp);
 		var log_concise_new = log_array.join("");
-		if (log_concise_new == log_concise_old) {
-			if ($('#LogToast').prop('data-autoclose')) {
-				// so only if the old log was deemed unchanged *twice*, should the window be closed
-				clearInterval(regularLogToastBodyUpdate);
-				$('#LogToast').toast('hide');
+		if (logElapsedSec > logCleanupIntervalSec) {
+			if (log_concise_new == log_concise_old) {
+				if ($('#LogToast').prop('data-autoclose')) {
+					// so only if the old log was deemed unchanged *twice*, should the window be closed
+					clearInterval(regularLogToastBodyUpdate);
+					$('#LogToast').toast('hide');
+				}
+				$('#LogToast').prop('data-autoclose', true);
 			}
-			$('#LogToast').prop('data-autoclose', true);
-		}
-		else {
-			$('#LogToast').prop('data-autoclose', false);
+			else {
+				logElapsedSec = 0; // reset
+			}
 		}
 		log_concise_old = log_concise_new;
 		$("#LogToastBody").html(log_concise_new);

@@ -61,7 +61,7 @@ class Game extends Base
         }
 
         $outputFile = $outputDirectory."AutoDump_".date("Y-m-d_H-i").".sql";
-        Database::GetInstance($this->getGameSessionId())->CreateMspDatabaseDump($outputFile, false);
+        Database::GetInstance($this->getGameSessionId())->createMspDatabaseDump($outputFile, false);
     }
 
     /**
@@ -96,7 +96,17 @@ class Game extends Base
 
         $data['configured_simulations'] = $configuredSimulations;
         if (!isset($data['wiki_base_url'])) {
-            $data['wiki_base_url'] = Config::GetInstance()->WikiConfig()['game_base_url'];
+            $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
+        }
+
+        if (!isset($data['edition_name'])) {
+            $data['edition_name'] = $_ENV['DEFAULT_EDITION_NAME'];
+        }
+        if (!isset($data['edition_colour'])) {
+            $data['edition_colour'] = $_ENV['DEFAULT_EDITION_COLOUR'];
+        }
+        if (!isset($data['edition_letter'])) {
+            $data['edition_letter'] = $_ENV['DEFAULT_EDITION_LETTER'];
         }
 
         $passwordchecks = (new GameSession)->CheckGameSessionPasswords();
@@ -674,6 +684,7 @@ class Game extends Base
             }
 
             $realtimePerEra = explode(",", $state["game_planning_era_realtime"]);
+            // todo: division by zero.
             $currentEra = intval(floor($state["game_currentmonth"] / $state["game_planning_gametime"]));
             $realtimePerEra[$currentEra] = $state["game_planning_realtime"];
             $secondsPerMonthCurrentEra = round($state["game_planning_realtime"] / $state["game_eratime"]);
@@ -706,5 +717,19 @@ class Game extends Base
     public function GetCountries(): array
     {
         return Database::GetInstance()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function areSimulationsUpToDate(array $tickData): bool
+    {
+        $config = $this->GetGameConfigValues();
+        if ((isset($config["MEL"]) && $tickData['month'] > $tickData['mel_lastmonth']) ||
+            (isset($config["CEL"]) && $tickData['month'] > $tickData['cel_lastmonth']) ||
+            (isset($config["SEL"]) && $tickData['month'] > $tickData['sel_lastmonth'])) {
+            return false;
+        }
+        return true;
     }
 }

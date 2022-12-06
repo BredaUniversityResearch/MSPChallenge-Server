@@ -1,4 +1,9 @@
 <?php
+
+use App\Domain\API\v1\Config;
+use ServerManager\Redirect;
+use ServerManager\User;
+
 require 'init.php';
 $user = new User();
 $user->logout();
@@ -10,10 +15,10 @@ require_once 'templates/header.php';
   <div class="container">
     <div id="infobox"></div>
     <h1>Logging out...</h1>
-    <p>You have logged out and are being redirected. <a href="https://auth.mspchallenge.info/users/logout.php">Click here</a> if nothing happens.</p>
+    <p>You have logged out and are being redirected. <a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>/users/logout.php">Click here</a> if nothing happens.</p>
   </div>
 </div>
 <?php
 // @codingStandardsIgnoreEnd
 require_once 'templates/footer.php'; // the final html footer copyright row + the external js calls
-Redirect::to('https://auth.mspchallenge.info/users/logout.php');
+Redirect::to(Config::GetInstance()->getMSPAuthBaseURL() . '/users/logout.php');

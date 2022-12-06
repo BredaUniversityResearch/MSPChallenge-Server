@@ -2,7 +2,7 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Helper\AsyncDatabase;
+use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
@@ -60,6 +60,7 @@ class GameSession extends Base
 
     /**
      * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      */
     public static function getRequestApiRootAsync(): PromiseInterface
     {
@@ -70,22 +71,26 @@ class GameSession extends Base
 
         $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
+        $_SERVER['HTTPS'] ??= 'off';
         /** @noinspection HttpUrlsUsage */
-        $protocol = (($_SERVER['HTTPS'] ?: 'off') == 'on') ? "https://" : "http://";
+        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : "http://";
 
-        $connection = AsyncDatabase::createServerManagerConnection(Loop::get());
+        $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
         return $connection->query(
             $connection->createQueryBuilder()
                 ->select('address')
                 ->from('game_servers')
                 ->setMaxResults(1)
         )
-        ->then(function (Result $result) use ($protocol, $apiRoot) {
-            $row = $result->fetchFirstRow() ?? [];
-            $serverName = $row['address'] ?? $_SERVER["SERVER_NAME"] ?? gethostname();
-            $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$apiRoot;
-            return $GLOBALS['RequestApiRoot'];
-        });
+            ->then(
+                function (Result $result) use ($protocol, $apiRoot) {
+                    $row = $result->fetchFirstRow() ?? [];
+                    $serverName = $row['address'] ?? $_SERVER["SERVER_NAME"] ?? gethostname();
+                    $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
+                    $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$port.$apiRoot;
+                    return $GLOBALS['RequestApiRoot'];
+                }
+            );
     }
 
     /**
@@ -118,12 +123,13 @@ class GameSession extends Base
             $dbConfig["password"],
             $dbConfig["database"]
         );
+        $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
             $server_name = $row["address"];
             //if ($server_name == "localhost") $server_name = getHostByName(getHostName());
-            $GLOBALS['ServerManagerApiRoot'] = $protocol.$server_name.$apiFolder;
+            $GLOBALS['ServerManagerApiRoot'] = $protocol.$server_name.$port.$apiFolder;
         }
-        return $protocol.$server_name.$apiFolder;
+        return $protocol.$server_name.$port.$apiFolder;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -154,19 +160,19 @@ class GameSession extends Base
     }
 
     /**
-     * @apiGroup GameSession
-     * @apiDescription Sets up a new game session with the supplied information.
-     * @throws Exception
-     * @api {POST} /GameSession/CreateGameSession Creates new game session
-     * @apiParam {int} game_id Session identifier for this game.
-     * @apiParam {string} config_file_content JSON Object of the config file.
-     * @apiParam {string} password_admin Plain-text admin password.
-     * @apiParam {string} password_player Plain-text player password.
-     * @apiParam {string} watchdog_address URL at which the watchdog resides for this session.
-     * @apiParam {string} response_address URL which we call when the setup is done.
-     * @apiParam {int} allow_recreate (0|1) Allow overwriting of an existing session?
+     * @apiGroup           GameSession
+     * @apiDescription     Sets up a new game session with the supplied information.
+     * @throws             Exception
+     * @api                {POST} /GameSession/CreateGameSession Creates new game session
+     * @apiParam           {int} game_id Session identifier for this game.
+     * @apiParam           {string} config_file_content JSON Object of the config file.
+     * @apiParam           {string} password_admin Plain-text admin password.
+     * @apiParam           {string} password_player Plain-text player password.
+     * @apiParam           {string} watchdog_address URL at which the watchdog resides for this session.
+     * @apiParam           {string} response_address URL which we call when the setup is done.
+     * @apiParam           {int} allow_recreate (0|1) Allow overwriting of an existing session?
      * @ForceNoTransaction
-     * @noinspection PhpUnused
+     * @noinspection       PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function CreateGameSession(
@@ -245,17 +251,17 @@ class GameSession extends Base
     }
 
     /**
-     * @apiGroup GameSession
-     * @apiDescription For internal use: creates a new game session with the given config file path.
-     * @throws Exception
-     * @api {POST} /GameSession/CreateGameSession Creates new game session
-     * @apiParam {string} config_file_path Local path to the config file.
-     * @apiParam {string} password_admin Admin password for this session
-     * @apiParam {string} password_player Player password for this session
-     * @apiParam {string} watchdog_address API Address to direct all Watchdog calls to.
-     * @apiParam {string} response_address URL which we call when the setup is done.
+     * @apiGroup           GameSession
+     * @apiDescription     For internal use: creates a new game session with the given config file path.
+     * @throws             Exception
+     * @api                {POST} /GameSession/CreateGameSession Creates new game session
+     * @apiParam           {string} config_file_path Local path to the config file.
+     * @apiParam           {string} password_admin Admin password for this session
+     * @apiParam           {string} password_player Player password for this session
+     * @apiParam           {string} watchdog_address API Address to direct all Watchdog calls to.
+     * @apiParam           {string} response_address URL which we call when the setup is done.
      * @ForceNoTransaction
-     * @noinspection PhpUnused
+     * @noinspection       PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function CreateGameSessionAndSignal(
@@ -342,13 +348,13 @@ class GameSession extends Base
     }
 
     /**
-     * @apiGroup GameSession
-     * @apiDescription Archives a game session with a specified ID.
-     * @throws Exception
-     * @api {POST} /GameSession/ArchiveGameSession Archives game session
-     * @apiParam {string} response_url API call that we make with the zip encoded in the body upon completion.
+     * @apiGroup           GameSession
+     * @apiDescription     Archives a game session with a specified ID.
+     * @throws             Exception
+     * @api                {POST} /GameSession/ArchiveGameSession Archives game session
+     * @apiParam           {string} response_url API call that we make with the zip encoded in the body upon completion.
      * @ForceNoTransaction
-     * @noinspection PhpUnused
+     * @noinspection       PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ArchiveGameSession(string $response_url): void
@@ -368,13 +374,13 @@ class GameSession extends Base
     }
 
     /**
-     * @apiGroup GameSession
-     * @apiDescription Archives a game session with a specified ID.
-     * @throws Exception
-     * @api {POST} /GameSession/ArchiveGameSessionInternal Archives game session, internal method
-     * @apiParam {string} response_url API call that we make with the zip path upon completion.
+     * @apiGroup           GameSession
+     * @apiDescription     Archives a game session with a specified ID.
+     * @throws             Exception
+     * @api                {POST} /GameSession/ArchiveGameSessionInternal Archives game session, internal method
+     * @apiParam           {string} response_url API call that we make with the zip path upon completion.
      * @ForceNoTransaction
-     * @noinspection PhpUnused
+     * @noinspection       PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ArchiveGameSessionInternal(string $response_url): void
@@ -399,9 +405,12 @@ class GameSession extends Base
         }
     }
 
-    /** @noinspection PhpUnused
+    /**
+     *
+     *
+     * @noinspection PhpUnused
      * @noinspection SpellCheckingInspection
-     * @throws Exception
+     * @throws       Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SaveSession(
@@ -450,7 +459,7 @@ class GameSession extends Base
     }
 
     /**
-     * @throws Exception
+     * @throws       Exception
      * @noinspection SpellCheckingInspection
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -474,7 +483,7 @@ class GameSession extends Base
 
         Store::EnsureFolderExists($preferredfolder);
         
-        Database::GetInstance($this->getGameSessionId())->CreateMspDatabaseDump($sqlDumpPath, true);
+        Database::GetInstance($this->getGameSessionId())->createMspDatabaseDump($sqlDumpPath, true);
     
         $configFilePath = null;
         $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
@@ -525,7 +534,7 @@ class GameSession extends Base
     }
 
     /**
-     * @throws Exception
+     * @throws       Exception
      * @noinspection PhpUnused
      * @noinspection SpellCheckingInspection
      */
@@ -587,7 +596,11 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetUserAccess(string $password_admin, string $password_player): void
     {
-        /** @noinspection SqlWithoutWhere */
+        /**
+*
+         *
+ * @noinspection SqlWithoutWhere
+*/
         Database::GetInstance()->query(
             "UPDATE game_session SET game_session_password_admin = ?, game_session_password_player = ?;",
             array($password_admin, $password_player)
@@ -606,8 +619,8 @@ class GameSession extends Base
             "SELECT game_session_password_admin, game_session_password_player FROM game_session"
         );
         if (count($passwordData) > 0) {
-            if (!parent::isNewPasswordFormat($passwordData[0]["game_session_password_admin"]) ||
-                !parent::isNewPasswordFormat($passwordData[0]["game_session_password_player"])
+            if (!parent::isNewPasswordFormat($passwordData[0]["game_session_password_admin"])
+                || !parent::isNewPasswordFormat($passwordData[0]["game_session_password_player"])
             ) {
                 $adminHasPassword = !empty($passwordData[0]["game_session_password_admin"]);
                 $playerHasPassword = !empty($passwordData[0]["game_session_password_player"]);
@@ -660,10 +673,14 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function LocalApiRequest(string $apiUrl, int $sessionId, array $postValues, bool $async = false): void
     {
-        $baseUrl = SymfonyToLegacyHelper::getInstance()->getUrlGenerator()->generate('legacy_api_session', [
+        $baseUrl = SymfonyToLegacyHelper::getInstance()->getUrlGenerator()->generate(
+            'legacy_api_session',
+            [
             'session' => $sessionId,
             'query' => ''
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
+            ],
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
         
         $requestHeader = apache_request_headers();
         $headers = array();
@@ -675,7 +692,7 @@ class GameSession extends Base
     }
 
     /**
-     * @throws Exception
+     * @throws       Exception
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -683,9 +700,10 @@ class GameSession extends Base
         string $save_path,
         string $watchdog_address,
         string $response_address,
-        int $sessionId,
+        int $game_id,
         bool $allow_recreate = false
     ): void {
+        $sessionId = $game_id;
         if ($this->DoesSessionExist($sessionId)) {
             if (empty($allow_recreate) || $allow_recreate == false) {
                 throw new Exception("Session already exists.");
@@ -729,7 +747,7 @@ class GameSession extends Base
     }
 
     /**
-     * @throws Exception
+     * @throws       Exception
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

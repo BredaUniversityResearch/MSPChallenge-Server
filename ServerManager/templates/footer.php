@@ -1,14 +1,16 @@
 <footer style="text-align: center; padding-top: 15px;">
 
   <div>
-    MSP Challenge Server version <?php echo ServerManager::getInstance()->GetCurrentVersion(); ?>
+    MSP Challenge Server version <?php use ServerManager\ServerManager;
+
+      echo ServerManager::getInstance()->GetCurrentVersion(); ?>
   </div>
   <div>
     Server Address: 
-    <?php 
+    <?php
     $address = ServerManager::getInstance()->GetTranslatedServerURL();
     if ($address == "localhost") {
-      $address .= "<br/>Translated automatically to ".gethostbyname(gethostname());
+        $address .= "<br/>Translated automatically to ".gethostbyname(gethostname());
     }
     echo $address;
     ?>

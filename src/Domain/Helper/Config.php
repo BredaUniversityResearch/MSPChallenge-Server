@@ -18,24 +18,30 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//if you are ever questioning if your classes are being included, uncomment the line above and the words "config included" should show at the top of your page.
-class Config {
-	public static function get($path = null){
-		if($path){
-			$config = $GLOBALS['config'];
-			$path = explode('/', $path);
+//if you are ever questioning if your classes are being included, uncomment the line above and the words
+//  "config included" should show at the top of your page.
 
-			foreach ($path as $bit) {
-				if(isset($config[$bit])){
-					$config = $config[$bit];
-				} else {
-					return false;
-				}
-			}
+namespace App\Domain\Helper;
 
-			return $config;
-		}
+class Config
+{
+    public static function get($path = null)
+    {
+        if ($path) {
+            $config = $GLOBALS['config'];
+            $path = explode('/', $path);
 
-		return false;
-	}
+            foreach ($path as $bit) {
+                if (isset($config[$bit])) {
+                    $config = $config[$bit];
+                } else {
+                    return false;
+                }
+            }
+
+            return $config;
+        }
+
+        return false;
+    }
 }

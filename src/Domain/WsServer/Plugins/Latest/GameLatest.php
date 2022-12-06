@@ -2,16 +2,21 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
+use App\Domain\API\v1\Game;
 use App\Domain\Common\CommonBase;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use function App\parallel;
+use function App\resolveOnFutureTick;
 use function App\tpf;
 
 class GameLatest extends CommonBase
 {
+    private bool $allowEnergyKpiUpdate = true;
+
     /**
      * Gets the latest plans & messages from the server
      *
@@ -29,6 +34,10 @@ class GameLatest extends CommonBase
             $showDebug
         )
         ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
+            $game = new Game();
+            $this->asyncDataTransferTo($game);
+            $this->allowEnergyKpiUpdate = $game->areSimulationsUpToDate($tick) ||
+                $lastUpdateTime < PHP_FLOAT_EPSILON;
             $newTime = microtime(true);
             $data = array();
             $data['prev_update_time'] = $lastUpdateTime;
@@ -220,26 +229,26 @@ class GameLatest extends CommonBase
                         }
 
                         if ($showDebug) {
-                            wdo("diff: " . $diff);
+                            wdo("diff: " . $diff, OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
 
                         if ($showDebug) {
-                            wdo("timeleft: " . $tick['era_timeleft']);
+                            wdo("timeleft: " . $tick['era_timeleft'], OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     } elseif ($state == "PAUSE" || $state == "SETUP") {
                         //[MSP-1116] Seems sensible?
                         $tick['era_timeleft'] = $tick['era_realtime'] - ($tick['era_monthsdone'] * $secondsPerMonth);
                         if ($showDebug) {
-                            echo "GAME PAUSED";
+                            wdo('GAME PAUSED', OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     } else {
                         if ($showDebug) {
-                            echo "GAME ENDED";
+                            wdo('GAME ENDED', OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     }
 
                     if ($showDebug) {
-                        wdo(json_encode($tick));
+                        wdo('Tick: ' . PHP_EOL . json_encode($tick));
                     }
 
                     return $tick;
@@ -254,7 +263,7 @@ class GameLatest extends CommonBase
     {
         $data['tick'] = $tick;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after tick<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after tick');
         }
         $plan = new PlanLatest();
         $this->asyncDataTransferTo($plan);
@@ -272,7 +281,7 @@ class GameLatest extends CommonBase
     ): PromiseInterface {
         $data['plan'] = $planData;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after plan<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after plan');
         }
 
         $layer = new LayerLatest();
@@ -302,7 +311,7 @@ class GameLatest extends CommonBase
             //only send the geometry when it's required
             $p['layers'] = $layersContainer[$key];
             if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-                echo (microtime(true) - $newTime) . " elapsed after layers<br />";
+                wdo((microtime(true) - $newTime) . ' elapsed after layers<br />');
             }
 
             if ((
@@ -332,7 +341,7 @@ class GameLatest extends CommonBase
     ): PromiseInterface {
         $data['planmessages'] = $queryResultRows;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after plan messages<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after plan messages');
         }
 
         //return any raster layers that need to be updated
@@ -354,45 +363,60 @@ class GameLatest extends CommonBase
     ): PromiseInterface {
         $data['raster'] = $queryResult->fetchAllRows();
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after raster<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after raster<br />');
         }
 
         $energy = new EnergyLatest();
         $this->asyncDataTransferTo($energy);
-        return $energy->latest(
-            $lastUpdateTime
-        );
+        $deferred = new Deferred();
+        $energyData = [
+            'connections' => [],
+            'output' => []
+        ];
+        $this->allowEnergyKpiUpdate ?
+            $energy->latest($lastUpdateTime)->then(function (array $queryResults) use ($deferred, $energyData) {
+                $energyData['connections'] = $queryResults[0]->fetchAllRows();
+                $energyData['output'] = $queryResults[1]->fetchAllRows();
+                $deferred->resolve($energyData);
+            }) :
+            resolveOnFutureTick($deferred, $energyData);
+        return $deferred->promise();
     }
 
     /**
-     * @param Result[] $queryResults
-     * @param float $lastUpdateTime
+     * @param array $energyData
      * @param int $teamId
+     * @param float $lastUpdateTime
      * @param float $newTime
      * @param array $data
      * @return PromiseInterface
      * @throws Exception
      */
     private function latestLevel7(
-        array $queryResults,
+        array $energyData,
         int $teamId,
         float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['energy']['connections'] = $queryResults[0]->fetchAllRows();
-        $data['energy']['output'] = $queryResults[1]->fetchAllRows();
-
+        $data['energy'] = $energyData;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after energy<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after energy');
         }
 
         $kpi = new KpiLatest();
         $this->asyncDataTransferTo($kpi);
-        return $kpi->latest(
-            (int)$lastUpdateTime,
-            $teamId
-        );
+        $deferred = new Deferred();
+        $this->allowEnergyKpiUpdate ?
+            $kpi->latest((int)$lastUpdateTime, $teamId)->then(function (array $queryResultRows) use ($deferred) {
+                $deferred->resolve($queryResultRows);
+            }) :
+            resolveOnFutureTick($deferred, [
+                'ecology' => [],
+                'shipping' => [],
+                'energy' => []
+            ]);
+        return $deferred->promise();
     }
 
     /**
@@ -407,7 +431,7 @@ class GameLatest extends CommonBase
         $data['kpi'] = $queryResultRows;
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after kpi<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after kpi<br />');
         }
 
         $warning = new WarningLatest();
@@ -430,7 +454,7 @@ class GameLatest extends CommonBase
         $data['warning']['shipping_issues'] = $queryResults[1]->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after warning<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after warning<br />');
         }
 
         $objective = new ObjectiveLatest();
@@ -452,7 +476,7 @@ class GameLatest extends CommonBase
         $data['objectives'] = $result->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after objective<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after objective<br />');
         }
 
         //Add a slight fudge of 1ms to the update times to avoid rounding issues.

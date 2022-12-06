@@ -2,9 +2,12 @@
 namespace App\Domain\WsServer;
 
 use App\Domain\API\v1\Security;
+use App\Domain\Common\GetConstantsTrait;
 use App\Domain\Event\NameAwareEvent;
-use App\Domain\Helper\AsyncDatabase;
+use App\Domain\Helper\Config;
 use App\Domain\Helper\Util;
+use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\DoctrineMigrationsDependencyFactoryHelper;
 use App\Domain\WsServer\Plugins\PluginInterface;
 use Drift\DBAL\Connection;
 use Exception;
@@ -26,6 +29,13 @@ class WsServer extends EventDispatcher implements
     ServerManagerInterface,
     WsServerInterface
 {
+    use GetConstantsTrait;
+
+    const WS_SERVER_ADDRESS_MODIFICATION_NONE = 'none';
+    const WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT = 'add_game_session_id_to_port';
+    const WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_URI = 'add_game_session_id_to_uri';
+
+    private ?string $id = null;
     private ?int $gameSessionIdFilter = null;
     private array $stats = [];
     private array $medianValues = [];
@@ -54,24 +64,45 @@ class WsServer extends EventDispatcher implements
      */
     private array $pluginsUnregistered = [];
 
+    private DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper;
+
+    public function getDoctrineMigrationsDependencyFactoryHelper(): DoctrineMigrationsDependencyFactoryHelper
+    {
+        return $this->doctrineMigrationsDependencyFactoryHelper;
+    }
+
     public function getStats(): array
     {
         return $this->stats;
     }
 
     public function __construct(
+        DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper,
         // below is required by legacy to be auto-wired
         \App\Domain\API\APIHelper $apiHelper
     ) {
+        $this->doctrineMigrationsDependencyFactoryHelper = $doctrineMigrationsDependencyFactoryHelper;
+
         // for backwards compatibility, to prevent missing request data errors
         $_SERVER['REQUEST_URI'] = '';
 
         parent::__construct();
     }
 
-    public function setGameSessionIdFilter(int $gameSessionIdFilter): self
+    public function setGameSessionIdFilter(?int $gameSessionIdFilter): self
     {
         $this->gameSessionIdFilter = $gameSessionIdFilter;
+        return $this;
+    }
+
+    public function getId(): string
+    {
+        return $this->id ?? self::getWsServerURLBySessionId($this->gameSessionIdFilter ?? 0);
+    }
+
+    public function setId(?string $id): self
+    {
+        $this->id = $id;
         return $this;
     }
 
@@ -256,7 +287,7 @@ class WsServer extends EventDispatcher implements
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getGameSessionIds(bool $onlyPlaying = false): PromiseInterface
+    public function getGameSessionIds(bool $onlySimulable = false): PromiseInterface
     {
         $connection = $this->getServerManagerDbConnection();
         $qb = $connection->createQueryBuilder();
@@ -264,13 +295,15 @@ class WsServer extends EventDispatcher implements
             ->select('id')
             ->from('game_list')
             ->where($qb->expr()->eq('session_state', $qb->createPositionalParameter('healthy')));
-        if ($onlyPlaying) {
-            $qb->andWhere($qb->expr()->in(
-                'game_state',
-                $qb->createPositionalParameter([
-                    'play', 'fastforward' ,'simulation'
-                ])
-            ));
+        if ($onlySimulable) {
+            $qb->andWhere(
+                $qb->expr()->or(
+                    $qb->expr()->in(
+                        'game_state',
+                        $qb->createPositionalParameter(['play', 'fastforward' ,'simulation', 'pause', 'setup'])
+                    )
+                )
+            );
         }
         return $connection->query($qb);
     }
@@ -293,14 +326,20 @@ class WsServer extends EventDispatcher implements
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function getGameSessionDbConnection(int $gameSessionId): Connection
     {
-        return AsyncDatabase::getCachedGameSessionDbConnection($this->loop, $gameSessionId);
+        return ConnectionManager::getInstance()->getCachedAsyncGameSessionDbConnection($this->loop, $gameSessionId);
     }
 
+    /**
+     * @throws Exception
+     */
     public function getServerManagerDbConnection(): Connection
     {
-        return AsyncDatabase::getCachedServerManagerDbConnection($this->loop);
+        return ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection($this->loop);
     }
 
     public function getSecurity(int $connResourceId): Security
@@ -350,5 +389,37 @@ class WsServer extends EventDispatcher implements
     public function setClientInfo(int $connResourceId, string $clientInfoKey, $clientInfoValue): void
     {
         $this->clientInfoContainer[$connResourceId][$clientInfoKey] = $clientInfoValue;
+    }
+
+    public static function getWsServerURLBySessionId(
+        int $sessionId = 0,
+        string $hostDefaultValue = 'localhost'
+    ): string {
+        $addressModificationKey = 'ws_server/address_modification';
+        $addressModificationValue = Config::get($addressModificationKey) ?? 'none';
+        $port = Config::get('ws_server/port') ?: 45001;
+        $uri = Config::get('ws_server/uri');
+        switch ($addressModificationValue) {
+            case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT:
+                $port += $sessionId;
+                break;
+            case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_URI:
+                $uri = rtrim($uri, '/') . '/' . $sessionId . '/';
+                break;
+            case self::WS_SERVER_ADDRESS_MODIFICATION_NONE:
+                break;
+            default:
+                throw new \http\Exception\UnexpectedValueException(
+                    sprintf(
+                        'Encountered unexpected value for config %s: %s. Value must be: %s',
+                        $addressModificationKey,
+                        $addressModificationValue,
+                        implode(', ', self::getConstants())
+                    )
+                );
+        }
+        return Config::get('ws_server/scheme') .
+            (Config::get('ws_server/host') ?: $hostDefaultValue) .
+            ':' . $port . $uri;
     }
 }

@@ -210,10 +210,7 @@ class User extends Base
 
     private function checkProviderExists($provider): bool
     {
-        if (class_exists($provider) && is_subclass_of($provider, "Auths")) {
-            return true;
-        }
-        return false;
+        return is_subclass_of($provider, Auths::class);
     }
     
     public function getProviders(): array
@@ -222,7 +219,10 @@ class User extends Base
         self::AutoloadAllClasses();
         foreach (get_declared_classes() as $class) {
             if ($this->checkProviderExists($class)) {
-                $return[] = ["id" => $class, "name" => (new $class)->getName()];
+                $return[] = [
+                    "id" => $class,
+                    "name" => (new $class)->getName()
+                ];
             }
         }
         return $return;

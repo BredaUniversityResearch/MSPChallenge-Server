@@ -6,16 +6,19 @@ use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
 use App\Domain\WsServer\MeasurementCollectionManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
+use App\Domain\WsServer\WsServerOutput;
 use Exception;
 use React\EventLoop\LoopInterface;
 use Closure;
 use App\Domain\Event\NameAwareEvent;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
-abstract class Plugin implements PluginInterface
+abstract class Plugin extends EventDispatcher implements PluginInterface
 {
     private string $name;
     private float $minIntervalSec;
     private bool $debugOutputEnabled;
+    private int $messageVerbosity = WsServerOutput::VERBOSITY_DEFAULT_MESSAGE;
     private ?int $gameSessionIdFilter = null;
     private bool $registeredToLoop = false;
 
@@ -33,6 +36,7 @@ abstract class Plugin implements PluginInterface
         $this->name = $name;
         $this->minIntervalSec = $minIntervalSec;
         $this->debugOutputEnabled = $debugOutputEnabled;
+        parent::__construct();
     }
 
     public function getName(): string
@@ -55,10 +59,21 @@ abstract class Plugin implements PluginInterface
         $this->debugOutputEnabled = $debugOutputEnabled;
     }
 
-    public function addDebugOutput(string $output): self
+    public function getMessageVerbosity(): int
     {
+        return $this->messageVerbosity;
+    }
+
+    public function setMessageVerbosity(int $messageVerbosity): void
+    {
+        $this->messageVerbosity = $messageVerbosity;
+    }
+
+    public function addOutput(string $output, ?int $verbosity = null): self
+    {
+        $verbosity ??= $this->messageVerbosity;
         if ($this->isDebugOutputEnabled()) {
-            wdo($output);
+            wdo($output, $verbosity);
         }
         return $this;
     }
@@ -72,6 +87,12 @@ abstract class Plugin implements PluginInterface
     {
         $this->registeredToLoop = true;
         $this->loop = $loop;
+
+        // interval sec is zero, so no interval, no repeating
+        if ($this->getMinIntervalSec() < PHP_FLOAT_EPSILON) {
+            $loop->futureTick($this->onCreatePromiseFunction());
+            return;
+        }
         $loop->addTimer(mt_rand() * $this->getMinIntervalSec() / mt_getrandmax(), PluginHelper::createRepeatedFunction(
             $this,
             $loop,

@@ -327,7 +327,7 @@ class Store extends Base
     private function moveDataFromArray(
         array $layerMetaData,
         array &$featureProperties,
-        int &$type,
+        string &$type,
         ?int &$mspId,
         ?int &$countryId
     ): void {
@@ -354,12 +354,11 @@ class Store extends Base
             if ($type == -1) {
                 $type = $typeOther ?? 0;
             }
-        } elseif (isset($featureProperties['type'])
-            && is_numeric($featureProperties['type'])
-        ) {
-            $type = intval($featureProperties['type']);
+        } else {
+            $type = $featureProperties['type'] ?: 0;
             unset($featureProperties['type']);
         }
+
 
         if (isset($featureProperties['mspid'])
             && is_numeric($featureProperties['mspid'])
@@ -386,7 +385,7 @@ class Store extends Base
         int $layerId,
         string $jsonData,
         ?int $countryId,
-        int $type,
+        string $type,
         ?int $mspId,
         string $filename
     ): void {
@@ -542,7 +541,7 @@ class Store extends Base
         string $geometry,
         string $data,
         ?int $countryId,
-        int $type,
+        string $type,
         ?int $mspId,
         int $subtractive = 0,
         string $layerName = ''

@@ -20,10 +20,8 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/{Command,Controller}'
-        public: true
     App\Domain\:
         resource: '../src/Domain/{Services}'
-        public: true
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
@@ -32,3 +30,15 @@ services:
     App\Domain\API\APIHelper:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
+    # make classes in src/DataFixtures available to be used as services
+    # and have a tag that allows actions to type-hint services
+    App\DataFixtures\:
+        resource: '../src/DataFixtures'
+        tags:
+            - 'doctrine.fixture.orm'
+            - 'kernel.event_subscriber'

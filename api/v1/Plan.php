@@ -780,12 +780,12 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function PlanHasErrors(int $currentPlanId): bool
     {
-        $energyError = Database::GetInstance()->query(
+        $energyError = Database::GetInstance($this->getGameSessionId())->query(
             "SELECT plan_energy_error FROM plan WHERE plan.plan_id = ?",
             array($currentPlanId)
         );
 
-        $errors = Database::GetInstance()->query(
+        $errors = Database::GetInstance($this->getGameSessionId())->query(
             "
             SELECT COUNT(warning_id) as error_count
             FROM warning

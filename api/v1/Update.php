@@ -3,7 +3,11 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\API\APIHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Throwable;
 
 class Update extends Base
@@ -26,7 +30,10 @@ class Update extends Base
         "ImportScenario",
         "ManualExportDatabase",
         ["From40beta7To40beta8", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+        ["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        ["From40beta7To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        ["From40beta8To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        ["From40beta9To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
     );
 
     public function __construct(string $method = '')
@@ -292,7 +299,7 @@ class Update extends Base
     public function RebuildDatabaseByDumpImport(string $dbase_file_path, string $new_config_file_name): void
     {
         Log::LogInfo("RebuildDatabaseByDumpImport -> Recreating database from save's dump file ...");
-        $outputDirectory = "export/DatabaseDumps/";
+        $outputDirectory = SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/export/DatabaseDumps/';
         if (!is_dir($outputDirectory)) {
             mkdir($outputDirectory);
         }
@@ -455,6 +462,61 @@ class Update extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function From40beta7To40beta9(): void
     {
+        //there was no difference in db structure between beta8 and beta9
         $this->From40beta7To40beta8();
+    }
+
+    /**
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function From40beta7To40beta10(): void
+    {
+        try {
+            $this->From40beta7To40beta9();
+        } catch (Exception $e) {
+            $original = $e;
+            while (null !== $e->getPrevious()) {
+                $e = $e->getPrevious();
+            }
+            switch ($e->getCode()) {
+                case '42S21': // SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name
+                    // meaning this database is probably already a beta9 database. So just continue on...
+                    break;
+                default:
+                    throw $original; // re-throw error, to fail this migration.
+            }
+        }
+
+        $this->From40beta9To40beta10();
+    }
+
+    /**
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function From40beta8To40beta10(): void
+    {
+        $this->From40beta9To40beta10();
+    }
+
+    /**
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function From40beta9To40beta10(): string
+    {
+        // Run doctrine migrations.
+        $application = new Application(SymfonyToLegacyHelper::getInstance()->getKernel());
+        $application->setAutoExit(false);
+        $output = new BufferedOutput();
+        $application->run(
+            new StringInput('doctrine:migrations:migrate -vvv -n --em=' . Database::GetInstance()->GetDatabaseName()),
+            $output
+        );
+        return $output->fetch();
     }
 }

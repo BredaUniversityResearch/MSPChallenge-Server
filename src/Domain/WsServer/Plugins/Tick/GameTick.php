@@ -12,6 +12,7 @@ use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class GameTick extends TickBase
 {
@@ -88,24 +89,29 @@ class GameTick extends TickBase
             ($tickData['era_realtime'] / $tickData['era_gametime']);
         if ($diff <= $secondsPerMonth) {
             if ($showDebug) {
-                wdo("Waiting for update time " . ($secondsPerMonth - $diff) . " seconds remaining");
+                wdo(
+                    "Waiting for update time " . ($secondsPerMonth - $diff) . " seconds remaining",
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
             }
             return null;
         }
 
         // let's do the "tick" which updates server time and month
         if ($showDebug) {
-            wdo("Trying to tick the server");
+            wdo("Trying to tick the server", OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
 
-        if (!strstr($_SERVER['REQUEST_URI'], 'dev') || Config::GetInstance()->ShouldWaitForSimulationsInDev()) {
-            if (!$this->AreSimulationsUpToDate($tickData)) {
-                if ($showDebug) {
-                    wdo('Waiting for simulations to update.');
-                }
-                return null;
+
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        if (!$game->areSimulationsUpToDate($tickData)) {
+            if ($showDebug) {
+                wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
+            return null;
         }
+
 
         return $this->serverTickInternal($showDebug)
             ->otherwise(function (SilentFailException $e) {
@@ -148,27 +154,10 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function AreSimulationsUpToDate(array $tickData): bool
-    {
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
-        $config = $game->GetGameConfigValues();
-        if ((isset($config["MEL"]) && $tickData['month'] > $tickData['mel_lastmonth']) ||
-            (isset($config["CEL"]) && $tickData['month'] > $tickData['cel_lastmonth']) ||
-            (isset($config["SEL"]) && $tickData['month'] > $tickData['sel_lastmonth'])) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @throws Exception
-     */
     private function serverTickInternal(bool $showDebug): PromiseInterface
     {
         if ($showDebug) {
-            wdo('Ticking server.');
+            wdo('Ticking server.', OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
         return $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()

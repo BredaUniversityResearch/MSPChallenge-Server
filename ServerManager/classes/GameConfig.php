@@ -1,10 +1,11 @@
 <?php
 
+namespace ServerManager;
+
 class GameConfig extends Base
 {
-    private $_db;
-    private $_old;
-    private $_upload_temp_path;
+    private ?DB $db = null;
+    private $uploadTempPath;
 
     public $filename;
     public $description;
@@ -20,21 +21,29 @@ class GameConfig extends Base
     public $game_config_files_id;
     public $id; // version id
     
-    public function __construct() 
+    public function __construct()
     {
-        $this->_db = DB::getInstance();
+        $this->db = DB::getInstance();
     }
 
     private function validateVars()
     {
-        if (strlen($this->filename) == 0) throw new Exception("Filename cannot be empty.");
+        if (strlen($this->filename) == 0) {
+            throw new ServerManagerAPIException("Filename cannot be empty.");
+        }
         $this->filename = strip_tags($this->filename);
-		$this->filename = str_replace(" ", "_", $this->filename);
-		$this->filename = preg_replace( '/[^a-zA-Z0-9\_]+/', '-', $this->filename);
-        if (strlen($this->description) == 0) throw new Exception("Description cannot be empty.");
+        $this->filename = str_replace(" ", "_", $this->filename);
+        $this->filename = preg_replace('/[^a-zA-Z0-9\_]+/', '-', $this->filename);
+        if (strlen($this->description) == 0) {
+            throw new ServerManagerAPIException("Description cannot be empty.");
+        }
         $this->version = intval($this->version);
-        if (strlen($this->version_message) == 0) throw new Exception("Version message cannot be empty.");
-        if ($this->visibility != "active" && $this->visibility != "archived") throw new Exception("Visibility needs to be active or archived only.");
+        if (strlen($this->version_message) == 0) {
+            throw new ServerManagerAPIException("Version message cannot be empty.");
+        }
+        if ($this->visibility != "active" && $this->visibility != "archived") {
+            throw new ServerManagerAPIException("Visibility needs to be active or archived only.");
+        }
         $this->upload_user = intval($this->upload_user);
         $this->upload_time = intval($this->upload_time);
         $this->last_played_time = intval($this->last_played_time);
@@ -43,32 +52,43 @@ class GameConfig extends Base
     public function get()
     {
         if (!empty($this->id)) {
-            if (!$this->_db->query("SELECT gcv.*, gcf.filename, gcf.description 
+            if (!$this->db->query("SELECT gcv.*, gcf.filename, gcf.description 
                                     FROM game_config_version gcv 
                                     INNER JOIN game_config_files gcf ON gcv.game_config_files_id = gcf.id 
-                                    WHERE gcv.id = ?;", array($this->id))) throw new Exception($this->_db->errorString());
-            if ($this->_db->count() == 0) throw new Exception("Config file not found.");
-        }
-        elseif (!empty($this->game_config_files_id)) {
-            if (!$this->_db->query("SELECT gcv.*, gcf.filename, gcf.description 
+                                    WHERE gcv.id = ?;", array($this->id))) {
+                throw new ServerManagerAPIException($this->db->errorString());
+            }
+            if ($this->db->count() == 0) {
+                throw new ServerManagerAPIException("Config file not found.");
+            }
+        } elseif (!empty($this->game_config_files_id)) {
+            if (!$this->db->query("SELECT gcv.*, gcf.filename, gcf.description 
                                     FROM game_config_files gcf 
                                     INNER JOIN game_config_version gcv ON gcv.game_config_files_id = gcf.id 
                                     WHERE gcf.id = ?
                                     ORDER BY gcv.version DESC
-                                    LIMIT 1;", array($this->game_config_files_id))) throw new Exception($this->_db->errorString());
-            if ($this->_db->count() == 0) throw new Exception("Config file not found.");
+                                    LIMIT 1;", array($this->game_config_files_id))) {
+                throw new ServerManagerAPIException($this->db->errorString());
+            }
+            if ($this->db->count() == 0) {
+                throw new ServerManagerAPIException("Config file not found.");
+            }
+        } else {
+            throw new ServerManagerAPIException("Cannot obtain GameConfig without a valid id.");
         }
-        else throw new Exception("Cannot obtain GameConfig without a valid id.");
-        foreach ($this->_db->first(true) as $varname => $varvalue)
-        {
-            if (property_exists($this, $varname)) $this->$varname = $varvalue;
+        foreach ($this->db->first(true) as $varname => $varvalue) {
+            if (property_exists($this, $varname)) {
+                $this->$varname = $varvalue;
+            }
         }
     }
 
-    public function getFile()
+    public function getFile(): bool|string
     {
         $path = ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path;
-        if (file_exists($path)) return $path;
+        if (file_exists($path)) {
+            return $path;
+        }
         return false;
     }
 
@@ -77,38 +97,53 @@ class GameConfig extends Base
         return json_decode(file_get_contents($this->getFile()), true);
     }
 
-    public function getPrettyVars()
+    public function getPrettyVars(): array
     {
         $return["upload_time"] = date("j M Y - H:i", $this->upload_time);
-        $return["last_played_time"] = ($this->last_played_time == 0) ? "Never" : date("j M Y - H:i", $this->last_played_time);
-        $return["upload_user"] = ($this->upload_user == 1) ? "BUas (at installation)" : (new User($this->upload_user))->data()->username;
+        $return["last_played_time"] = (
+            $this->last_played_time == 0) ? "Never" : date("j M Y - H:i", $this->last_played_time);
+        $return["upload_user"] = ($this->upload_user == 1) ? "BUas (at installation)" :
+            (new User($this->upload_user))->data()->username;
         return $return;
     }
 
     private function getValuesFromConfigContents()
     {
         $config_contents = $this->getContents();
-        $this->region = $configFileValues["datamodel"]["region"] ?? "Unknown";
-        $min = $config_contents["metadata"]["min_supported_client"] ?? "Any";
-        $max = $config_contents["metadata"]["max_supported_client"] ?? "Any";
-		$this->client_versions = ($min != "Any" || $max != "Any") ? $min." - ".$max : "Any";
+        $this->region = $config_contents["datamodel"]["region"] ?: "Unknown";
+        $min = $config_contents["metadata"]["min_supported_client"] ?: "Any";
+        $max = $config_contents["metadata"]["max_supported_client"] ?: "Any";
+        $this->client_versions = ($min != "Any" || $max != "Any") ? $min." - ".$max : "Any";
     }
 
-    public function add() 
+    public function add()
     {
         $this->validateVars();
 
         $this->file_path = $this->filename."/".$this->filename."_".$this->version.".json";
-        if (is_file(ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path)) 
-            throw new Exception("Cannot store that file as it already exists.");
-        $outputDirectory = pathinfo(ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path, PATHINFO_DIRNAME);
-        if (!is_dir($outputDirectory)) mkdir($outputDirectory, 0777); 
-        if (!move_uploaded_file($this->_upload_temp_path, ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path))
-            throw new Exception("Could not put the config file in its proper place.");
+        if (is_file(ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path)) {
+            throw new ServerManagerAPIException("Cannot store that file as it already exists.");
+        }
+        $outputDirectory = pathinfo(
+            ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path,
+            PATHINFO_DIRNAME
+        );
+        if (!is_dir($outputDirectory)) {
+            mkdir($outputDirectory, 0777);
+        }
+        if (!move_uploaded_file(
+            $this->uploadTempPath,
+            ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path
+        )
+        ) {
+            throw new ServerManagerAPIException("Could not put the config file in its proper place.");
+        }
 
         $this->getValuesFromConfigContents();
 
-        if ($this->game_config_files_id == -1) $this->addFirstFile();
+        if ($this->game_config_files_id == -1) {
+            $this->addFirstFile();
+        }
 
         $sql = "INSERT INTO `game_config_version` 
                 (   version, 
@@ -127,26 +162,37 @@ class GameConfig extends Base
         unset($args["id"]);
         unset($args["filename"]);
         unset($args["description"]);
-        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
-        $this->id = $this->_db->lastId();        
+        if (!$this->db->query($sql, $args)) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
+        $this->id = $this->db->lastId();
     }
 
     public function uploadTemp($path)
     {
-        if (!is_file($path)) throw new Exception("Nothing seems to have been uploaded.");
-        $this->_upload_temp_path = $path;
+        if (!is_file($path)) {
+            throw new ServerManagerAPIException("Nothing seems to have been uploaded.");
+        }
+        $this->uploadTempPath = $path;
     }
     
     private function addFirstFile()
     {
-        if (!$this->_db->query("INSERT INTO game_config_files (filename, description) VALUES(?, ?)", array($this->filename, $this->description)))
-            throw new Exception($this->_db->errorString());
-        $this->game_config_files_id = $this->_db->lastId();
+        if (!$this->db->query(
+            "INSERT INTO game_config_files (filename, description) VALUES(?, ?)",
+            array($this->filename, $this->description)
+        )
+        ) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
+        $this->game_config_files_id = $this->db->lastId();
     }
 
-    public function edit()
+    public function edit(): bool
     {
-        if (empty($this->id)) throw new Exception("Cannot update with knowing which id to use.");
+        if (empty($this->id)) {
+            throw new ServerManagerAPIException("Cannot update with knowing which id to use.");
+        }
         $this->validateVars();
         $args = getPublicObjectVars($this);
         $sql = "UPDATE game_config_files gcf, game_config_version gcv SET 
@@ -163,7 +209,9 @@ class GameConfig extends Base
                     gcv.client_versions = ?
                 WHERE gcf.id = ?
                 AND gcv.id = ?";
-        if (!$this->_db->query($sql, $args)) throw new Exception($this->_db->errorString());
+        if (!$this->db->query($sql, $args)) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
         return true;
     }
 
@@ -175,14 +223,16 @@ class GameConfig extends Base
         $this->edit();
     }
 
-    public function getList($where_array)
+    public function getList($where_array): array
     {
-        if (!$this->_db->get("game_config_files", array(), "filename ASC"))throw new Exception($this->_db->errorString());
-        $return_array = $this->_db->results(true);
+        if (!$this->db->get("game_config_files", array(), "filename ASC")) {
+            throw new ServerManagerAPIException($this->db->errorString());
+        }
+        $return_array = $this->db->results(true);
         foreach ($return_array as $row => $gameconfig) {
             $total_where_array = array("AND", $where_array, array("game_config_files_id", "=", $gameconfig["id"]));
-            $this->_db->get("game_config_version", $total_where_array, "upload_time DESC");
-            $results = $this->_db->results(true);
+            $this->db->get("game_config_version", $total_where_array, "upload_time DESC");
+            $results = $this->db->results(true);
             if (count($results) > 0) {
                 foreach ($results as $row2 => $gameconfig2) {
                     $this->upload_time = $gameconfig2["upload_time"];
@@ -192,8 +242,9 @@ class GameConfig extends Base
                     $results[$row2]["pretty"] = $pretty_vars;
                 }
                 $return_array[$row]["all_versions"] = $results;
+            } else {
+                unset($return_array[$row]);
             }
-            else unset($return_array[$row]);
         }
         return $return_array;
     }

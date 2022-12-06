@@ -1,9 +1,16 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\Base;
+use ServerManager\ServerManager;
+use ServerManager\Session;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 $api = new API;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 if (empty($_POST['token'])) {
     $api->setMessage("Cannot do anything without a token.");

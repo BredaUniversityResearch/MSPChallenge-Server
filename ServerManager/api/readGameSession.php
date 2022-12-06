@@ -1,5 +1,14 @@
 <?php
 
+use ServerManager\API;
+use ServerManager\GameConfig;
+use ServerManager\GameSave;
+use ServerManager\GameSession;
+use ServerManager\GeoServer;
+use ServerManager\ServerManager;
+use ServerManager\User;
+use ServerManager\Watchdog;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
@@ -9,7 +18,7 @@ $watchdog = new Watchdog;
 $geoserver = new GeoServer;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 // first check if the session_id referred to can even be obtained
 $gamesession->id = $_POST["session_id"] ?? "";

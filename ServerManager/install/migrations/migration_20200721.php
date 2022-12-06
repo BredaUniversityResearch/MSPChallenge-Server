@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -16,4 +17,3 @@ $response = json_decode($rawresponse);
 $sql = 
    "INSERT INTO settings (name, value) VALUES ('server_name', '".$response->server_name."');";
 */
-?>

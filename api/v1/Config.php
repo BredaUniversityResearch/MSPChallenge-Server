@@ -7,8 +7,7 @@ use App\Domain\API\APIHelper;
 class Config
 {
     private const DEFAULT_GAME_AUTOSAVE_INTERVAL = 120;
-    private const MSP_AUTH = "https://auth.mspchallenge.info/usersc/plugins/apibuilder/authmsp/";
-        
+
     private static ?Config $instance = null;
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function GetInstance(): self
@@ -34,10 +33,17 @@ class Config
         $this->configRoot = $GLOBALS['api_config'];
     }
 
+    public function getMSPAuthBaseURL(): string
+    {
+        return ($_ENV['AUTH_SERVER_SCHEME'] ?? 'https') . '://' .
+            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth.mspchallenge.info') . ':' .
+            ($_ENV['AUTH_SERVER_PORT'] ?? 443);
+    }
+
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetAuth(): string
     {
-        return self::MSP_AUTH;
+        return $this->getMSPAuthBaseURL() . '/usersc/plugins/apibuilder/authmsp/';
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
