@@ -13,6 +13,7 @@ use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Throwable;
 use ZipArchive;
 use function App\resolveOnFutureTick;
 use function App\await;
@@ -270,12 +271,17 @@ class GameSession extends Base
         // get the entire session database in order - bare minimum the database is created and config file is put on
         //  its designated spot
         $update = new Update();
-        $result = $update->ReimportAdvanced(
-            $config_file_path,
-            $geoserver_url,
-            $geoserver_username,
-            $geoserver_password
-        );
+        $e = null;
+        try {
+            $update->ReimportAdvanced(
+                $config_file_path,
+                $geoserver_url,
+                $geoserver_username,
+                $geoserver_password
+            );
+        } catch (Throwable $e) {
+            $e = new Exception('Recreate failed', 0, $e);
+        }
 
         // get ready for an optional callback
         $postValues = (new Game())->GetGameDetails();
@@ -284,12 +290,12 @@ class GameSession extends Base
         $postValues["token"] = $token; // to pass ServerManager security
         $postValues["api_access_token"] = $token; // to store in ServerManager
 
-        if (!$result) {
+        if (null !== $e) {
             if (!empty($response_address)) {
                 $postValues["session_state"] = "failed";
                 $this->CallBack($response_address, $postValues);
             }
-            throw new Exception("Recreate failed");
+            throw $e;
         }
 
         // get the watchdog and end-user log-on in order
