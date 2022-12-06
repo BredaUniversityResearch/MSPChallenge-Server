@@ -13,6 +13,7 @@
         MSP Challenge Server version
         <?php
         use ServerManager\ServerManager;
+
         echo ServerManager::getInstance()->GetCurrentVersion();
         ?>
     </div>
