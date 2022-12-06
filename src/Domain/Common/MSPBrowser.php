@@ -50,4 +50,9 @@ class MSPBrowser
     {
         $headers[] = 'User-Agent: MSP Challenge Server API';
     }
+
+    public function __call(string $name, array $arguments)
+    {
+        return call_user_func_array([$this->browser, $name], $arguments);
+    }
 }
