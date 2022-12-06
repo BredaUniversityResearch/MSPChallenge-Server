@@ -205,14 +205,14 @@ class GameSession extends Base
                 'response_address' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSession.php',
             ]
         );
-        if (empty($server_call["success"])) {
+        if (empty($server_call['success'])) {
             if (0 == $allow_recreate) {
                 $this->revert();
             }
             if (is_string($server_call)) {
-                $server_call["message"] = $server_call;
+                $server_call['message'] = $server_call;
             }
-            throw new ServerManagerAPIException($server_call["message"] ?? 'Unknown error');
+            throw new ServerManagerAPIException($server_call['message'] ?? 'Unknown error');
         }
 
         $gameconfig->last_played_time = time();
