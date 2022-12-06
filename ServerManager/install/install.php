@@ -48,7 +48,6 @@ $db = DB::getInstance();
 require_once __DIR__ . '/../templates/header.php';
 
 if ($servermanager->install($user)) {
-
     $freshinstall["success"] = true;
 // todo
 //    //send it to the authoriser to store with successfully logged in user_id
