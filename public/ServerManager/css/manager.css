@@ -369,6 +369,7 @@ div#sessionsList, div#savesList, div#configVersionsList {
 	margin:0;
 	padding:0;
 	white-space:nowrap;
+	font-size: 17px;
 }
 
 #header-menu > li {
