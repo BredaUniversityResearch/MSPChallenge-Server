@@ -25,7 +25,7 @@ class SymfonyToLegacyHelper
     private TranslatorInterface $translator;
     private ?Closure $fnControllerForwarder = null;
 
-    // @phpstan-ignore-next-line "Constructor of class App\Domain\Services\SymfonyToLegacyHelper has an unused parameter"
+    // @phpstan-ignore-next-line "Constructor has an unused parameter"
     public function __construct(
         string $projectDir,
         UrlGeneratorInterface $urlGenerator,

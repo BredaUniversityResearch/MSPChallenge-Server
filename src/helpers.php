@@ -1,5 +1,5 @@
 <?php
-
+// phpcs:ignoreFile PSR1.Files.SideEffects.FoundWithSymbols
 namespace App;
 
 /* This captures all PHP errors and warnings to ensure the standard return format */
