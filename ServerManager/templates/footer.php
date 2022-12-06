@@ -1,7 +1,4 @@
 <footer style="text-align: center; padding-top: 15px;">
-
-
-
     <div id="footer">
         MSP Challenge is a community-based, open source and not for profit initiative, since 2011.
     </div>
@@ -13,9 +10,11 @@
         <p></p>
     </div>
     <div>
-        MSP Challenge Server version <?php use ServerManager\ServerManager;
-
-      echo ServerManager::getInstance()->GetCurrentVersion(); ?>
+        MSP Challenge Server version
+        <?php
+        use ServerManager\ServerManager;
+        echo ServerManager::getInstance()->GetCurrentVersion();
+        ?>
     </div>
     <div>
         Server Address:
@@ -27,7 +26,6 @@
         echo $address;
         ?>
     </div>
-
 </footer>
 </body>
 </html>
