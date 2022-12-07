@@ -90,7 +90,7 @@ abstract class Base extends CommonBase
     public static function ErrorString($errorException): string
     {
         $errorException = self::getOriginalError($errorException);
-        return $errorException . PHP_EOL . "Of file " . $errorException->getFile() . " On line " .
+        return $errorException->getMessage() . PHP_EOL . "Of file " . $errorException->getFile() . " On line " .
             $errorException->getLine() . PHP_EOL . "Stack trace: " . $errorException->getTraceAsString();
     }
 
