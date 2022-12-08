@@ -26,7 +26,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
     // space required for height, table header, footer and cursor itself
     const HEIGHT_RESERVED_LINES = 5;
 
-    private WsServerInterface $wsServer;
+    private WsServer $wsServer;
     private Table $table;
     private array $tableInput = [];
     private ConsoleOutput $output;
@@ -37,7 +37,7 @@ class WsServerConsoleHelper implements EventSubscriberInterface
     private ?string $messageFilter = null;
 
     public function __construct(
-        WsServerInterface $wsServer,
+        WsServer $wsServer,
         ConsoleOutput $output,
         bool $tableOutput,
         ?int $messageMaxLines,

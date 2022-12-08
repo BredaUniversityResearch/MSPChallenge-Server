@@ -2,8 +2,8 @@
 
 namespace App\EventListener;
 
-use API;
-use ServerManagerAPIException;
+use ServerManager\API;
+use ServerManager\ServerManagerAPIException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 

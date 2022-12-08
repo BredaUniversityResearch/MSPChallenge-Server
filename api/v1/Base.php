@@ -8,6 +8,7 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\Common\CommonBase;
 use Exception;
 use TypeError;
+use function App\isJsonObject;
 
 function IsFeatureFlagEnabled(string $featureName): bool
 {
@@ -283,7 +284,7 @@ abstract class Base extends CommonBase
         if ($async == false && ($return === false || $info === false || in_array($info["http_code"], [401, 502]))) {
             throw new Exception("Request failed to url " . $url . PHP_EOL . "CURL Error: " . curl_error($ch) . PHP_EOL .
                 "Response Http code: " . ($info["http_code"] ?? "Unknown") . PHP_EOL . "Response Page output: " .
-                ($return ?? "Nothing"));
+                ($return ?: "Nothing"));
         }
         curl_close($ch);
 

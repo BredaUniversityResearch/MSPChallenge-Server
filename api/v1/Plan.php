@@ -426,7 +426,6 @@ class Plan extends Base
      */
     private function archivePlan(int $planId, string $planName, string $message): PromiseInterface
     {
-        /** @var ToPromiseFunction[] $toPromiseFunctions */
         $toPromiseFunctions[] = tpf(function () use ($planId, $message) {
             return $this->messageAsync($planId, 1, 'SYSTEM', $message);
         });
@@ -1577,6 +1576,7 @@ class Plan extends Base
         array &$remappedGeometryIds,
         array &$remappedPersistentGeometryIds
     ): array {
+        /** @var array{geometry_id: int, geometry_FID: int, geometry_persistent: int, geometry: string, data: string, country: int, type: string, deleted: bool} $geometryData */
         $geometryData = Database::GetInstance()->query(
             "SELECT
 				geometry.geometry_id,

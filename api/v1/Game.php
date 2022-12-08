@@ -2,7 +2,7 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Common\MSPBrowser;
+use App\Domain\Common\MSPBrowserFactory;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
@@ -508,7 +508,7 @@ class Game extends Base
         }
 
         // we want to use the watchdog, but first we check if it is running
-        $browser = new MSPBrowser($url);
+        $browser = MSPBrowserFactory::create($url);
         $deferred = new Deferred();
         $browser
             // any response is acceptable, even 4xx or 5xx status codes
@@ -558,7 +558,6 @@ class Game extends Base
                         $newAccessToken = json_encode($result);
                         return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
                             ->then(function (string $token) use (
-                                $security,
                                 $simulations,
                                 $apiRoot,
                                 $newWatchdogGameState,
@@ -567,7 +566,6 @@ class Game extends Base
                                 $recoveryToken = json_encode(['token' => $token]);
                                 return $this->getWatchdogSessionUniqueToken()
                                     ->then(function (string $watchdogSessionUniqueToken) use (
-                                        $security,
                                         $simulations,
                                         $apiRoot,
                                         $newWatchdogGameState,
@@ -577,7 +575,7 @@ class Game extends Base
                                         // note(MH): GetWatchdogAddress is not async, but it is cached once it
                                         //   has been retrieved once, so that's "fine"
                                         $url = $this->GetWatchdogAddress(true)."/Watchdog/UpdateState";
-                                        $browser = new MSPBrowser($url);
+                                        $browser = MSPBrowserFactory::create($url);
                                         $postValues = [
                                             'game_session_api' => $apiRoot,
                                             'game_session_token' => $watchdogSessionUniqueToken,

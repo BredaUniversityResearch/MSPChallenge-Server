@@ -9,6 +9,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use stdClass;
 use ZipArchive;
+use function App\rcopy;
+use function App\rrmdir;
 
 class Store extends Base
 {

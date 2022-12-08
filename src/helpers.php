@@ -1,23 +1,26 @@
 <?php
+// phpcs:ignoreFile PSR1.Files.SideEffects.FoundWithSymbols
+namespace App;
 
 /* This captures all PHP errors and warnings to ensure the standard return format */
-set_error_handler('exceptions_error_handler');
 
-function exceptions_error_handler($severity, $message, $filename, $lineno)
-{
+use ErrorException;
+
+set_error_handler(function ($severity, $message, $filename, $lineno) {
     $errorNotices = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
     if ($severity & $errorNotices) { // only real errors
         throw new ErrorException($message, 0, $severity, $filename, $lineno);
     }
-}
+});
+
 /* End of PHP error and warning capturing code */
 
-function isJsonObject($string)
+function isJsonObject($string): bool
 {
     return is_object(json_decode($string));
 }
 
-function rrmdir($src)
+function rrmdir($src): void
 {
     $dir = opendir($src);
     while (false !== ( $file = readdir($dir))) {
@@ -34,7 +37,7 @@ function rrmdir($src)
     rmdir($src);
 }
 
-function rcopy($src, $dst)
+function rcopy($src, $dst): void
 {
     if (file_exists($dst)) {
         rrmdir($dst);

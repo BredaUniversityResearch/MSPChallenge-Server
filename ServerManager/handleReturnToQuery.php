@@ -7,6 +7,7 @@ use ServerManager\Redirect;
 use ServerManager\ServerManager;
 use ServerManager\Session;
 use ServerManager\User;
+use function ServerManager\lang;
 
 function handleReturnToQuery(ServerManager $serverManager, array &$errors, array &$link): void
 {

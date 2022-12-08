@@ -405,6 +405,7 @@ class DB
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function get_subquery_sql($action, $table, $where, &$values, &$is_ok): string
     {
+        $where_text = '';
         if (is_array($where)) {
             if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok)) {
                 $where_text = " WHERE $where_text";
