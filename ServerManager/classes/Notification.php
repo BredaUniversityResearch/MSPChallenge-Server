@@ -23,11 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class Notification
 {
-    public function __construct()
-    {
-        return false;
-    }
-
     private function getAllNotifications($all): bool
     {
         return false;

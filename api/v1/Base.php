@@ -97,7 +97,7 @@ abstract class Base extends CommonBase
      * @param array $data
      * @return false|string
      */
-    public static function JSON(array $data)/*: false|string */ // <-- for php 8
+    public static function JSON(array $data): false|string
     {
         if (self::$more) {
             self::Debug($data);
@@ -112,7 +112,7 @@ abstract class Base extends CommonBase
      * @return array|false|string
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function MergeGeometry(array $data, bool $encode = false)/*: false|string|array */ // <-- for php 8
+    public static function MergeGeometry(array $data, bool $encode = false): false|string|array
     {
         if (self::$more) {
             self::Debug($data);
@@ -236,7 +236,7 @@ abstract class Base extends CommonBase
         bool $async = false,
         bool $asjson = false,
         array $customopt = array()
-    ) {/*: false|string */ // <-- for php 8
+    ): false|string {
         $ch = curl_init($url);
 
         // any proxy required for the external calls of any kind

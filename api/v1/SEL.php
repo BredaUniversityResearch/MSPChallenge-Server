@@ -118,7 +118,7 @@ class SEL extends Base
      * @return float|int
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function CeilToCellSize($input, $cellSize)/*: int|float */ // <-- for php 8
+    private function CeilToCellSize($input, $cellSize): int|float
     {
         return ceil($input / $cellSize) * $cellSize;
     }
@@ -1029,7 +1029,7 @@ class SEL extends Base
      * @return array|object
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSELGameClientConfig()/*: array|object */ // <-- for php 8
+    public function GetSELGameClientConfig(): array|object
     {
         $config = $this->GetSELConfigInternal();
         if ($config != null && array_key_exists("game_client_settings", $config)) {

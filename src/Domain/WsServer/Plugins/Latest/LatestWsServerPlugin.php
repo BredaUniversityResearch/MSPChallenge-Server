@@ -187,7 +187,9 @@ class LatestWsServerPlugin extends Plugin
                 $promises[$connResourceId] = $this->latestForClient($connResourceId, $clientInfo);
             }
         }
-        return all($promises);
+        /** @var PromiseInterface&Promise $promise */
+        $promise = all($promises);
+        return $promise;
     }
 
     private function comparePayloads(array $p1, array $p2): EPayloadDifferenceType

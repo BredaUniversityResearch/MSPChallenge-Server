@@ -102,7 +102,7 @@ class Plan extends Base
             }
         }
         $this->UpdatePlanConstructionTime($id);
-        return $id;
+        return (int)$id;
     }
 
     /**
@@ -138,6 +138,7 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function All(): array
     {
+        /** @var array{plan_id: int} $data */
         $data = Database::GetInstance()->query("SELECT * FROM plan WHERE plan_active=?", array(1));
 
         self::Debug($data);
@@ -222,7 +223,7 @@ class Plan extends Base
 
         $this->UpdatePlanConstructionTime($id);
 
-        return $lid;
+        return (int)$lid;
     }
 
     /**
@@ -1073,6 +1074,7 @@ class Plan extends Base
     public function Export(array &$result, ?array &$errors = null): bool
     {
         //Make sure we don't export plans with NULL name as these are auto generated fishing plans.
+        /** @var array<array{plan_id: int, grids: array<array{grid_id: int, energy: array, removed: array, sockets: array, sources: array}>, layers: array<array{layer_id: int, layer_editing_type: string, warnings: array, deleted: array<array{geometry_id: int, base_geometry_info: array}>, geometry: array<array{geometry_id: int, energy_output: array, data: ?array, cable: array{start: array, end: array}}>}>}> $plans */
         $plans = Database::GetInstance()->query(
             "
             SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type, plan_alters_energy_distribution
@@ -1576,7 +1578,7 @@ class Plan extends Base
         array &$remappedGeometryIds,
         array &$remappedPersistentGeometryIds
     ): array {
-        /** @var array{geometry_id: int, geometry_FID: int, geometry_persistent: int, geometry: string, data: string, country: int, type: string, deleted: bool} $geometryData */
+        /** @var array<array{geometry_id: int, geometry_FID: int, geometry_persistent: int, geometry: string, data: string, country: int, type: string, deleted: bool}> $geometryData */
         $geometryData = Database::GetInstance()->query(
             "SELECT
 				geometry.geometry_id,

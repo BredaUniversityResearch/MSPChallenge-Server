@@ -58,7 +58,7 @@ class GeoServer extends Base
         string $method = "GET",
         string $data = "",
         string $contentType = "text/xml"
-    ) {/*: false|string */ // <-- for php 8
+    ): false|string {
         $headers = array("Content-Type: " . $contentType, "Content-Length: " . strlen($data));
         $customOpt = array(
             CURLOPT_USERPWD => $this->username . ":" . $this->password,

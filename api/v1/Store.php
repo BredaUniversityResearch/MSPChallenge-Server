@@ -555,7 +555,7 @@ class Store extends Base
              $mspId = hash('fnv1a64', $layerName.$geometry);
         }
 
-        return Database::GetInstance()->query(
+        return (int)Database::GetInstance()->query(
             "
             INSERT INTO geometry (
                 geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_mspid,

@@ -397,8 +397,9 @@ class Batch extends Base
         $childSpecifiers = null;
         if ($firstArrayAccessor !== false) {
             $firstArrayAccessor -= $refSpecifierLength;
-            $matches = preg_match_all("/\[(?<Accessor>[a-zA-Z0-9]+)]*/", $value);
-            $childSpecifiers = $matches["Accessor"];
+            if (1 === preg_match_all("/\[(?<Accessor>[a-zA-Z0-9]+)]*/", $value, $matches)) {
+                $childSpecifiers = $matches["Accessor"];
+            }
         } else {
             $firstArrayAccessor = PHP_INT_MAX;
         }
