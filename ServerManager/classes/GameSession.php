@@ -79,7 +79,8 @@ class GameSession extends Base
         if (empty($this->id)) {
             throw new ServerManagerAPIException('Cannot obtain GameSession without a valid id.');
         }
-        if (!$this->db->query('SELECT * FROM game_list WHERE id = ?', [$this->id])) {
+        $this->db->query('SELECT * FROM game_list WHERE id = ?', [$this->id]);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         if (0 == $this->db->count()) {
@@ -148,7 +149,8 @@ class GameSession extends Base
         $args['password_player'] = base64_encode($args['password_player']);
         unset($args['id']);
         unset($args['log']);
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();
@@ -346,7 +348,8 @@ class GameSession extends Base
                     save_id = ?,
                     server_version = ?
                 WHERE id = ?';
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
     }

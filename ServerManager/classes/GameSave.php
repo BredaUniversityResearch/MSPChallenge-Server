@@ -78,7 +78,8 @@ class GameSave extends Base
         if (empty($this->id)) {
             throw new ServerManagerAPIException('Cannot obtain GameSave without a valid id.');
         }
-        if (!$this->db->query('SELECT * FROM game_saves WHERE id = ?', [$this->id])) {
+        $this->db->query('SELECT * FROM game_saves WHERE id = ?', [$this->id]);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         if (0 == $this->db->count()) {
@@ -452,7 +453,8 @@ class GameSave extends Base
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         $args = getPublicObjectVars($this);
         unset($args['id']);
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();
@@ -492,7 +494,8 @@ class GameSave extends Base
                     save_timestamp = ?,
                     server_version = ?
                 WHERE id = ?';
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
     }

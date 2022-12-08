@@ -35,7 +35,8 @@ class Watchdog extends Base
         if (empty($this->id)) {
             throw new ServerManagerAPIException("Cannot obtain Watchdog without a valid id.");
         }
-        if (!$this->db->query("SELECT * FROM game_watchdog_servers WHERE id = ?;", array($this->id))) {
+        $this->db->query("SELECT * FROM game_watchdog_servers WHERE id = ?;", array($this->id));
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         if ($this->db->count() == 0) {
@@ -52,7 +53,8 @@ class Watchdog extends Base
 
     public function getList(): array
     {
-        if (!$this->db->query("SELECT id, name, address, available FROM game_watchdog_servers")) {
+        $this->db->query("SELECT id, name, address, available FROM game_watchdog_servers");
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         return $this->db->results(true);
@@ -61,7 +63,7 @@ class Watchdog extends Base
     public function add()
     {
         $this->validateVars();
-        if (!$this->db->query(
+        $this->db->query(
             "INSERT INTO game_watchdog_servers (
                                     name, 
                                     address, 
@@ -72,7 +74,8 @@ class Watchdog extends Base
                                     $this->address,
                                     $this->available
             )
-        )) {
+        );
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();
@@ -90,7 +93,8 @@ class Watchdog extends Base
                     address = ?,
                     available = ?
                 WHERE id = ?;";
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
     }

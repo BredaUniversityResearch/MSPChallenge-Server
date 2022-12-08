@@ -45,7 +45,7 @@ class Router
     );
 
     private const TRANSACTIONS_TOGGLE = false; // should we be using transactions at all?
-    private const TRANSACTIONS_MODE = "OptIn"; // or OptOut
+    private static string $debugTransActionsMode = "OptIn"; // or OptOut
                                // >> OptIn means some calls will request transactions (so default is no transactions)
                                // >> OptOut means some calls will request no transactions (so default is transactions)
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -395,9 +395,9 @@ class Router
     private static function CheckMethodCommentsForTransactionOptions(ReflectionMethod $methodData): bool
     {
         $comment = $methodData->getDocComment();
-        if (self::TRANSACTIONS_MODE == "OptOut") {
+        if (self::$debugTransActionsMode == "OptOut") {
             return stristr($comment, "@ForceNoTransaction") === false;
-        } elseif (self::TRANSACTIONS_MODE == "OptIn") {
+        } elseif (self::$debugTransActionsMode == "OptIn") {
             return stristr($comment, "@ForceTransaction") !== false;
         }
         return false;

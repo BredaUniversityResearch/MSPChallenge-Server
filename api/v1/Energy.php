@@ -146,7 +146,8 @@ class Energy extends Base
     public function UpdateGridEnergy(int $id, array $expected): ?PromiseInterface
     {
         foreach ($expected as $country) {
-            if ((false === $int = filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT)) && $int > 0) {
+            $int = (int)filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT);
+            if ($int > 0) {
                 throw new Exception(
                     'Encountered invalid integer country_id value (should be 1+): ' . $country['country_id']
                 );

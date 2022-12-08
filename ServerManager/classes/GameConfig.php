@@ -52,22 +52,24 @@ class GameConfig extends Base
     public function get()
     {
         if (!empty($this->id)) {
-            if (!$this->db->query("SELECT gcv.*, gcf.filename, gcf.description 
+            $this->db->query("SELECT gcv.*, gcf.filename, gcf.description 
                                     FROM game_config_version gcv 
                                     INNER JOIN game_config_files gcf ON gcv.game_config_files_id = gcf.id 
-                                    WHERE gcv.id = ?;", array($this->id))) {
+                                    WHERE gcv.id = ?;", array($this->id));
+            if ($this->db->error()) {
                 throw new ServerManagerAPIException($this->db->errorString());
             }
             if ($this->db->count() == 0) {
                 throw new ServerManagerAPIException("Config file not found.");
             }
         } elseif (!empty($this->game_config_files_id)) {
-            if (!$this->db->query("SELECT gcv.*, gcf.filename, gcf.description 
+            $this->db->query("SELECT gcv.*, gcf.filename, gcf.description 
                                     FROM game_config_files gcf 
                                     INNER JOIN game_config_version gcv ON gcv.game_config_files_id = gcf.id 
                                     WHERE gcf.id = ?
                                     ORDER BY gcv.version DESC
-                                    LIMIT 1;", array($this->game_config_files_id))) {
+                                    LIMIT 1;", array($this->game_config_files_id));
+            if ($this->db->error()) {
                 throw new ServerManagerAPIException($this->db->errorString());
             }
             if ($this->db->count() == 0) {
@@ -162,7 +164,8 @@ class GameConfig extends Base
         unset($args["id"]);
         unset($args["filename"]);
         unset($args["description"]);
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();
@@ -178,11 +181,10 @@ class GameConfig extends Base
     
     private function addFirstFile()
     {
-        if (!$this->db->query(
+        $this->db->query(
             "INSERT INTO game_config_files (filename, description) VALUES(?, ?)",
-            array($this->filename, $this->description)
-        )
-        ) {
+            array($this->filename, $this->description));
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->game_config_files_id = $this->db->lastId();
@@ -209,7 +211,8 @@ class GameConfig extends Base
                     gcv.client_versions = ?
                 WHERE gcf.id = ?
                 AND gcv.id = ?";
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         return true;

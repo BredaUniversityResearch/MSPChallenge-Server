@@ -33,31 +33,31 @@ class GameConfigVersion
     private ?string $uploadTime = null;
 
     /**
-     * @note User ID from UserSpice.
+     * User ID from UserSpice.
      */
     #[ORM\Column]
     private ?int $uploadUser = null;
 
     /**
-     * @note Unix timestamp
+     * Unix timestamp
      */
     #[ORM\Column(type: Types::BIGINT)]
     private ?string $lastPlayedTime = null;
 
     /**
-     * @note File path relative to the root config directory
+     * File path relative to the root config directory
      */
     #[ORM\Column(length: 255)]
     private ?string $filePath = null;
 
     /**
-     * @note Region defined in the config file
+     * Region defined in the config file
      */
     #[ORM\Column(length: 45)]
     private ?string $region = null;
 
     /**
-     * @note Compatible client versions. Formatted as "min-max"
+     * Compatible client versions. Formatted as "min-max"
      */
     #[ORM\Column(length: 45)]
     private ?string $clientVersions = null;
