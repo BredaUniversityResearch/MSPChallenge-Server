@@ -426,7 +426,6 @@ class Plan extends Base
      */
     private function archivePlan(int $planId, string $planName, string $message): PromiseInterface
     {
-        /** @var ToPromiseFunction[] $toPromiseFunctions */
         $toPromiseFunctions[] = tpf(function () use ($planId, $message) {
             return $this->messageAsync($planId, 1, 'SYSTEM', $message);
         });

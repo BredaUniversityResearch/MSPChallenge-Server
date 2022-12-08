@@ -8,7 +8,7 @@ use DateTime;
 class GameSession extends Base
 {
     private ?DB $db = null;
-    private $old;
+    private ?GameSession $old = null;
 
     public $name;
     public $game_config_version_id;
@@ -293,7 +293,7 @@ class GameSession extends Base
 
     public function demoCheck(): bool
     {
-        if (!is_a($this->old, 'GameSession')) {
+        if (null === $this->old) {
             throw new ServerManagerAPIException("Cannot continue as I don't have original GameSession object.");
         }
 
@@ -665,7 +665,7 @@ class GameSession extends Base
 
     public function changeGameState(): bool
     {
-        if (!is_a($this->old, 'GameSession')) {
+        if (null === $this->old) {
             throw new ServerManagerAPIException("Can't continue as I don't have the old GameSession object.");
         }
         if (0 == strcasecmp($this->old->game_state, $this->game_state)) {

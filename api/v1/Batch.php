@@ -7,9 +7,11 @@ use Doctrine\DBAL\Types\Types;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use function App\chain;
 use function App\parallel;
+use function App\query;
 use function App\tpf;
 use function React\Promise\reject;
 
@@ -226,7 +228,7 @@ class Batch extends Base
     /**
      * @throws Exception
      */
-    public function setCommunicated(int $batchId): PromiseInterface
+    public function setCommunicated(int $batchId): Promise
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
@@ -237,12 +239,13 @@ class Batch extends Base
         );
     }
 
-    public function executeQueuedBatch(int $batchId, string $serverId): PromiseInterface
+    public function executeQueuedBatch(int $batchId, string $serverId): Promise
     {
         // get batch tasks to execute
         $this->cachedBatchResults[$batchId] = [];
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return $this->getAsyncDatabase()->query(
+        return query(
+            $this->getAsyncDatabase(),
             $qb
                 ->select('t.*')
                 ->from('api_batch_task', 't')
@@ -390,7 +393,7 @@ class Batch extends Base
             return;
         }
 
-        $firstArrayAccessor = strstr($value, '[');
+        $firstArrayAccessor = strpos($value, '[');
         $childSpecifiers = null;
         if ($firstArrayAccessor !== false) {
             $firstArrayAccessor -= $refSpecifierLength;

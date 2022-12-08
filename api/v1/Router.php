@@ -10,7 +10,10 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionIntersectionType;
 use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionUnionType;
 use Throwable;
 use function App\resolveOnFutureTick;
 
@@ -259,6 +262,7 @@ class Router
                 $parameterValue = $argumentsArray[$parameter->getName()];
                 if ($parameter->hasType()) {
                     $parameterType = $parameter->getType();
+                    /** @var ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null $parameterType */
                     $parameterTypeName = $parameterType->getName();
                     try {
                         if (gettype($parameterValue) !== $parameterTypeName &&

@@ -2,17 +2,18 @@
 
 namespace App\Domain\WsServer\Plugins\Tick;
 
-use App\Domain\API\v1\Config;
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Security;
-use App\Domain\Common\MSPBrowser;
+use App\Domain\Common\MSPBrowserFactory;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function App\query;
 
 class GameTick extends TickBase
 {
@@ -138,7 +139,7 @@ class GameTick extends TickBase
                         $postValues['session_id'] = $this->getGameSessionId();
                         $postValues['action'] = 'demoCheck';
                         $url = GameSession::GetServerManagerApiRoot().'editGameSession.php';
-                        $browser = new MSPBrowser($url);
+                        $browser = MSPBrowserFactory::create($url);
                         return $browser
                             ->post(
                                 $url,
@@ -154,12 +155,13 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    private function serverTickInternal(bool $showDebug): PromiseInterface
+    private function serverTickInternal(bool $showDebug): Promise
     {
         if ($showDebug) {
             wdo('Ticking server.', OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
-        return $this->getAsyncDatabase()->query(
+        return query(
+            $this->getAsyncDatabase(),
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
                     'game_state as state',

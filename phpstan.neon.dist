@@ -1,5 +1,5 @@
 parameters:
-  level: 1
+  level: 2
   paths:
     - api
     - api_test
@@ -8,3 +8,18 @@ parameters:
     - ServerManager
   ignoreErrors:
     - '#has an unused parameter \$helper#'
+    - '#^Access to an undefined property Ratchet\\ConnectionInterface\:\:\$httpRequest\.$#'
+    - '#^Access to an undefined property Ratchet\\ConnectionInterface\:\:\$resourceId\.$#'
+  stubFiles:
+    - stubs/Doctrine-Common-DataFixtures-FixtureInterface.stub
+    - stubs/Doctrine-DBAL-Exception.stub
+    - stubs/Doctrine-DBAL-Exception-InvalidArgumentException.stub
+    - stubs/Doctrine-DBAL-Query-QueryBuilder.stub
+    - stubs/Drift-DBAL-Connection.stub
+    - stubs/Evenement-EventEmitterInterface.stub
+    - stubs/React-Http-Browser.stub
+    - stubs/React-Promise-CancellablePromiseInterface.stub
+    - stubs/React-Promise-ExtendedPromiseInterface.stub
+    - stubs/React-Promise-Promise.stub
+    - stubs/React-Promise-PromiseInterface.stub
+    - stubs/React-Stream-ReadableStreamInterface.stub

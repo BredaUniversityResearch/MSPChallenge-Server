@@ -169,13 +169,8 @@ class GameSave extends Base
         return $return;
     }
 
-    public function createZip($gamesession): bool
+    public function createZip(GameSession $gameSession): bool
     {
-        if (!is_a($gamesession, 'GameSession')) {
-            throw new ServerManagerAPIException(
-                "Can't continue because the passed-on variable is not a Game Session object."
-            );
-        }
         $server_call = self::callServer(
             'GameSession/SaveSession',
             [
@@ -186,8 +181,8 @@ class GameSave extends Base
                 'nooverwrite' => true,
                 'response_url' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSave.php',
             ],
-            $gamesession->id,
-            $gamesession->api_access_token
+            $gameSession->id,
+            $gameSession->api_access_token
         );
         if (!$server_call['success']) {
             throw new ServerManagerAPIException($server_call['message']);

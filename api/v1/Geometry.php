@@ -106,7 +106,7 @@ class Geometry extends Base
                     return null;
                 }
 
-                return parallel($toPromiseFunctions)
+                parallel($toPromiseFunctions)
                     ->done(
                         function () use ($deferred, $newId) {
                             $deferred->resolve($newId);

@@ -2,7 +2,7 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Common\MSPBrowser;
+use App\Domain\Common\MSPBrowserFactory;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
@@ -508,7 +508,7 @@ class Game extends Base
         }
 
         // we want to use the watchdog, but first we check if it is running
-        $browser = new MSPBrowser($url);
+        $browser = MSPBrowserFactory::create($url);
         $deferred = new Deferred();
         $browser
             // any response is acceptable, even 4xx or 5xx status codes
@@ -575,7 +575,7 @@ class Game extends Base
                                         // note(MH): GetWatchdogAddress is not async, but it is cached once it
                                         //   has been retrieved once, so that's "fine"
                                         $url = $this->GetWatchdogAddress(true)."/Watchdog/UpdateState";
-                                        $browser = new MSPBrowser($url);
+                                        $browser = MSPBrowserFactory::create($url);
                                         $postValues = [
                                             'game_session_api' => $apiRoot,
                                             'game_session_token' => $watchdogSessionUniqueToken,

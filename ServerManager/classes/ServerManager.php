@@ -9,7 +9,7 @@ use App\Domain\WsServer\WsServer;
 class ServerManager extends Base
 {
     private static ?ServerManager $instance = null;
-    private $old;
+    private ?ServerManager $old = null;
     private $db;
     private array $serverVersions = [];
     private array $serverAcceptedClients = [];
@@ -20,7 +20,7 @@ class ServerManager extends Base
     private string $mspAuthUrl = '';
     private string $mspAuthApi = '';
     public $server_id;
-    public $server_name;
+    public ?string $server_name = null;
     public $server_address;
     public $server_description;
 
@@ -230,7 +230,8 @@ class ServerManager extends Base
             $this->server_name = $user->data()->username.'_'.date('Ymd');
         }
 
-        if (is_a($this->old, 'ServerManager') && $this->old->server_name == $this->server_name) {
+        if ($this->old !== null &&
+            $this->old->server_name == $this->server_name) {
             return $this->server_name; // no need to do anything if nothing changes
         }
 
@@ -256,7 +257,8 @@ class ServerManager extends Base
                 'changed this default description yet. This can be done through the ServerManager.';
         }
 
-        if (is_a($this->old, 'ServerManager') && $this->old->server_description == $this->server_description) {
+        if ($this->old !== null &&
+            $this->old->server_description == $this->server_description) {
             return $this->server_description; // no need to do anything if nothing changes
         }
 

@@ -11,6 +11,7 @@ use App\Domain\WsServer\Plugins\Plugin;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
 use Closure;
 use Exception;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use function React\Promise\all;
@@ -157,7 +158,7 @@ class LatestWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function latest(): PromiseInterface
+    private function latest(): Promise
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();

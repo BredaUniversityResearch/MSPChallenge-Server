@@ -126,7 +126,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             'Created "executeBatches" payload for: ' . $connResourceId,
                             OutputInterface::VERBOSITY_VERY_VERBOSE
                         );
-                        $this->getClientConnectionResourceManager()->addToMeasurementCollection(
+                        $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                             $this->getName(),
                             $connResourceId,
                             microtime(true) - $timeStart
