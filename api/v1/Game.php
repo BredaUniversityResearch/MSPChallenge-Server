@@ -333,7 +333,7 @@ class Game extends Base
     {
         // find cable layers
         $cableLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'cable')->keyBy('layer_id');
-        if (empty($cableLayers)) {
+        if ($cableLayers->isEmpty()) {
             return;
         }
         // if cable layers exists, go through all layers
