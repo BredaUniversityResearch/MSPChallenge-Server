@@ -15,7 +15,8 @@ set_error_handler(function (int $errno, string $message, string $filename, int $
 
     $errorNotices = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
     if (!($errno & $errorNotices)) { // we are only interested in real errors to be converted to ErrorException
-        return false;
+        /* Don't execute PHP internal error handler */
+        return true;
     }
 
     throw new ErrorException($message, 0, $errno, $filename, $lineno);

@@ -3,7 +3,6 @@
 namespace App\Domain\API\v1;
 
 use Exception;
-use Throwable;
 
 class GeoServer extends Base
 {

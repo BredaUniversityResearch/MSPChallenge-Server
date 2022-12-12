@@ -66,6 +66,9 @@ class GameSession extends Base
                     break;
                 case 'log':
                     break; // ignoring, because not stored in dbase
+                case 'save_id':
+                    // null is accepted.
+                    break;
                 default:
                     if (0 == strlen($this->$varname)) {
                         throw new ServerManagerAPIException('Missing value for '.$varname);

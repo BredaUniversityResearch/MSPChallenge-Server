@@ -383,7 +383,6 @@ class Batch extends Base
      * @param array $presentResults
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function fixupReferences(&$value, $key, array $presentResults): void
     {
         $refSpecifierLength = strlen(self::REFERENCE_SPECIFIER);

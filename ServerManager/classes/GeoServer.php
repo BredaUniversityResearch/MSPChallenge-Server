@@ -75,8 +75,7 @@ class GeoServer extends Base
             }
         }
 
-        // @phpstan-ignore-next-line "Call to function is_null() with string will always evaluate to false"
-        if (1 == $this->id && !is_null($this->jwt)) {
+        if (1 == $this->id && null !== $this->jwt) {
             $this->retrievePublic(); // this will get the BUas public GeoServer address and credentials
         }
 
