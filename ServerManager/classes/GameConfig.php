@@ -183,7 +183,8 @@ class GameConfig extends Base
     {
         $this->db->query(
             "INSERT INTO game_config_files (filename, description) VALUES(?, ?)",
-            array($this->filename, $this->description));
+            array($this->filename, $this->description)
+        );
         if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }

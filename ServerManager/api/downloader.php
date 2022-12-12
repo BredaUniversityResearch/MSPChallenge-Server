@@ -5,7 +5,7 @@ use ServerManager\User;
 
 // setup custom error handling while downloading the file.
 // Any error/exception will lead to "die", so there is no need call restore_error_handler()/restore_exception_handler()
-set_exception_handler(function($e) {
+set_exception_handler(function ($e) {
     $msg = $e->getMessage();
     if (is_a($e, \ErrorException::class)) {
         $msg = $e->getSeverity().": ".$msg." - on line ".$e->getLine()." of file ".
@@ -13,7 +13,7 @@ set_exception_handler(function($e) {
     }
     die($msg);
 });
-set_error_handler(function($errno, $errMsg, $errFile, $errLine) {
+set_error_handler(function ($errno, $errMsg, $errFile, $errLine) {
     throw new \ErrorException($errMsg, 0, $errno, $errFile, $errLine);
 });
 
