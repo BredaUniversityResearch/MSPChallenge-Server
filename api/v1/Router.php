@@ -80,7 +80,8 @@ class Router
         }
     }
 
-    #[ArrayShape(["class" => "string", "method" => "string"])] public static function parseEndpointString(string $apiCallUrl): array
+    #[ArrayShape(["class" => "string", "method" => "string"])]
+    public static function parseEndpointString(string $apiCallUrl): array
     {
         $arr = explode("/", $apiCallUrl);
         $class = ucfirst($arr[0]);

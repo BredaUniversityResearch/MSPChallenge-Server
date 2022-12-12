@@ -85,7 +85,8 @@ class Kpi extends Base
             ON DUPLICATE KEY UPDATE kpi_value = ?, kpi_lastupdate = ?
             ",
             array(
-                $kpiName, $kpiValue, $kpiMonth, $kpiType, microtime(true), $kpiUnit, $kpiCountry, $kpiValue, microtime(true)
+                $kpiName, $kpiValue, $kpiMonth, $kpiType, microtime(true), $kpiUnit, $kpiCountry, $kpiValue,
+                microtime(true)
             ),
             true
         );
