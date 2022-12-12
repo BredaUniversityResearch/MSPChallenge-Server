@@ -271,8 +271,8 @@ class Geometry extends Base
         $this->getAsyncDatabase()->query(
             $qb
                 ->update('geometry')
-                ->set('geometry_active', 0)
-                ->set('geometry_deleted', 1)
+                ->set('geometry_active', '0')
+                ->set('geometry_deleted', '1')
                 ->where(
                     $qb->expr()->or(
                         $qb->expr()->eq('geometry_id', $qb->createPositionalParameter($id))

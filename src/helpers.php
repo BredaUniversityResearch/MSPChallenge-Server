@@ -2,15 +2,23 @@
 // phpcs:ignoreFile PSR1.Files.SideEffects.FoundWithSymbols
 namespace App;
 
-/* This captures all PHP errors and warnings to ensure the standard return format */
-
 use ErrorException;
 
-set_error_handler(function ($severity, $message, $filename, $lineno) {
-    $errorNotices = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
-    if ($severity & $errorNotices) { // only real errors
-        throw new ErrorException($message, 0, $severity, $filename, $lineno);
+// This captures all PHP errors and warnings to ensure the standard return format
+//   It only captures non-exceptions, so basically it converts all errors to ErrorException exceptions.
+set_error_handler(function (int $errno, string $message, string $filename, int $lineno) {
+    if (!(error_reporting() & $errno)) {
+        // This error code is not included in error_reporting, so let it fall
+        // through to the standard PHP error handler
+        return false;
     }
+
+    $errorNotices = E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
+    if (!($errno & $errorNotices)) { // we are only interested in real errors to be converted to ErrorException
+        return false;
+    }
+
+    throw new ErrorException($message, 0, $errno, $filename, $lineno);
 });
 
 /* End of PHP error and warning capturing code */

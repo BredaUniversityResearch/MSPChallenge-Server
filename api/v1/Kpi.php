@@ -78,7 +78,6 @@ class Kpi extends Base
         string $kpiUnit,
         int $kpiCountry = -1
     ): int {
-        $value = floatval(str_replace(",", ".", $kpiValue));
         return (int)Database::GetInstance()->query(
             "
             INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 
@@ -86,7 +85,7 @@ class Kpi extends Base
             ON DUPLICATE KEY UPDATE kpi_value = ?, kpi_lastupdate = ?
             ",
             array(
-                $kpiName, $value, $kpiMonth, $kpiType, microtime(true), $kpiUnit, $kpiCountry, $value, microtime(true)
+                $kpiName, $kpiValue, $kpiMonth, $kpiType, microtime(true), $kpiUnit, $kpiCountry, $kpiValue, microtime(true)
             ),
             true
         );

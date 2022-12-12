@@ -5,6 +5,7 @@ namespace App\Domain\Common;
 use App\Domain\API\v1\Base;
 use App\Domain\API\v1\Config;
 use App\Domain\API\v1\GameSession;
+use Clue\React\HttpProxy\ProxyConnector;
 use Exception;
 use React\Http\Browser;
 
@@ -22,7 +23,7 @@ class MSPBrowserFactory
         if (!empty($proxy) && !str_contains($targetUrl, GameSession::GetRequestApiRoot()) &&
             !str_contains($targetUrl, "localhost") && Base::PHPCanProxy()
         ) {
-            $connector = $proxy;
+            $connector = new ProxyConnector($proxy);
         }
 
         $browser = new Browser($connector);

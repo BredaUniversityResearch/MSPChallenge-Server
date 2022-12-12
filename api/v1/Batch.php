@@ -163,8 +163,8 @@ class Batch extends Base
                 $cachedResults
             );
 
-            $endpointData = Router::ParseEndpointString($endpoint);
-            $taskResult = Router::ExecuteCall($endpointData['class'], $endpointData['method'], $callData, false);
+            $endpointData = Router::parseEndpointString($endpoint);
+            $taskResult = Router::executeCall($endpointData['class'], $endpointData['method'], $callData, false);
 
             if ($taskResult['success'] == 0) {
                 $batchResult['failed_task_id'] = $task['api_batch_task_id'];

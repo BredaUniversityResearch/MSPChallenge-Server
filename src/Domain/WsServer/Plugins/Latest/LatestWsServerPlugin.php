@@ -77,7 +77,7 @@ class LatestWsServerPlugin extends Plugin
             );
             $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                 $this->getName(),
-                $connResourceId,
+                (string)$connResourceId,
                 microtime(true) - $latestTimeStart
             );
             if (empty($payload)) {

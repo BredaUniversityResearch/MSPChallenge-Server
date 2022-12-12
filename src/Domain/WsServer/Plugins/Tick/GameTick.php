@@ -211,9 +211,9 @@ class GameTick extends TickBase
         // set the default update query and its values
         $qb
             ->update('game')
-            ->set('game_lastupdate', microtime(true))
-            ->set('game_currentmonth', $currentMonth)
-            ->set('game_planning_monthsdone', $monthsDone);
+            ->set('game_lastupdate', sprintf('%.4f', microtime(true)))
+            ->set('game_currentmonth', (string)$currentMonth)
+            ->set('game_planning_monthsdone', (string)$monthsDone);
 
         if ($currentMonth >= ($tick['era_time'] * 4)) { //Hardcoded to 4 eras as designed.
             //Entire game is done.
@@ -231,7 +231,7 @@ class GameTick extends TickBase
             //planning phase is complete, move to the simulation phase
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set('game_planning_monthsdone', 0)
+                    ->set('game_planning_monthsdone', '0')
                     ->set('game_state', $qb->createPositionalParameter('SIMULATION'))
             )
             ->then(function (/*Result $result*/) {
@@ -246,7 +246,7 @@ class GameTick extends TickBase
             $era_realtime = explode(',', $tick['planning_era_realtime']);
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set('game_planning_monthsdone', 0)
+                    ->set('game_planning_monthsdone', '0')
                     ->set('game_state', $qb->createPositionalParameter('PLAY'))
                     ->set('game_planning_realtime', $era_realtime[$era])
             )

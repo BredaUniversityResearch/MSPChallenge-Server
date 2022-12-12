@@ -44,7 +44,7 @@ class WsServerOutput
         }
 
         $mSec = '0000';
-        if ((false !== $parts = explode('.', microtime(true))) && count($parts) > 1) {
+        if ((false !== $parts = explode('.', sprintf('%.4f', microtime(true)))) && count($parts) > 1) {
             $mSec = $parts[1];
         }
         echo '[' . date('H:i:s.') . sprintf("%'.04d", $mSec) . '] ' . $message . PHP_EOL;

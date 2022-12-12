@@ -78,7 +78,7 @@ class Plan extends Base
         array $layers = [],
         bool $alters_energy_distribution = false
     ): int {
-        $id = Database::GetInstance()->query(
+        $id = (int)Database::GetInstance()->query(
             "
             INSERT INTO plan (
                 plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_alters_energy_distribution
@@ -468,7 +468,7 @@ class Plan extends Base
                         return $this->getAsyncDatabase()->query(
                             $qb
                                 ->update('plan', 'p')
-                                ->set('p.plan_energy_error', 1)
+                                ->set('p.plan_energy_error', '1')
                                 ->set('p.plan_previousstate', 'p.plan_state')
                                 ->set('p.plan_state', $qb->createPositionalParameter('DESIGN'))
                                 ->set('p.plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
@@ -571,7 +571,7 @@ class Plan extends Base
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->update('grid')
-                    ->set('grid_active', 0)
+                    ->set('grid_active', '0')
                     ->where($qb->expr()->or(
                         $qb->expr()->in(
                             'grid_persistent',
@@ -672,7 +672,7 @@ class Plan extends Base
                         return $this->getAsyncDatabase()->query(
                             $qb
                                 ->update('geometry', 'g')
-                                ->set('g.geometry_active', 0)
+                                ->set('g.geometry_active', '0')
 
                                 // since it is not possible to use this innerJoin with an update with DBAL,
                                 //   use a sub query instead:
@@ -840,7 +840,7 @@ class Plan extends Base
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->update('geometry')
-                    ->set('geometry_active', 0)
+                    ->set('geometry_active', '0')
                     ->where(
                         'geometry_id IN (' .
                             implode(',', $idsToDisable) .
@@ -1074,7 +1074,7 @@ class Plan extends Base
     public function Export(array &$result, ?array &$errors = null): bool
     {
         //Make sure we don't export plans with NULL name as these are auto generated fishing plans.
-        /** @var array<array{plan_id: int, grids: array<array{grid_id: int, energy: array, removed: array, sockets: array, sources: array}>, layers: array<array{layer_id: int, layer_editing_type: string, warnings: array, deleted: array<array{geometry_id: int, base_geometry_info: array}>, geometry: array<array{geometry_id: int, energy_output: array, data: ?array, cable: array{start: array, end: array}}>}>}> $plans */
+        /** @var array<array{plan_id: int, grids: array<array{grid_id: int, energy: array, removed: array, sockets: array, sources: array}>, layers: array<array{layer_id: int, layer_editing_type: string, warnings: array, deleted: array<array{geometry_id: int, base_geometry_info: array}>, geometry: array<array{geometry_id: int, energy_output: array, data: ?string, cable: array{start: array, end: array}}>}>}> $plans */
         $plans = Database::GetInstance()->query(
             "
             SELECT plan_id, plan_country_id, plan_name, plan_gametime, plan_type, plan_alters_energy_distribution
@@ -1295,7 +1295,7 @@ class Plan extends Base
             if (!isset($plan['plan_alters_energy_distribution'])) {
                 $plan['plan_alters_energy_distribution'] = 0;
             }
-            $planid = Database::GetInstance()->query(
+            $planid = (int)Database::GetInstance()->query(
                 "
                 INSERT INTO plan (
                     plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type,

@@ -104,7 +104,7 @@ class Log extends Base
         ob_start(function (string $message, int $phase) {
             return self::RecreateLoggingHandler($message, $phase);
         }, 16);
-        ob_implicit_flush(1);
+        ob_implicit_flush(true);
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
