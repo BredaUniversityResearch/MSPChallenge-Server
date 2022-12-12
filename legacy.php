@@ -8,8 +8,6 @@ if (version_compare(PHP_VERSION, '7.1.0') < 0) {
     throw new Exception("Required at least php version 7.1.0 for ReflectionNamedType");
 }
 
-require_once("helpers.php");
-
 //unlimited memory usage on the server
 ini_set('memory_limit', '-1');
 
