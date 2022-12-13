@@ -9,9 +9,10 @@ jobs:
       matrix:
         php-version: ['8.1']
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           path: MSPChallenge-Server
-      - name: run linters
-        run: cd MSPChallenge-Server && ./test.sh && vendor/bin/phpstan analyse
+      - uses: php-actions/composer@v6 # or alternative dependency management
+      - uses: php-actions/phpstan@v3
+      - name: Run our test script with cs fixer
+        run: cd MSPChallenge-Server && ./test.sh
