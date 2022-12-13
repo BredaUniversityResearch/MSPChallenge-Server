@@ -7,6 +7,7 @@ use App\Domain\API\APIHelper;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\Common\CommonBase;
 use Exception;
+use Throwable;
 use TypeError;
 use function App\isJsonObject;
 
@@ -89,8 +90,18 @@ abstract class Base extends CommonBase
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function ErrorString($errorException): string
     {
+        $errorException = self::getOriginalError($errorException);
         return $errorException->getMessage() . PHP_EOL . "Of file " . $errorException->getFile() . " On line " .
             $errorException->getLine() . PHP_EOL . "Stack trace: " . $errorException->getTraceAsString();
+    }
+
+    private static function getOriginalError(Throwable $errorException): Throwable
+    {
+        $e = $errorException;
+        while (null !== $prev = $errorException->getPrevious()) {
+            $e = $prev;
+        }
+        return $e;
     }
 
     /**
