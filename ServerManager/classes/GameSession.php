@@ -218,6 +218,7 @@ class GameSession extends Base
                 $this->revert();
             }
             if (is_string($server_call)) {
+                $server_call = [];
                 $server_call['message'] = $server_call;
             }
             throw new ServerManagerAPIException($server_call['message'] ?? 'Unknown error');
