@@ -1,21 +1,30 @@
 #!/bin/bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+DOTENV_FILE="../.env"
+DOTENV_LOCAL_FILE="../.env.local"
+source "${SCRIPT_DIR}/resolve-app-env.sh"
+
+if [[ "${APP_ENV}" == "prod" ]]; then
+  echo "Skipping install cghooks"
+  exit 0
+fi
 
 if [ ! -d ".git/" ]
 then
     echo "Please run this script from the git root folder"
-    exit 1;
+    exit 1
 fi
 
 if [ ! -d "vendor/" ]
 then
     echo "Please run 'composer install' to create the vendor folder"
-    exit 2;
+    exit 2
 fi
 
 if [ ! -f "vendor/bin/cghooks" ]
 then
     echo "Could not find cghooks, is it installed? See https://github.com/BrainMaestro/composer-git-hooks'"
-    exit 3;
+    exit 3
 fi
 
 git merge --quiet HEAD &> /dev/null
