@@ -18,7 +18,7 @@ class GameServer
     private ?string $name = null;
 
     /**
-     * @note with trailing slash
+     * with trailing slash
      */
     #[ORM\Column(length: 255)]
     private ?string $address = null;

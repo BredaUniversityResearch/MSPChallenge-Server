@@ -30,16 +30,12 @@ class User extends Base
     private $data;
     private $sessionName;
     private bool $isLoggedIn = false;
-    private $cookieName;
     public string $tableName = 'users';
 
     public function __construct($user = null)
     {
         $this->db = DB::getInstance();
         $this->sessionName = Config::get('session/session_name');
-        $this->cookieName = Config::get('remember/cookie_name');
-
-
         if (!$user) {
             if (Session::exists($this->sessionName)) {
                 $user = Session::get($this->sessionName);

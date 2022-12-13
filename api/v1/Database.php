@@ -162,7 +162,7 @@ class Database
         string $statement,
         ?array $vars = null,
         bool $getId = false
-    ) {/*: array|string */ // <-- for php 8
+    ): array|string {
         if (!$this->connectToDatabase()) {
             return [];
         }

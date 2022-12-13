@@ -77,7 +77,7 @@ class LatestWsServerPlugin extends Plugin
             );
             $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                 $this->getName(),
-                $connResourceId,
+                (string)$connResourceId,
                 microtime(true) - $latestTimeStart
             );
             if (empty($payload)) {
@@ -187,7 +187,9 @@ class LatestWsServerPlugin extends Plugin
                 $promises[$connResourceId] = $this->latestForClient($connResourceId, $clientInfo);
             }
         }
-        return all($promises);
+        /** @var PromiseInterface&Promise $promise */
+        $promise = all($promises);
+        return $promise;
     }
 
     private function comparePayloads(array $p1, array $p2): EPayloadDifferenceType

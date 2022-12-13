@@ -54,14 +54,14 @@ class CEL extends Base
 
     /**
      * @apiGroup Cel
-     * @return mixed|stdClass
+     * @return array|stdClass
      * @throws Exception
      * @api {POST} /cel/GetCELConfig Get Config
      * @apiDescription Returns the Json encoded config string
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetCELConfig()/*: array|object */ // <-- for php 8
+    public function GetCELConfig(): array|stdClass
     {
         $game = new Game();
         $tmp = $game->GetGameConfigValues();

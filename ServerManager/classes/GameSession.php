@@ -66,6 +66,9 @@ class GameSession extends Base
                     break;
                 case 'log':
                     break; // ignoring, because not stored in dbase
+                case 'save_id':
+                    // null is accepted.
+                    break;
                 default:
                     if (0 == strlen($this->$varname)) {
                         throw new ServerManagerAPIException('Missing value for '.$varname);
@@ -79,7 +82,8 @@ class GameSession extends Base
         if (empty($this->id)) {
             throw new ServerManagerAPIException('Cannot obtain GameSession without a valid id.');
         }
-        if (!$this->db->query('SELECT * FROM game_list WHERE id = ?', [$this->id])) {
+        $this->db->query('SELECT * FROM game_list WHERE id = ?', [$this->id]);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         if (0 == $this->db->count()) {
@@ -148,7 +152,8 @@ class GameSession extends Base
         $args['password_player'] = base64_encode($args['password_player']);
         unset($args['id']);
         unset($args['log']);
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();
@@ -349,7 +354,8 @@ class GameSession extends Base
                     save_id = ?,
                     server_version = ?
                 WHERE id = ?';
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
     }

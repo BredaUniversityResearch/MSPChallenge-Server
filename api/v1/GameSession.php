@@ -190,7 +190,7 @@ class GameSession extends Base
         $sessionId = $game_id;
         
         if ($this->DoesSessionExist($sessionId)) {
-            if (empty($allow_recreate) || $allow_recreate == false) {
+            if (empty($allow_recreate)) {
                 throw new Exception("Session already exists.");
             } else {
                 Database::GetInstance()->SwitchToSessionDatabase($sessionId);
@@ -705,7 +705,7 @@ class GameSession extends Base
     ): void {
         $sessionId = $game_id;
         if ($this->DoesSessionExist($sessionId)) {
-            if (empty($allow_recreate) || $allow_recreate == false) {
+            if (empty($allow_recreate)) {
                 throw new Exception("Session already exists.");
             } else {
                 Database::GetInstance()->SwitchToSessionDatabase($sessionId);

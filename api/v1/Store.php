@@ -357,7 +357,7 @@ class Store extends Base
                 $type = $typeOther ?? 0;
             }
         } else {
-            $type = $featureProperties['type'] ?: 0;
+            $type = (int)($featureProperties['type'] ?? 0);
             unset($featureProperties['type']);
         }
 
@@ -527,11 +527,14 @@ class Store extends Base
             "SELECT layer_id FROM layer WHERE layer_name = ?",
             array($layerName)
         );
-        return $checkExists[0]["layer_id"] ?: Database::GetInstance()->query(
-            "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
-            array($layerName, $layerGeoType, $layerGroup),
-            true
-        );
+        if ((int)($checkExists[0]["layer_id"] ?? 0) === 0) {
+            return (int)Database::GetInstance()->query(
+                "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
+                array($layerName, $layerGeoType, $layerGroup),
+                true
+            );
+        }
+        return (int)$checkExists[0]["layer_id"];
     }
 
     /**
@@ -555,7 +558,7 @@ class Store extends Base
              $mspId = hash('fnv1a64', $layerName.$geometry);
         }
 
-        return Database::GetInstance()->query(
+        return (int)Database::GetInstance()->query(
             "
             INSERT INTO geometry (
                 geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_mspid,

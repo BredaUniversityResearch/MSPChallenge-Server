@@ -6,16 +6,16 @@ use App\Domain\Helper\Config;
 
 class Base
 {
-    protected string $jwt = '';
+    protected ?string $jwt = null;
 
     public function setJWT($jwt): void
     {
         $this->jwt = $jwt;
     }
 
-    public function getJWT()
+    public function getJWT(): string
     {
-        if (empty($this->jwt)) {
+        if (null === $this->jwt) {
             $vars = array(
                 "server_id" => ServerManager::getInstance()->GetServerID(),
                 "audience" => ServerManager::getInstance()->GetBareHost()

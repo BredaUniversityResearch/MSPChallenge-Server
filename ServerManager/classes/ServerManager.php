@@ -17,8 +17,6 @@ class ServerManager extends Base
     private $serverRoot;
     private string $serverManagerRoot = '';
     private array $serverUpgrades = [];
-    private string $mspAuthUrl = '';
-    private string $mspAuthApi = '';
     public $server_id;
     public ?string $server_name = null;
     public $server_address;
@@ -50,8 +48,6 @@ class ServerManager extends Base
           'From40beta9To40beta10',
         ];
         $this->setRootVars();
-        $this->mspAuthUrl = $this->GetMSPAuthURL();
-        $this->mspAuthApi = $this->GetMSPAuthAPI();
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

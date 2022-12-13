@@ -369,7 +369,7 @@ class DB
 
     public function first($assoc = false)
     {
-        return (!$assoc || $assoc && $this->count()>0)  ?  $this->results($assoc)[0]  :  [];
+        return (!$assoc || $this->count()>0) ? $this->results($assoc)[0] : [];
     }
 
     public function count(): int

@@ -163,8 +163,8 @@ class Batch extends Base
                 $cachedResults
             );
 
-            $endpointData = Router::ParseEndpointString($endpoint);
-            $taskResult = Router::ExecuteCall($endpointData['class'], $endpointData['method'], $callData, false);
+            $endpointData = Router::parseEndpointString($endpoint);
+            $taskResult = Router::executeCall($endpointData['class'], $endpointData['method'], $callData, false);
 
             if ($taskResult['success'] == 0) {
                 $batchResult['failed_task_id'] = $task['api_batch_task_id'];
@@ -383,7 +383,6 @@ class Batch extends Base
      * @param array $presentResults
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function fixupReferences(&$value, $key, array $presentResults): void
     {
         $refSpecifierLength = strlen(self::REFERENCE_SPECIFIER);
@@ -397,8 +396,9 @@ class Batch extends Base
         $childSpecifiers = null;
         if ($firstArrayAccessor !== false) {
             $firstArrayAccessor -= $refSpecifierLength;
-            $matches = preg_match_all("/\[(?<Accessor>[a-zA-Z0-9]+)]*/", $value);
-            $childSpecifiers = $matches["Accessor"];
+            if (1 === preg_match_all("/\[(?<Accessor>[a-zA-Z0-9]+)]*/", $value, $matches)) {
+                $childSpecifiers = $matches["Accessor"];
+            }
         } else {
             $firstArrayAccessor = PHP_INT_MAX;
         }

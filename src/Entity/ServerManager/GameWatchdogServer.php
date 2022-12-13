@@ -19,7 +19,7 @@ class GameWatchdogServer
     private ?string $name = null;
 
     /**
-     * @note with trailing slash
+     * with trailing slash
      */
     #[ORM\Column(length: 255, unique: true)]
     private ?string $address = null;
