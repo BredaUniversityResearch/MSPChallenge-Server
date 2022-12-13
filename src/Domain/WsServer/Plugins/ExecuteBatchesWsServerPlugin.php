@@ -121,12 +121,12 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                         $this->getWsServer()->getId()
                     )
                 ->then(
-                    function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
+                    function (array $batchResultContainer) use ($connResourceId, $timeStart) {
                         $this->addOutput(
                             'Created "executeBatches" payload for: ' . $connResourceId,
                             OutputInterface::VERBOSITY_VERY_VERBOSE
                         );
-                        $this->getClientConnectionResourceManager()->addToMeasurementCollection(
+                        $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                             $this->getName(),
                             $connResourceId,
                             microtime(true) - $timeStart
@@ -274,7 +274,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     ->set('b.api_batch_state', $qb->createPositionalParameter('Failed'))
                     ->where($qb->expr()->in('b.api_batch_id', array_keys($batches)))
             )
-            ->then(function (/* Result $result */) use ($connection, $batches) {
+            ->then(function (/* Result $result */) use ($batches) {
                 // find client connections matching these batches if any
                 $clientInfoContainer = $this->getClientConnectionResourceManager()
                     ->getClientInfoContainer();

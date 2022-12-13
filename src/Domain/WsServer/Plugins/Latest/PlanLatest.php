@@ -205,9 +205,9 @@ class PlanLatest extends CommonBase
                     unset($d);
                     return parallel($toPromiseFunctions)
                         ->then(function (array $results) use (&$plans) {
-                            /** @var Result[] $results */
                             foreach ($plans as $pKey => &$d) {
                                 foreach ($d['grids'] as $gKey => &$g) {
+                                    /** @var Result[] $results */
                                     $g['energy'] = $results['energy'.$pKey.'-'.$gKey]->fetchAllRows();
                                     $g['sources'] = $results['sources'.$pKey.'-'.$gKey]->fetchAllRows();
                                     $g['sockets'] = $results['sockets'.$pKey.'-'.$gKey]->fetchAllRows();

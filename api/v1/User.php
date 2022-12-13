@@ -162,10 +162,10 @@ class User extends Base
 
         if (array_key_exists("application_versions", $config)) {
             $clientBuildDate = DateTime::createFromFormat(DateTimeInterface::ATOM, $build_timestamp);
-
             $versionConfig = $config["application_versions"];
             $minDate = new DateTime("@0");
             $minBuildDate = $minDate;
+            $maxBuildDate = new DateTime(); // now
             if (array_key_exists("client_build_date_min", $versionConfig)) {
                 $minBuildDate = DateTime::createFromFormat(
                     DateTimeInterface::ATOM,
@@ -173,14 +173,11 @@ class User extends Base
                 );
             }
             if (array_key_exists("client_build_date_max", $versionConfig)) {
-                DateTime::createFromFormat(
+                $maxBuildDate = DateTime::createFromFormat(
                     DateTimeInterface::ATOM,
                     $versionConfig["client_build_date_max"]
                 );
             }
-            $maxBuildDate = (array_key_exists("client_build_date_max", $versionConfig)) ?
-                $versionConfig["client_build_date_max"] : -1;
-
             if ($minBuildDate > $clientBuildDate || ($maxBuildDate > $minDate && $maxBuildDate < $clientBuildDate)) {
                 if ($maxBuildDate > $minDate) {
                     $clientVersionsMessage = "Accepted client versions are between ".

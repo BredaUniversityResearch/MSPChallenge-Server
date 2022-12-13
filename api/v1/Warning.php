@@ -40,7 +40,7 @@ class Warning extends Base
         return $this->getAsyncDatabase()->query(
             $qb
                 ->update('warning')
-                ->set('warning_active', 0)
+                ->set('warning_active', '0')
                 ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
                 ->where($qb->expr()->in('warning_id', $removed))
         );
@@ -95,7 +95,7 @@ class Warning extends Base
                     $qb
                         ->update('warning')
                         ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
-                        ->set('warning_active', 1)
+                        ->set('warning_active', '1')
                         ->where($qb->expr()->eq(
                             'warning_id',
                             $qb->createPositionalParameter($existingIssue['warning_id'])
@@ -113,7 +113,7 @@ class Warning extends Base
                         $qb
                             ->update('warning')
                             ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
-                            ->set('warning_active', 0)
+                            ->set('warning_active', '0')
                             ->where($qb->expr()->eq(
                                 'warning_id',
                                 $qb->createPositionalParameter($existingIssue['warning_id'])

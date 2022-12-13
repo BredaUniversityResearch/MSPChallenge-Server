@@ -139,7 +139,6 @@ class GameLatest extends CommonBase
                                             $data
                                         )
                                         ->then(function (Result $result) use (
-                                            $lastUpdateTime,
                                             $user,
                                             $newTime,
                                             &$data

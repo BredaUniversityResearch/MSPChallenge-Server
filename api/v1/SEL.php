@@ -113,12 +113,12 @@ class SEL extends Base
     }
 
     /**
-     * @param int|float $input
-     * @param int|float $cellSize
-     * @return float|int
+     * @param float|int $input
+     * @param float|int $cellSize
+     * @return float
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function CeilToCellSize($input, $cellSize)/*: int|float */ // <-- for php 8
+    private function CeilToCellSize(float|int $input, float|int $cellSize): float
     {
         return ceil($input / $cellSize) * $cellSize;
     }
@@ -785,6 +785,7 @@ class SEL extends Base
                     );
                 } else {
                     $melConfig = &$globalConfig["MEL"];
+                    // @phpstan-ignore-next-line "Result of || is always false." ??
                     if (!array_key_exists("x_min", $melConfig) || !array_key_exists("y_min", $melConfig) ||
                         !array_key_exists("x_max", $melConfig) || !array_key_exists("y_max", $melConfig)) {
                         throw new Exception(
@@ -1029,7 +1030,7 @@ class SEL extends Base
      * @return array|object
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSELGameClientConfig()/*: array|object */ // <-- for php 8
+    public function GetSELGameClientConfig(): array|object
     {
         $config = $this->GetSELConfigInternal();
         if ($config != null && array_key_exists("game_client_settings", $config)) {

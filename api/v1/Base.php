@@ -7,7 +7,9 @@ use App\Domain\API\APIHelper;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\Common\CommonBase;
 use Exception;
+use Throwable;
 use TypeError;
+use function App\isJsonObject;
 
 function IsFeatureFlagEnabled(string $featureName): bool
 {
@@ -88,15 +90,25 @@ abstract class Base extends CommonBase
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function ErrorString($errorException): string
     {
+        $errorException = self::getOriginalError($errorException);
         return $errorException->getMessage() . PHP_EOL . "Of file " . $errorException->getFile() . " On line " .
             $errorException->getLine() . PHP_EOL . "Stack trace: " . $errorException->getTraceAsString();
+    }
+
+    private static function getOriginalError(Throwable $errorException): Throwable
+    {
+        $e = $errorException;
+        while (null !== $prev = $errorException->getPrevious()) {
+            $e = $prev;
+        }
+        return $e;
     }
 
     /**
      * @param array $data
      * @return false|string
      */
-    public static function JSON(array $data)/*: false|string */ // <-- for php 8
+    public static function JSON(array $data): false|string
     {
         if (self::$more) {
             self::Debug($data);
@@ -111,7 +123,7 @@ abstract class Base extends CommonBase
      * @return array|false|string
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function MergeGeometry(array $data, bool $encode = false)/*: false|string|array */ // <-- for php 8
+    public static function MergeGeometry(array $data, bool $encode = false): false|string|array
     {
         if (self::$more) {
             self::Debug($data);
@@ -235,7 +247,7 @@ abstract class Base extends CommonBase
         bool $async = false,
         bool $asjson = false,
         array $customopt = array()
-    ) {/*: false|string */ // <-- for php 8
+    ): false|string {
         $ch = curl_init($url);
 
         // any proxy required for the external calls of any kind
@@ -282,8 +294,8 @@ abstract class Base extends CommonBase
 
         if ($async == false && ($return === false || $info === false || in_array($info["http_code"], [401, 502]))) {
             throw new Exception("Request failed to url " . $url . PHP_EOL . "CURL Error: " . curl_error($ch) . PHP_EOL .
-                "Response Http code: " . ($info["http_code"] ?? "Unknown") . PHP_EOL . "Response Page output: " .
-                ($return ?? "Nothing"));
+                "Response Http code: " . $info["http_code"] . PHP_EOL . "Response Page output: " .
+                ($return ?: "Nothing"));
         }
         curl_close($ch);
 

@@ -1,11 +1,17 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\GameSession;
+use ServerManager\ServerManager;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $gamesession = new GameSession;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 $gamesession->setJWT($_POST['jwt'] ?? "");
 $gamesession->processPostedVars();

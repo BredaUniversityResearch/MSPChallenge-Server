@@ -146,7 +146,8 @@ class Energy extends Base
     public function UpdateGridEnergy(int $id, array $expected): ?PromiseInterface
     {
         foreach ($expected as $country) {
-            if ((false === $int = filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT)) && $int > 0) {
+            $int = (int)filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT);
+            if ($int > 0) {
                 throw new Exception(
                     'Encountered invalid integer country_id value (should be 1+): ' . $country['country_id']
                 );
@@ -241,7 +242,7 @@ class Energy extends Base
             $qb
                 ->update('energy_output')
                 ->set('energy_output_active', $qb->createPositionalParameter(0))
-                ->set('energy_output_lastupdate', microtime(true))
+                ->set('energy_output_lastupdate', sprintf('%.4f', microtime(true)))
                 ->where($qb->expr()->eq('energy_output_geometry_id', $id))
         )
         ->done(
@@ -590,7 +591,7 @@ class Energy extends Base
             $qb
                 ->update('energy_connection')
                 ->set('energy_connection_lastupdate', $qb->createPositionalParameter(microtime(true)))
-                ->set('energy_connection_active', 0)
+                ->set('energy_connection_active', '0')
                 ->where(
                     $qb->expr()->and(
                         $qb->expr()->eq('energy_connection_cable_id', $qb->createPositionalParameter($cable))
@@ -679,7 +680,7 @@ class Energy extends Base
                     ->update('energy_output')
                     ->set('energy_output_capacity', $qb->createPositionalParameter($capacity))
                     ->set('energy_output_maxcapacity', $qb->createPositionalParameter($maxcapacity))
-                    ->set('energy_output_active', 1)
+                    ->set('energy_output_active', '1')
                     ->set('energy_output_lastupdate', $qb->createPositionalParameter(microtime(true)))
                     ->where($qb->expr()->eq('energy_output_geometry_id', $qb->createPositionalParameter($id)))
             );

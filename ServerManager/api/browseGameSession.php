@@ -1,4 +1,9 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\GameSession;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;

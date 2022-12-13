@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -23,5 +24,3 @@ $sql = "CREATE TABLE `game_saves` (
          ADD UNIQUE (`save_path`);
          ALTER TABLE `game_saves`
          MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;";
-
-?>

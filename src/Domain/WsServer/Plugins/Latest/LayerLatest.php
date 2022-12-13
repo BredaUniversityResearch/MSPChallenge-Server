@@ -105,8 +105,8 @@ class LayerLatest extends CommonBase
         });
         return parallel($toPromiseFunctions)
             ->then(function (array $results) use ($layers) {
-                /** @var Result[] $results */
                 foreach ($layers as $key => $layer) {
+                    /** @var Result[] $results */
                     $layers[$key]['geometry'] = $results['geometry-'.$key]->fetchAllRows();
                     $layers[$key]['geometry'] = Base::MergeGeometry($layers[$key]['geometry']);
                     $layers[$key]['issues'] = $results['issues-'.$key]->fetchAllRows() ?? [];

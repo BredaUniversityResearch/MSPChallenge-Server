@@ -14,6 +14,7 @@ TestBase::$ms_targetSession = 1;
 $_GET["session"] = TestBase::$ms_targetSession;
 
 ob_implicit_flush(true);
+// @phpstan-ignore-next-line "Parameter #1 $callback of function ob_start expects callable(): mixed, null given"
 ob_start(null, 32);
 
 /* unit tests to make sure the API responds correctly.*/
@@ -26,7 +27,7 @@ try {
         array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION)
     );
     $tokenId = rand(0, PHP_INT_MAX);
-    $token = $pdo->prepare(
+    $pdo->prepare(
         "INSERT INTO api_token (api_token_token, api_token_valid_until, api_token_scope) VALUES(?, 0, ?)"
     )->execute(array($tokenId, 0x7FFFFFFF));
 } catch (PDOException $e) {
@@ -42,7 +43,7 @@ $testClasses = [
 //  new TestBatch($tokenId),
 //  new TestCEL($tokenId),
 //  new TestRecreate($tokenId)
-  new TestLoggedCalls($tokenId)
+  new TestLoggedCalls((string)$tokenId)
 ];
 foreach ($testClasses as $test) {
     $test->RunAll();

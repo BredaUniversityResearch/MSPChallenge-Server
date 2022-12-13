@@ -31,8 +31,7 @@ class TestBase
                 try {
                     $this->m_subtaskFailCount = 0;
                     $method->invoke($this);
-
-                    if ($this->m_subtaskFailCount > 0) {
+                    if ($this->m_subtaskFailCount > 0) { // @phpstan-ignore-line
                         throw new Exception("One or more subtasks failed");
                     }
                     print("✅ ".$type->getName()."::".$method->getName()."".PHP_EOL);

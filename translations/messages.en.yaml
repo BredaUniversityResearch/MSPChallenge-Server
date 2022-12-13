@@ -1,0 +1,3 @@
+SIGNIN_FAIL: "** FAILED LOGIN **"
+MAINT_TOK: "There was an error with your form. Please go back and try again. Please note that submitting the form by refreshing the page will cause an error. If this continues to happen, please contact the administrator."
+GEN_BACK: "Back"
