@@ -210,7 +210,7 @@ class Plan extends Base
      * @noinspection SpellCheckingInspection
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Layer(int $id, int $layerid): int
+    public function Layer(int $id, int $layerid): int|PromiseInterface
     {
         $lid = Database::GetInstance()->query(
             "INSERT INTO layer (layer_original_id) VALUES (?)",
@@ -225,6 +225,10 @@ class Plan extends Base
 
         $this->UpdatePlanConstructionTime($id);
 
+        // @todo: fake it till you make it... but fix it later!
+        if ($this->isAsync()) {
+            return resolveOnFutureTick(new Deferred(), (int)$rid)->promise();
+        }
         return (int)$rid;
     }
 
