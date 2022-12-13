@@ -28,6 +28,7 @@ use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token\InvalidTokenStructure;
 use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\Token\UnsupportedHeaderFound;
+use Lcobucci\JWT\UnencryptedToken;
 
 class User extends Base
 {
@@ -169,6 +170,7 @@ class User extends Base
         // see: https://lcobucci-jwt.readthedocs.io/en/latest/parsing-tokens/
         $parser = new Parser(new JoseEncoder());
         try {
+            /** @var UnencryptedToken $unencryptedToken */
             $unencryptedToken = $parser->parse($tokenFields['token']);
         } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
             return null;

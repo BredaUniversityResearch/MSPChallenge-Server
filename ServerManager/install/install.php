@@ -58,7 +58,7 @@ if ($servermanager->install($user)) {
 //        "audience" => $servermanager->GetBareHost()
 //    );
 //    $freshinstall = Base::postCallAuthoriser("freshinstalljwt.php", $params);
-    if ($freshinstall["success"]) {
+    if ($freshinstall["success"]) { // @phpstan-ignore-line
         // @codingStandardsIgnoreStart
         //echo 'settings sent <br/>';
         ?>
