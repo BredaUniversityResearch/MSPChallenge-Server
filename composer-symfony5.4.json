@@ -98,7 +98,8 @@
                "bash install.sh"
            ],
            "pre-push": [
-               "bash test.sh"
+               "bash test.sh",
+	       "vendor/bin/phpstan analyse"
            ]
         },
         "symfony": {
