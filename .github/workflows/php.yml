@@ -12,5 +12,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install composer dependencies
         run: bash install.sh
-      - name: Run our test script with cs fixer
-        run: cd MSPChallenge-Server && ./test.sh && ./vendor/bin/phpstan
+      - name: Phpstan analyse
+        run: vendor/bin/phpstan
+      - name: Run our own custom linter script
+        run: bash test.sh
+
