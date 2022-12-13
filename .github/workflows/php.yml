@@ -11,6 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: /app
-      - uses: php-actions/composer@v6 # or alternative dependency management
-      - uses: php-actions/phpstan@v3
+          path: MSPChallenge-Server
+      - name: Install composer dependencies
+        run: cd MSPChallenge-Server && ./install.sh
+      - name: Run our test script with cs fixer
+        run: cd MSPChallenge-Server && ./test.sh && ./vendor/bin/phpstan
