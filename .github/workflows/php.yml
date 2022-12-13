@@ -10,5 +10,7 @@ jobs:
         php-version: ['8.1']
     steps:
       - uses: actions/checkout@v3
+        with:
+          path: app
       - uses: php-actions/composer@v6 # or alternative dependency management
       - uses: php-actions/phpstan@v3
