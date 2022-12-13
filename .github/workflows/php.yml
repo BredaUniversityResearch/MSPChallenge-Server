@@ -10,9 +10,5 @@ jobs:
         php-version: ['8.1']
     steps:
       - uses: actions/checkout@v3
-        with:
-          path: MSPChallenge-Server
       - uses: php-actions/composer@v6 # or alternative dependency management
       - uses: php-actions/phpstan@v3
-      - name: Run our test script with cs fixer
-        run: cd MSPChallenge-Server && ./test.sh
