@@ -104,7 +104,7 @@ class Plan extends Base
         if ($this->isAsync()) {
             return resolveOnFutureTick(new Deferred(), (int)$id)->promise();
         }
-        return $id;
+        return (int)$id;
     }
 
     /**
