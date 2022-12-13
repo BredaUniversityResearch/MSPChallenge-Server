@@ -61,7 +61,7 @@ class TickWsServerPlugin extends Plugin
             function () use ($tickTimeStart) {
                 $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                     $this->getName(),
-                    $this->gameSessionId,
+                    (string)$this->gameSessionId,
                     microtime(true) - $tickTimeStart
                 );
                 return $this->gameSessionId; // just to identify this tick

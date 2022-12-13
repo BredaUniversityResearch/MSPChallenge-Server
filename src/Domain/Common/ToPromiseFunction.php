@@ -3,7 +3,7 @@
 namespace App\Domain\Common;
 
 use Closure;
-use React\Promise\PromiseInterface;
+use React\Promise\Promise;
 
 class ToPromiseFunction
 {
@@ -14,7 +14,7 @@ class ToPromiseFunction
         $this->function = $function;
     }
 
-    public function __invoke(): PromiseInterface
+    public function __invoke(): Promise
     {
         return ($this->function)();
     }

@@ -2,8 +2,6 @@
 
 namespace ServerManager;
 
-use JetBrains\PhpStorm\NoReturn;
-
 class API extends Base
 {
     private ?DB $db = null;
@@ -69,7 +67,7 @@ class API extends Base
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    #[NoReturn] public function Return(): void
+    public function Return(): never
     {
         $this->printReturn();
         die();

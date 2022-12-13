@@ -136,6 +136,7 @@ class Update extends Base
     /**
      * @apiGroup Update
      * @throws Exception
+     * @throws Throwable
      * @api {POST} /update/Reimport Reimport
      * @apiDescription Performs a full reimport of the database with the set filename in $configFilename.
      */
@@ -145,7 +146,7 @@ class Update extends Base
         string $geoserver_url = '',
         string $geoserver_username = '',
         string $geoserver_password = ''
-    ): bool {
+    ): void {
         Log::SetupFileLogger(Log::getRecreateLogPath());
         Log::LogInfo("Reimport -> Starting game session creation process...");
         try {
@@ -164,7 +165,6 @@ class Update extends Base
             $this->ImportScenario();
 
             Log::LogInfo("Reimport -> Created session.");
-            return true;
         } catch (Throwable $e) {
             Log::LogError("Reimport -> Something went wrong.");
             Log::LogError($e->getMessage()." on line ".$e->getLine()." of file ".$e->getFile());
@@ -175,20 +175,23 @@ class Update extends Base
             }
             Log::ClearFileLogger();
 
-            return false;
+            throw $e;
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ReimportAdvanced(
         string $configFilename,
         string $geoserver_url,
         string $geoserver_username,
         string $geoserver_password
-    ): bool {
+    ): void {
         set_time_limit(Config::GetInstance()->GetLongRequestTimeout());
 
-        return $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
+        $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
     }
 
     /**

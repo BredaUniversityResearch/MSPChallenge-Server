@@ -16,7 +16,7 @@ class GameConfigFile
     private ?int $id = null;
 
     /**
-     * @note no whitespaces and no special characters please and without file extension (.json)
+     * no whitespaces and no special characters please and without file extension (.json)
      */
     #[ORM\Column(length: 45)]
     private ?string $filename = null;

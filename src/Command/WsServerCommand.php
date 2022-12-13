@@ -53,7 +53,7 @@ class WsServerCommand extends Command
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'the server port to use',
-                Config::get('ws_server/port') ?: 45001
+                (int)Config::get('ws_server/port') ?: 45001
             )
             ->addOption(
                 self::OPTION_ADDRESS,

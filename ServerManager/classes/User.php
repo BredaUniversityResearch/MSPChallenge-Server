@@ -23,13 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 use App\Domain\Helper\Config;
 use Exception;
-use JetBrains\PhpStorm\NoReturn;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token\InvalidTokenStructure;
 use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\Token\UnsupportedHeaderFound;
-use Symfony\Component\HttpFoundation\Request;
 
 class User extends Base
 {
@@ -37,16 +35,12 @@ class User extends Base
     private $data;
     private $sessionName;
     private bool $isLoggedIn = false;
-    private $cookieName;
     public string $tableName = 'users';
 
     public function __construct($user = null)
     {
         $this->db = DB::getInstance();
         $this->sessionName = Config::get('session/session_name');
-        $this->cookieName = Config::get('remember/cookie_name');
-
-
         if (!$user) {
             if (Session::exists($this->sessionName)) {
                 $user = Session::get($this->sessionName);
@@ -154,7 +148,7 @@ class User extends Base
         $this->forbidden();
     }
 
-    #[NoReturn] public function forbidden()
+    public function forbidden(): never
     {
         http_response_code(404);
         die();

@@ -162,7 +162,7 @@ class Database
         string $statement,
         ?array $vars = null,
         bool $getId = false
-    ) {/*: array|string */ // <-- for php 8
+    ): array|string {
         if (!$this->connectToDatabase()) {
             return [];
         }
@@ -288,7 +288,7 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SwitchToSessionDatabase(int $sessionId): void
     {
-        $this->SetupConfiguration($sessionId);
+        $this->SetupConfiguration();
         $this->SwitchDatabase($this->GetDatabaseName());
     }
 

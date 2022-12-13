@@ -108,7 +108,7 @@ class Auth_MSP extends Auths
         }
         $jwt = $jwtReturn->jwt;
         // use the jwt to check the sent username and password at the Authoriser
-        $usercheck_return = json_decode($this->CallBack(
+        $usercheckReturn = json_decode($this->CallBack(
             Config::getInstance()->GetAuthJWTUserCheck(),
             array(
                 "jwt" => $jwt,
@@ -118,11 +118,13 @@ class Auth_MSP extends Auths
             array(), // no headers
             false,  // synchronous, so wait
             true
-        )); // post as json
-        if (!is_object($usercheck_return) || !property_exists($usercheck_return, 'success') ||
-            !$usercheck_return->success) {
+        ), true); // post as json
+        if (empty($usercheckReturn['success'])) {
             throw new Exception("Users not found.");
         }
-        return array("found" => $usercheck_return->found, "notfound" => $usercheck_return->notfound);
+        return [
+            "found" => $usercheckReturn['found'] ?? false,
+            "notfound" => $usercheckReturn['notfound'] ?? false
+        ];
     }
 }

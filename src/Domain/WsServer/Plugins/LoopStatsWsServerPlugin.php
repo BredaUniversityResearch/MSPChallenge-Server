@@ -22,7 +22,7 @@ class LoopStatsWsServerPlugin extends Plugin
             return resolveOnFutureTick(new Deferred())->promise()->then(function () use ($latestTimeStart) {
                 $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                     $this->getName(),
-                    $this->loop++,
+                    (string)$this->loop++,
                     microtime(true) - $latestTimeStart
                 );
             });

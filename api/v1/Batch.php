@@ -7,9 +7,11 @@ use Doctrine\DBAL\Types\Types;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use function App\chain;
 use function App\parallel;
+use function App\query;
 use function App\tpf;
 use function React\Promise\reject;
 
@@ -161,8 +163,8 @@ class Batch extends Base
                 $cachedResults
             );
 
-            $endpointData = Router::ParseEndpointString($endpoint);
-            $taskResult = Router::ExecuteCall($endpointData['class'], $endpointData['method'], $callData, false);
+            $endpointData = Router::parseEndpointString($endpoint);
+            $taskResult = Router::executeCall($endpointData['class'], $endpointData['method'], $callData, false);
 
             if ($taskResult['success'] == 0) {
                 $batchResult['failed_task_id'] = $task['api_batch_task_id'];
@@ -226,7 +228,7 @@ class Batch extends Base
     /**
      * @throws Exception
      */
-    public function setCommunicated(int $batchId): PromiseInterface
+    public function setCommunicated(int $batchId): Promise
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
@@ -237,12 +239,13 @@ class Batch extends Base
         );
     }
 
-    public function executeQueuedBatch(int $batchId, string $serverId): PromiseInterface
+    public function executeQueuedBatch(int $batchId, string $serverId): Promise
     {
         // get batch tasks to execute
         $this->cachedBatchResults[$batchId] = [];
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return $this->getAsyncDatabase()->query(
+        return query(
+            $this->getAsyncDatabase(),
             $qb
                 ->select('t.*')
                 ->from('api_batch_task', 't')
@@ -380,7 +383,6 @@ class Batch extends Base
      * @param array $presentResults
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function fixupReferences(&$value, $key, array $presentResults): void
     {
         $refSpecifierLength = strlen(self::REFERENCE_SPECIFIER);
@@ -390,12 +392,13 @@ class Batch extends Base
             return;
         }
 
-        $firstArrayAccessor = strstr($value, '[');
+        $firstArrayAccessor = strpos($value, '[');
         $childSpecifiers = null;
         if ($firstArrayAccessor !== false) {
             $firstArrayAccessor -= $refSpecifierLength;
-            $matches = preg_match_all("/\[(?<Accessor>[a-zA-Z0-9]+)]*/", $value);
-            $childSpecifiers = $matches["Accessor"];
+            if (1 === preg_match_all("/\[(?<Accessor>[a-zA-Z0-9]+)]*/", $value, $matches)) {
+                $childSpecifiers = $matches["Accessor"];
+            }
         } else {
             $firstArrayAccessor = PHP_INT_MAX;
         }

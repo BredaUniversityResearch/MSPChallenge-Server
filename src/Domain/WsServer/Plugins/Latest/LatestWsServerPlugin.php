@@ -11,6 +11,7 @@ use App\Domain\WsServer\Plugins\Plugin;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
 use Closure;
 use Exception;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use function React\Promise\all;
@@ -76,7 +77,7 @@ class LatestWsServerPlugin extends Plugin
             );
             $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                 $this->getName(),
-                $connResourceId,
+                (string)$connResourceId,
                 microtime(true) - $latestTimeStart
             );
             if (empty($payload)) {
@@ -157,7 +158,7 @@ class LatestWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function latest(): PromiseInterface
+    private function latest(): Promise
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
@@ -186,7 +187,9 @@ class LatestWsServerPlugin extends Plugin
                 $promises[$connResourceId] = $this->latestForClient($connResourceId, $clientInfo);
             }
         }
-        return all($promises);
+        /** @var PromiseInterface&Promise $promise */
+        $promise = all($promises);
+        return $promise;
     }
 
     private function comparePayloads(array $p1, array $p2): EPayloadDifferenceType

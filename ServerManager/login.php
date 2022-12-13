@@ -1,5 +1,5 @@
 <?php
-
+// phpcs:ignoreFile PSR1.Files.SideEffects.FoundWithSymbols
 use ServerManager\MSPAuthException;
 use ServerManager\ServerManager;
 
@@ -40,4 +40,32 @@ require_once 'templates/header.php';
 
 <?php
 
-require_once 'templates/footer.php'; // the final html footer copyright row + the external js calls ?>
+require_once 'templates/footer.php'; // the final html footer copyright row + the external js calls
+
+function resultBlock($errors, $successes): void
+{
+    //Error block
+    if (count($errors) > 0) {
+        echo "<div class='alert alert-danger alert-dismissible' role='alert'> " .
+            "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>".
+            "<span aria-hidden='true'>&times;</span></button><ul style='padding-left:1.25rem !important'>";
+        foreach ($errors as $error) {
+            echo "<li>".$error."</li>";
+        }
+        echo "</ul>";
+        echo "</div>";
+    }
+
+    //Success block
+    if (count($successes) > 0) {
+        echo "<div class='alert alert-success alert-dismissible' role='alert'> " .
+            "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>" .
+            "<span aria-hidden='true'>&times;</span></button><ul style='padding-left:1.25rem !important'>";
+        foreach ($successes as $success) {
+            echo "<li>" . $success . "</li>";
+        }
+        echo "</ul>";
+        echo "</div>";
+    }
+}
+

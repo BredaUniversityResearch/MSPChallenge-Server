@@ -2,7 +2,7 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Common\MSPBrowser;
+use App\Domain\Common\MSPBrowserFactory;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
@@ -87,8 +87,7 @@ class Game extends Base
         }
 
         foreach ($data as $key => $d) {
-            if ((is_object($d) || is_array($d)) && $key != "expertise_definitions" &&
-                $key != "dependencies"
+            if ((is_array($d)) && $key != "expertise_definitions" && $key != "dependencies"
             ) {
                 unset($data[$key]);
             }
@@ -158,6 +157,9 @@ class Game extends Base
 
     /**
      * @throws Exception
+     * @todo: use https://github.com/karriereat/json-decoder "to convert your JSON data into an actual php class"
+     * phpcs:ignore Generic.Files.LineLength.TooLong
+     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameConfigValues(string $overrideFileName = ''): array
@@ -508,7 +510,7 @@ class Game extends Base
         }
 
         // we want to use the watchdog, but first we check if it is running
-        $browser = new MSPBrowser($url);
+        $browser = MSPBrowserFactory::create($url);
         $deferred = new Deferred();
         $browser
             // any response is acceptable, even 4xx or 5xx status codes
@@ -558,7 +560,6 @@ class Game extends Base
                         $newAccessToken = json_encode($result);
                         return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
                             ->then(function (string $token) use (
-                                $security,
                                 $simulations,
                                 $apiRoot,
                                 $newWatchdogGameState,
@@ -567,7 +568,6 @@ class Game extends Base
                                 $recoveryToken = json_encode(['token' => $token]);
                                 return $this->getWatchdogSessionUniqueToken()
                                     ->then(function (string $watchdogSessionUniqueToken) use (
-                                        $security,
                                         $simulations,
                                         $apiRoot,
                                         $newWatchdogGameState,
@@ -577,7 +577,7 @@ class Game extends Base
                                         // note(MH): GetWatchdogAddress is not async, but it is cached once it
                                         //   has been retrieved once, so that's "fine"
                                         $url = $this->GetWatchdogAddress(true)."/Watchdog/UpdateState";
-                                        $browser = new MSPBrowser($url);
+                                        $browser = MSPBrowserFactory::create($url);
                                         $postValues = [
                                             'game_session_api' => $apiRoot,
                                             'game_session_token' => $watchdogSessionUniqueToken,

@@ -8,7 +8,7 @@ use DateTime;
 class GameSession extends Base
 {
     private ?DB $db = null;
-    private $old;
+    private ?GameSession $old = null;
 
     public $name;
     public $game_config_version_id;
@@ -66,6 +66,9 @@ class GameSession extends Base
                     break;
                 case 'log':
                     break; // ignoring, because not stored in dbase
+                case 'save_id':
+                    // null is accepted.
+                    break;
                 default:
                     if (0 == strlen($this->$varname)) {
                         throw new ServerManagerAPIException('Missing value for '.$varname);
@@ -79,7 +82,8 @@ class GameSession extends Base
         if (empty($this->id)) {
             throw new ServerManagerAPIException('Cannot obtain GameSession without a valid id.');
         }
-        if (!$this->db->query('SELECT * FROM game_list WHERE id = ?', [$this->id])) {
+        $this->db->query('SELECT * FROM game_list WHERE id = ?', [$this->id]);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         if (0 == $this->db->count()) {
@@ -148,7 +152,8 @@ class GameSession extends Base
         $args['password_player'] = base64_encode($args['password_player']);
         unset($args['id']);
         unset($args['log']);
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();
@@ -208,11 +213,15 @@ class GameSession extends Base
                 'response_address' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSession.php',
             ]
         );
-        if (!$server_call['success']) {
+        if (empty($server_call['success'])) {
             if (0 == $allow_recreate) {
                 $this->revert();
             }
-            throw new ServerManagerAPIException($server_call['message']);
+            if (is_string($server_call)) {
+                $server_call = [];
+                $server_call['message'] = $server_call;
+            }
+            throw new ServerManagerAPIException($server_call['message'] ?? 'Unknown error');
         }
 
         $gameconfig->last_played_time = time();
@@ -288,7 +297,7 @@ class GameSession extends Base
 
     public function demoCheck(): bool
     {
-        if (!is_a($this->old, 'GameSession')) {
+        if (null === $this->old) {
             throw new ServerManagerAPIException("Cannot continue as I don't have original GameSession object.");
         }
 
@@ -341,7 +350,8 @@ class GameSession extends Base
                     save_id = ?,
                     server_version = ?
                 WHERE id = ?';
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
     }
@@ -660,7 +670,7 @@ class GameSession extends Base
 
     public function changeGameState(): bool
     {
-        if (!is_a($this->old, 'GameSession')) {
+        if (null === $this->old) {
             throw new ServerManagerAPIException("Can't continue as I don't have the old GameSession object.");
         }
         if (0 == strcasecmp($this->old->game_state, $this->game_state)) {

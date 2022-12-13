@@ -62,7 +62,8 @@ class GeoServer extends Base
             throw new ServerManagerAPIException('Cannot obtain data without a valid geoserver id.');
         }
 
-        if (!$this->db->query('SELECT * FROM game_geoservers WHERE id = ?', [$this->id])) {
+        $this->db->query('SELECT * FROM game_geoservers WHERE id = ?', [$this->id]);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         if (0 == $this->db->count()) {
@@ -74,7 +75,7 @@ class GeoServer extends Base
             }
         }
 
-        if (1 == $this->id && !is_null($this->jwt)) {
+        if (1 == $this->id && null !== $this->jwt) {
             $this->retrievePublic(); // this will get the BUas public GeoServer address and credentials
         }
 
@@ -83,7 +84,8 @@ class GeoServer extends Base
 
     public function getList(): array
     {
-        if (!$this->db->query('SELECT id, name, address, available FROM game_geoservers')) {
+        $this->db->query('SELECT id, name, address, available FROM game_geoservers');
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
 
@@ -112,7 +114,8 @@ class GeoServer extends Base
                     password = ?,
                     available = ?
                 WHERE id = ?';
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
     }
@@ -122,7 +125,7 @@ class GeoServer extends Base
         $this->validateVars();
         $args = getPublicObjectVars($this);
         unset($args['id']);
-        if (!$this->db->query(
+        $this->db->query(
             'INSERT INTO game_geoservers (
                                     name, 
                                     address, 
@@ -131,7 +134,8 @@ class GeoServer extends Base
                                     available
                                     ) VALUES (?, ?, ?, ?, ?)',
             $args
-        )) {
+        );
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();

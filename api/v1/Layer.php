@@ -546,7 +546,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Post(string $name, string $geotype): int
     {
-        return Database::GetInstance()->query(
+        return (int)Database::GetInstance()->query(
             "INSERT INTO layer (layer_name, layer_geotype) VALUES (?, ?)",
             array($name, $geotype),
             true

@@ -7,6 +7,7 @@ use Shapefile\Shapefile;
 use Shapefile\ShapefileException;
 use Shapefile\ShapefileWriter;
 use ZipArchive;
+use function App\rrmdir;
 
 class GameSave extends Base
 {
@@ -77,7 +78,8 @@ class GameSave extends Base
         if (empty($this->id)) {
             throw new ServerManagerAPIException('Cannot obtain GameSave without a valid id.');
         }
-        if (!$this->db->query('SELECT * FROM game_saves WHERE id = ?', [$this->id])) {
+        $this->db->query('SELECT * FROM game_saves WHERE id = ?', [$this->id]);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         if (0 == $this->db->count()) {
@@ -168,13 +170,8 @@ class GameSave extends Base
         return $return;
     }
 
-    public function createZip($gamesession): bool
+    public function createZip(GameSession $gameSession): bool
     {
-        if (!is_a($gamesession, 'GameSession')) {
-            throw new ServerManagerAPIException(
-                "Can't continue because the passed-on variable is not a Game Session object."
-            );
-        }
         $server_call = self::callServer(
             'GameSession/SaveSession',
             [
@@ -185,8 +182,8 @@ class GameSave extends Base
                 'nooverwrite' => true,
                 'response_url' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSave.php',
             ],
-            $gamesession->id,
-            $gamesession->api_access_token
+            $gameSession->id,
+            $gameSession->api_access_token
         );
         if (!$server_call['success']) {
             throw new ServerManagerAPIException($server_call['message']);
@@ -456,7 +453,8 @@ class GameSave extends Base
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         $args = getPublicObjectVars($this);
         unset($args['id']);
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();
@@ -496,7 +494,8 @@ class GameSave extends Base
                     save_timestamp = ?,
                     server_version = ?
                 WHERE id = ?';
-        if (!$this->db->query($sql, $args)) {
+        $this->db->query($sql, $args);
+        if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
         }
     }

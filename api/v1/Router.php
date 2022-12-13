@@ -6,12 +6,17 @@ use App\Domain\Common\ObjectMethod;
 use App\Domain\WsServer\ClientDisconnectedException;
 use Closure;
 use Exception;
+use JetBrains\PhpStorm\ArrayShape;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionIntersectionType;
 use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionUnionType;
 use Throwable;
+use TypeError;
 use function App\resolveOnFutureTick;
 
 // Routes the HTTP request incl. its parameters to the correct class method, and wraps that method's results in a
@@ -42,7 +47,7 @@ class Router
     );
 
     private const TRANSACTIONS_TOGGLE = false; // should we be using transactions at all?
-    private const TRANSACTIONS_MODE = "OptIn"; // or OptOut
+    private static string $debugTransActionsMode = "OptIn"; // or OptOut
                                // >> OptIn means some calls will request transactions (so default is no transactions)
                                // >> OptOut means some calls will request no transactions (so default is transactions)
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -50,7 +55,7 @@ class Router
     {
         $endpointData = self::parseEndpointString($apiCallUrl);
         try {
-            $result = self::ExecuteCall(
+            $result = self::executeCall(
                 $endpointData["class"],
                 $endpointData["method"],
                 $data,
@@ -75,6 +80,7 @@ class Router
         }
     }
 
+    #[ArrayShape(["class" => "string", "method" => "string"])]
     public static function parseEndpointString(string $apiCallUrl): array
     {
         $arr = explode("/", $apiCallUrl);
@@ -118,7 +124,7 @@ class Router
 
         try {
             $promise = $class->$method(...$arguments);
-        } catch (Throwable $e) {
+        } catch (Exception|TypeError $e) {
             // execution failed, perhaps because of database connection failure or PHP warning, or because
             //   endpoint threw exception
             // PHP code parsing errors are caught in the shutdown function as defined in helpers.php
@@ -132,7 +138,7 @@ class Router
         }
 
         return $promise
-            ->then(function ($payload) use ($className, $method, $data, $postExecuteCallback) {
+            ->then(function ($payload) use ($postExecuteCallback) {
                 if (null !== $postExecuteCallback) {
                     $postExecuteCallback($payload);
                 }
@@ -145,7 +151,7 @@ class Router
      */
     public static function createObjectMethodFromEndpoint(string $endpoint): ObjectMethod
     {
-        $endpointData = self::ParseEndpointString($endpoint);
+        $endpointData = self::parseEndpointString($endpoint);
         return new ObjectMethod(
             self::createObjectFrom($endpointData['class'], $endpointData['method']),
             $endpointData['method']
@@ -180,8 +186,7 @@ class Router
      * @throws ReflectionException
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function ExecuteCall(
+    public static function executeCall(
         string $className,
         string $method,
         array $data,
@@ -217,12 +222,13 @@ class Router
                 if ($CallWantsTransaction && $startDatabaseTransaction) {
                     Database::GetInstance()->DBCommitTransaction();
                 }
-            } catch (Throwable $e) {
+            } catch (Exception|TypeError $e) {
                 // execution failed, perhaps because of database connection failure or PHP warning, or because
                 //   endpoint threw exception
                 // PHP code parsing errors are caught in the shutdown function as defined in helpers.php
                 $success = false;
 
+                // @phpstan-ignore-next-line "Left/Right side of && is always true".
                 if ($CallWantsTransaction && $startDatabaseTransaction) {
                     Database::GetInstance()->DBRollbackTransaction();
                 }
@@ -259,6 +265,7 @@ class Router
                 $parameterValue = $argumentsArray[$parameter->getName()];
                 if ($parameter->hasType()) {
                     $parameterType = $parameter->getType();
+                    /** @var ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null $parameterType */
                     $parameterTypeName = $parameterType->getName();
                     try {
                         if (gettype($parameterValue) !== $parameterTypeName &&
@@ -391,9 +398,9 @@ class Router
     private static function CheckMethodCommentsForTransactionOptions(ReflectionMethod $methodData): bool
     {
         $comment = $methodData->getDocComment();
-        if (self::TRANSACTIONS_MODE == "OptOut") {
+        if (self::$debugTransActionsMode == "OptOut") {
             return stristr($comment, "@ForceNoTransaction") === false;
-        } elseif (self::TRANSACTIONS_MODE == "OptIn") {
+        } elseif (self::$debugTransActionsMode == "OptIn") {
             return stristr($comment, "@ForceTransaction") !== false;
         }
         return false;
