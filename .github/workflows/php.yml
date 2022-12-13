@@ -7,10 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['7.4']
+        php-version: ['8.1']
     steps:
-      - uses: actions/checkout@v2
-        with:
-          path: MSPChallenge-Server
-      - name: run linters
-        run: cd MSPChallenge-Server && ./test.sh
+      - uses: actions/checkout@v3
+      - name: Install composer dependencies
+        run: bash install.sh
+      - name: Phpstan analyse
+        run: vendor/bin/phpstan
+      - name: Run our own custom linter script
+        run: bash test.sh
+

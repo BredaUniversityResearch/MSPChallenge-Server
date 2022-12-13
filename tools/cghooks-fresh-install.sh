@@ -30,7 +30,7 @@ fi
 # ./vendor/bin/cghooks remove -f post-merge pre-push
 
 # this will add hooks that need updating
-./vendor/bin/cghooks add --ignore-lock
+./vendor/bin/cghooks add --ignore-lock --force
 
 result=$?
 if [ $result -ne 0 ]
