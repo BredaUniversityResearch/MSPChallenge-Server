@@ -11,6 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          path: app
+          path: /app
       - uses: php-actions/composer@v6 # or alternative dependency management
       - uses: php-actions/phpstan@v3
