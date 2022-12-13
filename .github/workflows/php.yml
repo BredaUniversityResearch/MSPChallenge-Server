@@ -9,7 +9,8 @@ jobs:
       matrix:
         php-version: ['8.1']
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out repository
+        uses: actions/checkout@v3
         with:
           path: MSPChallenge-Server
       - name: run linters
