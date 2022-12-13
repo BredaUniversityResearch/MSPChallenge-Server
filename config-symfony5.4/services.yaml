@@ -35,10 +35,12 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
-    # make classes in src/DataFixtures available to be used as services
-    # and have a tag that allows actions to type-hint services
-    App\DataFixtures\:
-        resource: '../src/DataFixtures'
-        tags:
-            - 'doctrine.fixture.orm'
-            - 'kernel.event_subscriber'
+when@dev:
+    services:
+        # make classes in src/DataFixtures available to be used as services
+        # and have a tag that allows actions to type-hint services
+        App\DataFixtures\:
+            resource: '../fixtures/'
+            tags:
+                - 'doctrine.fixture.orm'
+                - 'kernel.event_subscriber'

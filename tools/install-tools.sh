@@ -5,22 +5,6 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "${SCRIPT_DIR}" || exit 4
 
 DOWNLOAD_DIR="../var/tools/"
-DOTENV_FILE="../.env"
-DOTENV_LOCAL_FILE="../.env.local"
-if [[ ! -f $DOTENV_FILE ]]; then
-  echo "Could not find file ${DOTENV_FILE}"
-  exit 1
-fi
-
-# export all .env variables as environmental variables, e.g. APP_ENV
-if [[ -z "${APP_ENV}" ]]; then
-  echo "No APP_ENV enviromental variable found, checking .env file"
-  set -o allexport; source "${DOTENV_FILE}"; set +o allexport
-  if [[ -f $DOTENV_LOCAL_FILE ]]; then
-    echo "Checking .env.local file"
-    set -o allexport; source "${DOTENV_LOCAL_FILE}"; set +o allexport
-  fi
-fi
 
 FORCE=0
 while getopts ":fe:" opt; do
@@ -41,10 +25,9 @@ while getopts ":fe:" opt; do
   esac
 done
 
-case $APP_ENV in
-    prod|dev) echo "Environment: ${APP_ENV}" ;;
-    *) echo "Encountered invalid environment: ${APP_ENV}" ;;
-esac
+DOTENV_FILE="../.env"
+DOTENV_LOCAL_FILE="../.env.local"
+source resolve-app-env.sh
 
 if [[ $FORCE == 1 ]]; then
   echo 'Forcing download to latest versions...'
