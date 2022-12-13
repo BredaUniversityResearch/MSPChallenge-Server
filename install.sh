@@ -4,6 +4,9 @@
 export MSYS=winsymlinks:nativestrict
 VERSION_DEFAULT="5.4"
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source "${SCRIPT_DIR}/tools/resolve-app-env.sh"
+
 setSymfonyVersion() {
   VERSION=$1
   if [[ -z $1 || "$1" == "default" ]]; then
@@ -62,7 +65,12 @@ if [[ -z $COMPOSER_BINARY ]]; then
    COMPOSER_BINARY=$(which composer)
 fi
 
-eval "${COMPOSER_BINARY} install"
+COMPOSER_ARGS=""
+if [[ "${APP_DEV}" == "prod" ]]; then
+  COMPOSER_ARGS="--no-dev"
+fi
+
+eval "APP_ENV=${APP_ENV} ${COMPOSER_BINARY} install ${COMPOSER_ARGS}"
 eval "${COMPOSER_BINARY} dump-autoload -o ${COMPOSER_ARGS}"
 bash tools/install-tools.sh
 
