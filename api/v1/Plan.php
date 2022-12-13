@@ -46,7 +46,6 @@ class Plan extends Base
         "SetEnergyDistribution"
     );
 
-
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
@@ -75,7 +74,7 @@ class Plan extends Base
         string $type = '0,0,0',
         array $layers = [],
         bool $alters_energy_distribution = false
-    ): int {
+    ) { /*: int|PromiseInterface */ // <-- for php 8
         $id = Database::GetInstance()->query(
             "
             INSERT INTO plan (
@@ -100,6 +99,11 @@ class Plan extends Base
             }
         }
         $this->UpdatePlanConstructionTime($id);
+
+        // @todo: fake it till you make it... but fix it later!
+        if ($this->isAsync()) {
+            return resolveOnFutureTick(new Deferred(), (int)$id)->promise();
+        }
         return $id;
     }
 
@@ -1895,12 +1899,18 @@ class Plan extends Base
      * @apiParam {string} name new plan name
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Name(int $id, string $name): void
+    public function Name(int $id, string $name): ?PromiseInterface
     {
         Database::GetInstance()->query(
             "UPDATE plan SET plan_name=?, plan_lastupdate=? WHERE plan_id=?",
             array($name, microtime(true), $id)
         );
+
+        // @todo: fake it till you make it... but fix it later!
+        if ($this->isAsync()) {
+            return resolveOnFutureTick(new Deferred())->promise();
+        }
+        return null;
     }
 
     /**
@@ -1912,13 +1922,19 @@ class Plan extends Base
      * @apiParam {int} date new plan date
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Date(int $id, int $date): void
+    public function Date(int $id, int $date): ?PromiseInterface
     {
         Database::GetInstance()->query(
             "UPDATE plan SET plan_gametime=?, plan_lastupdate=? WHERE plan_id=?",
             array($date, microtime(true), $id)
         );
         $this->UpdatePlanConstructionTime($id);
+
+        // @todo: fake it till you make it... but fix it later!
+        if ($this->isAsync()) {
+            return resolveOnFutureTick(new Deferred())->promise();
+        }
+        return null;
     }
 
     /**
@@ -1981,7 +1997,7 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetRestrictionAreas(int $plan_id, array $settings)
+    public function SetRestrictionAreas(int $plan_id, array $settings): ?PromiseInterface
     {
         foreach ($settings as $setting) {
             Database::GetInstance()->query(
@@ -2002,6 +2018,12 @@ class Plan extends Base
             "UPDATE plan SET plan_lastupdate = ? WHERE plan_id = ?",
             array(microtime(true), $plan_id)
         );
+
+        // @todo: fake it till you make it... but fix it later!
+        if ($this->isAsync()) {
+            return resolveOnFutureTick(new Deferred())->promise();
+        }
+        return null;
     }
 
     /**
