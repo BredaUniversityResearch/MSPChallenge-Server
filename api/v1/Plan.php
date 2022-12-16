@@ -75,7 +75,8 @@ class Plan extends Base
         array $layers = [],
         bool $alters_energy_distribution = false
     ): int|PromiseInterface {
-        $id = (int)Database::GetInstance()->query(
+        $db = Database::GetInstance($this->getGameSessionId());
+        $id = (int)$db->query(
             "
             INSERT INTO plan (
                 plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_alters_energy_distribution
@@ -86,13 +87,13 @@ class Plan extends Base
         );
         foreach ($layers as $layer) {
             if (is_numeric($layer)) {
-                $lid = Database::GetInstance()->query(
+                $lid = $db->query(
                     "INSERT INTO layer(layer_original_id) VALUES (?)",
                     array($layer),
                     true
                 );
 
-                Database::GetInstance()->query(
+                $db->query(
                     "INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)",
                     array($id, $lid)
                 );
@@ -212,15 +213,17 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Layer(int $id, int $layerid): int|PromiseInterface
     {
-        $lid = Database::GetInstance()->query(
+        $db = Database::GetInstance($this->getGameSessionId());
+        $lid = $db->query(
             "INSERT INTO layer (layer_original_id) VALUES (?)",
             array($layerid),
             true
         );
 
-        $rid = Database::GetInstance()->query(
+        $rid = $db->query(
             "INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)",
-            array($id, $lid)
+            array($id, $lid),
+            true
         );
 
         $this->UpdatePlanConstructionTime($id);
@@ -241,7 +244,8 @@ class Plan extends Base
     {
         $highest = 0;
 
-        $planlayers = Database::GetInstance()->query("SELECT l2.layer_states FROM plan_layer
+        $db = Database::GetInstance($this->getGameSessionId());
+        $planlayers = $db->query("SELECT l2.layer_states FROM plan_layer
 				LEFT JOIN layer l1 ON l1.layer_id=plan_layer.plan_layer_layer_id
 				LEFT JOIN layer l2 ON l1.layer_original_id=l2.layer_id
 				WHERE plan_layer_plan_id=?", array($planId));
@@ -257,7 +261,7 @@ class Plan extends Base
             }
         }
 
-        Database::GetInstance()->query(
+        $db->query(
             "UPDATE plan SET plan_lastupdate=?, plan_constructionstart=plan_gametime-? WHERE plan_id=?",
             array(microtime(true), $highest, $planId)
         );
@@ -274,7 +278,8 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function DeleteLayer(int $id): void
     {
-        $planid = Database::GetInstance()->query(
+        $db = Database::GetInstance($this->getGameSessionId());
+        $planid = $db->query(
             "SELECT plan_layer_plan_id as id FROM plan_layer WHERE plan_layer_layer_id=?",
             array($id)
         );
@@ -283,9 +288,9 @@ class Plan extends Base
         $energy = new Energy();
         $energy->DeleteEnergyInformationFromLayer($id);
 
-        Database::GetInstance()->query("DELETE FROM geometry WHERE geometry_layer_id=?", array($id));
-        Database::GetInstance()->query("DELETE FROM plan_layer WHERE plan_layer_layer_id=?", array($id));
-        Database::GetInstance()->query(
+        $db->query("DELETE FROM geometry WHERE geometry_layer_id=?", array($id));
+        $db->query("DELETE FROM plan_layer WHERE plan_layer_layer_id=?", array($id));
+        $db->query(
             "DELETE FROM plan_delete WHERE plan_delete_geometry_persistent IN (
 					SELECT geometry_persistent FROM geometry
 					LEFT JOIN layer ON geometry_layer_id=layer_original_id
@@ -300,7 +305,7 @@ class Plan extends Base
 
         // @todo: also delete everything to do with energy connected to this
 
-        Database::GetInstance()->query(
+        $db->query(
             "UPDATE plan SET plan_lastupdate=? WHERE plan_id=?",
             array(microtime(true), $planid[0]['id'])
         );

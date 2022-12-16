@@ -617,12 +617,13 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function DeleteEnergyInformationFromLayer(int $layerId): void
     {
-        $geometryToDelete = Database::GetInstance()->query(
+        $db = Database::GetInstance($this->getGameSessionId());
+        $geometryToDelete = $db->query(
             "SELECT geometry_id FROM geometry WHERE geometry_layer_id = ?",
             array($layerId)
         );
         foreach ($geometryToDelete as $geometry) {
-            Database::GetInstance()->query(
+            $db->query(
                 "
                 DELETE FROM energy_connection
                 WHERE energy_connection_start_id = :geometryId OR energy_connection_end_id = :geometryId OR
@@ -630,7 +631,7 @@ class Energy extends Base
                 ",
                 array("geometryId" => $geometry['geometry_id'])
             );
-            Database::GetInstance()->query(
+            $db->query(
                 "DELETE FROM energy_output WHERE energy_output_geometry_id = ?",
                 array($geometry['geometry_id'])
             );
