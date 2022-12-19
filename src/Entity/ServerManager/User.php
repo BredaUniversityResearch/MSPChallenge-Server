@@ -70,7 +70,7 @@ class User
         return $this->refreshToken;
     }
 
-    public function setRefreshToken(string $refreshToken): self
+    public function setRefreshToken(?string $refreshToken): self
     {
         $this->refreshToken = $refreshToken;
 
@@ -82,7 +82,7 @@ class User
         return $this->refreshTokenExpiration;
     }
 
-    public function setRefreshTokenExpiration(\DateTimeInterface $refreshTokenExpiration): self
+    public function setRefreshTokenExpiration(?\DateTimeInterface $refreshTokenExpiration): self
     {
         $this->refreshTokenExpiration = $refreshTokenExpiration;
 

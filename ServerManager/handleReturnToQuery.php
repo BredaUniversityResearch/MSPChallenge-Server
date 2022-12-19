@@ -19,7 +19,7 @@ function handleReturnToQuery(ServerManager $serverManager, array &$errors, array
     $userId = $user->importTokenFields($request->query->all());
 
     // find user in the local database, so we can finalise
-    if ($userId === null || !$user->find($userId)) {
+    if ($userId === null) {
         //something went wrong
         $msg = lang("SIGNIN_FAIL");
         $msg2 = "Something went wrong. Please try again later.";
@@ -33,6 +33,9 @@ function handleReturnToQuery(ServerManager $serverManager, array &$errors, array
     // set up local php session
     Session::put(Config::get('session/session_name'), $userId);
     Session::put("currentToken", $request->get('token')); // this is still necessary in case of page refreshes
+
+    // attempt to retrieve the refresh token
+    $user->importRefreshToken();
 
     // now check if the user is actually allowed to run this MSP Challenge Server Manager
     if ($user->isAuthorised() || $serverManager->freshinstall()) {

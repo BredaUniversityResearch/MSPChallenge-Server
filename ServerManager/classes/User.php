@@ -181,16 +181,36 @@ class User extends Base
             // for backwards compatibility
             'account_owner' => 0, // what is this? Used by User::find()
         ], $tokenFields);
-        if (array_key_exists('refresh_token_expiration', $fields)) {
-            // unix timestamp to datetime conversion
-            $fields['refresh_token_expiration'] = date('Y-m-d H:i:s', $fields['refresh_token_expiration']);
-        }
-        $data = $this->db->get('users', array('username', '=', $username));
-        if ($data->count()) {
-            $this->db->update('users', $data->first()->id, $fields);
-            return $data->first()->id;
+        if ($this->find($username, 'username')) {
+            $this->db->update('users', $this->data()->id, $fields);
+            return $this->data()->id;
         }
         $this->db->insert('users', $fields);
-        return $this->db->lastId();
+        $userId = $this->db->lastId();
+        if ($this->find($userId)) {
+            return $userId;
+        }
+        return null;
+    }
+
+    public function importRefreshToken(): void
+    {
+        if (!$this->exists()) {
+            return;
+        }
+        $response = self::getCallAuthoriser('refresh_tokens?page=1');
+        if (false === $refreshTokenData = current($response['hydra:member'] ?? [])) {
+            return;
+        }
+        // remove empty values
+        $refreshTokenData = array_filter($refreshTokenData);
+        if (null === $refreshToken = ($refreshTokenData['refreshToken'] ?? null)) {
+            return;
+        }
+        $refreshTokenExpiration = $refreshTokenData['valid'] ?? null;
+        $this->db->update('users', $this->data()->id, [
+            'refresh_token' => $refreshToken,
+            'refresh_token_expiration' => $refreshTokenExpiration
+        ]);
     }
 }
