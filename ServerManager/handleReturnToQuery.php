@@ -1,7 +1,8 @@
 <?php
 
 use App\Domain\Helper\Config;
-use App\Domain\Services\SymfonyToLegacyHelper;
+use ServerManager\Base;
+use ServerManager\DB;
 use ServerManager\Redirect;
 use ServerManager\ServerManager;
 use ServerManager\Session;
@@ -10,16 +11,21 @@ use function ServerManager\lang;
 
 function handleReturnToQuery(ServerManager $serverManager, array &$errors, array &$link): void
 {
-    $request = SymfonyToLegacyHelper::getInstance()->getRequest();
-    if (null === $request->get('token')) {
+    if (empty($_GET['returntoquery'])) {
         return;
     }
 
+    $db = DB::getInstance();
     $user = new User();
-    $userId = $user->importTokenFields($request->query->all());
 
-    // find user in the local database, so we can finalise
-    if ($userId === null) {
+    $arraySend = array (
+      "jwt" => $_GET['returntoquery'],
+      "audience" => $serverManager->GetBareHost()
+    );
+
+    $resultDecoded = Base::callAuthoriser("checkjwt.php", $arraySend);
+
+    if (!$resultDecoded["success"] || empty($resultDecoded["userdata"])) {
         //something went wrong
         $msg = lang("SIGNIN_FAIL");
         $msg2 = "Something went wrong. Please try again later.";
@@ -30,29 +36,40 @@ function handleReturnToQuery(ServerManager $serverManager, array &$errors, array
         return;
     }
 
-    // set up local php session
-    Session::put(Config::get('session/session_name'), $userId);
-    Session::put("currentToken", $request->get('token')); // this is still necessary in case of page refreshes
-
-    // attempt to retrieve the refresh token
-    $user->importRefreshToken();
-
-    // now check if the user is actually allowed to run this MSP Challenge Server Manager
-    if ($user->isAuthorised() || $serverManager->freshinstall()) {
-        $_SESSION['last_confirm'] = date("Y-m-d H:i:s");
-        if ($serverManager->freshinstall()) {
-            Redirect::to('install/install.php');
-        } else {
-            Redirect::to('index.php');
-        }
-        return;
+    $fields = array(
+        'id' => $resultDecoded["userdata"]["id"],
+        'username' => $resultDecoded["userdata"]["username"],
+        'account_owner' => $resultDecoded["userdata"]["account_owner"],
+    );
+    $data = $db->get('users', array("username", '=', $resultDecoded["userdata"]["username"]));
+    if ($data->count()) {
+        $db->update('users', $data->first()->id, $fields);
+    } else {
+        $db->insert('users', $fields);
     }
 
-    $user->logout();
-    $msg = lang("SIGNIN_FAIL");
-    $msg2 = 'You don\'t have access to this particular Server Manager. Please contact this  ' .
-    'Server Manager\'s primary user if you would like to obtain access.';
-    $errors[] = '<strong>' . $msg . '</strong>' . $msg2;
-    $link["href"] = "https://community.mspchallenge.info";
-    $link["text"] = "Return to the MSP Challenge Community wiki.";
+    // user was found through the local database, so we are ready to finalise
+    if ($user->find($resultDecoded["userdata"]["id"])) {
+        // set up local php session
+        Session::put(Config::get('session/session_name'), $user->data()->id);
+        // this is still necessary in case of page refreshes
+        Session::put("currentToken", $resultDecoded["jwt"]);
+        // now check if the user is actually allowed to run this MSP Challenge Server Manager
+        if ($user->isAuthorised() || $serverManager->freshInstall()) {
+            $_SESSION['last_confirm'] = date("Y-m-d H:i:s");
+            if ($serverManager->freshInstall()) {
+                Redirect::to('install/install.php');
+            } else {
+                Redirect::to('index.php');
+            }
+        } else {
+            $user->logout();
+            $msg = lang("SIGNIN_FAIL");
+            $msg2 = 'You don\'t have access to this particular Server Manager. Please contact this  ' .
+                'Server Manager\'s primary user if you would like to obtain access.';
+            $errors[] = '<strong>' . $msg . '</strong>' . $msg2;
+            $link["href"] = "https://community.mspchallenge.info";
+            $link["text"] = "Return to the MSP Challenge Community wiki.";
+        }
+    }
 }

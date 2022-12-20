@@ -20,7 +20,6 @@
         "drift/dbal": "dev-master",
         "gasparesganga/php-shapefile": "3.3.3",
         "illuminate/collections": "^8.73.2",
-        "lcobucci/jwt": "^4.0",
         "react/http": "^1.5",
         "react/mysql": "^0.5.6",
         "symfony/console": "5.4.*",

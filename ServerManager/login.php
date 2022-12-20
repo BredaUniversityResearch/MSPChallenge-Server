@@ -1,6 +1,6 @@
 <?php
 // phpcs:ignoreFile PSR1.Files.SideEffects.FoundWithSymbols
-use ServerManager\MSPAuthException;
+use ServerManager\Redirect;
 use ServerManager\ServerManager;
 
 if (isset($_SESSION)) {
@@ -15,7 +15,10 @@ handleReturnToQuery($serverManager, $errors, $link);
 // if you have no errors to display, then immediately redirect to Authoriser's sso.php page with the proper redirect
 //   link
 if (empty($errors)) {
-    throw new MSPAuthException(401); // this will force a redirect to the login page
+    Redirect::to(
+        ServerManager::getInstance()->GetMSPAuthURL(). '/users/sso.php?redirect='.
+        urlencode($serverManager->GetFullSelfAddress().'login.php')
+    );
 }
 
 require_once 'templates/header.php';

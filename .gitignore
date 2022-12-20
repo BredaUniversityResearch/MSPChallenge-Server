@@ -92,7 +92,6 @@ symfony.lock
 
 # linter cache
 .php-cs-fixer.cache
-.phpcs-cache
 
 # skip adminer/
 /public/adminer/

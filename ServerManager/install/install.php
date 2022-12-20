@@ -48,17 +48,15 @@ $db = DB::getInstance();
 require_once __DIR__ . '/../templates/header.php';
 
 if ($servermanager->install($user)) {
-    $freshinstall["success"] = true;
-// todo
-//    //send it to the authoriser to store with successfully logged in user_id
-//    $params = array(
-//            "jwt" => Session::get("currentToken"),
-//        "server_id" => $servermanager->GetServerID(),
-//        "server_name" => $servermanager->GetServerName(),
-//        "audience" => $servermanager->GetBareHost()
-//    );
-//    $freshinstall = Base::postCallAuthoriser("freshinstalljwt.php", $params);
-    if ($freshinstall["success"]) { // @phpstan-ignore-line
+  //send it to the authoriser to store with successfully logged in user_id
+    $params = array(
+            "jwt" => Session::get("currentToken"),
+        "server_id" => $servermanager->GetServerID(),
+        "server_name" => $servermanager->GetServerName(),
+        "audience" => $servermanager->GetBareHost()
+    );
+    $freshinstall = Base::callAuthoriser("freshinstalljwt.php", $params);
+    if ($freshinstall["success"]) {
         // @codingStandardsIgnoreStart
         //echo 'settings sent <br/>';
         ?>
