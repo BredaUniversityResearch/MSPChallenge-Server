@@ -220,7 +220,7 @@ class Plan extends Base
             true
         );
 
-        $rid = $db->query(
+        $db->query(
             "INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)",
             array($id, $lid),
             true
@@ -230,9 +230,9 @@ class Plan extends Base
 
         // @todo: fake it till you make it... but fix it later!
         if ($this->isAsync()) {
-            return resolveOnFutureTick(new Deferred(), (int)$rid)->promise();
+            return resolveOnFutureTick(new Deferred(), (int)$lid)->promise();
         }
-        return (int)$rid;
+        return (int)$lid;
     }
 
     /**
