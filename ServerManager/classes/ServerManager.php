@@ -134,11 +134,10 @@ class ServerManager extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetMSPAuthAPI(): string
     {
-        return $this->GetMSPAuthURL().'/usersc/plugins/apibuilder/authmsp/';
+        return $this->getMSPAuthBaseURL().($_ENV['AUTH_SERVER_API_BASE_PATH'] ?? '/api/');
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetMSPAuthURL(): string
+    public function getMSPAuthBaseURL(): string
     {
         return \App\Domain\API\v1\Config::GetInstance()->getMSPAuthBaseURL();
     }
@@ -178,7 +177,11 @@ class ServerManager extends Base
     public function freshInstall(): bool
     {
         if (empty($this->server_id)) {
-            $this->CompletePropertiesFromDB();
+            try {
+                $this->CompletePropertiesFromDB();
+            } catch (\Exception $e) {
+                return true;
+            }
         }
 
         return empty($this->server_id);
@@ -307,7 +310,11 @@ class ServerManager extends Base
     public function GetTranslatedServerURL(): string
     {
         if (empty($this->server_address)) {
-            $this->CompletePropertiesFromDB();
+            try {
+                $this->CompletePropertiesFromDB();
+            } catch (\Exception $e) {
+                // silent fail.
+            }
         }
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
@@ -443,7 +450,7 @@ class ServerManager extends Base
         $this->SetServerAddress();
         $this->SetServerDescription();
 
-        Base::callAuthoriser( // doing this here because JWT won't be available elsewhere
+        Base::postCallAuthoriser( // doing this here because JWT won't be available elsewhere
             'updateservernamejwt.php',
             [
             'jwt' => $this->getJWT(),

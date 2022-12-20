@@ -18,6 +18,15 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $username = null;
 
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $token = null;
+
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $refreshToken = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $refreshTokenExpiration = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $pin = null;
 
@@ -40,6 +49,42 @@ class User
     public function setUsername(string $username): self
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function setToken(string $token): self
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
+    public function getRefreshToken(): ?string
+    {
+        return $this->refreshToken;
+    }
+
+    public function setRefreshToken(?string $refreshToken): self
+    {
+        $this->refreshToken = $refreshToken;
+
+        return $this;
+    }
+
+    public function getRefreshTokenExpiration(): ?\DateTimeInterface
+    {
+        return $this->refreshTokenExpiration;
+    }
+
+    public function setRefreshTokenExpiration(?\DateTimeInterface $refreshTokenExpiration): self
+    {
+        $this->refreshTokenExpiration = $refreshTokenExpiration;
 
         return $this;
     }

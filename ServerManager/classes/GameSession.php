@@ -227,16 +227,11 @@ class GameSession extends Base
         $gameconfig->last_played_time = time();
         $gameconfig->edit();
 
-        self::callAuthoriser(
-            'logcreatejwt.php',
-            [
-                'jwt' => $this->getJWT(),
-                'audience' => ServerManager::getInstance()->GetBareHost(),
-                'server_id' => ServerManager::getInstance()->GetServerID(),
-                'region' => $gameconfig->region,
-                'session_id' => $this->id,
-            ]
-        );
+        // do we allow an exception for log failure, or should we catch it...?
+        self::postCallAuthoriser('logs', [
+            'level' => 200,
+            'message' => sprintf('%s|%s', $gameconfig->region, $this->id)
+        ]);
     }
 
     public function recreate(): bool

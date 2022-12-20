@@ -13,11 +13,15 @@ if ($user->isLoggedIn()) {
     if ($serverManager->freshInstall()) {
       // new installation, redirect to set up ServerManager database
         Redirect::to($serverManager->GetServerManagerFolder().'install/install.php');
-    } else {
-      // run any outstanding database migrations
-        DB::getInstance()->dbase_migrate();
-        Redirect::to($serverManager->GetServerManagerFolder().'manager.php');
     }
+  // deprecated migrations...
+//    else {
+//      // run any outstanding database migrations
+//        DB::getInstance()->dbase_migrate();
+//        Redirect::to($serverManager->GetServerManagerFolder().'manager.php');
+//    }
+
+    Redirect::to($serverManager->GetServerManagerFolder().'manager.php');
 } else {
     Redirect::to($serverManager->GetServerManagerFolder().'login.php');
 }

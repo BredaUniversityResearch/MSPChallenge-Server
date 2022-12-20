@@ -20,7 +20,7 @@ class Base
                 "server_id" => ServerManager::getInstance()->GetServerID(),
                 "audience" => ServerManager::getInstance()->GetBareHost()
             );
-            $authoriserCall = self::callAuthoriser(
+            $authoriserCall = self::postCallAuthoriser(
                 "getjwt.php",
                 $vars
             );
@@ -87,15 +87,45 @@ class Base
         return json_decode($call_return, true);
     }
 
-    // needs a function to call Authoriser API
-    public static function callAuthoriser($endpoint, $data2send)
+    public static function getCallAuthoriser(string $endpoint, array $data2send = [])
     {
-        $call_return = self::callAPI("POST", ServerManager::getInstance()->GetMSPAuthAPI().$endpoint, $data2send);
-        return json_decode($call_return, true);
+        return self::callAuthoriser('GET', $endpoint, $data2send);
+    }
+
+    // needs a function to call Authoriser API
+    /**
+     * @throws HydraErrorException
+     */
+    public static function postCallAuthoriser(string $endpoint, array $data2send = [])
+    {
+        return self::callAuthoriser('POST', $endpoint, $data2send);
+    }
+
+    /**
+     * @throws HydraErrorException
+     */
+    public static function callAuthoriser(string $method, string $endpoint, array $data2send = [])
+    {
+        $headers = [
+            'Authorization: Bearer '.Session::get("currentToken")
+        ];
+        $callReturn = self::callAPI(
+            $method,
+            ServerManager::getInstance()->GetMSPAuthAPI().$endpoint,
+            $data2send,
+            $headers
+        );
+        $callReturnDecoded = json_decode($callReturn, true);
+        if ((array_key_exists('code', $callReturnDecoded ?? [])) && $callReturnDecoded['code'] == 401) {
+            throw new MSPAuthException(401, $callReturnDecoded['message'] ?? 'Unauthorized');
+        }
+        if ((array_key_exists('@type', $callReturnDecoded ?? [])) && $callReturnDecoded['@type'] == 'hydra:Error') {
+            throw new HydraErrorException($callReturnDecoded);
+        }
+        return $callReturnDecoded;
     }
 
     // needs a generic calling something function
-    /** @noinspection PhpSameParameterValueInspection */
     private static function callAPI($method, $url, $data2send = false, $headers = array(), $asJson = true): bool|string
     {
         $curl = curl_init();
@@ -116,6 +146,9 @@ class Base
                 if ($data2send) {
                     $url = sprintf("%s?%s", $url, http_build_query($data2send));
                 }
+        }
+        if ($asJson) {
+            $headers[] = 'Content-Type: application/json';
         }
         if (!empty($headers) && is_array($headers)) {
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);

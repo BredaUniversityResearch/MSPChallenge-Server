@@ -40,7 +40,7 @@ class Session
         }
     }
 
-    public static function get($name)
+    public static function get($name): string
     {
         if (isset($_SESSION[$name])) {
             return $_SESSION[$name];
@@ -48,23 +48,11 @@ class Session
         return '';
     }
 
-    public static function flash($name, $string = '')
-    {
-        if (self::exists($name)) {
-            $session =  self::get($name);
-            self::delete($name);
-            return $session;
-        } else {
-            self::put($name, $string);
-        }
-    }
-
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function uagent_no_version(): array|string|null
     {
-        $uagent = $_SERVER['HTTP_USER_AGENT'];
+        $uAgent = $_SERVER['HTTP_USER_AGENT'];
         $regx = '/\/[a-zA-Z0-9.]+/';
-        $newString = preg_replace($regx, '', $uagent);
-        return $newString;
+        return preg_replace($regx, '', $uAgent);
     }
 }
