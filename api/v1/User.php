@@ -39,7 +39,7 @@ class User extends Base
         $response = array();
         $this->CheckVersion($build_timestamp);
             
-        $passwords = Database::GetInstance()->query(
+        $passwords = $this->getDatabase()->query(
             "SELECT game_session_password_admin, game_session_password_player FROM game_session"
         );
         $password_admin = $passwords[0]["game_session_password_admin"];
@@ -96,7 +96,7 @@ class User extends Base
                 }
             }
             // all is well!
-            $response["session_id"] = Database::GetInstance()->query(
+            $response["session_id"] = $this->getDatabase()->query(
                 "INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)",
                 array($user_name, $country_id),
                 true
@@ -118,7 +118,7 @@ class User extends Base
         string $userName = ""
     ): array {
         $response = array();
-        $passwords = Database::GetInstance()->query(
+        $passwords = $this->getDatabase()->query(
             "SELECT game_session_password_admin, game_session_password_player FROM game_session"
         );
         $hasCorrectPassword = true;
@@ -130,7 +130,7 @@ class User extends Base
 
         if ($hasCorrectPassword) {
             try {
-                $response["session_id"] = Database::GetInstance()->query(
+                $response["session_id"] = $this->getDatabase()->query(
                     "INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)",
                     array($userName, $countryId),
                     true
@@ -202,7 +202,7 @@ class User extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function CloseSession(int $session_id): void
     {
-        Database::GetInstance()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
+        $this->getDatabase()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
     }
 
     private function checkProviderExists($provider): bool

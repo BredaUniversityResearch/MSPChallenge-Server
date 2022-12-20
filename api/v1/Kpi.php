@@ -71,7 +71,7 @@ class Kpi extends Base
         string $kpiUnit,
         int $kpiCountry = -1
     ): int {
-        return (int)Database::GetInstance()->query(
+        return (int)$this->getDatabase()->query(
             "
             INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 
             VALUES (?, ?, ?, ?, ?, ?, ?)

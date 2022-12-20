@@ -55,7 +55,7 @@ class Simulations extends Base
     public function GetWatchdogTokenForServer(): array
     {
         $token = null;
-        $data = Database::GetInstance()->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
+        $data = $this->getDatabase()->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
         if (count($data) > 0) {
             $token = $data[0]["game_session_watchdog_token"];
         }

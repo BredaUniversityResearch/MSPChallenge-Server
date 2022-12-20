@@ -43,7 +43,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Delete(int $layer_id): void
     {
-        Database::GetInstance()->query("UPDATE layer SET layer_active=? WHERE layer_id=?", array(0, $layer_id));
+        $this->getDatabase()->query("UPDATE layer SET layer_active=? WHERE layer_id=?", array(0, $layer_id));
     }
 
     /**
@@ -57,13 +57,13 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Export(int $layer_id): array
     {
-        $layer = Database::GetInstance()->query("SELECT * FROM layer WHERE layer_id=?", array($layer_id));
+        $layer = $this->getDatabase()->query("SELECT * FROM layer WHERE layer_id=?", array($layer_id));
         if (empty($layer)) {
             throw new Exception("Layer not found.");
         }
         $layer = $layer[0];
 
-        $geometry = Database::GetInstance()->query(
+        $geometry = $this->getDatabase()->query(
             "
             SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data,
                 geometry_mspid
@@ -80,7 +80,7 @@ class Layer extends Base
 
         // getting all active subtractive geometry for this layer, which only occurs in the original layer
         //   dataset because the client doesn't support adding/editing/deleting subtractive geometry ('holes')
-        $subtractiveArr = Database::GetInstance()->query(
+        $subtractiveArr = $this->getDatabase()->query(
             "
             SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data,
                 geometry_subtractive 
@@ -179,7 +179,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Get(int $layer_id): ?array
     {
-        $vectorCheck = Database::GetInstance()->query(
+        $vectorCheck = $this->getDatabase()->query(
             "SELECT layer_geotype FROM layer WHERE layer_id = ?",
             array($layer_id)
         );
@@ -187,7 +187,7 @@ class Layer extends Base
             throw new Exception("Not a vector layer.");
         }
             
-        $data = Database::GetInstance()->query("SELECT 
+        $data = $this->getDatabase()->query("SELECT 
 					geometry_id as id, 
 					geometry_geometry as geometry, 
 					geometry_country_id as country,
@@ -226,7 +226,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetRaster(string $layer_name, int $month = -1): array
     {
-        $layerData = Database::GetInstance()->query(
+        $layerData = $this->getDatabase()->query(
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
             array($layer_name)
         );
@@ -315,7 +315,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function VerifyLayerTypesForLayer(array $layerData, int $layerId): void
     {
-        $allTypes = Database::GetInstance()->query(
+        $allTypes = $this->getDatabase()->query(
             "SELECT geometry_type FROM geometry WHERE geometry_layer_id=? GROUP BY geometry_type",
             array($layerId)
         );
@@ -350,7 +350,7 @@ class Layer extends Base
     private function VerifyLayerExists(string $layerName, array $struct): int
     {
         //check if the layer exists
-        $d = Database::GetInstance()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($layerName));
+        $d = $this->getDatabase()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($layerName));
 
         if (empty($d)) {
             Log::LogWarning($layerName ." was not found. Has this layer been renamed or removed?");
@@ -434,11 +434,11 @@ class Layer extends Base
         $inserts = substr($inserts, 0, -2);
 
         array_push($insertarr, $dbLayerId);
-        Database::GetInstance()->query("UPDATE layer SET " . $inserts . " WHERE layer_id=?", $insertarr);
+        $this->getDatabase()->query("UPDATE layer SET " . $inserts . " WHERE layer_id=?", $insertarr);
 
         //Import raster specific information.
         if ($layerData["layer_geotype"] == "raster") {
-            $sqlRasterInfo = Database::GetInstance()->query(
+            $sqlRasterInfo = $this->getDatabase()->query(
                 "SELECT layer_raster FROM layer WHERE layer_id=?",
                 array($dbLayerId)
             );
@@ -462,7 +462,7 @@ class Layer extends Base
                 $existingRasterInfo["layer_raster_filter_mode"] = $layerData["layer_raster_filter_mode"];
             }
 
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "
                 UPDATE layer SET layer_raster = ?
                 WHERE layer_id = ?
@@ -471,7 +471,7 @@ class Layer extends Base
             );
         }
 
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE layer SET layer_type=? WHERE layer_id=?",
             array(json_encode($layerData['layer_type'], JSON_FORCE_OBJECT), $dbLayerId)
         );
@@ -487,7 +487,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function List(): array
     {
-        return Database::GetInstance()->query("SELECT 
+        return $this->getDatabase()->query("SELECT 
 									layer.layer_id,
 									layer.layer_name,
 									layer.layer_geotype
@@ -524,7 +524,7 @@ class Layer extends Base
     public function MetaByName(string $name): array
     {
         $result = array(); //"[]";
-        $layerID = Database::GetInstance()->query("SELECT layer_id FROM layer where layer_name=?", array($name));
+        $layerID = $this->getDatabase()->query("SELECT layer_id FROM layer where layer_name=?", array($name));
         if (count($layerID) > 0) {
             //self::JSON($this->GetMetaForLayerById($layerID[0]["layer_id"])[0]);
             $result = $this->GetMetaForLayerById($layerID[0]["layer_id"])[0];
@@ -546,7 +546,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Post(string $name, string $geotype): int
     {
-        return (int)Database::GetInstance()->query(
+        return (int)$this->getDatabase()->query(
             "INSERT INTO layer (layer_name, layer_geotype) VALUES (?, ?)",
             array($name, $geotype),
             true
@@ -576,7 +576,7 @@ class Layer extends Base
         int $depth,
         int $id
     ): void {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "
             UPDATE layer SET layer_short=?, layer_category=?, layer_subcategory=?, layer_type=?, layer_depth=?
             WHERE layer_id=?
@@ -598,7 +598,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateRaster(string $layer_name, string $image_data, array $raster_bounds = null): void
     {
-        $layerData = Database::GetInstance()->query(
+        $layerData = $this->getDatabase()->query(
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
             array($layer_name)
         );
@@ -614,7 +614,7 @@ class Layer extends Base
         }
 
         if (file_exists(Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'])) {
-            $gameData = Database::GetInstance()->query("SELECT game_currentmonth FROM game")[0];
+            $gameData = $this->getDatabase()->query("SELECT game_currentmonth FROM game")[0];
             Store::EnsureFolderExists(Store::GetRasterArchiveFolder($this->getGameSessionId()));
 
             $layerPathInfo = pathinfo($rasterData['url']);
@@ -639,12 +639,12 @@ class Layer extends Base
         file_put_contents(Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'], $imageData);
 
         if ($rasterDataUpdated) {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1, layer_raster = ? WHERE layer_id = ?",
                 array(microtime(true), json_encode($rasterData), $layerData[0]['layer_id'])
             );
         } else {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1 WHERE layer_id = ?",
                 array(microtime(true), $layerData[0]['layer_id'])
             );
@@ -739,7 +739,7 @@ class Layer extends Base
             throw new Exception("Empty layer_id.");
         }
 
-        $layerData = Database::GetInstance()->query(
+        $layerData = $this->getDatabase()->query(
             "SELECT layer_id, layer_raster FROM layer WHERE layer_id = ?",
             array($layer_id)
         );
@@ -761,7 +761,7 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function GetMetaForLayerById(int $layerId): array
     {
-        $data = Database::GetInstance()->query("SELECT * FROM layer WHERE layer_id=?", array($layerId));
+        $data = $this->getDatabase()->query("SELECT * FROM layer WHERE layer_id=?", array($layerId));
         Layer::FixupLayerMetaData($data[0]);
         return $data;
     }

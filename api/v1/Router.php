@@ -161,7 +161,7 @@ class Router
     /**
      * @throws Exception
      */
-    private static function createObjectFrom(string $className, string $method): object
+    private static function createObjectFrom(string $className, string $method): Base
     {
         //make sure the class exists is allowed to be called at all, and if not, immediately fail
         if (!self::AllowedClass($className)) {
@@ -212,15 +212,16 @@ class Router
             //   exceptions thrown
             $arguments = self::resolveArguments($classData, $methodData, $data);
             $CallWantsTransaction = self::CheckMethodCommentsForTransactionOptions($methodData);
+
             try {
                 if ($CallWantsTransaction && $startDatabaseTransaction) {
-                    Database::GetInstance()->DBStartTransaction();
+                    Database::GetInstance($class->getGameSessionId())->DBStartTransaction();
                 }
 
                 $payload = $class->$method(...$arguments);
 
                 if ($CallWantsTransaction && $startDatabaseTransaction) {
-                    Database::GetInstance()->DBCommitTransaction();
+                    Database::GetInstance($class->getGameSessionId())->DBCommitTransaction();
                 }
             } catch (Exception|TypeError $e) {
                 // execution failed, perhaps because of database connection failure or PHP warning, or because
@@ -230,7 +231,7 @@ class Router
 
                 // @phpstan-ignore-next-line "Left/Right side of && is always true".
                 if ($CallWantsTransaction && $startDatabaseTransaction) {
-                    Database::GetInstance()->DBRollbackTransaction();
+                    Database::GetInstance($class->getGameSessionId())->DBRollbackTransaction();
                 }
 
                 $message = Base::ErrorString($e);

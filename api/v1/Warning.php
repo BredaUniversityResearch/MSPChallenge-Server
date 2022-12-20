@@ -178,7 +178,7 @@ class Warning extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function RemoveAllWarningsForLayer(int $layerId, bool $hardDelete = false): void
     {
-        $db = Database::GetInstance($this->getGameSessionId());
+        $db = $this->getDatabase();
         if ($hardDelete) {
             $db->query(
                 "DELETE FROM warning WHERE warning_source_plan_id = ?",
@@ -203,7 +203,7 @@ class Warning extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetShippingIssues(string $issues): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "
             UPDATE shipping_warning SET shipping_warning_active = 0, shipping_warning_lastupdate = ?
             WHERE shipping_warning_active = 1
@@ -213,7 +213,7 @@ class Warning extends Base
 
         $newIssues = json_decode($issues, true);
         foreach ($newIssues as $issue) {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "
                 INSERT INTO shipping_warning (
                     shipping_warning_lastupdate, shipping_warning_source_geometry_persistent_id,

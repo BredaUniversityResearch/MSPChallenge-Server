@@ -151,7 +151,7 @@ class GameSession extends Base
 
         $result = [];
 
-        $databaseList = Database::GetInstance()->query("SHOW DATABASES LIKE '".$sessionDatabasePattern."'");
+        $databaseList = $this->getDatabase()->query("SHOW DATABASES LIKE '".$sessionDatabasePattern."'");
         foreach ($databaseList as $r) {
             $databaseName = reset($r); //Get the first entry from the array.
             $result[] = intval(substr($databaseName, strlen($dbConfig["multisession_database_prefix"])));
@@ -193,8 +193,8 @@ class GameSession extends Base
             if (empty($allow_recreate)) {
                 throw new Exception("Session already exists.");
             } else {
-                Database::GetInstance()->SwitchToSessionDatabase($sessionId);
-                Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
+                $this->getDatabase()->SwitchToSessionDatabase($sessionId);
+                $this->getDatabase()->DropSessionDatabase($this->getDatabase()->GetDatabaseName());
             }
         }
 
@@ -305,7 +305,7 @@ class GameSession extends Base
         }
 
         // get the watchdog and end-user log-on in order
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "
             INSERT INTO game_session (
                 game_session_watchdog_address, game_session_watchdog_token, game_session_password_admin,
@@ -341,7 +341,7 @@ class GameSession extends Base
             throw new Exception("Watchdog address cannot be empty.");
         }
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT();",
             array($watchdog_address)
         );
@@ -393,13 +393,14 @@ class GameSession extends Base
         
         if (!empty($zippath)) {
             // ok, delete everything!
-            $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
+            $db = $this->getDatabase();
+            $gameData = $db->query("SELECT game_configfile FROM game");
             if (count($gameData) > 0) {
                 $configFilePath = self::getConfigDirectory().$gameData[0]['game_configfile'];
                 unlink($configFilePath);
             }
-            
-            Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
+
+            $db->DropSessionDatabase($db->GetDatabaseName());
             
             self::RemoveDirectory(Store::GetRasterStoreFolder($this->getGameSessionId()));
         }
@@ -483,10 +484,10 @@ class GameSession extends Base
 
         Store::EnsureFolderExists($preferredfolder);
         
-        Database::GetInstance($this->getGameSessionId())->createMspDatabaseDump($sqlDumpPath, true);
+        $this->getDatabase()->createMspDatabaseDump($sqlDumpPath, true);
     
         $configFilePath = null;
-        $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
+        $gameData = $this->getDatabase()->query("SELECT game_configfile FROM game");
         if (count($gameData) > 0) {
             $configFilePath = self::getConfigDirectory().$gameData[0]['game_configfile'];
         }
@@ -596,12 +597,8 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetUserAccess(string $password_admin, string $password_player): void
     {
-        /**
-*
-         *
- * @noinspection SqlWithoutWhere
-*/
-        Database::GetInstance()->query(
+        // @noinspection SqlWithoutWhere
+        $this->getDatabase()->query(
             "UPDATE game_session SET game_session_password_admin = ?, game_session_password_player = ?;",
             array($password_admin, $password_player)
         );
@@ -615,7 +612,7 @@ class GameSession extends Base
     {
         $adminHasPassword = true;
         $playerHasPassword = true;
-        $passwordData = Database::GetInstance()->query(
+        $passwordData = $this->getDatabase()->query(
             "SELECT game_session_password_admin, game_session_password_player FROM game_session"
         );
         if (count($passwordData) > 0) {
@@ -708,8 +705,9 @@ class GameSession extends Base
             if (empty($allow_recreate)) {
                 throw new Exception("Session already exists.");
             } else {
-                Database::GetInstance()->SwitchToSessionDatabase($sessionId);
-                Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
+                $db = $this->getDatabase();
+                $db->SwitchToSessionDatabase($sessionId);
+                $db->DropSessionDatabase($db->GetDatabaseName());
             }
         }
         if (!file_exists($save_path)) {

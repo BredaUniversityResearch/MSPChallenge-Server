@@ -298,7 +298,7 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SwitchDatabase(string $databaseName): void
     {
-        Database::GetInstance()->query("USE ".$databaseName);
+        $this->query("USE ".$databaseName);
         $this->db_name = $databaseName;
     }
 

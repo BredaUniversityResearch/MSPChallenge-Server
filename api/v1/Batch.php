@@ -47,7 +47,7 @@ class Batch extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartBatch(int $country_id, int $user_id)
     {
-        return Database::GetInstance()->query(
+        return $this->getDatabase()->query(
             "INSERT INTO api_batch(api_batch_country_id, api_batch_user_id) VALUES (?, ?)",
             array($country_id, $user_id),
             true
@@ -79,7 +79,7 @@ class Batch extends Base
     ): string {
         $endpoint = preg_replace("/\A[\/]?api\//", "", $endpoint);
         
-        Database::GetInstance()->query("INSERT INTO api_batch_task (
+        $this->getDatabase()->query("INSERT INTO api_batch_task (
 			api_batch_task_batch_id, 
 			api_batch_task_group, 
 			api_batch_task_reference_identifier, 
@@ -116,7 +116,7 @@ class Batch extends Base
     public function ExecuteBatch(int $batch_id, bool $async = false)/*: array|string // <-- php 8 */
     {
         if ($async) {
-            $data = Database::GetInstance()->query("SELECT api_batch_task_id, 
+            $data = $this->getDatabase()->query("SELECT api_batch_task_id, 
                     api_batch_task_reference_identifier, 
                     api_batch_task_api_endpoint, 
                     api_batch_task_api_endpoint_data 
@@ -128,7 +128,7 @@ class Batch extends Base
             }
 
             // queue it
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 'UPDATE api_batch SET api_batch_state=\'Queued\' WHERE api_batch_id = ?',
                 array($batch_id)
             );
@@ -140,7 +140,7 @@ class Batch extends Base
         $batchResult = array("results" => array());
         $cachedResults = array(); //Results by call-id indexed;
 
-        $data = Database::GetInstance()->query("SELECT api_batch_task_id, 
+        $data = $this->getDatabase()->query("SELECT api_batch_task_id, 
 				api_batch_task_reference_identifier, 
 				api_batch_task_api_endpoint, 
 				api_batch_task_api_endpoint_data 

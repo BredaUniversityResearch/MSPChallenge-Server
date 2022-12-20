@@ -36,7 +36,7 @@ class APIHelper
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetGameSessionIdForCurrentRequest(): int
+    public function GetGameSessionIdForCurrentRequest(): int
     {
         $sessionId = self::INVALID_SESSION_ID;
         if (isset($_GET['session'])) {

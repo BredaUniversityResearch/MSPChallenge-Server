@@ -199,7 +199,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateMaxCapacity(int $id, int $maxcapacity): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "
             UPDATE energy_output SET energy_output_maxcapacity=?, energy_output_lastupdate=?
             WHERE energy_output_geometry_id=?
@@ -219,7 +219,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetUsedCapacity(int $id): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "SELECT energy_output_capacity as capacity FROM energy_output WHERE energy_output_geometry_id=?",
             array($id)
         );
@@ -269,7 +269,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateGridName(int $id, string $name): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE grid SET grid_name=?, grid_lastupdate=? WHERE grid_id=?",
             array($name, microtime(true), $id)
         );
@@ -446,7 +446,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AddSocket(int $grid, int $geometry): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES (?, ?)",
             array($grid, $geometry)
         );
@@ -463,7 +463,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function DeleteSocket(int $geometry): void
     {
-        Database::GetInstance()->query("DELETE FROM grid_socket WHERE grid_socket_geometry_id=?", array($geometry));
+        $this->getDatabase()->query("DELETE FROM grid_socket WHERE grid_socket_geometry_id=?", array($geometry));
     }
 
     /**
@@ -478,7 +478,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AddSource(int $grid, int $geometry): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES (?, ?)",
             array($grid, $geometry)
         );
@@ -495,7 +495,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function DeleteSource(int $geometry): void
     {
-        Database::GetInstance()->query("DELETE FROM grid_source WHERE grid_source_geometry_id=?", array($geometry));
+        $this->getDatabase()->query("DELETE FROM grid_source WHERE grid_source_geometry_id=?", array($geometry));
     }
 
     /**
@@ -617,7 +617,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function DeleteEnergyInformationFromLayer(int $layerId): void
     {
-        $db = Database::GetInstance($this->getGameSessionId());
+        $db = $this->getDatabase();
         $geometryToDelete = $db->query(
             "SELECT geometry_id FROM geometry WHERE geometry_layer_id = ?",
             array($layerId)
@@ -709,7 +709,7 @@ class Energy extends Base
     public function GetConnections(): array
     {
         // @todo: This is part of CEL
-        return Database::GetInstance()->query(
+        return $this->getDatabase()->query(
             "SELECT 
 					energy_connection_start_id as start,
 					energy_connection_end_id as end,
@@ -729,7 +729,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Clear(): void
     {
-        Database::GetInstance()->query("TRUNCATE TABLE energy_connection");
+        $this->getDatabase()->query("TRUNCATE TABLE energy_connection");
     }
 
     /**
@@ -986,7 +986,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function FindOverlappingEnergyPlans(int $planId, array &$result): void
     {
-        $removedGridIds = Database::GetInstance()->query(
+        $removedGridIds = $this->getDatabase()->query(
             "
             SELECT COALESCE(
                 grid_removed.grid_removed_grid_persistent, grid.grid_persistent
@@ -1000,7 +1000,7 @@ class Energy extends Base
         );
             
         foreach ($removedGridIds as $removedGridId) {
-            $futureReferencedGrids = Database::GetInstance()->query(
+            $futureReferencedGrids = $this->getDatabase()->query(
                 "
                 SELECT grid_plan_id as plan_id 
                 FROM grid INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
@@ -1020,7 +1020,7 @@ class Energy extends Base
                 $result[] = $futureGrid['plan_id'];
             }
 
-            $futureDeletedGrids = Database::GetInstance()->query(
+            $futureDeletedGrids = $this->getDatabase()->query(
                 "
                 SELECT grid_removed_plan_id as plan_id 
                 FROM grid_removed
@@ -1067,12 +1067,12 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function FindPreviousOverlappingPlans(int $planId): bool
     {
-        $planData = Database::GetInstance()->query(
+        $planData = $this->getDatabase()->query(
             "SELECT plan_gametime FROM plan WHERE plan_id = ?",
             array($planId)
         );
         // @todo: Does not actually check if plans are in influencing state
-        $result = Database::GetInstance()->query(
+        $result = $this->getDatabase()->query(
             "
             SELECT grid_removed_grid_persistent 
 			FROM grid_removed 
@@ -1114,7 +1114,7 @@ class Energy extends Base
         $geoIds = array_map('intval', $geoIds);
         $whereClause = implode("','", $geoIds);
             
-        $result = Database::GetInstance()->query(
+        $result = $this->getDatabase()->query(
             "
             SELECT energy_output_geometry_id FROM energy_output WHERE energy_output_geometry_id IN (".$whereClause.")
             GROUP BY energy_output_geometry_id
@@ -1160,7 +1160,7 @@ class Energy extends Base
         $clientMissingSourceIDs = array();
         $clientMissingSocketIDs = array();
 
-        $grid_sources = Database::GetInstance()->query(
+        $grid_sources = $this->getDatabase()->query(
             "SELECT * FROM grid_source WHERE grid_source_grid_id = ?",
             array($grid_id)
         );
@@ -1174,7 +1174,7 @@ class Energy extends Base
         }
         $clientExtraSourceIDs = $source_ids;
 
-        $grid_sockets = Database::GetInstance()->query(
+        $grid_sockets = $this->getDatabase()->query(
             "SELECT * FROM grid_socket WHERE grid_socket_grid_id = ?",
             array($grid_id)
         );
