@@ -33,7 +33,7 @@ class GameConfig extends Base
         }
         $this->filename = strip_tags($this->filename);
         $this->filename = str_replace(" ", "_", $this->filename);
-        $this->filename = preg_replace('/[^a-zA-Z0-9_]+/', '-', $this->filename);
+        $this->filename = preg_replace('/[^a-zA-Z0-9\_]+/', '-', $this->filename);
         if (strlen($this->description) == 0) {
             throw new ServerManagerAPIException("Description cannot be empty.");
         }

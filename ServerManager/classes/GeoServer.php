@@ -44,7 +44,7 @@ class GeoServer extends Base
     public function retrievePublic()
     {
         $vars = ['jwt' => $this->jwt, 'audience' => ServerManager::getInstance()->GetBareHost()];
-        $authoriser_call = self::postCallAuthoriser(
+        $authoriser_call = self::callAuthoriser(
             'geocredjwt.php',
             $vars
         );

@@ -36,7 +36,7 @@ class Config
     public function getMSPAuthBaseURL(): string
     {
         return ($_ENV['AUTH_SERVER_SCHEME'] ?? 'https') . '://' .
-            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info') . ':' .
+            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth.mspchallenge.info') . ':' .
             ($_ENV['AUTH_SERVER_PORT'] ?? 443);
     }
 
