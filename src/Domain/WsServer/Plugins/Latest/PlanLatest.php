@@ -234,14 +234,17 @@ class PlanLatest extends CommonBase
         $plans = collect($plans)
             ->map(function ($plan) {
                 unset($plan['type']);
+                $plan['policies'] = [];
                 // PolicyUpdateEnergyPlan
-                $plan['policies'][] = [
-                    'policy_type' => 'energy',
-                    'alters_energy_distribution' => $plan['alters_energy_distribution'],
-                    'grids' => $plan['grids'],
-                    'deleted_grids' => $plan['deleted_grids'],
-                    'energy_error' => $plan['energy_error']
-                ];
+                if (!empty($plan['grids'])) {
+                    $plan['policies'][] = [
+                        'policy_type' => 'energy',
+                        'alters_energy_distribution' => $plan['alters_energy_distribution'],
+                        'grids' => $plan['grids'],
+                        'deleted_grids' => $plan['deleted_grids'],
+                        'energy_error' => $plan['energy_error']
+                    ];
+                }
                 unset(
                     $plan['alters_energy_distribution'],
                     $plan['grids'],
@@ -249,19 +252,20 @@ class PlanLatest extends CommonBase
                     $plan['energy_error']
                 );
                 // PolicyUpdateFishingPlan
-                $fishingPolicy = [
-                    'policy_type' => 'fishing',
-                ];
-                if (array_key_exists('fishing', $plan)) {
-                    $fishingPolicy['fishing'] = $plan['fishing'];
+                if (!empty($plan['fishing'])) {
+                    $plan['policies'][] = [
+                        'policy_type' => 'fishing',
+                        'fishing' => $plan['fishing']
+                    ];
                 }
-                $plan['policies'][] = $fishingPolicy;
                 unset($plan['fishing']);
                 // PolicyUpdateShippingPlan
-                $plan['policies'][] = [
-                    'policy_type' => 'shipping',
-                    'restriction_settings' => $plan['restriction_settings']
-                ];
+                if (!empty($plan['restriction_settings'])) {
+                    $plan['policies'][] = [
+                        'policy_type' => 'shipping',
+                        'restriction_settings' => $plan['restriction_settings']
+                    ];
+                }
                 unset($plan['restriction_settings']);
                 return $plan;
             })
