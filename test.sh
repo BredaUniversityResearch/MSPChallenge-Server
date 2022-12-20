@@ -1,35 +1,31 @@
 #!/bin/bash
 set -e
 
+if [[ ! -f "vendor/bin/phpcs" ]]; then
+  echo Could not find vendor/bin/phpcs. Please run 'bash install.sh'
+  exit 1;
+fi
+if [[ ! -f "vendor/bin/phpcbf" ]]; then
+  echo Could not find vendor/bin/phpcbf. Please run 'bash install.sh'
+  exit 1;
+fi
+
 function summary() {
-  ./var/tools/phpcs --standard=PSR2 --report=summary "$1"
+  ./vendor/bin/phpcs --report=summary
 }
 
 function lint() {
-  ./var/tools/phpcs --standard=PSR2 "$1" -s
+  ./vendor/bin/phpcs -s
 }
 
 function fix() {
-  ./var/tools/phpcbf --standard=PSR2 "$1"
+  ./vendor/bin/phpcbf
 }
 
-PATHS="
-src/
-api/
-api_test/
-legacy.php
-ServerManager/
-"
-
-bash ./tools/install-tools.sh
-for p in $PATHS
-do
-  if [[ "$1" == "--fix" ]]; then
-    echo "fixing $p"
-    fix "$p"
-  elif [[ "$1" == "--verbose" ]]; then
-    lint "$p"
-  else
-    summary "$p"
-  fi
-done
+if [[ "$1" == "--fix" ]]; then
+  fix
+elif [[ "$1" == "--verbose" ]]; then
+  lint
+else
+  summary
+fi

@@ -333,6 +333,7 @@ class DB
 
     public function update($table, $id, $fields): bool
     {
+        /** @noinspection SqlWithoutWhere */
         $sql   = "UPDATE {$table} SET " . (empty($fields) ? "" : "`") . implode("` = ? , `", array_keys($fields)) .
             (empty($fields) ? "" : "` = ? ");
         $is_ok = true;
