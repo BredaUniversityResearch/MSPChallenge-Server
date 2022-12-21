@@ -275,7 +275,7 @@ class ServerManager extends Base
         // use this one if you just want the full URL of a Server's session
         $url = Config::get('msp_server_protocol').$this->GetTranslatedServerURL().Config::get('code_branch');
         if (!empty($sessionId)) {
-            $url .= '/'.$sessionId;
+            $url = rtrim($url, '/').'/'.$sessionId;
         }
 
         return $url;
