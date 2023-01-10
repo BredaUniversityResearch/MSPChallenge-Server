@@ -144,18 +144,9 @@ class Base
 
         switch ($method) {
             case "POST":
-                curl_setopt($curl, CURLOPT_POST, 1);
-                if ($data2send) {
-                    if ($asJson) {
-                        $data2send = json_encode($data2send);
-                        $headers[] = 'Content-Type: application/json';
-                    }
-                    curl_setopt($curl, CURLOPT_POSTFIELDS, $data2send);
-                }
-                break;
             case "PUT":
                 curl_setopt($curl, CURLOPT_POST, 1);
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
                 if ($data2send) {
                     if ($asJson) {
                         $data2send = json_encode($data2send);

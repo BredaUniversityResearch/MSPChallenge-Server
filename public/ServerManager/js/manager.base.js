@@ -1,6 +1,6 @@
 function CallAuthoriser(method, endpoint, data = {})
 {
-    let url = "http://localhost:8000" + endpoint;
+    let url = 'http://localhost:8000' + endpoint;
     return  $.ajax({
         url: url,
         type: method,
