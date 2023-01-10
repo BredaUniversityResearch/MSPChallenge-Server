@@ -32,7 +32,9 @@
         "symfony/runtime": "5.4.*",
         "symfony/translation": "5.4.*",
         "symfony/twig-bundle": "5.4.*",
-        "symfony/yaml": "5.4.*"
+        "symfony/uid": "5.4.*",
+        "symfony/yaml": "5.4.*",
+        "ext-openssl": "*"
     },
     "config": {
         "optimize-autoloader": true,

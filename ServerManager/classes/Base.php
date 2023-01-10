@@ -16,16 +16,20 @@ class Base
     public function getJWT(): string
     {
         if (null === $this->jwt) {
-            $vars = array(
-                "server_id" => ServerManager::getInstance()->GetServerID(),
-                "audience" => ServerManager::getInstance()->GetBareHost()
-            );
-            $authoriserCall = self::postCallAuthoriser(
-                "getjwt.php",
-                $vars
-            );
-            if ($authoriserCall["success"]) {
-                $this->jwt = $authoriserCall["jwt"] ?? "";
+            // this will only happen if this is called without a logged-in user on ServerManager
+            // meaning: when the WebSocket server recreates a demo session that reached the end
+            try {
+                $vars = array(
+                    "username" => ServerManager::getInstance()->GetServerID(),
+                    "password" => ServerManager::getInstance()->GetServerPassword()
+                );
+                $authoriserCall = self::postCallAuthoriser(
+                    "login_check",
+                    $vars
+                );
+                $this->jwt = $authoriserCall["token"] ?? "";
+            } catch (\Exception $e) {
+                $this->jwt = '';
             }
         }
         return $this->jwt;
@@ -104,6 +108,14 @@ class Base
     /**
      * @throws HydraErrorException
      */
+    public static function putCallAuthoriser(string $endpoint, array $data2send = [])
+    {
+        return self::callAuthoriser('PUT', $endpoint, $data2send);
+    }
+
+    /**
+     * @throws HydraErrorException
+     */
     public static function callAuthoriser(string $method, string $endpoint, array $data2send = [])
     {
         $headers = [
@@ -129,26 +141,33 @@ class Base
     private static function callAPI($method, $url, $data2send = false, $headers = array(), $asJson = true): bool|string
     {
         $curl = curl_init();
+
         switch ($method) {
             case "POST":
                 curl_setopt($curl, CURLOPT_POST, 1);
                 if ($data2send) {
                     if ($asJson) {
                         $data2send = json_encode($data2send);
+                        $headers[] = 'Content-Type: application/json';
                     }
                     curl_setopt($curl, CURLOPT_POSTFIELDS, $data2send);
                 }
                 break;
             case "PUT":
-                curl_setopt($curl, CURLOPT_PUT, 1);
+                curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+                if ($data2send) {
+                    if ($asJson) {
+                        $data2send = json_encode($data2send);
+                        $headers[] = 'Content-Type: application/json';
+                    }
+                    curl_setopt($curl, CURLOPT_POSTFIELDS, $data2send);
+                }
                 break;
             default:
                 if ($data2send) {
                     $url = sprintf("%s?%s", $url, http_build_query($data2send));
                 }
-        }
-        if ($asJson) {
-            $headers[] = 'Content-Type: application/json';
         }
         if (!empty($headers) && is_array($headers)) {
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);

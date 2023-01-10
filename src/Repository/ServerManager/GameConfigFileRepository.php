@@ -3,22 +3,15 @@
 namespace App\Repository\ServerManager;
 
 use App\Entity\ServerManager\GameConfigFile;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
-/**
- * @extends ServiceEntityRepository<GameConfigFile>
- *
- * @method GameConfigFile|null find($id, $lockMode = null, $lockVersion = null)
- * @method GameConfigFile|null findOneBy(array $criteria, array $orderBy = null)
- * @method GameConfigFile[]    findAll()
- * @method GameConfigFile[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
-class GameConfigFileRepository extends ServiceEntityRepository
+class GameConfigFileRepository extends EntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
-        parent::__construct($registry, GameConfigFile::class);
+        parent::__construct($em, $class);
     }
 
     public function save(GameConfigFile $entity, bool $flush = false): void

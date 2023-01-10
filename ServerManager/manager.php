@@ -21,10 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\API\v1\Config;
+use ServerManager\Base;
 use ServerManager\Redirect;
 use ServerManager\ServerManager;
 use ServerManager\Session;
 use ServerManager\User;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\Setting;
 
 require 'init.php';
 $user = new User();
@@ -231,7 +234,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                             <p class="card-text">The other users that should have access to this MSP Challenge server. Note that only this server's administrator(s) can change this.</p>
                         </div>
                         <div class="card-footer">
-                            <a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
+                            <button type="button" id="btnUserAccess" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalUserAccess">Change</button>
                         </div>
                     </div>
                     <div class="card">
@@ -919,6 +922,54 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                 </div>
             </div>
         </div>
+
+        <!-- Modal User Access -->
+        <div class="modal fade" id="modalUserAccess" tabindex="-1" role="dialog" aria-labelledby="UserAccessModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="UserAccessModalLabel">User Access</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            Note: if you are not an administrator for this Server Manager, then you'll only see your own
+                            account in the list below, and you won't be able to add other users to this Server Manager.
+                        </p>
+                        <table id="UserAccessTable" class="table table-sm table-hover">
+                            <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Administrator?</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="UserAccessBody">
+                            </tbody>
+                        </table>
+                        <form class="form-horizontal" role="form" data-toggle="validator" id="formNewUserAccess" enctype="multipart/form-data">
+                            <h5 id="WatchdogFormTitle">Add additional users</h5>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="newUserAccess">Username or e-mail address</label>
+                                    <input type="text" class="form-control" id="newUserAccess" required="required" placeholder="required">
+                                </div>
+                                <div class="col">
+                                    <label for="newUserAccessAdmin">Administrator</label>
+                                    <input type="checkbox" class="form-control" id="newUserAccessAdmin">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="UserAccessFormButton" onClick="submitNewUserAccess();">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
     </div>
 
@@ -963,6 +1014,8 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 <!-- Place any per-page javascript here -->
 <script type="text/javascript">
     var currentToken = '<?php echo Session::get("currentToken"); ?>';
+    var serverUUID = '<?php echo SymfonyToLegacyHelper::getInstance()->getEntityManager()
+        ->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid'])->getValue(); ?>';
     regularupdateToken = setInterval(function() {
         updatecurrentToken();
     }, 30000);
@@ -1030,6 +1083,11 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
         // when showing modalServerDetails, update the values
         $('#modalServerDetails').on('show.bs.modal', function (event) {
             GetServerAddr();
+        });
+
+        // when showing modalUserAccess, update the values
+        $('#modalUserAccess').on('show.bs.modal', function (event) {
+            GetUserAccessList();
         });
     });
 

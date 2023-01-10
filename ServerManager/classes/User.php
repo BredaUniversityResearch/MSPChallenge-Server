@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\Helper\Config;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\Setting;
 use Exception;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\JoseEncoder;
@@ -61,28 +63,25 @@ class User extends Base
         }
 
         try {
-            // todo : how to handle server id??
-//            $servermanager = ServerManager::getInstance();
-//            $response = collect(
-//                collect(
-//                    Base::getCallAuthoriser('server_users')
-//                )->only('hydra:member')->first()
-//            )->filter(
-//                fn($e) =>
-//                    $e['server']['serverId'] === $servermanager->GetServerID() &&
-//                    $e['user']['username'] === $this->_data->username
-//                // todo: audience? = $servermanager->GetBareHost()
-//            )->all();
-//            return !empty($response);
-
-            // not finding the user will trigger a HydraErrorException
-            Base::getCallAuthoriser(sprintf('users/%s', $this->data->username));
+            $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+            $serverUUID = $em->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid']);
+            if (empty($serverUUID)) {
+                return false;
+            }
+            $response = collect(
+                collect(Base::getCallAuthoriser(
+                    sprintf(
+                        'servers/%s/server_users',
+                        $serverUUID->getValue()
+                    )
+                ))->pull('hydra:member')
+            )->filter(function ($value) {
+                return $value['user']['username'] === $this->data()->username;
+            });
+            return !$response->isEmpty();
         } catch (Exception $e) {
             return false;
         }
-
-        // todo: we could update user table with email, isVerified, firstName, etc from response data, is it necessary ?
-        return true;
     }
 
     public function find($user = null, $loginHandler = null): bool

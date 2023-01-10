@@ -43,19 +43,25 @@ class Config
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetAuth(): string
     {
-        return $this->getMSPAuthBaseURL() . '/usersc/plugins/apibuilder/authmsp/';
+        return $this->getMSPAuthBaseURL() . '/api/';
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetAuthJWTRetrieval(): string
     {
-        return $this->GetAuth().'getjwt.php';
+        return $this->GetAuth().'login_check';
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetAuthJWTUserCheck(): string
     {
-        return $this->GetAuth().'checkuserjwt.php';
+        return $this->GetAuth().'users';
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetAuthJWTUserEmailCheck($username): string
+    {
+        return $this->GetAuth().'users/'.$username;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

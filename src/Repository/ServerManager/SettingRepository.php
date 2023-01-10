@@ -3,22 +3,15 @@
 namespace App\Repository\ServerManager;
 
 use App\Entity\ServerManager\Setting;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
-/**
- * @extends ServiceEntityRepository<Setting>
- *
- * @method Setting|null find($id, $lockMode = null, $lockVersion = null)
- * @method Setting|null findOneBy(array $criteria, array $orderBy = null)
- * @method Setting[]    findAll()
- * @method Setting[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
-class SettingRepository extends ServiceEntityRepository
+class SettingRepository extends EntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
-        parent::__construct($registry, Setting::class);
+        parent::__construct($em, $class);
     }
 
     public function save(Setting $entity, bool $flush = false): void

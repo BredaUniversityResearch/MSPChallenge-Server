@@ -65,9 +65,8 @@ class GameSession extends Base
                     }
                     break;
                 case 'log':
-                    break; // ignoring, because not stored in dbase
+                case 'game_geoserver_id':
                 case 'save_id':
-                    // null is accepted.
                     break;
                 default:
                     if (0 == strlen($this->$varname)) {
@@ -121,7 +120,6 @@ class GameSession extends Base
     public function add()
     {
         $this->validateVars();
-        $args = [];
         $sql = 'INSERT INTO `game_list` 
                 (   name, 
                     game_config_version_id, 
@@ -198,20 +196,22 @@ class GameSession extends Base
         $watchdog->id = $this->watchdog_server_id;
         $watchdog->get();
 
+        $dataArray = [
+            'game_id' => $this->id,
+            'config_file' => $gameconfig->getFile(),
+            'geoserver_url' => $geoserver->address,
+            'geoserver_username' => $geoserver->username,
+            'geoserver_password' => $geoserver->password,
+            'password_admin' => base64_encode($this->password_admin),
+            'password_player' => base64_encode($this->password_player),
+            'watchdog_address' => $watchdog->address,
+            'allow_recreate' => $allow_recreate,
+            'response_address' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSession.php',
+        ];
         $server_call = self::callServer(
             'GameSession/CreateGameSession',
-            [
-                'game_id' => $this->id,
-                'config_file' => $gameconfig->getFile(),
-                'geoserver_url' => $geoserver->address,
-                'geoserver_username' => $geoserver->username,
-                'geoserver_password' => $geoserver->password,
-                'password_admin' => base64_encode($this->password_admin),
-                'password_player' => base64_encode($this->password_player),
-                'watchdog_address' => $watchdog->address,
-                'allow_recreate' => $allow_recreate,
-                'response_address' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSession.php',
-            ]
+            $dataArray,
+            $this->id
         );
         if (empty($server_call['success'])) {
             if (0 == $allow_recreate) {
@@ -227,9 +227,8 @@ class GameSession extends Base
         $gameconfig->last_played_time = time();
         $gameconfig->edit();
 
-        // do we allow an exception for log failure, or should we catch it...?
         self::postCallAuthoriser('logs', [
-            'level' => 200,
+            'level' => '200',
             'message' => sprintf('%s|%s', $gameconfig->region, $this->id)
         ]);
     }

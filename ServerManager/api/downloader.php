@@ -24,10 +24,10 @@ $user->hasToBeLoggedIn();
 $allowed = array(
     // to extend this, just create a method that returns either a file path or an array of two values:
     //   1) filename 2) file content
-    "gamesession/getArchive",
-    "gamesession/getConfigWithPlans",
-    "gameconfig/getFile",
-    "gamesave/getFullZipPath"
+    "GameSession/getArchive",
+    "GameSession/getConfigWithPlans",
+    "GameConfig/getFile",
+    "GameSave/getFullZipPath"
 );
 
 if (!isset($_GET["request"])) {
@@ -42,6 +42,7 @@ if (!in_array($_GET['request'], $allowed)) {
 
 $id = intval($_GET['id']);
 $request_array = explode("/", $_GET['request']);
+$request_array[0] = '\\ServerManager\\'.$request_array[0];
 $object = new $request_array[0];
 $object->id = $id;
 $object->get();

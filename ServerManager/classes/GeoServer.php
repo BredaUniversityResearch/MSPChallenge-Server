@@ -43,17 +43,27 @@ class GeoServer extends Base
 
     public function retrievePublic()
     {
-        $vars = ['jwt' => $this->jwt, 'audience' => ServerManager::getInstance()->GetBareHost()];
-        $authoriser_call = self::postCallAuthoriser(
-            'geocredjwt.php',
-            $vars
-        );
-        if (!$authoriser_call['success']) {
-            throw new ServerManagerAPIException('Could not obtain public MSP Challenge GeoServer credentials.');
+        try {
+            $authoriser_call = self::getCallAuthoriser('geo_servers');
+            if (!empty($authoriser_call['hydra:member'])) {
+                $this->address = $authoriser_call['hydra:member'][0]['baseurl'] ?? '';
+                $this->username = $authoriser_call['hydra:member'][0]['username'] ?? '';
+                $this->username = base64_encode($this->username);
+                $this->password = base64_encode(openssl_decrypt(
+                    $authoriser_call['hydra:member'][0]['password'] ?? '',
+                    'aes-128-cbc',
+                    $this->getJWT(),
+                    0,
+                    decbin(65535)
+                ));
+
+                $return = self::postCallAuthoriser('logs', [
+                    'level' => '220'
+                ]);
+            }
+        } catch (\Exception $e) {
+            return;
         }
-        $this->address = $authoriser_call['credentials']['baseurl'] ?? '';
-        $this->username = $authoriser_call['credentials']['username'] ?? '';
-        $this->password = $authoriser_call['credentials']['password'] ?? '';
     }
 
     public function get()
