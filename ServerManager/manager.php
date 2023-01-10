@@ -1009,6 +1009,10 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
         </div>
     </div>
 
+    <div id="auth2BaseURL" data-url="<?php
+    echo Config::GetInstance()->getMSPAuthBaseURL();
+    ?>"></div>
+
 </div>
 
 <!-- Place any per-page javascript here -->

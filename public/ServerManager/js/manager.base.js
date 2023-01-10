@@ -1,6 +1,6 @@
 function CallAuthoriser(method, endpoint, data = {})
 {
-    let url = 'http://localhost:8000' + endpoint;
+    let url = $('#auth2BaseURL').attr('data-url') + endpoint;
     return  $.ajax({
         url: url,
         type: method,
