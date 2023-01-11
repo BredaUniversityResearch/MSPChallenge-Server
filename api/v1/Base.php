@@ -265,6 +265,7 @@ abstract class Base extends CommonBase
 
         if ($asjson) {
             $post = json_encode($postarray);
+            $headers[] = 'Content-Type: application/json';
         } else {
             $post = $postarray;
         }
@@ -292,7 +293,7 @@ abstract class Base extends CommonBase
         $return = curl_exec($ch);
         $info = curl_getinfo($ch);
 
-        if ($async == false && ($return === false || $info === false || in_array($info["http_code"], [401, 502]))) {
+        if ($async === false && ($return === false || $info === false || in_array($info["http_code"], [401, 502]))) {
             throw new Exception("Request failed to url " . $url . PHP_EOL . "CURL Error: " . curl_error($ch) . PHP_EOL .
                 "Response Http code: " . $info["http_code"] . PHP_EOL . "Response Page output: " .
                 ($return ?: "Nothing"));

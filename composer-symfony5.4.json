@@ -20,6 +20,7 @@
         "drift/dbal": "dev-master",
         "gasparesganga/php-shapefile": "3.3.3",
         "illuminate/collections": "^8.73.2",
+        "lcobucci/jwt": "^4.0",
         "react/http": "^1.5",
         "react/mysql": "^0.5.6",
         "symfony/console": "5.4.*",
@@ -31,7 +32,9 @@
         "symfony/runtime": "5.4.*",
         "symfony/translation": "5.4.*",
         "symfony/twig-bundle": "5.4.*",
-        "symfony/yaml": "5.4.*"
+        "symfony/uid": "5.4.*",
+        "symfony/yaml": "5.4.*",
+        "ext-openssl": "*"
     },
     "config": {
         "optimize-autoloader": true,

@@ -914,6 +914,10 @@ textarea.form-control {
 	border-radius: 1rem;
 }
 
+input[type="checkbox"], input[type="radio"] {
+	width: revert !important;
+}
+
 footer {
 	padding: 15px 0 15px 0;
 	font-size: 15px;

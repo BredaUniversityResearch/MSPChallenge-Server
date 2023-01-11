@@ -32,3 +32,9 @@ return static function (DoctrineConfig $doctrineConfig) {
     $ormConfig
         ->autoGenerateProxyClasses(false);
 };
+
+//custom_mapping:
+//                    type: annotation
+//                    prefix: Client\IntranetBundle\LDAP\
+//                    dir: "%kernel.root_dir%/src/Client/IntranetBundle/LDAP/"
+//                    is_bundle: false

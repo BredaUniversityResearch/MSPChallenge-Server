@@ -3,22 +3,15 @@
 namespace App\Repository\ServerManager;
 
 use App\Entity\ServerManager\GameSave;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
-/**
- * @extends ServiceEntityRepository<GameSave>
- *
- * @method GameSave|null find($id, $lockMode = null, $lockVersion = null)
- * @method GameSave|null findOneBy(array $criteria, array $orderBy = null)
- * @method GameSave[]    findAll()
- * @method GameSave[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
-class GameSaveRepository extends ServiceEntityRepository
+class GameSaveRepository extends EntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
-        parent::__construct($registry, GameSave::class);
+        parent::__construct($em, $class);
     }
 
     public function save(GameSave $entity, bool $flush = false): void
