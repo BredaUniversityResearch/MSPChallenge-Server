@@ -46,5 +46,4 @@ ALTER TABLE users CHANGE token token TEXT NOT NULL,
     CHANGE refresh_token_expiration refresh_token_expiration DATETIME DEFAULT NULL
 SQL);
     }
-
 }
