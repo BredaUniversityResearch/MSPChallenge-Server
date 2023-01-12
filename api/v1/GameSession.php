@@ -2,8 +2,12 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\GameList;
+use App\Entity\ServerManager\GameSave;
 use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;
@@ -12,6 +16,7 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 use ZipArchive;
@@ -298,8 +303,8 @@ class GameSession extends Base
 
         if (null !== $e) {
             if (!empty($response_address)) {
-                $postValues["session_state"] = "failed";
-                $this->CallBack($response_address, $postValues);
+                $postValues["session_state"] = new GameSessionStateValue('failed');
+                $this->updateServerManagerGameList($postValues);
             }
             throw $e;
         }
@@ -326,9 +331,51 @@ class GameSession extends Base
         };
 
         if (!empty($response_address)) {
-            $postValues["session_state"] = $watchdogSuccess == true ? "healthy" : "failed";
-            $this->CallBack($response_address, $postValues);
+            $postValues["session_state"] = $watchdogSuccess ?
+                new GameSessionStateValue('healthy') : new GameSessionStateValue('failed');
+            $this->updateServerManagerGameList($postValues);
         }
+    }
+
+    private function updateServerManagerGameList($postValues): void
+    {
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $gameSession = $manager->getRepository(GameList::class)->findOneBy(['id' => $postValues['session_id']]);
+        if (isset($postValues['game_start_year'])) {
+            $gameSession->setGameStartYear((int) $postValues['game_start_year']);
+        }
+        if (isset($postValues['game_end_month'])) {
+            $gameSession->setGameEndMonth((int) $postValues['game_end_month']);
+        }
+        if (isset($postValues['game_current_month'])) {
+            $gameSession->setGameCurrentMonth((int) $postValues['game_current_month']);
+        }
+        if (isset($postValues['game_state'])) {
+            if (!$postValues['game_state'] instanceof GameStateValue) {
+                $postValues['game_state'] = new GameStateValue($postValues['game_state']);
+            }
+            $gameSession->setGameState($postValues['game_state']);
+        }
+        if (isset($postValues['players_past_hour'])) {
+            $gameSession->setPlayersPastHour((int) $postValues['players_past_hour']);
+        }
+        if (isset($postValues['players_active'])) {
+            $gameSession->setPlayersActive((int) $postValues['players_active']);
+        }
+        if (isset($postValues['game_running_til_time'])) {
+            $gameSession->setGameRunningTilTime((string) $postValues['game_running_til_time']);
+        }
+        if (isset($postValues['session_state'])) {
+            if (!$postValues['session_state'] instanceof GameSessionStateValue) {
+                $postValues['session_state'] = new GameSessionStateValue($postValues['session_state']);
+            }
+            $gameSession->setSessionState($postValues['session_state']);
+        }
+        if (isset($postValues['token'])) {
+            $gameSession->setApiAccessToken((string) $postValues['token']);
+        }
+        $manager->persist($gameSession);
+        $manager->flush();
     }
 
     /**
@@ -444,13 +491,14 @@ class GameSession extends Base
                 true
             );
         } elseif ($type == "layers") {
+            $post = array(
+                "save_id" => $save_id, "response_url" => $response_url, "preferredfolder" => $preferredfolder,
+                "preferredname" => $preferredname
+            );
             $this->LocalApiRequest(
                 "GameSession/CreateGameSessionLayersZip",
                 $sessionId,
-                array(
-                    "save_id" => $save_id, "response_url" => $response_url, "preferredfolder" => $preferredfolder,
-                    "preferredname" => $preferredname
-                ),
+                $post,
                 true
             );
         } else {
@@ -576,7 +624,6 @@ class GameSession extends Base
             }
         }
         $zip->close();
-
         // callback if requested
         if (!empty($response_url)) {
             $token = (new Security())->getServerManagerToken();
@@ -681,7 +728,7 @@ class GameSession extends Base
             ],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
-        
+
         $requestHeader = apache_request_headers();
         $headers = array();
         if (isset($requestHeader["MSPAPIToken"])) {
@@ -775,7 +822,7 @@ class GameSession extends Base
         if (!$result) {
             if (!empty($response_address)) {
                 $postValues["session_state"] = "failed";
-                $this->CallBack($response_address, $postValues);
+                $this->updateServerManagerGameList($postValues);
             }
             throw new Exception("Reload of save failed");
         }
@@ -788,7 +835,7 @@ class GameSession extends Base
         
         if (!empty($response_address)) {
             $postValues["session_state"] = "healthy";
-            $this->CallBack($response_address, $postValues);
+            $this->updateServerManagerGameList($postValues);
         }
     }
 

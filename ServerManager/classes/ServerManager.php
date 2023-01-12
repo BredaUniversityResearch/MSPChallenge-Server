@@ -5,6 +5,9 @@ namespace ServerManager;
 use App\Domain\Helper\Config;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\WsServer;
+use App\Entity\ServerManager\GameServer;
+use App\Entity\ServerManager\Setting;
+use Symfony\Component\Uid\Uuid;
 
 class ServerManager extends Base
 {
@@ -17,6 +20,7 @@ class ServerManager extends Base
     private $serverRoot;
     private string $serverManagerRoot = '';
     private array $serverUpgrades = [];
+    public $server_uuid;
     public $server_id;
     public ?string $server_name = null;
     public $server_address;
@@ -53,11 +57,16 @@ class ServerManager extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function CompletePropertiesFromDB()
     {
-        $this->db = DB::getInstance();
-        $this->server_id = $this->db->cell('settings.value', ['name', '=', 'server_id']);
-        $this->server_name = $this->db->cell('settings.value', ['name', '=', 'server_name']);
-        $this->server_address = $this->db->cell('game_servers.address', ['id', '=', 1]);
-        $this->server_description = $this->db->cell('settings.value', ['name', '=', 'server_description']);
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $settings = $manager->getRepository(Setting::class)->findAll();
+        foreach ($settings as $setting) {
+            $name = $setting->getName();
+            if (property_exists($this, $name)) {
+                $this->$name = $setting->getValue();
+            }
+        }
+
+        $this->server_address = $manager->getRepository(GameServer::class)->findOneBy(['id' => 1])->getAddress();
 
         $this->old = clone $this;
     }
@@ -134,11 +143,10 @@ class ServerManager extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetMSPAuthAPI(): string
     {
-        return $this->GetMSPAuthURL().'/usersc/plugins/apibuilder/authmsp/';
+        return $this->getMSPAuthBaseURL().($_ENV['AUTH_SERVER_API_BASE_PATH'] ?? '/api/');
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetMSPAuthURL(): string
+    public function getMSPAuthBaseURL(): string
     {
         return \App\Domain\API\v1\Config::GetInstance()->getMSPAuthBaseURL();
     }
@@ -166,6 +174,24 @@ class ServerManager extends Base
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetServerPassword()
+    {
+        return SymfonyToLegacyHelper::getInstance()->getEntityManager()
+            ->getRepository(Setting::class)->findOneBy(['name' => 'server_password'])
+            ->getValue();
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetServerUUID()
+    {
+        if (is_null($this->server_uuid)) {
+            $this->CompletePropertiesFromDB();
+        }
+
+        return $this->server_uuid;
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetServerName()
     {
         if (empty($this->server_name)) {
@@ -177,11 +203,9 @@ class ServerManager extends Base
 
     public function freshInstall(): bool
     {
-        if (empty($this->server_id)) {
-            $this->CompletePropertiesFromDB();
-        }
-
-        return empty($this->server_id);
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $settings = $manager->getRepository(Setting::class)->findBy(['name' => 'server_id']);
+        return empty($settings);
     }
 
     public function install($user = null): bool
@@ -190,6 +214,13 @@ class ServerManager extends Base
             $this->SetServerID();
             $this->SetServerName($user);
             $this->SetServerDescription();
+
+            $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+            $settingServerUUID = new Setting('server_uuid', Uuid::v4());
+            $manager->persist($settingServerUUID);
+            $settingServerPassword = new Setting('server_password', (string) time());
+            $manager->persist($settingServerPassword);
+            $manager->flush();
 
             return true;
         }
@@ -200,7 +231,11 @@ class ServerManager extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetServerAddress($user = null)
     {
-        $this->db->query('UPDATE game_servers SET address = ? WHERE id = 1;', [$this->server_address]);
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $serverAddress = $manager->getRepository(GameServer::class)->findOneBy(['id' => 1]);
+        $serverAddress->setAddress($this->server_address);
+        $manager->persist($serverAddress);
+        $manager->flush();
 
         return $this->server_address;
     }
@@ -210,9 +245,11 @@ class ServerManager extends Base
     {
         if (empty($this->server_id)) {
             $this->server_id = uniqid('', true);
-            $this->db->query('INSERT INTO settings (name, value) VALUES (?, ?);', ['server_id', $this->server_id]);
+            $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+            $settingServerID = new Setting('server_id', $this->server_id);
+            $manager->persist($settingServerID);
+            $manager->flush();
         }
-
         return $this->server_id;
     }
 
@@ -231,17 +268,15 @@ class ServerManager extends Base
             return $this->server_name; // no need to do anything if nothing changes
         }
 
-        $try_update = $this->db->query(
-            'UPDATE settings SET value = ? WHERE name = ?;',
-            [$this->server_name, 'server_name']
-        );
-        if ($try_update && 0 == $this->db->count()) {
-            $this->db->query(
-                'INSERT INTO settings (name, value) VALUES (?, ?);',
-                ['server_name', $this->server_name]
-            );
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $settingServerAddress = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_name']);
+        if (is_null($settingServerAddress)) {
+            $settingServerAddress = new Setting();
+            $settingServerAddress->setName('server_name');
         }
-
+        $settingServerAddress->setValue($this->server_name);
+        $manager->persist($settingServerAddress);
+        $manager->flush();
         return $this->server_name;
     }
 
@@ -253,18 +288,15 @@ class ServerManager extends Base
                 'changed this default description yet. This can be done through the ServerManager.';
         }
 
-        if ($this->old !== null &&
-            $this->old->server_description == $this->server_description) {
-            return $this->server_description; // no need to do anything if nothing changes
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $settingServerDesc = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
+        if (is_null($settingServerDesc)) {
+            $settingServerDesc = new Setting();
+            $settingServerDesc->setName('server_description');
         }
-
-        $try_update = $this->db->query('UPDATE settings SET value = ? WHERE name = ?;', [
-            $this->server_description, 'server_description', ]);
-        if ($try_update && 0 == $this->db->count()) {
-            $this->db->query('INSERT INTO settings (name, value) VALUES (?, ?);', [
-                'server_description', $this->server_description, ]);
-        }
-
+        $settingServerDesc->setValue($this->server_description);
+        $manager->persist($settingServerDesc);
+        $manager->flush();
         return $this->server_description;
     }
 
@@ -307,7 +339,11 @@ class ServerManager extends Base
     public function GetTranslatedServerURL(): string
     {
         if (empty($this->server_address)) {
-            $this->CompletePropertiesFromDB();
+            try {
+                $this->CompletePropertiesFromDB();
+            } catch (\Exception $e) {
+                // silent fail.
+            }
         }
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
@@ -439,17 +475,15 @@ class ServerManager extends Base
 
     public function edit()
     {
+
         $this->SetServerName();
         $this->SetServerAddress();
         $this->SetServerDescription();
 
-        Base::callAuthoriser( // doing this here because JWT won't be available elsewhere
-            'updateservernamejwt.php',
+        Base::putCallAuthoriser( // doing this here because JWT won't be available elsewhere
+            sprintf('servers/%s', $this->GetServerUUID()),
             [
-            'jwt' => $this->getJWT(),
-            'audience' => $this->GetBareHost(),
-            'server_id' => $this->GetServerID(),
-            'server_name' => $this->GetServerName(),
+                'serverName' => $this->GetServerName(),
             ]
         );
     }

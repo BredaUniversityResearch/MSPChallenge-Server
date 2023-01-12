@@ -16,6 +16,7 @@ class GameSave extends Base
 
     public $name;
     public $game_config_files_id;
+    public $game_config_version_id;
     public $game_config_files_filename;
     public $game_config_versions_region;
     public $game_server_id;
@@ -90,6 +91,7 @@ class GameSave extends Base
                 $this->$varname = $varvalue;
             }
         }
+        $this->game_config_files_id = $this->game_config_version_id;
 
         $this->old = clone $this;
     }
@@ -453,6 +455,7 @@ class GameSave extends Base
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         $args = getPublicObjectVars($this);
         unset($args['id']);
+        unset($args['game_config_files_id']);
         $this->db->query($sql, $args);
         if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
@@ -469,7 +472,7 @@ class GameSave extends Base
         $args = getPublicObjectVars($this);
         $sql = 'UPDATE game_saves SET 
                     name = ?,
-                    game_config_version_id = ?,
+                    
                     game_config_files_filename = ?,
                     game_config_versions_region = ?,
                     game_server_id = ?,
@@ -494,6 +497,8 @@ class GameSave extends Base
                     save_timestamp = ?,
                     server_version = ?
                 WHERE id = ?';
+        unset($args['game_config_version_id']); // temporary hack HW 10 Jan 2023
+        unset($args['game_config_files_id']);
         $this->db->query($sql, $args);
         if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());
@@ -528,7 +533,7 @@ class GameSave extends Base
         );
         $gamesession->watchdog_server_id = $_POST['watchdog_server_id'] ?? $this->watchdog_server_id;
         $gamesession->id = -1;
-        $gamesession->game_geoserver_id = 0;
+        $gamesession->game_geoserver_id = null;
         $gamesession->game_config_version_id = $this->game_config_files_id;
         $gamesession->game_server_id = $this->game_server_id;
         $gamesession->game_creation_time = $this->game_creation_time;

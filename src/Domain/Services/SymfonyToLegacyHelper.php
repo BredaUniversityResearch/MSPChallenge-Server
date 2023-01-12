@@ -5,6 +5,7 @@ namespace App\Domain\Services;
 use App\Domain\API\APIHelper;
 use App\Kernel;
 use Closure;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +25,7 @@ class SymfonyToLegacyHelper
     private Kernel $kernel;
     private TranslatorInterface $translator;
     private ?Closure $fnControllerForwarder = null;
+    private EntityManagerInterface $em;
 
     // @phpstan-ignore-next-line "Constructor has an unused parameter"
     public function __construct(
@@ -33,6 +35,7 @@ class SymfonyToLegacyHelper
         RequestStack $requestStack,
         Kernel $kernel,
         TranslatorInterface $translator,
+        EntityManagerInterface $em,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
         ConnectionManager $connectionManager
@@ -43,6 +46,7 @@ class SymfonyToLegacyHelper
         $this->requestStack = $requestStack;
         $this->kernel = $kernel;
         $this->translator = $translator;
+        $this->em = $em;
         self::$instance = $this;
     }
 
@@ -59,6 +63,11 @@ class SymfonyToLegacyHelper
     public function getTranslator(): TranslatorInterface
     {
         return $this->translator;
+    }
+
+    public function getEntityManager(): EntityManagerInterface
+    {
+        return $this->em;
     }
 
     /**

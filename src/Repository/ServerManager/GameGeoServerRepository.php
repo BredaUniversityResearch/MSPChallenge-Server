@@ -3,22 +3,15 @@
 namespace App\Repository\ServerManager;
 
 use App\Entity\ServerManager\GameGeoServer;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
-/**
- * @extends ServiceEntityRepository<GameGeoServer>
- *
- * @method GameGeoServer|null find($id, $lockMode = null, $lockVersion = null)
- * @method GameGeoServer|null findOneBy(array $criteria, array $orderBy = null)
- * @method GameGeoServer[]    findAll()
- * @method GameGeoServer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
-class GameGeoServerRepository extends ServiceEntityRepository
+class GameGeoServerRepository extends EntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
-        parent::__construct($registry, GameGeoServer::class);
+        parent::__construct($em, $class);
     }
 
     public function save(GameGeoServer $entity, bool $flush = false): void

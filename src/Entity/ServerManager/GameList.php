@@ -29,7 +29,7 @@ class GameList
     private ?GameServer $gameServer = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'game_geoserver_id', nullable: false)]
+    #[ORM\JoinColumn(name: 'game_geoserver_id', nullable: true)]
     private ?GameGeoServer $gameGeoServer = null;
 
     #[ORM\ManyToOne]
