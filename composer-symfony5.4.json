@@ -34,8 +34,7 @@
         "symfony/twig-bundle": "5.4.*",
         "symfony/uid": "5.4.*",
         "symfony/yaml": "5.4.*",
-        "ext-openssl": "*",
-        "ext-pcntl": "*"
+        "ext-openssl": "*"
     },
     "config": {
         "optimize-autoloader": true,
