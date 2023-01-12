@@ -37,10 +37,10 @@ HTML;
 echo $html;
 
 if (isset($_GET['err'])) {
-    err("<font color='red'>".($_GET['err'] ?? '')."</font>");
+    err("<font color='red'>".$_GET['err']."</font>");
 }
 
 if (isset($_GET['msg'])) {
-    err($_GET['msg'] ?? '');
+    err($_GET['msg']);
 }
 
