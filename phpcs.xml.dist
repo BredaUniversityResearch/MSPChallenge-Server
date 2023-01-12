@@ -19,7 +19,6 @@
     <file>public/</file>
     <file>ServerManager/</file>
     <file>src/</file>
-    <file>tests/</file>
 
     <exclude-pattern>*/public/adminer/*$</exclude-pattern>
 
