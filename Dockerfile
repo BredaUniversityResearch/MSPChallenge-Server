@@ -37,6 +37,7 @@ RUN set -eux; \
     	zip \
     	apcu \
 		opcache \
+        pcntl \
     ;
 
 ###> recipes ###

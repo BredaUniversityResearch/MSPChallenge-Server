@@ -475,8 +475,8 @@ class Game extends Base
     public function StartWatchdog(): void
     {
         self::StartSimulationExe([
-            'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/MSW/'
+            'exe' => 'MSW',
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/v1/'
         ]);
     }
 
@@ -491,11 +491,22 @@ class Game extends Base
         $args = $args."APIEndpoint ".$apiEndpoint;
 
         $workingDirectory = "";
-        if (isset($params["working_directory"])) {
-            $workingDirectory = "cd ".$params["working_directory"]." & ";
+        if (substr(php_uname(), 0, 7) == "Windows") {
+            if (isset($params["working_directory"])) {
+                $workingDirectory = "cd ".$params["working_directory"]." & ";
+            }
+            Database::execInBackground(
+                'start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"'
+            );
+            return;
         }
 
-        Database::execInBackground('start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"');
+        if (substr(php_uname(), 0, 5) == "Linux") {
+            if (isset($params["working_directory"])) {
+                $workingDirectory = "cd ".$params["working_directory"]." && ";
+            }
+            exec($workingDirectory.'./'.$params["exe"].' '.$args." >> /srv/app/log &");
+        }
     }
 
     /**

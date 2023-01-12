@@ -96,7 +96,8 @@ class GameConfig extends Base
 
     public function getContents()
     {
-        return json_decode(file_get_contents($this->getFile()), true);
+        $content = file_get_contents($this->getFile());
+        return json_decode($content, true);
     }
 
     public function getPrettyVars(): array

@@ -148,13 +148,20 @@ class WsServerCommand extends Command
         // plugins
         $this->wsServer->registerPlugin(new BootstrapWsServerPlugin($this->projectDir));
 
-        sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
-            switch ($event) {
-                case PHP_WINDOWS_EVENT_CTRL_C:
+        if (function_exists('\sapi_windows_set_ctrl_handler')) {
+            \sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
+                if ($event == PHP_WINDOWS_EVENT_CTRL_C) {
                     $server->loop->stop();
-                    break;
-            }
-        });
+                }
+            });
+        }
+        if (function_exists('\pcntl_signal')) {
+            \pcntl_signal(SIGTERM, function (int $sigNo) use ($server) {
+                if ($sigNo == SIGTERM) {
+                    $server->loop->stop();
+                }
+            });
+        }
         $server->run();
 
         return Command::SUCCESS;

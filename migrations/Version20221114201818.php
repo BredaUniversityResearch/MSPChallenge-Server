@@ -59,13 +59,13 @@ final class Version20221114201818 extends MSPMigration
 
         $this->addSql(<<<'SQL'
   INSERT INTO `game_servers` (`id`, `name`, `address`) VALUES
-  (1, 'Default: the server machine', 'localhost');
+  (1, 'Default: the server machine', 'caddy');
 SQL
         );
 
         $this->addSql(<<<'SQL'
   INSERT INTO `game_watchdog_servers` (`id`, `name`, `address`) VALUES
-  (1, 'Default: the same server machine', 'localhost');
+  (1, 'Default: the same server machine', 'caddy');
 SQL
         );
 
