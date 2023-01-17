@@ -44,3 +44,10 @@ when@dev:
             tags:
                 - 'doctrine.fixture.orm'
                 - 'kernel.event_subscriber'
+
+        App\DataCollector\MSPDataCollector:
+            tags:
+                -
+                    name: data_collector
+                    id: 'App\DataCollector\MSPDataCollector'
+                    template: 'data_collector/msp.html.twig'

@@ -79,9 +79,17 @@ class Base
     }
 
     // needs a function to call server API
-    public static function callServer($endpoint, $data2send = false, $session_id = "", $api_access_token = "")
+    public static function callServer($endpoint, $data2send = false, $sessionId = "", $api_access_token = "")
     {
-        $url = ServerManager::getInstance()->GetServerURLBySessionId($session_id);
+        if (isset($_ENV['DOCKER'])) {
+            // this is always called from inside the docker environment,so just use http://caddy:80/...
+            $url = 'http://caddy:80'.Config::get('code_branch');
+            if (!empty($sessionId)) {
+                $url = rtrim($url, '/').'/'.$sessionId;
+            }
+        } else {
+            $url = ServerManager::getInstance()->GetServerURLBySessionId($sessionId);
+        }
         $url = rtrim($url, '/').'/api/'.$endpoint;
         $call_return = self::callAPI(
             "POST",

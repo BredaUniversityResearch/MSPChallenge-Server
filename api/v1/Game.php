@@ -486,9 +486,11 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function StartSimulationExe(array $params): void
     {
-        $apiEndpoint = GameSession::GetRequestApiRoot();
         $args = isset($params["args"])? $params["args"]." " : "";
-        $args = $args."APIEndpoint ".$apiEndpoint;
+        $args = isset($_ENV['DOCKER']) ?
+            // this is always called from inside the docker environment,so just use http://caddy:80/...
+            $args.'APIEndpoint=http://caddy:80' :
+            $args."APIEndpoint ".GameSession::GetRequestApiRoot();
 
         $workingDirectory = "";
         if (substr(php_uname(), 0, 7) == "Windows") {
@@ -536,6 +538,7 @@ class Game extends Base
                 // so the Watchdog is off, and now it should be switched on
                 function (/*Exception $e*/) use ($deferred) {
                     self::StartWatchdog();
+                    sleep(5);
                     $deferred->resolve();
                 }
             );
@@ -552,6 +555,12 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
+                if (isset($_ENV['DOCKER'])) {
+                    $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
+                    $apiRoot = str_replace("//", "/", $apiRoot);
+                    // this is always called from inside the docker environment,so just use http://caddy:80/...
+                    return 'http://caddy:80'.$apiRoot;
+                }
                 return GameSession::getRequestApiRootAsync();
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
