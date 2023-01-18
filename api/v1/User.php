@@ -202,6 +202,11 @@ class User extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function CloseSession(int $session_id): void
     {
+        //clean up all plans that are still locked by a user
+        Database::GetInstance()->query(
+            "UPDATE plan SET plan_lock_user_id=NULL WHERE plan_lock_user_id=?",
+            array($session_id)
+        );
         $this->getDatabase()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
     }
 
