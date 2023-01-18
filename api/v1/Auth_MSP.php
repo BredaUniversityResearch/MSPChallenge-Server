@@ -62,18 +62,8 @@ class Auth_MSP extends Auths
             false,  // synchronous, so wait
             true // post as json
         ), true);
-        if (empty($userCheckReturn['token'])) {
-            throw new Exception("Username and/or password incorrect.");
-        }
-        // and obtain the e-mail address, so that can be returned for authorization
-        $userEmailReturn = json_decode($this->CallBack(
-            Config::getInstance()->GetAuthJWTUserEmailCheck($username),
-            array(), // no post
-            array('Authorization: Bearer '.$userCheckReturn['token']),
-            false  // synchronous, so wait
-        ), true);
 
-        return $userEmailReturn['email'];
+        return true; //if authentication failed, an exception would have been thrown
     }
 
     /**
@@ -93,7 +83,7 @@ class Auth_MSP extends Auths
         $jwt = $jwtReturn['token'] ?? '';
 
         // use the jwt to check the sent username and password at the Authoriser
-        $inputArray = explode(" ", $input);
+        $inputArray = explode("|", $input);
 
         $usercheckReturn = json_decode($this->CallBack(
             sprintf(
@@ -125,11 +115,11 @@ class Auth_MSP extends Auths
         $found = [];
         foreach ($usercheckReturnTotal as $user) {
             $notfound = array_diff($notfound, [strtolower($user['username']), strtolower($user['email'])]);
-            $found[] = $user['email'];
+            $found[] = $user['username'];
         }
         return [
-            "found" => implode(" ", array_unique($found)),
-            "notfound" => implode(" ", array_unique($notfound))
+            "found" => implode("|", array_unique($found)),
+            "notfound" => implode("|", array_unique($notfound))
         ];
     }
 }
