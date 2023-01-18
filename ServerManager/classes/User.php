@@ -22,7 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\Helper\Config;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\Setting;
 use Exception;
+use Lcobucci\JWT\Encoding\CannotDecodeContent;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\InvalidTokenStructure;
+use Lcobucci\JWT\Token\Parser;
+use Lcobucci\JWT\Token\UnsupportedHeaderFound;
+use Lcobucci\JWT\UnencryptedToken;
 
 class User extends Base
 {
@@ -39,7 +47,6 @@ class User extends Base
         if (!$user) {
             if (Session::exists($this->sessionName)) {
                 $user = Session::get($this->sessionName);
-
                 if ($this->find($user)) {
                     $this->isLoggedIn = true;
                 }
@@ -49,32 +56,32 @@ class User extends Base
         }
     }
 
-    public function isAuthorised()
+    public function isAuthorised(): bool
     {
-        if ($this->exists()) {
-            $servermanager = ServerManager::getInstance();
-            $params = array(
-                "jwt" => Session::get("currentToken"),
-                "server_id" => $servermanager->GetServerID(),
-                "audience" => $servermanager->GetBareHost()
-            );
-            $authorize = Base::callAuthoriser("authjwt.php", $params);
-            if (isset($authorize["success"])) {
-                if ($authorize["success"]) {
-                    return true;
-                } else {
-                    if (isset($authorize["error"])) {
-                        if ($authorize["error"] == 503) {
-                            die(
-                                'MSP Challenge Authoriser cannot be reached. ' .
-                                'Are you sure you are connected to the internet?'
-                            );
-                        }
-                    }
-                }
-            }
+        if (!$this->exists()) {
+            return false;
         }
-        return false;
+
+        try {
+            $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+            $serverUUID = $em->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid']);
+            if (empty($serverUUID)) {
+                return false;
+            }
+            $response = collect(
+                collect(Base::getCallAuthoriser(
+                    sprintf(
+                        'servers/%s/server_users',
+                        $serverUUID->getValue()
+                    )
+                ))->pull('hydra:member')
+            )->filter(function ($value) {
+                return $value['user']['username'] === $this->data()->username;
+            });
+            return !$response->isEmpty();
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     public function find($user = null, $loginHandler = null): bool
@@ -151,5 +158,58 @@ class User extends Base
     {
         session_unset();
         session_destroy();
+    }
+
+    public function importTokenFields(array $tokenFields): ?int
+    {
+        // @note(MH)
+        // vendor/lexik/jwt-authentication-bundle/Encoder/LcobucciJWTEncoder.php says:
+        //   "Json Web Token encoder/decoder based on the lcobucci/jwt library."
+        // so instead of using lexik's, we directly use the smaller lcobucci/jwt library
+        // see: https://lcobucci-jwt.readthedocs.io/en/latest/parsing-tokens/
+        $parser = new Parser(new JoseEncoder());
+        try {
+            /** @var UnencryptedToken $unencryptedToken */
+            $unencryptedToken = $parser->parse($tokenFields['token']);
+        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
+            return null;
+        }
+        $username = $unencryptedToken->claims()->get('username');
+        $fields = array_merge([
+            'username' => $username,
+            // for backwards compatibility
+            'account_owner' => 0, // what is this? Used by User::find()
+        ], $tokenFields);
+        if ($this->find($username, 'username')) {
+            $this->db->update('users', $this->data()->id, $fields);
+            return $this->data()->id;
+        }
+        $this->db->insert('users', $fields);
+        $userId = $this->db->lastId();
+        if ($this->find($userId)) {
+            return $userId;
+        }
+        return null;
+    }
+
+    public function importRefreshToken(): void
+    {
+        if (!$this->exists()) {
+            return;
+        }
+        $response = self::getCallAuthoriser('refresh_tokens?page=1');
+        if (false === $refreshTokenData = current($response['hydra:member'] ?? [])) {
+            return;
+        }
+        // remove empty values
+        $refreshTokenData = array_filter($refreshTokenData);
+        if (null === $refreshToken = ($refreshTokenData['refreshToken'] ?? null)) {
+            return;
+        }
+        $refreshTokenExpiration = $refreshTokenData['valid'] ?? null;
+        $this->db->update('users', $this->data()->id, [
+            'refresh_token' => $refreshToken,
+            'refresh_token_expiration' => $refreshTokenExpiration
+        ]);
     }
 }

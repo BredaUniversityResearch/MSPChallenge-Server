@@ -21,4 +21,4 @@ require_once 'templates/header.php';
 <?php
 // @codingStandardsIgnoreEnd
 require_once 'templates/footer.php'; // the final html footer copyright row + the external js calls
-Redirect::to(Config::GetInstance()->getMSPAuthBaseURL() . '/users/logout.php');
+Redirect::to(Config::GetInstance()->getMSPAuthBaseURL() . '/logout');

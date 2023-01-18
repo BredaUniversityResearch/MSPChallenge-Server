@@ -30,7 +30,7 @@ if ($gamesession->id == 0 && isset($_FILES['uploadedSaveFile']['tmp_name'])) {
     $gameconfig->get();
 
     $gamesave->name = DB::getInstance()->ensure_unique_name($gamesession->name, "name", "game_saves");
-    $gamesave->game_config_files_id = $gamesession->game_config_version_id;
+    $gamesave->game_config_version_id = $gamesession->game_config_version_id;
     $gamesave->game_config_files_filename = $gameconfig->filename;
     $gamesave->game_config_versions_region = $gameconfig->region;
     $gamesave->game_server_id = $gamesession->game_server_id;

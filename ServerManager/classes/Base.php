@@ -16,16 +16,20 @@ class Base
     public function getJWT(): string
     {
         if (null === $this->jwt) {
-            $vars = array(
-                "server_id" => ServerManager::getInstance()->GetServerID(),
-                "audience" => ServerManager::getInstance()->GetBareHost()
-            );
-            $authoriserCall = self::callAuthoriser(
-                "getjwt.php",
-                $vars
-            );
-            if ($authoriserCall["success"]) {
-                $this->jwt = $authoriserCall["jwt"] ?? "";
+            // this will only happen if this is called without a logged-in user on ServerManager
+            // meaning: when the WebSocket server recreates a demo session that reached the end
+            try {
+                $vars = array(
+                    "username" => ServerManager::getInstance()->GetServerID(),
+                    "password" => ServerManager::getInstance()->GetServerPassword()
+                );
+                $authoriserCall = self::postCallAuthoriser(
+                    "login_check",
+                    $vars
+                );
+                $this->jwt = $authoriserCall["token"] ?? "";
+            } catch (\Exception $e) {
+                $this->jwt = '';
             }
         }
         return $this->jwt;
@@ -87,30 +91,69 @@ class Base
         return json_decode($call_return, true);
     }
 
-    // needs a function to call Authoriser API
-    public static function callAuthoriser($endpoint, $data2send)
+    public static function getCallAuthoriser(string $endpoint, array $data2send = [])
     {
-        $call_return = self::callAPI("POST", ServerManager::getInstance()->GetMSPAuthAPI().$endpoint, $data2send);
-        return json_decode($call_return, true);
+        return self::callAuthoriser('GET', $endpoint, $data2send);
+    }
+
+    // needs a function to call Authoriser API
+    /**
+     * @throws HydraErrorException
+     */
+    public static function postCallAuthoriser(string $endpoint, array $data2send = [])
+    {
+        return self::callAuthoriser('POST', $endpoint, $data2send);
+    }
+
+    /**
+     * @throws HydraErrorException
+     */
+    public static function putCallAuthoriser(string $endpoint, array $data2send = [])
+    {
+        return self::callAuthoriser('PUT', $endpoint, $data2send);
+    }
+
+    /**
+     * @throws HydraErrorException
+     */
+    public static function callAuthoriser(string $method, string $endpoint, array $data2send = [])
+    {
+        $headers = [
+            'Authorization: Bearer '.Session::get("currentToken")
+        ];
+        $callReturn = self::callAPI(
+            $method,
+            ServerManager::getInstance()->GetMSPAuthAPI().$endpoint,
+            $data2send,
+            $headers
+        );
+        $callReturnDecoded = json_decode($callReturn, true);
+        if ((array_key_exists('code', $callReturnDecoded ?? [])) && $callReturnDecoded['code'] == 401) {
+            throw new MSPAuthException(401, $callReturnDecoded['message'] ?? 'Unauthorized');
+        }
+        if ((array_key_exists('@type', $callReturnDecoded ?? [])) && $callReturnDecoded['@type'] == 'hydra:Error') {
+            throw new HydraErrorException($callReturnDecoded);
+        }
+        return $callReturnDecoded;
     }
 
     // needs a generic calling something function
-    /** @noinspection PhpSameParameterValueInspection */
     private static function callAPI($method, $url, $data2send = false, $headers = array(), $asJson = true): bool|string
     {
         $curl = curl_init();
+
         switch ($method) {
             case "POST":
+            case "PUT":
                 curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
                 if ($data2send) {
                     if ($asJson) {
                         $data2send = json_encode($data2send);
+                        $headers[] = 'Content-Type: application/json';
                     }
                     curl_setopt($curl, CURLOPT_POSTFIELDS, $data2send);
                 }
-                break;
-            case "PUT":
-                curl_setopt($curl, CURLOPT_PUT, 1);
                 break;
             default:
                 if ($data2send) {

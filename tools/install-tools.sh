@@ -34,14 +34,6 @@ if [[ $FORCE == 1 ]]; then
 fi
 
 function download() {
-  # install platform independent tools -- runs on both Linux Ubuntu or Windows Git bash
-  if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}phpcs.phar" ]]; then
-    curl --create-dirs -Lso "${DOWNLOAD_DIR}phpcs.phar" https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
-  fi
-  if [[ $FORCE == 1|| ! -f "${DOWNLOAD_DIR}phpcbf.phar" ]]; then
-    curl --create-dirs -Lso "${DOWNLOAD_DIR}phpcbf.phar" https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar
-  fi
-
   # install Windows tools
   if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
     # install Symfony cli
@@ -102,25 +94,5 @@ CONTENT
   fi
 }
 
-function makeExecutable() {
-  TARGET_FILE="${DOWNLOAD_DIR}${1}"
-  cat > "${TARGET_FILE}" <<- CONTENT
-#!/bin/bash
-SCRIPT_DIR="\$( cd -- "\$( dirname -- "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-php "\${SCRIPT_DIR}/$1.phar" "\$@"
-CONTENT
-  chmod u+x "${TARGET_FILE}"
-}
-
-function makeExecutables() {
-  if [[ $FORCE == 1 || ! -f phpcs ]]; then
-    makeExecutable phpcs
-  fi
-  if [[ $FORCE == 1 || ! -f phpcbf ]]; then
-    makeExecutable phpcbf
-  fi
-}
-
 download
-makeExecutables
 cd "${CWD}" || exit 5
