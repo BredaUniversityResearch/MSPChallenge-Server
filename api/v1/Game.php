@@ -475,7 +475,7 @@ class Game extends Base
     public function StartWatchdog(): void
     {
         self::StartSimulationExe([
-            'exe' => 'MSW',
+            'exe' => 'MSW'.(str_starts_with(php_uname(), "Windows") ? '.exe' : ''),
             'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/v1/'
         ]);
     }
@@ -493,7 +493,7 @@ class Game extends Base
             $args."APIEndpoint ".GameSession::GetRequestApiRoot();
 
         $workingDirectory = "";
-        if (substr(php_uname(), 0, 7) == "Windows") {
+        if (str_starts_with(php_uname(), "Windows")) {
             if (isset($params["working_directory"])) {
                 $workingDirectory = "cd ".$params["working_directory"]." & ";
             }
@@ -503,7 +503,7 @@ class Game extends Base
             return;
         }
 
-        if (substr(php_uname(), 0, 5) == "Linux") {
+        if (str_starts_with(php_uname(), "Linux")) {
             if (isset($params["working_directory"])) {
                 $workingDirectory = "cd ".$params["working_directory"]." && ";
             }
