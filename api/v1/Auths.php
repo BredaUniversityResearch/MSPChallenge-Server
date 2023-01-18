@@ -24,7 +24,5 @@ abstract class Auths extends Base
     /** @noinspection SpellCheckingInspection */
     abstract public function checkuser(string $username): array;
 
-    public function authorize(string $username, string $team)
-    {
-    }
+    abstract public function authorize(string $username, string $team): bool;
 }
