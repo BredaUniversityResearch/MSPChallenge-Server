@@ -19,10 +19,8 @@ abstract class Auths extends Base
     }
 
     abstract public function getName(): string;
-    abstract public function authenticate(string $username, string $password): string;
+    abstract public function authenticate(string $username, string $password): bool;
 
     /** @noinspection SpellCheckingInspection */
     abstract public function checkuser(string $username): array;
-
-    abstract public function authorize(string $username, string $team): bool;
 }
