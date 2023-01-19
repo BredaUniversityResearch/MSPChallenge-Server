@@ -470,7 +470,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                     </div>
                     <div class="modal-body">
                         <p>When setting a password, anyone who has that password will be able to log on to your session as that user type. 
-                        When setting specific users, those authentication provider's users will be able to log on to your session as that user type (assuming they entered the correct username and password). 
+                        When setting specific users, those users will be able to log on to your session as that user type (assuming they entered the correct username and password).
                         </p>
                         <form class="form-horizontal" role="form" data-toggle="validator" id="formSessionUsers">
                             <div class="row">
@@ -495,6 +495,9 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                                                     Set users from
                                                 </label>
                                                 <select class="form-control-sm d-inline-block p-0 h-25" id="provider_admin_external"></select>
+                                                <small id="passwordHelpBlock" class="form-text text-muted">
+                                                    Enter one username or e-mail address per line, and click Find.
+                                                </small>
                                             </div>
                                         </div>
                                         <div id="adminUserFields">
@@ -528,6 +531,9 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                                                     Set users from
                                                 </label>
                                                 <select class="form-control-sm d-inline-block p-0 h-25" id="provider_region_external"></select>
+                                                <small id="passwordHelpBlock" class="form-text text-muted">
+                                                    Enter one username or e-mail address per line, and click Find.
+                                                </small>
                                             </div>
                                         </div>
                                         <div id="regionUserFields">
@@ -568,12 +574,15 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                                                     Set users from 
                                                 </label>
                                                 <select class="form-control-sm d-inline-block p-0 h-25" id="provider_player_external"></select>
+                                                <small id="passwordHelpBlock" class="form-text text-muted">
+                                                    Enter one username or e-mail address per line, and click Find.
+                                                </small>
                                             </div>
                                         </div>
                                         <div id="playerUserFields">
                                             <div class="input-group mb-3">
                                                 <div contenteditable="true" class="form-control" style="height: auto !important;" id="users_playerall"></div>
-                                                <script language="javascript">$("#users_playerall").on("change keydown paste input", function() {
+                                                <script type="text/javascript">$("#users_playerall").on("change keydown paste input", function() {
                                                     toggleDivs();
                                                 });</script>
                                                 <div class="input-group-append">

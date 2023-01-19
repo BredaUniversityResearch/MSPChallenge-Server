@@ -294,6 +294,9 @@ abstract class Base extends CommonBase
         $info = curl_getinfo($ch);
 
         if ($async === false && ($return === false || $info === false || in_array($info["http_code"], [401, 502]))) {
+            if ($info["http_code"] == 401) {
+                throw new Exception("Authentication failed. Please check the details you provided.");
+            }
             throw new Exception("Request failed to url " . $url . PHP_EOL . "CURL Error: " . curl_error($ch) . PHP_EOL .
                 "Response Http code: " . $info["http_code"] . PHP_EOL . "Response Page output: " .
                 ($return ?: "Nothing"));
