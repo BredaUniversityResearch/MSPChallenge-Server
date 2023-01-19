@@ -2271,12 +2271,17 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetEnergyDistribution(int $id, bool $alters_energy_distribution): void
+    public function SetEnergyDistribution(int $id, bool $alters_energy_distribution): ?PromiseInterface
     {
         $this->getDatabase()->query(
             "UPDATE plan SET plan_alters_energy_distribution=? WHERE plan_id=?",
             array($alters_energy_distribution, $id)
         );
+        // @todo: fake it till you make it... but fix it later!
+        if ($this->isAsync()) {
+            return resolveOnFutureTick(new Deferred())->promise();
+        }
+        return null;
     }
 
     /**
