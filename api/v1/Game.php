@@ -487,7 +487,7 @@ class Game extends Base
     private static function StartSimulationExe(array $params): void
     {
         $args = isset($params["args"])? $params["args"]." " : "";
-        $args = isset($_ENV['DOCKER']) ?
+        $args = getenv('DOCKER') ?
             // this is always called from inside the docker environment,so just use http://caddy:80/...
             $args.'APIEndpoint=http://caddy:80' :
             $args."APIEndpoint ".GameSession::GetRequestApiRoot();
@@ -555,7 +555,7 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
-                if (isset($_ENV['DOCKER'])) {
+                if (getenv('DOCKER')) {
                     $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
                     $apiRoot = str_replace("//", "/", $apiRoot);
                     // this is always called from inside the docker environment,so just use http://caddy:80/...

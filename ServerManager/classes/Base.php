@@ -81,7 +81,7 @@ class Base
     // needs a function to call server API
     public static function callServer($endpoint, $data2send = false, $sessionId = "", $api_access_token = "")
     {
-        if (isset($_ENV['DOCKER'])) {
+        if (getenv('DOCKER')) {
             // this is always called from inside the docker environment,so just use http://caddy:80/...
             $url = 'http://caddy:80'.Config::get('code_branch');
             if (!empty($sessionId)) {
