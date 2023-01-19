@@ -22,33 +22,30 @@ function setUserAccessList(serverUser)
 
 function submitNewUserAccess()
 {
-    var username = $('#newUserAccess').val();
-    var isAdmin = $("#newUserAccessAdmin").is(':checked');
+    let endpoint;
+    let username = $('#newUserAccess').val();
+    let isAdmin = $("#newUserAccessAdmin").is(':checked');
     if (isEmail(username)) {
-        $.when(CallAuthoriser('GET', '/api/users?email=' + encodeURI(username)))
-            .done(function (results) {
-                if (results[0]) {
-                    var data = {
-                        server: '/api/servers/' + serverUUID,
-                        user: results[0]['@id'],
-                        isAdmin: isAdmin
-                    }
-                    submitNewUserAccessFinal(data);
-                } else {
-                    handleAPIError(results, 'No user found with that e-mail address.');
-                }
-            })
-            .fail(function (results) {
-                handleAPIError(results);
-            });
+        endpoint = '/api/users?email=';
     } else {
-        var data = {
-            server: '/api/servers/' + serverUUID,
-            user: '/api/users/' + username,
-            isAdmin: isAdmin
-        }
-        submitNewUserAccessFinal(data);
+        endpoint = '/api/users?username=';
     }
+    $.when(CallAuthoriser('GET', endpoint + encodeURI(username)))
+        .done(function (results) {
+            if (results[0]) {
+                var data = {
+                    server: '/api/servers/' + serverUUID,
+                    user: results[0]['@id'],
+                    isAdmin: isAdmin
+                }
+                submitNewUserAccessFinal(data);
+            } else {
+                handleAPIError(results, 'No user found with that e-mail address.');
+            }
+        })
+        .fail(function (results) {
+            handleAPIError(results);
+        });
 }
 
 function submitNewUserAccessFinal(data)

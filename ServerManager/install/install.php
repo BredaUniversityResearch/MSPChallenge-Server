@@ -64,7 +64,7 @@ if ($servermanager->install($user)) {
             "serverName" => $em->getRepository(Setting::class)->findOneBy(['name' => 'server_name'])
                 ->getValue()
         ],
-        "user" => "/api/users/".$user->data()->username
+        "user" => "/api/users/".$user->data()->id
     ];
     Base::postCallAuthoriser("server_users", $params);
     // @codingStandardsIgnoreStart

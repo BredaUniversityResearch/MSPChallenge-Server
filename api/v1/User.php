@@ -75,9 +75,8 @@ class User extends Base
                 }
             } else {
                 // an external username/password authentication provider should be used
-                $user_name = $this->callProvidersAuthentication($provider, $user_name, $country_password);
-                // now do the authorization
-                if (!empty($user_name)) {
+                if ($this->callProvidersAuthentication($provider, $user_name, $country_password)) {
+                    // now do authorization
                     if ($country_id == 1) {
                         $userlist = $password_admin["admin"]["value"];
                     } elseif ($country_id == 2) {
@@ -85,7 +84,7 @@ class User extends Base
                     } else {
                         $userlist = $password_player["value"][$country_id];
                     }
-                    $userarray = explode(" ", $userlist);
+                    $userarray = explode("|", $userlist);
                     if (!in_array($user_name, $userarray)) {
                         throw new Exception("You are not allowed to log on for that country.");
                     }
