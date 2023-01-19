@@ -35,7 +35,6 @@ services:
       context: .
       target: app_php
       args:
-        DOCKER: 1
         SYMFONY_VERSION: ${SYMFONY_VERSION:-}
         STABILITY: ${STABILITY:-stable}
     restart: unless-stopped
@@ -50,6 +49,7 @@ services:
       retries: 3
       start_period: 30s
     environment:
+      DOCKER: 1
       DATABASE_HOST: database
       # Run "composer require symfony/mercure-bundle" to install and configure the Mercure integration
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://caddy/.well-known/mercure}
