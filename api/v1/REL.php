@@ -29,7 +29,7 @@ class REL extends Base
     public function GetRestrictionGeometry(): array
     {
         //TODO: Check with Marin what  we should send here... Just windfarms or all of the geometry that SEL uses...
-        $result = Database::GetInstance()->query(
+        $result = $this->getDatabase()->query(
             "SELECT geometry_id as geometry_id,
 			geometry_geometry as geometry, 
 			geometry_type as geometry_type
@@ -97,7 +97,7 @@ class REL extends Base
         $rasterLayerData = [];
         $rasterLayerData["layer_name"] = $rasterLayerName;
 
-        $existingLayer = Database::GetInstance()->query(
+        $existingLayer = $this->getDatabase()->query(
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
             array($rasterLayerData["layer_name"])
         );
@@ -113,7 +113,7 @@ class REL extends Base
         $jsonRasterData = json_encode($rasterData);
 
         if (count($existingLayer) > 0) {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "UPDATE layer SET layer_raster = ? WHERE layer_id = ?",
                 array($jsonRasterData, $existingLayer[0]["layer_id"])
             );
@@ -138,7 +138,7 @@ class REL extends Base
                 "REL Adding in raster layer " . $rasterData["layer_name"] .
                 " with default values. Defining this layer in the config file will allow you to modify the values."
             );
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "
                 INSERT INTO layer (
                     layer_name, layer_short, layer_geotype, layer_category, layer_subcategory, layer_raster, layer_type

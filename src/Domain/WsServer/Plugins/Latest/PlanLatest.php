@@ -215,11 +215,61 @@ class PlanLatest extends CommonBase
                                 unset($g);
                             }
                             unset($d);
+                            $this->formatPlans($plans);
                             return $plans;
                         });
                 });
         });
         return $this->isAsync() ? $promise : await($promise);
+    }
+
+    /**
+     * new format since new UI style (2022-11-24), see MSP-4142
+     *
+     * @param array $plans
+     * @return void
+     */
+    private function formatPlans(array &$plans): void
+    {
+        $plans = collect($plans)
+            ->map(function ($plan) {
+                unset($plan['type']);
+                $plan['policies'] = [];
+                // PolicyUpdateEnergyPlan
+                if (!empty($plan['grids'])) {
+                    $plan['policies'][] = [
+                        'policy_type' => 'energy',
+                        'alters_energy_distribution' => $plan['alters_energy_distribution'],
+                        'grids' => $plan['grids'],
+                        'deleted_grids' => $plan['deleted_grids'],
+                        'energy_error' => $plan['energy_error']
+                    ];
+                }
+                unset(
+                    $plan['alters_energy_distribution'],
+                    $plan['grids'],
+                    $plan['deleted_grids'],
+                    $plan['energy_error']
+                );
+                // PolicyUpdateFishingPlan
+                if (!empty($plan['fishing'])) {
+                    $plan['policies'][] = [
+                        'policy_type' => 'fishing',
+                        'fishing' => $plan['fishing']
+                    ];
+                }
+                unset($plan['fishing']);
+                // PolicyUpdateShippingPlan
+                if (!empty($plan['restriction_settings'])) {
+                    $plan['policies'][] = [
+                        'policy_type' => 'shipping',
+                        'restriction_settings' => $plan['restriction_settings']
+                    ];
+                }
+                unset($plan['restriction_settings']);
+                return $plan;
+            })
+            ->all();
     }
 
     /**

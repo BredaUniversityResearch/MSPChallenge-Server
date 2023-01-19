@@ -26,14 +26,8 @@ class GameTick extends TickBase
      */
     public function tick(bool $showDebug = false): PromiseInterface
     {
-        $plan = new PlanTick();
-        $this->asyncDataTransferTo($plan);
-        // Plan tick first: to clean up plans
-        return $plan->tick()
-            // fetch game information, incl. state name
-            ->then(function (/*Result $result*/) {
-                return $this->getTickData();
-            })
+        // fetch game information, incl. state name
+        return $this->getTickData()
             ->then(function (Result $result) use ($showDebug) {
                 if (null !== $tickData = $result->fetchFirstRow()) {
                     if (null !== $promise = $this->tryTickServer($tickData, $showDebug)) {

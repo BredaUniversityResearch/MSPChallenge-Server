@@ -44,12 +44,13 @@ class MEL extends Base
     public function OnReimport(array $config): void
     {
         //wipe the table for testing purposes
-        Database::GetInstance()->query("TRUNCATE TABLE mel_layer");
-        Database::GetInstance()->query("TRUNCATE TABLE fishing");
+        $db = $this->getDatabase();
+        $db->query("TRUNCATE TABLE mel_layer");
+        $db->query("TRUNCATE TABLE fishing");
 
         //Check the config file.
         if (isset($config["fishing"])) {
-            $countries = Database::GetInstance()->query("SELECT * FROM country WHERE country_is_manager = 0");
+            $countries = $db->query("SELECT * FROM country WHERE country_is_manager = 0");
             foreach ($config["fishing"] as $fleet) {
                 if (isset($fleet["initialFishingDistribution"])) {
                     foreach ($countries as $country) {
@@ -78,14 +79,14 @@ class MEL extends Base
 
             if ($pressureId != -1) {
                 foreach ($pressure['layers'] as $layer) {
-                    $layerid = Database::GetInstance()->query(
+                    $layerid = $db->query(
                         "SELECT layer_id FROM layer WHERE layer_name=?",
                         array($layer['name'])
                     );
                     if (!empty($layerid)) {
                         $layerid = $layerid[0]['layer_id'];
                             
-                        $mellayer = Database::GetInstance()->query(
+                        $mellayer = $db->query(
                             "
                             SELECT mel_layer_id FROM mel_layer WHERE mel_layer_pressurelayer=? AND mel_layer_layer_id=?
                             ",
@@ -93,7 +94,7 @@ class MEL extends Base
                         );
                         if (empty($mellayer)) {
                             //add a layer to the mel_layer table for faster accessing
-                            Database::GetInstance()->query(
+                            $db->query(
                                 "INSERT INTO mel_layer (mel_layer_pressurelayer, mel_layer_layer_id) VALUES (?, ?)",
                                 array($pressureId, $layerid)
                             );
@@ -115,7 +116,7 @@ class MEL extends Base
     private function SetupMELLayer(string $melLayerName, array $config): int
     {
         $layerName = "mel_" . str_replace(" ", "_", $melLayerName);
-        $data = Database::GetInstance()->query(
+        $data = $this->getDatabase()->query(
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name=?",
             array($layerName)
         );
@@ -130,7 +131,7 @@ class MEL extends Base
         if (empty($data)) {
             //create new layer
             $rasterFormat = json_encode($rasterProperties);
-            $layerId = Database::GetInstance()->query(
+            $layerId = $this->getDatabase()->query(
                 "
                 INSERT INTO layer (
                     layer_name, layer_short, layer_geotype, layer_group, layer_category, layer_subcategory, layer_raster
@@ -144,7 +145,7 @@ class MEL extends Base
             $existingRasterProperties = json_decode($data[0]['layer_raster'], true);
             $rasterProperties = array_merge($existingRasterProperties ?? array(), $rasterProperties);
             $rasterFormat = json_encode($rasterProperties);
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "UPDATE layer SET layer_raster=? WHERE layer_id = ?",
                 array($rasterFormat, $layerId)
             );
@@ -158,7 +159,7 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function InitialFishing(array $fishing_values): void
     {
-        $existingPlans = Database::GetInstance()->query(
+        $existingPlans = $this->getDatabase()->query(
             "SELECT plan.plan_id FROM plan WHERE plan.plan_gametime = -1 AND plan.plan_type LIKE '_,1,_'"
         );
         if (count($existingPlans) > 0) {
@@ -168,10 +169,10 @@ class MEL extends Base
             return;
         }
 
-        $countries = Database::GetInstance()->query("SELECT country_id FROM country WHERE country_is_manager != 1");
+        $countries = $this->getDatabase()->query("SELECT country_id FROM country WHERE country_is_manager != 1");
         $numCountries = count($countries);
 
-        $planid = Database::GetInstance()->query(
+        $planid = $this->getDatabase()->query(
             "
             INSERT INTO plan (
                 plan_name, plan_country_id, plan_gametime, plan_state, plan_type) VALUES (?, ?, ?, ?, ?
@@ -216,7 +217,7 @@ class MEL extends Base
             foreach ($countries as $country) {
                 $countryId = $country["country_id"];
                 $weight = $weightsByFleet[$name][$countryId] ?? 0.1;
-                Database::GetInstance()->query(
+                $this->getDatabase()->query(
                     "
                     INSERT INTO fishing (
                         fishing_country_id, fishing_plan_id, fishing_type, fishing_amount, fishing_active
@@ -234,7 +235,7 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateLayer(string $layer_name): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE layer SET layer_lastupdate=? WHERE layer_name=?",
             array(microtime(true), $layer_name)
         );
@@ -246,7 +247,7 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Update(): array
     {
-        $r = Database::GetInstance()->query(
+        $r = $this->getDatabase()->query(
             "SELECT layer_name, layer_melupdate_construction FROM layer WHERE layer_melupdate=?",
             array(1)
         );
@@ -262,7 +263,7 @@ class MEL extends Base
         }
 
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE layer SET layer_melupdate=0");
+        $this->getDatabase()->query("UPDATE layer SET layer_melupdate=0");
 
         return $layers;
     }
@@ -296,7 +297,7 @@ class MEL extends Base
     public function TickDone(): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_mel_lastmonth=game_currentmonth");
+        $this->getDatabase()->query("UPDATE game SET game_mel_lastmonth=game_currentmonth");
     }
 
     /**
@@ -305,7 +306,7 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetFishing(int $game_month): array
     {
-        $data = Database::GetInstance()->query(
+        $data = $this->getDatabase()->query(
             "SELECT SUM(fishing_amount) as scalar, fishing_type as name FROM fishing 
 									LEFT JOIN plan ON plan.plan_id=fishing.fishing_plan_id
 									WHERE fishing_active = 1 AND plan_gametime <= ?
@@ -336,7 +337,7 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GeometryExportName(string $name, int $layer_type = -1, bool $construction_only = false): ?array
     {
-        $id = Database::GetInstance()->query(
+        $id = $this->getDatabase()->query(
             "SELECT layer_id, layer_geotype, layer_raster FROM layer WHERE layer_name=?",
             array($name)
         );
@@ -370,7 +371,7 @@ class MEL extends Base
             $planStateSelector = "plan_layer_state=\"ASSEMBLY\"";
         }
 
-        $geometry = Database::GetInstance()->query("SELECT layer_id, geometry_geometry as g FROM layer 
+        $geometry = $this->getDatabase()->query("SELECT layer_id, geometry_geometry as g FROM layer 
                 LEFT JOIN plan_layer ON plan_layer_layer_id=layer_id
                 LEFT JOIN geometry ON geometry_layer_id=layer_id
                 WHERE (

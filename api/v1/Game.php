@@ -34,7 +34,8 @@ class Game extends Base
         ["Setupfilename", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], // nominated for full security
         "Speed",
         ["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
-        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        "PolicySimSettings"
     );
 
     public function __construct(string $method = '')
@@ -61,7 +62,7 @@ class Game extends Base
         }
 
         $outputFile = $outputDirectory."AutoDump_".date("Y-m-d_H-i").".sql";
-        Database::GetInstance($this->getGameSessionId())->createMspDatabaseDump($outputFile, false);
+        $this->getDatabase()->createMspDatabaseDump($outputFile, false);
     }
 
     /**
@@ -75,17 +76,6 @@ class Game extends Base
     {
         $data = $this->GetGameConfigValues();
 
-        $configuredSimulations = array();
-        if (isset($data['MEL'])) {
-            $configuredSimulations[] = "MEL";
-        }
-        if (isset($data['SEL'])) {
-            $configuredSimulations[] = "SEL";
-        }
-        if (isset($data['CEL'])) {
-            $configuredSimulations[] = "CEL";
-        }
-
         foreach ($data as $key => $d) {
             if ((is_array($d)) && $key != "expertise_definitions" && $key != "dependencies"
             ) {
@@ -93,7 +83,6 @@ class Game extends Base
             }
         }
 
-        $data['configured_simulations'] = $configuredSimulations;
         if (!isset($data['wiki_base_url'])) {
             $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
         }
@@ -126,7 +115,7 @@ class Game extends Base
     public function NextMonth(): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
+        $this->getDatabase()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
     }
 
     /**
@@ -136,7 +125,7 @@ class Game extends Base
     public function LoadConfigFile(string $filename = ''): string
     {
         if ($filename == "") {    //if there's no file given, use the one in the database
-            $data = Database::GetInstance($this->getGameSessionId())->query("SELECT game_configfile FROM game");
+            $data = $this->getDatabase()->query("SELECT game_configfile FROM game");
 
             $path = GameSession::getConfigDirectory() . $data[0]['game_configfile'];
         } else {
@@ -190,7 +179,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCurrentMonthAsId(): int
     {
-        $currentMonth = Database::GetInstance()->query("SELECT game_currentmonth, game_state FROM game")[0];
+        $currentMonth = $this->getDatabase()->query("SELECT game_currentmonth, game_state FROM game")[0];
         if ($currentMonth["game_state"] == "SETUP") {
             $currentMonth["game_currentmonth"] = -1;
         }
@@ -205,7 +194,7 @@ class Game extends Base
     public function Setupfilename(string $configFilename): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_configfile=?", array($configFilename));
+        $this->getDatabase()->query("UPDATE game SET game_configfile=?", array($configFilename));
     }
 
     /**
@@ -224,12 +213,12 @@ class Game extends Base
         }
 
         //Admin country.
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
             array(1, $adminColor, 1)
         );
         //Region manager country.
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
             array(2, $regionManagerColor, 1)
         );
@@ -238,7 +227,7 @@ class Game extends Base
             if ($layerMeta['layer_name'] == $configData['countries']) {
                 foreach ($layerMeta['layer_type'] as $country) {
                     $countryId = $country['value'];
-                    Database::GetInstance()->query(
+                    $this->getDatabase()->query(
                         "
                         INSERT INTO country (country_id, country_name, country_colour, country_is_manager)
                         VALUES (?, ?, ?, ?)
@@ -249,7 +238,7 @@ class Game extends Base
             }
         }
         //Setup Admin Test User so we have a default session we can use for testing.
-        Database::GetInstance()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
+        $this->getDatabase()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
     }
 
     /**
@@ -275,7 +264,7 @@ class Game extends Base
         $str = substr($str, 0, -1);
 
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE game SET game_planning_era_realtime=?, game_eratime=?",
             array($str, $data['era_total_months'])
         );
@@ -306,7 +295,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = false)
     {
-        Database::GetInstance()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
+        $this->getDatabase()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
 
         $activeQueryPart = "";
         if ($onlyActiveLayers) {
@@ -314,12 +303,12 @@ class Game extends Base
         }
 
         if ($sort) {
-            $data = Database::GetInstance()->query(
+            $data = $this->getDatabase()->query(
                 "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart." ORDER BY layer_name ASC",
                 array()
             );
         } else {
-            $data = Database::GetInstance()->query(
+            $data = $this->getDatabase()->query(
                 "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart,
                 array()
             );
@@ -328,8 +317,52 @@ class Game extends Base
         for ($i = 0; $i < sizeof($data); $i++) {
             Layer::FixupLayerMetaData($data[$i]);
         }
+        $this->addLayerDependenciesToMetaData($data);
 
         return $data;
+    }
+
+    /**
+     * This method adds "layer_dependencies" int[] field to a layer which holds all layer ids the layer depends on for
+     *   editing.
+     * Currently, that is, all the grey energy layers depend on the grey cable layer and all the green energy layers
+     *   on the green cable layer.
+     *
+     * @param array $meta input meta data from Meta()
+     * @return void
+     */
+    private function addLayerDependenciesToMetaData(array &$meta): void
+    {
+        // find cable layers
+        $cableLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'cable')->keyBy('layer_id');
+        if ($cableLayers->isEmpty()) {
+            return;
+        }
+        // if cable layers exists, go through all layers
+        foreach ($meta as &$layer) {
+            $layer['layer_dependencies'] = [];
+
+            // has to be a non-cable
+            if ($cableLayers->has($layer['layer_id'])) {
+                continue;
+            }
+            // if they have the required energy editing type: "transformer", "socket", "sourcepoint" or "sourcepolygon"
+            if (!in_array(
+                $layer['layer_editing_type'],
+                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
+            )) {
+                continue;
+            }
+
+            // find the corresponding green or grey cable layer
+            if (null === $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])) {
+                continue;
+            }
+
+            // add the associated cable layer id to their dependency
+            $layer['layer_dependencies'][] = $cableLayer['layer_id'];
+        }
+        unset($layer);
     }
 
     /**
@@ -343,7 +376,7 @@ class Game extends Base
     public function Planning(int $months): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_planning_gametime=?", array($months));
+        $this->getDatabase()->query("UPDATE game SET game_planning_gametime=?", array($months));
     }
 
     /**
@@ -357,7 +390,7 @@ class Game extends Base
     public function Realtime(int $realtime): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
+        $this->getDatabase()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
     }
 
     /**
@@ -367,7 +400,7 @@ class Game extends Base
     private function SetStartDate(int $a_startYear): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_start=?", array($a_startYear));
+        $this->getDatabase()->query("UPDATE game SET game_start=?", array($a_startYear));
     }
 
     /**
@@ -382,7 +415,7 @@ class Game extends Base
     public function FutureRealtime(string $realtime): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
+        $this->getDatabase()->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
     }
 
     /**
@@ -395,7 +428,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function State(string $state): void
     {
-        $currentState = Database::GetInstance()->query("SELECT game_state FROM game")[0];
+        $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
         if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
             throw new Exception("Invalid current state of ".$currentState["game_state"]);
         }
@@ -407,11 +440,70 @@ class Game extends Base
         }
 
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE game SET game_lastupdate = ?, game_state=?",
             array(microtime(true), $state)
         );
         await($this->onGameStateUpdated($state));
+    }
+
+    /**
+     * @apiGroup Game
+     * @throws Exception
+     * @api {POST} /game/PolicySimSettings PolicySimSettings
+     * @apiDescription Get policy and simulation settings
+     * @apiSuccess {string} JSON object
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function PolicySimSettings()
+    {
+        // just enable all policy types?
+        $policySettings[] = [
+            'policy_type' => 'fishing'
+        ];
+        $policySettings[] = [
+            'policy_type' => 'shipping'
+        ];
+        $policySettings[] = [
+            'policy_type' => 'energy'
+        ];
+
+        $simulationSettings = [];
+        $data = $this->GetGameConfigValues();
+        if (isset($data['MEL'])) {
+            $mel = new MEL();
+            $simulationSettings[] = [
+                'simulation_type' => 'MEL',
+                'content' => $mel->Config()
+            ];
+        }
+        if (isset($data['SEL'])) {
+            $sel = new SEL();
+            $selGameClientConfig = $sel->GetSELGameClientConfig();
+            if (is_object($selGameClientConfig)) {
+                $selGameClientConfig = get_object_vars($selGameClientConfig);
+            }
+            $simulationSettings[] = array_merge(
+                [
+                    'simulation_type' => 'SEL',
+                    'kpis' => $sel->GetKPIDefinition()
+                ],
+                // E.g. returns key directionality_icon_color
+                $selGameClientConfig
+            );
+        }
+        if (isset($data['CEL'])) {
+            $cel = new CEL();
+            $simulationSettings[] = array_merge([
+                'simulation_type' => 'CEL'
+            ], $cel->GetCELConfig());
+        }
+
+        return [
+            'policy_settings' => $policySettings,
+            'simulation_settings' => $simulationSettings
+        ];
     }
 
     /**
@@ -435,7 +527,7 @@ class Game extends Base
             return $this->watchdog_address;
         }
 
-        $result = Database::GetInstance($this->getGameSessionId())->query(
+        $result = $this->getDatabase()->query(
             "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
         );
         if (count($result) > 0) {
@@ -638,7 +730,7 @@ class Game extends Base
     public function GetActualDateForSimulatedMonth(int $simulated_month): array
     {
         $result = array("year" => -1, "month_of_year" => -1);
-        $startYear = Database::GetInstance()->query("SELECT game_start FROM game LIMIT 0,1");
+        $startYear = $this->getDatabase()->query("SELECT game_start FROM game LIMIT 0,1");
                 
         if (count($startYear) == 1) {
             $result["year"] = floor($simulated_month / 12) + $startYear[0]["game_start"];
@@ -716,7 +808,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCountries(): array
     {
-        return Database::GetInstance()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
+        return $this->getDatabase()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
     }
 
     /**

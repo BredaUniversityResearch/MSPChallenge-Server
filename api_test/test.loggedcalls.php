@@ -16,7 +16,10 @@ class TestLoggedCalls extends TestBase
      */
     public function RunLoggedCalls() // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     {
-        $targetFolder = APIHelper::getInstance()->GetBaseFolder().UnitTestSupport::GetIntermediateFolder();
+        $apiHelper = APIHelper::getInstance();
+        $targetFolder = $apiHelper->GetBaseFolder().UnitTestSupport::GetIntermediateFolder(
+            $apiHelper->GetGameSessionIdForCurrentRequest()
+        );
 
         $targetSubtaskMethod = new ReflectionMethod($this, "RunStoredRequest");
         $targetSubtaskMethod->setAccessible(true);

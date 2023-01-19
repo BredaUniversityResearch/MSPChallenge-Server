@@ -126,14 +126,14 @@ class GameLatest extends CommonBase
                                         $newTime,
                                         $data
                                     )
-                                    ->then(function (array $results) use (
+                                    ->then(function (Result $queryResult) use (
                                         $lastUpdateTime,
                                         $user,
                                         $newTime,
                                         &$data
                                     ) {
                                         return $this->latestLevel9(
-                                            $results,
+                                            $queryResult,
                                             $lastUpdateTime,
                                             $newTime,
                                             $data
@@ -398,7 +398,9 @@ class GameLatest extends CommonBase
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['energy'] = $energyData;
+        $data['policy_updates'][] = array_merge([
+            'policy_type' => 'energy',
+        ], $energyData);
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             wdo((microtime(true) - $newTime) . ' elapsed after energy');
         }
@@ -427,7 +429,18 @@ class GameLatest extends CommonBase
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['kpi'] = $queryResultRows;
+        $data['simulation_updates'][0] = [
+            'simulation_type' => 'CEL',
+            'kpi' => $queryResultRows['energy']
+        ];
+        $data['simulation_updates'][1] = [
+            'simulation_type' => 'MEL',
+            'kpi' => $queryResultRows['ecology']
+        ];
+        $data['simulation_updates'][2] = [
+            'simulation_type' => 'SEL',
+            'kpi' => $queryResultRows['shipping']
+        ];
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             wdo((microtime(true) - $newTime) . ' elapsed after kpi<br />');
@@ -444,13 +457,12 @@ class GameLatest extends CommonBase
      * @throws Exception
      */
     private function latestLevel9(
-        array $queryResults,
+        Result $queryResult,
         float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['warning']['plan_issues'] = $queryResults[0]->fetchAllRows();
-        $data['warning']['shipping_issues'] = $queryResults[1]->fetchAllRows();
+        $data['simulation_updates'][2]['shipping_issues'] = $queryResult->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
             wdo((microtime(true) - $newTime) . ' elapsed after warning<br />');
@@ -471,7 +483,7 @@ class GameLatest extends CommonBase
         int $user,
         float $newTime,
         array &$data
-    ): ?PromiseInterface {
+    ): PromiseInterface {
         $data['objectives'] = $result->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
@@ -492,8 +504,7 @@ class GameLatest extends CommonBase
             empty($data['warning']) &&
             empty($data['raster']) &&
             empty($data['objectives'])) {
-            $data = '';
-            return null;
+            return resolveOnFutureTick(new Deferred(), '')->promise();
         }
 
         return $this->getAsyncDatabase()->update(

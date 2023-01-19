@@ -46,7 +46,7 @@ class Objective extends Base
         if ($country != -1) {
             array_push($countries, $country);
         } else {
-            $data = Database::GetInstance()->query("SELECT country_id FROM country WHERE country_is_manager = 0");
+            $data = $this->getDatabase()->query("SELECT country_id FROM country WHERE country_is_manager = 0");
 
             foreach ($data as $d) {
                 array_push($countries, $d['country_id']);
@@ -54,7 +54,7 @@ class Objective extends Base
         }
 
         foreach ($countries as $country) {
-            $id = Database::GetInstance()->query(
+            $id = $this->getDatabase()->query(
                 "
                 INSERT INTO objective (
                     objective_country_id, objective_title, objective_description, objective_deadline,
@@ -72,7 +72,7 @@ class Objective extends Base
                     $sectorName = null;
                 }
 
-                Database::GetInstance()->query(
+                $this->getDatabase()->query(
                     "
                     INSERT INTO task (
                         task_objective_id, task_sectorname, task_category, task_subcategory, task_function, task_value,
@@ -98,7 +98,7 @@ class Objective extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Delete(int $id): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE objective SET objective_active=?, objective_lastupdate=? WHERE objective_id=?",
             array(0, microtime(true), $id)
         );
@@ -115,7 +115,7 @@ class Objective extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetCompleted(int $objective_id, int $completed): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE objective SET objective_complete = ?, objective_lastupdate = ? WHERE objective_id = ?",
             array($completed, microtime(true), $objective_id)
         );
@@ -128,7 +128,7 @@ class Objective extends Base
     public function Export(array &$configObject): void
     {
         // move to deprecate - was used in the old tools class only as far as I know (Harald)
-        $objectives = Database::GetInstance()->query("SELECT objective_id, 
+        $objectives = $this->getDatabase()->query("SELECT objective_id, 
 					objective_country_id as country_id, 
 					objective_title as title, 
 					objective_description as description, 
@@ -152,7 +152,7 @@ class Objective extends Base
         }
 
         foreach ($config['objectives'] as $objective) {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "
                 INSERT INTO objective (
                     objective_country_id, objective_title, objective_description, objective_deadline,
