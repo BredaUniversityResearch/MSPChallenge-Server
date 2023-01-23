@@ -29,7 +29,9 @@ RUN apk add --no-cache \
 		file \
 		gettext \
 		git \
-	;
+        openssl1.1-compat \
+        libgdiplus \
+    ;
 
 RUN set -eux; \
     install-php-extensions \
