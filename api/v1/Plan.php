@@ -2174,7 +2174,7 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Fishing(int $plan, array $fishing_values): void
+    public function Fishing(int $plan, array $fishing_values): ?PromiseInterface
     {
         $this->DeleteFishing($plan);
 
@@ -2193,6 +2193,12 @@ class Plan extends Base
             "UPDATE plan SET plan_lastupdate=? WHERE plan_id=?",
             array(microtime(true), $plan)
         );
+
+        // @todo: fake it till you make it... but fix it later!
+        if ($this->isAsync()) {
+            return resolveOnFutureTick(new Deferred())->promise();
+        }
+        return null;
     }
 
     /**
