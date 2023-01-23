@@ -90,9 +90,9 @@ class CEL extends Base
         $implementedPlans = $this->getDatabase()->query(
             "
             SELECT plan_type FROM plan
-            WHERE plan_gametime = ? AND plan_state = 'IMPLEMENTED' AND plan_type LIKE '1,_,_'
+            WHERE plan_gametime = ? AND plan_state = 'IMPLEMENTED' AND (plan_type & ? = ?)
             ",
-            array($time['game_currentmonth'])
+            array($time['game_currentmonth'], PolicyType::ENERGY, PolicyType::ENERGY)
         );
         return (count($implementedPlans) > 0);
     }

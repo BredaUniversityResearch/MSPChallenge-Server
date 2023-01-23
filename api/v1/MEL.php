@@ -160,7 +160,8 @@ class MEL extends Base
     public function InitialFishing(array $fishing_values): void
     {
         $existingPlans = $this->getDatabase()->query(
-            "SELECT plan.plan_id FROM plan WHERE plan.plan_gametime = -1 AND plan.plan_type LIKE '_,1,_'"
+            "SELECT plan.plan_id FROM plan WHERE plan.plan_gametime = -1 AND (plan.plan_type & ? = ?)",
+            [PolicyType::FISHING, PolicyType::FISHING]
         );
         if (count($existingPlans) > 0) {
             // In this case we already have something in the database that is a fishing plan, might be of a previous
@@ -178,7 +179,7 @@ class MEL extends Base
                 plan_name, plan_country_id, plan_gametime, plan_state, plan_type) VALUES (?, ?, ?, ?, ?
             )
             ",
-            array("", 1, -1, "IMPLEMENTED", "0,1,0"),
+            array("", 1, -1, "IMPLEMENTED", PolicyType::FISHING),
             true
         );
 

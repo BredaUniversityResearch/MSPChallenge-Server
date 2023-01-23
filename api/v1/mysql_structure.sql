@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`plan` (
   `plan_previousstate` ENUM('NONE', 'DESIGN', 'CONSULTATION', 'APPROVAL', 'APPROVED') NOT NULL DEFAULT 'NONE',
   `plan_active` TINYINT NOT NULL DEFAULT 1,
   `plan_constructionstart` INT NULL,
-  `plan_type` VARCHAR(75) NOT NULL COMMENT 'If a plan is energy/ecology/shipping. Comma separated value',
+  `plan_type` INT NOT NULL DEFAULT 0 COMMENT 'If a plan is energy/fishing/shipping. bit flags',
   `plan_energy_error` TINYINT(1) NOT NULL DEFAULT 0,
   `plan_alters_energy_distribution` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`plan_id`),

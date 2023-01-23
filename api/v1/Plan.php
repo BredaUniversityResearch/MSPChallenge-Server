@@ -43,12 +43,50 @@ class Plan extends Base
         "AddApproval",
         "Vote",
         "DeleteApproval",
-        "SetEnergyDistribution"
+        "SetEnergyDistribution",
+        "SetPolicy"
     );
 
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
+    }
+
+    public static function convertToNewPlanType(string $planType): int
+    {
+        $newPlanType = (int)$planType; // assuming a correct db value, which is int of bit flags.
+
+        // detect old way of comma separated of 3 bits, order has meaning
+        if (1 === preg_match('/(\d),(\d),(\d)/', $planType, $matches)) { // e.g. 0,1,0
+            array_shift($matches);
+            array_walk($matches, function (string $item, int $key) use (&$newPlanType) {
+                if ($item === '0') {
+                    return;
+                }
+                $newPlanType |= array_values(PolicyType::getConstants())[$key];
+            });
+            return $newPlanType;
+        }
+
+        // detect old way of up to 3 comma separated strings energy/ecology/shipping
+        //   but also accept the new "fishing" for ecology, and random order
+        if (1 === preg_match(
+            '/(energy|ecology|fishing|shipping)'.
+            '(?:,(energy|ecology|fishing|shipping)(?:,(energy|ecology|fishing|shipping))?)?/',
+            $planType,
+            $matches
+        )) {
+            array_shift($matches);
+            array_walk($matches, function (string $item) use (&$newPlanType) {
+                if ($item == 'ecology') {
+                    $item = 'fishing';
+                }
+                $newPlanType |= PolicyType::getConstants()[strtoupper($item)];
+            });
+            return $newPlanType;
+        }
+
+        return $newPlanType;
     }
 
     /**
@@ -82,7 +120,7 @@ class Plan extends Base
                 plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_alters_energy_distribution
             ) VALUES (?, ?, ?, ?, ?, ?)
             ",
-            array($country, $name, $time, microtime(true), $type, $alters_energy_distribution),
+            [$country, $name, $time, microtime(true), self::convertToNewPlanType($type), $alters_energy_distribution],
             true
         );
         foreach ($layers as $layer) {
@@ -332,7 +370,7 @@ class Plan extends Base
         }
 
         $previousState = $currentPlanData[0]['plan_state'];
-        $isEnergyPlan = explode(",", $currentPlanData[0]['plan_type'])[0] == "1";
+        $isEnergyPlan = $currentPlanData[0]['plan_type'] == PolicyType::ENERGY;
 
         $performEnergyDependencyCheck = false;  //Design / Deleted -> Concultation / Approval / Approved
         $performEnergyOverlapCheck = false;     //Concultation / Approval / Approved -> Design / Deleted
@@ -1299,7 +1337,8 @@ class Plan extends Base
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
                 ",
                 array(
-                    $plan['plan_country_id'], $plan['plan_name'], $plan['plan_gametime'], 0, $plan['plan_type'],
+                    $plan['plan_country_id'], $plan['plan_name'], $plan['plan_gametime'], 0,
+                    self::convertToNewPlanType($plan['plan_type']),
                     $plan['plan_alters_energy_distribution'], "APPROVED"
                 ),
                 true
@@ -1994,7 +2033,7 @@ class Plan extends Base
     {
         $this->getDatabase()->query(
             "UPDATE plan SET plan_type=?, plan_lastupdate=? WHERE plan_id=?",
-            array($type, microtime(true), $id)
+            array(self::convertToNewPlanType($type), microtime(true), $id)
         );
     }
 
@@ -2384,5 +2423,34 @@ class Plan extends Base
                 }
             }
         }
+    }
+
+    /**
+     * @apiGroup Plan
+     * @throws Exception
+     * @api {POST} /plan/SetPolicy (De)activate a plan policy
+     * @apiParam {int} id plan id
+     * @apiParam {string} policy_type [energy|fishing|shipping]
+     * @apiDescription (De)activate a plan policy
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function SetPolicy(int $plan_id, string $policy_type, bool $active): ?PromiseInterface
+    {
+        $policyTypes = PolicyType::getConstants();
+        $policyTypeKey = strtoupper($policy_type);
+        if (!array_key_exists($policyTypeKey, $policyTypes)) {
+            throw new Exception('Encountered invalid policy type: ' . $policy_type);
+        }
+        $policyTypeValue = $policyTypes[$policyTypeKey];
+        $bitWiseOperation = $active ? '|' : '&~';
+        $promise = $this->getAsyncDatabase()->queryBySQL(
+            'UPDATE plan SET plan_type = plan_type ' . $bitWiseOperation . ' ? WHERE plan_id = ?',
+            [$policyTypeValue, $plan_id]
+        );
+        if ($this->isAsync()) {
+            return $promise;
+        }
+        await($promise);
+        return null;
     }
 }
