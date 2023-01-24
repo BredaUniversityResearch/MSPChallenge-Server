@@ -2074,7 +2074,7 @@ class Plan extends Base
     {
         $toPromiseFunctions = [];
         foreach ($settings as $setting) {
-            $toPromiseFunctions[] = tpf(function() use ($plan_id, $setting) {
+            $toPromiseFunctions[] = tpf(function () use ($plan_id, $setting) {
                 return $this->getAsyncDatabase()->queryBySQL(
                     'INSERT INTO plan_restriction_area (
                     plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id,
@@ -2088,7 +2088,7 @@ class Plan extends Base
                 );
             });
         }
-        $toPromiseFunctions[] = tpf(function() use ($plan_id) {
+        $toPromiseFunctions[] = tpf(function () use ($plan_id) {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             return $this->getAsyncDatabase()->query(
                 $qb
