@@ -474,10 +474,12 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
     {
-        self::StartSimulationExe([
-            'exe' => 'MSW'.(str_starts_with(php_uname(), "Windows") ? '.exe' : ''),
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/v1/'
-        ]);
+        // todo: startup the watchdog inside the docker container once the simulations are fully compatible with Linux
+        //  current alternative is running MSW.exe as a service on the Windows host running docker
+//        self::StartSimulationExe([
+//            'exe' => 'MSW'.(str_starts_with(php_uname(), "Windows") ? '.exe' : ''),
+//            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/v1/'
+//        ]);
     }
 
     /**
@@ -538,6 +540,7 @@ class Game extends Base
                 // so the Watchdog is off, and now it should be switched on
                 function (/*Exception $e*/) use ($deferred) {
                     self::StartWatchdog();
+                    // todo: do another watchdog alive test, with a repeat and failure mechanism ?
                     sleep(5);
                     $deferred->resolve();
                 }
