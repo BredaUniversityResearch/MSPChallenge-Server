@@ -1,0 +1,20 @@
+{
+	"available_simulations": [
+		{
+			"simulation_name": "CEL",
+			"relative_exe_path": "CEL.exe"
+		},
+		{
+			"simulation_name": "MEL",
+			"relative_exe_path": "MEL.exe"
+		},
+		{
+			"simulation_name": "SEL",
+			"relative_exe_path": "SEL.exe"
+		},
+		{
+			"simulation_name": "REL",
+			"relative_exe_path": "REL.exe"
+		}
+	]
+}
