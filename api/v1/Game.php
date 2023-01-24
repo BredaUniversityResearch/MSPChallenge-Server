@@ -14,7 +14,7 @@ use function App\await;
 
 class Game extends Base
 {
-    private string $watchdog_address = '';
+    private ?string $watchdog_address = null;
     const WATCHDOG_PORT = 45000;
 
     private const ALLOWED = array(
@@ -428,25 +428,24 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetWatchdogAddress(bool $withPort = false): string
     {
-        if (!empty($this->watchdog_address)) {
-            if ($withPort) {
-                return $this->watchdog_address.':'.self::WATCHDOG_PORT;
-            }
-            return $this->watchdog_address;
+        $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
+        if (null === $this->watchdog_address) {
+            return '';
         }
+        /** @noinspection HttpUrlsUsage */
+        $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
+        return $this->watchdog_address.($withPort ? ':'.self::WATCHDOG_PORT : '');
+    }
 
+    private function getWatchdogAddressFromDb(): ?string
+    {
         $result = Database::GetInstance($this->getGameSessionId())->query(
             "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
         );
-        if (count($result) > 0) {
-            /** @noinspection HttpUrlsUsage */
-            $this->watchdog_address = 'http://'.$result[0]['game_session_watchdog_address'];
-            if ($withPort) {
-                return $this->watchdog_address.':'.self::WATCHDOG_PORT;
-            }
-            return $this->watchdog_address;
+        if (count($result) == 0) {
+            return null;
         }
-        return '';
+        return $result[0]['game_session_watchdog_address'];
     }
 
     /**
@@ -475,13 +474,13 @@ class Game extends Base
     public function StartWatchdog(): void
     {
         // todo: startup the watchdog inside the docker container once the simulations are fully compatible with Linux
-        //  current alternative is running MSW.exe as a service on the Windows host running docker
+        //  The current alternative is running MSW.exe as a service on the Windows host running docker
         if (!str_starts_with(php_uname(), "Windows")) {
             return;
         }
         self::StartSimulationExe([
             'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/win-x64/v1/'
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/simulations/4.0-beta10/MSW/'
         ]);
     }
 
@@ -495,7 +494,7 @@ class Game extends Base
         $args = getenv('DOCKER') ?
             // this is always called from inside the docker environment,so just use http://caddy:80/...
             $args.'APIEndpoint=http://caddy:80' :
-            $args."APIEndpoint ".GameSession::GetRequestApiRoot();
+            $args."APIEndpoint=".GameSession::GetRequestApiRoot();
 
         $workingDirectory = "";
         if (str_starts_with(php_uname(), "Windows")) {
