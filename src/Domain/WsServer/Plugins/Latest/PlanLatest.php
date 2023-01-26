@@ -241,9 +241,15 @@ class PlanLatest extends CommonBase
                 if (($type & PolicyType::ENERGY) === PolicyType::ENERGY) {
                     $policy['policy_type'] = 'energy';
                     $policy['alters_energy_distribution'] = $plan['alters_energy_distribution'];
-                    $policy['grids'] = $plan['grids'];
-                    $policy['deleted_grids'] = $plan['deleted_grids'];
-                    $policy['energy_error'] = $plan['energy_error'];
+                    if (!empty($plan['grids'])) {
+                        $policy['grids'] = $plan['grids'];
+                    }
+                    if (!empty($plan['deleted_grids'])) {
+                        $policy['deleted_grids'] = $plan['deleted_grids'];
+                    }
+                    if (!empty($plan['energy_error'])) {
+                        $policy['energy_error'] = $plan['energy_error'];
+                    }
                     $plan['policies'][] = $policy;
                 }
                 unset(
@@ -257,7 +263,9 @@ class PlanLatest extends CommonBase
                 // PolicyUpdateFishingPlan
                 if (($type & PolicyType::FISHING) === PolicyType::FISHING) {
                     $policy['policy_type'] = 'fishing';
-                    $policy['fishing'] = $plan['fishing'];
+                    if (!empty($plan['fishing'])) {
+                        $policy['fishing'] = $plan['fishing'];
+                    }
                     $plan['policies'][] = $policy;
                 }
                 unset($policy, $plan['fishing']);
@@ -265,7 +273,9 @@ class PlanLatest extends CommonBase
                 // PolicyUpdateShippingPlan
                 if (($type & PolicyType::SHIPPING) === PolicyType::SHIPPING) {
                     $policy['policy_type'] = 'shipping';
-                    $policy['restriction_settings'] = $plan['restriction_settings'];
+                    if (!empty($plan['restriction_settings'])) {
+                        $policy['restriction_settings'] = $plan['restriction_settings'];
+                    }
                     $plan['policies'][] = $policy;
                 }
                 unset($policy, $plan['restriction_settings']);
