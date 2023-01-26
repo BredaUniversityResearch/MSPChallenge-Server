@@ -257,10 +257,7 @@ class PlanLatest extends CommonBase
                 // PolicyUpdateFishingPlan
                 if (($type & PolicyType::FISHING) === PolicyType::FISHING) {
                     $policy['policy_type'] = 'fishing';
-                    // PolicyUpdateEnergyPlan
-                    if (!empty($plan['fishing'])) {
-                        $policy['fishing'] = $plan['fishing'];
-                    }
+                    $policy['fishing'] = $plan['fishing'];
                     $plan['policies'][] = $policy;
                 }
                 unset($policy, $plan['fishing']);
@@ -268,10 +265,7 @@ class PlanLatest extends CommonBase
                 // PolicyUpdateShippingPlan
                 if (($type & PolicyType::SHIPPING) === PolicyType::SHIPPING) {
                     $policy['policy_type'] = 'shipping';
-                    // PolicyUpdateEnergyPlan
-                    if (!empty($plan['restriction_settings'])) {
-                        $policy['restriction_settings'] = $plan['restriction_settings'];
-                    }
+                    $policy['restriction_settings'] = $plan['restriction_settings'];
                     $plan['policies'][] = $policy;
                 }
                 unset($policy, $plan['restriction_settings']);
