@@ -240,6 +240,7 @@ class PlanLatest extends CommonBase
                 // PolicyUpdateEnergyPlan
                 if (($type & PolicyType::ENERGY) === PolicyType::ENERGY) {
                     $policy['policy_type'] = 'energy';
+                    $policy['alters_energy_distribution'] = false;
                     if (!empty($plan['grids'])) {
                         $policy['alters_energy_distribution'] = $plan['alters_energy_distribution'];
                         $policy['grids'] = $plan['grids'];
