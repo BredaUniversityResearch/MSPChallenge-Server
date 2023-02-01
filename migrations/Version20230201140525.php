@@ -32,6 +32,7 @@ final class Version20230201140525 extends AbstractMigration
             ADD `game_cel_lastupdate` double NULL AFTER `game_mel_lastupdate`,
             ADD `game_sel_lastupdate` double NULL AFTER `game_cel_lastupdate`'
         );
+        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $this->addSql(
             "ALTER TABLE `game` CHANGE `game_currentmonth` `game_currentmonth` int(11) NULL DEFAULT '-1' AFTER `game_lastupdate`"
         );
@@ -43,6 +44,7 @@ final class Version20230201140525 extends AbstractMigration
         $this->addSql(
             'ALTER TABLE `game` DROP `game_mel_lastupdate`, DROP `game_cel_lastupdate`, DROP `game_sel_lastupdate`'
         );
+        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $this->addSql(
             "ALTER TABLE `game` CHANGE `game_currentmonth` `game_currentmonth` int(11) NULL DEFAULT 0 AFTER `game_lastupdate`"
         );
