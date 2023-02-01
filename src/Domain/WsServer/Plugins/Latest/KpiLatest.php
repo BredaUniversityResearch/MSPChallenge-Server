@@ -12,14 +12,9 @@ use function App\tpf;
 
 class KpiLatest extends CommonBase
 {
-    /**
-     * @throws Exception
-     * @return array|PromiseInterface
-     */
-    public function latest(int $time, int $country)/*: array|PromiseInterface // <-- php 8 */
+    private function getQueryBuilderKpiBase(string $simLastMonthColumn, string $simLastUpdateColumn)
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-
         // template query builder for both ecology and shipping
         $qb
             ->select(
@@ -33,7 +28,10 @@ class KpiLatest extends CommonBase
             ->from('kpi')
             ->where(
                 $qb->expr()->and(
-                    'kpi_lastupdate > ?',
+                    $qb->expr()->in(
+                        'kpi_month',
+                        "SELECT $simLastMonthColumn FROM game WHERE $simLastUpdateColumn > ?",
+                    ),
                     $qb->expr()->or(
                         'kpi_country_id = ?',
                         'kpi_country_id = -1'
@@ -41,16 +39,26 @@ class KpiLatest extends CommonBase
                     'kpi_type = ?'
                 )
             );
+        return $qb;
+    }
 
+    /**
+     * @throws Exception
+     * @return array|PromiseInterface
+     */
+    public function latest(int $time, int $country)/*: array|PromiseInterface // <-- php 8 */
+    {
         // ecology
-        $toPromiseFunctions[] = tpf(function () use ($qb, $time, $country) {
+        $toPromiseFunctions[] = tpf(function () use ($time, $country) {
+            $qb = $this->getQueryBuilderKpiBase('game_mel_lastmonth', 'game_mel_lastupdate');
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->setParameters([$time, $country, 'ECOLOGY'])
             );
         });
         // shipping
-        $toPromiseFunctions[] = tpf(function () use ($qb, $time, $country) {
+        $toPromiseFunctions[] = tpf(function () use ($time, $country) {
+            $qb = $this->getQueryBuilderKpiBase('game_sel_lastmonth', 'game_sel_lastupdate');
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->setParameters([$time, $country, 'SHIPPING'])
@@ -69,7 +77,11 @@ class KpiLatest extends CommonBase
                         'energy_kpi_actual as actual',
                     )
                     ->from('energy_kpi')
-                    ->where('energy_kpi_lastupdate > ' . $qb->createPositionalParameter($time))
+                    ->where($qb->expr()->in(
+                        'energy_kpi_month',
+                        'SELECT game_cel_lastmonth FROM game WHERE game_cel_lastupdate > '.
+                            $qb->createPositionalParameter($time)
+                    ))
             );
         });
 

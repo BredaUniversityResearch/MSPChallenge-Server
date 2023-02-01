@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`game` (
   `game_start` INT(5) NULL DEFAULT 2010 COMMENT 'starting year',
   `game_state` ENUM('SETUP', 'PLAY', 'SIMULATION', 'FASTFORWARD', 'PAUSE', 'END') NULL DEFAULT 'SETUP',
   `game_lastupdate` DOUBLE NULL DEFAULT 0,
-  `game_currentmonth` INT NULL DEFAULT 0,
+  `game_currentmonth` INT NULL DEFAULT -1,
   `game_energyupdate` TINYINT NULL DEFAULT 0,
   `game_planning_gametime` INT NULL DEFAULT 36 COMMENT 'how many in-game months the planning phase takes',
   `game_planning_realtime` INT NULL DEFAULT 1 COMMENT 'how long the planning era takes',
