@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230201140525 extends AbstractMigration
+final class Version20230201140525 extends MSPMigration
 {
     public function getDescription(): string
     {
@@ -23,7 +23,7 @@ final class Version20230201140525 extends AbstractMigration
         return new MSPDatabaseType(MSPDatabaseType::DATABASE_TYPE_GAME_SESSION);
     }
 
-    public function up(Schema $schema): void
+    protected function onUp(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(
@@ -38,7 +38,7 @@ final class Version20230201140525 extends AbstractMigration
         );
     }
 
-    public function down(Schema $schema): void
+    protected function onDown(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(
