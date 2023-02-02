@@ -24,7 +24,7 @@ class GameSave
     private ?string $name = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?GameConfigVersion $gameConfigVersion = null;
 
     #[ORM\Column(length: 45)]
