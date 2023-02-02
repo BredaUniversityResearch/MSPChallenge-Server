@@ -314,7 +314,7 @@ class Energy extends Base
                     ->keyBy('plan_id')
                     ->map(function ($row) {
                         return $row['plan_id'];
-                    });
+                    })->all();
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $qb
                     ->update('plan', 'p')
