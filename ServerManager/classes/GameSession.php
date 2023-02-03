@@ -67,6 +67,7 @@ class GameSession extends Base
                 case 'log':
                 case 'game_geoserver_id':
                 case 'save_id':
+                case 'game_config_version_id':
                     break;
                 default:
                     if (0 == strlen($this->$varname)) {
