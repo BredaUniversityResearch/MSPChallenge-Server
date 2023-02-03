@@ -162,6 +162,7 @@ class User extends Base
 
     public function importTokenFields(array $tokenFields): ?int
     {
+        $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
         // @note(MH)
         // vendor/lexik/jwt-authentication-bundle/Encoder/LcobucciJWTEncoder.php says:
         //   "Json Web Token encoder/decoder based on the lcobucci/jwt library."
@@ -175,21 +176,17 @@ class User extends Base
             return null;
         }
         $username = $unencryptedToken->claims()->get('username');
-        $fields = array_merge([
-            'username' => $username,
-            // for backwards compatibility
-            'account_owner' => 0, // what is this? Used by User::find()
-        ], $tokenFields);
-        if ($this->find($username, 'username')) {
-            $this->db->update('users', $this->data()->id, $fields);
-            return $this->data()->id;
+        $userID = $unencryptedToken->claims()->get('id');
+
+        $user = $em->getRepository(\App\Entity\ServerManager\User::class)->findOneBy(['id' => $userID]);
+        if (null === $user) {
+            $user = new \App\Entity\ServerManager\User();
+            $user->setId($userID);
         }
-        $this->db->insert('users', $fields);
-        $userId = $this->db->lastId();
-        if ($this->find($userId)) {
-            return $userId;
-        }
-        return null;
+        $user->setUsername($username);
+        $em->persist($user);
+        $em->flush();
+        return $user->getId();
     }
 
     public function importRefreshToken(): void
