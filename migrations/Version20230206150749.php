@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230206131412 extends MSPMigration
+final class Version20230206150749 extends MSPMigration
 {
     public function getDescription(): string
     {
@@ -24,13 +24,15 @@ final class Version20230206131412 extends MSPMigration
 
     protected function onUp(Schema $schema): void
     {
-        $this->addSql('DROP INDEX username ON users');
+        // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('ALTER TABLE users DROP account_owner');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_1483A5E9F85E0677 ON users (username)');
     }
 
     protected function onDown(Schema $schema): void
     {
-        $this->addSql('DROP INDEX uniq_1483a5e9f85e0677 ON users');
-        $this->addSql('CREATE UNIQUE INDEX username ON users (username)');
+        // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('DROP INDEX UNIQ_1483A5E9F85E0677 ON users');
+        $this->addSql('ALTER TABLE users ADD account_owner SMALLINT DEFAULT 0 NOT NULL');
     }
 }
