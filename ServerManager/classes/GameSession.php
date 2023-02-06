@@ -570,7 +570,9 @@ class GameSession extends Base
         $date_current_month = new DateTime($this->game_start_year.'-01-01');
         $date_end_month = new DateTime($this->game_start_year.'-01-01');
         $return['game_start_year'] = $date_current_month->format('M Y');
-        $date_current_month->add(new DateInterval('P'.$this->game_current_month.'M'));
+        if ($this->game_current_month >= 0) {
+            $date_current_month->add(new DateInterval('P' . $this->game_current_month . 'M'));
+        }
         $return['game_current_month'] = $date_current_month->format('M Y');
         $date_end_month->add(new DateInterval('P'.$this->game_end_month.'M'));
         $return['game_end_month'] = $date_end_month->format('M Y');
