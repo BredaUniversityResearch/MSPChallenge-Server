@@ -15,7 +15,7 @@ class User
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $username = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -29,9 +29,6 @@ class User
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $pin = null;
-
-    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 0])]
-    private int $accountOwner = 0;
 
     #[ORM\Column(options: ['default' => 0])]
     private int $accountId = 0;
@@ -97,18 +94,6 @@ class User
     public function setPin(?string $pin): self
     {
         $this->pin = $pin;
-
-        return $this;
-    }
-
-    public function getAccountOwner(): int
-    {
-        return $this->accountOwner;
-    }
-
-    public function setAccountOwner(int $accountOwner): self
-    {
-        $this->accountOwner = $accountOwner;
 
         return $this;
     }

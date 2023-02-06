@@ -177,7 +177,7 @@ class User extends Base
 
         $fields = array_merge([
             'username' => $username,
-            'account_id' => $userID, // what is this? Used by User::find()
+            'account_id' => $userID
         ], $tokenFields);
         if ($this->find($username, 'username')) {
             $this->db->update('users', $this->data()->id, $fields);
