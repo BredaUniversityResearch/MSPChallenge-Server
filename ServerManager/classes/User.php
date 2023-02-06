@@ -93,9 +93,6 @@ class User extends Base
             $data = $this->db->get('users', array($field, '=', $user));
             if ($data->count()) {
                 $this->data = $data->first();
-                if ($this->data()->account_id == 0 && $this->data()->account_owner == 1) {
-                    $this->data->account_id = $this->data->id;
-                }
                 return true;
             }
         }
@@ -178,15 +175,20 @@ class User extends Base
         $username = $unencryptedToken->claims()->get('username');
         $userID = $unencryptedToken->claims()->get('id');
 
-        $user = $em->getRepository(\App\Entity\ServerManager\User::class)->findOneBy(['id' => $userID]);
-        if (null === $user) {
-            $user = new \App\Entity\ServerManager\User();
-            $user->setId($userID);
+        $fields = array_merge([
+            'username' => $username,
+            'account_id' => $userID, // what is this? Used by User::find()
+        ], $tokenFields);
+        if ($this->find($username, 'username')) {
+            $this->db->update('users', $this->data()->id, $fields);
+            return $this->data()->id;
         }
-        $user->setUsername($username);
-        $em->persist($user);
-        $em->flush();
-        return $user->getId();
+        $this->db->insert('users', $fields);
+        $userId = $this->db->lastId();
+        if ($this->find($userId)) {
+            return $userId;
+        }
+        return null;
     }
 
     public function importRefreshToken(): void
