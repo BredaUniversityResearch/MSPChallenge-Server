@@ -24,6 +24,7 @@ class Kpi extends Base
     }
 
     /**
+     * called from MEL
      * @apiGroup KPI
      * @throws Exception
      * @api {POST} /kpi/post Post
@@ -43,6 +44,7 @@ class Kpi extends Base
     }
 
     /**
+     * called from SEL
      * @apiGroup KPI
      * @throws Exception
      * @api {POST} /kpi/BatchPost BatchPost

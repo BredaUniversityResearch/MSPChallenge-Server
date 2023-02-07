@@ -29,6 +29,7 @@ class Log extends Base
     }
 
     /**
+     * called from SEL
      * @apiGroup Log
      * @apiDescription Posts an 'error' event in the server log.
      * @throws Exception

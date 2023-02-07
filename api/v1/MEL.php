@@ -296,7 +296,10 @@ class MEL extends Base
     public function TickDone(): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_mel_lastmonth=game_currentmonth");
+        Database::GetInstance()->query(
+            'UPDATE game SET game_mel_lastmonth=game_currentmonth, game_mel_lastupdate=?',
+            [microtime(true)]
+        );
     }
 
     /**

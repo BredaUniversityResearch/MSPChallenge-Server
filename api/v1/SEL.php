@@ -945,6 +945,7 @@ class SEL extends Base
     }
 
     /**
+     *
      * @apiGroup SEL
      * @throws Exception
      * @api {POST} /sel/NotifyUpdateFinished Notify Update Finished
@@ -956,7 +957,10 @@ class SEL extends Base
     public function NotifyUpdateFinished(int $month): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_sel_lastmonth = ?", array($month));
+        Database::GetInstance()->query(
+            'UPDATE game SET game_sel_lastmonth=?, game_sel_lastupdate=?',
+            [$month, microtime(true)]
+        );
     }
 
     /**

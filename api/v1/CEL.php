@@ -109,7 +109,10 @@ class CEL extends Base
     public function UpdateFinished(int $month): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_cel_lastmonth = ?", array($month));
+        Database::GetInstance()->query(
+            'UPDATE game SET game_cel_lastmonth=?, game_cel_lastupdate=?',
+            [$month, microtime(true)]
+        );
     }
 
     /**

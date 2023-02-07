@@ -352,6 +352,14 @@ class Update extends Base
         $game->Setupfilename($filename);
         $this->ApplyGameConfig();
 
+        $application = new Application(SymfonyToLegacyHelper::getInstance()->getKernel());
+        $application->setAutoExit(false);
+        $output = new BufferedOutput();
+        $application->run(
+            new StringInput('doctrine:migrations:migrate -vvv -n --em=' . $db->GetDatabaseName()),
+            $output
+        );
+
         Log::LogInfo("RebuildDatabase -> Database rebuilt.");
     }
 
