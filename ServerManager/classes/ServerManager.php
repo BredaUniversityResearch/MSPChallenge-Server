@@ -36,11 +36,13 @@ class ServerManager extends Base
           '4.0-beta8',
           '4.0-beta9',
           '4.0-beta10',
+          '4.0-rc1'
         ];
         $this->serverAcceptedClients = [
           '4.0-beta8' => '2021-04-20 13:54:41Z',
           '4.0-beta9' => '2021-11-08 08:13:08Z',
           '4.0-beta10' => '2022-05-24 00:00:00Z',
+          '4.0-rc1' => '2023-02-02 00:00:00Z'
         ];
         $this->serverCurrentVersion = end($this->serverVersions);
         $this->serverUpgrades = [ // make sure these functions exist in server API update class and is actually
@@ -50,6 +52,10 @@ class ServerManager extends Base
           'From40beta7To40beta10',
           'From40beta8To40beta10',
           'From40beta9To40beta10',
+          'From40beta7To40rc1',
+          'From40beta8To40rc1',
+          'From40beta9To40rc1',
+          'From40beta10To40rc1',
         ];
         $this->setRootVars();
     }
@@ -104,11 +110,14 @@ class ServerManager extends Base
     public function CheckForUpgrade($versiondetermined): array|bool|string|null
     {
         if (!empty($versiondetermined)) {
+            // migration support was added with beta7
+            // starting with beta10, migrations are handled by Doctrine's db migrations system
+            // thus, if this session db is pre-beta-10, then simply run From40beta[X]To40beta10
             // postulate the upgrade function name
             $upgradefunction = preg_replace(
                 '/[^A-Za-z0-9]/',
                 '',
-                'From'.$versiondetermined.'To'.$this->serverCurrentVersion
+                'From'.$versiondetermined.'To4.0-beta10'
             );
             // see if it's in the _server_upgrades list
             if (in_array($upgradefunction, $this->serverUpgrades)) {

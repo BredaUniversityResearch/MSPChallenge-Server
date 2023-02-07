@@ -33,7 +33,7 @@ class WarningLatest extends CommonBase
                     ->where('warning_last_update > ' . $qb->createPositionalParameter($time))
             );
         });
-        $toPromiseFunctions[] = tpf(function () use ($time) {
+        $toPromiseFunctions[] = tpf(function () {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             return $this->getAsyncDatabase()->query(
                 $qb
@@ -45,7 +45,9 @@ class WarningLatest extends CommonBase
                         'shipping_warning_active as active'
                     )
                     ->from('shipping_warning')
-                    ->where('shipping_warning_lastupdate > ' . $qb->createPositionalParameter($time))
+                    // note the active ones are the ones from the last simulation run, anything older is deactivated,
+                    //  see Warning::SetShippingIssues()
+                    ->where('shipping_warning_active = 1')
             );
         });
         return parallel($toPromiseFunctions);

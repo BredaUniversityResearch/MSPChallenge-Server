@@ -551,11 +551,18 @@ class Store extends Base
         int $subtractive = 0,
         string $layerName = ''
     ): int {
-        if (IsFeatureFlagEnabled('auto_mspids_by_hash') && $subtractive === 0 && is_null($mspId)) {
-             Log::LogDebug(' -> Auto-generating an MSP ID for a bit of geometry in layer ' . $layerName . ' .');
-             // so many algorithms to choose from, but this one seemed to have low collision, reasonable speed,
-             //   and simply availability to PHP in default installation
-             $mspId = hash('fnv1a64', $layerName.$geometry);
+        if ($subtractive === 0 && is_null($mspId)) {
+            Log::LogDebug(' -> Auto-generating an MSP ID for a bit of geometry in layer ' . $layerName . ' .');
+            // so many algorithms to choose from, but this one seemed to have low collision, reasonable speed,
+            //   and simply availability to PHP in default installation
+            $algo = 'fnv1a64';
+            // to avoid duplicate MSP IDs, we need the string to include the layer name, the geometry, and if available
+            //   the geometry's name ... there have been cases in which one layer had exactly the same geometry twice
+            //   to indicate two different names given to that area... very annoying
+            $dataToHash = $layerName.$geometry;
+            $dataArray = json_decode($data, true);
+            $dataToHash .= $dataArray['name'] ?? '';
+            $mspId = hash($algo, $dataToHash);
         }
 
         return (int)Database::GetInstance()->query(

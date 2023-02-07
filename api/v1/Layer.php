@@ -586,6 +586,7 @@ class Layer extends Base
     }
 
     /**
+     * called from MEL, SEL, REL
      * @apiGroup Layer
      * @throws Exception
      * @api {POST} /layer/UpdateRaster

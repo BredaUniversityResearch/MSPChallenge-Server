@@ -93,9 +93,6 @@ class User extends Base
             $data = $this->db->get('users', array($field, '=', $user));
             if ($data->count()) {
                 $this->data = $data->first();
-                if ($this->data()->account_id == 0 && $this->data()->account_owner == 1) {
-                    $this->data->account_id = $this->data->id;
-                }
                 return true;
             }
         }
@@ -162,6 +159,7 @@ class User extends Base
 
     public function importTokenFields(array $tokenFields): ?int
     {
+        $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
         // @note(MH)
         // vendor/lexik/jwt-authentication-bundle/Encoder/LcobucciJWTEncoder.php says:
         //   "Json Web Token encoder/decoder based on the lcobucci/jwt library."
@@ -175,10 +173,11 @@ class User extends Base
             return null;
         }
         $username = $unencryptedToken->claims()->get('username');
+        $userID = $unencryptedToken->claims()->get('id');
+
         $fields = array_merge([
             'username' => $username,
-            // for backwards compatibility
-            'account_owner' => 0, // what is this? Used by User::find()
+            'account_id' => $userID
         ], $tokenFields);
         if ($this->find($username, 'username')) {
             $this->db->update('users', $this->data()->id, $fields);
