@@ -456,6 +456,9 @@ class GameSave extends Base
         $args = getPublicObjectVars($this);
         unset($args['id']);
         unset($args['game_config_files_id']);
+        // game_watchdog_servers should contain something right?...
+        $this->db->query('SELECT id FROM game_watchdog_servers LIMIT 1');
+        $args['watchdog_server_id'] = $this->db->first(true)['id'];
         $this->db->query($sql, $args);
         if ($this->db->error()) {
             throw new ServerManagerAPIException($this->db->errorString());

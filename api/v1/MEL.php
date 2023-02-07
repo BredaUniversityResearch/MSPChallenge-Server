@@ -298,7 +298,10 @@ class MEL extends Base
     public function TickDone(): void
     {
         /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_mel_lastmonth=game_currentmonth");
+        $this->getDatabase()->query(
+            'UPDATE game SET game_mel_lastmonth=game_currentmonth, game_mel_lastupdate=?',
+            [microtime(true)]
+        );
     }
 
     /**

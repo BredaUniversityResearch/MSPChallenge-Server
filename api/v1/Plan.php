@@ -1780,7 +1780,7 @@ class Plan extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetGeometryIdByMspId(int $mspId): int
+    private function GetGeometryIdByMspId(int|string $mspId): int
     {
         $result = $this->getDatabase()->query(
             "SELECT geometry_id FROM geometry WHERE geometry_mspid = ?",
