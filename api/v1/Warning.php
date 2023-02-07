@@ -176,21 +176,22 @@ class Warning extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function RemoveAllWarningsForLayer(int $layerId, bool $hardDelete = false): void
+    public function RemoveAllWarningsForLayer(int $layerId, bool $hardDelete = false): ?PromiseInterface
     {
-        $db = $this->getDatabase();
-        if ($hardDelete) {
-            $db->query(
-                "DELETE FROM warning WHERE warning_source_plan_id = ?",
-                array($layerId)
-            );
-            return;
-        }
-
-        $db->query(
-            "UPDATE warning SET warning_active = 0, warning_last_update = ? WHERE warning_source_plan_id = ?",
-            array(microtime(true), $layerId)
-        );
+        $promise = $this->getAsyncDatabase()->delete('warning', ['warning_source_plan_id' => $layerId])
+            ->then(function (/* Result $result */) use ($layerId) {
+                return $this->getAsyncDatabase()->update(
+                    'warning',
+                    [
+                        'warning_source_plan_id' => $layerId
+                    ],
+                    [
+                        'warning_active' => 0,
+                        'warning_last_update' => microtime(true)
+                    ]
+                );
+            });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**

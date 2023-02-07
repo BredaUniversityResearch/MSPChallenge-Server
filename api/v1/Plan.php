@@ -331,39 +331,79 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteLayer(int $id): void
+    public function DeleteLayer(int $id): ?PromiseInterface
     {
-        $db = $this->getDatabase();
-        $planid = $db->query(
-            "SELECT plan_layer_plan_id as id FROM plan_layer WHERE plan_layer_layer_id=?",
-            array($id)
-        );
+        $toPromiseFunctions[] = tpf(function () use ($id) {
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return
+                $this->getAsyncDatabase()->query(
+                    $qb
+                        ->select('plan_layer_plan_id as id')
+                        ->from('plan_layer')
+                        ->where($qb->expr()->eq('plan_layer_layer_id', $qb->createPositionalParameter($id)))
+                )
+                ->then(function (Result $result) {
+                    if (null === $planId = $result->fetchFirstRow()['id'] ?? null) {
+                        return null;
+                    }
+                    //Invalidate all warnings from this plan layer
+                    $warning = new Warning();
+                    $this->asyncDataTransferTo($warning);
+                    return $warning->RemoveAllWarningsForLayer($planId, true) // hard-delete
+                        ->then(function (/*Result $result*/) use ($planId) {
+                            return $planId;
+                        });
+                    // @todo: also delete everything to do with energy connected to this
+                });
+        });
 
         //Try to nuke the energy data on all layers.
-        $energy = new Energy();
-        $energy->DeleteEnergyInformationFromLayer($id);
+        $toPromiseFunctions[] = tpf(function () use ($id) {
+            $energy = new Energy();
+            $this->asyncDataTransferTo($energy);
+            return $energy->DeleteEnergyInformationFromLayer($id)
+                ->then(function (/* array $results */) use ($id) {
+                    $toPromiseFunctions[] = tpf(function () use ($id) {
+                         return $this->getAsyncDatabase()->delete('geometry', ['geometry_layer_id' => $id]);
+                    });
+                    $toPromiseFunctions[] = tpf(function () use ($id) {
+                         return $this->getAsyncDatabase()->delete('plan_layer', ['plan_layer_layer_id' => $id]);
+                    });
+                    $toPromiseFunctions[] = tpf(function () use ($id) {
+                         $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                         return $this->getAsyncDatabase()->query(
+                             $qb
+                                ->delete('plan_delete')
+                                ->where($qb->expr()->in(
+                                    'plan_delete_geometry_persistent',
+                                    'SELECT geometry_persistent FROM geometry
+                                        LEFT JOIN layer ON geometry_layer_id=layer_original_id
+                                        WHERE layer_id=?'
+                                ))
+                                ->setParameters([$id])
+                         );
+                    });
+                    return parallel($toPromiseFunctions);
+                });
+        });
 
-        $db->query("DELETE FROM geometry WHERE geometry_layer_id=?", array($id));
-        $db->query("DELETE FROM plan_layer WHERE plan_layer_layer_id=?", array($id));
-        $db->query(
-            "DELETE FROM plan_delete WHERE plan_delete_geometry_persistent IN (
-					SELECT geometry_persistent FROM geometry
-					LEFT JOIN layer ON geometry_layer_id=layer_original_id
-					WHERE layer_id=?
-				)",
-            array($id)
-        );
-
-        //Invalidate all warnings from this plan layer
-        $warning = new Warning();
-        $warning->RemoveAllWarningsForLayer($planid[0]['id'], true); // hard-delete
-
-        // @todo: also delete everything to do with energy connected to this
-
-        $db->query(
-            "UPDATE plan SET plan_lastupdate=? WHERE plan_id=?",
-            array(microtime(true), $planid[0]['id'])
-        );
+        $promise = parallel($toPromiseFunctions)
+            // set plan_lastupdate once all deletion have been processed
+            ->then(function (array $results) {
+                if (null === $planId = ($results[0] ?? null)) {
+                    return null;
+                }
+                return $this->getAsyncDatabase()->update(
+                    'plan',
+                    [
+                        'plan_id' => $planId
+                    ],
+                    [
+                        'plan_lastupdate' => microtime(true)
+                    ]
+                );
+            });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**

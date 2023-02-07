@@ -615,27 +615,56 @@ class Energy extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteEnergyInformationFromLayer(int $layerId): void
+    public function DeleteEnergyInformationFromLayer(int $layerId): ?PromiseInterface
     {
-        $db = $this->getDatabase();
-        $geometryToDelete = $db->query(
-            "SELECT geometry_id FROM geometry WHERE geometry_layer_id = ?",
-            array($layerId)
-        );
-        foreach ($geometryToDelete as $geometry) {
-            $db->query(
-                "
-                DELETE FROM energy_connection
-                WHERE energy_connection_start_id = :geometryId OR energy_connection_end_id = :geometryId OR
-                      energy_connection_cable_id = :geometryId
-                ",
-                array("geometryId" => $geometry['geometry_id'])
-            );
-            $db->query(
-                "DELETE FROM energy_output WHERE energy_output_geometry_id = ?",
-                array($geometry['geometry_id'])
-            );
-        }
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->select('geometry_id')
+                ->from('geometry')
+                ->where($qb->expr()->eq('geometry_layer_id', $qb->createPositionalParameter($layerId)))
+        )
+        ->then(function (Result $result) {
+            $geometryToDelete = $result->fetchAllRows() ?? [];
+            $toPromiseFunctions = [];
+            foreach ($geometryToDelete as $geometry) {
+                $geometryId = $geometry['geometry_id'];
+                $toPromiseFunctions[] = tpf(function () use ($geometryId) {
+                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                     return $this->getAsyncDatabase()->query(
+                         $qb
+                            ->delete('energy_connection')
+                            ->where(
+                                $qb->expr()->eq(
+                                    'energy_connection_start_id',
+                                    $qb->createPositionalParameter($geometryId)
+                                )
+                            )
+                            ->orWhere(
+                                $qb->expr()->eq(
+                                    'energy_connection_end_id',
+                                    $qb->createPositionalParameter($geometryId)
+                                )
+                            )
+                            ->orWhere(
+                                $qb->expr()->eq(
+                                    'energy_connection_cable_id',
+                                    $qb->createPositionalParameter($geometryId)
+                                )
+                            )
+                     );
+                });
+                $toPromiseFunctions[] = tpf(function () use ($geometryId) {
+                     return $this->getAsyncDatabase()->delete(
+                         'energy_output',
+                         ['energy_output_geometry_id' => $geometryId]
+                     );
+                });
+            }
+            return parallel($toPromiseFunctions);
+        });
+
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
