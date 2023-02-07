@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
+use App\Domain\API\v1\PolicyType;
 use App\Domain\Common\CommonBase;
 use Drift\DBAL\Result;
 use Exception;
@@ -233,40 +234,51 @@ class PlanLatest extends CommonBase
     {
         $plans = collect($plans)
             ->map(function ($plan) {
+                $type = $plan['type'];
                 unset($plan['type']);
-                $plan['policies'] = [];
+
                 // PolicyUpdateEnergyPlan
-                if (!empty($plan['grids'])) {
-                    $plan['policies'][] = [
-                        'policy_type' => 'energy',
-                        'alters_energy_distribution' => $plan['alters_energy_distribution'],
-                        'grids' => $plan['grids'],
-                        'deleted_grids' => $plan['deleted_grids'],
-                        'energy_error' => $plan['energy_error']
-                    ];
+                if (($type & PolicyType::ENERGY) === PolicyType::ENERGY) {
+                    $policy['policy_type'] = 'energy';
+                    $policy['alters_energy_distribution'] = $plan['alters_energy_distribution'];
+                    if (!empty($plan['grids'])) {
+                        $policy['grids'] = $plan['grids'];
+                    }
+                    if (!empty($plan['deleted_grids'])) {
+                        $policy['deleted_grids'] = $plan['deleted_grids'];
+                    }
+                    if (!empty($plan['energy_error'])) {
+                        $policy['energy_error'] = $plan['energy_error'];
+                    }
+                    $plan['policies'][] = $policy;
                 }
                 unset(
+                    $policy,
                     $plan['alters_energy_distribution'],
                     $plan['grids'],
                     $plan['deleted_grids'],
                     $plan['energy_error']
                 );
+
                 // PolicyUpdateFishingPlan
-                if (!empty($plan['fishing'])) {
-                    $plan['policies'][] = [
-                        'policy_type' => 'fishing',
-                        'fishing' => $plan['fishing']
-                    ];
+                if (($type & PolicyType::FISHING) === PolicyType::FISHING) {
+                    $policy['policy_type'] = 'fishing';
+                    if (!empty($plan['fishing'])) {
+                        $policy['fishing'] = $plan['fishing'];
+                    }
+                    $plan['policies'][] = $policy;
                 }
-                unset($plan['fishing']);
+                unset($policy, $plan['fishing']);
+
                 // PolicyUpdateShippingPlan
-                if (!empty($plan['restriction_settings'])) {
-                    $plan['policies'][] = [
-                        'policy_type' => 'shipping',
-                        'restriction_settings' => $plan['restriction_settings']
-                    ];
+                if (($type & PolicyType::SHIPPING) === PolicyType::SHIPPING) {
+                    $policy['policy_type'] = 'shipping';
+                    if (!empty($plan['restriction_settings'])) {
+                        $policy['restriction_settings'] = $plan['restriction_settings'];
+                    }
+                    $plan['policies'][] = $policy;
                 }
-                unset($plan['restriction_settings']);
+                unset($policy, $plan['restriction_settings']);
                 return $plan;
             })
             ->all();

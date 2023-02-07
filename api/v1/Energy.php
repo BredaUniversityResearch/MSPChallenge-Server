@@ -81,7 +81,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -122,7 +122,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -146,8 +146,8 @@ class Energy extends Base
     public function UpdateGridEnergy(int $id, array $expected): ?PromiseInterface
     {
         foreach ($expected as $country) {
-            $int = (int)filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT);
-            if ($int > 0) {
+            $int = (int)filter_var($country['country_id'] ?? null, FILTER_VALIDATE_INT);
+            if ($int <= 0) {
                 throw new Exception(
                     'Encountered invalid integer country_id value (should be 1+): ' . $country['country_id']
                 );
@@ -176,7 +176,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -247,7 +247,7 @@ class Energy extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -314,7 +314,7 @@ class Energy extends Base
                     ->keyBy('plan_id')
                     ->map(function ($row) {
                         return $row['plan_id'];
-                    });
+                    })->all();
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $qb
                     ->update('plan', 'p')
@@ -328,7 +328,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* Result $result */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -424,7 +424,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -527,7 +527,7 @@ class Energy extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -564,7 +564,7 @@ class Energy extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -601,7 +601,7 @@ class Energy extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -688,7 +688,7 @@ class Energy extends Base
         })
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);

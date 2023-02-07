@@ -169,7 +169,12 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                                 $message = $reason;
                             }
                             while ($reason instanceof Throwable) {
-                                $message .= $reason->getMessage() . PHP_EOL;
+                                $message .= $reason->getMessage().PHP_EOL.
+                                    (
+                                        // add the call-stack on dev/test environments
+                                        ($_ENV['APP_ENV'] ?? 'prod') !== 'prod' ?
+                                            $reason->getTraceAsString() . PHP_EOL : ''
+                                    );
                                 $reason = $reason->getPrevious();
                             }
                             $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)

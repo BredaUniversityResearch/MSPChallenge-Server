@@ -43,12 +43,50 @@ class Plan extends Base
         "AddApproval",
         "Vote",
         "DeleteApproval",
-        "SetEnergyDistribution"
+        "SetEnergyDistribution",
+        "SetPolicy"
     );
 
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
+    }
+
+    public static function convertToNewPlanType(string $planType): int
+    {
+        $newPlanType = (int)$planType; // assuming a correct db value, which is int of bit flags.
+
+        // detect old way of comma separated of 3 bits, order has meaning
+        if (1 === preg_match('/(\d),(\d),(\d)/', $planType, $matches)) { // e.g. 0,1,0
+            array_shift($matches);
+            array_walk($matches, function (string $item, int $key) use (&$newPlanType) {
+                if ($item === '0') {
+                    return;
+                }
+                $newPlanType |= array_values(PolicyType::getConstants())[$key];
+            });
+            return $newPlanType;
+        }
+
+        // detect old way of up to 3 comma separated strings energy/ecology/shipping
+        //   but also accept the new "fishing" for ecology, and random order
+        if (1 === preg_match(
+            '/(energy|ecology|fishing|shipping)'.
+            '(?:,(energy|ecology|fishing|shipping)(?:,(energy|ecology|fishing|shipping))?)?/',
+            $planType,
+            $matches
+        )) {
+            array_shift($matches);
+            array_walk($matches, function (string $item) use (&$newPlanType) {
+                if ($item == 'ecology') {
+                    $item = 'fishing';
+                }
+                $newPlanType |= PolicyType::getConstants()[strtoupper($item)];
+            });
+            return $newPlanType;
+        }
+
+        return $newPlanType;
     }
 
     /**
@@ -75,37 +113,50 @@ class Plan extends Base
         array $layers = [],
         bool $alters_energy_distribution = false
     ): int|PromiseInterface {
-        $db = $this->getDatabase();
-        $id = (int)$db->query(
-            "
-            INSERT INTO plan (
-                plan_country_id, plan_name, plan_gametime, plan_lastupdate, plan_type, plan_alters_energy_distribution
-            ) VALUES (?, ?, ?, ?, ?, ?)
-            ",
-            array($country, $name, $time, microtime(true), $type, $alters_energy_distribution),
-            true
-        );
-        foreach ($layers as $layer) {
-            if (is_numeric($layer)) {
-                $lid = $db->query(
-                    "INSERT INTO layer(layer_original_id) VALUES (?)",
-                    array($layer),
-                    true
-                );
-
-                $db->query(
-                    "INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)",
-                    array($id, $lid)
-                );
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->insert('plan')
+                ->values([
+                    'plan_country_id' => $qb->createPositionalParameter($country),
+                    'plan_name' => $qb->createPositionalParameter($name),
+                    'plan_gametime' => $qb->createPositionalParameter($time),
+                    'plan_lastupdate' => $qb->createPositionalParameter(microtime(true)),
+                    'plan_type' => $qb->createPositionalParameter(self::convertToNewPlanType($type)),
+                    'plan_alters_energy_distribution' => $qb->createPositionalParameter($alters_energy_distribution)
+                ])
+        )
+        ->then(function (Result $result) use ($layers) {
+            if (null === $id = $result->getLastInsertedId()) {
+                return 0;
             }
-        }
-        $this->UpdatePlanConstructionTime($id);
-
-        // @todo: fake it till you make it... but fix it later!
-        if ($this->isAsync()) {
-            return resolveOnFutureTick(new Deferred(), (int)$id)->promise();
-        }
-        return (int)$id;
+            $toPromiseFunctions = [];
+            foreach ($layers as $layer) {
+                if (!is_numeric($layer)) {
+                    continue;
+                }
+                $toPromiseFunctions[] = tpf(function () use ($layer, $id) {
+                    return $this->getAsyncDatabase()->insert('layer', ['layer_original_id' => $layer])
+                        ->then(function (Result $result) use ($id) {
+                            if (null === $lid = $result->getLastInsertedId()) {
+                                return null;
+                            }
+                            return $this->getAsyncDatabase()->insert('plan_layer', [
+                                'plan_layer_plan_id' => $id,
+                                'plan_layer_layer_id' => $lid
+                            ]);
+                        });
+                });
+            }
+            return parallel($toPromiseFunctions)
+                ->then(function (/* array $results */) use ($id) {
+                    return $this->UpdatePlanConstructionTime($id);
+                })
+                ->then(function (/* int $affectedRows */) use ($id) {
+                    return $id;
+                });
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -213,26 +264,25 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Layer(int $id, int $layerid): int|PromiseInterface
     {
-        $db = $this->getDatabase();
-        $lid = $db->query(
-            "INSERT INTO layer (layer_original_id) VALUES (?)",
-            array($layerid),
-            true
-        );
-
-        $db->query(
-            "INSERT INTO plan_layer (plan_layer_plan_id, plan_layer_layer_id) VALUES (?, ?)",
-            array($id, $lid),
-            true
-        );
-
-        $this->UpdatePlanConstructionTime($id);
-
-        // @todo: fake it till you make it... but fix it later!
-        if ($this->isAsync()) {
-            return resolveOnFutureTick(new Deferred(), (int)$lid)->promise();
-        }
-        return (int)$lid;
+        $promise = $this->getAsyncDatabase()->insert('layer', [
+            'layer_original_id' => $layerid
+        ])
+        ->then(function (Result $result) use ($id) {
+            if (null == $lid = $result->getLastInsertedId()) {
+                return 0;
+            }
+            return $this->getAsyncDatabase()->insert('plan_layer', [
+                'plan_layer_plan_id' => $id,
+                'plan_layer_layer_id' => $lid
+            ])
+            ->then(function (/* Result $result */) use ($id) {
+                return $this->UpdatePlanConstructionTime($id);
+            })
+            ->then(function (/* int $affectedRows */) use ($lid) {
+                return $lid;
+            });
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -240,31 +290,36 @@ class Plan extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function UpdatePlanConstructionTime(int $planId): void
+    private function UpdatePlanConstructionTime(int $planId): int|PromiseInterface
     {
-        $highest = 0;
-
-        $db = $this->getDatabase();
-        $planlayers = $db->query("SELECT l2.layer_states FROM plan_layer
-				LEFT JOIN layer l1 ON l1.layer_id=plan_layer.plan_layer_layer_id
-				LEFT JOIN layer l2 ON l1.layer_original_id=l2.layer_id
-				WHERE plan_layer_plan_id=?", array($planId));
-
-        foreach ($planlayers as $pl) {
-            $json = json_decode($pl['layer_states'], true);
-
-            foreach ($json as $j) {
-                if ($j["state"] == "ASSEMBLY" && $j['time'] > $highest) {
-                    $highest = $j['time'];
-                    break;
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->select('l2.layer_states')
+                ->from('plan_layer', 'plan_layer')
+                ->leftJoin('plan_layer', 'layer', 'l1', 'l1.layer_id=plan_layer.plan_layer_layer_id')
+                ->leftJoin('l1', 'layer', 'l2', 'l1.layer_original_id=l2.layer_id')
+                ->where($qb->expr()->eq('plan_layer.plan_layer_plan_id', $qb->createPositionalParameter($planId)))
+        )->then(function (Result $result) use ($planId) {
+            $planLayers = $result->fetchAllRows() ?? [];
+            $highest = 0;
+            foreach ($planLayers as $pl) {
+                $json = json_decode($pl['layer_states'], true);
+                foreach ($json as $j) {
+                    if ($j["state"] == "ASSEMBLY" && $j['time'] > $highest) {
+                        $highest = $j['time'];
+                        break;
+                    }
                 }
             }
-        }
-
-        $db->query(
-            "UPDATE plan SET plan_lastupdate=?, plan_constructionstart=plan_gametime-? WHERE plan_id=?",
-            array(microtime(true), $highest, $planId)
-        );
+            return $this->getAsyncDatabase()->queryBySQL(
+                'UPDATE plan SET plan_lastupdate=?, plan_constructionstart=plan_gametime-? WHERE plan_id=?',
+                [microtime(true), $highest, $planId]
+            )->then(function (Result $result) {
+                return (int)$result->getAffectedRows();
+            });
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -332,7 +387,7 @@ class Plan extends Base
         }
 
         $previousState = $currentPlanData[0]['plan_state'];
-        $isEnergyPlan = explode(",", $currentPlanData[0]['plan_type'])[0] == "1";
+        $isEnergyPlan = $currentPlanData[0]['plan_type'] == PolicyType::ENERGY;
 
         $performEnergyDependencyCheck = false;  //Design / Deleted -> Concultation / Approval / Approved
         $performEnergyOverlapCheck = false;     //Concultation / Approval / Approved -> Design / Deleted
@@ -502,7 +557,7 @@ class Plan extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -941,7 +996,7 @@ class Plan extends Base
             ->done(
                 /** @var Result[] $results */
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -989,7 +1044,7 @@ class Plan extends Base
         $this->getAsyncDatabase()->delete('approval', ['approval_plan_id' => $id])
             ->done(
                 function (/* Result $result */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -1299,7 +1354,8 @@ class Plan extends Base
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
                 ",
                 array(
-                    $plan['plan_country_id'], $plan['plan_name'], $plan['plan_gametime'], 0, $plan['plan_type'],
+                    $plan['plan_country_id'], $plan['plan_name'], $plan['plan_gametime'], 0,
+                    self::convertToNewPlanType($plan['plan_type']),
                     $plan['plan_alters_energy_distribution'], "APPROVED"
                 ),
                 true
@@ -1724,7 +1780,7 @@ class Plan extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetGeometryIdByMspId(int $mspId): int
+    private function GetGeometryIdByMspId(int|string $mspId): int
     {
         $result = $this->getDatabase()->query(
             "SELECT geometry_id FROM geometry WHERE geometry_mspid = ?",
@@ -1912,16 +1968,18 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Name(int $id, string $name): ?PromiseInterface
     {
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_name=?, plan_lastupdate=? WHERE plan_id=?",
-            array($name, microtime(true), $id)
-        );
-
-        // @todo: fake it till you make it... but fix it later!
-        if ($this->isAsync()) {
-            return resolveOnFutureTick(new Deferred())->promise();
-        }
-        return null;
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->update('plan')
+                ->set('plan_name', $qb->createPositionalParameter($name))
+                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
+        )
+        ->then(function (/* Result $result */) {
+            return null; // we do not care about the result
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -1935,17 +1993,21 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Date(int $id, int $date): ?PromiseInterface
     {
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_gametime=?, plan_lastupdate=? WHERE plan_id=?",
-            array($date, microtime(true), $id)
-        );
-        $this->UpdatePlanConstructionTime($id);
-
-        // @todo: fake it till you make it... but fix it later!
-        if ($this->isAsync()) {
-            return resolveOnFutureTick(new Deferred())->promise();
-        }
-        return null;
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->update('plan')
+                ->set('plan_gametime', $qb->createPositionalParameter($date))
+                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
+        )
+        ->then(function (/* Result $result */) use ($id) {
+            return $this->UpdatePlanConstructionTime($id);
+        })
+        ->then(function (/* int $affectedRows */) {
+            return null; // we do not care about the result
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -1970,7 +2032,7 @@ class Plan extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -1994,7 +2056,7 @@ class Plan extends Base
     {
         $this->getDatabase()->query(
             "UPDATE plan SET plan_type=?, plan_lastupdate=? WHERE plan_id=?",
-            array($type, microtime(true), $id)
+            array(self::convertToNewPlanType($type), microtime(true), $id)
         );
     }
 
@@ -2010,31 +2072,36 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetRestrictionAreas(int $plan_id, array $settings): ?PromiseInterface
     {
+        $toPromiseFunctions = [];
         foreach ($settings as $setting) {
-            $this->getDatabase()->query(
-                "
-                INSERT INTO plan_restriction_area (
+            $toPromiseFunctions[] = tpf(function () use ($plan_id, $setting) {
+                return $this->getAsyncDatabase()->queryBySQL(
+                    'INSERT INTO plan_restriction_area (
                     plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id,
                     plan_restriction_area_entity_type, plan_restriction_area_size
-                ) VALUES(?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE plan_restriction_area_size = ?
-                ",
-                array(
-                    $plan_id, $setting["layer_id"], $setting["team_id"], $setting["entity_type_id"],
-                    $setting["restriction_size"], $setting["restriction_size"]
-                )
+                    ) VALUES(?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE plan_restriction_area_size = ?',
+                    [
+                        $plan_id, $setting["layer_id"], $setting["team_id"], $setting["entity_type_id"],
+                        $setting["restriction_size"], $setting["restriction_size"]
+                    ]
+                );
+            });
+        }
+        $toPromiseFunctions[] = tpf(function () use ($plan_id) {
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->update('plan')
+                    ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                    ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan_id)))
             );
-        }
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_lastupdate = ? WHERE plan_id = ?",
-            array(microtime(true), $plan_id)
-        );
-
-        // @todo: fake it till you make it... but fix it later!
-        if ($this->isAsync()) {
-            return resolveOnFutureTick(new Deferred())->promise();
-        }
-        return null;
+        });
+        $promise = parallel($toPromiseFunctions)
+            ->then(function (/* array $results */) {
+                return null; // we do not care about the result
+            });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -2076,7 +2143,7 @@ class Plan extends Base
         })
         ->done(
             function (/* ?Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -2174,25 +2241,43 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Fishing(int $plan, array $fishing_values): void
+    public function Fishing(int $plan, array $fishing_values): ?PromiseInterface
     {
-        $this->DeleteFishing($plan);
-
-        foreach ($fishing_values as $fishingValues) {
-            $this->getDatabase()->query(
-                "
-                INSERT INTO fishing (
-                    fishing_country_id, fishing_type, fishing_amount, fishing_plan_id
-                ) VALUES (?, ?, ?, ?)
-                ",
-                array($fishingValues['country_id'], $fishingValues['type'], $fishingValues['amount'], $plan)
-            );
-        }
-
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_lastupdate=? WHERE plan_id=?",
-            array(microtime(true), $plan)
-        );
+        $promise = $this
+            ->DeleteFishing($plan)
+            ->then(function () use ($plan, $fishing_values) {
+                $toPromiseFunctions = [];
+                foreach ($fishing_values as $fishingValues) {
+                    $toPromiseFunctions[] = tpf(function () use ($plan, $fishingValues) {
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        return $this->getAsyncDatabase()->query(
+                            $qb
+                                ->insert('fishing')
+                                ->values([
+                                    'fishing_country_id' =>
+                                        $qb->createPositionalParameter($fishingValues['country_id']),
+                                    'fishing_type' => $qb->createPositionalParameter($fishingValues['type']),
+                                    'fishing_amount' => $qb->createPositionalParameter($fishingValues['amount']),
+                                    'fishing_plan_id' => $qb->createPositionalParameter($plan)
+                                ])
+                        );
+                    });
+                }
+                return parallel($toPromiseFunctions);
+            })
+            ->then(function (/* array $results */) use ($plan) {
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->update('plan')
+                        ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                        ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
+                );
+            })
+            ->then(function (/* Result $result */) {
+                return null; // we do not care about the result
+            });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -2203,9 +2288,18 @@ class Plan extends Base
      * @apiDescription delete all the fishing settings associated with a plan
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteFishing(int $plan): void
+    public function DeleteFishing(int $plan): ?PromiseInterface
     {
-        $this->getDatabase()->query("DELETE FROM fishing WHERE fishing_plan_id=?", array($plan));
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->delete('fishing')
+                ->where($qb->expr()->eq('fishing_plan_id', $qb->createPositionalParameter($plan)))
+        )
+        ->then(function (/* Result $result */) {
+            return null; // we do not care about the result
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -2251,7 +2345,7 @@ class Plan extends Base
         ->done(
             /** @var null $dummy */
             function (/* $dummy */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -2271,12 +2365,19 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetEnergyDistribution(int $id, bool $alters_energy_distribution): void
+    public function SetEnergyDistribution(int $id, bool $alters_energy_distribution): ?PromiseInterface
     {
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_alters_energy_distribution=? WHERE plan_id=?",
-            array($alters_energy_distribution, $id)
-        );
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->update('plan')
+                ->set('plan_alters_energy_distribution', $qb->createPositionalParameter($alters_energy_distribution))
+                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
+        )
+        ->then(function (/* Result $result */) {
+            return null; // we do not care about the result
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -2373,5 +2474,34 @@ class Plan extends Base
                 }
             }
         }
+    }
+
+    /**
+     * @apiGroup Plan
+     * @throws Exception
+     * @api {POST} /plan/SetPolicy (De)activate a plan policy
+     * @apiParam {int} id plan id
+     * @apiParam {string} policy_type [energy|fishing|shipping]
+     * @apiDescription (De)activate a plan policy
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function SetPolicy(int $plan_id, string $policy_type, bool $active): ?PromiseInterface
+    {
+        $policyTypes = PolicyType::getConstants();
+        $policyTypeKey = strtoupper($policy_type);
+        if (!array_key_exists($policyTypeKey, $policyTypes)) {
+            throw new Exception('Encountered invalid policy type: ' . $policy_type);
+        }
+        $policyTypeValue = $policyTypes[$policyTypeKey];
+        $bitWiseOperation = $active ? '|' : '&~';
+        $promise = $this->getAsyncDatabase()->queryBySQL(
+            'UPDATE plan SET plan_type = plan_type ' . $bitWiseOperation . ' ? WHERE plan_id = ?',
+            [$policyTypeValue, $plan_id]
+        );
+        if ($this->isAsync()) {
+            return $promise;
+        }
+        await($promise);
+        return null;
     }
 }

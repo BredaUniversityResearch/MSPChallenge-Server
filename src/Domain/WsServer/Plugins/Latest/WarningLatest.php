@@ -24,7 +24,9 @@ class WarningLatest extends CommonBase
                     'shipping_warning_active as active'
                 )
                 ->from('shipping_warning')
-                ->where('shipping_warning_lastupdate > ' . $qb->createPositionalParameter($time))
+                // note the active ones are the ones from the last simulation run, anything older is deactivated,
+                //  see Warning::SetShippingIssues()
+                ->where('shipping_warning_active = 1')
         );
     }
 }

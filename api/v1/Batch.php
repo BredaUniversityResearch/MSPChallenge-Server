@@ -352,7 +352,7 @@ class Batch extends Base
                         foreach ($taskResults as $taskId => $taskResult) {
                             $batchResult[$batchId]['results'][] = [
                                 'call_id' => $taskId,
-                                'payload' => $taskResult
+                                'payload' => json_encode($taskResult) ?: null
                             ];
                         }
                     }
