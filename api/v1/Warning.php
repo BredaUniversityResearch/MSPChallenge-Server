@@ -25,16 +25,10 @@ class Warning extends Base
 
     private function postHandleRemovals(array $removed): PromiseInterface
     {
+        $removed = filter_var_array($removed, FILTER_VALIDATE_INT);
         if (empty($removed)) {
             return resolveOnFutureTick(new Deferred())->promise();
         }
-
-        // $removed can be simplified to only hold the issue_database_id,
-        //   also key on issue_database_id, removing duplicates
-        $removed = collect($removed)
-            ->keyBy('issue_database_id')
-            ->keys()
-            ->all();
 
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
