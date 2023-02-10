@@ -338,25 +338,26 @@ class Batch extends Base
 
             return chain($chain)
                 ->then(function (array $taskResultsContainer) use ($batchId) {
-                    // run async query to set batches to success, no need to wait for the result.
                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    $this->getAsyncDatabase()->query(
+                    return $this->getAsyncDatabase()->query(
                         $qb
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Success'))
+                            ->set('api_batch_lastupdate', $qb->createPositionalParameter(microtime(true)))
                             ->where($qb->expr()->eq('api_batch_id', $batchId))
-                    );
-
-                    $batchResult = [];
-                    foreach ($taskResultsContainer as $groupId => $taskResults) {
-                        foreach ($taskResults as $taskId => $taskResult) {
-                            $batchResult[$batchId]['results'][] = [
-                                'call_id' => $taskId,
-                                'payload' => json_encode($taskResult) ?: null
-                            ];
+                    )
+                    ->then(function (/* Result $result */) use ($taskResultsContainer, $batchId) {
+                        $batchResult = [];
+                        foreach ($taskResultsContainer as $groupId => $taskResults) {
+                            foreach ($taskResults as $taskId => $taskResult) {
+                                $batchResult[$batchId]['results'][] = [
+                                    'call_id' => $taskId,
+                                    'payload' => json_encode($taskResult) ?: null
+                                ];
+                            }
                         }
-                    }
-                    return $batchResult;
+                        return $batchResult;
+                    });
                 })
                 ->otherwise(function ($reason) use ($batchId) {
                     // run async query to set batches to failed, no need to wait for the result.
@@ -365,6 +366,7 @@ class Batch extends Base
                         $qb
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
+                            ->set('api_batch_lastupdate', $qb->createPositionalParameter(microtime(true)))
                             ->where($qb->expr()->eq('api_batch_id', $batchId))
                     );
                     // Propagate by returning rejection

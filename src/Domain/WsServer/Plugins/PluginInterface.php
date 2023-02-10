@@ -12,6 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 interface PluginInterface
 {
+    public static function getDefaultMinIntervalSec(): float;
+
     public function getName(): string;
     public function getMinIntervalSec(): float;
     public function isDebugOutputEnabled(): bool;

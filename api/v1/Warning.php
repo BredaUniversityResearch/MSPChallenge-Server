@@ -79,11 +79,17 @@ class Warning extends Base
                             'warning_source_plan_id' => $qb->createPositionalParameter($planId),
                             'warning_restriction_id' => $addedIssue['restriction_id']
                         ])
-                );
+                )
+                ->then(function (Result $result) use ($addedIssue) {
+                    $addedIssue['issue_database_id'] = $result->getLastInsertedId();
+                    return $addedIssue;
+                });
             }
 
             $existingIssue = current($existingIssues);
-            $toPromiseFunctions[$existingIssue['warning_id']] = tpf(function () use ($existingIssue) {
+            $warningIdUpdated = $existingIssue['warning_id'];
+            $addedIssue['issue_database_id'] = $warningIdUpdated;
+            $toPromiseFunctions[$warningIdUpdated] = tpf(function () use ($warningIdUpdated) {
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $this->getAsyncDatabase()->query(
                     $qb
@@ -92,7 +98,7 @@ class Warning extends Base
                         ->set('warning_active', '1')
                         ->where($qb->expr()->eq(
                             'warning_id',
-                            $qb->createPositionalParameter($existingIssue['warning_id'])
+                            $qb->createPositionalParameter($warningIdUpdated)
                         ))
                 );
             });
@@ -115,7 +121,15 @@ class Warning extends Base
                     );
                 });
             }
-            return parallel($toPromiseFunctions);
+            // todo: we might not need to await the result of the updates...and already return the $warningIdUpdated ?
+            //   so like this:
+            //     parallel($toPromiseFunctions); // to execute them
+            //     return $warningIdUpdated; // but not awaiting the results, notice the lack of "->then(...)"
+            //   but might have impact on the "latest" response data, so for safety, we just wait for them to finish
+            return parallel($toPromiseFunctions)
+                ->then(function (/*array $results*/) use ($addedIssue) {
+                    return $addedIssue;
+                });
         });
     }
 
@@ -140,9 +154,14 @@ class Warning extends Base
      * @apiParam {arrat} removed Json array of IssueObjects that are removed.
      * @apiDescription Add or update a warning message on the server
      * @noinspection SpellCheckingInspection
+     * @return array{
+     *   array{
+     *     issue_database_id: int, type: string, active: boolean, x: float, y: float, restriction_id: int
+     *   }
+     * }|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Post(int $plan, int $planlayer_id, array $added, array $removed = []): ?PromiseInterface
+    public function Post(int $plan, int $planlayer_id, array $added, array $removed = []): array|PromiseInterface
     {
         $deferred = new Deferred();
         $toPromiseFunctions[] = tpf(function () use ($plan, $planlayer_id, $added) {
@@ -155,8 +174,12 @@ class Warning extends Base
         }
         parallel($toPromiseFunctions)
             ->done(
-                function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                /** @var array{0: array{int}} $results */
+                function (array $results) use ($deferred) {
+                    if (empty($results[0])) { // nothing added
+                        $deferred->resolve([]);
+                    }
+                    $deferred->resolve($results[0]);
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);

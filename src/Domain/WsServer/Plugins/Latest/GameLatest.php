@@ -155,6 +155,26 @@ class GameLatest extends CommonBase
                     });
                 });
             });
+        })
+        // add debug data to payload, only to be dumped to log, see PluginHelper::dump()
+        ->then(function (array &$data) use ($lastUpdateTime) {
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->select(
+                        'api_batch_id',
+                        'api_batch_state',
+                        'api_batch_country_id',
+                        'api_batch_user_id',
+                        'api_batch_communicated'
+                    )
+                    ->from('api_batch')
+                    ->where($qb->expr()->gt('api_batch_lastupdate', $qb->createPositionalParameter($lastUpdateTime)))
+            )
+            ->then(function (Result $result) use (&$data) {
+                $data['debug']['batches'] = $result->fetchAllRows() ?: [];
+                return $data;
+            });
         });
     }
 

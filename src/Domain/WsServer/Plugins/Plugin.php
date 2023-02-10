@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
 use App\Domain\WsServer\MeasurementCollectionManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
@@ -9,12 +10,15 @@ use App\Domain\WsServer\WsServerInterface;
 use App\Domain\WsServer\WsServerOutput;
 use Exception;
 use React\EventLoop\LoopInterface;
-use Closure;
 use App\Domain\Event\NameAwareEvent;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use function App\tpf;
 
 abstract class Plugin extends EventDispatcher implements PluginInterface
 {
+    public const EVENT_PLUGIN_EXECUTION_FINISHED = 'EVENT_PLUGIN_EXECUTION_FINISHED';
+
     private string $name;
     private float $minIntervalSec;
     private bool $debugOutputEnabled;
@@ -30,11 +34,11 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
 
     public function __construct(
         string $name,
-        float $minIntervalSec,
+        ?float $minIntervalSec = null,
         bool $debugOutputEnabled = true
     ) {
         $this->name = $name;
-        $this->minIntervalSec = $minIntervalSec;
+        $this->minIntervalSec ??= $minIntervalSec ?? static::getDefaultMinIntervalSec();
         $this->debugOutputEnabled = $debugOutputEnabled;
         parent::__construct();
     }
@@ -83,6 +87,9 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this->registeredToLoop;
     }
 
+    /**
+     * @throws Exception
+     */
     final public function registerToLoop(LoopInterface $loop)
     {
         $this->registeredToLoop = true;
@@ -90,14 +97,19 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
 
         // interval sec is zero, so no interval, no repeating
         if ($this->getMinIntervalSec() < PHP_FLOAT_EPSILON) {
-            $loop->futureTick($this->onCreatePromiseFunction());
+            $loop->futureTick($this->createPromiseFunction());
             return;
         }
-        $loop->addTimer(mt_rand() * $this->getMinIntervalSec() / mt_getrandmax(), PluginHelper::createRepeatedFunction(
-            $this,
-            $loop,
-            $this->onCreatePromiseFunction()
-        ));
+        $loop->addTimer(
+            mt_rand() * $this->getMinIntervalSec() / mt_getrandmax(),
+            PluginHelper::getInstance()->createRepeatedFunction(
+                $this,
+                $loop,
+                function () {
+                    return ($this->createPromiseFunction())();
+                }
+            )
+        );
     }
 
     final public function unregisterFromLoop(LoopInterface $loop)
@@ -193,7 +205,25 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this;
     }
 
-    abstract protected function onCreatePromiseFunction(): Closure;
+    private function createPromiseFunction(): ToPromiseFunction
+    {
+        return tpf(function () {
+            $tpf = $this->onCreatePromiseFunction();
+            return ($tpf)()
+                ->then(function () {
+                    $this->addOutput(
+                        'Plugin '.$this->getName().' just finished',
+                        OutputInterface::VERBOSITY_DEBUG
+                    );
+                    $this->dispatch(
+                        new NameAwareEvent(self::EVENT_PLUGIN_EXECUTION_FINISHED, $this),
+                        self::EVENT_PLUGIN_EXECUTION_FINISHED
+                    );
+                });
+        });
+    }
+
+    abstract protected function onCreatePromiseFunction(): ToPromiseFunction;
 
     public function onWsServerEventDispatched(NameAwareEvent $event): void
     {

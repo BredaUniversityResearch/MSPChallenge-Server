@@ -76,7 +76,6 @@ class WsServer extends EventDispatcher implements
         return $this->stats;
     }
 
-    // @phpstan-ignore-next-line "Constructor of class App\Domain\WsServer\WsServer has an unused parameter $apiHelper"
     public function __construct(
         DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper,
         // below is required by legacy to be auto-wired
