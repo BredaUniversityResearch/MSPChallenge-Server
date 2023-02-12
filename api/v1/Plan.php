@@ -416,78 +416,108 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetState(int $id, string $state, int $user): void
+    public function SetState(int $id, string $state, int $user): ?PromiseInterface
     {
-        $currentPlanData = $this->getDatabase()->query(
-            "SELECT plan_state, plan_name, plan_type FROM plan WHERE plan_id = ? AND plan_lock_user_id = ?",
-            array($id, $user)
-        );
-        if (count($currentPlanData) == 0) {
-            throw new Exception("Trying to set plan state of plan ".$id." without user ".$user." having it locked");
-        }
-
-        $previousState = $currentPlanData[0]['plan_state'];
-        $isEnergyPlan = $currentPlanData[0]['plan_type'] == PolicyType::ENERGY;
-
-        $performEnergyDependencyCheck = false;  //Design / Deleted -> Concultation / Approval / Approved
-        $performEnergyOverlapCheck = false;     //Concultation / Approval / Approved -> Design / Deleted
-
-        if ($isEnergyPlan) {
-            if ($state == "DESIGN" || $state == "DELETED") {
-                if ($previousState == "CONSULTATION" || $previousState == "APPROVAL" || $previousState == "APPROVED") {
-                    $performEnergyDependencyCheck = true;
-                }
-            } else {
-                if ($previousState == "DESIGN" || $previousState == "DELETED") {
-                    $performEnergyOverlapCheck = true;
-                }
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->select('plan_state', 'plan_name', 'plan_type')
+                ->from('plan')
+                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
+                ->andWhere($qb->expr()->eq('plan_lock_user_id', $qb->createPositionalParameter($user)))
+        )
+        ->then(function (Result $result) use ($id, $state, $user) {
+            $currentPlanData = $result->fetchAllRows() ?: [];
+            if (count($currentPlanData) == 0) {
+                throw new Exception('Trying to set plan state of plan '.$id.' without user '.$user.' having it locked');
             }
-        }
+            $previousState = $currentPlanData[0]['plan_state'];
 
-        // We explicitly don't set the plan_updatetime here to prevent issues with half-updates. plan_updatettime is set
-        //   when the plan is unlocked again.
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_previousstate=plan_state, plan_state=? WHERE plan_id=?",
-            array($state, $id)
-        );
-        if ($previousState == "APPROVAL") {
-            $this->getDatabase()->query(
-                "UPDATE approval SET approval_vote = -1 WHERE approval_plan_id = ?",
-                array($id)
-            );
-        }
-
-        if ($isEnergyPlan) {
-            //Set dependent plans back to design and set the energy error.
-            $erroringEnergyPlans = array();
-            $energy = new Energy();
-            if ($performEnergyDependencyCheck) {
-                await($energy->findDependentEnergyPlans($id, $erroringEnergyPlans));
-            }
-            if ($performEnergyOverlapCheck) {
-                $energy->FindOverlappingEnergyPlans($id, $erroringEnergyPlans);
-            }
-
-            foreach ($erroringEnergyPlans as $planId) {
-                $this->getDatabase()->query(
-                    "
-                    UPDATE plan
-                    SET plan_previousstate = plan_state, plan_state = ?, plan_lastupdate = ?, plan_energy_error = 1
-                    WHERE plan_id = ? AND plan_state <> 'DELETED'
-                    ",
-                    array("DESIGN", microtime(true), $planId)
+            // We explicitly don't set the plan_updatetime here to prevent issues with half-updates. plan_updatettime
+            //   is set when the plan is unlocked again.
+            $toPromiseFunctions[] = tpf(function () use ($id, $state) {
+                return $this->getAsyncDatabase()->queryBySQL(
+                    'UPDATE plan SET plan_previousstate=plan_state, plan_state=? WHERE plan_id=?',
+                    [$state, $id]
                 );
-                $this->Message(
-                    $planId,
-                    1,
-                    "SYSTEM",
-                    "Plan was moved back to design. An energy conflict was found when plan \"".
-                    $currentPlanData[0]["plan_name"]."\" was moved to a different state."
-                );
+            });
+            if ($previousState == "APPROVAL") {
+                $toPromiseFunctions[] = tpf(function () use ($id) {
+                    return $this->getAsyncDatabase()->update(
+                        'approval',
+                        ['approval_plan_id' => $id],
+                        ['approval_vote' => -1]
+                    );
+                });
             }
-        }
+            return parallel($toPromiseFunctions)
+                ->then(function (/*array $results*/) use ($id, $state, &$currentPlanData) {
+                    $previousState = $currentPlanData[0]['plan_state'];
+                    $isEnergyPlan = $currentPlanData[0]['plan_type'] == PolicyType::ENERGY;
+                    if (!$isEnergyPlan) {
+                        return null;
+                    }
+                    $performEnergyDependencyCheck = false;  //Design / Deleted -> Concultation / Approval / Approved
+                    $performEnergyOverlapCheck = false;     //Concultation / Approval / Approved -> Design / Deleted
+                    if ($state == "DESIGN" || $state == "DELETED") {
+                        if ($previousState == "CONSULTATION" || $previousState == "APPROVAL" ||
+                            $previousState == "APPROVED") {
+                            $performEnergyDependencyCheck = true;
+                        }
+                    } else {
+                        if ($previousState == "DESIGN" || $previousState == "DELETED") {
+                            $performEnergyOverlapCheck = true;
+                        }
+                    }
+                    //Set dependent plans back to design and set the energy error.
+                    $erroringEnergyPlans = array();
+                    $energy = new Energy();
+                    $this->asyncDataTransferTo($energy);
+                    $toPromiseFunctions = [];
+                    if ($performEnergyDependencyCheck) {
+                        $toPromiseFunctions[] = tpf(function () use ($energy, $id, &$erroringEnergyPlans) {
+                            return $energy->findDependentEnergyPlans($id, $erroringEnergyPlans);
+                        });
+                    }
+                    if ($performEnergyOverlapCheck) {
+                        $toPromiseFunctions[] = tpf(function () use ($energy, $id, &$erroringEnergyPlans) {
+                            return $energy->FindOverlappingEnergyPlans($id, $erroringEnergyPlans);
+                        });
+                    }
 
-        //$this->DBCommitTransaction();
+                    return parallel($toPromiseFunctions)
+                        ->then(function (/* array $results */) use (&$currentPlanData, &$erroringEnergyPlans) {
+                            $toPromiseFunctions = [];
+                            foreach ($erroringEnergyPlans as $planId) {
+                                $toPromiseFunctions[] = tpf(function () use (&$currentPlanData, $planId) {
+                                    return $this->getAsyncDatabase()->queryBySQL(
+                                        '
+                                        UPDATE plan
+                                        SET plan_previousstate = plan_state, plan_state = ?, plan_lastupdate = ?,
+                                            plan_energy_error = 1
+                                        WHERE plan_id = ? AND plan_state <> "DELETED"
+                                        ',
+                                        ['DESIGN', microtime(true), $planId]
+                                    )
+                                    ->then(function (/*Result $result*/) use (&$currentPlanData, $planId) {
+                                        return $this->Message(
+                                            $planId,
+                                            1,
+                                            "SYSTEM",
+                                            "Plan was moved back to design. An energy conflict was found when plan \"".
+                                            $currentPlanData[0]["plan_name"]."\" was moved to a different state."
+                                        );
+                                    });
+                                });
+                            }
+                            return parallel($toPromiseFunctions);
+                        });
+                });
+        })
+        ->then(function (/*array $results*/) {
+            return null; // we do not care about the result
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -1969,9 +1999,13 @@ class Plan extends Base
      * @apiParam {string} text Message sent by the user
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Message(int $plan, int $team_id, string $user_name, string $text): void
+    public function Message(int $plan, int $team_id, string $user_name, string $text): ?PromiseInterface
     {
-        await($this->messageAsync($plan, $team_id, $user_name, $text));
+        $promise = $this->messageAsync($plan, $team_id, $user_name, $text)
+            ->then(function (/* Result $result */) {
+                return null; // we do not care about the result
+            });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**

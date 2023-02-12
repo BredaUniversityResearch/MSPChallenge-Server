@@ -1013,10 +1013,10 @@ class Energy extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function FindOverlappingEnergyPlans(int $planId, array &$result): void
+    public function FindOverlappingEnergyPlans(int $planId, array &$result): ?PromiseInterface
     {
-        $removedGridIds = $this->getDatabase()->query(
-            "
+        $promise = $this->getAsyncDatabase()->queryBySQL(
+            '
             SELECT COALESCE(
                 grid_removed.grid_removed_grid_persistent, grid.grid_persistent
             ) AS grid_persistent, plan.plan_gametime 
@@ -1024,51 +1024,68 @@ class Energy extends Base
             LEFT OUTER JOIN grid_removed ON grid_removed.grid_removed_plan_id = plan.plan_id
             LEFT OUTER JOIN grid ON grid.grid_plan_id = plan.plan_id
             WHERE grid_removed.grid_removed_plan_id = ? OR grid.grid_plan_id = ?
-            ",
-            array($planId, $planId)
-        );
-            
-        foreach ($removedGridIds as $removedGridId) {
-            $futureReferencedGrids = $this->getDatabase()->query(
-                "
-                SELECT grid_plan_id as plan_id 
-                FROM grid INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
-                WHERE grid_persistent = :gridPersistent AND (
-                    plan.plan_gametime > :gameTime OR (
-                        plan.plan_gametime = :gameTime AND plan.plan_id > :planId
+            ',
+            [$planId, $planId]
+        )
+        ->then(function (Result $qResult) use ($planId, &$result) {
+            $removedGridIds = $qResult->fetchAllRows() ?: [];
+            $toPromiseFunctions = [];
+            foreach ($removedGridIds as $removedGridId) {
+                $toPromiseFunctions[] = tpf(function () use ($removedGridId, $planId, &$result) {
+                    return $this->getAsyncDatabase()->queryBySQL(
+                        '
+                        SELECT grid_plan_id as plan_id 
+                        FROM grid INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
+                        WHERE grid_persistent = ? AND (
+                            plan.plan_gametime > ? OR (
+                                plan.plan_gametime = ? AND plan.plan_id > ?
+                            )
+                        )
+                        ',
+                        [
+                            $removedGridId['grid_persistent'],
+                            $removedGridId['plan_gametime'],
+                            $removedGridId['plan_gametime'],
+                            $planId
+                        ]
                     )
-                )
-                ",
-                array(
-                    ":gridPersistent" => $removedGridId['grid_persistent'],
-                    ":gameTime" => $removedGridId['plan_gametime'], ":planId" => $planId
-                )
-            );
-                    
-            foreach ($futureReferencedGrids as $futureGrid) {
-                $result[] = $futureGrid['plan_id'];
+                    ->then(function (Result $qResult) use (&$result) {
+                        $futureReferencedGrids = $qResult->fetchAllRows() ?: [];
+                        foreach ($futureReferencedGrids as $futureGrid) {
+                            $result[] = $futureGrid['plan_id'];
+                        }
+                    });
+                });
+                $toPromiseFunctions[] = tpf(function () use ($removedGridId, $planId, &$result) {
+                    return $this->getAsyncDatabase()->queryBySQL(
+                        '
+                        SELECT grid_removed_plan_id as plan_id 
+                        FROM grid_removed
+                        INNER JOIN plan on grid_removed.grid_removed_plan_id = plan.plan_id
+                        WHERE grid_removed_grid_persistent = ? AND (
+                            plan.plan_gametime > ? OR (plan.plan_gametime = ? AND plan.plan_id > ?))
+                        ',
+                        [
+                            $removedGridId['grid_persistent'],
+                            $removedGridId['plan_gametime'],
+                            $removedGridId['plan_gametime'],
+                            $planId
+                        ]
+                    )
+                    ->then(function (Result $qResult) use (&$result) {
+                        $futureDeletedGrids = $qResult->fetchAllRows() ?: [];
+                        foreach ($futureDeletedGrids as $futureDeletedGrid) {
+                            $result[] = $futureDeletedGrid['plan_id'];
+                        }
+                    });
+                });
+                return parallel($toPromiseFunctions)
+                    ->then(function (/*array $qResults*/) use (&$result) {
+                        $result = array_unique($result);
+                    });
             }
-
-            $futureDeletedGrids = $this->getDatabase()->query(
-                "
-                SELECT grid_removed_plan_id as plan_id 
-                FROM grid_removed
-                INNER JOIN plan on grid_removed.grid_removed_plan_id = plan.plan_id
-                WHERE grid_removed_grid_persistent = :gridPersistent AND (
-                    plan.plan_gametime > :gameTime OR (plan.plan_gametime = :gameTime AND plan.plan_id > :planId))
-                ",
-                array(
-                    ":gridPersistent" => $removedGridId['grid_persistent'],
-                    ":gameTime" => $removedGridId['plan_gametime'], ":planId" => $planId
-                )
-            );
-                
-            foreach ($futureDeletedGrids as $futureDeletedGrid) {
-                $result[] = $futureDeletedGrid['plan_id'];
-            }
-        }
-
-        $result = array_unique($result);
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
