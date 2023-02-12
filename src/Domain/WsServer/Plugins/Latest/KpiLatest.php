@@ -12,7 +12,7 @@ use function App\tpf;
 
 class KpiLatest extends CommonBase
 {
-    private function getQueryBuilderKpiBase(string $simLastMonthColumn, string $simLastUpdateColumn)
+    private function getQueryBuilderKpiBase(int $time, int $country, string $kpiType)
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         // template query builder for both ecology and shipping
@@ -30,13 +30,23 @@ class KpiLatest extends CommonBase
                 $qb->expr()->and(
                     $qb->expr()->in(
                         'kpi_month',
-                        "SELECT $simLastMonthColumn FROM game WHERE $simLastUpdateColumn > ?",
+                        // if there is a recent simulation change, retrieve all changes of that month
+                        //  note that game_currentmonth is always equal to game_Xel_month column in this case
+                        //  and that all simulation runs have been finished here
+                        'SELECT game_currentmonth FROM game WHERE (
+                            game_mel_lastupdate > '.$qb->createPositionalParameter($time).' OR
+                            game_sel_lastupdate > '.$qb->createPositionalParameter($time).' OR
+                            game_cel_lastupdate > '.$qb->createPositionalParameter($time).'
+                        )',
                     ),
                     $qb->expr()->or(
-                        'kpi_country_id = ?',
+                        $qb->expr()->eq('kpi_country_id', $qb->createPositionalParameter($country)),
                         'kpi_country_id = -1'
                     ),
-                    'kpi_type = ?'
+                    $qb->expr()->eq(
+                        'kpi_type',
+                        $qb->createPositionalParameter($kpiType, \Doctrine\DBAL\Types\Types::STRING)
+                    )
                 )
             );
         return $qb;
@@ -50,24 +60,18 @@ class KpiLatest extends CommonBase
     {
         // ecology
         $toPromiseFunctions[] = tpf(function () use ($time, $country) {
-            $qb = $this->getQueryBuilderKpiBase('game_mel_lastmonth', 'game_mel_lastupdate');
-            return $this->getAsyncDatabase()->query(
-                $qb
-                    ->setParameters([$time, $country, 'ECOLOGY'])
-            );
+            $qb = $this->getQueryBuilderKpiBase($time, $country, 'ECOLOGY');
+            return $this->getAsyncDatabase()->query($qb);
         });
         // shipping
         $toPromiseFunctions[] = tpf(function () use ($time, $country) {
-            $qb = $this->getQueryBuilderKpiBase('game_sel_lastmonth', 'game_sel_lastupdate');
-            return $this->getAsyncDatabase()->query(
-                $qb
-                    ->setParameters([$time, $country, 'SHIPPING'])
-            );
+            $qb = $this->getQueryBuilderKpiBase($time, $country, 'SHIPPING');
+            return $this->getAsyncDatabase()->query($qb);
         });
 
         // energy
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        $toPromiseFunctions[] = tpf(function () use ($qb, $time) {
+        $toPromiseFunctions[] = tpf(function () use ($time) {
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->select(
@@ -79,8 +83,14 @@ class KpiLatest extends CommonBase
                     ->from('energy_kpi')
                     ->where($qb->expr()->in(
                         'energy_kpi_month',
-                        'SELECT game_cel_lastmonth FROM game WHERE game_cel_lastupdate > '.
-                            $qb->createPositionalParameter($time)
+                        // if there is a recent simulation change, retrieve all changes of that month
+                        //  note that game_currentmonth is always equal to game_Xel_month column in this case
+                        //  and that all simulation runs have been finished here
+                        'SELECT game_currentmonth FROM game WHERE (
+                            game_mel_lastupdate > '.$qb->createPositionalParameter($time).' OR
+                            game_sel_lastupdate > '.$qb->createPositionalParameter($time).' OR
+                            game_cel_lastupdate > '.$qb->createPositionalParameter($time).'
+                        )'
                     ))
             );
         });
