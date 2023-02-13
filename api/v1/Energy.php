@@ -267,12 +267,17 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateGridName(int $id, string $name): void
+    public function UpdateGridName(int $id, string $name): ?PromiseInterface
     {
-        $this->getDatabase()->query(
-            "UPDATE grid SET grid_name=?, grid_lastupdate=? WHERE grid_id=?",
-            array($name, microtime(true), $id)
-        );
+        $promise = $this->getAsyncDatabase()->update(
+            'grid',
+            ['grid_id' => $id],
+            ['grid_name' => $name, 'grid_lastupdate' => microtime(true)]
+        )
+        ->then(function (Result $result) {
+            return null; // we do not care about the result
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
