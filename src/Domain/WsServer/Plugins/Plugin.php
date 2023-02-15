@@ -138,6 +138,12 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this->loop;
     }
 
+    public function setLoop(LoopInterface $loop): self
+    {
+        $this->loop = $loop;
+        return $this;
+    }
+
     /**
      * @throws Exception
      */
@@ -205,7 +211,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this;
     }
 
-    private function createPromiseFunction(): ToPromiseFunction
+    protected function createPromiseFunction(): ToPromiseFunction
     {
         return tpf(function () {
             $tpf = $this->onCreatePromiseFunction();

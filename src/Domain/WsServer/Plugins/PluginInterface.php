@@ -20,6 +20,8 @@ interface PluginInterface
     public function setDebugOutputEnabled(bool $debugOutputEnabled): void;
     public function addOutput(string $output, int $verbosity = OutputInterface::VERBOSITY_NORMAL): self;
 
+    public function getLoop(): LoopInterface;
+    public function setLoop(LoopInterface $loop): self;
     public function isRegisteredToLoop(): bool;
     public function registerToLoop(LoopInterface $loop);
     public function unregisterFromLoop(LoopInterface $loop);

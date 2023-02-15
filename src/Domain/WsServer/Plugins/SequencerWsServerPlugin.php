@@ -3,16 +3,10 @@
 namespace App\Domain\WsServer\Plugins;
 
 use App\Domain\Common\ToPromiseFunction;
-use App\Domain\Event\NameAwareEvent;
-use Exception;
-use React\Promise\Deferred;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use function App\chain;
-use function App\resolveOnFutureTick;
 use function App\tpf;
 
-class SequencerWsServerPlugin extends Plugin implements EventSubscriberInterface
+class SequencerWsServerPlugin extends Plugin
 {
     /**
      * @var Plugin[] array
@@ -44,7 +38,6 @@ class SequencerWsServerPlugin extends Plugin implements EventSubscriberInterface
             $constructorParams['minIntervalSec'] = 0;
             /** @var Plugin $plugin */
             $plugin = new ($class)(...($constructorParams));
-            $plugin->addSubscriber($this);
             $this->plugins[] = $plugin;
         }
 
@@ -66,38 +59,16 @@ class SequencerWsServerPlugin extends Plugin implements EventSubscriberInterface
     {
         return tpf(function () {
             $toPromiseFunctions = collect($this->plugins)->map(function (Plugin $p) {
-                return tpf(function () use ($p) {
-                    $this->addOutput(
-                        $this->getName().': registering plugin '.$p->getName(),
-                        OutputInterface::VERBOSITY_VERY_VERBOSE
-                    );
-                    $this->getWsServer()->registerPlugin($p);
-                    // meaning sequencer plugin itself will not register any promises, but since it calls registerPlugin
-                    //   on other plugins, those will be registered
-                    return resolveOnFutureTick(new Deferred())->promise();
-                });
+                $p
+                    ->setLoop($this->getLoop())
+                    ->setGameSessionIdFilter($this->getGameSessionIdFilter())
+                    ->setMeasurementCollectionManager($this->getMeasurementCollectionManager())
+                    ->setClientConnectionResourceManager($this->getClientConnectionResourceManager())
+                    ->setServerManager($this->getServerManager())
+                    ->setWsServer($this->getWsServer());
+                return $p->createPromiseFunction();
             })->all();
             return chain($toPromiseFunctions);
         });
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function onEvent(NameAwareEvent $event)
-    {
-        if ($event->getEventName() != self::EVENT_PLUGIN_EXECUTION_FINISHED) {
-            return;
-        }
-        /** @var Plugin $plugin */
-        $plugin = $event->getSubject(); // the plugin that just finished
-        $this->getWsServer()->unregisterPlugin($plugin);
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            self::EVENT_PLUGIN_EXECUTION_FINISHED => 'onEvent'
-        ];
     }
 }
