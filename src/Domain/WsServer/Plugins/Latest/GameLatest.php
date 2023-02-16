@@ -19,9 +19,9 @@ class GameLatest extends CommonBase
 
     private function newSimulationDataAvailable(array $tickData, float $lastUpdateTime): bool
     {
-        if (($lastUpdateTime > $tickData['mel_lastupdate']) ||
-            ($lastUpdateTime > $tickData['cel_lastupdate']) ||
-            ($lastUpdateTime > $tickData['sel_lastupdate'])) {
+        if (($tickData['mel_lastupdate'] > $lastUpdateTime) ||
+            ($tickData['cel_lastupdate'] > $lastUpdateTime) ||
+            ($tickData['sel_lastupdate'] > $lastUpdateTime)) {
             return true;
         }
         return false;
