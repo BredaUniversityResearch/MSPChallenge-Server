@@ -198,7 +198,7 @@ class LatestWsServerPlugin extends Plugin
         $p2TickEraTimeleft = $p2['tick']['era_timeleft'] ?? 0;
         $eraTimeLeftDiff = abs($p1TickEraTimeleft - $p2TickEraTimeleft);
 
-        // if there are any other changes then "time" fields, it is essential
+        // if there are any other changes then "time" or "debug" fields, it is essential
         unset(
             $p1['prev_update_time'],
             $p1['update_time'],
