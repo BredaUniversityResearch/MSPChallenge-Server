@@ -12,10 +12,29 @@ use function App\tpf;
 
 class KpiLatest extends CommonBase
 {
-    private function getQueryBuilderKpiBase(int $country, string $kpiType)
+    private function createQueryBuilderKpiBase(int $country, string $kpiType, bool $currentMonthOnly = true)
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         // template query builder for both ecology and shipping
+        $andExpr = $qb->expr()->and(
+            $qb->expr()->or(
+                $qb->expr()->eq('kpi_country_id', $qb->createPositionalParameter($country)),
+                'kpi_country_id = -1'
+            ),
+            $qb->expr()->eq(
+                'kpi_type',
+                $qb->createPositionalParameter($kpiType, \Doctrine\DBAL\Types\Types::STRING)
+            )
+        );
+        if ($currentMonthOnly) {
+            $andExpr = $andExpr->with($qb->expr()->in(
+                'kpi_month',
+                // if there is a recent simulation change, retrieve all changes of that month
+                //  note that game_currentmonth is always equal to game_Xel_month column in this case
+                //  and that all simulation runs have been finished here
+                'SELECT game_currentmonth FROM game',
+            ));
+        }
         $qb
             ->select(
                 'kpi_name as name',
@@ -26,44 +45,35 @@ class KpiLatest extends CommonBase
                 'kpi_country_id as country',
             )
             ->from('kpi')
-            ->where(
-                $qb->expr()->and(
-                    $qb->expr()->in(
-                        'kpi_month',
-                        // if there is a recent simulation change, retrieve all changes of that month
-                        //  note that game_currentmonth is always equal to game_Xel_month column in this case
-                        //  and that all simulation runs have been finished here
-                        'SELECT game_currentmonth FROM game',
-                    ),
-                    $qb->expr()->or(
-                        $qb->expr()->eq('kpi_country_id', $qb->createPositionalParameter($country)),
-                        'kpi_country_id = -1'
-                    ),
-                    $qb->expr()->eq(
-                        'kpi_type',
-                        $qb->createPositionalParameter($kpiType, \Doctrine\DBAL\Types\Types::STRING)
-                    )
-                )
-            );
+            ->where($andExpr);
         return $qb;
+    }
+
+    private function createPromiseFunctionKpi(int $time, int $country, string $kpiType)
+    {
+        return tpf(function () use ($time, $country, $kpiType) {
+            $qb = $this->createQueryBuilderKpiBase($country, $kpiType);
+            return $this->getAsyncDatabase()->query($qb)
+                ->then(function (Result $result) use ($time, $country, $kpiType) {
+                    $kpiMinLastUpdate = collect($result->fetchAllRows() ?: [])
+                        ->reduce(fn($carry, $item) => min($carry, $item), $time);
+                    if ($time <= $kpiMinLastUpdate) { // oh, we need to retrieve more that just the current month
+                        $qb = $this->createQueryBuilderKpiBase($country, $kpiType, false); // fetch all
+                        return $this->getAsyncDatabase()->query($qb);
+                    }
+                    return $result;
+                });
+        });
     }
 
     /**
      * @throws Exception
      * @return array|PromiseInterface
      */
-    public function fetchLastMonth(int $country)/*: array|PromiseInterface // <-- php 8 */
+    public function latest(int $time, int $country)/*: array|PromiseInterface // <-- php 8 */
     {
-        // ecology
-        $toPromiseFunctions[] = tpf(function () use ($country) {
-            $qb = $this->getQueryBuilderKpiBase($country, 'ECOLOGY');
-            return $this->getAsyncDatabase()->query($qb);
-        });
-        // shipping
-        $toPromiseFunctions[] = tpf(function () use ($country) {
-            $qb = $this->getQueryBuilderKpiBase($country, 'SHIPPING');
-            return $this->getAsyncDatabase()->query($qb);
-        });
+        $toPromiseFunctions[] = $this->createPromiseFunctionKpi($time, $country, 'ECOLOGY');
+        $toPromiseFunctions[] = $this->createPromiseFunctionKpi($time, $country, 'SHIPPING');
 
         // energy
         $toPromiseFunctions[] = tpf(function () {

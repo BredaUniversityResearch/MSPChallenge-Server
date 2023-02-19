@@ -108,7 +108,7 @@ class GameLatest extends CommonBase
                             $newTime,
                             &$data
                         ) {
-                            return $this->latestLevel6(
+                            return $this->latestLevel6( // energy
                                 $result,
                                 $newTime,
                                 $data
@@ -123,6 +123,7 @@ class GameLatest extends CommonBase
                                 return $this->latestLevel7(
                                     $results,
                                     $teamId,
+                                    $lastUpdateTime,
                                     $newTime,
                                     $data
                                 )
@@ -426,6 +427,7 @@ class GameLatest extends CommonBase
     private function latestLevel7(
         array $energyData,
         int $teamId,
+        float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
@@ -440,7 +442,7 @@ class GameLatest extends CommonBase
         $this->asyncDataTransferTo($kpi);
         $deferred = new Deferred();
         $this->allowEnergyKpiUpdate ?
-            $kpi->fetchLastMonth($teamId)->then(function (array $queryResultRows) use ($deferred) {
+            $kpi->latest((int)$lastUpdateTime, $teamId)->then(function (array $queryResultRows) use ($deferred) {
                 $deferred->resolve($queryResultRows);
             }) :
             resolveOnFutureTick($deferred, [
