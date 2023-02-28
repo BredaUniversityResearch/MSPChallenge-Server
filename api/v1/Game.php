@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowserFactory;
+use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
@@ -428,22 +429,30 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function State(string $state): void
     {
+        $state = strtoupper($state);
         $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
         if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
             throw new Exception("Invalid current state of ".$currentState["game_state"]);
         }
 
+        // prepare update query using builder
+        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
+            ->createQueryBuilder();
+        $qb
+            ->update('game')
+            ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
+            ->set('game_state', $qb->createPositionalParameter($state));
         if ($currentState["game_state"] == "SETUP") {
             //Starting plans should be implemented when we any state "PLAY"
             $plan = new Plan();
             await($plan->updateLayerState(0));
-        }
 
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query(
-            "UPDATE game SET game_lastupdate = ?, game_state=?",
-            array(microtime(true), $state)
-        );
+            if ($state == "PAUSE") {
+                $qb->set('game_currentmonth', $qb->createPositionalParameter(0));
+            }
+        }
+        $qb->executeQuery();
+
         await($this->onGameStateUpdated($state));
     }
 
