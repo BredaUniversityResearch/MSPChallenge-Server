@@ -236,20 +236,38 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteEnergy(int $plan): void
+    public function DeleteEnergy(int $plan): ?PromiseInterface
     {
         // Put an energy error in depent plans, similar to "api/plan/SetEnergyError" with "check_dependent_plans" set to
         //   1.
         // This should ofc be done before energy elements are removed from the plan.
-        $planData = $this->getDatabase()->query("SELECT plan_name FROM plan WHERE plan_id = ?", array($plan));
-        await($this->setAllDependentEnergyPlansToError($plan, $planData[0]["plan_name"]));
-
-        $this->getDatabase()->query("DELETE FROM grid WHERE grid_plan_id=?", array($plan));
-        // Set the target plans energy error to 0
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_lastupdate = ?, plan_energy_error = 0 WHERE plan_id = ?",
-            array(microtime(true), $plan)
-        );
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->select('plan_name')
+                ->from('plan')
+                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
+        )
+        ->then(function (Result $result) use ($plan) {
+            $planData = $result->fetchAllRows() ?: [];
+            return $this->setAllDependentEnergyPlansToError($plan, $planData[0]["plan_name"]);
+        })
+        ->then(function (/* array $results */) use ($plan) {
+            $toPromiseFunctions[] = tpf(function () use ($plan) {
+                return $this->getAsyncDatabase()->delete('grid', ['grid_plan_id' => $plan]);
+            });
+            $toPromiseFunctions[] = tpf(function () use ($plan) {
+                return $this->getAsyncDatabase()->update('plan', ['plan_id' => $plan], [
+                    'plan_lastupdate' => microtime(true),
+                    'plan_energy_error' => 0
+                ]);
+            });
+            return parallel($toPromiseFunctions);
+        })
+        ->then(function (/* array $results */) {
+            return null; // we do not care about the result
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
