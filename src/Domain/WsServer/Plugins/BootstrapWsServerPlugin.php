@@ -102,6 +102,9 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
      */
     private function startStateRegisterPlugins()
     {
+        if (extension_loaded('pcntl')) {
+            $this->getWsServer()->registerPlugin(new BlackfireWsServerPlugin());
+        }
         if ($this->tableOutput) {
             $this->getWsServer()->registerPlugin(new LoopStatsWsServerPlugin());
         }
