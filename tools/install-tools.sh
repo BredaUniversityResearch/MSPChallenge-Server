@@ -56,6 +56,8 @@ function downloadDevTools() {
 
   if [[ $FORCE == 1 || ! -f ./../public/adminer/index.php ]]; then
     curl --create-dirs -Lso ./../public/adminer/adminer.php https://www.adminer.org/latest-mysql-en.php
+    curl --create-dirs -Lso ./../public/adminer/plugins/plugin.php https://raw.github.com/vrana/adminer/master/plugins/plugin.php
+    curl --create-dirs -Lso ./../public/adminer/plugins/sql-log.php https://raw.github.com/vrana/adminer/master/plugins/sql-log.php
     cat > ./../public/adminer/index.php <<- CONTENT
 <?php
 use App\Domain\Common\DatabaseDefaults;
@@ -63,7 +65,15 @@ use Symfony\Component\Dotenv\Dotenv;
 
 function adminer_object()
 {
-    class MyAdminer extends Adminer
+    include_once "./plugins/plugin.php";
+    foreach (glob("plugins/*.php") as \$filename) {
+        include_once "./\$filename";
+    }
+    \$plugins = [
+        new AdminerSqlLog(),
+    ];
+
+    class MyAdminer extends AdminerPlugin
     {
         public function login(\$login, \$password)
         {
@@ -86,7 +96,7 @@ function adminer_object()
             );
         }
     }
-    return new MyAdminer;
+    return new MyAdminer(\$plugins);
 }
 
 include "./adminer.php";
