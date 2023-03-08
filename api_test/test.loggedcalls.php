@@ -18,7 +18,7 @@ class TestLoggedCalls extends TestBase
     {
         $apiHelper = APIHelper::getInstance();
         $targetFolder = $apiHelper->GetBaseFolder().UnitTestSupport::GetIntermediateFolder(
-            $apiHelper->GetGameSessionIdForCurrentRequest()
+            $apiHelper->getGameSessionIdForCurrentRequest()
         );
 
         $targetSubtaskMethod = new ReflectionMethod($this, "RunStoredRequest");
