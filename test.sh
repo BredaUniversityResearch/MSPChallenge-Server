@@ -11,7 +11,7 @@ if [[ ! -f "vendor/bin/phpcbf" ]]; then
 fi
 
 function summary() {
-  ./vendor/bin/phpcs --report=summary
+  ./vendor/bin/phpcs --report=summary -d memory_limit=-1
 }
 
 function lint() {
