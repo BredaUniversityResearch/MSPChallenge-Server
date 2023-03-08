@@ -13,7 +13,9 @@ $html =<<<"HTML"
 <div id="header-wrapper" >
 
     <nav class="navbar">
-      <a class="title" href="${url_app_root}index.php"> MSP Challenge Server Manager</a>
+      <div id="logo">
+        <img src="images/MSP_Challenge_Icon-037c7c.png">
+      </div>
       <div id="header-menu-wrapper">
         <ul id="header-menu">
           <li id="main-menu-item">
