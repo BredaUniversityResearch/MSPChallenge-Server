@@ -292,7 +292,6 @@ abstract class Base extends CommonBase
 
         $return = curl_exec($ch);
         $info = curl_getinfo($ch);
-
         if ($async === false && ($return === false || $info === false || in_array($info["http_code"], [401, 502]))) {
             if ($info["http_code"] == 401) {
                 throw new Exception("Authentication failed. Please check the details you provided.");
