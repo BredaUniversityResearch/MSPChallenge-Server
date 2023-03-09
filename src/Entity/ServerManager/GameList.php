@@ -234,7 +234,7 @@ class GameList
         return $this;
     }
 
-    public function getSessionState(): ?GameSessionStateValue
+    public function getSessionState(): ?GameSessionStataeValue
     {
         if (null === $this->sessionState) {
             return null;
