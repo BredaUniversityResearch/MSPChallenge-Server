@@ -1,20 +1,5 @@
 # MSPChallenge-Server
 
-## Getting Started using Docker Compose
-
-Make sure you do not run XAMPP Services, to free up port 80 (the web server) and 3306 (database server), to be run by Docker
-
-1. If not already done, install either:
-   - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended)
-   - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --pull --no-cache` to build fresh images
-3. Run `docker compose up` (the logs will be displayed in the current shell) <br />
-   Run `docker compose up -d` (so with -d) to detach from the compose process. <br />
-   You can view the logs in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details"
-4. Wait for the logs to show "NOTICE: ready to handle connection"
-5. Open `https://localhost/ServerManager` in your favorite web browser to open up the Server manager
-6. Run `docker compose down --remove-orphans` to stop the Docker containers.
-
 ## Contribution rules
 - Any contribution to the project must be proposed through a Pull Request.
 - The branch you are creating the PR from, shall have the same name of the Jira issue you are working on.
@@ -26,67 +11,51 @@ Make sure you do not run XAMPP Services, to free up port 80 (the web server) and
  git config commit.template .gitmessage
 ```
 
-## Sponsors
+## Getting Started using Symfony Docker
+
+MSP Challenge's Docker configuration is based on [Symfony Docker](https://github.com/dunglas/symfony-docker).
+Make sure you do not run XAMPP Services, to free up port 80/443 (the web server) and 3306 (database server), such that they can be run by Docker
+
+1. If not already done, install either:
+   - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended)
+   - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
+2. Run `docker compose build --pull --no-cache` to build fresh images
+3. Run `docker compose up` (the logs will be displayed in the current shell) <br />
+   Run `docker compose up -d` (so with -d) to detach from the compose process. <br />
+   You can view the logs in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details"
+4. Wait for the logs to show "NOTICE: ready to handle connection"
+5. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
+6. Run `docker compose down --remove-orphans` to stop the Docker containers.
+
+## Symfony Docker features
+
+* Production, development and CI ready
+* [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
+* Automatic HTTPS (in dev and in prod!)
+* HTTP/2, HTTP/3 and [Preload](https://symfony.com/doc/current/web_link.html) support
+* Built-in [Mercure](https://symfony.com/doc/current/mercure.html) hub
+* [Vulcain](https://vulcain.rocks) support
+* Native [XDebug](docs/xdebug.md) integration
+* Just 2 services (PHP FPM and Caddy server)
+* Super-readable configuration
+
+## More docs on Symfony Docker
+
+1. [Build options](docs/build.md)
+2. [Support for extra services](docs/extra-services.md)
+3. [Deploying in production](docs/production.md)
+4. [Debugging with Xdebug](docs/xdebug.md)
+5. [TLS Certificates](docs/tls.md)
+6. [Using a Makefile](docs/makefile.md)
+7. [Troubleshooting](docs/troubleshooting.md)
+
+## Sponsors and credits
 
 Thanks to all of them for their great support:
 
-- Blackfire.io, the profiling and monitoring service for PHP
+- [Blackfire.io](https://blackfire.io/), the profiling and monitoring service for PHP
+- [Symfony Docker](https://github.com/dunglas/symfony-docker), created by [Kévin Dunglas](https://dunglas.fr), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
 
-# Using Xdebug
+## License
 
-The default development image is shipped with [Xdebug](https://xdebug.org/),
-a popular debugger and profiler for PHP.
-
-Because it has a significant performance overhead, the step-by-step debugger is disabled by default.
-It can be enabled by setting the `XDEBUG_MODE` environment variable to `debug`.
-
-On Linux and Mac:
-
-```
-XDEBUG_MODE=debug docker compose up -d
-```
-
-On Windows:
-
-```
-set XDEBUG_MODE=debug&& docker compose up -d&set XDEBUG_MODE=
-```
-
-## Debugging with Xdebug and PHPStorm
-
-First, [create a PHP debug remote server configuration](https://www.jetbrains.com/help/phpstorm/creating-a-php-debug-server-configuration.html):
-
-1. In the `Settings/Preferences` dialog, go to `PHP | Servers`
-2. Create a new server:
-   * Name: `symfony` (or whatever you want to use for the variable `PHP_IDE_CONFIG`)
-   * Host: `localhost` (or the one defined using the `SERVER_NAME` environment variable)
-   * Port: `443`
-   * Debugger: `Xdebug`
-   * Check `Use path mappings`
-   * Absolute path on the server: `/srv/app`
-
-You can now use the debugger!
-
-1. In PHPStorm, open the `Run` menu and click on `Start Listening for PHP Debug Connections`
-2. Add the `XDEBUG_SESSION=PHPSTORM` query parameter to the URL of the page you want to debug, or use [other available triggers](https://xdebug.org/docs/step_debug#activate_debugger)
-
-    Alternatively, you can use [the **Xdebug extension**](https://xdebug.org/docs/step_debug#browser-extensions) for your preferred web browser. 
-
-3. On command line, we might need to tell PHPStorm which [path mapping configuration](https://www.jetbrains.com/help/phpstorm/zero-configuration-debugging-cli.html#configure-path-mappings) should be used, set the value of the PHP_IDE_CONFIG environment variable to `serverName=symfony`, where `symfony` is the name of the debug server configured higher.
-
-    Example:
-
-    ```console
-    XDEBUG_SESSION=1 PHP_IDE_CONFIG="serverName=symfony" php bin/console ...
-    ```
-
-## Troubleshooting
-
-Inspect the installation with the following command. The Xdebug version should be displayed.
-
-```console
-$ docker compose exec php php --version
-
-PHP ...
-    with Xdebug v3.x.x ...
-```
+[Symfony Docker](https://github.com/dunglas/symfony-docker) is available under the MIT License.
