@@ -31,6 +31,7 @@ RUN apk add --no-cache \
 		git \
         openssl1.1-compat \
         libgdiplus \
+        bash \
     ;
 
 RUN set -eux; \
