@@ -486,7 +486,7 @@ class GameSession extends Base
             games.game_running_til_time,
             games.session_state, games.game_state, games.game_visibility, games.players_active, games.players_past_hour,
             '".ServerManager::getInstance()->getServerURLBySessionId()."' AS game_server_address,
-            '".ServerManager::getInstance()->GetWsServerURLBySessionId()."' AS game_ws_server_address,
+            '".ServerManager::getInstance()->getWsServerURLBySessionId()."' AS game_ws_server_address,
             watchdogs.name AS watchdog_name, watchdogs.address AS watchdog_address, games.save_id, 
             CASE
                 WHEN games.save_id > 0 THEN 0

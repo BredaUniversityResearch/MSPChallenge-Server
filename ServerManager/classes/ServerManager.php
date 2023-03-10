@@ -291,17 +291,24 @@ class ServerManager extends Base
         return $url;
     }
 
+    public function getWsServerURLBySessionId(int $sessionId = 0): string
+    {
+        $urlParts = parse_url($this->GetTranslatedServerURL());
+
+        return WsServer::getWsServerURLBySessionId($sessionId, $urlParts['host'] ?: 'localhost');
+    }
+
     public function getAbsoluteUrlBase(): string
     {
         // e.g. http://localhost/ServerManager/
         // use this one if you just want the full URL of the ServerManager
-        return $this->urlGenerator->generate('server_manager_index', [], UrlGeneratorInterface::ABSOLUTE_URL).'/';
+        return $this->urlGenerator->generate('server_manager_index', [], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
     public function getAbsolutePathBase(): string
     {
         // e.g. /ServerManager/
-        return $this->urlGenerator->generate('server_manager_index').'/';
+        return $this->urlGenerator->generate('server_manager_index');
     }
 
     public function getTranslatedServerURL(): string
