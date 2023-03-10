@@ -443,7 +443,7 @@ class DB
     public function dbase_migrate(): void
     {
         // this function is called in index.php
-        $directory = ServerManager::getInstance()->GetServerManagerRoot()."install/migrations";
+        $directory = ServerManager::getInstance()->getServerManagerRoot()."install/migrations";
         $files = array_diff(scandir($directory), array('..', '.'));
         // for each file found, check if the filename is in the settings table
         foreach ($files as $file) {
@@ -451,7 +451,7 @@ class DB
             if (empty($this->results(true))) {
                 // if it isn't then require_once and add it to the database
                 $sql = '';
-                require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/migrations/".$file);
+                require_once(ServerManager::getInstance()->getServerManagerRoot()."install/migrations/".$file);
                 $sql =
                 "START TRANSACTION;"
                 .$sql.

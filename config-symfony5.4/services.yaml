@@ -35,6 +35,8 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
+    ServerManager\ServerManager:
+
 when@dev:
     services:
         # make classes in src/DataFixtures available to be used as services

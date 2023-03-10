@@ -87,7 +87,7 @@ class GameConfig extends Base
 
     public function getFile(): bool|string
     {
-        $path = ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path;
+        $path = ServerManager::getInstance()->getConfigBaseDirectory().$this->file_path;
         if (file_exists($path)) {
             return $path;
         }
@@ -124,11 +124,11 @@ class GameConfig extends Base
         $this->validateVars();
 
         $this->file_path = $this->filename."/".$this->filename."_".$this->version.".json";
-        if (is_file(ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path)) {
+        if (is_file(ServerManager::getInstance()->getConfigBaseDirectory().$this->file_path)) {
             throw new ServerManagerAPIException("Cannot store that file as it already exists.");
         }
         $outputDirectory = pathinfo(
-            ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path,
+            ServerManager::getInstance()->getConfigBaseDirectory().$this->file_path,
             PATHINFO_DIRNAME
         );
         if (!is_dir($outputDirectory)) {
@@ -136,7 +136,7 @@ class GameConfig extends Base
         }
         if (!move_uploaded_file(
             $this->uploadTempPath,
-            ServerManager::getInstance()->GetConfigBaseDirectory().$this->file_path
+            ServerManager::getInstance()->getConfigBaseDirectory().$this->file_path
         )
         ) {
             throw new ServerManagerAPIException("Could not put the config file in its proper place.");

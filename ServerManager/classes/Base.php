@@ -20,8 +20,8 @@ class Base
             // meaning: when the WebSocket server recreates a demo session that reached the end
             try {
                 $vars = array(
-                    "username" => ServerManager::getInstance()->GetServerID(),
-                    "password" => ServerManager::getInstance()->GetServerPassword()
+                    "username" => ServerManager::getInstance()->getServerId(),
+                    "password" => ServerManager::getInstance()->getServerPassword()
                 );
                 $authoriserCall = self::postCallAuthoriser(
                     "login_check",
@@ -88,7 +88,7 @@ class Base
                 $url = rtrim($url, '/').'/'.$sessionId;
             }
         } else {
-            $url = ServerManager::getInstance()->GetServerURLBySessionId($sessionId);
+            $url = ServerManager::getInstance()->getServerURLBySessionId($sessionId);
         }
         $url = rtrim($url, '/').'/api/'.$endpoint;
         $call_return = self::callAPI(
@@ -133,7 +133,7 @@ class Base
         ];
         $callReturn = self::callAPI(
             $method,
-            ServerManager::getInstance()->GetMSPAuthAPI().$endpoint,
+            ServerManager::getInstance()->getMSPAuthAPI().$endpoint,
             $data2send,
             $headers
         );
@@ -177,7 +177,7 @@ class Base
         // any proxy required for the external calls to the MSP Authoriser? (which are the only kind of external calls
         //   done by ServerManager)
         $proxy = Config::get('msp_auth/with_proxy');
-        if (!empty($proxy) && str_contains($url, ServerManager::getInstance()->GetMSPAuthAPI()) && PHPCanProxy()) {
+        if (!empty($proxy) && str_contains($url, ServerManager::getInstance()->getMSPAuthAPI()) && PHPCanProxy()) {
             curl_setopt($curl, CURLOPT_PROXY, $proxy);
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
             curl_setopt($curl, CURLOPT_MAXREDIRS, 1);

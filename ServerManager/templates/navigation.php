@@ -5,7 +5,7 @@ use App\Domain\API\v1\Config;
 use ServerManager\ServerManager;
 use function ServerManager\err;
 
-$url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
+$url_app_root = ServerManager::getInstance()->getAbsolutePathBase();
 
 $userLoggedIn = isset($user) && $user->isLoggedIn();
 $authBaseUrl = Config::GetInstance()->getMSPAuthBaseURL();
