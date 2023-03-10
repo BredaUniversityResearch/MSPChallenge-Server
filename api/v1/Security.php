@@ -223,7 +223,7 @@ class Security extends Base
      */
     private function getTokenDetails(string $tokenValue): ?array
     {
-        $details = Database::GetInstance($this->getGameSessionId())->query(
+        $details = $this->getDatabase()->query(
             "SELECT api_token_scope, UNIX_TIMESTAMP(api_token_valid_until) as expiry_time,
             UNIX_TIMESTAMP(api_token_valid_until) - UNIX_TIMESTAMP(NOW()) as valid_time_remaining
             FROM api_token WHERE api_token_token = ?

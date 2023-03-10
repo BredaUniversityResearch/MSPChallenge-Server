@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Domain\Helper\Config;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\BootstrapWsServerPlugin;
+use App\Domain\WsServer\Plugins\PluginHelper;
 use App\Domain\WsServer\WsServer;
 use App\Domain\WsServer\WsServerConsoleHelper;
 use App\Domain\WsServer\WsServerOutput;
@@ -36,7 +37,8 @@ class WsServerCommand extends Command
         WsServer $wsServer,
         string $projectDir,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
-        SymfonyToLegacyHelper $helper
+        SymfonyToLegacyHelper $helper,
+        PluginHelper $pluginHelper
     ) {
         $this->wsServer = $wsServer;
         $this->projectDir = $projectDir;
@@ -146,7 +148,7 @@ class WsServerCommand extends Command
         $this->wsServer->registerLoop($server->loop);
 
         // plugins
-        $this->wsServer->registerPlugin(new BootstrapWsServerPlugin($this->projectDir));
+        $this->wsServer->registerPlugin(new BootstrapWsServerPlugin($input->getOption(self::OPTION_TABLE_OUTPUT)));
 
         if (function_exists('\sapi_windows_set_ctrl_handler')) {
             \sapi_windows_set_ctrl_handler(function (int $event) use ($server) {

@@ -27,7 +27,6 @@ class SymfonyToLegacyHelper
     private ?Closure $fnControllerForwarder = null;
     private EntityManagerInterface $em;
 
-    // @phpstan-ignore-next-line "Constructor has an unused parameter"
     public function __construct(
         string $projectDir,
         UrlGeneratorInterface $urlGenerator,

@@ -2,22 +2,28 @@
 
 namespace App\Domain\WsServer\Plugins;
 
-use Closure;
+use App\Domain\Common\ToPromiseFunction;
 use React\Promise\Deferred;
 use function App\resolveOnFutureTick;
+use function App\tpf;
 
 class LoopStatsWsServerPlugin extends Plugin
 {
     private int $loop = 1;
 
-    public function __construct()
+    public static function getDefaultMinIntervalSec(): float
     {
-        parent::__construct('loop', 0);
+        return PHP_FLOAT_EPSILON * 2; // like as quick as possible
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    public function __construct()
     {
-        return function () {
+        parent::__construct('loop');
+    }
+
+    protected function onCreatePromiseFunction(): ToPromiseFunction
+    {
+        return tpf(function () {
             $latestTimeStart = microtime(true);
             return resolveOnFutureTick(new Deferred())->promise()->then(function () use ($latestTimeStart) {
                 $this->getMeasurementCollectionManager()->addToMeasurementCollection(
@@ -26,6 +32,6 @@ class LoopStatsWsServerPlugin extends Plugin
                     microtime(true) - $latestTimeStart
                 );
             });
-        };
+        });
     }
 }
