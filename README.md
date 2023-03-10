@@ -45,7 +45,7 @@ Make sure you do not run XAMPP Services, to free up port 80/443 (the web server)
 
 1. [Build options](docs/build.md)
 2. [Support for extra services](docs/extra-services.md)
-3. [Deploying in production](docs/production.md)
+3. [Deploying in production](docs/production.md), and also how to disable https
 4. [Debugging with Xdebug](docs/xdebug.md)
 5. [TLS Certificates](docs/tls.md)
 6. [Using a Makefile](docs/makefile.md)
