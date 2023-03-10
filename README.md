@@ -22,7 +22,9 @@ Make sure you do not run XAMPP Services, to free up port 80/443 (the web server)
 2. Run `docker compose build --pull --no-cache` to build fresh images
 3. Run `docker compose up` (the logs will be displayed in the current shell) <br />
    Run `docker compose up -d` (so with -d) to detach from the compose process. <br />
-   You can view the logs in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details"
+   You can view the logs in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details" <br />
+   - For dev, to disable HTTPS:<br/>
+     Add environmental variable SERVER_NAME with value :80, e.g. like this: Run `SERVER_NAME=:80 docker compose up -d`
 4. Wait for the logs to show "NOTICE: ready to handle connection"
 5. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
 6. Run `docker compose down --remove-orphans` to stop the Docker containers.
