@@ -116,7 +116,12 @@ class GameSession extends Base
             return $GLOBALS['ServerManagerApiRoot'];
         }
 
-        $server_name = $_SERVER["SERVER_NAME"] ?? gethostname();
+        $serverName = $_SERVER["SERVER_NAME"] ?? gethostname();
+        if (getenv('DOCKER')) {
+            // this is always called from inside the docker environment, so just use caddy
+            $serverName = 'caddy';
+        }
+
         /** @noinspection HttpUrlsUsage */
         $protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
         $apiFolder = "/ServerManager/api/";
@@ -130,11 +135,15 @@ class GameSession extends Base
         );
         $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
-            $server_name = $row["address"];
-            //if ($server_name == "localhost") $server_name = getHostByName(getHostName());
-            $GLOBALS['ServerManagerApiRoot'] = $protocol.$server_name.$port.$apiFolder;
+            $serverName = $row["address"];
+            if (getenv('DOCKER')) {
+                // this is always called from inside the docker environment, so just use caddy
+                $serverName = 'caddy';
+            }
+            //if ($serverName == "localhost") $serverName = getHostByName(getHostName());
+            $GLOBALS['ServerManagerApiRoot'] = $protocol.$serverName.$port.$apiFolder;
         }
-        return $protocol.$server_name.$port.$apiFolder;
+        return $protocol.$serverName.$port.$apiFolder;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

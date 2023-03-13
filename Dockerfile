@@ -32,6 +32,7 @@ RUN apk add --no-cache \
         openssl1.1-compat \
         libgdiplus \
         bash \
+        supervisor \
     ;
 
 RUN set -eux; \
@@ -93,6 +94,14 @@ RUN set -eux; \
 		composer run-script --no-dev post-install-cmd; \
 		chmod +x bin/console; sync; \
     fi
+
+# Supervisor
+RUN mkdir -p /var/log/supervisor/
+COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
+RUN mkdir -p /etc/supervisor.d/
+COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
+COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
+# now simply run: /usr/bin/supervisord -c /etc/supervisord.conf
 
 # Dev image
 FROM app_php AS app_php_dev

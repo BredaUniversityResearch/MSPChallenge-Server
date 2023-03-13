@@ -55,12 +55,11 @@ services:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://caddy/.well-known/mercure}
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      # todo: expose ports 45000/45001 when not run by host machine.
-#    ports:
-#      # Watchdog
-#      - '45000:45000'
-#      # Websocket server
-#      - '45001:45001'
+    ports:
+      # Watchdog
+      - '45000:45000'
+      # Websocket server
+      - '45001:45001'
 
   caddy:
     build:
