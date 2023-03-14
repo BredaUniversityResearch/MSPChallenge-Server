@@ -102,6 +102,7 @@ RUN mkdir -p /etc/supervisor.d/
 COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
 COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
 # now simply run: /usr/bin/supervisord -c /etc/supervisord.conf
+# or, from Git bash: MSYS_NO_PATHCONV=1 docker exec mspchallenge-server-php-1 /usr/bin/supervisord -c /etc/supervisord.conf
 
 # Dev image
 FROM app_php AS app_php_dev
