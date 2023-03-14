@@ -55,9 +55,6 @@ services:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://caddy/.well-known/mercure}
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      # Define Blackfire Agent log verbosity level
-      BLACKFIRE_LOG_LEVEL: ${BLACKFIRE_LOG_LEVEL:-1}
-      # You may then tail the logs with "docker compose logs -f blackfire"
       # Exposes BLACKFIRE_CLIENT_* environment variables allowing the client to communicate with Blackfire's API:
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
@@ -66,6 +63,24 @@ services:
       - '45000:45000'
       # Websocket server
       - '45001:45001'
+
+  blackfire:
+    image: blackfire/blackfire:2
+    ports: ["8307"]
+    environment:
+        # Define Blackfire Agent log vebosity level
+        BLACKFIRE_LOG_LEVEL: 4
+
+        # Exposes BLACKFIRE_SERVER_* environment variables from the host
+        BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID:-}
+        BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN:-}
+
+        # Exposes BLACKFIRE_CLIENT_* environment variables
+        # allowing the client to communicate with Blackfire's API:
+        BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
+        BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
+    networks:
+      - php
 
   caddy:
     build:

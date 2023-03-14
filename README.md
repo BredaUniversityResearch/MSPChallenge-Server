@@ -22,12 +22,38 @@ Make sure you do not run XAMPP Services, to free up port 80/443 (the web server)
 2. Run `docker compose build --pull --no-cache` to build fresh images
 3. Run `docker compose up` (the logs will be displayed in the current shell) <br />
    Run `docker compose up -d` (so with -d) to detach from the compose process. <br />
-   You can view the logs in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details" <br />
+   You can view the logs by running `docker logs mspchallenge-server-php-1`, or in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details" <br />
    - For dev, to disable HTTPS:<br/>
      Add environmental variable SERVER_NAME with value :80, e.g. like this: Run `SERVER_NAME=:80 docker compose up -d`
 4. Wait for the logs to show "NOTICE: ready to handle connection"
 5. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
 6. Run `docker compose down --remove-orphans` to stop the Docker containers.
+
+## Blackfire
+
+Fill-in your Blackfire Server id+token and client id+token below and run:<br/>
+`BLACKFIRE_SERVER_ID=... BLACKFIRE_SERVER_TOKEN=... BLACKFIRE_CLIENT_ID=... BLACKFIRE_CLIENT_TOKEN=... docker compose up -d`
+For dev also prepend with:<br/>
+`SERVER_NAME=:80`
+
+Now you can simply profile from CLI using `blackfire run php script.php`
+
+## Supervisor
+
+To start supervisor, run:<br/>
+`docker exec mspchallenge-server-php-1 /usr/bin/supervisord -c /etc/supervisord.conf`<br/>
+Or, from Git bash:<br/>
+`MSYS_NO_PATHCONV=1 docker exec mspchallenge-server-php-1 /usr/bin/supervisord -c /etc/supervisord.conf`<br/>
+
+To start/stop/restart supervisor services, see some examples here:<br/>
+`docker exec mspchallenge-server-php-1 supervisorctl start all`<br/>
+`docker exec mspchallenge-server-php-1 supervisorctl start app-ws-server`<br/>
+`docker exec mspchallenge-server-php-1 supervisorctl start msw`<br/>
+`docker exec mspchallenge-server-php-1 supervisorctl stop all`<br/>
+`docker exec mspchallenge-server-php-1 supervisorctl restart all`<br/>
+
+To check their status:<br/>
+`docker exec mspchallenge-server-php-1 supervisorctl status all`<br/>
 
 ## Symfony Docker features
 
