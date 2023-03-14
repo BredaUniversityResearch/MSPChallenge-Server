@@ -66,13 +66,17 @@ class LatestWsServerPlugin extends Plugin
     {
         $latestTimeStart = microtime(true);
         $this->addOutput('Starting "latest" for: ' . $connResourceId, OutputInterface::VERBOSITY_VERY_VERBOSE);
-        return $this->getGameLatest($connResourceId)->Latest(
+        return $this->getGameLatest($connResourceId)->latest(
             $clientInfo['team_id'],
             $clientInfo['last_update_time'],
             $clientInfo['user'],
             $this->isDebugOutputEnabled()
         )
         ->then(function ($payload) use ($connResourceId, $latestTimeStart, $clientInfo) {
+            if ($payload === null) {
+                $this->addOutput('no payload', OutputInterface::VERBOSITY_VERY_VERBOSE);
+                return [];
+            }
             $this->addOutput(
                 'Created "latest" payload for: ' . $connResourceId,
                 OutputInterface::VERBOSITY_VERY_VERBOSE
