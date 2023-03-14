@@ -21,7 +21,7 @@ class PluginHelper
     ) {
         // constructor will be called by Symfony services mechanism.
         self::$instance = $this;
-        $this->dumpDir = $projectDir . '\\var\\log\\dump\\' . date('YmdHis') . '\\';
+        $this->dumpDir = $projectDir . '/var/log/dump/' . date('YmdHis') . '/';
     }
 
     /**
