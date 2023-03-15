@@ -14,9 +14,9 @@
           "message": "Precautionary areas are reserved for shipping.",
           "value": 0.0,
           "type": "WARNING",
-          "startlayer": "NS_Telecom_Cables",
+          "startlayer": "NS_Precautionary_Areas",
           "starttype": "",
-          "endlayer": "NS_Countries",
+          "endlayer": "NS_Telecom_Cables",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -57,14 +57,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Precautionary_Areas|NS_Recreational_Areas": [
+      "NS_Precautionary_Areas|NS_Recreational_Areas_fixed": [
         {
           "message": "Precautionary areas are reserved for shipping.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Precautionary_Areas",
           "starttype": "",
-          "endlayer": "NS_Recreational_Areas",
+          "endlayer": "NS_Recreational_Areas_fixed",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -22261,7 +22261,7 @@
               "construction": true
             },
             {
-              "name": "NS_Recreational_Areas",
+              "name": "NS_Recreational_Areas_fixed",
               "influence": 0.1,
               "construction": false
             },
@@ -22331,7 +22331,7 @@
               "construction": true
             },
             {
-              "name": "NS_Recreational_Areas",
+              "name": "NS_Recreational_Areas_fixed",
               "influence": 0.2,
               "construction": false
             },
@@ -22855,7 +22855,7 @@
       "ecologyCategories": [
         {
           "categoryName": "Biomass",
-          "categoryColor": "#FFFFFFFF",
+          "categoryColor": "#4575b4",
           "unit": "t/km2",
           "valueDefinitions": [
             {
@@ -22928,7 +22928,7 @@
         },
         {
           "categoryName": "Biodiversity",
-          "categoryColor": "#FFFFFFFF",
+          "categoryColor": "#5aae61",
           "unit": "",
           "valueDefinitions": [
             {
@@ -22947,7 +22947,7 @@
         },
         {
           "categoryName": "Fishery",
-          "categoryColor": "#FFFFFFFF",
+          "categoryColor": "#fdae61",
           "unit": "t/km2",
           "valueDefinitions": [
             {
@@ -22972,7 +22972,7 @@
         },
         {
           "categoryName": "Protected Areas",
-          "categoryColor": "#FFFFFFFF",
+          "categoryColor": "#9970ab",
           "unit": "km2",
           "valueDefinitions": [
             {
@@ -28159,7 +28159,7 @@
         ]
       },
       {
-        "layer_name": "NS_Recreational_Areas",
+        "layer_name": "NS_Recreational_Areas_fixed",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Recreational Interest",
@@ -29915,7 +29915,7 @@
             "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#000000FF",
-            "pointSize": 1.0,
+            "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,

@@ -8348,7 +8348,7 @@
         "fromId": 29,
         "toId": 31,
         "severity": -1,
-        "description": "(Cod feeds on sprat "
+        "description": "Cod feeds on sprat "
       }, {
         "fromId": 33,
         "toId": 31,
@@ -8382,7 +8382,7 @@
       }, {
         "fromId": 22,
         "toId": 31,
-        "severity": -2,
+        "severity": -3,
         "description": "Pelagic fleets catch sprat "
       }, {
         "fromId": 20,
@@ -8392,17 +8392,17 @@
       }, {
         "fromId": 21,
         "toId": 30,
-        "severity": -2,
+        "severity": -1,
         "description": "Passive demersal fleets catch herring from the Baltic Proper "
       }, {
         "fromId": 22,
         "toId": 30,
-        "severity": -2,
+        "severity": -3,
         "description": "Pelagic fleets catch herring from the Baltic Proper "
       }, {
         "fromId": 22,
         "toId": 32,
-        "severity": -1,
+        "severity": -2,
         "description": "Pelagic fleets catch herring from the Bothnian Sea"
       }, {
         "fromId": 20,
@@ -8412,12 +8412,12 @@
       }, {
         "fromId": 21,
         "toId": 29,
-        "severity": -3,
+        "severity": -2,
         "description": "Passive demersal fleets catch cod "
       }, {
         "fromId": 22,
         "toId": 29,
-        "severity": -1,
+        "severity": -2,
         "description": "Pelagic fleets catch cod "
       }]
     },
@@ -20135,6 +20135,12 @@
               "unit": "km2",
               "valueDependentCountry": -1
             },
+			{
+              "valueName": "No protection against fisheries",
+              "valueColor": "#73FFBCFF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
             {
               "valueName": "Active Demersal Fleet Protection",
               "valueColor": "#FFC773FF",
@@ -20149,6 +20155,24 @@
             },
             {
               "valueName": "Pelagic Fleet Protection",
+              "valueColor": "#CEFF73FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+			{
+              "valueName": "Birds directive",
+              "valueColor": "#CEFF73FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+			{
+              "valueName": "Habitats Directive",
+              "valueColor": "#CEFF73FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+			{
+              "valueName": "Habitat and Birds Directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
@@ -31586,7 +31610,7 @@
         ]
       },
       {
-        "layer_name": "BS_Natura_2000",
+        "layer_name": "BS_Natura_2000_new",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Natura 2000 Sites",
@@ -31602,7 +31626,7 @@
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
         "layer_selectable": 1,
-        "layer_editable": 1,
+        "layer_editable": 0,
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
@@ -31657,10 +31681,38 @@
             "availability": -12,
             "media": "wiki://Natura_2000"
           },
-          "1": {
-            "displayName": "Active Demersal Fleet Protection",
+		  "1": {
+            "displayName": "Birds directive",
             "approval": "NotDependent",
-            "value": 0,
+            "value": 1,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00590DFF",
+            "polygonPatternName": "18",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#004C12FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Natura_2000"
+          },
+          "2": {
+            "displayName": "Habitats Directive",
+            "approval": "NotDependent",
+            "value": 2,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#00590DFF",
@@ -31685,10 +31737,10 @@
             "availability": -12,
             "media": "wiki://Natura_2000"
           },
-          "2": {
-            "displayName": "Passive Demersal Fleet Protection",
+          "3": {
+            "displayName": "Habitat and Birds Directive",
             "approval": "NotDependent",
-            "value": 0,
+            "value": 3,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#00590DFF",
@@ -31700,34 +31752,6 @@
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
             "lineColor": "#33FF63FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Natura_2000"
-          },
-          "3": {
-            "displayName": "Pelagic Fleet Protection",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "18",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#80FF95FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -31832,7 +31856,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No protection",
+            "displayName": "No protection against fisheries",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
