@@ -481,9 +481,7 @@ class GameLatest extends CommonBase
 
         $warning = new WarningLatest();
         $this->asyncDataTransferTo($warning);
-        return $warning->latest(
-            $lastUpdateTime
-        );
+        return $warning->latest();
     }
 
     /**
