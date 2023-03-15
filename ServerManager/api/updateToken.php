@@ -20,7 +20,7 @@ if (null === $request->get('token')) {
 }
 
 // check the old token and get the new token in one go
-$response = Base::postCallAuthoriser('token/refresh', [
+$response = $api->postCallAuthoriser('token/refresh', [
     'refresh_token' => $user->data()->refresh_token
 ]);
 

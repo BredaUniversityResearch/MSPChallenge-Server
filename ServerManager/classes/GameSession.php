@@ -228,7 +228,7 @@ class GameSession extends Base
         $gameconfig->last_played_time = time();
         $gameconfig->edit();
 
-        self::postCallAuthoriser('logs', [
+        $this->postCallAuthoriser('logs', [
             'level' => '200',
             'message' => sprintf('%s|%s', $gameconfig->region, $this->id)
         ]);

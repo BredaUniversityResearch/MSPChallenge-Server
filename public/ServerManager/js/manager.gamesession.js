@@ -666,7 +666,7 @@ function wrapWords(str, tmpl)
 function unWrapWords(str, tmpl1, tmpl2)
 {
     let returnArr = [];
-    const regexp1 = /<button.*?>(\w+)(?:<.*?>)?<\/button>/ig;
+    const regexp1 = /<button.*?>([^<>\/]+)(?:<.*?>)?<\/button>/ig;
     const regexp2 = /<div>([^<>\/]+)<\/div>/gi;
 
     str = str.replaceAll('&nbsp;', '');

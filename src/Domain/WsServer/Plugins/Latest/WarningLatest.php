@@ -11,7 +11,7 @@ class WarningLatest extends CommonBase
     /**
      * @throws Exception
      */
-    public function latest(float $time): PromiseInterface
+    public function latest(): PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(

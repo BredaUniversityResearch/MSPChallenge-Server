@@ -45,10 +45,11 @@ class GameLatest extends CommonBase
         ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
             $game = new Game();
             $this->asyncDataTransferTo($game);
-            if (!$game->areSimulationsUpToDate($tick)) {
-                return null; // do not send any updates at all, if the simulations are not up-to-date.
-            }
-            $this->allowEnergyKpiUpdate = $this->newSimulationDataAvailable($tick, $lastUpdateTime) ||
+            $this->allowEnergyKpiUpdate =
+                (
+                    $game->areSimulationsUpToDate($tick) &&
+                    $this->newSimulationDataAvailable($tick, $lastUpdateTime)
+                ) ||
                 $lastUpdateTime < PHP_FLOAT_EPSILON; // first client update
             $newTime = microtime(true);
             $data = array();
@@ -168,10 +169,7 @@ class GameLatest extends CommonBase
             });
         })
         // add debug data to payload, only to be dumped to log, see PluginHelper::dump()
-        ->then(function (?array $data) use ($lastUpdateTime) {
-            if ($data === null) {
-                return null; // do not send any updates at all, if the simulations are not up-to-date.
-            }
+        ->then(function (array &$data) use ($lastUpdateTime) {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             return $this->getAsyncDatabase()->query(
                 $qb
@@ -185,7 +183,7 @@ class GameLatest extends CommonBase
                     ->from('api_batch')
                     ->where($qb->expr()->gt('api_batch_lastupdate', $qb->createPositionalParameter($lastUpdateTime)))
             )
-            ->then(function (Result $result) use ($data) {
+            ->then(function (Result $result) use (&$data) {
                 $data['debug']['batches'] = $result->fetchAllRows() ?: [];
                 return $data;
             });
@@ -482,9 +480,7 @@ class GameLatest extends CommonBase
 
         $warning = new WarningLatest();
         $this->asyncDataTransferTo($warning);
-        return $warning->latest(
-            $lastUpdateTime
-        );
+        return $warning->latest();
     }
 
     /**

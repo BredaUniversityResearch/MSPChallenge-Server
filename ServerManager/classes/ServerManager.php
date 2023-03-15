@@ -401,8 +401,8 @@ class ServerManager extends Base
         $this->setServerAddress();
         $this->setServerDescription();
 
-        Base::putCallAuthoriser( // doing this here because JWT won't be available elsewhere
-            sprintf('servers/%s', $this->getServerUuid()),
+        $this->putCallAuthoriser( // doing this here because JWT won't be available elsewhere
+            sprintf('servers/%s', $this->GetServerUUID()),
             [
                 'serverName' => $this->getServerName(),
             ]

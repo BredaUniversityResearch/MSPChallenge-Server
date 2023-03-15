@@ -15,6 +15,7 @@ class Base
 
     public function getJWT(): string
     {
+        $this->jwt = Session::get("currentToken");
         if (null === $this->jwt) {
             // this will only happen if this is called without a logged-in user on ServerManager
             // meaning: when the WebSocket server recreates a demo session that reached the end
@@ -23,13 +24,13 @@ class Base
                     "username" => ServerManager::getInstance()->getServerId(),
                     "password" => ServerManager::getInstance()->getServerPassword()
                 );
-                $authoriserCall = self::postCallAuthoriser(
+                $authoriserCall = $this->postCallAuthoriser(
                     "login_check",
                     $vars
                 );
                 $this->jwt = $authoriserCall["token"] ?? "";
             } catch (\Exception $e) {
-                $this->jwt = '';
+                $this->jwt = null;
             }
         }
         return $this->jwt;
@@ -101,35 +102,38 @@ class Base
         return json_decode($call_return, true);
     }
 
-    public static function getCallAuthoriser(string $endpoint, array $data2send = [])
+    /**
+     * @throws HydraErrorException
+     */
+    public function getCallAuthoriser(string $endpoint, array $data2send = [])
     {
-        return self::callAuthoriser('GET', $endpoint, $data2send);
+        return $this->callAuthoriser('GET', $endpoint, $data2send);
     }
 
     // needs a function to call Authoriser API
     /**
      * @throws HydraErrorException
      */
-    public static function postCallAuthoriser(string $endpoint, array $data2send = [])
+    public function postCallAuthoriser(string $endpoint, array $data2send = [])
     {
-        return self::callAuthoriser('POST', $endpoint, $data2send);
+        return $this->callAuthoriser('POST', $endpoint, $data2send);
     }
 
     /**
      * @throws HydraErrorException
      */
-    public static function putCallAuthoriser(string $endpoint, array $data2send = [])
+    public function putCallAuthoriser(string $endpoint, array $data2send = [])
     {
-        return self::callAuthoriser('PUT', $endpoint, $data2send);
+        return $this->callAuthoriser('PUT', $endpoint, $data2send);
     }
 
     /**
      * @throws HydraErrorException
      */
-    public static function callAuthoriser(string $method, string $endpoint, array $data2send = [])
+    public function callAuthoriser(string $method, string $endpoint, array $data2send = [])
     {
         $headers = [
-            'Authorization: Bearer '.Session::get("currentToken")
+            'Authorization: Bearer '.$this->getJWT()
         ];
         $callReturn = self::callAPI(
             $method,

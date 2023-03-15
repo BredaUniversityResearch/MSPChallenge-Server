@@ -236,7 +236,7 @@ class User extends Base
     {
         if ($this->checkProviderExists($provider)) {
             $call_provider = new $provider;
-            return $call_provider->checkuser($users);
+            return $call_provider->checkUser($users);
         }
         throw new Exception("Could not work with authentication provider '".$provider."'.");
     }

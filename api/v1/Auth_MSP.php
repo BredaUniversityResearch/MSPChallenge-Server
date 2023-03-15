@@ -25,34 +25,9 @@ class Auth_MSP extends Auths
         return $this->name;
     }
 
-    private function getJsonWebTokenObject(): array
+    private function loginWithMSPChallengeAuth($username, $password): array
     {
-        // get a temp JWT from the Authoriser for further communication
-        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
-        $serverID = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_id']);
-        $serverPass = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_password']);
-        return json_decode(
-            $this->CallBack(
-                Config::getInstance()->GetAuthJWTRetrieval(),
-                array(
-                    "username" => $serverID->getValue(),
-                    "password" => $serverPass->getValue()
-                ),
-                array(), // no headers
-                false, // synchronous, so wait
-                true // post as json
-            ),
-            true
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function authenticate(string $username, string $password): bool
-    {
-        // use the jwt to authenticate the provided username and password
-        $userCheckReturn = json_decode($this->CallBack(
+        return json_decode($this->CallBack(
             Config::getInstance()->GetAuthJWTRetrieval(),
             array(
                 "username" => $username,
@@ -62,7 +37,23 @@ class Auth_MSP extends Auths
             false,  // synchronous, so wait
             true // post as json
         ), true);
+    }
 
+    private function getJsonWebTokenObject(): array
+    {
+        // get a temp JWT from the Authoriser for further communication
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $serverID = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_id']);
+        $serverPass = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_password']);
+        return $this->loginWithMSPChallengeAuth($serverID->getValue(), $serverPass->getValue());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function authenticate(string $username, string $password): bool
+    {
+        $this->loginWithMSPChallengeAuth($username, $password);
         return true; //if authentication failed, an exception would have been thrown
     }
 
@@ -70,7 +61,7 @@ class Auth_MSP extends Auths
      * @throws Exception
      * @noinspection SpellCheckingInspection
      */
-    public function checkuser(string $input): array
+    public function checkUser(string $input): array
     {
         $input = strtolower($input);
         $jwtReturn = $this->getJsonWebTokenObject();
@@ -85,7 +76,7 @@ class Auth_MSP extends Auths
         // use the jwt to check the sent username and password at the Authoriser
         $inputArray = explode("|", $input);
 
-        $usercheckReturn = json_decode($this->CallBack(
+        $userEmailCheckReturn = json_decode($this->CallBack(
             sprintf(
                 '%s?%s',
                 Config::getInstance()->GetAuthJWTUserCheck(),
@@ -95,7 +86,7 @@ class Auth_MSP extends Auths
             array('Authorization: Bearer '.$jwt)
         ), true);
 
-        $usercheckReturn2 = json_decode($this->CallBack(
+        $userNameCheckReturn = json_decode($this->CallBack(
             sprintf(
                 '%s?%s',
                 Config::getInstance()->GetAuthJWTUserCheck(),
@@ -105,21 +96,21 @@ class Auth_MSP extends Auths
             array('Authorization: Bearer '.$jwt)
         ), true);
 
-        $usercheckReturnTotal =
-            array_merge($usercheckReturn['hydra:member'] ?? [], $usercheckReturn2['hydra:member'] ?? []);
+        $userTotalCheck =
+            array_merge($userEmailCheckReturn['hydra:member'] ?? [], $userNameCheckReturn['hydra:member'] ?? []);
 
-        if (empty($usercheckReturnTotal)) {
+        // since Auth2 API only returns usernames (for understandable privary/security reasons)
+        // when a user entered email addresses, we cannot know which of those were not found
+        // so, for now, if *anything* was found, keep 'notfound' simply empty
+        if (empty($userTotalCheck)) {
             return ['found' => '', 'notfound' => $input];
         }
-        $notfound = $inputArray;
-        $found = [];
-        foreach ($usercheckReturnTotal as $user) {
-            $notfound = array_diff($notfound, [strtolower($user['username']), strtolower($user['email'])]);
+        foreach ($userTotalCheck as $user) {
             $found[] = $user['username'];
         }
         return [
-            "found" => implode("|", array_unique($found)),
-            "notfound" => implode("|", array_unique($notfound))
+            'found' => implode('|', array_unique($found)),
+            'notfound' => ''
         ];
     }
 }
