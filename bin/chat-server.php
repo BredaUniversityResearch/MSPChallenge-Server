@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile PSR1.Files.SideEffects.FoundWithSymbols
 
 use App\Domain\WsServer\WsServerConnection;
 use Ratchet\MessageComponentInterface;
