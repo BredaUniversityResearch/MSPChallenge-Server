@@ -388,18 +388,7 @@ class Plan extends Base
                          return $this->getAsyncDatabase()->delete('plan_layer', ['plan_layer_layer_id' => $id]);
                     });
                     $toPromiseFunctions[] = tpf(function () use ($id) {
-                         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                         return $this->getAsyncDatabase()->query(
-                             $qb
-                                ->delete('plan_delete')
-                                ->where($qb->expr()->in(
-                                    'plan_delete_geometry_persistent',
-                                    'SELECT geometry_persistent FROM geometry
-                                        LEFT JOIN layer ON geometry_layer_id=layer_original_id
-                                        WHERE layer_id=?'
-                                ))
-                                ->setParameters([$id])
-                         );
+                         return $this->getAsyncDatabase()->delete('plan_delete', ['plan_delete_layer_id' => $id]);
                     });
                     return parallel($toPromiseFunctions);
                 });

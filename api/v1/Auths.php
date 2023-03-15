@@ -8,5 +8,5 @@ abstract class Auths extends Base
     abstract public function authenticate(string $username, string $password): bool;
 
     /** @noinspection SpellCheckingInspection */
-    abstract public function checkuser(string $username): array;
+    abstract public function checkUser(string $username): array;
 }

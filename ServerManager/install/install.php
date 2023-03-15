@@ -66,7 +66,7 @@ if ($servermanager->install($user)) {
         ],
         "user" => "/api/users/".$user->data()->account_id
     ];
-    Base::postCallAuthoriser("server_users", $params);
+    $servermanager->postCallAuthoriser("server_users", $params);
     // @codingStandardsIgnoreStart
     //echo 'settings sent <br/>';
     ?>

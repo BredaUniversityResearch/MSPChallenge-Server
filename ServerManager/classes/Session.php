@@ -40,12 +40,12 @@ class Session
         }
     }
 
-    public static function get($name): string
+    public static function get($name): ?string
     {
         if (isset($_SESSION[$name])) {
             return $_SESSION[$name];
         }
-        return '';
+        return null;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
