@@ -69,7 +69,7 @@ class User extends Base
                 return false;
             }
             $response = collect(
-                collect(Base::getCallAuthoriser(
+                collect($this->getCallAuthoriser(
                     sprintf(
                         'servers/%s/server_users',
                         $serverUUID->getValue()
@@ -196,7 +196,7 @@ class User extends Base
         if (!$this->exists()) {
             return;
         }
-        $response = self::getCallAuthoriser('refresh_tokens?page=1');
+        $response = $this->getCallAuthoriser('refresh_tokens?page=1');
         if (false === $refreshTokenData = current($response['hydra:member'] ?? [])) {
             return;
         }

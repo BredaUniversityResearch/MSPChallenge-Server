@@ -37,7 +37,7 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetConnections(): array
     {
-        return Database::GetInstance()->query("SELECT 
+        return $this->getDatabase()->query("SELECT 
 					energy_connection_start_id as fromNodeID,
 					energy_connection_end_id as toNodeID,
 					energy_connection_cable_id as cableID,
@@ -82,17 +82,17 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ShouldUpdate(): bool
     {
-        $time = Database::GetInstance()->query('SELECT game_currentmonth FROM game')[0];
+        $time = $this->getDatabase()->query('SELECT game_currentmonth FROM game')[0];
         if ($time['game_currentmonth'] == 0) { //Yay starting plans.
             return true;
         }
 
-        $implementedPlans = Database::GetInstance()->query(
+        $implementedPlans = $this->getDatabase()->query(
             "
             SELECT plan_type FROM plan
-            WHERE plan_gametime = ? AND plan_state = 'IMPLEMENTED' AND plan_type LIKE '1,_,_'
+            WHERE plan_gametime = ? AND plan_state = 'IMPLEMENTED' AND (plan_type & ? = ?)
             ",
-            array($time['game_currentmonth'])
+            array($time['game_currentmonth'], PolicyType::ENERGY, PolicyType::ENERGY)
         );
         return (count($implementedPlans) > 0);
     }
@@ -109,7 +109,7 @@ class CEL extends Base
     public function UpdateFinished(int $month): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             'UPDATE game SET game_cel_lastmonth=?, game_cel_lastupdate=?',
             [$month, microtime(true)]
         );
@@ -125,7 +125,7 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetNodes(): array
     {
-        return Database::GetInstance()->query(
+        return $this->getDatabase()->query(
             "
             SELECT 
 				energy_output_geometry_id as geometry_id, 
@@ -152,7 +152,7 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetSources(): array
     {
-        $data = Database::GetInstance()->query(
+        $data = $this->getDatabase()->query(
             "
             SELECT grid_source.grid_source_geometry_id FROM grid
             INNER JOIN grid_source ON grid_source.grid_source_grid_id = grid.grid_id
@@ -185,7 +185,7 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGrids(): array
     {
-        $data = Database::GetInstance()->query(
+        $data = $this->getDatabase()->query(
             "
             SELECT grid.grid_id, grid_energy.grid_energy_country_id, grid_energy.grid_energy_expected,
                    geometry.geometry_id
@@ -245,7 +245,7 @@ class CEL extends Base
     {
         $values = json_decode($geomCapacityValues, true);
         foreach ($values as $value) {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "
                 UPDATE energy_output SET energy_output_capacity=?, energy_output_lastupdate=?
                 WHERE energy_output_geometry_id=?
@@ -267,7 +267,7 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetGridCapacity(string $kpiValues): void
     {
-        $gameMonth = Database::GetInstance()->query(
+        $gameMonth = $this->getDatabase()->query(
             "SELECT game_currentmonth FROM game WHERE game_id = 1"
         )[0]["game_currentmonth"];
 
@@ -275,7 +275,7 @@ class CEL extends Base
 
         $values = json_decode($kpiValues, true);
         foreach ($values as $value) {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "
                 INSERT INTO energy_kpi (
                     energy_kpi_grid_id, energy_kpi_month, energy_kpi_country_id, energy_kpi_actual,

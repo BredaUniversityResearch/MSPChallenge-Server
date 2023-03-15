@@ -3,42 +3,44 @@
 namespace App\Domain\WsServer\Plugins\Latest;
 
 use App\Domain\API\v1\Security;
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ClientHeaderKeys;
 use App\Domain\WsServer\EPayloadDifferenceType;
 use App\Domain\WsServer\Plugins\Plugin;
+use App\Domain\WsServer\Plugins\PluginHelper;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
-use Closure;
 use Exception;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function App\tpf;
 use function React\Promise\all;
 use function React\Promise\reject;
 
 class LatestWsServerPlugin extends Plugin
 {
-    private const LATEST_MIN_INTERVAL_SEC = 0.2;
     private const LATEST_CLIENT_UPDATE_SPEED = 60.0;
-
-    private int $nextDumpNo = 1;
-    private string $dumpDir;
 
     /**
      * @var GameLatest[]
      */
     private array $gameLatestInstances = [];
 
-    public function __construct(string $projectDir)
+    public static function getDefaultMinIntervalSec(): float
     {
-        parent::__construct('latest', self::LATEST_MIN_INTERVAL_SEC);
-        $this->dumpDir = $projectDir . '\\var\\log\\dump\\' . date('YmdHis') . '\\';
+        return 0.2;
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    public function __construct(?float $minIntervalSec = null)
     {
-        return function () {
+        parent::__construct('latest', $minIntervalSec);
+    }
+
+    protected function onCreatePromiseFunction(): ToPromiseFunction
+    {
+        return tpf(function () {
             return $this->latest()
                 ->then(function (array $payloadContainer) {
                     $this->addOutput(
@@ -57,7 +59,7 @@ class LatestWsServerPlugin extends Plugin
                     }
                     return reject($reason);
                 });
-        };
+        });
     }
 
     private function latestForClient(int $connResourceId, array $clientInfo): PromiseInterface
@@ -123,6 +125,16 @@ class LatestWsServerPlugin extends Plugin
                 return []; // no need to send
             }
 
+            $this->addOutput('send payload to: ' . $connResourceId);
+            $data = [
+                'header_type' => 'Game/Latest',
+                'header_data' => null,
+                'success' => true,
+                'message' => null,
+                'payload' => $payload
+            ];
+            PluginHelper::getInstance()->dump($connResourceId, $data);
+            $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson($data);
             $this->getClientConnectionResourceManager()->setClientInfo(
                 $connResourceId,
                 'prev_payload',
@@ -133,24 +145,6 @@ class LatestWsServerPlugin extends Plugin
                 'last_update_time',
                 $payload['update_time']
             );
-
-            $this->addOutput('send payload to: ' . $connResourceId);
-
-            if (array_key_exists('WS_SERVER_PAYLOAD_DUMP', $_ENV) && $_ENV['WS_SERVER_PAYLOAD_DUMP']) {
-                @mkdir($this->dumpDir, 0777, true);
-                file_put_contents(
-                    $this->dumpDir . date('YmdHis') . 'payload' . ($this->nextDumpNo++) . '.log',
-                    json_encode($payload, JSON_PRETTY_PRINT)
-                );
-            }
-
-            $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson([
-                'header_type' => 'Game/Latest',
-                'header_data' => null,
-                'success' => true,
-                'message' => null,
-                'payload' => $payload
-            ]);
             return $payload;
         });
     }
@@ -204,16 +198,18 @@ class LatestWsServerPlugin extends Plugin
         $p2TickEraTimeleft = $p2['tick']['era_timeleft'] ?? 0;
         $eraTimeLeftDiff = abs($p1TickEraTimeleft - $p2TickEraTimeleft);
 
-        // if there are any other changes then "time" fields, it is essential
+        // if there are any other changes then "time" or "debug" fields, it is essential
         unset(
             $p1['prev_update_time'],
             $p1['update_time'],
             $p1TickEraTimeleft,
             $p1['tick']['era_timeleft'],
+            $p1['debug'],
             $p2['prev_update_time'],
             $p2['update_time'],
             $p2TickEraTimeleft,
-            $p2['tick']['era_timeleft']
+            $p2['tick']['era_timeleft'],
+            $p2['debug'],
         );
         if (0 != strcmp(json_encode($p1), json_encode($p2))) {
             return new EPayloadDifferenceType(EPayloadDifferenceType::ESSENTIAL_DIFFERENCES);

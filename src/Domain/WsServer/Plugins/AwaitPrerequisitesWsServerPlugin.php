@@ -2,18 +2,21 @@
 
 namespace App\Domain\WsServer\Plugins;
 
-use App\Domain\Event\NameAwareEvent;
-use Closure;
+use App\Domain\Common\ToPromiseFunction;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use function App\tpf;
 
 class AwaitPrerequisitesWsServerPlugin extends Plugin
 {
-    public const EVENT_PREREQUISITES_MET = 'EVENT_PREREQUISITES_MET';
-
-    public function __construct()
+    public static function getDefaultMinIntervalSec(): float
     {
-        parent::__construct('bootstrap', 10);
+        return 10;
+    }
+
+    public function __construct(?float $minIntervalSec = null)
+    {
+        parent::__construct('await prerequisites', $minIntervalSec);
         $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
     }
 
@@ -29,7 +32,6 @@ class AwaitPrerequisitesWsServerPlugin extends Plugin
         )
         ->then(function (/* Result $resul t*/) {
             $this->addOutput('Found msp_server_manager database');
-            $this->dispatch(new NameAwareEvent(self::EVENT_PREREQUISITES_MET), self::EVENT_PREREQUISITES_MET);
         })
         ->otherwise(function ($reason) {
             // Handle the rejection, and don't propagate. This is like catch without a rethrow
@@ -38,10 +40,10 @@ class AwaitPrerequisitesWsServerPlugin extends Plugin
         });
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    protected function onCreatePromiseFunction(): ToPromiseFunction
     {
-        return function () {
+        return tpf(function () {
             return $this->checkServerManagerDbConnection();
-        };
+        });
     }
 }

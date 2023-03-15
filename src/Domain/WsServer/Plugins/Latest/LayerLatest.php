@@ -17,7 +17,6 @@ class LayerLatest extends CommonBase
     // ----------------------------------
     /**
      * @throws Exception
-     * @noinspection PhpUnusedParameterInspection
      */
     public function latest(array $layers, float $time, int $planId): PromiseInterface
     {
@@ -25,7 +24,7 @@ class LayerLatest extends CommonBase
         //   been replaced by a newer generation (so the highest geometry_id of any persistent ID)
         $toPromiseFunctions = [];
         foreach ($layers as $key => $layer) {
-            $toPromiseFunctions[$key] = tpf(function () use ($layer) {
+            $toPromiseFunctions['geometry-'.$key] = tpf(function () use ($layer) {
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $this->getAsyncDatabase()->query(
                     $qb
@@ -69,6 +68,25 @@ class LayerLatest extends CommonBase
                         ->setParameters(array_fill(0, 3, $layer['layerid']))
                 );
             });
+            $toPromiseFunctions['issues-'.$key] = tpf(function () use ($planId, $time, $layer) {
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->select(
+                            'warning_id as issue_database_id',
+                            'warning_active as active',
+                            'warning_layer_id as base_layer_id',
+                            'warning_issue_type as type',
+                            'warning_x as x',
+                            'warning_y as y',
+                            'warning_restriction_id as restriction_id'
+                        )
+                        ->from('warning')
+                        ->where('warning_last_update > ' . $qb->createPositionalParameter($time))
+                        ->andWhere($qb->expr()->eq('warning_source_plan_id', $planId))
+                        ->andWhere($qb->expr()->eq('warning_layer_id', $layer['layerid']))
+                );
+            });
         }
         $toPromiseFunctions['deleted'] = tpf(function () use ($planId) {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -89,8 +107,9 @@ class LayerLatest extends CommonBase
             ->then(function (array $results) use ($layers) {
                 foreach ($layers as $key => $layer) {
                     /** @var Result[] $results */
-                    $layers[$key]['geometry'] = $results[$key]->fetchAllRows();
+                    $layers[$key]['geometry'] = $results['geometry-'.$key]->fetchAllRows();
                     $layers[$key]['geometry'] = Base::MergeGeometry($layers[$key]['geometry']);
+                    $layers[$key]['issues'] = $results['issues-'.$key]->fetchAllRows() ?? [];
                 }
                 $deleted = $results['deleted']->fetchAllRows();
                 foreach ($deleted as $del) {

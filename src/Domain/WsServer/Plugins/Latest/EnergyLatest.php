@@ -13,9 +13,9 @@ class EnergyLatest extends CommonBase
     /**
      * @throws Exception
      */
-    public function latest(float $time): PromiseInterface
+    public function fetchAll(): PromiseInterface
     {
-        $toPromiseFunctions[] = tpf(function () use ($time) {
+        $toPromiseFunctions[] = tpf(function () {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             return $this->getAsyncDatabase()->query(
                 $qb
@@ -27,10 +27,10 @@ class EnergyLatest extends CommonBase
                         'energy_connection_active as active',
                     )
                     ->from('energy_connection')
-                    ->where('energy_connection_lastupdate > ' . $qb->createPositionalParameter($time))
+                    ->where($qb->expr()->eq('energy_connection_active', 1))
             );
         });
-        $toPromiseFunctions[] = tpf(function () use ($time) {
+        $toPromiseFunctions[] = tpf(function () {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             return $this->getAsyncDatabase()->query(
                 $qb
@@ -41,7 +41,7 @@ class EnergyLatest extends CommonBase
                         'energy_output_active as active'
                     )
                     ->from('energy_output')
-                    ->where('energy_output_lastupdate > ' . $qb->createPositionalParameter($time))
+                    ->where($qb->expr()->eq('energy_output_active', 1))
             );
         });
         return parallel($toPromiseFunctions);

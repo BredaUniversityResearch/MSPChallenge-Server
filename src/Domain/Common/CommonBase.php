@@ -2,6 +2,7 @@
 
 namespace App\Domain\Common;
 
+use App\Domain\API\v1\Database;
 use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Log;
 use App\Domain\API\v1\Security;
@@ -20,6 +21,11 @@ abstract class CommonBase
     private ?string $token = null;
     private bool $async = false;
     private ?Log $logger = null;
+
+    protected function getDatabase(): Database
+    {
+        return Database::GetInstance($this->getGameSessionId());
+    }
 
     /**
      * @throws Exception

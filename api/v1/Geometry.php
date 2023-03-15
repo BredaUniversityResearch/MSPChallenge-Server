@@ -178,7 +178,7 @@ class Geometry extends Base
         })
         ->done(
             function (/* ?Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -245,7 +245,7 @@ class Geometry extends Base
         )
         ->done(
             function (Result $result) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -282,7 +282,7 @@ class Geometry extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -313,7 +313,7 @@ class Geometry extends Base
         ])
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -349,7 +349,7 @@ class Geometry extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);

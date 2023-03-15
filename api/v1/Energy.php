@@ -81,7 +81,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -122,7 +122,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -146,8 +146,8 @@ class Energy extends Base
     public function UpdateGridEnergy(int $id, array $expected): ?PromiseInterface
     {
         foreach ($expected as $country) {
-            $int = (int)filter_var($country['energy_expected'] ?? null, FILTER_VALIDATE_INT);
-            if ($int > 0) {
+            $int = (int)filter_var($country['country_id'] ?? null, FILTER_VALIDATE_INT);
+            if ($int <= 0) {
                 throw new Exception(
                     'Encountered invalid integer country_id value (should be 1+): ' . $country['country_id']
                 );
@@ -176,7 +176,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -199,7 +199,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateMaxCapacity(int $id, int $maxcapacity): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "
             UPDATE energy_output SET energy_output_maxcapacity=?, energy_output_lastupdate=?
             WHERE energy_output_geometry_id=?
@@ -219,7 +219,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetUsedCapacity(int $id): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "SELECT energy_output_capacity as capacity FROM energy_output WHERE energy_output_geometry_id=?",
             array($id)
         );
@@ -247,7 +247,7 @@ class Energy extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -267,12 +267,17 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateGridName(int $id, string $name): void
+    public function UpdateGridName(int $id, string $name): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "UPDATE grid SET grid_name=?, grid_lastupdate=? WHERE grid_id=?",
-            array($name, microtime(true), $id)
-        );
+        $promise = $this->getAsyncDatabase()->update(
+            'grid',
+            ['grid_id' => $id],
+            ['grid_name' => $name, 'grid_lastupdate' => microtime(true)]
+        )
+        ->then(function (Result $result) {
+            return null; // we do not care about the result
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -314,7 +319,7 @@ class Energy extends Base
                     ->keyBy('plan_id')
                     ->map(function ($row) {
                         return $row['plan_id'];
-                    });
+                    })->all();
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $qb
                     ->update('plan', 'p')
@@ -328,7 +333,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* Result $result */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -424,7 +429,7 @@ class Energy extends Base
             })
             ->done(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                    $deferred->resolve(); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -446,7 +451,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AddSocket(int $grid, int $geometry): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "INSERT INTO grid_socket (grid_socket_grid_id, grid_socket_geometry_id) VALUES (?, ?)",
             array($grid, $geometry)
         );
@@ -463,7 +468,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function DeleteSocket(int $geometry): void
     {
-        Database::GetInstance()->query("DELETE FROM grid_socket WHERE grid_socket_geometry_id=?", array($geometry));
+        $this->getDatabase()->query("DELETE FROM grid_socket WHERE grid_socket_geometry_id=?", array($geometry));
     }
 
     /**
@@ -478,7 +483,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AddSource(int $grid, int $geometry): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "INSERT INTO grid_source (grid_source_grid_id, grid_source_geometry_id) VALUES (?, ?)",
             array($grid, $geometry)
         );
@@ -495,7 +500,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function DeleteSource(int $geometry): void
     {
-        Database::GetInstance()->query("DELETE FROM grid_source WHERE grid_source_geometry_id=?", array($geometry));
+        $this->getDatabase()->query("DELETE FROM grid_source WHERE grid_source_geometry_id=?", array($geometry));
     }
 
     /**
@@ -527,7 +532,7 @@ class Energy extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -564,7 +569,7 @@ class Energy extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -601,7 +606,7 @@ class Energy extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -615,26 +620,56 @@ class Energy extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function DeleteEnergyInformationFromLayer(int $layerId): void
+    public function DeleteEnergyInformationFromLayer(int $layerId): ?PromiseInterface
     {
-        $geometryToDelete = Database::GetInstance()->query(
-            "SELECT geometry_id FROM geometry WHERE geometry_layer_id = ?",
-            array($layerId)
-        );
-        foreach ($geometryToDelete as $geometry) {
-            Database::GetInstance()->query(
-                "
-                DELETE FROM energy_connection
-                WHERE energy_connection_start_id = :geometryId OR energy_connection_end_id = :geometryId OR
-                      energy_connection_cable_id = :geometryId
-                ",
-                array("geometryId" => $geometry['geometry_id'])
-            );
-            Database::GetInstance()->query(
-                "DELETE FROM energy_output WHERE energy_output_geometry_id = ?",
-                array($geometry['geometry_id'])
-            );
-        }
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->select('geometry_id')
+                ->from('geometry')
+                ->where($qb->expr()->eq('geometry_layer_id', $qb->createPositionalParameter($layerId)))
+        )
+        ->then(function (Result $result) {
+            $geometryToDelete = $result->fetchAllRows() ?? [];
+            $toPromiseFunctions = [];
+            foreach ($geometryToDelete as $geometry) {
+                $geometryId = $geometry['geometry_id'];
+                $toPromiseFunctions[] = tpf(function () use ($geometryId) {
+                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                     return $this->getAsyncDatabase()->query(
+                         $qb
+                            ->delete('energy_connection')
+                            ->where(
+                                $qb->expr()->eq(
+                                    'energy_connection_start_id',
+                                    $qb->createPositionalParameter($geometryId)
+                                )
+                            )
+                            ->orWhere(
+                                $qb->expr()->eq(
+                                    'energy_connection_end_id',
+                                    $qb->createPositionalParameter($geometryId)
+                                )
+                            )
+                            ->orWhere(
+                                $qb->expr()->eq(
+                                    'energy_connection_cable_id',
+                                    $qb->createPositionalParameter($geometryId)
+                                )
+                            )
+                     );
+                });
+                $toPromiseFunctions[] = tpf(function () use ($geometryId) {
+                     return $this->getAsyncDatabase()->delete(
+                         'energy_output',
+                         ['energy_output_geometry_id' => $geometryId]
+                     );
+                });
+            }
+            return parallel($toPromiseFunctions);
+        });
+
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -687,7 +722,7 @@ class Energy extends Base
         })
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -708,7 +743,7 @@ class Energy extends Base
     public function GetConnections(): array
     {
         // @todo: This is part of CEL
-        return Database::GetInstance()->query(
+        return $this->getDatabase()->query(
             "SELECT 
 					energy_connection_start_id as start,
 					energy_connection_end_id as end,
@@ -728,7 +763,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Clear(): void
     {
-        Database::GetInstance()->query("TRUNCATE TABLE energy_connection");
+        $this->getDatabase()->query("TRUNCATE TABLE energy_connection");
     }
 
     /**
@@ -983,10 +1018,10 @@ class Energy extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function FindOverlappingEnergyPlans(int $planId, array &$result): void
+    public function FindOverlappingEnergyPlans(int $planId, array &$result): ?PromiseInterface
     {
-        $removedGridIds = Database::GetInstance()->query(
-            "
+        $promise = $this->getAsyncDatabase()->queryBySQL(
+            '
             SELECT COALESCE(
                 grid_removed.grid_removed_grid_persistent, grid.grid_persistent
             ) AS grid_persistent, plan.plan_gametime 
@@ -994,51 +1029,68 @@ class Energy extends Base
             LEFT OUTER JOIN grid_removed ON grid_removed.grid_removed_plan_id = plan.plan_id
             LEFT OUTER JOIN grid ON grid.grid_plan_id = plan.plan_id
             WHERE grid_removed.grid_removed_plan_id = ? OR grid.grid_plan_id = ?
-            ",
-            array($planId, $planId)
-        );
-            
-        foreach ($removedGridIds as $removedGridId) {
-            $futureReferencedGrids = Database::GetInstance()->query(
-                "
-                SELECT grid_plan_id as plan_id 
-                FROM grid INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
-                WHERE grid_persistent = :gridPersistent AND (
-                    plan.plan_gametime > :gameTime OR (
-                        plan.plan_gametime = :gameTime AND plan.plan_id > :planId
+            ',
+            [$planId, $planId]
+        )
+        ->then(function (Result $qResult) use ($planId, &$result) {
+            $removedGridIds = $qResult->fetchAllRows() ?: [];
+            $toPromiseFunctions = [];
+            foreach ($removedGridIds as $removedGridId) {
+                $toPromiseFunctions[] = tpf(function () use ($removedGridId, $planId, &$result) {
+                    return $this->getAsyncDatabase()->queryBySQL(
+                        '
+                        SELECT grid_plan_id as plan_id 
+                        FROM grid INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
+                        WHERE grid_persistent = ? AND (
+                            plan.plan_gametime > ? OR (
+                                plan.plan_gametime = ? AND plan.plan_id > ?
+                            )
+                        )
+                        ',
+                        [
+                            $removedGridId['grid_persistent'],
+                            $removedGridId['plan_gametime'],
+                            $removedGridId['plan_gametime'],
+                            $planId
+                        ]
                     )
-                )
-                ",
-                array(
-                    ":gridPersistent" => $removedGridId['grid_persistent'],
-                    ":gameTime" => $removedGridId['plan_gametime'], ":planId" => $planId
-                )
-            );
-                    
-            foreach ($futureReferencedGrids as $futureGrid) {
-                $result[] = $futureGrid['plan_id'];
+                    ->then(function (Result $qResult) use (&$result) {
+                        $futureReferencedGrids = $qResult->fetchAllRows() ?: [];
+                        foreach ($futureReferencedGrids as $futureGrid) {
+                            $result[] = $futureGrid['plan_id'];
+                        }
+                    });
+                });
+                $toPromiseFunctions[] = tpf(function () use ($removedGridId, $planId, &$result) {
+                    return $this->getAsyncDatabase()->queryBySQL(
+                        '
+                        SELECT grid_removed_plan_id as plan_id 
+                        FROM grid_removed
+                        INNER JOIN plan on grid_removed.grid_removed_plan_id = plan.plan_id
+                        WHERE grid_removed_grid_persistent = ? AND (
+                            plan.plan_gametime > ? OR (plan.plan_gametime = ? AND plan.plan_id > ?))
+                        ',
+                        [
+                            $removedGridId['grid_persistent'],
+                            $removedGridId['plan_gametime'],
+                            $removedGridId['plan_gametime'],
+                            $planId
+                        ]
+                    )
+                    ->then(function (Result $qResult) use (&$result) {
+                        $futureDeletedGrids = $qResult->fetchAllRows() ?: [];
+                        foreach ($futureDeletedGrids as $futureDeletedGrid) {
+                            $result[] = $futureDeletedGrid['plan_id'];
+                        }
+                    });
+                });
+                return parallel($toPromiseFunctions)
+                    ->then(function (/*array $qResults*/) use (&$result) {
+                        $result = array_unique($result);
+                    });
             }
-
-            $futureDeletedGrids = Database::GetInstance()->query(
-                "
-                SELECT grid_removed_plan_id as plan_id 
-                FROM grid_removed
-                INNER JOIN plan on grid_removed.grid_removed_plan_id = plan.plan_id
-                WHERE grid_removed_grid_persistent = :gridPersistent AND (
-                    plan.plan_gametime > :gameTime OR (plan.plan_gametime = :gameTime AND plan.plan_id > :planId))
-                ",
-                array(
-                    ":gridPersistent" => $removedGridId['grid_persistent'],
-                    ":gameTime" => $removedGridId['plan_gametime'], ":planId" => $planId
-                )
-            );
-                
-            foreach ($futureDeletedGrids as $futureDeletedGrid) {
-                $result[] = $futureDeletedGrid['plan_id'];
-            }
-        }
-
-        $result = array_unique($result);
+        });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -1066,12 +1118,12 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function FindPreviousOverlappingPlans(int $planId): bool
     {
-        $planData = Database::GetInstance()->query(
+        $planData = $this->getDatabase()->query(
             "SELECT plan_gametime FROM plan WHERE plan_id = ?",
             array($planId)
         );
         // @todo: Does not actually check if plans are in influencing state
-        $result = Database::GetInstance()->query(
+        $result = $this->getDatabase()->query(
             "
             SELECT grid_removed_grid_persistent 
 			FROM grid_removed 
@@ -1113,7 +1165,7 @@ class Energy extends Base
         $geoIds = array_map('intval', $geoIds);
         $whereClause = implode("','", $geoIds);
             
-        $result = Database::GetInstance()->query(
+        $result = $this->getDatabase()->query(
             "
             SELECT energy_output_geometry_id FROM energy_output WHERE energy_output_geometry_id IN (".$whereClause.")
             GROUP BY energy_output_geometry_id
@@ -1159,7 +1211,7 @@ class Energy extends Base
         $clientMissingSourceIDs = array();
         $clientMissingSocketIDs = array();
 
-        $grid_sources = Database::GetInstance()->query(
+        $grid_sources = $this->getDatabase()->query(
             "SELECT * FROM grid_source WHERE grid_source_grid_id = ?",
             array($grid_id)
         );
@@ -1173,7 +1225,7 @@ class Energy extends Base
         }
         $clientExtraSourceIDs = $source_ids;
 
-        $grid_sockets = Database::GetInstance()->query(
+        $grid_sockets = $this->getDatabase()->query(
             "SELECT * FROM grid_socket WHERE grid_socket_grid_id = ?",
             array($grid_id)
         );

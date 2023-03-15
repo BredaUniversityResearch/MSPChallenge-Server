@@ -44,7 +44,7 @@ class GeoServer extends Base
     public function retrievePublic()
     {
         try {
-            $authoriser_call = self::getCallAuthoriser('geo_servers');
+            $authoriser_call = $this->getCallAuthoriser('geo_servers');
             if (!empty($authoriser_call['hydra:member'])) {
                 $this->address = $authoriser_call['hydra:member'][0]['baseurl'] ?? '';
                 $this->username = $authoriser_call['hydra:member'][0]['username'] ?? '';
@@ -57,7 +57,7 @@ class GeoServer extends Base
                     decbin(65535)
                 ));
 
-                $return = self::postCallAuthoriser('logs', [
+                $return = $this->postCallAuthoriser('logs', [
                     'level' => '220'
                 ]);
             }
