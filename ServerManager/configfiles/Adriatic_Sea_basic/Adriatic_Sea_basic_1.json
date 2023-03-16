@@ -33601,7 +33601,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://Red"
+                        "media": null
                     },
                     {
                         "displayName": "Green",
@@ -33628,7 +33628,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://Green"
+                        "media": null
                     },
                     {
                         "displayName": "Pink",
@@ -33655,7 +33655,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://Pink"
+                        "media": null
                     },
                     {
                         "displayName": "Disputed area",
@@ -33682,7 +33682,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://Yellow"
+                        "media": null
                     },
                     {
                         "displayName": "Orange",
@@ -33709,7 +33709,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://Orange"
+                        "media": null
                     },
                     {
                         "displayName": "Lime",
@@ -33736,7 +33736,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://Lime"
+                        "media": null
                     },
                     {
                         "displayName": "Blue",
@@ -33763,7 +33763,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://Blue"
+                        "media": null
                     }
                 ],
                 "layer_info_properties": []
@@ -34169,7 +34169,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": 0,
-                        "media": "wiki://Red"
+                        "media": null
                     },
                     "2": {
                         "displayName": "Pink",
@@ -34196,7 +34196,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": 0,
-                        "media": "wiki://Pink"
+                        "media": null
                     },
                     "3": {
                         "displayName": "Yellow",
@@ -34223,7 +34223,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": 0,
-                        "media": "wiki://Yellow"
+                        "media": null
                     },
                     "4": {
                         "displayName": "Orange",
@@ -34250,7 +34250,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": 0,
-                        "media": "wiki://Orange"
+                        "media": null
                     },
                     "5": {
                         "displayName": "Lime",
@@ -34277,7 +34277,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": 0,
-                        "media": "wiki://Lime"
+                        "media": null
                     },
                     "6": {
                         "displayName": "Blue",
@@ -34304,7 +34304,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": 0,
-                        "media": "wiki://Blue"
+                        "media": null
                     },
                     "7": {
                         "displayName": "Grey",
@@ -34331,7 +34331,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": 0,
-                        "media": "wiki://Grey"
+                        "media": null
                     }
                 },
                 "layer_info_properties": null

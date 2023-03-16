@@ -6033,86 +6033,86 @@
             "ecologyCategories": [
                 {
                     "categoryName": "Biomass",
-                    "categoryColor": "#FFFFFFFF",
-                    "unit": "t\/km2",
+                    "categoryColor": "#4575b4",
+                    "unit": "t/km2",
                     "valueDefinitions": [
                         {
                             "valueName": "Benthic Biomass",
                             "valueColor": "#E3F2FDFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Birds Biomass",
                             "valueColor": "#BBDEFBFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Cetaceans Biomass",
                             "valueColor": "#90CAF9FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Cod Biomass",
                             "valueColor": "#64B5F6FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Flatfish Biomass",
                             "valueColor": "#42A5F5FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Herring Biomass",
                             "valueColor": "#2196F3FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Mackerel Biomass",
                             "valueColor": "#1E88E5FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Rays and Skates Biomass",
                             "valueColor": "#1976D2FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Seals Biomass",
                             "valueColor": "#1565C0FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Sandeel Biomass",
                             "valueColor": "#0D47A1FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Sharks Biomass",
                             "valueColor": "#82B1FFFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Whiting Biomass",
                             "valueColor": "#448AFFFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         }
                     ]
                 },
                 {
                     "categoryName": "Biodiversity",
-                    "categoryColor": "#FFFFFFFF",
+                    "categoryColor": "#5aae61",
                     "unit": "",
                     "valueDefinitions": [
                         {
@@ -6131,38 +6131,38 @@
                 },
                 {
                     "categoryName": "Fishery",
-                    "categoryColor": "#FFFFFFFF",
-                    "unit": "t\/km2",
+                    "categoryColor": "#fdae61",
+                    "unit": "t/km2",
                     "valueDefinitions": [
                         {
                             "valueName": "Demersal Trawl Catch",
                             "valueColor": "#73FFBCFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Nephrops Trawl Catch",
                             "valueColor": "#FFC773FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Scallop Fleet Catch",
                             "valueColor": "#CEFF73FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Seine Catch",
                             "valueColor": "#73D9FFFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         }
                     ]
                 },
                 {
                     "categoryName": "Protection area",
-                    "categoryColor": "#FFFFFFFF",
+                    "categoryColor": "#9970ab",
                     "unit": "km2",
                     "valueDefinitions": [
                         {
