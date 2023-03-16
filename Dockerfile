@@ -33,6 +33,7 @@ RUN apk add --no-cache \
         libgdiplus \
         bash \
         supervisor \
+        mysql-client \
     ;
 
 RUN set -eux; \
