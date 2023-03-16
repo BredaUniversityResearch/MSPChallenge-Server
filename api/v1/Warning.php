@@ -81,14 +81,12 @@ class Warning extends Base
                         ])
                 )
                 ->then(function (Result $result) use ($addedIssue) {
-                    $addedIssue['issue_database_id'] = $result->getLastInsertedId();
                     return $addedIssue;
                 });
             }
 
             $existingIssue = current($existingIssues);
             $warningIdUpdated = $existingIssue['warning_id'];
-            $addedIssue['issue_database_id'] = $warningIdUpdated;
             $toPromiseFunctions[$warningIdUpdated] = tpf(function () use ($warningIdUpdated) {
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $this->getAsyncDatabase()->query(
@@ -174,12 +172,33 @@ class Warning extends Base
         }
         parallel($toPromiseFunctions)
             ->done(
-                /** @var array{0: array{int}} $results */
-                function (array $results) use ($deferred) {
-                    if (empty($results[0])) { // nothing added
-                        $deferred->resolve([]);
-                    }
-                    $deferred->resolve($results[0]);
+                function (/* array $results */) use ($deferred, $planlayer_id) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select(
+                                'warning_id as issue_database_id',
+                                'warning_issue_type as type',
+                                'warning_active as active',
+                                'warning_restriction_id as restriction_id',
+                                'warning_x as x',
+                                'warning_y as y'
+                            )
+                            ->from('warning')
+                            ->where('warning_active = 1')
+                            ->andWhere(
+                                $qb->expr()->eq('warning_layer_id', $qb->createPositionalParameter($planlayer_id))
+                            )
+                    )
+                    ->done(function (Result $result) use ($deferred) {
+                        $deferred->resolve(
+                            collect($result->fetchAllRows() ?: [])
+                                ->map(function ($issue) {
+                                    $issue['active'] = $issue['active'] === '1';
+                                    return $issue;
+                                })->all()
+                        );
+                    });
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
