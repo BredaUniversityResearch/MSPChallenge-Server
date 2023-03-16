@@ -195,7 +195,7 @@ class Warning extends Base
                     ->done(function (Result $result) use ($deferred) {
                         $deferred->resolve(
                             collect($result->fetchAllRows() ?: [])
-                                ->map(function($issue) {
+                                ->map(function ($issue) {
                                     $issue['active'] = $issue['active'] === '1';
                                     return $issue;
                                 })->all()
