@@ -81,14 +81,12 @@ class Warning extends Base
                         ])
                 )
                 ->then(function (Result $result) use ($addedIssue) {
-                    $addedIssue['issue_database_id'] = $result->getLastInsertedId();
                     return $addedIssue;
                 });
             }
 
             $existingIssue = current($existingIssues);
             $warningIdUpdated = $existingIssue['warning_id'];
-            $addedIssue['issue_database_id'] = $warningIdUpdated;
             $toPromiseFunctions[$warningIdUpdated] = tpf(function () use ($warningIdUpdated) {
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $this->getAsyncDatabase()->query(
