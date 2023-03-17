@@ -38,7 +38,7 @@ class LatestWsServerPlugin extends Plugin
         parent::__construct('latest', $minIntervalSec);
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
         return tpf(function () {
             return $this->latest()

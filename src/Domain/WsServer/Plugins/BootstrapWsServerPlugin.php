@@ -38,7 +38,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
         $this->databaseMigrationsPlugin = $this->createDatabaseMigrationsPlugin();
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
         return tpf(function () {
             $this->changeState(self::STATE_AWAIT_PREREQUISITES);
@@ -102,17 +102,27 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
      */
     private function startStateRegisterPlugins()
     {
+        // create plugins
+        $ticksHandlerPlugin = new TicksHandlerWsServerPlugin();
+        $sequencerPlugin = new SequencerWsServerPlugin([
+            ExecuteBatchesWsServerPlugin::class,
+            LatestWsServerPlugin::class
+        ]);
+
+        // then create & register blackfire plugin
         if (extension_loaded('pcntl')) {
-            $this->getWsServer()->registerPlugin(new BlackfireWsServerPlugin());
+            $blackfirePlugin = new BlackfireWsServerPlugin();
+            $sequencerPlugin->addSubscriber($blackfirePlugin);
+            $ticksHandlerPlugin->addSubscriber($blackfirePlugin);
+            $this->getWsServer()->registerPlugin($blackfirePlugin);
         }
+
+        // register other plugins
         if ($this->tableOutput) {
             $this->getWsServer()->registerPlugin(new LoopStatsWsServerPlugin());
         }
-        $this->getWsServer()->registerPlugin(new TicksHandlerWsServerPlugin());
-        $this->getWsServer()->registerPlugin(new SequencerWsServerPlugin([
-            ExecuteBatchesWsServerPlugin::class,
-            LatestWsServerPlugin::class
-        ]));
+        $this->getWsServer()->registerPlugin($sequencerPlugin);
+        $this->getWsServer()->registerPlugin($ticksHandlerPlugin);
 
         // set state ready on next tick
         $this->getLoop()->futureTick(function () {

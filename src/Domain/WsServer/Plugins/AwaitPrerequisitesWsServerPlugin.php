@@ -40,7 +40,7 @@ class AwaitPrerequisitesWsServerPlugin extends Plugin
         });
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
         return tpf(function () {
             return $this->checkServerManagerDbConnection();

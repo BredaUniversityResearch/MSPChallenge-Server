@@ -39,9 +39,9 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         parent::__construct('executeBatches', $minIntervalSec);
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function () {
+        return tpf(function () use ($executionId) {
             if ($this->firstStart) {
                 // allow clients to connect in the next 10 sec. todo: can we improve this?
                 $this->getLoop()->addTimer(10, function () {
@@ -50,7 +50,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                 $this->firstStart = false;
             }
 
-            return $this->executeBatches()
+            return $this->executeBatches($executionId)
                 ->then(function (array $clientToBatchResultContainer) {
                     $this->addOutput(
                         'just finished "executeBatches" for connections: ' .
@@ -102,7 +102,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function executeBatches(): PromiseInterface
+    private function executeBatches(string $executionId): PromiseInterface
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
@@ -122,7 +122,17 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     ->executeNextQueuedBatchFor(
                         $clientInfo['team_id'],
                         $clientInfo['user'],
-                        $this->getWsServer()->getId()
+                        $this->getWsServer()->getId(),
+                        function () use ($executionId) {
+                            $this->dispatch(
+                                new NameAwareEvent(
+                                    self::EVENT_PLUGIN_EXECUTION_ENABLE_PROBE,
+                                    $this,
+                                    [self::EVENT_ARG_EXECUTION_ID => $executionId]
+                                ),
+                                self::EVENT_PLUGIN_EXECUTION_ENABLE_PROBE,
+                            );
+                        }
                     )
                 ->then(
                     function (array $batchResultContainer) use ($connResourceId, $timeStart) {
