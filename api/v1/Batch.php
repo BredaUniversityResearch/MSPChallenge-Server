@@ -22,8 +22,6 @@ class Batch extends Base
     private array $cachedBatchResults = [];
 
     private const ALLOWED = array(
-        "StartBatch",
-        "AddToBatch",
         "ExecuteBatch"
     );
     
@@ -33,66 +31,49 @@ class Batch extends Base
     }
 
     /**
-     * @apiGroup Batch
      * @throws Exception
-     * @api {POST} /batch/startbatch StartBatch
-     * @apiDescription Starts a new batch
-     *
-     * @apiParam {int} $country_id id of country/team for which the batch was started
-     * @apiParam {int} $user_id id of user for which the batch was started
-     *
-     * @apiSuccess {int} batch_id Batch ID used to identify this batch.
-     * @noinspection PhpUnused
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function StartBatch(int $country_id, int $user_id)
+    private function startBatch(int $countryId, int $userId, string $batchGuid): int
     {
-        return $this->getDatabase()->query(
-            "INSERT INTO api_batch(api_batch_country_id, api_batch_user_id) VALUES (?, ?)",
-            array($country_id, $user_id),
+        $id = $this->getDatabase()->query(
+            "INSERT INTO api_batch(api_batch_country_id, api_batch_user_id, api_batch_guid) VALUES (?, ?, ?)",
+            array($countryId, $userId, $batchGuid),
             true
         );
+        if (empty($id)) { // empty array (no connection), or false (insert failed)
+            return 0;
+        }
+        return (int)$id;
     }
 
     /**
-     * @apiGroup Batch
+     * @param int $batchId
+     * @param array{int: array{call_id: int, group: string, end_point: string, endpoint_data: string}} $requests
      * @throws Exception
-     * @api {POST} /batch/addtobatch AddToBatch
-     * @apiDescription Starts a new batch
-     *
-     * @apiParam {int} batch_id Batch ID to add to
-     * @apiParam {int} batch_group Batch execution group
-     * @apiParam {string} call_id Client defined identfier that is unique within the current batch_id.
-     * @apiParam {string} endpoint Endpoint for this batch call to make. E.g. "api/geometry/post"
-     * @apiParam {string} endpoint_data Json data that should be send to the endpoint when called.
-     *
-     * @apiSuccess {int} execution_task_id Unique task identifier used to identify this execution task.
-     * @noinspection PhpUnused
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function AddToBatch(
-        int $batch_id,
-        int $batch_group,
-        string $call_id,
-        string $endpoint,
-        string $endpoint_data
-    ): string {
-        $endpoint = preg_replace("/\A[\/]?api\//", "", $endpoint);
-        
-        $this->getDatabase()->query("INSERT INTO api_batch_task (
-			api_batch_task_batch_id, 
-			api_batch_task_group, 
-			api_batch_task_reference_identifier, 
-			api_batch_task_api_endpoint, 
-			api_batch_task_api_endpoint_data)
-			VALUES (?, ?, ?, ?, ?)", array(
-                $batch_id,
-                $batch_group,
-                $call_id,
-                $endpoint,
-                $endpoint_data));
-        
-        return $call_id;
+    private function addToBatch(
+        int $batchId,
+        array $requests
+    ): void {
+        $requests = collect($requests)->map(function ($r) {
+            $r['endpoint'] = preg_replace("/\A[\/]?api\//", "", $r['endpoint']);
+            return $r;
+        })->all();
+        foreach ($requests as $r) {
+            $this->getDatabase()->query("INSERT INTO api_batch_task (
+                api_batch_task_batch_id, 
+                api_batch_task_group, 
+                api_batch_task_reference_identifier, 
+                api_batch_task_api_endpoint, 
+                api_batch_task_api_endpoint_data)
+                VALUES (?, ?, ?, ?, ?)", array(
+                    $batchId,
+                    $r['group'],
+                    $r['call_id'],
+                    $r['endpoint'],
+                    $r['endpoint_data']
+            ));
+        }
     }
 
     /**
@@ -101,7 +82,10 @@ class Batch extends Base
      * @api {POST} /batch/executebatch ExecuteBatch
      * @apiDescription execute batch
      *
-     * @apiParam {int} batch_id Batch ID to execute.
+     * @apiParam {int} $country_id id of country/team for which the batch was started
+     * @apiParam {int} $user_id id of user for which the batch was started
+     * @apiParam {string} batch_guid Batch Guid to execute.
+     * @apiParam {string} requests Json data containg the batch requests
      * @apiParam {bool} async Execute this batch asynchronous. Results of the executed batch will be communicated
      *   through the websocket connection.
      *
@@ -113,8 +97,21 @@ class Batch extends Base
      * @return array|string
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function ExecuteBatch(int $batch_id, bool $async = false)/*: array|string // <-- php 8 */
-    {
+    public function ExecuteBatch(
+        int $country_id,
+        int $user_id,
+        string $batch_guid,
+        string $requests,
+        bool $async = false
+    ): array|string {
+        if (0 === $batchId = $this->startBatch($country_id, $user_id, $batch_guid)) {
+            throw new Exception("Unable to start batch: ".$batch_guid);
+        }
+        // @var null|array{int: array{call_id: int, group: string, end_point: string, endpoint_data: string}}
+        if (null === $requests = json_decode($requests, true)) {
+            throw new Exception("Unable to decode requests for batch: ".$batch_guid);
+        }
+        $this->addToBatch($batchId, $requests);
         if ($async) {
             $data = $this->getDatabase()->query("SELECT api_batch_task_id, 
                     api_batch_task_reference_identifier, 
@@ -122,7 +119,7 @@ class Batch extends Base
                     api_batch_task_api_endpoint_data 
                 FROM api_batch_task 
                 WHERE api_batch_task_batch_id = ? 
-                ORDER BY api_batch_task_group", array($batch_id));
+                ORDER BY api_batch_task_group", array($batchId));
             if (empty($data)) {
                 throw new Exception("Tried to execute an empty batch");
             }
@@ -130,7 +127,7 @@ class Batch extends Base
             // queue it
             $this->getDatabase()->query(
                 'UPDATE api_batch SET api_batch_state=\'Queued\' WHERE api_batch_id = ?',
-                array($batch_id)
+                array($batchId)
             );
 
             // no results yet, will be sent later through websocket connection
@@ -146,7 +143,7 @@ class Batch extends Base
 				api_batch_task_api_endpoint_data 
 			FROM api_batch_task 
 			WHERE api_batch_task_batch_id = ? 
-			ORDER BY api_batch_task_group", array($batch_id));
+			ORDER BY api_batch_task_group", array($batchId));
         if (empty($data)) {
             throw new Exception("Tried to execute an empty batch");
         }
@@ -195,7 +192,7 @@ class Batch extends Base
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $this->getAsyncDatabase()->query(
             $qb
-                ->select('b.api_batch_id')
+                ->select('b.api_batch_guid')
                 ->from('api_batch', 'b')
                 ->where(
                     $qb->expr()->and(
@@ -212,10 +209,10 @@ class Batch extends Base
                 return [];
             }
             $onExecuteQueuedBatchesFunction();
-            $batchId = $row['api_batch_id'];
-            return $this->executeQueuedBatch($batchId, $serverId)
-                ->otherwise(function ($reason) use ($batchId) {
-                    return reject(new ExecuteBatchRejection($batchId, $reason));
+            $batchGuid = $row['api_batch_guid'];
+            return $this->executeQueuedBatch($batchGuid, $serverId)
+                ->otherwise(function ($reason) use ($batchGuid) {
+                    return reject(new ExecuteBatchRejection($batchGuid, $reason));
                 });
         })
         ->done(
@@ -233,21 +230,21 @@ class Batch extends Base
     /**
      * @throws Exception
      */
-    public function setCommunicated(int $batchId): Promise
+    public function setCommunicated(string $batchGuid): Promise
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
             $qb
                 ->update('api_batch')
                 ->set('api_batch_communicated', $qb->createPositionalParameter(true, Types::BOOLEAN))
-                ->where($qb->expr()->eq('api_batch_id', $batchId))
+                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
         );
     }
 
-    public function executeQueuedBatch(int $batchId, string $serverId): Promise
+    public function executeQueuedBatch(string $batchGuid, string $serverId): Promise
     {
         // get batch tasks to execute
-        $this->cachedBatchResults[$batchId] = [];
+        $this->cachedBatchResults[$batchGuid] = [];
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return query(
             $this->getAsyncDatabase(),
@@ -261,11 +258,11 @@ class Batch extends Base
                     $qb->expr()->and(
                         'b.api_batch_id = t.api_batch_task_batch_id',
                         'b.api_batch_state = "Queued"',
-                        $qb->expr()->eq('b.api_batch_id', $batchId)
+                        $qb->expr()->eq('b.api_batch_guid', $qb->createPositionalParameter($batchGuid))
                     )
                 )
         )
-        ->then(function (Result $result) use ($batchId, $serverId) {
+        ->then(function (Result $result) use ($batchGuid, $serverId) {
             $deferred = new Deferred();
             // first set the state to "Executing" before continuing
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -274,20 +271,20 @@ class Batch extends Base
                     ->update('api_batch')
                     ->set('api_batch_server_id', $qb->createPositionalParameter($serverId))
                     ->set('api_batch_state', $qb->createPositionalParameter('Executing'))
-                    ->where($qb->expr()->eq('api_batch_id', $batchId))
+                    ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
             )
             ->done(
                 function (Result $dummy) use ($deferred, $result) {
                     // just pass the original result.
                     $deferred->resolve($result);
                 },
-                function () use ($deferred, $batchId) {
-                    $deferred->reject('Could not set to status "Executing" for batch id: ' . $batchId);
+                function () use ($deferred, $batchGuid) {
+                    $deferred->reject('Could not set to status "Executing" for batch guid: ' . $batchGuid);
                 }
             );
             return $deferred->promise();
         })
-        ->then(function (Result $result) use ($batchId) {
+        ->then(function (Result $result) use ($batchGuid) {
             $groupToBatchTasks = collect($result->fetchAllRows() ?: [])
                 ->groupBy('api_batch_task_group')
                 ->sortKeys()
@@ -311,26 +308,27 @@ class Batch extends Base
                         function () use (
                             $objectMethod,
                             $callData,
-                            $batchId,
+                            $batchGuid,
                             $task
                         ) {
                             return Router::executeCallAsync(
                                 $objectMethod,
                                 $callData,
-                                function (array &$callData) use ($batchId) {
+                                function (array &$callData) use ($batchGuid) {
                                     // fix references in call data using batch cache results
                                     array_walk_recursive(
                                         $callData,
                                         function (&$value, $key, array $presentResults) {
                                             self::fixupReferences($value, $key, $presentResults);
                                         },
-                                        $this->cachedBatchResults[$batchId]
+                                        $this->cachedBatchResults[$batchGuid]
                                     );
                                 },
-                                function (&$payload) use ($batchId, $task) {
+                                function (&$payload) use ($batchGuid, $task) {
                                     // fill batch cache results
-                                    $this->cachedBatchResults[$batchId][$task['api_batch_task_reference_identifier']] =
-                                        $payload;
+                                    $this->cachedBatchResults[$batchGuid][
+                                        $task['api_batch_task_reference_identifier']
+                                    ] = $payload;
                                 }
                             );
                         }
@@ -342,20 +340,20 @@ class Batch extends Base
             }
 
             return chain($chain)
-                ->then(function (array $taskResultsContainer) use ($batchId) {
+                ->then(function (array $taskResultsContainer) use ($batchGuid) {
                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
                     return $this->getAsyncDatabase()->query(
                         $qb
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Success'))
                             ->set('api_batch_lastupdate', $qb->createPositionalParameter(microtime(true)))
-                            ->where($qb->expr()->eq('api_batch_id', $batchId))
+                            ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
                     )
-                    ->then(function (/* Result $result */) use ($taskResultsContainer, $batchId) {
+                    ->then(function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
                         $batchResult = [];
                         foreach ($taskResultsContainer as $groupId => $taskResults) {
                             foreach ($taskResults as $taskId => $taskResult) {
-                                $batchResult[$batchId]['results'][] = [
+                                $batchResult[$batchGuid]['results'][] = [
                                     'call_id' => $taskId,
                                     'payload' => json_encode($taskResult) ?: null
                                 ];
@@ -364,7 +362,7 @@ class Batch extends Base
                         return $batchResult;
                     });
                 })
-                ->otherwise(function ($reason) use ($batchId) {
+                ->otherwise(function ($reason) use ($batchGuid) {
                     // run async query to set batches to failed, no need to wait for the result.
                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
                     $this->getAsyncDatabase()->query(
@@ -372,14 +370,14 @@ class Batch extends Base
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
                             ->set('api_batch_lastupdate', $qb->createPositionalParameter(microtime(true)))
-                            ->where($qb->expr()->eq('api_batch_id', $batchId))
+                            ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
                     );
                     // Propagate by returning rejection
                     return reject($reason);
                 })
-                ->always(function () use ($batchId) {
+                ->always(function () use ($batchGuid) {
                     // clean up batch cache results
-                    unset($this->cachedBatchResults[$batchId]);
+                    unset($this->cachedBatchResults[$batchGuid]);
                 });
         });
     }

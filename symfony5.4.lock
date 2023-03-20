@@ -1,7 +1,4 @@
 {
-    "brainmaestro/composer-git-hooks": {
-        "version": "v2.8.5"
-    },
     "cboden/ratchet": {
         "version": "v0.4.4"
     },
