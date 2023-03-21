@@ -16,7 +16,7 @@ use function App\await;
 class Game extends Base
 {
     private ?string $watchdog_address = null;
-    const WATCHDOG_PORT = 45000;
+    const DEFAULT_WATCHDOG_PORT = 45000;
 
     private const ALLOWED = array(
         "AutoSaveDatabase",
@@ -527,7 +527,7 @@ class Game extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetWatchdogAddress(bool $withPort = false): string
+    public function GetWatchdogAddress(): string
     {
         $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
         if (null === $this->watchdog_address) {
@@ -535,7 +535,7 @@ class Game extends Base
         }
         /** @noinspection HttpUrlsUsage */
         $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
-        return $this->watchdog_address.($withPort ? ':'.self::WATCHDOG_PORT : '');
+        return $this->watchdog_address.':'.($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT);
     }
 
     private function getWatchdogAddressFromDb(): ?string
@@ -622,7 +622,7 @@ class Game extends Base
     private function assureWatchdogAlive(): ?PromiseInterface
     {
         // note(MH): GetWatchdogAddress is not async, but it is cached once it has been retrieved once, so that's "fine"
-        $url = $this->GetWatchdogAddress(true);
+        $url = $this->GetWatchdogAddress();
         if (empty($url)) {
             return null;
         }
@@ -702,7 +702,7 @@ class Game extends Base
                                     ) {
                                         // note(MH): GetWatchdogAddress is not async, but it is cached once it
                                         //   has been retrieved once, so that's "fine"
-                                        $url = $this->GetWatchdogAddress(true)."/Watchdog/UpdateState";
+                                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
                                         $browser = MSPBrowserFactory::create($url);
                                         $postValues = [
                                             'game_session_api' => $apiRoot,
