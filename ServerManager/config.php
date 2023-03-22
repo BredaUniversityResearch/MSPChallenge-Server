@@ -14,7 +14,7 @@ $GLOBALS['config'] = array(
         //   which is the same host as the api server.
         'host' => $_ENV['WS_SERVER_HOST'] ?? null,
         'port' => $_ENV['WS_SERVER_PORT'] ?? 45001,
-        'port_external' => $_ENV['WS_SERVER_PORT_EXTERNAL'] ?? 45001,
+        'port_external' => ($_ENV['WS_SERVER_PORT_EXTERNAL'] ?? null) ?: 45001,
         'uri' =>  $_ENV['WS_SERVER_URI'] ?? '',
         // none, add_game_session_id_to_port, add_game_session_id_to_uri
         'address_modification' => $_ENV['WS_SERVER_ADDRESS_MODIFICATION'] ?? 'none'
