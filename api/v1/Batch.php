@@ -94,7 +94,7 @@ class Batch extends Base
      * When failed this object contains failed_task_id which references the execution_task_id returned in the
      *   AddToBatch.
      * @noinspection PhpUnused
-     * @return array|string
+     * @return string
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ExecuteBatch(
@@ -102,8 +102,7 @@ class Batch extends Base
         int $user_id,
         string $batch_guid,
         string $requests,
-        bool $async = false
-    ): array|string {
+    ): string {
         if (0 === $batchId = $this->startBatch($country_id, $user_id, $batch_guid)) {
             throw new Exception("Unable to start batch: ".$batch_guid);
         }
@@ -112,72 +111,25 @@ class Batch extends Base
             throw new Exception("Unable to decode requests for batch: ".$batch_guid);
         }
         $this->addToBatch($batchId, $requests);
-        if ($async) {
-            $data = $this->getDatabase()->query("SELECT api_batch_task_id, 
-                    api_batch_task_reference_identifier, 
-                    api_batch_task_api_endpoint, 
-                    api_batch_task_api_endpoint_data 
-                FROM api_batch_task 
-                WHERE api_batch_task_batch_id = ? 
-                ORDER BY api_batch_task_group", array($batchId));
-            if (empty($data)) {
-                throw new Exception("Tried to execute an empty batch");
-            }
-
-            // queue it
-            $this->getDatabase()->query(
-                'UPDATE api_batch SET api_batch_state=\'Queued\' WHERE api_batch_id = ?',
-                array($batchId)
-            );
-
-            // no results yet, will be sent later through websocket connection
-            return '';
-        }
-
-        $batchResult = array("results" => array());
-        $cachedResults = array(); //Results by call-id indexed;
-
         $data = $this->getDatabase()->query("SELECT api_batch_task_id, 
-				api_batch_task_reference_identifier, 
-				api_batch_task_api_endpoint, 
-				api_batch_task_api_endpoint_data 
-			FROM api_batch_task 
-			WHERE api_batch_task_batch_id = ? 
-			ORDER BY api_batch_task_group", array($batchId));
+                api_batch_task_reference_identifier, 
+                api_batch_task_api_endpoint, 
+                api_batch_task_api_endpoint_data 
+            FROM api_batch_task 
+            WHERE api_batch_task_batch_id = ? 
+            ORDER BY api_batch_task_group", array($batchId));
         if (empty($data)) {
             throw new Exception("Tried to execute an empty batch");
         }
 
-        foreach ($data as $task) {
-            $endpoint = $task['api_batch_task_api_endpoint'];
-            $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
+        // queue it
+        $this->getDatabase()->query(
+            'UPDATE api_batch SET api_batch_state=\'Queued\' WHERE api_batch_id = ?',
+            array($batchId)
+        );
 
-            array_walk_recursive(
-                $callData,
-                function (&$value, $key, array $presentResults) {
-                    self::fixupReferences($value, $key, $presentResults);
-                },
-                $cachedResults
-            );
-
-            $endpointData = Router::parseEndpointString($endpoint);
-            $taskResult = Router::executeCall($endpointData['class'], $endpointData['method'], $callData, false);
-
-            if ($taskResult['success'] == 0) {
-                $batchResult['failed_task_id'] = $task['api_batch_task_id'];
-                throw new Exception(
-                    "ExecuteBatch failed. A subtask (".$task['api_batch_task_id'].") failed with \"".
-                    $taskResult['message']."\""
-                );
-            } elseif (!empty($task['api_batch_task_reference_identifier'])) {
-                $batchResult["results"][] = array(
-                    "call_id" => $task['api_batch_task_reference_identifier'],
-                    "payload" => $taskResult["payload"]);
-                $cachedResults[$task['api_batch_task_reference_identifier']] = $taskResult["payload"];
-            }
-        }
-
-        return $batchResult;
+        // no results yet, will be sent later through websocket connection
+        return '';
     }
 
     public function executeNextQueuedBatchFor(int $teamId, int $userId, string $serverId): PromiseInterface
@@ -225,7 +177,7 @@ class Batch extends Base
     /**
      * @throws Exception
      */
-    public function setCommunicated(string $batchGuid): Promise
+    public function setCommunicated(string $batchGuid): PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(

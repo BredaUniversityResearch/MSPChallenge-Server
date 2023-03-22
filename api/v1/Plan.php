@@ -1096,28 +1096,27 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Vote(int $country, int $plan, int $vote): ?PromiseInterface
     {
-        $toPromiseFunctions[] = tpf(function () use ($country, $plan, $vote) {
-            return $this->getAsyncDatabase()->queryBySQL(
-                "UPDATE approval SET approval_vote=? WHERE approval_country_id=? AND approval_plan_id=?",
-                array($vote, $country, $plan)
-            );
-        });
-        $toPromiseFunctions[] = tpf(function () use ($plan) {
+        $deferred = new Deferred();
+        // todo: convert to createQueryBuilder.
+        $this->getAsyncDatabase()->queryBySQL(
+            "UPDATE approval SET approval_vote=? WHERE approval_country_id=? AND approval_plan_id=?",
+            array($vote, $country, $plan)
+        )
+        ->then(function (/* Result $result */) use ($plan) {
+            // todo: convert to createQueryBuilder.
             return $this->getAsyncDatabase()->queryBySQL(
                 "UPDATE plan SET plan_lastupdate=? WHERE plan_id=?",
                 array(microtime(true), $plan)
             );
-        });
-        $deferred = new Deferred();
-        parallel($toPromiseFunctions)
-            ->then(
-                function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
-                },
-                function ($reason) use ($deferred) {
-                    $deferred->reject($reason);
-                }
-            );
+        })
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
+        );
         $promise = $deferred->promise();
         return $this->isAsync() ? $promise : await($promise);
     }
@@ -2172,6 +2171,7 @@ class Plan extends Base
         $toPromiseFunctions = [];
         foreach ($settings as $setting) {
             $toPromiseFunctions[] = tpf(function () use ($plan_id, $setting) {
+                // todo: convert to ->upsert().
                 return $this->getAsyncDatabase()->queryBySQL(
                     'INSERT INTO plan_restriction_area (
                     plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id,
