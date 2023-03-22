@@ -177,7 +177,7 @@ class Batch extends Base
     /**
      * @throws Exception
      */
-    public function setCommunicated(string $batchGuid): PromiseInterface
+    public function setCommunicated(string $batchGuid): Promise
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
