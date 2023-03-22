@@ -4,7 +4,7 @@
 - Any contribution to the project must be proposed through a Pull Request.
 - The branch you are creating the PR from, shall have the same name of the Jira issue you are working on.
 - All Pull Requests need to be reviewed by at least one member of the MSP development team before being merged.
-- All Pull Requests shall contain only 1 commit possibly. If you have more then consider squashing them.
+- All Pull Requests shall contain only 1 commit possibly. If you have more than consider squashing them.
 - Remember to put the Jira issue number in the commit message.
 - Set _.gitmessage_ as your commit message template by running the following command from git bash:
 ```sh
@@ -54,6 +54,45 @@ To start/stop/restart supervisor services, see some examples here:<br/>
 
 To check their status:<br/>
 `docker exec mspchallenge-server-php-1 supervisorctl status all`<br/>
+
+## Aliases
+
+If the host machine running Docker is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you can add .bashrc file in your home direct to create these aliases:
+
+```
+# dcu = docker(d) compose(c) up(u)
+alias dcu="SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN docker compose up -d --remove-orphans && des"
+# dcu + xdebug (x)
+alias dcux="XDEBUG_MODE=debug dcu"
+ALIAS_DL_BASE="docker logs"
+PHP_CONATINER='mspchallenge-server-php-1'
+# dl = docker(d) logs(l) with default container mspchallenge-server-php-1
+alias dl="$ALIAS_DL_BASE $PHP_CONATINER"
+# dl + mspchallenge-server-blackfire-1 (b)
+alias dlb="$ALIAS_DL_BASE mspchallenge-server-blackfire-1"
+# dl + mspchallenge-server-caddy-1 (c)
+alias dlc="$ALIAS_DL_BASE mspchallenge-server-caddy-1"
+# dl + mspchallenge-server-database-1 (d)
+alias dld="$ALIAS_DL_BASE mspchallenge-server-database-1"
+# de = docker(d) execute(e) with container mspchallenge-server-php-1
+ALIAS_DE_BASE='MSYS_NO_PATHCONV=1 docker exec'
+alias de="$ALIAS_DE_BASE $PHP_CONATINER"
+# de + supervisor (s)
+alias des="de /usr/bin/supervisord -c /etc/supervisord.conf"
+# de + supervisorctl (sc)
+alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw]\n'; de supervisorctl"
+# de + top (t)
+alias det='de top'
+# de + choose profile (cpf) to "Choose Blackfire profile on running websocket server process"
+alias decpf='de pkill -SIGUSR1 -f "php bin/console app:ws-server"'
+# de + choose profile (rpf) to "Run Blackfire profile on running websocket server process"
+alias derpf='de pkill -SIGUSR2 -f "php bin/console app:ws-server"'
+# de + Run websocket server manually (wss)
+ALIAS_WSS='php /srv/app/bin/console app:ws-server'
+alias dewss="de $ALIAS_WSS"
+# dewss + xdebug (x)
+alias dewssx="$ALIAS_DE_BASE -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" $PHP_CONATINER $ALIAS_WSS"
+```
 
 ## Symfony Docker features
 
