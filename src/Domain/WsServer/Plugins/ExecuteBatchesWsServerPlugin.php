@@ -9,6 +9,7 @@ use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ClientHeaderKeys;
 use App\Domain\WsServer\ExecuteBatchRejection;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
+use Doctrine\DBAL\ArrayParameterType;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -148,13 +149,13 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             throw $e;
                         }
 
-                        $batchId = key($batchResultContainer);
+                        $batchGuid = key($batchResultContainer);
                         $batchResult = current($batchResultContainer);
 
                         $data = [
                             'header_type' => 'Batch/ExecuteBatch',
                             'header_data' => [
-                                'batch_id' => $batchId,
+                                'batch_guid' => $batchGuid,
                             ],
                             'success' => true,
                             'message' => null,
@@ -165,12 +166,12 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             $data
                         );
 
-                        return $this->setBatchToCommunicated($connResourceId, $batchId, $batchResultContainer);
+                        return $this->setBatchToCommunicated($connResourceId, $batchGuid, $batchResultContainer);
                     },
                     function ($rejection) use ($connResourceId) {
                         $reason = $rejection;
                         if ($rejection instanceof ExecuteBatchRejection) {
-                            $batchId = $rejection->getBatchId();
+                            $batchGuid = $rejection->getBatchGuid();
                             $reason = $rejection->getReason();
                             $message = '';
                             if (is_string($reason)) {
@@ -188,7 +189,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             $data = [
                                 'header_type' => 'Batch/ExecuteBatch',
                                 'header_data' => [
-                                    'batch_id' => $batchId,
+                                    'batch_guid' => $batchGuid,
                                 ],
                                 'success' => false,
                                 'message' => $message ?: 'Unknown reason',
@@ -199,7 +200,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                                 ->sendAsJson($data);
                             return $this->setBatchToCommunicated(
                                 $connResourceId,
-                                $batchId,
+                                $batchGuid,
                                 [] // do not propagate rejection, just resolve to empty batch results
                             );
                         }
@@ -214,11 +215,11 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function setBatchToCommunicated(int $connResourceId, int $batchId, $value = null): PromiseInterface
+    private function setBatchToCommunicated(int $connResourceId, string $batchGuid, $value = null): PromiseInterface
     {
         // set batch as "communicated"
         $deferred = new Deferred();
-        $this->getBatch($connResourceId)->setCommunicated($batchId)
+        $this->getBatch($connResourceId)->setCommunicated($batchGuid)
             ->done(
                 function (/* Result $result */) use ($deferred, $value) {
                     $deferred->resolve($value);
@@ -264,7 +265,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         $qb = $connection->createQueryBuilder();
         return $connection->query(
             $qb
-                ->select('b.api_batch_id', 'b.api_batch_user_id', 'b.api_batch_country_id')
+                ->select('b.api_batch_guid', 'b.api_batch_user_id', 'b.api_batch_country_id')
                 ->from('api_batch', 'b')
                 ->where(
                     $qb->expr()->and(
@@ -276,7 +277,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         )
         ->then(function (Result $result) use ($connection) {
             $batches = collect($result->fetchAllRows() ?? [])
-                ->keyBy('api_batch_id')
+                ->keyBy('api_batch_guid')
                 ->all();
             if (empty($batches)) {
                 return [];
@@ -286,7 +287,10 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                 $qb
                     ->update('api_batch', 'b')
                     ->set('b.api_batch_state', $qb->createPositionalParameter('Failed'))
-                    ->where($qb->expr()->in('b.api_batch_id', array_keys($batches)))
+                    ->where($qb->expr()->in(
+                        'b.api_batch_guid',
+                        $qb->createPositionalParameter($batches, ArrayParameterType::STRING)
+                    ))
             )
             ->then(function (/* Result $result */) use ($batches) {
                 // find client connections matching these batches if any
