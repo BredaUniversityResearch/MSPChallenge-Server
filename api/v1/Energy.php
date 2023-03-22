@@ -983,7 +983,7 @@ class Energy extends Base
                         foreach ($planIdsDependentOnThisPlan as $erroredPlanId) {
                             if (!in_array($erroredPlanId, $result)) {
                                 $result[] = $erroredPlanId;
-                                $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, $result) {
+                                $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, &$result) {
                                     return $this->findDependentEnergyPlans($erroredPlanId, $result);
                                 });
                             }
