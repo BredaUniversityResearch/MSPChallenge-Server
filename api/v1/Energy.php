@@ -775,12 +775,12 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetDependentEnergyPlans(int $plan_id): array
+    public function GetDependentEnergyPlans(int $plan_id): array|PromiseInterface
     {
         $planId = $plan_id;
         $result = array();
-        await($this->findDependentEnergyPlans($planId, $result));
-        return $result;
+        $promise = $this->findDependentEnergyPlans($planId, $result);
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -983,7 +983,7 @@ class Energy extends Base
                         foreach ($planIdsDependentOnThisPlan as $erroredPlanId) {
                             if (!in_array($erroredPlanId, $result)) {
                                 $result[] = $erroredPlanId;
-                                $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, $result) {
+                                $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, &$result) {
                                     return $this->findDependentEnergyPlans($erroredPlanId, $result);
                                 });
                             }
@@ -992,6 +992,9 @@ class Energy extends Base
                     });
                 });
             });
+        })
+        ->then(function (/* array $results */) use (&$result) {
+            return $result;
         });
     }
 
@@ -1005,11 +1008,10 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetOverlappingEnergyPlans(int $plan_id): array
+    public function GetOverlappingEnergyPlans(int $plan_id): array|PromiseInterface
     {
         $result = array();
-        $this->FindOverlappingEnergyPlans($plan_id, $result);
-        return $result;
+        return $this->findOverlappingEnergyPlans($plan_id, $result);
     }
 
     /**
@@ -1017,8 +1019,7 @@ class Energy extends Base
      *
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function FindOverlappingEnergyPlans(int $planId, array &$result): ?PromiseInterface
+    public function findOverlappingEnergyPlans(int $planId, array &$result): ?PromiseInterface
     {
         $promise = $this->getAsyncDatabase()->queryBySQL(
             '
@@ -1084,11 +1085,11 @@ class Energy extends Base
                         }
                     });
                 });
-                return parallel($toPromiseFunctions)
-                    ->then(function (/*array $qResults*/) use (&$result) {
-                        $result = array_unique($result);
-                    });
             }
+            return parallel($toPromiseFunctions)
+                ->then(function (/*array $qResults*/) use (&$result) {
+                    $result = array_unique($result);
+                });
         });
         return $this->isAsync() ? $promise : await($promise);
     }
