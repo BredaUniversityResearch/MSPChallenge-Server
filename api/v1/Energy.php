@@ -983,7 +983,7 @@ class Energy extends Base
                         foreach ($planIdsDependentOnThisPlan as $erroredPlanId) {
                             if (!in_array($erroredPlanId, $result)) {
                                 $result[] = $erroredPlanId;
-                                $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, $result) {
+                                $toPromiseFunctions[] = tpf(function () use ($erroredPlanId, &$result) {
                                     return $this->findDependentEnergyPlans($erroredPlanId, $result);
                                 });
                             }
@@ -1084,11 +1084,11 @@ class Energy extends Base
                         }
                     });
                 });
-                return parallel($toPromiseFunctions)
-                    ->then(function (/*array $qResults*/) use (&$result) {
-                        $result = array_unique($result);
-                    });
             }
+            return parallel($toPromiseFunctions)
+                ->then(function (/*array $qResults*/) use (&$result) {
+                    $result = array_unique($result);
+                });
         });
         return $this->isAsync() ? $promise : await($promise);
     }
