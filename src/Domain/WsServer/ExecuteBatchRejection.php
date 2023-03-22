@@ -4,25 +4,32 @@ namespace App\Domain\WsServer;
 
 class ExecuteBatchRejection
 {
-    private string $batchGuid;
-    private mixed $reason;
+    private int $batchId;
 
     /**
-     * @param string $batchGuid
+     * @var mixed
+     */
+    private $reason;
+
+    /**
+     * @param int $batchId
      * @param mixed $reason
      */
-    public function __construct(string $batchGuid, mixed $reason)
+    public function __construct(int $batchId, $reason)
     {
-        $this->batchGuid = $batchGuid;
+        $this->batchId = $batchId;
         $this->reason = $reason;
     }
 
-    public function getBatchGuid(): string
+    public function getBatchId(): int
     {
-        return $this->batchGuid;
+        return $this->batchId;
     }
 
-    public function getReason(): mixed
+    /**
+     * @return mixed
+     */
+    public function getReason()
     {
         return $this->reason;
     }
