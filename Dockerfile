@@ -63,6 +63,13 @@ RUN chmod +x /usr/local/bin/docker-healthcheck
 
 HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
 
+# Supervisor
+RUN mkdir -p /var/log/supervisor/
+COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
+RUN mkdir -p /etc/supervisor.d/
+COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
+COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
+
 COPY --link docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
 
@@ -112,13 +119,6 @@ RUN set -eux; \
 		composer run-script --no-dev post-install-cmd; \
 		chmod +x bin/console; sync; \
     fi
-
-# Supervisor
-RUN mkdir -p /var/log/supervisor/
-COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
-RUN mkdir -p /etc/supervisor.d/
-COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
-COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
 
 # Dev image
 FROM app_php AS app_php_dev
