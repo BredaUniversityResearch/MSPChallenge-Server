@@ -397,7 +397,7 @@ class WsServer extends EventDispatcher implements
     ): string {
         $addressModificationKey = 'ws_server/address_modification';
         $addressModificationValue = Config::get($addressModificationKey) ?? 'none';
-        $port = Config::get('ws_server/port') ?: 45001;
+        $port = Config::get('ws_server/port_external') ?: 45001;
         $uri = Config::get('ws_server/uri');
         switch ($addressModificationValue) {
             case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT:

@@ -9,13 +9,15 @@ $codeBranch = '/';
 /** @noinspection HttpUrlsUsage */
 $GLOBALS['config'] = array(
     'ws_server' => [
-        'scheme' => 'ws://',
+        'scheme' => $_ENV['WS_SERVER_SCHEME'] ?? 'ws://',
         // if "host" is not set, ServerManager::getInstance()->GetTranslatedServerURL() is used,
         //   which is the same host as the api server.
-        // 'host' => 'localhost',
+        'host' => $_ENV['WS_SERVER_HOST'] ?? null,
         'port' => $_ENV['WS_SERVER_PORT'] ?? 45001,
-        'uri' => '',
-        'address_modification' => 'none' // none, add_game_session_id_to_port, add_game_session_id_to_uri
+        'port_external' => $_ENV['WS_SERVER_PORT_EXTERNAL'] ?? 45001,
+        'uri' =>  $_ENV['WS_SERVER_URI'] ?? '',
+        // none, add_game_session_id_to_port, add_game_session_id_to_uri
+        'address_modification' => $_ENV['WS_SERVER_ADDRESS_MODIFICATION'] ?? 'none'
     ],
     'code_branch' => $codeBranch,
     'mysql' => array_merge($connectionConfig, [

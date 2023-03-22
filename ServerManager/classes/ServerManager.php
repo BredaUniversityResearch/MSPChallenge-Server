@@ -313,6 +313,10 @@ class ServerManager extends Base
 
     public function getTranslatedServerURL(): string
     {
+        if (($_ENV['WEB_SERVER_HOST'] ?? null) !== null) {
+            return $_ENV['WEB_SERVER_HOST'].':'.($_ENV['WEB_SERVER_PORT'] ?? 80);
+        }
+
         if (empty($this->serverAddress)) {
             try {
                 $this->completePropertiesFromDB();
