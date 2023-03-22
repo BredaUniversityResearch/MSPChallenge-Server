@@ -60,6 +60,14 @@ To check their status:<br/>
 If the host machine running Docker is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you can add .bashrc file in your home direct to create these aliases:
 
 ```
+# export settings
+# you can leave the Blackfire ids and tokens empty if you do not intend to use it
+export BLACKFIRE_CLIENT_ID=
+export BLACKFIRE_CLIENT_TOKEN=
+export BLACKFIRE_SERVER_ID=
+export BLACKFIRE_SERVER_TOKEN=
+
+# aliases
 # dcu = docker(d) compose(c) up(u)
 alias dcu="SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN docker compose up -d --remove-orphans && des"
 # dcu + xdebug (x)
