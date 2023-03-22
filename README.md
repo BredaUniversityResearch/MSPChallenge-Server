@@ -55,9 +55,10 @@ To start/stop/restart supervisor services, see some examples here:<br/>
 To check their status:<br/>
 `docker exec mspchallenge-server-php-1 supervisorctl status all`<br/>
 
-## Aliases
+## Aliases for development
 
-If the host machine running Docker is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you can add .bashrc file in your home direct to create these aliases:
+If the host machine running Docker is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you can add aliases in the .bashrc file in your home directory using below lines.
+Note that we use SERVER_NAME=:80 in alias dcu to disable https
 
 ```
 # export settings
