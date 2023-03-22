@@ -58,7 +58,9 @@ To check their status:<br/>
 ## Aliases for development
 
 If the host machine running Docker is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you can add aliases in the .bashrc file in your home directory using below lines.
-Note that we use SERVER_NAME=:80 in alias dcu to disable https
+Note that we use SERVER_NAME=:80 in alias dcu to disable https.
+
+Once you have created the .bashrc file you need to log-out and -in, reboot the system, or restart the terminal. Then, just type "alias" to see a list of them.
 
 ```
 # export settings
