@@ -71,8 +71,10 @@ export BLACKFIRE_SERVER_ID=
 export BLACKFIRE_SERVER_TOKEN=
 
 # aliases
+# ede = export (e) dotenv (de)
+alias ede='export $(docker/php/export-dotenv.sh)'
 # dcu = docker(d) compose(c) up(u)
-alias dcu="SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN docker compose up -d --remove-orphans"
+alias dcu="ede && SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN docker compose up -d --remove-orphans"
 # dcu + xdebug (x)
 alias dcux="XDEBUG_MODE=debug dcu"
 ALIAS_DL_BASE="docker logs"
