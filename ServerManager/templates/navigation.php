@@ -14,7 +14,7 @@ $html =<<<"HTML"
 
     <nav class="navbar">
       <div id="logo">
-        <img src="images/MSP_Challenge_Icon-037c7c.png">
+        <img src="/ServerManager/images/MSP_Challenge_Icon-037c7c.png">
       </div>
       <div id="header-menu-wrapper">
         <ul id="header-menu">
