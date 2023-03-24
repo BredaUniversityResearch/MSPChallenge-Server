@@ -8,12 +8,6 @@ use Ratchet\Server\IoServer;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-//// This simple io server can be reached by using : telnet localhost 45001
-$server = IoServer::factory(
-    new Chat(),
-    45001
-);
-
 // Or using the WsServer component to be able to connect with a web browser by using the following html/js:
 /**
 <html>
@@ -45,14 +39,15 @@ $server = IoServer::factory(
 </body>
 </html>
  */
-//$server = IoServer::factory(
-//    new \Ratchet\Http\HttpServer(
-//        new \Ratchet\WebSocket\WsServer(
-//            createChat()
-//        )
-//    ),
-//    45001
-//);
+$server = IoServer::factory(
+    new \Ratchet\Http\HttpServer(
+        new \Ratchet\WebSocket\WsServer(
+            createChat()
+        )
+    ),
+    (int)($argv[1] ?? 45001),
+    ($argv[2] ?? '0.0.0.0'),
+);
 
 $server->run();
 
