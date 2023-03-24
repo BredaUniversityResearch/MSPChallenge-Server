@@ -6,14 +6,11 @@ services:
     image: 'mariadb:10.4.25'
     restart: unless-stopped
     environment:
+      DATABASE_PORT: ${DATABASE_PORT:-3306}
       MYSQL_ALLOW_EMPTY_PASSWORD: yes
       MYSQL_DATABASE: msp_server_manager
     ports:
-      # To allow the host machine to access the ports below, modify the lines below.
-      # For example, to allow the host to connect to port 3306 on the container, you would change
-      # "3306" to "3306:3306". Where the first port is exposed to the host and the second is the container port.
-      # See https://docs.docker.com/compose/compose-file/compose-file-v3/#ports for more information.
-      - "${DATABASE_PORT:-3306}:${DATABASE_PORT:-3306}"
+      - "${DATABASE_PORT:-3306}"
     # Run below command in your terminal to see all possible variables and their default values:
     #   mysqld --help --verbose | grep -A 9999 'Variables (--variable-name=value)'
     command: [

@@ -8,17 +8,6 @@ $codeBranch = '/';
 
 /** @noinspection HttpUrlsUsage */
 $GLOBALS['config'] = array(
-    'ws_server' => [
-        'scheme' => $_ENV['WS_SERVER_SCHEME'] ?? 'ws://',
-        // if "host" is not set, ServerManager::getInstance()->GetTranslatedServerURL() is used,
-        //   which is the same host as the api server.
-        'host' => $_ENV['WS_SERVER_HOST'] ?? null,
-        'port' => $_ENV['WS_SERVER_PORT'] ?? 45001,
-        'port_external' => ($_ENV['WS_SERVER_PORT_EXTERNAL'] ?? null) ?: 45001,
-        'uri' =>  $_ENV['WS_SERVER_URI'] ?? '',
-        // none, add_game_session_id_to_port, add_game_session_id_to_uri
-        'address_modification' => $_ENV['WS_SERVER_ADDRESS_MODIFICATION'] ?? 'none'
-    ],
     'code_branch' => $codeBranch,
     'mysql' => array_merge($connectionConfig, [
         'db' => $_ENV['DBNAME_SERVER_MANAGER'] ?? DatabaseDefaults::DEFAULT_DBNAME_SERVER_MANAGER,
@@ -38,7 +27,7 @@ $GLOBALS['config'] = array(
         'with_proxy' => ''
     ),
     // change to https to go secure with all background connections to your MSP Challenge servers
-    'msp_server_protocol'   => 'http://',
+    'msp_server_protocol'   => $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http://',
     // change to https to go secure with all background connections to your MSP Challenge Server Manager
-    'msp_servermanager_protocol' => 'http://'
+    'msp_servermanager_protocol' => $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http://'
 );

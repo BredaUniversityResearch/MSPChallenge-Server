@@ -64,6 +64,8 @@ class GameSession extends Base
     }
 
     /**
+     * used to communicate "game_session_api" URL to the watchdog
+     *
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
@@ -73,9 +75,16 @@ class GameSession extends Base
             $deferred = new Deferred();
             return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'])->promise();
         }
-
         $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
+
+        // this is always called from inside the docker environment,so just use http://caddy:80/...
+        if (getenv('DOCKER')) {
+            $deferred = new Deferred();
+            $GLOBALS['RequestApiRoot'] = 'http://caddy:80'.$apiRoot;
+            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'])->promise();
+        }
+
         $_SERVER['HTTPS'] ??= 'off';
         /** @noinspection HttpUrlsUsage */
         $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : "http://";
@@ -87,15 +96,16 @@ class GameSession extends Base
                 ->from('game_servers')
                 ->setMaxResults(1)
         )
-            ->then(
-                function (Result $result) use ($protocol, $apiRoot) {
-                    $row = $result->fetchFirstRow() ?? [];
-                    $serverName = $row['address'] ?? $_SERVER["SERVER_NAME"] ?? gethostname();
-                    $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
-                    $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$port.$apiRoot;
-                    return $GLOBALS['RequestApiRoot'];
-                }
-            );
+        ->then(
+            function (Result $result) use ($protocol, $apiRoot) {
+                $row = $result->fetchFirstRow() ?? [];
+                $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row['address'] ?? $_SERVER["SERVER_NAME"] ??
+                    gethostname();
+                $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+                $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$port.$apiRoot;
+                return $GLOBALS['RequestApiRoot'];
+            }
+        );
     }
 
     /**
@@ -109,23 +119,29 @@ class GameSession extends Base
         return await(self::getRequestApiRootAsync());
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetServerManagerApiRoot(): string
+    /**
+     * Used by GameTick to generate a server manager URL towards editGameSession.php
+     *
+     * @return string
+     */
+    public static function getServerManagerApiRoot(): string
     {
         if (isset($GLOBALS['ServerManagerApiRoot'])) {
             return $GLOBALS['ServerManagerApiRoot'];
         }
 
         $serverName = $_SERVER["SERVER_NAME"] ?? gethostname();
-        if (getenv('DOCKER')) {
-            // this is always called from inside the docker environment, so just use caddy
-            $serverName = 'caddy';
-        }
 
         /** @noinspection HttpUrlsUsage */
         $protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
         $apiFolder = "/ServerManager/api/";
-        
+
+        // this is always called from inside the docker environment,so just use http://caddy:80/...
+        if (getenv('DOCKER')) {
+            $GLOBALS['ServerManagerApiRoot'] = 'http://caddy:80'.$apiFolder;
+            return $GLOBALS['ServerManagerApiRoot'];
+        }
+
         $dbConfig = Config::GetInstance()->DatabaseConfig();
         $temporaryConnection = Database::CreateTemporaryDBConnection(
             $dbConfig["host"],
@@ -133,13 +149,9 @@ class GameSession extends Base
             $dbConfig["password"],
             $dbConfig["database"]
         );
-        $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
+        $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
-            $serverName = $row["address"];
-            if (getenv('DOCKER')) {
-                // this is always called from inside the docker environment, so just use caddy
-                $serverName = 'caddy';
-            }
+            $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row["address"];
             //if ($serverName == "localhost") $serverName = getHostByName(getHostName());
             $GLOBALS['ServerManagerApiRoot'] = $protocol.$serverName.$port.$apiFolder;
         }

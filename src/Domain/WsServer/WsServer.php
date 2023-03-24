@@ -395,11 +395,11 @@ class WsServer extends EventDispatcher implements
         int $sessionId = 0,
         string $hostDefaultValue = 'localhost'
     ): string {
-        $addressModificationKey = 'ws_server/address_modification';
-        $addressModificationValue = Config::get($addressModificationKey) ?? 'none';
-        $port = Config::get('ws_server/port_external') ?: 45001;
-        $uri = Config::get('ws_server/uri');
-        switch ($addressModificationValue) {
+        $addressModificationEnvName = 'URL_WS_SERVER_ADDRESS_MODIFICATION';
+        $addressModificationEnvValue = ($_ENV['URL_WS_SERVER_ADDRESS_MODIFICATION'] ?? null) ?: 'none';
+        $port = ($_ENV['URL_WS_SERVER_PORT'] ?? null) ?: 45001;
+        $uri = $_ENV['URL_WS_SERVER_URI'] ?? '';
+        switch ($addressModificationEnvValue) {
             case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT:
                 $port += $sessionId;
                 break;
@@ -411,15 +411,15 @@ class WsServer extends EventDispatcher implements
             default:
                 throw new \http\Exception\UnexpectedValueException(
                     sprintf(
-                        'Encountered unexpected value for config %s: %s. Value must be: %s',
-                        $addressModificationKey,
-                        $addressModificationValue,
+                        'Encountered unexpected value for environmental variable %s: %s. Value must be: %s',
+                        $addressModificationEnvName,
+                        $addressModificationEnvValue,
                         implode(', ', self::getConstants())
                     )
                 );
         }
-        return Config::get('ws_server/scheme') .
-            (Config::get('ws_server/host') ?: $hostDefaultValue) .
-            ':' . $port . $uri;
+        $scheme = ($_ENV['URL_WS_SERVER_SCHEME'] ?? null) ?: 'ws://';
+        $host = ($_ENV['URL_WS_SERVER_HOST'] ?? null) ?: $hostDefaultValue;
+        return $scheme.$host.':'.$port.$uri;
     }
 }

@@ -592,11 +592,7 @@ class Game extends Base
     private static function StartSimulationExe(array $params): void
     {
         $args = isset($params["args"])? $params["args"]." " : "";
-        $args = getenv('DOCKER') ?
-            // this is always called from inside the docker environment,so just use http://caddy:80/...
-            $args.'APIEndpoint=http://caddy:80' :
-            $args."APIEndpoint=".GameSession::GetRequestApiRoot();
-
+        $args = $args."APIEndpoint=".GameSession::GetRequestApiRoot();
         $workingDirectory = "";
         if (str_starts_with(php_uname(), "Windows")) {
             if (isset($params["working_directory"])) {
@@ -661,12 +657,6 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
-                if (getenv('DOCKER')) {
-                    $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
-                    $apiRoot = str_replace("//", "/", $apiRoot);
-                    // this is always called from inside the docker environment,so just use http://caddy:80/...
-                    return 'http://caddy:80'.$apiRoot;
-                }
                 return GameSession::getRequestApiRootAsync();
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {

@@ -47,7 +47,6 @@ class WsServerCommand extends Command
 
     protected function configure(): void
     {
-        require($this->projectDir . '/ServerManager/config.php'); // todo: move server manager config to .env
         $this
             ->setDescription('Run the websocket server for MSP Challenge')
             ->addOption(
@@ -55,7 +54,7 @@ class WsServerCommand extends Command
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'the server port to use',
-                (int)Config::get('ws_server/port') ?: 45001
+                (int)($_ENV['WS_SERVER_PORT'] ?? 45001)
             )
             ->addOption(
                 self::OPTION_ADDRESS,
