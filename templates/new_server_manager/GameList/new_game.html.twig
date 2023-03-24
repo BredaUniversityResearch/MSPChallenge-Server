@@ -1,0 +1,60 @@
+{% for flash_error in app.flashes('new_session_error') %}
+    <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+{% endfor %}
+
+{{ form_start(newSessionForm) }}
+    <div class="modal-body">
+        <div class="form-group">
+            {{ form_label(newSessionForm.name, 'Session Name', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(newSessionForm.name) }}
+            </div>
+            {{ form_help(newSessionForm.name) }}
+            {{ form_widget(newSessionForm.name, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(newSessionForm.gameConfigVersion, 'Configuration Version', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(newSessionForm.gameConfigVersion) }}
+            </div>
+            {{ form_help(newSessionForm.gameConfigVersion) }}
+            {{ form_widget(newSessionForm.gameConfigVersion, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(newSessionForm.gameGeoServer, 'GeoServer', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(newSessionForm.gameGeoServer) }}
+            </div>
+            {{ form_help(newSessionForm.gameGeoServer) }}
+            {{ form_widget(newSessionForm.gameGeoServer, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(newSessionForm.gameWatchdogServer, 'Simulation Server', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(newSessionForm.gameWatchdogServer) }}
+            </div>
+            {{ form_help(newSessionForm.gameWatchdogServer) }}
+            {{ form_widget(newSessionForm.gameWatchdogServer, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(newSessionForm.passwordAdmin, 'Admin Password', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(newSessionForm.passwordAdmin) }}
+            </div>
+            {{ form_help(newSessionForm.passwordAdmin) }}
+            {{ form_widget(newSessionForm.passwordAdmin, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(newSessionForm.passwordPlayer, 'Player Password', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(newSessionForm.passwordPlayer) }}
+            </div>
+            {{ form_help(newSessionForm.passwordPlayer) }}
+            {{ form_widget(newSessionForm.passwordPlayer, {'attr': {'class': 'form-control'}}) }}
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-action="modal-form#closeModal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create session</button>
+    </div>
+{{ form_end(newSessionForm) }}

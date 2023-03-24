@@ -1,0 +1,15 @@
+<div class="modal fade" tabindex="-1" aria-hidden="true" data-modal-form-target="modal">
+    <div class="modal-dialog modal-wide">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="newSessionModalLabel">{{ modalTitle }}</h4>
+                <button type="button" class="btn btn-danger" data-action="modal-form#closeModal">
+                    <i class="fa fa-remove"></i>
+                </button>
+            </div>
+            {{ render(controller(
+                formController
+            )) }}
+        </div>
+    </div>
+</div>

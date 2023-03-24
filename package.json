@@ -25,6 +25,8 @@
         "@popperjs/core": "^2.11.6",
         "bootstrap": "^5.2.3",
         "font-awesome": "^4.7.0",
-        "jquery": "^3.6.4"
+        "jquery": "^3.6.4",
+        "stimulus": "^3.2.1",
+        "tata-js": "^0.1.5"
     }
 }

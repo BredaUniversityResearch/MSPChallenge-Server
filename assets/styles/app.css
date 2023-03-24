@@ -1,2 +1,9 @@
 @import '~bootstrap';
 @import '~font-awesome';
+
+#alert-wrapper {
+    z-index: 10;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}

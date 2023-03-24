@@ -14,3 +14,4 @@ import './bootstrap';
 import $ from 'jquery';
 import '@popperjs/core';
 import 'bootstrap';
+import 'tata-js';

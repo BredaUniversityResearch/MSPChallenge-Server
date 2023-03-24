@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello NewServerManagerController!{% endblock %}
+{% block title %}New Server Manager{% endblock %}
 
 {% block body %}
     <div id="page-wrapper">
@@ -32,11 +32,17 @@
 
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="tabSessionsList" role="tabpanel" aria-labelledby="tabSessionsList-tab">
-                    <div class="row">
-                        <div class="col-md-12 flex-row">
-                            <button type="button" id="btnCreateServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSession"><i class="fa fa-plus-circle" title="Create new session"></i> New Session</button>
-                            <button id="buttonRefreshSessionsList" class="btn btn-primary"><i class="fa fa-refresh" title="Refresh" id="buttonRefreshSessionsListIcon"></i> Refresh</button>
-                        </div>
+                    <div class="row" {{ stimulus_controller('modal-form') }}>
+                        <button type="button" id="btnCreateServer" class="btn btn-primary pull-left" data-action="modal-form#openModal">
+                            <i class="fa fa-plus-circle" title="Create new session"></i>
+                            New Session
+                        </button>
+                        {{ include('new_server_manager/_modal_form.html.twig',
+                            {
+                                'modalTitle': 'Create New Session',
+                                'formController': 'App\\Controller\\NewServerManagerController::newSessionForm'
+                            }
+                        )}}
                         <div class="col-md-12" id="sessionsList">
                             <div class="float-left">
                                 Here you can create a new MSP Challenge session, and administer existing ones.
@@ -75,10 +81,10 @@
                                         <th class="text-center">Quick Actions</th>
                                     </tr>
                                     </thead>
-                                    <tbody id="sessionsListtbody">
-                                    <tr>
-                                        <td id="sessionsListtd" colspan="8" class="text-center"><span><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span> waiting for data...</td>
-                                    </tr>
+                                    <tbody id="sessionsListtbody" {{ turbo_stream_listen('GameList') }}>
+                                        {% for game in gameList %}
+                                        {{ include('new_server_manager/snippets/gamelist.html.twig', {game}) }}
+                                        {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
@@ -334,90 +340,7 @@
             </div>
 
             <!-- Modal: new Session -->
-            <div class="modal fade" id="modalNewSession" tabindex="-1" role="dialog" aria-labelledby="newSessionModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-wide" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" id="newSessionModalLabel">Create New Session</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
 
-                            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link active" id="NewSessionModalDefault-tab" data-toggle="tab" href="#NewSessionModalDefault" role="tab" aria-controls="NewSessionModalDefault" aria-selected="true">By Selecting a Configuration File</a>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link" id="NewSessionModalLoadSave-tab" data-toggle="tab" href="#NewSessionModalLoadSave" role="tab" aria-controls="NewSessionModalLoadSave" aria-selected="false">Or By Loading a Saved Session</a>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="myNewSessionModalTabContent">
-                                <div class="tab-pane fade show active" id="NewSessionModalDefault" role="tabpanel" aria-labelledby="NewSessionModalDefault-tab">
-                                    <form class="form-horizontal" role="form" data-toggle="validator" id="formNewSession" enctype="multipart/form-data">
-                                        <div class="form-group">
-                                            <label for="newSessionName">Session Name</label>
-                                            <input type="text" class="form-control" id="newSessionName" name="session name" required="true">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="newConfigFile">Configuration File</label>
-                                            <select class="form-control" id="newConfigFile" required="required">
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="newConfigVersion">Configuration Version</label>
-                                            <select class="form-control" id="newConfigVersion" required="required"></select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="newGeoServer">GeoServer</label>
-                                            <select class="form-control" id="newGeoServer" required="required">
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="newWatchdog">Simulation Server</label>
-                                            <select class="form-control" id="newWatchdog" required="required">
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="newAdminPassword">Admin Password</label>
-                                            <input type="text" class="form-control" id="newAdminPassword" required="required">
-                                            <small id="adminPasswordHelp" class="form-text text-muted">This and more sophisticated user access settings can always be changed after the session has been successfully created.</small>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="newPlayerPassword">Player Password</label>
-                                            <input type="text" class="form-control" id="newPlayerPassword" title="This feature offers minimal security only. The set password will be retrievable here in the ServerManager for all its users. So do not enter one of your personal, commonly-used passwords.">
-                                            <small id="userPasswordHelp" class="form-text text-muted">This and more sophisticated user access settings can always be changed after the session has been successfully created.</small>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="tab-pane fade show" id="NewSessionModalLoadSave" role="tabpanel" aria-labelledby="NewSessionModalLoadSave-tab">
-                                    <form class="form-horizontal" role="form" data-toggle="validator" id="formLoadSave" enctype="multipart/form-data">
-                                        <div class="form-group">
-                                            <label for="newSessionName2">Session Name</label>
-                                            <input type="text" class="form-control" id="newServerName" name="session name" required="true">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="newWatchdogLoadSave">Simulation Server</label>
-                                            <select class="form-control" id="newWatchdogLoadSave" required="required">
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="SaveFileSelector">Select the Session Save you wish to load</label>
-                                            <select class="form-control" id="SaveFileSelector" required="required">
-                                            </select>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" onClick="newSessionChoice();">Create session</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Modal Session user management -->
             <div class="modal fade" id="sessionUsers" tabindex="-1" role="dialog" aria-labelledby="sessionUsersCenterTitle" aria-hidden="true">
@@ -976,8 +899,6 @@
 
             </div>
         </div>
-
-        <div id="auth2BaseURL">version info here</div>
 
     </div>
 {% endblock %}
