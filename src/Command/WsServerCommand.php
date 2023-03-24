@@ -31,17 +31,14 @@ class WsServerCommand extends Command
     protected static $defaultName = 'app:ws-server';
 
     private WsServer $wsServer;
-    private string $projectDir;
 
     public function __construct(
         WsServer $wsServer,
-        string $projectDir,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         SymfonyToLegacyHelper $helper,
         PluginHelper $pluginHelper
     ) {
         $this->wsServer = $wsServer;
-        $this->projectDir = $projectDir;
         parent::__construct();
     }
 
