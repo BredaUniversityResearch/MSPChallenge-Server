@@ -57,6 +57,7 @@ services:
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
       WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
       WS_SERVER_PORT: ${WS_SERVER_PORT:-45001}
+      APP_ENV: ${APP_ENV:-dev}
     ports:
       # Watchdog
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
