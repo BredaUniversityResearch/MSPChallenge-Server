@@ -60,19 +60,23 @@ class Batch extends Base
             return $r;
         })->all();
         foreach ($requests as $r) {
-            $this->getDatabase()->query("INSERT INTO api_batch_task (
+            $this->getDatabase()->query(
+                "INSERT INTO api_batch_task (
                 api_batch_task_batch_id, 
                 api_batch_task_group, 
                 api_batch_task_reference_identifier, 
                 api_batch_task_api_endpoint, 
                 api_batch_task_api_endpoint_data)
-                VALUES (?, ?, ?, ?, ?)", array(
+                VALUES (?, ?, ?, ?, ?)",
+                array(
                     $batchId,
                     $r['group'],
                     $r['call_id'],
                     $r['endpoint'],
                     $r['endpoint_data']
-            ));
+                ),
+                true
+            );
         }
     }
 
@@ -110,7 +114,17 @@ class Batch extends Base
         if (null === $requests = json_decode($requests, true)) {
             throw new Exception("Unable to decode requests for batch: ".$batch_guid);
         }
-        $this->addToBatch($batchId, $requests);
+
+        // add to batch inserts in a db transaction
+        $this->getDatabase()->DBStartTransaction();
+        try {
+            $this->addToBatch($batchId, $requests);
+        } catch (Exception $e) {
+            $this->getDatabase()->DBRollbackTransaction();
+            throw $e;
+        }
+        $this->getDatabase()->DBCommitTransaction();
+
         $data = $this->getDatabase()->query("SELECT api_batch_task_id, 
                 api_batch_task_reference_identifier, 
                 api_batch_task_api_endpoint, 
