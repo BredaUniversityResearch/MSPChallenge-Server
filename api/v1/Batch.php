@@ -72,7 +72,9 @@ class Batch extends Base
                     $r['call_id'],
                     $r['endpoint'],
                     $r['endpoint_data']
-            ));
+                ),
+                true
+            );
         }
     }
 
@@ -103,17 +105,24 @@ class Batch extends Base
         string $batch_guid,
         string $requests,
     ): string {
-        $this->getDatabase()->DBStartTransaction();
-
         if (0 === $batchId = $this->startBatch($country_id, $user_id, $batch_guid)) {
             throw new Exception("Unable to start batch: ".$batch_guid);
         }
         // @var null|array{int: array{call_id: int, group: string, end_point: string, endpoint_data: string}}
         if (null === $requests = json_decode($requests, true)) {
-            $this->getDatabase()->DBRollbackTransaction();
             throw new Exception("Unable to decode requests for batch: ".$batch_guid);
         }
-        $this->addToBatch($batchId, $requests);
+
+        // add to batch inserts in a db transaction
+        $this->getDatabase()->DBStartTransaction();
+        try {
+            $this->addToBatch($batchId, $requests);
+        } catch (Exception $e) {
+            $this->getDatabase()->DBRollbackTransaction();
+            throw $e;
+        }
+        $this->getDatabase()->DBCommitTransaction();
+
         $data = $this->getDatabase()->query("SELECT api_batch_task_id, 
                 api_batch_task_reference_identifier, 
                 api_batch_task_api_endpoint, 
@@ -122,7 +131,6 @@ class Batch extends Base
             WHERE api_batch_task_batch_id = ? 
             ORDER BY api_batch_task_group", array($batchId));
         if (empty($data)) {
-            $this->getDatabase()->DBRollbackTransaction();
             throw new Exception("Tried to execute an empty batch");
         }
 
@@ -133,7 +141,6 @@ class Batch extends Base
         );
 
         // no results yet, will be sent later through websocket connection
-        $this->getDatabase()->DBCommitTransaction();
         return '';
     }
 
