@@ -69,14 +69,17 @@ export BLACKFIRE_CLIENT_ID=
 export BLACKFIRE_CLIENT_TOKEN=
 export BLACKFIRE_SERVER_ID=
 export BLACKFIRE_SERVER_TOKEN=
+# for production
+export CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey
 
 # aliases
-# ede = export (e) dotenv (de)
 alias ede='export $(docker/php/export-dotenv.sh)'
-# dcu = docker(d) compose(c) up(u)
-alias dcu="ede && SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN docker compose up -d --remove-orphans"
+DCU_BASE="ede && SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN CADDY_MERCURE_JWT_SECRET=$CADDY_MERCURE_JWT_SECRET docker compose"
+alias dcu="$DCU_BASE up -d --remove-orphans"
 # dcu + xdebug (x)
 alias dcux="XDEBUG_MODE=debug dcu"
+# dcu + production (p)
+alias dcup="$DCU_BASE -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
 PHP_CONATINER='mspchallenge-server-php-1'
 # dl = docker(d) logs(l) with default container mspchallenge-server-php-1
