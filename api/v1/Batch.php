@@ -60,13 +60,15 @@ class Batch extends Base
             return $r;
         })->all();
         foreach ($requests as $r) {
-            $this->getDatabase()->query("INSERT INTO api_batch_task (
+            $this->getDatabase()->query(
+                "INSERT INTO api_batch_task (
                 api_batch_task_batch_id, 
                 api_batch_task_group, 
                 api_batch_task_reference_identifier, 
                 api_batch_task_api_endpoint, 
                 api_batch_task_api_endpoint_data)
-                VALUES (?, ?, ?, ?, ?)", array(
+                VALUES (?, ?, ?, ?, ?)",
+                array(
                     $batchId,
                     $r['group'],
                     $r['call_id'],
