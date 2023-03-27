@@ -81,7 +81,13 @@ call :FirewallRemoveRule
 goto eof
 
 :get
+set singleparam=0
 if not "%~2"=="" (
+  if not "%~1"=="install" (
+    set singleparam=1
+  )
+)
+if "%singleparam%"=="1" (
   echo %2:
   %exe% get %service% %2
 ) else (
@@ -112,4 +118,3 @@ exit /b 0
 :FirewallRemoveRule
 netsh advfirewall firewall delete rule name="MSP Websocket server"
 exit /b 0
-
