@@ -775,12 +775,12 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetDependentEnergyPlans(int $plan_id): array
+    public function GetDependentEnergyPlans(int $plan_id): array|PromiseInterface
     {
         $planId = $plan_id;
         $result = array();
-        await($this->findDependentEnergyPlans($planId, $result));
-        return $result;
+        $promise = $this->findDependentEnergyPlans($planId, $result);
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -992,6 +992,9 @@ class Energy extends Base
                     });
                 });
             });
+        })
+        ->then(function (/* array $results */) use (&$result) {
+            return $result;
         });
     }
 
@@ -1005,10 +1008,12 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetOverlappingEnergyPlans(int $plan_id): array
+    public function GetOverlappingEnergyPlans(int $plan_id): array|PromiseInterface
     {
         $result = array();
-        $this->FindOverlappingEnergyPlans($plan_id, $result);
+        if (null !== $promise = $this->findOverlappingEnergyPlans($plan_id, $result)) {
+            return $promise;
+        }
         return $result;
     }
 
@@ -1017,9 +1022,9 @@ class Energy extends Base
      *
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function FindOverlappingEnergyPlans(int $planId, array &$result): ?PromiseInterface
+    public function findOverlappingEnergyPlans(int $planId, array &$result): ?PromiseInterface
     {
+        // todo: convert to createQueryBuilder.
         $promise = $this->getAsyncDatabase()->queryBySQL(
             '
             SELECT COALESCE(
@@ -1105,7 +1110,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetPreviousOverlappingPlans(int $plan_id): int
     {
-        $isOverlappingPlan = $this->FindPreviousOverlappingPlans($plan_id);
+        $isOverlappingPlan = $this->findPreviousOverlappingPlans($plan_id);
 
         return $isOverlappingPlan ? 1 : 0;
     }
@@ -1115,8 +1120,7 @@ class Energy extends Base
      *
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function FindPreviousOverlappingPlans(int $planId): bool
+    private function findPreviousOverlappingPlans(int $planId): bool
     {
         $planData = $this->getDatabase()->query(
             "SELECT plan_gametime FROM plan WHERE plan_id = ?",

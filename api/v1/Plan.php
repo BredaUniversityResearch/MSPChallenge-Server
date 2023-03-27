@@ -488,7 +488,7 @@ class Plan extends Base
                     }
                     if ($performEnergyOverlapCheck) {
                         $toPromiseFunctions[] = tpf(function () use ($energy, $id, &$erroringEnergyPlans) {
-                            return $energy->FindOverlappingEnergyPlans($id, $erroringEnergyPlans);
+                            return $energy->findOverlappingEnergyPlans($id, $erroringEnergyPlans);
                         });
                     }
 
@@ -603,7 +603,7 @@ class Plan extends Base
         $energy = new Energy();
         $this->asyncDataTransferTo($energy);
         $energy->findDependentEnergyPlans($planId, $dependentPlans)
-            ->then(function () use ($planName, &$dependentPlans) {
+            ->then(function (/* array $result */) use ($planName, &$dependentPlans) {
                 $toPromiseFunctions = [];
                 foreach ($dependentPlans as $erroredPlanId) {
                     $toPromiseFunctions[$erroredPlanId] = tpf(function () use ($erroredPlanId, $planName) {
@@ -1094,16 +1094,31 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Vote(int $country, int $plan, int $vote): void
+    public function Vote(int $country, int $plan, int $vote): ?PromiseInterface
     {
-        $this->getDatabase()->query(
+        $deferred = new Deferred();
+        // todo: convert to createQueryBuilder.
+        $this->getAsyncDatabase()->queryBySQL(
             "UPDATE approval SET approval_vote=? WHERE approval_country_id=? AND approval_plan_id=?",
             array($vote, $country, $plan)
+        )
+        ->then(function (/* Result $result */) use ($plan) {
+            // todo: convert to createQueryBuilder.
+            return $this->getAsyncDatabase()->queryBySQL(
+                "UPDATE plan SET plan_lastupdate=? WHERE plan_id=?",
+                array(microtime(true), $plan)
+            );
+        })
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_lastupdate=? WHERE plan_id=?",
-            array(microtime(true), $plan)
-        );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -2156,6 +2171,7 @@ class Plan extends Base
         $toPromiseFunctions = [];
         foreach ($settings as $setting) {
             $toPromiseFunctions[] = tpf(function () use ($plan_id, $setting) {
+                // todo: convert to ->upsert().
                 return $this->getAsyncDatabase()->queryBySQL(
                     'INSERT INTO plan_restriction_area (
                     plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id,
