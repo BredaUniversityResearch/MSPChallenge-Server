@@ -25,7 +25,7 @@ final class Version20230320211248 extends MSPMigration
     protected function onUp(Schema $schema): void
     {
         // phpcs:ignoreFile Generic.Files.LineLength.TooLong
-        $this->addSql("ALTER TABLE `api_batch` ADD `api_batch_guid` char(36) COLLATE 'utf8mb4_general_ci' NOT NULL AFTER `api_batch_user_id`");
+        $this->addSql("ALTER TABLE `api_batch` ADD `api_batch_guid` char(36) COLLATE 'utf8mb4_general_ci' NULL AFTER `api_batch_user_id`");
         $this->addSql("ALTER TABLE `api_batch` ADD UNIQUE `api_batch_guid` (`api_batch_guid`)");
     }
 
