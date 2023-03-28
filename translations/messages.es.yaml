@@ -1,0 +1,3 @@
+SIGNIN_FAIL: "** ERROR DE ACCESO **"
+MAINT_TOK: "Ha habido un error con tu formulario. Vuelve atr&aacute;s e intenta de nuevo. Recuerda que enviar el formulario refrecando la p&aacute;gina, dar&aacute; error. Si vuelve a ocurrir, por favor contacta con el administrador."
+GEN_BACK: "Volver"

@@ -1,18 +1,28 @@
 <?php
+
+use ServerManager\DB;
+use ServerManager\Redirect;
+use ServerManager\ServerManager;
+use ServerManager\User;
+
 require 'init.php';
 $user = new User();
-$servermanager = ServerManager::getInstance();
+$serverManager = ServerManager::getInstance();
 
 if ($user->isLoggedIn()) {
-    if ($servermanager->freshinstall()) {
+    if ($serverManager->freshInstall()) {
       // new installation, redirect to set up ServerManager database
-        Redirect::to($servermanager->GetServerManagerFolder().'install/install.php');
-    } else {
-      // run any outstanding database migrations
-        $db = DB::getInstance()->dbase_migrate();
-        Redirect::to($servermanager->GetServerManagerFolder().'manager.php');
+        Redirect::to($serverManager->GetServerManagerFolder().'install/install.php');
     }
+  // deprecated migrations...
+//    else {
+//      // run any outstanding database migrations
+//        DB::getInstance()->dbase_migrate();
+//        Redirect::to($serverManager->GetServerManagerFolder().'manager.php');
+//    }
+
+    Redirect::to($serverManager->GetServerManagerFolder().'manager.php');
 } else {
-    Redirect::to($servermanager->GetServerManagerFolder().'login.php');
+    Redirect::to($serverManager->GetServerManagerFolder().'login.php');
 }
 die();

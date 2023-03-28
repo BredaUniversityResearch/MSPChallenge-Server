@@ -106,7 +106,7 @@ class Geometry extends Base
                     return null;
                 }
 
-                return parallel($toPromiseFunctions)
+                parallel($toPromiseFunctions)
                     ->done(
                         function () use ($deferred, $newId) {
                             $deferred->resolve($newId);
@@ -178,7 +178,7 @@ class Geometry extends Base
         })
         ->done(
             function (/* ?Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -245,7 +245,7 @@ class Geometry extends Base
         )
         ->done(
             function (Result $result) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -271,8 +271,8 @@ class Geometry extends Base
         $this->getAsyncDatabase()->query(
             $qb
                 ->update('geometry')
-                ->set('geometry_active', 0)
-                ->set('geometry_deleted', 1)
+                ->set('geometry_active', '0')
+                ->set('geometry_deleted', '1')
                 ->where(
                     $qb->expr()->or(
                         $qb->expr()->eq('geometry_id', $qb->createPositionalParameter($id))
@@ -282,7 +282,7 @@ class Geometry extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -313,7 +313,7 @@ class Geometry extends Base
         ])
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -349,7 +349,7 @@ class Geometry extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);

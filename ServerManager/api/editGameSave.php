@@ -1,11 +1,16 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\GameSave;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $gamesave = new GameSave;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 // first check if the save_id referred to can even be obtained
 $gamesave->id = $_POST["save_id"] ?? "";

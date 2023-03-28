@@ -13,7 +13,6 @@ use Throwable;
 class Update extends Base
 {
     private const ALLOWED = array(
-        "Latest",
         "Meta",
         "Reimport",
         "ImportMeta",
@@ -136,6 +135,7 @@ class Update extends Base
     /**
      * @apiGroup Update
      * @throws Exception
+     * @throws Throwable
      * @api {POST} /update/Reimport Reimport
      * @apiDescription Performs a full reimport of the database with the set filename in $configFilename.
      */
@@ -145,7 +145,7 @@ class Update extends Base
         string $geoserver_url = '',
         string $geoserver_username = '',
         string $geoserver_password = ''
-    ): bool {
+    ): void {
         Log::SetupFileLogger(Log::getRecreateLogPath());
         Log::LogInfo("Reimport -> Starting game session creation process...");
         try {
@@ -164,7 +164,6 @@ class Update extends Base
             $this->ImportScenario();
 
             Log::LogInfo("Reimport -> Created session.");
-            return true;
         } catch (Throwable $e) {
             Log::LogError("Reimport -> Something went wrong.");
             Log::LogError($e->getMessage()." on line ".$e->getLine()." of file ".$e->getFile());
@@ -175,20 +174,23 @@ class Update extends Base
             }
             Log::ClearFileLogger();
 
-            return false;
+            throw $e;
         }
     }
 
+    /**
+     * @throws Throwable
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ReimportAdvanced(
         string $configFilename,
         string $geoserver_url,
         string $geoserver_username,
         string $geoserver_password
-    ): bool {
+    ): void {
         set_time_limit(Config::GetInstance()->GetLongRequestTimeout());
 
-        return $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
+        $this->Reimport($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
     }
 
     /**
@@ -264,7 +266,7 @@ class Update extends Base
     public function EmptyDatabase(): void
     {
         Log::LogInfo("EmptyDatabase -> Starting empty database...");
-        Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
+        $this->getDatabase()->DropSessionDatabase($this->getDatabase()->GetDatabaseName());
             
         Log::LogInfo("EmptyDatabase -> Deleted database.");
     }
@@ -302,7 +304,7 @@ class Update extends Base
         }
         $templocation = $outputDirectory."temp".rand(1, 100).".sql";
         if (copy($dbase_file_path, $templocation)) {
-            $db = Database::GetInstance();
+            $db = $this->getDatabase();
             $db->CreateDatabaseAndSelect();
             $db->ImportMspDatabaseDump($templocation, true);
             unlink($templocation);
@@ -328,7 +330,7 @@ class Update extends Base
         $defaultDatabaseName = "msp";
 
         //Ensure database exists
-        $db = Database::GetInstance();
+        $db = $this->getDatabase();
         $db->CreateDatabaseAndSelect();
         //import the db structure
         $query = file_get_contents(APIHelper::getInstance()->GetCurrentSessionServerApiFolder()."mysql_structure.sql");
@@ -349,6 +351,14 @@ class Update extends Base
         $game->Setupfilename($filename);
         $this->ApplyGameConfig();
 
+        $application = new Application(SymfonyToLegacyHelper::getInstance()->getKernel());
+        $application->setAutoExit(false);
+        $output = new BufferedOutput();
+        $application->run(
+            new StringInput('doctrine:migrations:migrate -vvv -n --em=' . $db->GetDatabaseName()),
+            $output
+        );
+
         Log::LogInfo("RebuildDatabase -> Database rebuilt.");
     }
 
@@ -359,7 +369,7 @@ class Update extends Base
     private function ApplyGameConfig(): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE game SET game_autosave_month_interval = ?",
             array(Config::GetInstance()->GetGameAutosaveInterval())
         );
@@ -374,21 +384,21 @@ class Update extends Base
     {
         Log::LogInfo("ClearPlans -> Cleaning plans ...");
 
-        Database::GetInstance()->query("SET FOREIGN_KEY_CHECKS=0");
-        $todelete = Database::GetInstance()->query("SELECT geometry_id FROM plan_layer
+        $this->getDatabase()->query("SET FOREIGN_KEY_CHECKS=0");
+        $todelete = $this->getDatabase()->query("SELECT geometry_id FROM plan_layer
 				LEFT JOIN geometry ON geometry.geometry_layer_id=plan_layer.plan_layer_layer_id");
 
         foreach ($todelete as $del) {
-            Database::GetInstance()->query("DELETE FROM geometry WHERE geometry_id=?", array($del['geometry_id']));
+            $this->getDatabase()->query("DELETE FROM geometry WHERE geometry_id=?", array($del['geometry_id']));
         }
 
-        Database::GetInstance()->query("TRUNCATE plan_delete");
-        Database::GetInstance()->query("TRUNCATE plan_message");
-        Database::GetInstance()->query("TRUNCATE plan_layer");
-        Database::GetInstance()->query("DELETE FROM layer WHERE layer_original_id IS NOT NULL");
-        Database::GetInstance()->query("TRUNCATE plan");
+        $this->getDatabase()->query("TRUNCATE plan_delete");
+        $this->getDatabase()->query("TRUNCATE plan_message");
+        $this->getDatabase()->query("TRUNCATE plan_layer");
+        $this->getDatabase()->query("DELETE FROM layer WHERE layer_original_id IS NOT NULL");
+        $this->getDatabase()->query("TRUNCATE plan");
 
-        Database::GetInstance()->query("SET FOREIGN_KEY_CHECKS=1");
+        $this->getDatabase()->query("SET FOREIGN_KEY_CHECKS=1");
 
         Log::LogInfo("ClearPlans -> All plans have been deleted.");
     }
@@ -428,22 +438,22 @@ class Update extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function From40beta7To40beta8(): void
     {
-        Database::GetInstance()->query("ALTER TABLE `user`
+        $this->getDatabase()->query("ALTER TABLE `user`
 				ADD `user_name` VARCHAR(45) NULL AFTER `user_id`,
   				ADD `user_loggedoff` TINYINT NOT NULL DEFAULT 0 AFTER `user_country_id`;");
 
-        Database::GetInstance()->query("ALTER TABLE `game_session` 
+        $this->getDatabase()->query("ALTER TABLE `game_session` 
 				CHANGE `game_session_password_admin` `game_session_password_admin` TEXT NOT NULL,
 				CHANGE `game_session_password_player` `game_session_password_player` TEXT NOT NULL;");
 
-        Database::GetInstance()->query("ALTER TABLE `country` 
+        $this->getDatabase()->query("ALTER TABLE `country` 
 				ADD `country_name` VARCHAR(45) NULL AFTER `country_id`;");
 
         $configData = (new Game)->GetGameConfigValues();
         foreach ($configData['meta'] as $layerMeta) {
             if ($layerMeta['layer_name'] == $configData['countries']) {
                 foreach ($layerMeta['layer_type'] as $country) {
-                    Database::GetInstance()->query(
+                    $this->getDatabase()->query(
                         "UPDATE country SET country_name = ? WHERE country_id = ?",
                         array($country['displayName'], $country['value'])
                     );
@@ -511,7 +521,7 @@ class Update extends Base
         $application->setAutoExit(false);
         $output = new BufferedOutput();
         $application->run(
-            new StringInput('doctrine:migrations:migrate -vvv -n --conn=' . Database::GetInstance()->GetDatabaseName()),
+            new StringInput('doctrine:migrations:migrate -vvv -n --em=' . $this->getDatabase()->GetDatabaseName()),
             $output
         );
         return $output->fetch();

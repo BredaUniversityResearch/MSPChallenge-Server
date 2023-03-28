@@ -6033,86 +6033,86 @@
             "ecologyCategories": [
                 {
                     "categoryName": "Biomass",
-                    "categoryColor": "#FFFFFFFF",
-                    "unit": "t\/km2",
+                    "categoryColor": "#4575b4",
+                    "unit": "t/km2",
                     "valueDefinitions": [
                         {
                             "valueName": "Benthic Biomass",
                             "valueColor": "#E3F2FDFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Birds Biomass",
                             "valueColor": "#BBDEFBFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Cetaceans Biomass",
                             "valueColor": "#90CAF9FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Cod Biomass",
                             "valueColor": "#64B5F6FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Flatfish Biomass",
                             "valueColor": "#42A5F5FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Herring Biomass",
                             "valueColor": "#2196F3FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Mackerel Biomass",
                             "valueColor": "#1E88E5FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Rays and Skates Biomass",
                             "valueColor": "#1976D2FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Seals Biomass",
                             "valueColor": "#1565C0FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Sandeel Biomass",
                             "valueColor": "#0D47A1FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Sharks Biomass",
                             "valueColor": "#82B1FFFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Whiting Biomass",
                             "valueColor": "#448AFFFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         }
                     ]
                 },
                 {
                     "categoryName": "Biodiversity",
-                    "categoryColor": "#FFFFFFFF",
+                    "categoryColor": "#5aae61",
                     "unit": "",
                     "valueDefinitions": [
                         {
@@ -6131,38 +6131,38 @@
                 },
                 {
                     "categoryName": "Fishery",
-                    "categoryColor": "#FFFFFFFF",
-                    "unit": "t\/km2",
+                    "categoryColor": "#fdae61",
+                    "unit": "t/km2",
                     "valueDefinitions": [
                         {
                             "valueName": "Demersal Trawl Catch",
                             "valueColor": "#73FFBCFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Nephrops Trawl Catch",
                             "valueColor": "#FFC773FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Scallop Fleet Catch",
                             "valueColor": "#CEFF73FF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         },
                         {
                             "valueName": "Seine Catch",
                             "valueColor": "#73D9FFFF",
-                            "unit": "t\/km2",
+                            "unit": "t/km2",
                             "valueDependentCountry": -1
                         }
                     ]
                 },
                 {
                     "categoryName": "Protection area",
-                    "categoryColor": "#FFFFFFFF",
+                    "categoryColor": "#9970ab",
                     "unit": "km2",
                     "valueDefinitions": [
                         {
@@ -8060,7 +8060,7 @@
                 "layer_green": 1,
                 "layer_tooltip": "Indicative location of submerged cables",
                 "layer_information": "",
-                "layer_media": "wiki://Cables_(non-editable)",
+                "layer_media": "wiki://Telecom_Cables",
                 "layer_text_info": null,
                 "layer_states": [
                     {
@@ -8105,7 +8105,7 @@
                         "capacity": 0,
                         "investmentCost": 0,
                         "availability": -12,
-                        "media": "wiki://ClydeRegion:Energy_Cables"
+                        "media": "wiki://Telecom_Cables"
                     }
                 ],
                 "layer_info_properties": [
@@ -10517,12 +10517,66 @@
                 "layer_special_entity_type": "Default",
                 "layer_depth": 1,
                 "layer_type": [
-                    {
-                        "displayName": "Boating",
+					{
+                        "displayName": "Low",
+                        "approval": "AreaManager",
+                        "value": 0,
+                        "displayPolygon": 1,
+                        "polygonColor": "#1e9ce280",
+                        "polygonPatternName": "5",
+                        "innerGlowEnabled": 0,
+                        "innerGlowRadius": 0,
+                        "innerGlowIterations": 0,
+                        "innerGlowMultiplier": 0,
+                        "innerGlowPixelSize": 0.2,
+                        "displayLines": 1,
+                        "lineColor": "#7AC943FF",
+                        "lineWidth": 1,
+                        "lineIcon": null,
+                        "linePatternType": "Solid",
+                        "displayPoints": 0,
+                        "pointColor": "#7AC943FF",
+                        "pointSize": 1,
+                        "pointSpriteName": "None",
+                        "description": "",
+                        "capacity": 0,
+                        "investmentCost": 0,
+                        "availability": -12,
+                        "media": "wiki://Recreational_Boating_Intensity"
+                    },
+					{
+                        "displayName": "Medium",
                         "approval": "AreaManager",
                         "value": 0,
                         "displayPolygon": 1,
                         "polygonColor": "#6CFF1C80",
+                        "polygonPatternName": "5",
+                        "innerGlowEnabled": 0,
+                        "innerGlowRadius": 0,
+                        "innerGlowIterations": 0,
+                        "innerGlowMultiplier": 0,
+                        "innerGlowPixelSize": 0.2,
+                        "displayLines": 1,
+                        "lineColor": "#7AC943FF",
+                        "lineWidth": 1,
+                        "lineIcon": null,
+                        "linePatternType": "Solid",
+                        "displayPoints": 0,
+                        "pointColor": "#7AC943FF",
+                        "pointSize": 1,
+                        "pointSpriteName": "None",
+                        "description": "",
+                        "capacity": 0,
+                        "investmentCost": 0,
+                        "availability": -12,
+                        "media": "wiki://Recreational_Boating_Intensity"
+                    },
+					{
+                        "displayName": "High",
+                        "approval": "AreaManager",
+                        "value": 0,
+                        "displayPolygon": 1,
+                        "polygonColor": "#df272780",
                         "polygonPatternName": "5",
                         "innerGlowEnabled": 0,
                         "innerGlowRadius": 0,
@@ -18941,7 +18995,7 @@
                         "capacity": 150000000,
                         "investmentCost": 200000,
                         "availability": -12,
-                        "media": "wiki://ClydeRegion:Energy_Cables"
+                        "media": "wiki://Energy_Cables"
                     }
                 ],
                 "layer_info_properties": []
@@ -19202,6 +19256,9 @@
         "expertise_definitions": [],
         "oceanview": null,
         "objectives": [],
+        "edition_name": "Clyde marine region edition",
+        "edition_colour": "#00b8abff",
+        "edition_letter": "C",
         "region": "simcelt",
         "start": 2010,
         "end": 2050,
@@ -19215,9 +19272,9 @@
         "user_region_manager_name": "Minister",
         "user_admin_color": "#8D8D8DFF",
         "user_region_manager_color": "#00FFFFFF",
-        "region_base_url": "https://knowledge.mspchallenge.info\/wiki\/Main_Page",
+        "region_base_url": "https://knowledge.mspchallenge.info/wiki/EEZ",
         "restriction_point_size": 0.125,
-        "wiki_base_url": "https://knowledge.mspchallenge.info\/wiki\/",
+        "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
         "windfarm_data_api_url": null
     }
 }

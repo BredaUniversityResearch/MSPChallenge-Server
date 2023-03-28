@@ -2,30 +2,33 @@
 
 namespace App\Domain\WsServer\Plugins;
 
-use App\Domain\Event\NameAwareEvent;
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use Closure;
 use Drift\DBAL\Result;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use function App\tpf;
 
 class DatabaseMigrationsWsServerPlugin extends Plugin
 {
-    public const EVENT_MIGRATIONS_FINISHED = 'EVENT_MIGRATIONS_FINISHED';
+    public static function getDefaultMinIntervalSec(): float
+    {
+        return 0; // 0 meaning no interval, no repeating
+    }
 
     public function __construct()
     {
-        parent::__construct('migrations', 0);
+        parent::__construct('migrations');
         $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    protected function onCreatePromiseFunction(): ToPromiseFunction
     {
-        return function () {
+        return tpf(function () {
             return $this->getServerManager()->getGameSessionIds()
                 ->then(function (Result $result) {
                     // collect
@@ -41,12 +44,8 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
                     $gameSessionIds = $gameSessionIds->all(); // to raw array
 
                     $this->migrations($gameSessionIds);
-                    $this->dispatch(
-                        new NameAwareEvent(self::EVENT_MIGRATIONS_FINISHED),
-                        self::EVENT_MIGRATIONS_FINISHED
-                    );
                 });
-        };
+        });
     }
 
     /**
@@ -67,7 +66,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
             $application->setAutoExit(false);
             $output = new BufferedOutput();
             $returnCode = $application->run(
-                new StringInput('doctrine:migrations:migrate -vvv -n --conn=' . $dbName),
+                new StringInput('doctrine:migrations:migrate -vvv -n --em=' . $dbName),
                 $output
             );
             if (0 !== $returnCode) {

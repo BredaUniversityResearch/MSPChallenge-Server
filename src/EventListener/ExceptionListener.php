@@ -2,9 +2,12 @@
 
 namespace App\EventListener;
 
-use API;
-use ServerManagerAPIException;
+use ServerManager\API;
+use ServerManager\MSPAuthException;
+use ServerManager\ServerManager;
+use ServerManager\ServerManagerAPIException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 class ExceptionListener
@@ -17,6 +20,14 @@ class ExceptionListener
             $api->setMessage($e->getMessage());
             $payload = $api->prepareReturn();
             $event->setResponse(new JsonResponse($payload));
+            return;
+        }
+        if ($e instanceof MSPAuthException) {
+            $servermanager = ServerManager::getInstance();
+            $event->setResponse(new RedirectResponse(
+                $servermanager->GetMSPAuthBaseURL().'/sso?redirect='.
+                urlencode($servermanager->GetFullSelfAddress().'login.php')
+            ));
         }
     }
 }

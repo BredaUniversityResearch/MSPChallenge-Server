@@ -1,4 +1,7 @@
 <?php
+
+namespace ServerManager;
+
 /*
 UserSpice 5
 An Open Source PHP User Management System
@@ -19,141 +22,193 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\Helper\Config;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\Setting;
+use Exception;
+use Lcobucci\JWT\Encoding\CannotDecodeContent;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\InvalidTokenStructure;
+use Lcobucci\JWT\Token\Parser;
+use Lcobucci\JWT\Token\UnsupportedHeaderFound;
+use Lcobucci\JWT\UnencryptedToken;
 
-class User extends Base {
-	private $_db, $_data, $_sessionName, $_isLoggedIn, $_cookieName,$_isNewAccount;
-	public $tableName = 'users';
+class User extends Base
+{
+    private ?DB $db = null;
+    private $data;
+    private $sessionName;
+    private bool $isLoggedIn = false;
+    public string $tableName = 'users';
 
+    public function __construct($user = null)
+    {
+        $this->db = DB::getInstance();
+        $this->sessionName = Config::get('session/session_name');
+        if (!$user) {
+            if (Session::exists($this->sessionName)) {
+                $user = Session::get($this->sessionName);
+                if ($this->find($user)) {
+                    $this->isLoggedIn = true;
+                }
+            }
+        } else {
+            $this->find($user);
+        }
+    }
 
+    public function isAuthorised(): bool
+    {
+        if (!$this->exists()) {
+            return false;
+        }
 
-	public function __construct($user = null){
-		$this->_db = DB::getInstance();
-		$this->_sessionName = Config::get('session/session_name');
-		$this->_cookieName = Config::get('remember/cookie_name');
+        try {
+            $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+            $serverUUID = $em->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid']);
+            if (empty($serverUUID)) {
+                return false;
+            }
+            $response = collect(
+                collect($this->getCallAuthoriser(
+                    sprintf(
+                        'servers/%s/server_users',
+                        $serverUUID->getValue()
+                    )
+                ))->pull('hydra:member')
+            )->filter(function ($value) {
+                return $value['user']['username'] === $this->data()->username;
+            });
+            return !$response->isEmpty();
+        } catch (Exception $e) {
+            return false;
+        }
+    }
 
+    public function find($user = null, $loginHandler = null): bool
+    {
+        if ($user) {
+            $field = $loginHandler!==null ? 'username' : (
+                is_numeric($user) ? 'id' : 'username'
+            );
+            $data = $this->db->get('users', array($field, '=', $user));
+            if ($data->count()) {
+                $this->data = $data->first();
+                return true;
+            }
+        }
+        return false;
+    }
 
-		if (!$user) {
-			if (Session::exists($this->_sessionName)) {
-				$user = Session::get($this->_sessionName);
+    public function exists(): bool
+    {
+        return !empty($this->data);
+    }
 
-				if ($this->find($user)) {
-					$this->_isLoggedIn = true;
-				} else {
-					//process Logout
-				}
-			}
-		} else {
-			$this->find($user);
-		}
-	}
+    public function data()
+    {
+        return $this->data;
+    }
 
-	public function isAuthorised(){
-		if ($this->exists()) {
-			$servermanager = ServerManager::getInstance();
-			$params = array("jwt" => Session::get("currentToken"), "server_id" => $servermanager->GetServerID(), "audience" => $servermanager->GetBareHost());
-			$authorize = Base::callAuthoriser("authjwt.php", $params);
-			if (isset($authorize["success"])) {
-				if ($authorize["success"]) {
-					return true;
-				}
-				else {
-					if (isset($authorize["error"])) {
-						if ($authorize["error"] == 503) {
-							die('MSP Challenge Authoriser cannot be reached. Are you sure you are connected to the internet?');
-						}
-					}
-				}
-			}
-		}
-		return false;
-	}
+    public function isLoggedIn(): bool
+    {
+        return $this->isLoggedIn;
+    }
 
-	public function find($user = null,$loginHandler = null){
+    public function hasToBeLoggedIn()
+    {
+        if ($this->isLoggedIn) {
+            return;
+        }
+        if (isset($_POST['session_id']) && isset($_POST['token'])) {
+            try {
+                $gamesession = new GameSession;
+                $gamesession->id = $_POST['session_id'];
+                $gamesession->get();
+                if ($gamesession->api_access_token == $_POST['token']) {
+                    return;
+                }
+                $server_call = self::callServer(
+                    "Security/checkaccess",
+                    array(
+                        "scope" => "ServerManager",
+                    ),
+                    $_POST['session_id'],
+                    $_POST['token']
+                );
+                if ($server_call["success"] && $server_call["payload"]["status"] == "UpForRenewal") {
+                    return;
+                }
+            } catch (Exception $e) {
+                $this->forbidden();
+            }
+        }
+        $this->forbidden();
+    }
 
-		if ($user) {
-				if($loginHandler!==null) {
-					if(!filter_var($user, FILTER_VALIDATE_EMAIL) === false){
-						$field = 'email';
-					}else{
-						$field = 'username';
-					}
-				}
-				else {
-				if(is_numeric($user)){
-					$field = 'id';
-				}elseif(!filter_var($user, FILTER_VALIDATE_EMAIL) === false){
-					$field = 'email';
-				}else{
-					$field = 'username';
-				}
-			}
-			$data = $this->_db->get('users', array($field, '=', $user));
+    public function forbidden(): never
+    {
+        http_response_code(404);
+        die();
+    }
 
-			if ($data->count()) {
-				$this->_data = $data->first();
-				if($this->data()->account_id == 0 && $this->data()->account_owner == 1){
-					$this->_data->account_id = $this->_data->id;
-				}
-				return true;
-			}
-		}
-		return false;
-	}
+    public function logout()
+    {
+        session_unset();
+        session_destroy();
+    }
 
-	public function exists(){
-		return (!empty($this->_data)) ? true : false;
-	}
+    public function importTokenFields(array $tokenFields): ?int
+    {
+        $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        // @note(MH)
+        // vendor/lexik/jwt-authentication-bundle/Encoder/LcobucciJWTEncoder.php says:
+        //   "Json Web Token encoder/decoder based on the lcobucci/jwt library."
+        // so instead of using lexik's, we directly use the smaller lcobucci/jwt library
+        // see: https://lcobucci-jwt.readthedocs.io/en/latest/parsing-tokens/
+        $parser = new Parser(new JoseEncoder());
+        try {
+            /** @var UnencryptedToken $unencryptedToken */
+            $unencryptedToken = $parser->parse($tokenFields['token']);
+        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
+            return null;
+        }
+        $username = $unencryptedToken->claims()->get('username');
+        $userID = $unencryptedToken->claims()->get('id');
 
-	public function data(){
-		return $this->_data;
-	}
+        $fields = array_merge([
+            'username' => $username,
+            'account_id' => $userID
+        ], $tokenFields);
+        if ($this->find($username, 'username')) {
+            $this->db->update('users', $this->data()->id, $fields);
+            return $this->data()->id;
+        }
+        $this->db->insert('users', $fields);
+        $userId = $this->db->lastId();
+        if ($this->find($userId)) {
+            return $userId;
+        }
+        return null;
+    }
 
-	public function isLoggedIn(){
-		return $this->_isLoggedIn;
-	}
-
-	public function notLoggedInRedirect($location){
-		if ($this->_isLoggedIn){
-			return true;
-		}
-		else {
-			Redirect::to($location);
-		}
-	}
-
-	public function hastobeLoggedIn() {
-		if ($this->_isLoggedIn) return;
-		if (isset($_POST['session_id']) && isset($_POST['token'])) {
-			try {
-				$gamesession = new GameSession;
-				$gamesession->id = $_POST['session_id'];
-				$gamesession->get();
-				if ($gamesession->api_access_token == $_POST['token']) return;
-				$server_call = self::callServer(
-					"Security/checkaccess", 
-					array(
-						"scope" => "ServerManager",
-					),
-					$_POST['session_id'],
-					$_POST['token']
-				);
-				if ($server_call["success"] && $server_call["payload"]["status"] == "UpForRenewal") return; 
-			} catch (Exception $e) {
-				$this->forbidden();
-			}
-		}
-		$this->forbidden();
-	}
-
-	public function forbidden() {
-		http_response_code(404);
-		die();
-	}
-
-	public function logout(){
-		session_unset();
-		session_destroy();
-	}
-
-
+    public function importRefreshToken(): void
+    {
+        if (!$this->exists()) {
+            return;
+        }
+        $response = $this->getCallAuthoriser('refresh_tokens?page=1');
+        if (false === $refreshTokenData = current($response['hydra:member'] ?? [])) {
+            return;
+        }
+        // remove empty values
+        $refreshTokenData = array_filter($refreshTokenData);
+        if (null === $refreshToken = ($refreshTokenData['refreshToken'] ?? null)) {
+            return;
+        }
+        $refreshTokenExpiration = $refreshTokenData['valid'] ?? null;
+        $this->db->update('users', $this->data()->id, [
+            'refresh_token' => $refreshToken,
+            'refresh_token_expiration' => $refreshTokenExpiration
+        ]);
+    }
 }

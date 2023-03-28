@@ -1,4 +1,5 @@
-<?php 
+<?php
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 // make sure this file only performs SQL statements on the database
 // use just use the $sql var
 
@@ -10,5 +11,3 @@ defined('APP_RAN') or die();
 
 $sql = "ALTER TABLE `game_saves` CHANGE `game_config_filename` `game_config_files_filename` VARCHAR(45) NOT NULL, 
                                  ADD `game_config_versions_region` VARCHAR(45) NOT NULL;";
-
-?>

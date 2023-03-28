@@ -2,27 +2,31 @@
 
 namespace App\Domain\WsServer\Plugins\Tick;
 
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\WsServer\Plugins\Plugin;
-use Closure;
 use Drift\DBAL\Result;
+use function App\tpf;
 
 class TicksHandlerWsServerPlugin extends Plugin
 {
-    private const TICKS_HANDLER_MIN_INTERVAL_SEC = 1;
-
     /**
      * @var TickWsServerPlugin[]
      */
     private array $tickPlugins = [];
 
-    public function __construct()
+    public static function getDefaultMinIntervalSec(): float
     {
-        parent::__construct('ticksHandler', self::TICKS_HANDLER_MIN_INTERVAL_SEC);
+        return 1;
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    public function __construct(?float $minIntervalSec = null)
     {
-        return function () {
+        parent::__construct('ticks handler', $minIntervalSec);
+    }
+
+    protected function onCreatePromiseFunction(): ToPromiseFunction
+    {
+        return tpf(function () {
             return $this->getServerManager()->getGameSessionIds(true)
                 ->then(function (Result $result) {
                     $gameSessionIds = collect($result->fetchAllRows() ?? [])
@@ -49,6 +53,6 @@ class TicksHandlerWsServerPlugin extends Plugin
                         $this->tickPlugins[$gameSessionId] = $tickPlugin;
                     }
                 });
-        };
+        });
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
+use App\Domain\API\v1\PolicyType;
 use App\Domain\Common\CommonBase;
 use Drift\DBAL\Result;
 use Exception;
@@ -205,9 +206,9 @@ class PlanLatest extends CommonBase
                     unset($d);
                     return parallel($toPromiseFunctions)
                         ->then(function (array $results) use (&$plans) {
-                            /** @var Result[] $results */
                             foreach ($plans as $pKey => &$d) {
                                 foreach ($d['grids'] as $gKey => &$g) {
+                                    /** @var Result[] $results */
                                     $g['energy'] = $results['energy'.$pKey.'-'.$gKey]->fetchAllRows();
                                     $g['sources'] = $results['sources'.$pKey.'-'.$gKey]->fetchAllRows();
                                     $g['sockets'] = $results['sockets'.$pKey.'-'.$gKey]->fetchAllRows();
@@ -215,11 +216,72 @@ class PlanLatest extends CommonBase
                                 unset($g);
                             }
                             unset($d);
+                            $this->formatPlans($plans);
                             return $plans;
                         });
                 });
         });
         return $this->isAsync() ? $promise : await($promise);
+    }
+
+    /**
+     * new format since new UI style (2022-11-24), see MSP-4142
+     *
+     * @param array $plans
+     * @return void
+     */
+    private function formatPlans(array &$plans): void
+    {
+        $plans = collect($plans)
+            ->map(function ($plan) {
+                $type = $plan['type'];
+                unset($plan['type']);
+
+                // PolicyUpdateEnergyPlan
+                if (($type & PolicyType::ENERGY) === PolicyType::ENERGY) {
+                    $policy['policy_type'] = 'energy';
+                    $policy['alters_energy_distribution'] = $plan['alters_energy_distribution'];
+                    if (!empty($plan['grids'])) {
+                        $policy['grids'] = $plan['grids'];
+                    }
+                    if (!empty($plan['deleted_grids'])) {
+                        $policy['deleted_grids'] = $plan['deleted_grids'];
+                    }
+                    if (!empty($plan['energy_error'])) {
+                        $policy['energy_error'] = $plan['energy_error'];
+                    }
+                    $plan['policies'][] = $policy;
+                }
+                unset(
+                    $policy,
+                    $plan['alters_energy_distribution'],
+                    $plan['grids'],
+                    $plan['deleted_grids'],
+                    $plan['energy_error']
+                );
+
+                // PolicyUpdateFishingPlan
+                if (($type & PolicyType::FISHING) === PolicyType::FISHING) {
+                    $policy['policy_type'] = 'fishing';
+                    if (!empty($plan['fishing'])) {
+                        $policy['fishing'] = $plan['fishing'];
+                    }
+                    $plan['policies'][] = $policy;
+                }
+                unset($policy, $plan['fishing']);
+
+                // PolicyUpdateShippingPlan
+                if (($type & PolicyType::SHIPPING) === PolicyType::SHIPPING) {
+                    $policy['policy_type'] = 'shipping';
+                    if (!empty($plan['restriction_settings'])) {
+                        $policy['restriction_settings'] = $plan['restriction_settings'];
+                    }
+                    $plan['policies'][] = $policy;
+                }
+                unset($policy, $plan['restriction_settings']);
+                return $plan;
+            })
+            ->all();
     }
 
     /**

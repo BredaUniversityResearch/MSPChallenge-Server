@@ -15,7 +15,6 @@ class Warning extends Base
 {
     private const ALLOWED = array(
         "Post",
-        "Update",
         "SetShippingIssues"
     );
     
@@ -26,28 +25,25 @@ class Warning extends Base
 
     private function postHandleRemovals(array $removed): PromiseInterface
     {
+        $removed = filter_var_array($removed, FILTER_VALIDATE_INT);
         if (empty($removed)) {
             return resolveOnFutureTick(new Deferred())->promise();
         }
-
-        // $removed can be simplified to only hold the issue_database_id,
-        //   also key on issue_database_id, removing duplicates
-        $removed = collect($removed)
-            ->keyBy('issue_database_id')
-            ->keys()
-            ->all();
 
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
             $qb
                 ->update('warning')
-                ->set('warning_active', 0)
+                ->set('warning_active', '0')
                 ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
                 ->where($qb->expr()->in('warning_id', $removed))
         );
     }
 
-    private function postHandleAddition(array $addedIssue): PromiseInterface
+    /**
+     * @throws Exception
+     */
+    private function postHandleAddition(int $planId, int $planLayerId, array $addedIssue): PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
@@ -62,11 +58,11 @@ class Warning extends Base
                 ->andWhere('warning_source_plan_id = ?')
                 ->andWhere('warning_restriction_id = ?')
                 ->setParameters([
-                    $addedIssue['plan_layer_id'], $addedIssue['type'], $addedIssue['x'], $addedIssue['y'],
-                    $addedIssue['source_plan_id'], $addedIssue['restriction_id']
+                    $planLayerId, $addedIssue['type'], $addedIssue['x'], $addedIssue['y'],
+                    $planId, $addedIssue['restriction_id']
                 ])
         )
-        ->then(function (Result $result) use ($addedIssue) {
+        ->then(function (Result $result) use ($planId, $planLayerId, $addedIssue) {
             $existingIssues = $result->fetchAllRows();
             if (empty($existingIssues)) {
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -76,29 +72,31 @@ class Warning extends Base
                         ->values([
                             'warning_last_update' => $qb->createPositionalParameter(microtime(true)),
                             'warning_active' => 1,
-                            'warning_layer_id' => $qb->createPositionalParameter($addedIssue['plan_layer_id']),
+                            'warning_layer_id' => $qb->createPositionalParameter($planLayerId),
                             'warning_issue_type' => $qb->createPositionalParameter($addedIssue['type']),
                             'warning_x' => $qb->createPositionalParameter($addedIssue['x']),
                             'warning_y' => $qb->createPositionalParameter($addedIssue['y']),
-                            'warning_source_plan_id' => $qb->createPositionalParameter(
-                                $addedIssue['source_plan_id']
-                            ),
+                            'warning_source_plan_id' => $qb->createPositionalParameter($planId),
                             'warning_restriction_id' => $addedIssue['restriction_id']
                         ])
-                );
+                )
+                ->then(function (Result $result) use ($addedIssue) {
+                    return $addedIssue;
+                });
             }
 
             $existingIssue = current($existingIssues);
-            $toPromiseFunctions[$existingIssue['warning_id']] = tpf(function () use ($existingIssue) {
+            $warningIdUpdated = $existingIssue['warning_id'];
+            $toPromiseFunctions[$warningIdUpdated] = tpf(function () use ($warningIdUpdated) {
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $this->getAsyncDatabase()->query(
                     $qb
                         ->update('warning')
                         ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
-                        ->set('warning_active', 1)
+                        ->set('warning_active', '1')
                         ->where($qb->expr()->eq(
                             'warning_id',
-                            $qb->createPositionalParameter($existingIssue['warning_id'])
+                            $qb->createPositionalParameter($warningIdUpdated)
                         ))
                 );
             });
@@ -113,7 +111,7 @@ class Warning extends Base
                         $qb
                             ->update('warning')
                             ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
-                            ->set('warning_active', 0)
+                            ->set('warning_active', '0')
                             ->where($qb->expr()->eq(
                                 'warning_id',
                                 $qb->createPositionalParameter($existingIssue['warning_id'])
@@ -121,16 +119,24 @@ class Warning extends Base
                     );
                 });
             }
-            return parallel($toPromiseFunctions);
+            // todo: we might not need to await the result of the updates...and already return the $warningIdUpdated ?
+            //   so like this:
+            //     parallel($toPromiseFunctions); // to execute them
+            //     return $warningIdUpdated; // but not awaiting the results, notice the lack of "->then(...)"
+            //   but might have impact on the "latest" response data, so for safety, we just wait for them to finish
+            return parallel($toPromiseFunctions)
+                ->then(function (/*array $results*/) use ($addedIssue) {
+                    return $addedIssue;
+                });
         });
     }
 
-    private function postHandleAdditions(array $added): PromiseInterface
+    private function postHandleAdditions(int $planId, int $planLayerId, array $added): PromiseInterface
     {
         $toPromiseFunctions = [];
         foreach ($added as $addedIssue) {
-            $toPromiseFunctions[] = tpf(function () use ($addedIssue) {
-                return $this->postHandleAddition($addedIssue);
+            $toPromiseFunctions[] = tpf(function () use ($planId, $planLayerId, $addedIssue) {
+                return $this->postHandleAddition($planId, $planLayerId, $addedIssue);
             });
         }
         return parallel($toPromiseFunctions);
@@ -140,24 +146,59 @@ class Warning extends Base
      * @apiGroup Warning
      * @throws Exception
      * @api {POST} /warning/post Post
-     * @apiParam {added} Json array of IssueObjects that are added.
-     * @apiParam {removed} Json array of IssueObjects that are removed.
+     * @apiParam {int} plan plan id
+     * @apiParam {int} planlayer_id id of the plan layer
+     * @apiParam {array} added Json array of IssueObjects that are added.
+     * @apiParam {arrat} removed Json array of IssueObjects that are removed.
      * @apiDescription Add or update a warning message on the server
+     * @noinspection SpellCheckingInspection
+     * @return array{
+     *   array{
+     *     issue_database_id: int, type: string, active: boolean, x: float, y: float, restriction_id: int
+     *   }
+     * }|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Post(array $added, array $removed): ?PromiseInterface
+    public function Post(int $plan, int $planlayer_id, array $added, array $removed = []): array|PromiseInterface
     {
         $deferred = new Deferred();
-        $toPromiseFunctions[] = tpf(function () use ($added) {
-            return $this->postHandleAdditions($added);
+        $toPromiseFunctions[] = tpf(function () use ($plan, $planlayer_id, $added) {
+            return $this->postHandleAdditions($plan, $planlayer_id, $added);
         });
-        $toPromiseFunctions[] = tpf(function () use ($removed) {
-            return $this->postHandleRemovals($removed);
-        });
+        if (!empty($removed)) {
+            $toPromiseFunctions[] = tpf(function () use ($removed) {
+                return $this->postHandleRemovals($removed);
+            });
+        }
         parallel($toPromiseFunctions)
             ->done(
-                function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // return void, we do not care about the result
+                function (/* array $results */) use ($deferred, $planlayer_id) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    $this->getAsyncDatabase()->query(
+                        $qb
+                            ->select(
+                                'warning_id as issue_database_id',
+                                'warning_issue_type as type',
+                                'warning_active as active',
+                                'warning_restriction_id as restriction_id',
+                                'warning_x as x',
+                                'warning_y as y'
+                            )
+                            ->from('warning')
+                            ->where('warning_active = 1')
+                            ->andWhere(
+                                $qb->expr()->eq('warning_layer_id', $qb->createPositionalParameter($planlayer_id))
+                            )
+                    )
+                    ->done(function (Result $result) use ($deferred) {
+                        $deferred->resolve(
+                            collect($result->fetchAllRows() ?: [])
+                                ->map(function ($issue) {
+                                    $issue['active'] = $issue['active'] === '1';
+                                    return $issue;
+                                })->all()
+                        );
+                    });
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -171,12 +212,22 @@ class Warning extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function RemoveAllWarningsForLayer(int $layerId): void
+    public function RemoveAllWarningsForLayer(int $layerId, bool $hardDelete = false): ?PromiseInterface
     {
-        Database::GetInstance()->query(
-            "UPDATE warning SET warning_active = 0, warning_last_update = ? WHERE warning_source_plan_id = ?",
-            array(microtime(true), $layerId)
-        );
+        $promise = $this->getAsyncDatabase()->delete('warning', ['warning_source_plan_id' => $layerId])
+            ->then(function (/* Result $result */) use ($layerId) {
+                return $this->getAsyncDatabase()->update(
+                    'warning',
+                    [
+                        'warning_source_plan_id' => $layerId
+                    ],
+                    [
+                        'warning_active' => 0,
+                        'warning_last_update' => microtime(true)
+                    ]
+                );
+            });
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -189,7 +240,7 @@ class Warning extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetShippingIssues(string $issues): void
     {
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "
             UPDATE shipping_warning SET shipping_warning_active = 0, shipping_warning_lastupdate = ?
             WHERE shipping_warning_active = 1
@@ -199,7 +250,7 @@ class Warning extends Base
 
         $newIssues = json_decode($issues, true);
         foreach ($newIssues as $issue) {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "
                 INSERT INTO shipping_warning (
                     shipping_warning_lastupdate, shipping_warning_source_geometry_persistent_id,

@@ -92,6 +92,7 @@ symfony.lock
 
 # linter cache
 .php-cs-fixer.cache
+.phpcs-cache
 
 # skip adminer/
 /public/adminer/
@@ -99,3 +100,5 @@ symfony.lock
 # github hooks lock file
 cghooks.lock
 
+# local PHPStan configuration
+phpstan.neon

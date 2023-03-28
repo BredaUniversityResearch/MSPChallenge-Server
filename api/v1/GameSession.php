@@ -2,8 +2,12 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\GameList;
+use App\Entity\ServerManager\GameSave;
 use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;
@@ -12,7 +16,9 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use ReflectionClass;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Throwable;
 use ZipArchive;
 use function App\resolveOnFutureTick;
 use function App\await;
@@ -150,7 +156,7 @@ class GameSession extends Base
 
         $result = [];
 
-        $databaseList = Database::GetInstance()->query("SHOW DATABASES LIKE '".$sessionDatabasePattern."'");
+        $databaseList = $this->getDatabase()->query("SHOW DATABASES LIKE '".$sessionDatabasePattern."'");
         foreach ($databaseList as $r) {
             $databaseName = reset($r); //Get the first entry from the array.
             $result[] = intval(substr($databaseName, strlen($dbConfig["multisession_database_prefix"])));
@@ -189,11 +195,11 @@ class GameSession extends Base
         $sessionId = $game_id;
         
         if ($this->DoesSessionExist($sessionId)) {
-            if (empty($allow_recreate) || $allow_recreate == false) {
+            if (empty($allow_recreate)) {
                 throw new Exception("Session already exists.");
             } else {
-                Database::GetInstance()->SwitchToSessionDatabase($sessionId);
-                Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
+                $this->getDatabase()->SwitchToSessionDatabase($sessionId);
+                $this->getDatabase()->DropSessionDatabase($this->getDatabase()->GetDatabaseName());
             }
         }
 
@@ -276,12 +282,17 @@ class GameSession extends Base
         // get the entire session database in order - bare minimum the database is created and config file is put on
         //  its designated spot
         $update = new Update();
-        $result = $update->ReimportAdvanced(
-            $config_file_path,
-            $geoserver_url,
-            $geoserver_username,
-            $geoserver_password
-        );
+        $e = null;
+        try {
+            $update->ReimportAdvanced(
+                $config_file_path,
+                $geoserver_url,
+                $geoserver_username,
+                $geoserver_password
+            );
+        } catch (Throwable $e) {
+            $e = new Exception('Recreate failed', 0, $e);
+        }
 
         // get ready for an optional callback
         $postValues = (new Game())->GetGameDetails();
@@ -290,16 +301,16 @@ class GameSession extends Base
         $postValues["token"] = $token; // to pass ServerManager security
         $postValues["api_access_token"] = $token; // to store in ServerManager
 
-        if (!$result) {
+        if (null !== $e) {
             if (!empty($response_address)) {
-                $postValues["session_state"] = "failed";
-                $this->CallBack($response_address, $postValues);
+                $postValues["session_state"] = new GameSessionStateValue('failed');
+                $this->updateServerManagerGameList($postValues);
             }
-            throw new Exception("Recreate failed");
+            throw $e;
         }
 
         // get the watchdog and end-user log-on in order
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "
             INSERT INTO game_session (
                 game_session_watchdog_address, game_session_watchdog_token, game_session_password_admin,
@@ -320,9 +331,51 @@ class GameSession extends Base
         };
 
         if (!empty($response_address)) {
-            $postValues["session_state"] = $watchdogSuccess == true ? "healthy" : "failed";
-            $this->CallBack($response_address, $postValues);
+            $postValues["session_state"] = $watchdogSuccess ?
+                new GameSessionStateValue('healthy') : new GameSessionStateValue('failed');
+            $this->updateServerManagerGameList($postValues);
         }
+    }
+
+    private function updateServerManagerGameList($postValues): void
+    {
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $gameSession = $manager->getRepository(GameList::class)->findOneBy(['id' => $postValues['session_id']]);
+        if (isset($postValues['game_start_year'])) {
+            $gameSession->setGameStartYear((int) $postValues['game_start_year']);
+        }
+        if (isset($postValues['game_end_month'])) {
+            $gameSession->setGameEndMonth((int) $postValues['game_end_month']);
+        }
+        if (isset($postValues['game_current_month'])) {
+            $gameSession->setGameCurrentMonth((int) $postValues['game_current_month']);
+        }
+        if (isset($postValues['game_state'])) {
+            if (!$postValues['game_state'] instanceof GameStateValue) {
+                $postValues['game_state'] = new GameStateValue($postValues['game_state']);
+            }
+            $gameSession->setGameState($postValues['game_state']);
+        }
+        if (isset($postValues['players_past_hour'])) {
+            $gameSession->setPlayersPastHour((int) $postValues['players_past_hour']);
+        }
+        if (isset($postValues['players_active'])) {
+            $gameSession->setPlayersActive((int) $postValues['players_active']);
+        }
+        if (isset($postValues['game_running_til_time'])) {
+            $gameSession->setGameRunningTilTime((string) $postValues['game_running_til_time']);
+        }
+        if (isset($postValues['session_state'])) {
+            if (!$postValues['session_state'] instanceof GameSessionStateValue) {
+                $postValues['session_state'] = new GameSessionStateValue($postValues['session_state']);
+            }
+            $gameSession->setSessionState($postValues['session_state']);
+        }
+        if (isset($postValues['token'])) {
+            $gameSession->setApiAccessToken((string) $postValues['token']);
+        }
+        $manager->persist($gameSession);
+        $manager->flush();
     }
 
     /**
@@ -335,7 +388,7 @@ class GameSession extends Base
             throw new Exception("Watchdog address cannot be empty.");
         }
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT();",
             array($watchdog_address)
         );
@@ -387,13 +440,14 @@ class GameSession extends Base
         
         if (!empty($zippath)) {
             // ok, delete everything!
-            $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
+            $db = $this->getDatabase();
+            $gameData = $db->query("SELECT game_configfile FROM game");
             if (count($gameData) > 0) {
                 $configFilePath = self::getConfigDirectory().$gameData[0]['game_configfile'];
                 unlink($configFilePath);
             }
-            
-            Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
+
+            $db->DropSessionDatabase($db->GetDatabaseName());
             
             self::RemoveDirectory(Store::GetRasterStoreFolder($this->getGameSessionId()));
         }
@@ -438,13 +492,14 @@ class GameSession extends Base
                 true
             );
         } elseif ($type == "layers") {
+            $post = array(
+                "save_id" => $save_id, "response_url" => $response_url, "preferredfolder" => $preferredfolder,
+                "preferredname" => $preferredname
+            );
             $this->LocalApiRequest(
                 "GameSession/CreateGameSessionLayersZip",
                 $sessionId,
-                array(
-                    "save_id" => $save_id, "response_url" => $response_url, "preferredfolder" => $preferredfolder,
-                    "preferredname" => $preferredname
-                ),
+                $post,
                 true
             );
         } else {
@@ -477,10 +532,10 @@ class GameSession extends Base
 
         Store::EnsureFolderExists($preferredfolder);
         
-        Database::GetInstance($this->getGameSessionId())->createMspDatabaseDump($sqlDumpPath, true);
+        $this->getDatabase()->createMspDatabaseDump($sqlDumpPath, true);
     
         $configFilePath = null;
-        $gameData = Database::GetInstance()->query("SELECT game_configfile FROM game");
+        $gameData = $this->getDatabase()->query("SELECT game_configfile FROM game");
         if (count($gameData) > 0) {
             $configFilePath = self::getConfigDirectory().$gameData[0]['game_configfile'];
         }
@@ -570,7 +625,6 @@ class GameSession extends Base
             }
         }
         $zip->close();
-
         // callback if requested
         if (!empty($response_url)) {
             $token = (new Security())->getServerManagerToken();
@@ -590,12 +644,8 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetUserAccess(string $password_admin, string $password_player): void
     {
-        /**
-*
-         *
- * @noinspection SqlWithoutWhere
-*/
-        Database::GetInstance()->query(
+        // @noinspection SqlWithoutWhere
+        $this->getDatabase()->query(
             "UPDATE game_session SET game_session_password_admin = ?, game_session_password_player = ?;",
             array($password_admin, $password_player)
         );
@@ -609,7 +659,7 @@ class GameSession extends Base
     {
         $adminHasPassword = true;
         $playerHasPassword = true;
-        $passwordData = Database::GetInstance()->query(
+        $passwordData = $this->getDatabase()->query(
             "SELECT game_session_password_admin, game_session_password_player FROM game_session"
         );
         if (count($passwordData) > 0) {
@@ -675,7 +725,7 @@ class GameSession extends Base
             ],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
-        
+
         $requestHeader = apache_request_headers();
         $headers = array();
         if (isset($requestHeader["MSPAPIToken"])) {
@@ -699,11 +749,12 @@ class GameSession extends Base
     ): void {
         $sessionId = $game_id;
         if ($this->DoesSessionExist($sessionId)) {
-            if (empty($allow_recreate) || $allow_recreate == false) {
+            if (empty($allow_recreate)) {
                 throw new Exception("Session already exists.");
             } else {
-                Database::GetInstance()->SwitchToSessionDatabase($sessionId);
-                Database::GetInstance()->DropSessionDatabase(Database::GetInstance()->GetDatabaseName());
+                $db = $this->getDatabase();
+                $db->SwitchToSessionDatabase($sessionId);
+                $db->DropSessionDatabase($db->GetDatabaseName());
             }
         }
         if (!file_exists($save_path)) {
@@ -769,7 +820,7 @@ class GameSession extends Base
         if (!$result) {
             if (!empty($response_address)) {
                 $postValues["session_state"] = "failed";
-                $this->CallBack($response_address, $postValues);
+                $this->updateServerManagerGameList($postValues);
             }
             throw new Exception("Reload of save failed");
         }
@@ -782,7 +833,7 @@ class GameSession extends Base
         
         if (!empty($response_address)) {
             $postValues["session_state"] = "healthy";
-            $this->CallBack($response_address, $postValues);
+            $this->updateServerManagerGameList($postValues);
         }
     }
 

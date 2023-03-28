@@ -28,9 +28,21 @@ services:
     App\Domain\WsServer\WsServer:
 
     App\Domain\API\APIHelper:
-        arguments:
-            $projectDir: '%kernel.project_dir%'
 
     App\EventListener\ExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+    App\Domain\WsServer\Plugins\PluginHelper:
+        arguments:
+            $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
+
+when@dev:
+    services:
+        # make classes in src/DataFixtures available to be used as services
+        # and have a tag that allows actions to type-hint services
+        App\DataFixtures\:
+            resource: '../fixtures/'
+            tags:
+                - 'doctrine.fixture.orm'
+                - 'kernel.event_subscriber'

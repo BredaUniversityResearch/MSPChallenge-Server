@@ -21,7 +21,7 @@ class Security extends Base
     const TOKEN_LIFETIME_INFINITE = -1;
     const TOKEN_DELETE_AFTER_TIME = self::DEFAULT_TOKEN_LIFETIME_SECONDS + 30 * 60;
 
-    private const DISABLE_SECURITY_CHECK = false;
+    private static bool $debugSecurityCheckEnabled = true;
 
     private const ALLOWED = array(
         ["RequestToken", Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN],
@@ -223,7 +223,7 @@ class Security extends Base
      */
     private function getTokenDetails(string $tokenValue): ?array
     {
-        $details = Database::GetInstance($this->getGameSessionId())->query(
+        $details = $this->getDatabase()->query(
             "SELECT api_token_scope, UNIX_TIMESTAMP(api_token_valid_until) as expiry_time,
             UNIX_TIMESTAMP(api_token_valid_until) - UNIX_TIMESTAMP(NOW()) as valid_time_remaining
             FROM api_token WHERE api_token_token = ?
@@ -253,7 +253,7 @@ class Security extends Base
         int &$tokenValidTimeRemaining = null,
         ?string $token = null
     ): bool {
-        if (self::DISABLE_SECURITY_CHECK) {
+        if (false === self::$debugSecurityCheckEnabled) {
             $tokenValidTimeRemaining = self::DEFAULT_TOKEN_LIFETIME_SECONDS;
             return true;
         }

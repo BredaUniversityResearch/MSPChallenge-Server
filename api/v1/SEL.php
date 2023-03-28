@@ -79,7 +79,7 @@ class SEL extends Base
             $config = $game->GetGameConfigValues();
         }
 
-        $data = Database::GetInstance()->query(
+        $data = $this->getDatabase()->query(
             "
             SELECT geometry.geometry_geometry as geometry FROM geometry
 			LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
@@ -113,12 +113,12 @@ class SEL extends Base
     }
 
     /**
-     * @param int|float $input
-     * @param int|float $cellSize
-     * @return float|int
+     * @param float|int $input
+     * @param float|int $cellSize
+     * @return float
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function CeilToCellSize($input, $cellSize)/*: int|float */ // <-- for php 8
+    private function CeilToCellSize(float|int $input, float|int $cellSize): float
     {
         return ceil($input / $cellSize) * $cellSize;
     }
@@ -168,13 +168,13 @@ class SEL extends Base
     public function GetCountryBorderGeometry(): array
     {
         $loadedConfig = $this->GetSELConfigInternal();
-        $encodedLayerTypes = Database::GetInstance()->query(
+        $encodedLayerTypes = $this->getDatabase()->query(
             "SELECT layer.layer_type FROM layer WHERE layer.layer_name = ?",
             array($loadedConfig["country_border_layer"])
         );
         $layerTypes = json_decode($encodedLayerTypes[0]["layer_type"], true);
 
-        $data = Database::GetInstance()->query(
+        $data = $this->getDatabase()->query(
             "
             SELECT geometry.geometry_geometry as geometry, geometry.geometry_data, geometry.geometry_type
             FROM geometry
@@ -203,7 +203,7 @@ class SEL extends Base
             if (!empty($result)) {
                 $result = $result.",";
             }
-            $result = $result.Database::GetInstance()->quote($val);
+            $result = $result.$this->getDatabase()->quote($val);
         }
         return $result;
     }
@@ -230,7 +230,7 @@ class SEL extends Base
         //Gather all the data for layers and plan layers that intersect with the shipping layers via restrictions.
         $result = array();
         foreach ($restrictionLayerIds as $restrictionLayerId) {
-            $restrictionData = Database::GetInstance()->query(
+            $restrictionData = $this->getDatabase()->query(
                 "
                 SELECT geometry.geometry_id, layer.layer_id, layer.layer_geotype, layer.layer_original_id,
                        geometry.geometry_geometry as geometry, geometry.geometry_type
@@ -248,7 +248,7 @@ class SEL extends Base
             foreach ($restrictionData as $d) {
                 $layerId = $d["layer_original_id"];
                 if ($layerId != null) {
-                    $originalLayerData = Database::GetInstance()->query(
+                    $originalLayerData = $this->getDatabase()->query(
                         "SELECT layer.layer_geotype FROM layer WHERE layer.layer_id = ?",
                         array($layerId)
                     );
@@ -283,7 +283,7 @@ class SEL extends Base
     private function GetRestrictionLayersForLayer(string $layerName): array
     {
         $result = array();
-        $layerId = Database::GetInstance()->query(
+        $layerId = $this->getDatabase()->query(
             "SELECT layer.layer_id FROM layer WHERE layer_name = ?",
             array($layerName)
         );
@@ -291,7 +291,7 @@ class SEL extends Base
             throw new Exception("Could not find layer with name \"".$layerName."\"");
         }
         $sourceLayerId = $layerId[0]["layer_id"];
-        $targetLayers = Database::GetInstance()->query(
+        $targetLayers = $this->getDatabase()->query(
             "
             SELECT DISTINCT(layer_id) 
             FROM layer 
@@ -321,7 +321,7 @@ class SEL extends Base
         $shippingLayers = $this->GetSELConfigInternal()["shipping_lane_layers"];
         $shipTypeMappings = $this->GetSELConfigInternal()["layer_type_ship_type_mapping"];
 
-        $layerIds = Database::GetInstance()->query(
+        $layerIds = $this->getDatabase()->query(
             "SELECT layer_id, layer_type FROM layer WHERE layer_name IN (".
             $this->ImplodeForMysqlInStatement($shippingLayers).")"
         );
@@ -331,7 +331,7 @@ class SEL extends Base
         foreach ($layerIds as $layerId) {
             $sourceLayerType = json_decode($layerId["layer_type"], true);
             
-            $data = Database::GetInstance()->query(
+            $data = $this->getDatabase()->query(
                 "
                 SELECT geometry.geometry_id, geometry.geometry_geometry, geometry.geometry_type, geometry.geometry_data
                 FROM geometry
@@ -400,7 +400,7 @@ class SEL extends Base
 
         foreach ($portLayers as $portLayer) {
             //As soon as we have plans that can specify ports this query needs to change to include those plans.
-            $layerId = Database::GetInstance()->query(
+            $layerId = $this->getDatabase()->query(
                 "SELECT layer_id, layer_states FROM layer WHERE layer.layer_name = ?",
                 array($portLayer['layer_name'])
             );
@@ -418,7 +418,7 @@ class SEL extends Base
                 );
             }
         
-            $data = Database::GetInstance()->query(
+            $data = $this->getDatabase()->query(
                 "
                 SELECT geometry.geometry_id, geometry.geometry_persistent, geometry.geometry_geometry,
                     geometry.geometry_data, geometry.geometry_mspid, plan.plan_gametime
@@ -552,7 +552,7 @@ class SEL extends Base
         $configData = $this->GetSELConfigInternal();
         $result = array();
         foreach ($configData["restriction_layer_exceptions"] as $layerExceptionEntry) {
-            $layerIdData = Database::GetInstance()->query(
+            $layerIdData = $this->getDatabase()->query(
                 "SELECT layer_id, layer_type FROM layer WHERE layer_name = ?",
                 array($layerExceptionEntry["layer_name"])
             );
@@ -623,7 +623,7 @@ class SEL extends Base
     {
         $configData = $this->GetSELConfigInternal()["heatmap_settings"];
         foreach ($configData ?? [] as $key => $value) {
-            $rasterData = Database::GetInstance()->query(
+            $rasterData = $this->getDatabase()->query(
                 "SELECT layer_raster FROM layer WHERE layer_name = ?",
                 array($value["layer_name"])
             );
@@ -653,7 +653,7 @@ class SEL extends Base
 
         $restrictionLayerExceptions = array();
         foreach ($riskMapSettings["restriction_layer_exceptions"] as $data) {
-            $layerData = Database::GetInstance()->query(
+            $layerData = $this->getDatabase()->query(
                 "SELECT layer_id FROM layer WHERE layer_name = ?",
                 array($data)
             );
@@ -691,7 +691,7 @@ class SEL extends Base
         }
         $layerNames = json_decode($layer_names);
         foreach ($layerNames as $layerName) {
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1 WHERE layer_name = ?",
                 array(microtime(true), $layerName)
             );
@@ -716,14 +716,14 @@ class SEL extends Base
         $decodedValues = json_decode($values);
 
         foreach ($decodedValues as $geometryId => $intensityValue) {
-            $queryResult = Database::GetInstance()->query(
+            $queryResult = $this->getDatabase()->query(
                 "SELECT geometry_data FROM geometry WHERE geometry_id = ?",
                 array($geometryId)
             );
             $baseGeometryData = json_decode($queryResult[0]["geometry_data"], true);
             $baseGeometryData["Shipping_Intensity"] = $intensityValue;
             $newGeometryData = Base::JSON($baseGeometryData);
-            Database::GetInstance()->query(
+            $this->getDatabase()->query(
                 "UPDATE geometry SET geometry_data = ? WHERE geometry_id = ?",
                 array($newGeometryData, $geometryId)
             );
@@ -762,7 +762,7 @@ class SEL extends Base
         $boundsConfig = $this->CalculateAlignedSimulationBounds($globalConfig);
 
         foreach ($config["heatmap_settings"] as $heatmap) {
-            $existingLayer = Database::GetInstance()->query(
+            $existingLayer = $this->getDatabase()->query(
                 "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
                 array($heatmap["layer_name"])
             );
@@ -785,6 +785,7 @@ class SEL extends Base
                     );
                 } else {
                     $melConfig = &$globalConfig["MEL"];
+                    // @phpstan-ignore-next-line "Result of || is always false." ??
                     if (!array_key_exists("x_min", $melConfig) || !array_key_exists("y_min", $melConfig) ||
                         !array_key_exists("x_max", $melConfig) || !array_key_exists("y_max", $melConfig)) {
                         throw new Exception(
@@ -807,7 +808,7 @@ class SEL extends Base
             $jsonRasterData = json_encode($rasterData);
 
             if (count($existingLayer) > 0) {
-                Database::GetInstance()->query(
+                $this->getDatabase()->query(
                     "UPDATE layer SET layer_raster = ? WHERE layer_id = ?",
                     array($jsonRasterData, $existingLayer[0]["layer_id"])
                 );
@@ -816,7 +817,7 @@ class SEL extends Base
                     "SEL Adding in raster layer " . $heatmap["layer_name"] .
                     " with default values. Defining this layer in the config file will allow you to modify the values."
                 );
-                Database::GetInstance()->query(
+                $this->getDatabase()->query(
                     "
                     INSERT INTO layer (
                        layer_name, layer_short, layer_geotype, layer_group, layer_category, layer_subcategory,
@@ -920,7 +921,7 @@ class SEL extends Base
             }
 
             //As soon as we have plans that can specify ports this query needs to change to include those plans.
-            $data = Database::GetInstance()->query(
+            $data = $this->getDatabase()->query(
                 "
                 SELECT geometry.geometry_data, geometry.geometry_country_id FROM geometry
                 LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
@@ -944,6 +945,7 @@ class SEL extends Base
     }
 
     /**
+     *
      * @apiGroup SEL
      * @throws Exception
      * @api {POST} /sel/NotifyUpdateFinished Notify Update Finished
@@ -955,7 +957,10 @@ class SEL extends Base
     public function NotifyUpdateFinished(int $month): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_sel_lastmonth = ?", array($month));
+        $this->getDatabase()->query(
+            'UPDATE game SET game_sel_lastmonth=?, game_sel_lastupdate=?',
+            [$month, microtime(true)]
+        );
     }
 
     /**
@@ -967,7 +972,7 @@ class SEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetUpdatePackage(): array
     {
-        $time = Database::GetInstance()->query('SELECT game_currentmonth FROM game')[0]['game_currentmonth'];
+        $time = $this->getDatabase()->query('SELECT game_currentmonth FROM game')[0]['game_currentmonth'];
         
         $result = array("rebuild_edges" => $this->HaveInterestedLayersChangedInMonth($time));
         if ($time == 0 && $result["rebuild_edges"] == false) {
@@ -988,7 +993,7 @@ class SEL extends Base
         $interestedLayers = array();
 
         foreach ($shippingLayers as $shippingLaneLayer) {
-            $shippingLayerData = Database::GetInstance()->query(
+            $shippingLayerData = $this->getDatabase()->query(
                 "SELECT layer_id FROM layer WHERE layer_name = ?",
                 array($shippingLaneLayer)
             );
@@ -1003,7 +1008,7 @@ class SEL extends Base
         $result = false;
         foreach ($interestedLayers as $layerId) {
             //But we only care about layers that are referenced in the plan and are applied to our original layers.
-            $layerResult = Database::GetInstance()->query(
+            $layerResult = $this->getDatabase()->query(
                 "
                 SELECT COUNT(plan.plan_id) as count
 				FROM plan
@@ -1029,7 +1034,7 @@ class SEL extends Base
      * @return array|object
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSELGameClientConfig()/*: array|object */ // <-- for php 8
+    public function GetSELGameClientConfig(): array|object
     {
         $config = $this->GetSELConfigInternal();
         if ($config != null && array_key_exists("game_client_settings", $config)) {

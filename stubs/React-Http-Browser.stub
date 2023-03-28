@@ -1,0 +1,31 @@
+<?php
+
+namespace React\Http;
+
+use React\Promise\Promise;
+use React\Promise\PromiseInterface;
+use React\Stream\ReadableStreamInterface;
+
+class Browser
+{
+    /**
+     * @param string $url URL for the request.
+     * @param array<string, null|scalar|bool> $headers
+     * @param string|ReadableStreamInterface $body
+     * @return PromiseInterface&Promise
+     */
+    public function post($url, array $headers = array(), $body = '')
+    {
+    }
+
+    /**
+     * @param string $method HTTP request method, e.g. GET/HEAD/POST etc.
+     * @param string $url URL for the request
+     * @param array<string, null|scalar|bool> $headers Additional request headers
+     * @param string|ReadableStreamInterface $body HTTP request body contents
+     * @return PromiseInterface&Promise
+     */
+    public function request($method, $url, array $headers = array(), $body = '')
+    {
+    }
+}

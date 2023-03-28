@@ -2,13 +2,16 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
 use App\Domain\WsServer\Plugins\Tick\TicksHandlerWsServerPlugin;
-use Closure;
 use Exception;
+use React\Promise\Deferred;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use function App\resolveOnFutureTick;
+use function App\tpf;
 
 class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
 {
@@ -21,22 +24,28 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     private AwaitPrerequisitesWsServerPlugin $awaitPrerequisitesPlugin;
     private DatabaseMigrationsWsServerPlugin $databaseMigrationsPlugin;
     private int $state = self::STATE_NONE;
-    private string $projectDir;
 
-    public function __construct(string $projectDir)
+    public static function getDefaultMinIntervalSec(): float
     {
-        $this->projectDir = $projectDir;
-        parent::__construct('bootstrap', 0); // 0 meaning no interval, no repeating
+        return 0; // 0 meaning no interval, no repeating
+    }
+
+    public function __construct(private readonly bool $tableOutput = false)
+    {
+        parent::__construct('bootstrap');
         $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
         $this->awaitPrerequisitesPlugin = $this->createAwaitPrerequisitesPlugin();
         $this->databaseMigrationsPlugin = $this->createDatabaseMigrationsPlugin();
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    protected function onCreatePromiseFunction(): ToPromiseFunction
     {
-        return function () {
+        return tpf(function () {
             $this->changeState(self::STATE_AWAIT_PREREQUISITES);
-        };
+            // meaning bootstrap plugin itself will not register any promises, but since it calls registerPlugin
+            //   on other plugins, those will be registered
+            return resolveOnFutureTick(new Deferred())->promise();
+        });
     }
 
     /**
@@ -93,10 +102,17 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
      */
     private function startStateRegisterPlugins()
     {
-        $this->getWsServer()->registerPlugin(new LoopStatsWsServerPlugin());
+        if (extension_loaded('pcntl')) {
+            $this->getWsServer()->registerPlugin(new BlackfireWsServerPlugin());
+        }
+        if ($this->tableOutput) {
+            $this->getWsServer()->registerPlugin(new LoopStatsWsServerPlugin());
+        }
         $this->getWsServer()->registerPlugin(new TicksHandlerWsServerPlugin());
-        $this->getWsServer()->registerPlugin(new LatestWsServerPlugin($this->projectDir));
-        $this->getWsServer()->registerPlugin(new ExecuteBatchesWsServerPlugin());
+        $this->getWsServer()->registerPlugin(new SequencerWsServerPlugin([
+            ExecuteBatchesWsServerPlugin::class,
+            LatestWsServerPlugin::class
+        ]));
 
         // set state ready on next tick
         $this->getLoop()->futureTick(function () {
@@ -155,21 +171,22 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
      */
     public function onEvent(NameAwareEvent $event)
     {
-        switch ($event->getEventName()) {
-            case AwaitPrerequisitesWsServerPlugin::EVENT_PREREQUISITES_MET:
-                $this->changeState(self::STATE_DATABASE_MIGRATIONS);
-                break;
-            case DatabaseMigrationsWsServerPlugin::EVENT_MIGRATIONS_FINISHED:
-                $this->changeState(self::STATE_REGISTER_PLUGINS);
-                break;
+        if ($event->getEventName() != self::EVENT_PLUGIN_EXECUTION_FINISHED) {
+            return;
+        }
+        /** @var Plugin $plugin */
+        $plugin = $event->getSubject(); // the plugin that just finished
+        if ($plugin instanceof AwaitPrerequisitesWsServerPlugin) {
+            $this->changeState(self::STATE_DATABASE_MIGRATIONS);
+        } else { // if ($plugin instanceof DatabaseMigrationsWsServerPlugin) {
+            $this->changeState(self::STATE_REGISTER_PLUGINS);
         }
     }
 
     public static function getSubscribedEvents(): array
     {
         return [
-            AwaitPrerequisitesWsServerPlugin::EVENT_PREREQUISITES_MET => 'onEvent',
-            DatabaseMigrationsWsServerPlugin::EVENT_MIGRATIONS_FINISHED => 'onEvent'
+            self::EVENT_PLUGIN_EXECUTION_FINISHED => 'onEvent'
         ];
     }
 }

@@ -5,12 +5,14 @@ namespace App\Domain\Services;
 use App\Domain\API\APIHelper;
 use App\Kernel;
 use Closure;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SymfonyToLegacyHelper
 {
@@ -21,7 +23,9 @@ class SymfonyToLegacyHelper
     private UrlMatcherInterface $urlMatcher;
     private RequestStack $requestStack;
     private Kernel $kernel;
+    private TranslatorInterface $translator;
     private ?Closure $fnControllerForwarder = null;
+    private EntityManagerInterface $em;
 
     public function __construct(
         string $projectDir,
@@ -29,6 +33,8 @@ class SymfonyToLegacyHelper
         UrlMatcherInterface $urlMatcher,
         RequestStack $requestStack,
         Kernel $kernel,
+        TranslatorInterface $translator,
+        EntityManagerInterface $em,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
         ConnectionManager $connectionManager
@@ -38,6 +44,8 @@ class SymfonyToLegacyHelper
         $this->urlMatcher = $urlMatcher;
         $this->requestStack = $requestStack;
         $this->kernel = $kernel;
+        $this->translator = $translator;
+        $this->em = $em;
         self::$instance = $this;
     }
 
@@ -49,6 +57,16 @@ class SymfonyToLegacyHelper
     public function getKernel(): Kernel
     {
         return $this->kernel;
+    }
+
+    public function getTranslator(): TranslatorInterface
+    {
+        return $this->translator;
+    }
+
+    public function getEntityManager(): EntityManagerInterface
+    {
+        return $this->em;
     }
 
     /**

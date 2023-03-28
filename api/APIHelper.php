@@ -35,8 +35,7 @@ class APIHelper
         return self::$instance;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetGameSessionIdForCurrentRequest(): int
+    public function getGameSessionIdForCurrentRequest(): int
     {
         $sessionId = self::INVALID_SESSION_ID;
         if (isset($_GET['session'])) {
@@ -72,7 +71,7 @@ class APIHelper
         $dbPass = $dbConfig['password'];
         $dbHost = $dbConfig['host'];
 
-        $sessionId = $this->GetGameSessionIdForCurrentRequest();
+        $sessionId = $this->getGameSessionIdForCurrentRequest();
         if ($sessionId != self::INVALID_SESSION_ID) {
             $dbName = $dbConfig["multisession_database_prefix"] . $sessionId;
 

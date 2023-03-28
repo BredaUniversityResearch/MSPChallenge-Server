@@ -39,7 +39,7 @@ class User extends Base
         $response = array();
         $this->CheckVersion($build_timestamp);
             
-        $passwords = Database::GetInstance()->query(
+        $passwords = $this->getDatabase()->query(
             "SELECT game_session_password_admin, game_session_password_player FROM game_session"
         );
         $password_admin = $passwords[0]["game_session_password_admin"];
@@ -75,9 +75,8 @@ class User extends Base
                 }
             } else {
                 // an external username/password authentication provider should be used
-                $user_name = $this->callProvidersAuthentication($provider, $user_name, $country_password);
-                // now do the authorization
-                if (!empty($user_name)) {
+                if ($this->callProvidersAuthentication($provider, $user_name, $country_password)) {
+                    // now do authorization
                     if ($country_id == 1) {
                         $userlist = $password_admin["admin"]["value"];
                     } elseif ($country_id == 2) {
@@ -85,7 +84,7 @@ class User extends Base
                     } else {
                         $userlist = $password_player["value"][$country_id];
                     }
-                    $userarray = explode(" ", $userlist);
+                    $userarray = explode("|", $userlist);
                     if (!in_array($user_name, $userarray)) {
                         throw new Exception("You are not allowed to log on for that country.");
                     }
@@ -96,7 +95,7 @@ class User extends Base
                 }
             }
             // all is well!
-            $response["session_id"] = Database::GetInstance()->query(
+            $response["session_id"] = $this->getDatabase()->query(
                 "INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)",
                 array($user_name, $country_id),
                 true
@@ -118,7 +117,7 @@ class User extends Base
         string $userName = ""
     ): array {
         $response = array();
-        $passwords = Database::GetInstance()->query(
+        $passwords = $this->getDatabase()->query(
             "SELECT game_session_password_admin, game_session_password_player FROM game_session"
         );
         $hasCorrectPassword = true;
@@ -130,7 +129,7 @@ class User extends Base
 
         if ($hasCorrectPassword) {
             try {
-                $response["session_id"] = Database::GetInstance()->query(
+                $response["session_id"] = $this->getDatabase()->query(
                     "INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)",
                     array($userName, $countryId),
                     true
@@ -162,10 +161,10 @@ class User extends Base
 
         if (array_key_exists("application_versions", $config)) {
             $clientBuildDate = DateTime::createFromFormat(DateTimeInterface::ATOM, $build_timestamp);
-
             $versionConfig = $config["application_versions"];
             $minDate = new DateTime("@0");
             $minBuildDate = $minDate;
+            $maxBuildDate = new DateTime(); // now
             if (array_key_exists("client_build_date_min", $versionConfig)) {
                 $minBuildDate = DateTime::createFromFormat(
                     DateTimeInterface::ATOM,
@@ -173,14 +172,11 @@ class User extends Base
                 );
             }
             if (array_key_exists("client_build_date_max", $versionConfig)) {
-                DateTime::createFromFormat(
+                $maxBuildDate = DateTime::createFromFormat(
                     DateTimeInterface::ATOM,
                     $versionConfig["client_build_date_max"]
                 );
             }
-            $maxBuildDate = (array_key_exists("client_build_date_max", $versionConfig)) ?
-                $versionConfig["client_build_date_max"] : -1;
-
             if ($minBuildDate > $clientBuildDate || ($maxBuildDate > $minDate && $maxBuildDate < $clientBuildDate)) {
                 if ($maxBuildDate > $minDate) {
                     $clientVersionsMessage = "Accepted client versions are between ".
@@ -205,7 +201,12 @@ class User extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function CloseSession(int $session_id): void
     {
-        Database::GetInstance()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
+        //clean up all plans that are still locked by a user
+        Database::GetInstance()->query(
+            "UPDATE plan SET plan_lock_user_id=NULL WHERE plan_lock_user_id=?",
+            array($session_id)
+        );
+        $this->getDatabase()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
     }
 
     private function checkProviderExists($provider): bool
@@ -235,7 +236,7 @@ class User extends Base
     {
         if ($this->checkProviderExists($provider)) {
             $call_provider = new $provider;
-            return $call_provider->checkuser($users);
+            return $call_provider->checkUser($users);
         }
         throw new Exception("Could not work with authentication provider '".$provider."'.");
     }

@@ -162,7 +162,7 @@ class Database
         string $statement,
         ?array $vars = null,
         bool $getId = false
-    ) {/*: array|string */ // <-- for php 8
+    ): array|string {
         if (!$this->connectToDatabase()) {
             return [];
         }
@@ -219,7 +219,7 @@ class Database
      * @return false|PDOStatement
      * @throws Exception
      */
-    private function executeQuery(string $statement, ?array $vars)/*: false|PDOStatement*/ // <<-- for php 8
+    private function executeQuery(string $statement, ?array $vars): false|PDOStatement
     {
         if (!$this->connectToDatabase()) {
             return false;
@@ -236,7 +236,7 @@ class Database
      * @param string $statement
      * @return false|PDOStatement
      */
-    public function prepareQuery(string $statement)/*: false|PDOStatement*/ // <<-- for php 8
+    public function prepareQuery(string $statement): false|PDOStatement
     {
         if (!$this->connectToDatabase()) {
             return false;
@@ -266,7 +266,7 @@ class Database
      * @param string $string
      * @return false|string
      */
-    public function quote(string $string)/*: false|string*/ // <<-- for php 8
+    public function quote(string $string): false|string
     {
         //Simple wrapper for PDO::Quote since that needs an instance of the connection...
         if (!$this->connectToDatabase()) {
@@ -288,7 +288,7 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SwitchToSessionDatabase(int $sessionId): void
     {
-        $this->SetupConfiguration($sessionId);
+        $this->SetupConfiguration();
         $this->SwitchDatabase($this->GetDatabaseName());
     }
 
@@ -298,7 +298,7 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SwitchDatabase(string $databaseName): void
     {
-        Database::GetInstance()->query("USE ".$databaseName);
+        $this->query("USE ".$databaseName);
         $this->db_name = $databaseName;
     }
 
@@ -379,7 +379,7 @@ class Database
      * @return false|string
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Encrypt(string $string)/*: false|string*/ // <<-- for php 8
+    public function Encrypt(string $string): false|string
     {
         return hash_hmac('sha512', $string, $this->salt);
     }

@@ -9,6 +9,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use stdClass;
 use ZipArchive;
+use function App\rcopy;
+use function App\rrmdir;
 
 class Store extends Base
 {
@@ -136,7 +138,7 @@ class Store extends Base
         $layer->geoserver->username = $this->geoserver->username;
         $layer->geoserver->password = $this->geoserver->password;
 
-        Database::GetInstance()->DBStartTransaction();
+        $this->getDatabase()->DBStartTransaction();
 
         $filename = $layerMetaData['layer_name'];
 
@@ -157,7 +159,7 @@ class Store extends Base
             } else {
                 // Create the metadata for the raster layer, but don't fill in the layer_raster field.
                 //   This must be done by something else later.
-                Database::GetInstance()->query(
+                $this->getDatabase()->query(
                     "INSERT INTO layer (layer_name, layer_geotype, layer_group, layer_editable) VALUES (?, ?, ?, ?)",
                     array($filename, "raster", $region, 0)
                 );
@@ -179,7 +181,7 @@ class Store extends Base
             } else {
                 // Create the metadata for the vector layer, but don't fill the geometry table.
                 //   This will be up to the players.
-                Database::GetInstance()->query(
+                $this->getDatabase()->query(
                     "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
                     array($filename, $layerMetaData['layer_geotype'], $region)
                 );
@@ -187,11 +189,11 @@ class Store extends Base
         }
 
         $startTime = microtime(true);
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE geometry SET geometry_persistent=geometry_id WHERE geometry_persistent IS NULL"
         );
         Log::LogDebug(" -> Updated persistent geometry Ids in " . (microtime(true) - $startTime) . " seconds.");
-        Database::GetInstance()->DBCommitTransaction();
+        $this->getDatabase()->DBCommitTransaction();
 
         $startTime = microtime(true);
         $this->CheckForDuplicateMspIds();
@@ -204,14 +206,14 @@ class Store extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function CheckForDuplicateMspIds(): void
     {
-        $result = Database::GetInstance()->query(
+        $result = $this->getDatabase()->query(
             "
             SELECT COUNT(*) as mspIdCount, geometry_mspid
             FROM geometry WHERE geometry_mspid IS NOT NULL GROUP BY geometry_mspid HAVING mspIdCount > 1
             "
         );
         foreach ($result as $duplicateId) {
-            $duplicatedLayerNames = Database::GetInstance()->query("SELECT DISTINCT(layer.layer_name) FROM layer 
+            $duplicatedLayerNames = $this->getDatabase()->query("SELECT DISTINCT(layer.layer_name) FROM layer 
 					INNER JOIN geometry ON geometry.geometry_layer_id = layer.layer_id
 				WHERE geometry.geometry_mspid = ?", array($duplicateId['geometry_mspid']));
             $layerNames = implode(", ", array_map(function ($data) {
@@ -293,7 +295,7 @@ class Store extends Base
             "url" => $layername . ".png", "boundingbox" => array(array($bb->minx, $bb->miny),
             array($bb->maxx, $bb->maxy))
         );
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "
             INSERT INTO layer (
                 layer_name, layer_raster, layer_geotype, layer_group, layer_editable
@@ -355,7 +357,7 @@ class Store extends Base
                 $type = $typeOther ?? 0;
             }
         } else {
-            $type = $featureProperties['type'] ?: 0;
+            $type = (int)($featureProperties['type'] ?? 0);
             unset($featureProperties['type']);
         }
 
@@ -521,15 +523,18 @@ class Store extends Base
         string $layerGeoType,
         string $layerGroup
     ): int {
-        $checkExists = Database::GetInstance()->query(
+        $checkExists = $this->getDatabase()->query(
             "SELECT layer_id FROM layer WHERE layer_name = ?",
             array($layerName)
         );
-        return $checkExists[0]["layer_id"] ?: Database::GetInstance()->query(
-            "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
-            array($layerName, $layerGeoType, $layerGroup),
-            true
-        );
+        if ((int)($checkExists[0]["layer_id"] ?? 0) === 0) {
+            return (int)$this->getDatabase()->query(
+                "INSERT INTO layer (layer_name, layer_geotype, layer_group) VALUES (?, ?, ?)",
+                array($layerName, $layerGeoType, $layerGroup),
+                true
+            );
+        }
+        return (int)$checkExists[0]["layer_id"];
     }
 
     /**
@@ -546,14 +551,21 @@ class Store extends Base
         int $subtractive = 0,
         string $layerName = ''
     ): int {
-        if (IsFeatureFlagEnabled('auto_mspids_by_hash') && $subtractive === 0 && is_null($mspId)) {
-             Log::LogDebug(' -> Auto-generating an MSP ID for a bit of geometry in layer ' . $layerName . ' .');
-             // so many algorithms to choose from, but this one seemed to have low collision, reasonable speed,
-             //   and simply availability to PHP in default installation
-             $mspId = hash('fnv1a64', $layerName.$geometry);
+        if ($subtractive === 0 && is_null($mspId)) {
+            Log::LogDebug(' -> Auto-generating an MSP ID for a bit of geometry in layer ' . $layerName . ' .');
+            // so many algorithms to choose from, but this one seemed to have low collision, reasonable speed,
+            //   and simply availability to PHP in default installation
+            $algo = 'fnv1a64';
+            // to avoid duplicate MSP IDs, we need the string to include the layer name, the geometry, and if available
+            //   the geometry's name ... there have been cases in which one layer had exactly the same geometry twice
+            //   to indicate two different names given to that area... very annoying
+            $dataToHash = $layerName.$geometry;
+            $dataArray = json_decode($data, true);
+            $dataToHash .= $dataArray['name'] ?? '';
+            $mspId = hash($algo, $dataToHash);
         }
 
-        return Database::GetInstance()->query(
+        return (int)$this->getDatabase()->query(
             "
             INSERT INTO geometry (
                 geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_mspid,
