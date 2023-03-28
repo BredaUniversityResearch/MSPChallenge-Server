@@ -181,21 +181,26 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
      */
     public function onEvent(NameAwareEvent $event)
     {
+        /** @var Plugin $plugin */
+        $plugin = $event->getSubject(); // the plugin that just finished
+        if (($plugin instanceof AwaitPrerequisitesWsServerPlugin) &&
+            $event->getEventName() === AwaitPrerequisitesWsServerPlugin::EVENT_PREREQUISITES_MET) {
+            $this->changeState(self::STATE_DATABASE_MIGRATIONS);
+            return;
+        }
         if ($event->getEventName() != self::EVENT_PLUGIN_EXECUTION_FINISHED) {
             return;
         }
-        /** @var Plugin $plugin */
-        $plugin = $event->getSubject(); // the plugin that just finished
-        if ($plugin instanceof AwaitPrerequisitesWsServerPlugin) {
-            $this->changeState(self::STATE_DATABASE_MIGRATIONS);
-        } else { // if ($plugin instanceof DatabaseMigrationsWsServerPlugin) {
-            $this->changeState(self::STATE_REGISTER_PLUGINS);
+        if (!($plugin instanceof DatabaseMigrationsWsServerPlugin)) {
+            return;
         }
+        $this->changeState(self::STATE_REGISTER_PLUGINS);
     }
 
     public static function getSubscribedEvents(): array
     {
         return [
+            AwaitPrerequisitesWsServerPlugin::EVENT_PREREQUISITES_MET => 'onEvent',
             self::EVENT_PLUGIN_EXECUTION_FINISHED => 'onEvent'
         ];
     }
