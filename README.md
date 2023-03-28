@@ -63,6 +63,7 @@ Note that we use SERVER_NAME=:80 in alias dcu to disable https.
 Once you have created the .bashrc file you need to log-out and -in, reboot the system, or restart the terminal. Then, just type "alias" to see a list of them.
 
 ```
+## BEGIN Docker stuff
 # export settings
 # you can leave the Blackfire ids and tokens empty if you do not intend to use it
 export BLACKFIRE_CLIENT_ID=
@@ -73,13 +74,15 @@ export BLACKFIRE_SERVER_TOKEN=
 export CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey
 
 # aliases
-alias ede='export $(docker/php/export-dotenv.sh)'
-DCU_BASE="ede && SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN CADDY_MERCURE_JWT_SECRET=$CADDY_MERCURE_JWT_SECRET docker compose"
-alias dcu="$DCU_BASE up -d --remove-orphans"
+# ede = export (e) dotenv (d) environmental variables (e)
+alias ede='unset $(docker/php/dotenv-vars.sh) && export $(docker/php/export-dotenv-vars.sh)'
+# dcu = docker(d) compose(c) up(u)
+DCU_BASE="SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN CADDY_MERCURE_JWT_SECRET=$CADDY_MERCURE_JWT_SECRET docker compose"
+alias dcu="ede && $DCU_BASE up -d --remove-orphans"
 # dcu + xdebug (x)
 alias dcux="XDEBUG_MODE=debug dcu"
 # dcu + production (p)
-alias dcup="$DCU_BASE -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
+alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$DCU_BASE -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
 PHP_CONATINER='mspchallenge-server-php-1'
 # dl = docker(d) logs(l) with default container mspchallenge-server-php-1
@@ -108,6 +111,7 @@ ALIAS_WSS='php /srv/app/bin/console app:ws-server'
 alias dewss="de $ALIAS_WSS"
 # dewss + xdebug (x)
 alias dewssx="$ALIAS_DE_BASE -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" $PHP_CONATINER $ALIAS_WSS"
+## END Docker stuff
 ```
 
 ## Symfony Docker features
