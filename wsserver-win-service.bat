@@ -30,6 +30,7 @@ if not exist %php% (
     set ERRORLEVEL=1
     goto eof
 )
+call :FirewallAddRule
 %exe% status %service% 1>NUL 2>NUL
 IF %ERRORLEVEL% NEQ 0 (
     %exe% install %service% %php% bin/console app:ws-server %2 %3 %4 %5 %6 %7 %8 %9
@@ -39,7 +40,6 @@ IF %ERRORLEVEL% NEQ 0 (
 %php% bin/console cache:clear
 %exe% start %service%
 %exe% status %service%
-call :FirewallAddRule
 goto get
 
 :blank
