@@ -65,7 +65,7 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
 
-  export $(docker/php/export-dotenv.sh)
+  export $(docker/php/export-dotenv-vars.sh)
 
   echo "Starting supervisor..."
   rm -f /run/supervisord.sock ; /usr/bin/supervisord -c /etc/supervisord.conf

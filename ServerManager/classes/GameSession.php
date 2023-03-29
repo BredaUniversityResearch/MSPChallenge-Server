@@ -622,7 +622,7 @@ class GameSession extends Base
             $this->api_access_token
         );
         if (!$server_call['success']) {
-            throw new ServerManagerAPIException($server_call['message']);
+            throw new ServerManagerAPIException($server_call['message'] ?? 'unknown error');
         }
         $this->session_state = 'archived';
         $this->edit();
