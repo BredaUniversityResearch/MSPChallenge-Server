@@ -3,16 +3,7 @@
     {$CADDY_DEBUG}
 }
 
-{$SERVER_NAME} {
-    proxy / caddy {
-        transparent
-        websocket /ws/ {
-            header_upstream Upgrade "websocket"
-            header_upstream Connection "Upgrade"
-            without /ws/
-        }
-    }
-}
+{$SERVER_NAME}
 
 {$CADDY_EXTRA_CONFIG}
 
