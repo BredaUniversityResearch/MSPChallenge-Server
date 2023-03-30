@@ -42,6 +42,17 @@ function download() {
         mkdir -p "${DOWNLOAD_DIR}Win/symfony-cli/"
       fi
       curl -Lso /tmp/symfony-cli_windows_386.zip https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_windows_386.zip && unzip -qqo /tmp/symfony-cli_windows_386.zip -d "${DOWNLOAD_DIR}Win/symfony-cli/" && rm /tmp/symfony-cli_windows_386.zip
+      rm -f ${DOWNLOAD_DIR}/symfony ; ln -s Win/symfony-cli/symfony.exe ${DOWNLOAD_DIR}/symfony
+    fi
+  # install Linux tools
+  elif [[ "$OSTYPE" == "linux-musl" ]]; then
+    # install Symfony cli
+    if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}Linux/symfony-cli/symfony.exe" ]]; then
+      if [[ ! -d "${DOWNLOAD_DIR}Linux/symfony-cli/" ]]; then
+        mkdir -p "${DOWNLOAD_DIR}Linux/symfony-cli/"
+      fi
+      curl -Lso /tmp/symfony-cli_linux_amd64.tar.gz https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_linux_amd64.tar.gz && tar -zxf /tmp/symfony-cli_linux_amd64.tar.gz -C "${DOWNLOAD_DIR}Linux/symfony-cli/" && rm /tmp/symfony-cli_linux_amd64.tar.gz
+      rm -f ${DOWNLOAD_DIR}/symfony ; ln -s Linux/symfony-cli/symfony ${DOWNLOAD_DIR}/symfony
     fi
   fi
 

@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Domain\Helper\Config;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\BootstrapWsServerPlugin;
 use App\Domain\WsServer\Plugins\PluginHelper;
