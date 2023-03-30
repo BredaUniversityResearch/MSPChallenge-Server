@@ -74,6 +74,7 @@ export BLACKFIRE_SERVER_TOKEN=
 # for production
 export CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey
 
+# docker aliases
 source "$CODEDIR/MSPCHallenge-Server/docker-aliases.sh"
 ## END Docker stuff
 ```
