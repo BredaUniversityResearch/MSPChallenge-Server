@@ -13,7 +13,7 @@ class EnergyLatest extends CommonBase
     /**
      * @throws Exception
      */
-    public function fetchAll(): PromiseInterface
+    public function fetchAll($allowEnergyKpiUpdate): PromiseInterface
     {
         $toPromiseFunctions[] = tpf(function () {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -30,19 +30,40 @@ class EnergyLatest extends CommonBase
                     ->where($qb->expr()->eq('energy_connection_active', 1))
             );
         });
-        $toPromiseFunctions[] = tpf(function () {
+        $toPromiseFunctions[] = tpf(function () use ($allowEnergyKpiUpdate) {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
-            return $this->getAsyncDatabase()->query(
-                $qb
-                    ->select(
-                        'energy_output_geometry_id as id',
-                        'energy_output_capacity as capacity',
-                        'energy_output_maxcapacity as maxcapacity',
-                        'energy_output_active as active'
+            $qb->
+                select(
+                    'eo.energy_output_geometry_id as id',
+                    'eo.energy_output_capacity as capacity',
+                    'eo.energy_output_maxcapacity as maxcapacity',
+                    'eo.energy_output_active as active'
+                )
+                ->from('energy_output', 'eo')
+                ->where($qb->expr()->eq('eo.energy_output_active', 1));
+            if (!$allowEnergyKpiUpdate) { // skip the IMPLEMENTED plans' output
+                $qb->
+                    join(
+                        'eo',
+                        'geometry',
+                        'g',
+                        'eo.energy_output_geometry_id = g.geometry_id'
                     )
-                    ->from('energy_output')
-                    ->where($qb->expr()->eq('energy_output_active', 1))
-            );
+                    ->join(
+                        'g',
+                        'plan_layer',
+                        'pl',
+                        'g.geometry_layer_id = pl.plan_layer_layer_id'
+                    )
+                    ->join(
+                        'pl',
+                        'plan',
+                        'p',
+                        'pl.plan_layer_plan_id = p.plan_id'
+                    )
+                    ->andWhere($qb->expr()->neq('p.plan_state', 'IMPLEMENTED'));
+            }
+            return $this->getAsyncDatabase()->query($qb);
         });
         return parallel($toPromiseFunctions);
     }

@@ -403,16 +403,11 @@ class GameLatest extends CommonBase
         $energy = new EnergyLatest();
         $this->asyncDataTransferTo($energy);
         $deferred = new Deferred();
-        $this->allowEnergyKpiUpdate ?
-            $energy->fetchAll()->then(function (array $queryResults) use ($deferred) {
-                $energyData['connections'] = $queryResults[0]->fetchAllRows();
-                $energyData['output'] = $queryResults[1]->fetchAllRows();
-                $deferred->resolve($energyData);
-            }) :
-            resolveOnFutureTick($deferred, [
-                'connections' => [],
-                'output' => []
-            ]);
+        $energy->fetchAll($this->allowEnergyKpiUpdate)->then(function (array $queryResults) use ($deferred) {
+            $energyData['connections'] = $queryResults[0]->fetchAllRows();
+            $energyData['output'] = $queryResults[1]->fetchAllRows();
+            $deferred->resolve($energyData);
+        });
         return $deferred->promise();
     }
 
