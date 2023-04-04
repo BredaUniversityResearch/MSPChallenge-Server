@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # aliases
+# some windows php handling to prevent error: `output is not a tty`. Use php.exe instead of php.
+alias php='f() { (([[ "${OS}" == "Windows_NT" ]] && echo "Windows detected, using php.exe" && php.exe $@) || php $@); unset -f f; } ; f'
 # ede = export (e) dotenv (d) environmental variables (e)
 alias ede='unset $(docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
