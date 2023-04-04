@@ -134,6 +134,11 @@ class WsServer extends EventDispatcher implements
             })
             ->all();
 
+        wdo(
+            'Client headers:'.PHP_EOL.
+            implode(PHP_EOL, collect($headers)->mapWithKeys(fn($x, $k) => [$k => "$k=$x"])->all())
+        );
+
         if (!array_key_exists(self::HEADER_KEY_GAME_SESSION_ID, $headers) ||
             !array_key_exists(self::HEADER_KEY_MSP_API_TOKEN, $headers)) {
             // required headers are not there, do not allow connection
@@ -148,6 +153,8 @@ class WsServer extends EventDispatcher implements
             $conn->close();
             return;
         }
+
+        $headers[self::HEADER_KEY_GAME_SESSION_ID] = (int)$headers[self::HEADER_KEY_GAME_SESSION_ID];
 
         // since we need client headers to create a Base instances, set it before calling getSecurity(...)
         $this->clientHeaders[$conn->resourceId] = $headers;

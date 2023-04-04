@@ -9,6 +9,18 @@
 
 log
 
+# see https://caddyserver.com/docs/v2-upgrade
+#   "Websocket proxying "just works" in v2; there is no need to "enable" websockets (upgrade connection) like in v1."
+route {$URL_WS_SERVER_URI}* {
+    reverse_proxy http://php:{$WS_SERVER_PORT} {
+        # Caddy applies header normalization:
+        #   e.g. GameSessionId => Gamesessionid, MSPAPIToken => Mspapitoken
+        # So, add new headers using the Train Case (HTTP Header Case)
+        header_up Game-Session-Id {http.request.header.Gamesessionid}
+        header_up Msp-Api-Token {http.request.header.Mspapitoken}
+    }
+}
+
 route {
     root * /srv/app/public
     mercure {

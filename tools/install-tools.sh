@@ -47,7 +47,7 @@ function download() {
   # install Linux tools
   elif [[ "$OSTYPE" == "linux-musl" ]]; then
     # install Symfony cli
-    if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}Linux/symfony-cli/symfony.exe" ]]; then
+    if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}Linux/symfony-cli/symfony" ]]; then
       if [[ ! -d "${DOWNLOAD_DIR}Linux/symfony-cli/" ]]; then
         mkdir -p "${DOWNLOAD_DIR}Linux/symfony-cli/"
       fi

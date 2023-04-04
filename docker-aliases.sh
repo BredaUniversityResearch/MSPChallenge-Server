@@ -2,7 +2,7 @@
 
 # aliases
 # ede = export (e) dotenv (d) environmental variables (e)
-alias ede='unset $(docker/php/dotenv-vars.sh) && bash tools/install-tools.sh -f && [[ -f var/tools/symfony ]] && export export $(var/tools/symfony console app:export-dotenv-vars $(docker/php/dotenv-vars.sh))'
+alias ede='unset $(docker/php/dotenv-vars.sh) && bash tools/install-tools.sh && [[ -f var/tools/symfony ]] && export export $(var/tools/symfony console app:export-dotenv-vars $(docker/php/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
 DCU_BASE="MSYS_NO_PATHCONV=1 SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN CADDY_MERCURE_JWT_SECRET=$CADDY_MERCURE_JWT_SECRET docker compose"
 alias dcu="ede && $DCU_BASE up -d --remove-orphans"
@@ -27,6 +27,14 @@ alias de="$ALIAS_DE_BASE $PHP_CONATINER"
 alias des="de /usr/bin/supervisord -c /etc/supervisord.conf"
 # de + supervisorctl (sc)
 alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw]\n'; de supervisorctl"
+# de + list (l) + log (l) + supervisor (s)
+alias dells="de ls -l /var/log/supervisor/"
+# de + tail log (tl)
+alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files names:" && dells && exit 1)) && (echo "press Ctrl+C to exit tail log"; de tail -f /var/log/supervisor/$1); unset -f f; } ; f'
+# de + tail log (tl) + websocket server (w)
+alias detlw="detl app-ws-server.log"
+# de + tail log (tl) + msw (m)
+alias detlm="detl msw.log"
 # de + top (t)
 alias det='de top'
 # de + choose profile (cpf) to "Choose Blackfire profile on running websocket server process"
