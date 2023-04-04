@@ -11,7 +11,7 @@ alias dcux="ede && XDEBUG_MODE=debug $DCU_BASE up -d --remove-orphans"
 # dcu + production (p)
 alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$DCU_BASE -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
-PHP_CONATINER='mspchallenge-server-php-1'
+[[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER='mspchallenge-server-php-1'
 # dl = docker(d) logs(l) with default container mspchallenge-server-php-1
 alias dl="$ALIAS_DL_BASE $PHP_CONATINER"
 # dl + mspchallenge-server-blackfire-1 (b)
