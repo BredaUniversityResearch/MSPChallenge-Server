@@ -5,6 +5,7 @@ namespace App\Domain\WsServer\Plugins\Latest;
 use App\Domain\Common\CommonBase;
 use Exception;
 use React\Promise\PromiseInterface;
+use function App\await;
 use function App\parallel;
 use function App\tpf;
 
@@ -13,7 +14,7 @@ class EnergyLatest extends CommonBase
     /**
      * @throws Exception
      */
-    public function fetchAll($allowEnergyKpiUpdate): PromiseInterface
+    public function fetchAll($allowEnergyKpiUpdate = true): PromiseInterface
     {
         $toPromiseFunctions[] = tpf(function () {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -61,10 +62,18 @@ class EnergyLatest extends CommonBase
                         'p',
                         'pl.plan_layer_plan_id = p.plan_id'
                     )
-                    ->andWhere($qb->expr()->neq('p.plan_state', 'IMPLEMENTED'));
+                    ->andWhere($qb->expr()->neq('p.plan_state', $qb->createPositionalParameter('IMPLEMENTED')));
             }
             return $this->getAsyncDatabase()->query($qb);
         });
         return parallel($toPromiseFunctions);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function fetchOutputConnectionsUnImplementedPlans(): PromiseInterface
+    {
+        return $this->fetchAll(false);
     }
 }
