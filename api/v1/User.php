@@ -261,11 +261,9 @@ class User extends Base
         }
         return await(
             $this->getAsyncDatabase()->query($qb)
-            ->then(
-                function (Result $result) {
-                    return $result->fetchAllRows();
-                }
-            )
+            ->then(function (Result $result) {
+                return $result->fetchAllRows();
+            })
         );
     }
 
