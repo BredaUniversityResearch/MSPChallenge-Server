@@ -6,7 +6,6 @@ use DateTime;
 use DateTimeInterface;
 use Drift\DBAL\Result;
 use Exception;
-use React\Promise\Deferred;
 use function App\await;
 
 class User extends Base
