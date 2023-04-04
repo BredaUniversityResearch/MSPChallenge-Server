@@ -13,7 +13,7 @@ alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_EN
 ALIAS_DL_BASE="docker logs"
 [[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER='mspchallenge-server-php-1'
 # dl = docker(d) logs(l) with default container mspchallenge-server-php-1
-alias dl="$ALIAS_DL_BASE $PHP_CONATINER"
+alias dl="$ALIAS_DL_BASE $PHP_CONTAINER"
 # dl + mspchallenge-server-blackfire-1 (b)
 alias dlb="$ALIAS_DL_BASE mspchallenge-server-blackfire-1"
 # dl + mspchallenge-server-caddy-1 (c)
@@ -22,7 +22,7 @@ alias dlc="$ALIAS_DL_BASE mspchallenge-server-caddy-1"
 alias dld="$ALIAS_DL_BASE mspchallenge-server-database-1"
 # de = docker(d) execute(e) with container mspchallenge-server-php-1
 ALIAS_DE_BASE='MSYS_NO_PATHCONV=1 docker exec'
-alias de="$ALIAS_DE_BASE $PHP_CONATINER"
+alias de="$ALIAS_DE_BASE $PHP_CONTAINER"
 # de + supervisor (s)
 alias des="de /usr/bin/supervisord -c /etc/supervisord.conf"
 # de + supervisorctl (sc)
@@ -45,4 +45,4 @@ alias derpf='de pkill -SIGUSR2 -f "php bin/console app:ws-server"'
 ALIAS_WSS='php /srv/app/bin/console app:ws-server'
 alias dewss="de $ALIAS_WSS"
 # dewss + xdebug (x)
-alias dewssx="$ALIAS_DE_BASE -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" $PHP_CONATINER $ALIAS_WSS"
+alias dewssx="$ALIAS_DE_BASE -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" $PHP_CONTAINER $ALIAS_WSS"
