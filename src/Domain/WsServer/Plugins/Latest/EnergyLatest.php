@@ -5,7 +5,6 @@ namespace App\Domain\WsServer\Plugins\Latest;
 use App\Domain\Common\CommonBase;
 use Exception;
 use React\Promise\PromiseInterface;
-use function App\await;
 use function App\parallel;
 use function App\tpf;
 
