@@ -4,7 +4,9 @@ namespace App\Domain\API\v1;
 
 use DateTime;
 use DateTimeInterface;
+use Drift\DBAL\Result;
 use Exception;
+use function App\await;
 
 class User extends Base
 {
@@ -12,7 +14,8 @@ class User extends Base
         ["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE],
         "CloseSession",
         ["getProviders", Security::ACCESS_LEVEL_FLAG_NONE],
-        ["checkExists", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+        ["checkExists", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        "List"
     );
 
     public function __construct(string $method = '')
@@ -239,6 +242,29 @@ class User extends Base
             return $call_provider->checkUser($users);
         }
         throw new Exception("Could not work with authentication provider '".$provider."'.");
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function List(int $country_id = 0)
+    {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $qb->select('user_id', 'user_name', 'user_country_id')
+            ->from('user')
+            ->where($qb->expr()->eq('user_loggedoff', 0))
+            ->andWhere($qb->expr()->lt('UNIX_TIMESTAMP() - user_lastupdate', 65));
+        if ($country_id > 0) {
+            $qb->andWhere($qb->expr()->eq('user_country_id', $country_id));
+        }
+        return await(
+            $this->getAsyncDatabase()->query($qb)
+            ->then(function (Result $result) {
+                return $result->fetchAllRows();
+            })
+        );
     }
 
     /**
