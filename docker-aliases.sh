@@ -2,7 +2,7 @@
 
 # aliases
 # ede = export (e) dotenv (d) environmental variables (e)
-alias ede='unset $(docker/php/dotenv-vars.sh) && bash tools/install-tools.sh && [[ -f var/tools/symfony ]] && export export $(var/tools/symfony console app:export-dotenv-vars $(docker/php/dotenv-vars.sh))'
+alias ede='unset $(docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
 DCU_BASE="MSYS_NO_PATHCONV=1 SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN CADDY_MERCURE_JWT_SECRET=$CADDY_MERCURE_JWT_SECRET docker compose"
 alias dcu="ede && $DCU_BASE up -d --remove-orphans"
