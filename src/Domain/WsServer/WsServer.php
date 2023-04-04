@@ -139,16 +139,6 @@ class WsServer extends EventDispatcher implements
             implode(PHP_EOL, collect($headers)->mapWithKeys(fn($x, $k) => [$k => "$k=$x"])->all())
         );
 
-        if (!array_key_exists(self::HEADER_KEY_GAME_SESSION_ID, $headers) ||
-            !array_key_exists(self::HEADER_KEY_MSP_API_TOKEN, $headers) ||
-            // encountered some deprecated headers still supported
-            count(array_intersect_key($headers, array_flip(self::HEADER_KEYS_DEPRECATED))) == 0) {
-            // required headers are not there, do not allow connection
-            wdo('required headers are not there, do not allow connection');
-            $conn->close();
-            return;
-        }
-
         // fix deprecated headers
         foreach (self::HEADER_KEYS_DEPRECATED as $newHeaderName => $deprecatedHeaderName) {
             if (!array_key_exists($deprecatedHeaderName, $headers)) {
@@ -156,6 +146,14 @@ class WsServer extends EventDispatcher implements
             }
             $headers[$newHeaderName] = $headers[$deprecatedHeaderName];
             unset($headers[$deprecatedHeaderName]);
+        }
+
+        if (!array_key_exists(self::HEADER_KEY_GAME_SESSION_ID, $headers) ||
+            !array_key_exists(self::HEADER_KEY_MSP_API_TOKEN, $headers)) {
+            // required headers are not there, do not allow connection
+            wdo('required headers are not there, do not allow connection');
+            $conn->close();
+            return;
         }
 
         $gameSessionId = $headers[self::HEADER_KEY_GAME_SESSION_ID];
