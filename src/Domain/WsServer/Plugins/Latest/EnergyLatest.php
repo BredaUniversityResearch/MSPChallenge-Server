@@ -13,7 +13,7 @@ class EnergyLatest extends CommonBase
     /**
      * @throws Exception
      */
-    public function fetchAll($allowEnergyKpiUpdate = true): PromiseInterface
+    public function fetchAll(bool $allowEnergyKpiUpdate = true): PromiseInterface
     {
         $toPromiseFunctions[] = tpf(function () {
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -66,13 +66,5 @@ class EnergyLatest extends CommonBase
             return $this->getAsyncDatabase()->query($qb);
         });
         return parallel($toPromiseFunctions);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function fetchOutputConnectionsUnImplementedPlans(): PromiseInterface
-    {
-        return $this->fetchAll(false);
     }
 }
