@@ -8,10 +8,10 @@ fi
 # ede = export (e) dotenv (d) environmental variables (e)
 alias ede='unset $(docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
-DCU_BASE="MSYS_NO_PATHCONV=1 SERVER_NAME=:80 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN CADDY_MERCURE_JWT_SECRET=$CADDY_MERCURE_JWT_SECRET docker compose"
+DCU_BASE="MSYS_NO_PATHCONV=1 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN CADDY_MERCURE_JWT_SECRET=$CADDY_MERCURE_JWT_SECRET docker compose"
 alias dcu="ede && $DCU_BASE up -d --remove-orphans"
 # dcu + xdebug (x)
-alias dcux="ede && XDEBUG_MODE=debug $DCU_BASE up -d --remove-orphans"
+alias dcux="ede && XDEBUG_MODE=debug SERVER_NAME=:80 $DCU_BASE up -d --remove-orphans"
 # dcu + production (p)
 alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$DCU_BASE -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
