@@ -98,13 +98,15 @@ class Security extends Base
     /**
      * Returns array of [token => TokenValue, valid_until => UnixTimestamp]
      *
-     * @throws Exception
+     * @param int $accessLevel
+     * @param int $lifetimeSeconds
      * @return array|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
      */
     public function generateToken(
         int $accessLevel = self::ACCESS_LEVEL_FLAG_FULL,
         int $lifetimeSeconds = self::DEFAULT_TOKEN_LIFETIME_SECONDS
-    )/*: array|PromiseInterface // <-- php 8 */ {
+    ): array|PromiseInterface {
         $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->delete('api_token')
@@ -173,10 +175,11 @@ class Security extends Base
     }
 
     /**
-     * @throws Exception
+     * @param int $accessLevel
      * @return string|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function getSpecialToken(int $accessLevel)/*: string|PromiseInterface // <-- php 8 */
+    public function getSpecialToken(int $accessLevel): string|PromiseInterface
     {
         $deferred = new Deferred();
         if ($accessLevel == self::ACCESS_LEVEL_FLAG_REQUEST_TOKEN ||

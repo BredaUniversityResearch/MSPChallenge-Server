@@ -16,11 +16,12 @@ class PlanLatest extends CommonBase
     /**
      * initially, ask for all from time 0 to load in all user created data
      *
-     * @throws Exception
-     * @noinspection SpellCheckingInspection
+     * @param int $lastupdate
      * @return array|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
+     * @noinspection SpellCheckingInspection
      */
-    public function latest(int $lastupdate)/*: array|PromiseInterface // <-- php 8 */
+    public function latest(int $lastupdate): array|PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         //get all plans that have changed
@@ -285,10 +286,11 @@ class PlanLatest extends CommonBase
     }
 
     /**
-     * @throws Exception
+     * @param float $time
      * @return array|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function getMessages(float $time)/*: array|PromiseInterface // <-- php 8 */
+    public function getMessages(float $time): array|PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $promise = $this->getAsyncDatabase()->query(
