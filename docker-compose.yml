@@ -8,6 +8,7 @@ services:
     environment:
       DATABASE_PORT: ${DATABASE_PORT:-3306}
       MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
       MYSQL_DATABASE: msp_server_manager
     ports:
       - "${DATABASE_PORT:-3306}"

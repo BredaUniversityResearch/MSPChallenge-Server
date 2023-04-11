@@ -139,15 +139,6 @@ class WsServer extends EventDispatcher implements
             implode(PHP_EOL, collect($headers)->mapWithKeys(fn($x, $k) => [$k => "$k=$x"])->all())
         );
 
-        // fix deprecated headers
-        foreach (self::HEADER_KEYS_DEPRECATED as $newHeaderName => $deprecatedHeaderName) {
-            if (!array_key_exists($deprecatedHeaderName, $headers)) {
-                continue;
-            }
-            $headers[$newHeaderName] = $headers[$deprecatedHeaderName];
-            unset($headers[$deprecatedHeaderName]);
-        }
-
         if (!array_key_exists(self::HEADER_KEY_GAME_SESSION_ID, $headers) ||
             !array_key_exists(self::HEADER_KEY_MSP_API_TOKEN, $headers)) {
             // required headers are not there, do not allow connection

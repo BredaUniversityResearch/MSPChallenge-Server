@@ -2,6 +2,17 @@ version: "3.7"
 
 # Development environment override
 services:
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+      ADMINER_PLUGINS: 'sql-log'
+    ports:
+      - 8080:8080
+    networks:
+      - database
+
   php:
     build:
       target: app_php_dev

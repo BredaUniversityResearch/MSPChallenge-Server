@@ -73,8 +73,10 @@ class ServerManager extends Base
         $settings = $manager->getRepository(Setting::class)->findAll();
         foreach ($settings as $setting) {
             $name = $setting->getName();
-            if (property_exists($this, $name)) {
-                $this->$name = $setting->getValue();
+            // snake to lower camel case
+            $propertyName = lcfirst(str_replace('_', '', ucwords($name, '_')));
+            if (property_exists($this, $propertyName)) {
+                $this->$propertyName = $setting->getValue();
             }
         }
 

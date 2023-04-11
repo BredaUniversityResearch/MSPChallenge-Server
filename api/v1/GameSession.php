@@ -6,8 +6,8 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Domain\WsServer\ClientHeaderKeys;
 use App\Entity\ServerManager\GameList;
-use App\Entity\ServerManager\GameSave;
 use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;
@@ -16,7 +16,6 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use ReflectionClass;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 use ZipArchive;
@@ -749,8 +748,9 @@ class GameSession extends Base
 
         $requestHeader = apache_request_headers();
         $headers = array();
-        if (isset($requestHeader["MSPAPIToken"])) {
-            $headers[] = "MSPAPIToken: ".$requestHeader["MSPAPIToken"];
+        if (isset($requestHeader[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
+            $headers[] = ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.
+                $requestHeader[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN];
         }
         
         $this->CallBack($baseUrl.$apiUrl, $postValues, $headers, $async);

@@ -3,6 +3,7 @@
 namespace ServerManager;
 
 use App\Domain\Helper\Config;
+use App\Domain\WsServer\ClientHeaderKeys;
 
 class Base
 {
@@ -95,7 +96,7 @@ class Base
             "POST",
             $url,
             $data2send,
-            array("MSPAPIToken: ".$api_access_token),
+            array(ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.$api_access_token),
             false
         );
         return json_decode($call_return, true);
