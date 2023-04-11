@@ -692,8 +692,8 @@ class SEL extends Base
         $layerNames = json_decode($layer_names);
         foreach ($layerNames as $layerName) {
             $this->getDatabase()->query(
-                "UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1 WHERE layer_name = ?",
-                array(microtime(true), $layerName)
+                "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)), layer_melupdate=1 WHERE layer_name=?",
+                array($layerName)
             );
         }
     }
@@ -958,8 +958,8 @@ class SEL extends Base
     {
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query(
-            'UPDATE game SET game_sel_lastmonth=?, game_sel_lastupdate=?',
-            [$month, microtime(true)]
+            'UPDATE game SET game_sel_lastmonth=?, game_sel_lastupdate=UNIX_TIMESTAMP(NOW(6))',
+            [$month]
         );
     }
 

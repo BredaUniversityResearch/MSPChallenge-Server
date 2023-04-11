@@ -205,7 +205,7 @@ class GameTick extends TickBase
         // set the default update query and its values
         $qb
             ->update('game')
-            ->set('game_lastupdate', sprintf('%.4f', microtime(true)))
+            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(4))')
             ->set('game_currentmonth', (string)$currentMonth)
             ->set('game_planning_monthsdone', (string)$monthsDone);
 

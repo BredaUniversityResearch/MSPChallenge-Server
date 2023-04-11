@@ -440,7 +440,7 @@ class Game extends Base
             ->createQueryBuilder();
         $qb
             ->update('game')
-            ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
+            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
             ->set('game_state', $qb->createPositionalParameter($state));
         if ($currentState["game_state"] == "SETUP") {
             //Starting plans should be implemented when we any state "PLAY"

@@ -228,7 +228,7 @@ class GameLatest extends CommonBase
                 $this->getAsyncDatabase()->query(
                     $qb
                         ->update('game')
-                        ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                        ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 )
                 ->done(
                     function (Result $result) use (&$tick, $assureGameLatestUpdate) {

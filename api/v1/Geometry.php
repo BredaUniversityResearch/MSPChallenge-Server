@@ -84,7 +84,7 @@ class Geometry extends Base
                         return $this->getAsyncDatabase()->query(
                             $qb
                                 ->update('plan')
-                                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                                ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
                         );
                     });
