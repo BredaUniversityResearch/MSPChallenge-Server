@@ -115,10 +115,12 @@ class KpiLatest extends CommonBase
     }
 
     /**
-     * @throws Exception
+     * @param int $time
+     * @param int $country
      * @return array|PromiseInterface
+     * @throws Exception
      */
-    public function latest(int $time, int $country)/*: array|PromiseInterface // <-- php 8 */
+    public function latest(int $time, int $country): array|PromiseInterface
     {
         $toPromiseFunctions[] = $this->createPromiseFunctionKpi($time, $country, 'ECOLOGY');
         $toPromiseFunctions[] = $this->createPromiseFunctionKpi($time, $country, 'SHIPPING');

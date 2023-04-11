@@ -768,7 +768,7 @@ class Game extends Base
      * @return array|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetGameDetails()/*: array|PromiseInterface // <-- php 8 */
+    public function GetGameDetails(): array|PromiseInterface
     {
         $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()

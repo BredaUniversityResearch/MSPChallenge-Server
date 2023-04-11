@@ -362,7 +362,7 @@ class Energy extends Base
         int $plan,
         bool $distribution_only,
         int $persistent = -1
-    ) {/*: int|PromiseInterface // <-- php 8 */
+    ): int|PromiseInterface {
         $deferred = new Deferred();
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $this->getAsyncDatabase()->query(
