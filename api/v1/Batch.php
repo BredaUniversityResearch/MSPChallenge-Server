@@ -312,7 +312,7 @@ class Batch extends Base
                         $qb
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Success'))
-                            ->set('api_batch_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                            ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                             ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
                     )
                     ->then(function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
@@ -335,7 +335,7 @@ class Batch extends Base
                         $qb
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
-                            ->set('api_batch_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                            ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                             ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
                     );
                     // Propagate by returning rejection

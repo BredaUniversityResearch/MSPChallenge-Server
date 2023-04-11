@@ -641,13 +641,14 @@ class Layer extends Base
 
         if ($rasterDataUpdated) {
             $this->getDatabase()->query(
-                "UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1, layer_raster = ? WHERE layer_id = ?",
-                array(microtime(true), json_encode($rasterData), $layerData[0]['layer_id'])
+                "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)), layer_melupdate=1, layer_raster=? ".
+                    "WHERE layer_id = ?",
+                array(json_encode($rasterData), $layerData[0]['layer_id'])
             );
         } else {
             $this->getDatabase()->query(
-                "UPDATE layer SET layer_lastupdate = ?, layer_melupdate = 1 WHERE layer_id = ?",
-                array(microtime(true), $layerData[0]['layer_id'])
+                "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)), layer_melupdate=1 WHERE layer_id=?",
+                array($layerData[0]['layer_id'])
             );
         }
     }

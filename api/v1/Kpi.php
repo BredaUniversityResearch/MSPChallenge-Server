@@ -76,12 +76,11 @@ class Kpi extends Base
         return (int)$this->getDatabase()->query(
             "
             INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE kpi_value = ?, kpi_lastupdate = ?
+            VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(NOW(6)), ?, ?)
+            ON DUPLICATE KEY UPDATE kpi_value=?, kpi_lastupdate=UNIX_TIMESTAMP(NOW(6))
             ",
             array(
-                $kpiName, $kpiValue, $kpiMonth, $kpiType, microtime(true), $kpiUnit, $kpiCountry, $kpiValue,
-                microtime(true)
+                $kpiName, $kpiValue, $kpiMonth, $kpiType, $kpiUnit, $kpiCountry, $kpiValue
             ),
             true
         );
