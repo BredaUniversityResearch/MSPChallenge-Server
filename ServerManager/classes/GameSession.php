@@ -185,7 +185,6 @@ class GameSession extends Base
     public function sendCreateRequest($allow_recreate = 0)
     {
         $geoserver = new GeoServer();
-        $geoserver->setJWT($this->getJWT());
         $geoserver->id = $this->game_geoserver_id;
         $geoserver->get();
 

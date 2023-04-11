@@ -13,7 +13,6 @@ $user = new User();
 
 $user->hasToBeLoggedIn();
 
-$gamesession->setJWT($_POST['jwt'] ?? "");
 $gamesession->processPostedVars();
 $gamesession->id = -1;
 $gamesession->game_server_id = 1;

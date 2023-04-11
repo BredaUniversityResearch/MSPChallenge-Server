@@ -13,9 +13,6 @@ $user = new User();
 $user->hasToBeLoggedIn();
 
 $servermanager->get();
-
-// optionally change all the object vars
-$servermanager->setJWT($_POST['jwt'] ?? "");
 $servermanager->processPostedVars();
 
 // ready to do final actual update
