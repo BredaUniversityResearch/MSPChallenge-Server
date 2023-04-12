@@ -41,7 +41,7 @@ alias detlw="detl app-ws-server.log"
 # de + tail log (tl) + msw (m)
 alias detlm="detl msw.log"
 # de + top (t)
-alias det='de top'
+alias det='de top; de pkill -f top'
 # de + choose profile (cpf) to "Choose Blackfire profile on running websocket server process"
 alias decpf='de pkill -SIGUSR1 -f "php bin/console app:ws-server"'
 # de + choose profile (rpf) to "Run Blackfire profile on running websocket server process"
