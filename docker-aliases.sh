@@ -35,7 +35,7 @@ alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw]\n'; de 
 # de + list (l) + log (l) + supervisor (s)
 alias dells="de ls -l /var/log/supervisor/"
 # de + tail log (tl)
-alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files names:" && dells && exit 1)) && (echo "press Ctrl+C to exit tail log"; de tail -f /var/log/supervisor/$1); unset -f f; } ; f'
+alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files names:" && dells && exit 1)) && (echo "press Ctrl+C to exit tail log"; de tail -f /var/log/supervisor/$1 ; de pkill -f "tail -f /var/log/supervisor/$1"); unset -f f; } ; f'
 # de + tail log (tl) + websocket server (w)
 alias detlw="detl app-ws-server.log"
 # de + tail log (tl) + msw (m)
