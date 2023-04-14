@@ -2181,6 +2181,7 @@ class Plan extends Base
                         'restriction_size' => 'plan_restriction_area_size'
                     ];
                     foreach ($settings as $record => $setting) {
+                        $transformedSetting = [];
                         array_walk(
                             $setting,
                             function ($value, $key) use (&$transformedSetting, $settingsMapper) {
