@@ -19,10 +19,6 @@ class MSPBrowserFactory
         // any proxy required for the external calls of any kind
         //  (MSP Authoriser, BUas GeoServer, or any other GeoServer)
         $connector = null;
-        $proxy ??= $_ENV['MSP_BROWSER_PROXY'] ?? null;
-        if ($proxy != null) {
-            $connector = new ProxyConnector($proxy);
-        }
         $proxy = Config::GetInstance()->GetAuthWithProxy();
         if (!empty($proxy) && !str_contains($targetUrl, GameSession::GetRequestApiRoot()) &&
             !str_contains($targetUrl, "localhost") && Base::PHPCanProxy()

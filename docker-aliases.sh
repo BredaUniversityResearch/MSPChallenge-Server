@@ -8,13 +8,12 @@ fi
 # ede = export (e) dotenv (d) environmental variables (e)
 alias ede='unset $(docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
-PRE_DCU="rm -f config composer.json composer.lock"
 DCU_BASE="MSYS_NO_PATHCONV=1 BLACKFIRE_SERVER_ID=$BLACKFIRE_SERVER_ID BLACKFIRE_SERVER_TOKEN=$BLACKFIRE_SERVER_TOKEN BLACKFIRE_CLIENT_ID=$BLACKFIRE_CLIENT_ID BLACKFIRE_CLIENT_TOKEN=$BLACKFIRE_CLIENT_TOKEN CADDY_MERCURE_JWT_SECRET=$CADDY_MERCURE_JWT_SECRET docker compose"
-alias dcu="ede && $PRE_DCU && SERVER_NAME=:80 $DCU_BASE up -d --remove-orphans"
+alias dcu="ede && $DCU_BASE up -d --remove-orphans"
 # dcu + xdebug (x)
-alias dcux="ede && $PRE_DCU && XDEBUG_MODE=debug SERVER_NAME=:80 $DCU_BASE up -d --remove-orphans"
+alias dcux="ede && XDEBUG_MODE=debug $DCU_BASE up -d --remove-orphans"
 # dcu + production (p)
-alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && $DCU_BASE -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
+alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$DCU_BASE -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
 [[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER='mspchallenge-server-php-1'
 # dl = docker(d) logs(l) with default container mspchallenge-server-php-1
