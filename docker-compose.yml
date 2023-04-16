@@ -28,6 +28,9 @@ services:
     ]
     networks:
       - database
+    volumes:
+      - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
+
   php:
     build:
       context: .
