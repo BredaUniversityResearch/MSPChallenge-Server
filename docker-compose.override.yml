@@ -36,7 +36,7 @@ services:
       #  from the bind-mount for better performance by enabling the next line:
       - /srv/app/vendor
     environment:
-      SERVER_NAME: ":80"
+      SERVER_NAME: ${SERVER_NAME:-:80}
       MERCURE_PUBLIC_URL: https://:80/.well-known/mercure
       # force web(socket) server over 8080 (mitmproxy reverse proxy)
       WEB_SERVER_PORT: 8080
@@ -51,7 +51,7 @@ services:
 
   caddy:
     environment:
-      SERVER_NAME: ":80"
+      SERVER_NAME: ${SERVER_NAME:-:80}
     volumes:
       - ./public:/srv/app/public:ro
       - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
