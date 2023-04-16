@@ -55,3 +55,5 @@ alias dewssx="${ALIAS_DE_BASE} -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName
 # docker (d) run (r) grafana (g)
 MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec ${DATABASE_CONTAINER} bash -c 'mysql -u root -p${DATABASE_PASSWORD} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
 alias drg="${MY2_SETUP} && docker stop grafana ; docker rm grafana ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana --label com.docker.compose.project=mspchallenge-server --network=mspchallenge-server_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
+# docker (d) run (r) mitmproxy (m)
+alias drm="docker stop mitmproxy ; docker rm mitmproxy ; MSYS_NO_PATHCONV=1 docker run -d -p 8080:8080 -p 8081:8081 --name=mitmproxy --label com.docker.compose.project=mspchallenge-server --network=mspchallenge-server_php mitmproxy/mitmproxy:9.0.1 mitmweb --web-host 0.0.0.0 --mode reverse:http://caddy --set websocket=true"

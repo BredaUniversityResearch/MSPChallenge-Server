@@ -15,7 +15,7 @@ services:
       - database
 
   mitmproxy:
-    image: mitmproxy/mitmproxy
+    image: mitmproxy/mitmproxy:9.0.1
     container_name: mitmproxy
     entrypoint: "mitmweb --web-host 0.0.0.0 --mode reverse:http://caddy --set websocket=true"
     networks:
