@@ -77,13 +77,6 @@ class GameSession extends Base
         $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
 
-        // this is always called from inside the docker environment,so just use http://caddy:80/...
-        if (getenv('DOCKER')) {
-            $deferred = new Deferred();
-            $GLOBALS['RequestApiRoot'] = 'http://caddy:80'.$apiRoot;
-            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'])->promise();
-        }
-
         $_SERVER['HTTPS'] ??= 'off';
         /** @noinspection HttpUrlsUsage */
         $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : "http://";
@@ -134,13 +127,6 @@ class GameSession extends Base
         /** @noinspection HttpUrlsUsage */
         $protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
         $apiFolder = "/ServerManager/api/";
-
-        // this is always called from inside the docker environment,so just use http://caddy:80/...
-        if (getenv('DOCKER')) {
-            $GLOBALS['ServerManagerApiRoot'] = 'http://caddy:80'.$apiFolder;
-            return $GLOBALS['ServerManagerApiRoot'];
-        }
-
         $dbConfig = Config::GetInstance()->DatabaseConfig();
         $temporaryConnection = Database::CreateTemporaryDBConnection(
             $dbConfig["host"],

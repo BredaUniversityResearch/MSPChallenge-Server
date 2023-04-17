@@ -35,9 +35,12 @@ services:
       # If you develop on Mac or Windows you can remove the vendor/ directory
       #  from the bind-mount for better performance by enabling the next line:
       - /srv/app/vendor
+    networks:
+      - mitmproxy
     environment:
-      SERVER_NAME: ${SERVER_NAME:-:80}
-      MERCURE_PUBLIC_URL: https://:80/.well-known/mercure
+      WEB_SERVER_HOST: mitmproxy
+      URL_WEB_SERVER_HOST: mitmproxy
+      URL_WS_SERVER_HOST: mitmproxy
       # force web(socket) server over 8080 (mitmproxy reverse proxy)
       WEB_SERVER_PORT: 8080
       URL_WEB_SERVER_PORT: 8080
@@ -58,3 +61,6 @@ services:
 
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
+
+networks:
+  mitmproxy:
