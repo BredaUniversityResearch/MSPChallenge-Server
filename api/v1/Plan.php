@@ -2166,37 +2166,50 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetRestrictionAreas(int $plan_id, array $settings): ?PromiseInterface
+    public function SetRestrictionAreas(int $plan_id, array $settings = []): ?PromiseInterface
     {
-        $toPromiseFunctions = [];
-        foreach ($settings as $setting) {
-            $toPromiseFunctions[] = tpf(function () use ($plan_id, $setting) {
-                // todo: convert to ->upsert().
-                return $this->getAsyncDatabase()->queryBySQL(
-                    'INSERT INTO plan_restriction_area (
-                    plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id,
-                    plan_restriction_area_entity_type, plan_restriction_area_size
-                    ) VALUES(?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE plan_restriction_area_size = ?',
-                    [
-                        $plan_id, $setting["layer_id"], $setting["team_id"], $setting["entity_type_id"],
-                        $setting["restriction_size"], $setting["restriction_size"]
-                    ]
-                );
-            });
-        }
-        $toPromiseFunctions[] = tpf(function () use ($plan_id) {
-            $qb = $this->getAsyncDatabase()->createQueryBuilder();
-            return $this->getAsyncDatabase()->query(
-                $qb
-                    ->update('plan')
-                    ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
-                    ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan_id)))
-            );
-        });
-        $promise = parallel($toPromiseFunctions)
-            ->then(function (/* array $results */) {
-                return null; // we do not care about the result
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $qb->delete('plan_restriction_area')
+            ->where($qb->expr()->eq('plan_restriction_area_plan_id', $qb->createPositionalParameter($plan_id)));
+        $promise = $this->getAsyncDatabase()->query($qb)
+            ->then(function (/* array $results */) use ($settings, $plan_id) {
+                if (!empty($settings)) {
+                    $settingsMapper = [
+                        'layer_id' => 'plan_restriction_area_layer_id',
+                        'team_id' => 'plan_restriction_area_country_id',
+                        'entity_type_id' => 'plan_restriction_area_entity_type',
+                        'restriction_size' => 'plan_restriction_area_size'
+                    ];
+                    foreach ($settings as $record => $setting) {
+                        $transformedSetting = [];
+                        array_walk(
+                            $setting,
+                            function ($value, $key) use (&$transformedSetting, $settingsMapper) {
+                                $transformedSetting[($settingsMapper[$key] ?? $key)] = $value;
+                            }
+                        );
+                        $transformedSetting['plan_restriction_area_plan_id'] = $plan_id;
+                        $toPromiseFunctions[] = tpf(function () use ($transformedSetting) {
+                            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                            $qb->insert('plan_restriction_area')
+                                ->values($transformedSetting);
+                            return $this->getAsyncDatabase()->query($qb);
+                        });
+                    }
+                }
+                $toPromiseFunctions[] = tpf(function () use ($plan_id) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->update('plan')
+                            ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                            ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan_id)))
+                    );
+                });
+                return parallel($toPromiseFunctions)
+                    ->then(function (/* array $results */) {
+                        return null; // we do not care about the result
+                    });
             });
         return $this->isAsync() ? $promise : await($promise);
     }
