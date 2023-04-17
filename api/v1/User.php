@@ -255,7 +255,7 @@ class User extends Base
         $qb->select('user_id', 'user_name', 'user_country_id')
             ->from('user')
             ->where($qb->expr()->eq('user_loggedoff', 0))
-            ->andWhere($qb->expr()->lt('UNIX_TIMESTAMP() - user_lastupdate', 65));
+            ->andWhere($qb->expr()->lt('UNIX_TIMESTAMP() - user_lastupdate', 3600));
         if ($country_id > 0) {
             $qb->andWhere($qb->expr()->eq('user_country_id', $country_id));
         }
