@@ -1,8 +1,8 @@
 <?php
 
-// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
 use App\Domain\WsServer\ClientHeaderKeys;
 
+// phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
 class TestBase
 {
     const TARGET_SERVER_BASE_URL = "http://localhost/";
