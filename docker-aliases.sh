@@ -8,7 +8,7 @@ fi
 # ede = export (e) dotenv (d) environmental variables (e)
 alias ede='unset $(docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
-PRE_DCU="rm -f config composer.json composer.lock"
+PRE_DCU="rm -f config composer.json composer.lock symfony.lock"
 DCU_BASE="MSYS_NO_PATHCONV=1 BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID} BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN} BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID} BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN} CADDY_MERCURE_JWT_SECRET=${CADDY_MERCURE_JWT_SECRET} docker compose"
 alias dcu="ede && $PRE_DCU && ${DCU_BASE} up -d --remove-orphans"
 # dcu + xdebug (x)
