@@ -6,17 +6,14 @@ use App\Domain\Helper\Config;
 
 class Base
 {
-    protected ?string $jwt = null;
-
-    public function setJWT($jwt): void
+    public function hasJWT(): bool
     {
-        $this->jwt = $jwt;
+        return Session::get("currentToken") !== null;
     }
 
     public function getJWT(): string
     {
-        $this->jwt = Session::get("currentToken");
-        if (null === $this->jwt) {
+        if (null === Session::get("currentToken")) {
             // this will only happen if this is called without a logged-in user on ServerManager
             // meaning: when the WebSocket server recreates a demo session that reached the end
             try {
@@ -28,12 +25,14 @@ class Base
                     "login_check",
                     $vars
                 );
-                $this->jwt = $authoriserCall["token"] ?? "";
+                if (null !== $authoriserCall["token"]) {
+                    Session::put('currentToken', $authoriserCall["token"]);
+                }
             } catch (\Exception $e) {
-                $this->jwt = null;
+                // nothing to do.
             }
         }
-        return $this->jwt;
+        return Session::get("currentToken") ?? '';
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -122,9 +121,10 @@ class Base
      */
     public function callAuthoriser(string $method, string $endpoint, array $data2send = [])
     {
-        $headers = [
-            'Authorization: Bearer '.$this->getJWT()
-        ];
+        $headers = [];
+        if ($this->hasJWT()) {
+            $headers[] = 'Authorization: Bearer ' . $this->getJWT();
+        }
         $callReturn = self::callAPI(
             $method,
             ServerManager::getInstance()->GetMSPAuthAPI().$endpoint,

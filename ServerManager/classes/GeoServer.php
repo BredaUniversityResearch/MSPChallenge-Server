@@ -85,7 +85,7 @@ class GeoServer extends Base
             }
         }
 
-        if (1 == $this->id && null !== $this->jwt) {
+        if (1 == $this->id && null !== $this->getJWT()) {
             $this->retrievePublic(); // this will get the BUas public GeoServer address and credentials
         }
 

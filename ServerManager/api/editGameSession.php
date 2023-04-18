@@ -16,8 +16,6 @@ $user->hasToBeLoggedIn();
 $gamesession->id = $_POST["session_id"] ?? "";
 $gamesession->get();
 
-// this endpoint will need the JWT in case of recreate
-$gamesession->setJWT($_POST['jwt'] ?? "");
 // now optionally change all the object vars
 $gamesession->processPostedVars();
 
