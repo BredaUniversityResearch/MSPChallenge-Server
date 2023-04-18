@@ -574,14 +574,17 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
     {
-        // todo: startup the watchdog inside the docker container once the simulations are fully compatible with Linux
-        //  The current alternative is running MSW.exe as a service on the Windows host running docker
+        // no need to startup watchdog in docker, handled by supervisor.
+        if (getenv('DOCKER')) {
+            return;
+        }
+        // below code is only necessary for Windows
         if (!str_starts_with(php_uname(), "Windows")) {
             return;
         }
         self::StartSimulationExe([
             'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/simulations/4.0-beta10/MSW/'
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/simulations/v1/win-x64/'
         ]);
     }
 
