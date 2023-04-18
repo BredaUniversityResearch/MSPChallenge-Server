@@ -84,22 +84,38 @@
             "cache:clear": "symfony-cmd"
         },
         "post-install-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "bash tools/cghooks-fresh-install.sh"
         ],
         "post-update-cmd": [
-            "@auto-scripts"
-        ]
+            "@auto-scripts",
+            "bash tools/cghooks-fresh-install.sh"
+        ],
+        "cghooks": "vendor/bin/cghooks"
     },
     "conflict": {
         "symfony/symfony": "*"
     },
     "extra": {
+        "hooks": {
+            "config": {
+                "stop-on-failure": ["pre-push"]
+            },
+            "post-merge": [
+                "bash install.sh"
+            ],
+            "pre-push": [
+                "bash test.sh",
+                "vendor/bin/phpstan analyse"
+            ]
+        },
         "symfony": {
             "allow-contrib": false,
             "require": "5.4.*"
         }
     },
     "require-dev": {
+        "brainmaestro/composer-git-hooks": "dev-master",
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "jetbrains/phpstorm-attributes": "^1.0",
         "phpstan/extension-installer": "^1.2",
@@ -110,5 +126,11 @@
         "symfony/maker-bundle": "^1.43",
         "symfony/stopwatch": "5.4.*",
         "symfony/web-profiler-bundle": "5.4.*"
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:BredaUniversityResearch/composer-git-hooks.git"
+        }
+    ]
 }
