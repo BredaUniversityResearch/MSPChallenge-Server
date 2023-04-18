@@ -36,13 +36,15 @@ class ServerManager extends Base
           '4.0-beta8',
           '4.0-beta9',
           '4.0-beta10',
-          '4.0-rc1'
+          '4.0-rc1',
+          '4.0-rc2'
         ];
         $this->serverAcceptedClients = [
           '4.0-beta8' => '2021-04-20 13:54:41Z',
           '4.0-beta9' => '2021-11-08 08:13:08Z',
           '4.0-beta10' => '2022-05-24 00:00:00Z',
-          '4.0-rc1' => '2023-02-02 00:00:00Z'
+          '4.0-rc1' => '2023-02-02 00:00:00Z',
+          '4.0-rc2' => '2023-02-02 00:00:00Z'
         ];
         $this->serverCurrentVersion = end($this->serverVersions);
         $this->serverUpgrades = [ // make sure these functions exist in server API update class and is actually
@@ -51,11 +53,7 @@ class ServerManager extends Base
           'From40beta7To40beta9',
           'From40beta7To40beta10',
           'From40beta8To40beta10',
-          'From40beta9To40beta10',
-          'From40beta7To40rc1',
-          'From40beta8To40rc1',
-          'From40beta9To40rc1',
-          'From40beta10To40rc1',
+          'From40beta9To40beta10'
         ];
         $this->setRootVars();
     }
