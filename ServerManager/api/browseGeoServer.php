@@ -12,8 +12,6 @@ $user = new User();
 
 $user->hasToBeLoggedIn();
 
-$geoserver->setJWT($_POST['jwt'] ?? "");
-
 $api->setPayload(["geoserverslist" => $geoserver->getList()]);
 $api->setStatusSuccess();
 $api->Return();
