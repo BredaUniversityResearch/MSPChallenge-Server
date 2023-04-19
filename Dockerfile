@@ -45,6 +45,12 @@ RUN set -eux; \
         pcntl \
     ;
 
+# if you want to debug on prod, enable below lines:
+##   Also check ./docker/php/conf.d/app.prod.ini
+#ENV XDEBUG_MODE=debug
+#RUN set -eux; \
+#	install-php-extensions xdebug
+
 ###> recipes ###
 ###> doctrine/doctrine-bundle ###
 RUN docker-php-ext-install mysqli pdo pdo_mysql
