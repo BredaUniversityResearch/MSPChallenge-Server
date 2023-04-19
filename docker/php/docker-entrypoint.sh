@@ -45,6 +45,20 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		fi
 	fi
 
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX export
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX export
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX raster
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX raster
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX running_session_config
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX running_session_config
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/log
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/log
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/saves
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/saves
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/session_archive
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/session_archive
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX session_archive
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX session_archive
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
 
