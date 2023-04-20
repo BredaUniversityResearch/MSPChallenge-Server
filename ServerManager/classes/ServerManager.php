@@ -315,8 +315,9 @@ class ServerManager extends Base
 
     public function getTranslatedServerURL(): string
     {
+        $port = $_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80;
         if (($_ENV['URL_WEB_SERVER_HOST'] ?? null) !== null) {
-            return $_ENV['URL_WEB_SERVER_HOST'].':'.($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+            return $_ENV['URL_WEB_SERVER_HOST'].':'.$port;
         }
 
         if (empty($this->serverAddress)) {
@@ -329,11 +330,11 @@ class ServerManager extends Base
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
             if ($_SERVER['SERVER_NAME'] != $this->serverAddress) {
-                return $_SERVER['SERVER_NAME'].':'.($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+                return $_SERVER['SERVER_NAME'].':'.$port;
             }
         }
 
-        return $this->serverAddress.':'.($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+        return $this->serverAddress.':'.$port;
     }
 
     public function getServerManagerRoot(): string
