@@ -637,7 +637,7 @@ class Game extends Base
                 function (/*Exception $e*/) use ($deferred) {
                     self::StartWatchdog();
                     // todo: do another watchdog alive test, with a repeat and failure mechanism ?
-                    sleep(5);
+                    sleep(10);
                     $deferred->resolve();
                 }
             );
