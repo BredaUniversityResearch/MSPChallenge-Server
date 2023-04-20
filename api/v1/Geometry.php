@@ -51,7 +51,7 @@ class Geometry extends Base
         string $data = "",
         int $country = null,
         int $plan = -1
-    )/*: int|PromiseInterface // <-- php 8 */ {
+    ): int|PromiseInterface {
         if ($country == -1) {
             $country = null;
         }
@@ -199,7 +199,7 @@ class Geometry extends Base
      * @return int|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Update(int $id, int $country, string $geometry)/*: int|PromiseInterface // <-- php 8 */
+    public function Update(int $id, int $country, string $geometry): int|PromiseInterface
     {
         $deferred = new Deferred();
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
