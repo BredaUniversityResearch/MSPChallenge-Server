@@ -25,7 +25,7 @@ class Warning extends Base
 
     private function postHandleRemovals(array $removed): PromiseInterface
     {
-        $removed = filter_var_array($removed, FILTER_VALIDATE_INT);
+        $removed = array_map(fn($x) => (string)$x, filter_var_array($removed, FILTER_VALIDATE_INT));
         if (empty($removed)) {
             return resolveOnFutureTick(new Deferred())->promise();
         }
@@ -35,7 +35,7 @@ class Warning extends Base
             $qb
                 ->update('warning')
                 ->set('warning_active', '0')
-                ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
+                ->set('warning_last_update', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->in('warning_id', $removed))
         );
     }
@@ -70,7 +70,7 @@ class Warning extends Base
                     $qb
                         ->insert('warning')
                         ->values([
-                            'warning_last_update' => $qb->createPositionalParameter(microtime(true)),
+                            'warning_last_update' => 'UNIX_TIMESTAMP(NOW(6))',
                             'warning_active' => 1,
                             'warning_layer_id' => $qb->createPositionalParameter($planLayerId),
                             'warning_issue_type' => $qb->createPositionalParameter($addedIssue['type']),
@@ -92,7 +92,7 @@ class Warning extends Base
                 return $this->getAsyncDatabase()->query(
                     $qb
                         ->update('warning')
-                        ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
+                        ->set('warning_last_update', 'UNIX_TIMESTAMP(NOW(6))')
                         ->set('warning_active', '1')
                         ->where($qb->expr()->eq(
                             'warning_id',
@@ -110,7 +110,7 @@ class Warning extends Base
                     return $this->getAsyncDatabase()->query(
                         $qb
                             ->update('warning')
-                            ->set('warning_last_update', $qb->createPositionalParameter(microtime(true)))
+                            ->set('warning_last_update', 'UNIX_TIMESTAMP(NOW(6))')
                             ->set('warning_active', '0')
                             ->where($qb->expr()->eq(
                                 'warning_id',
@@ -216,15 +216,13 @@ class Warning extends Base
     {
         $promise = $this->getAsyncDatabase()->delete('warning', ['warning_source_plan_id' => $layerId])
             ->then(function (/* Result $result */) use ($layerId) {
-                return $this->getAsyncDatabase()->update(
-                    'warning',
-                    [
-                        'warning_source_plan_id' => $layerId
-                    ],
-                    [
-                        'warning_active' => 0,
-                        'warning_last_update' => microtime(true)
-                    ]
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->update('warning')
+                        ->set('warning_active', $qb->createPositionalParameter(0))
+                        ->set('warning_last_update', 'UNIX_TIMESTAMP(NOW(6))')
+                        ->where($qb->expr()->eq('warning_source_plan_id', $qb->createPositionalParameter($layerId)))
                 );
             });
         return $this->isAsync() ? $promise : await($promise);
@@ -242,10 +240,9 @@ class Warning extends Base
     {
         $this->getDatabase()->query(
             "
-            UPDATE shipping_warning SET shipping_warning_active = 0, shipping_warning_lastupdate = ?
+            UPDATE shipping_warning SET shipping_warning_active=0, shipping_warning_lastupdate=UNIX_TIMESTAMP(NOW(6))
             WHERE shipping_warning_active = 1
-            ",
-            array(microtime(true))
+            "
         );
 
         $newIssues = json_decode($issues, true);
@@ -255,12 +252,12 @@ class Warning extends Base
                 INSERT INTO shipping_warning (
                     shipping_warning_lastupdate, shipping_warning_source_geometry_persistent_id,
                     shipping_warning_destination_geometry_persistent_id, shipping_warning_message
-                ) VALUES(?, ?, ?, ?)
-				ON DUPLICATE KEY UPDATE shipping_warning_active = 1, shipping_warning_lastupdate = ?
+                ) VALUES(UNIX_TIMESTAMP(NOW(6)), ?, ?, ?)
+				ON DUPLICATE KEY UPDATE shipping_warning_active=1, shipping_warning_lastupdate=UNIX_TIMESTAMP(NOW(6))
 				",
                 array(
-                    microtime(true), $issue['source_geometry_persistent_id'],
-                    $issue['destination_geometry_persistent_id'], $issue['message'], microtime(true)
+                    $issue['source_geometry_persistent_id'],
+                    $issue['destination_geometry_persistent_id'], $issue['message']
                 )
             );
         }
