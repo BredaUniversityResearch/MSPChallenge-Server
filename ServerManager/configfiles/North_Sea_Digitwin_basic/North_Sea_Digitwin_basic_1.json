@@ -31007,7 +31007,7 @@
                 ]
             },
             {
-                "layer_name": "NS_Natura_2000_DT_types",
+                "layer_name": "NS_Natura_2000_DT_type",
                 "layer_geotype": "polygon",
                 "layer_entity_value_max": null,
                 "layer_short": "Natura 2000",
@@ -31075,8 +31075,7 @@
                         "investmentCost": 0,
                         "availability": -12,
                         "media": ""
-                    },
-                    {
+                    },                    {
                         "displayName": "Habitats Directive",
                         "approval": "EEZ",
                         "value": 1,
@@ -31107,6 +31106,33 @@
                         "displayName": "Birds Directive",
                         "approval": "EEZ",
                         "value": 2,
+                        "displayPolygon": 1,
+                        "polygonColor": "#0070FFFF",
+                        "polygonPatternName": "1",
+                        "innerGlowEnabled": 0,
+                        "innerGlowRadius": 0,
+                        "innerGlowIterations": 0,
+                        "innerGlowMultiplier": 0,
+                        "innerGlowPixelSize": 3,
+                        "displayLines": 1,
+                        "lineColor": "#0070FFFF",
+                        "lineWidth": 1,
+                        "lineIcon": null,
+                        "linePatternType": "Solid",
+                        "displayPoints": 0,
+                        "pointColor": "#000000FF",
+                        "pointSize": 0.4,
+                        "pointSpriteName": "None",
+                        "description": "",
+                        "capacity": 0,
+                        "investmentCost": 0,
+                        "availability": -12,
+                        "media": ""
+                    },
+                    {
+                        "displayName": "Birds & Habitats Directive",
+                        "approval": "EEZ",
+                        "value": 3,
                         "displayPolygon": 1,
                         "polygonColor": "#0070FFFF",
                         "polygonPatternName": "1",
