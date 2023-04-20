@@ -584,8 +584,8 @@ class Game extends Base
         }
         self::StartSimulationExe([
             'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().(
-                $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? '/simulations/4.0-beta10/MSW/'
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/'.(
+                $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/4.0-beta10/MSW/'
             )
         ]);
     }
