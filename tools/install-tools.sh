@@ -65,6 +65,12 @@ function downloadDevTools() {
     return
   fi
 
+  # we do not need adminer on docker, it has its own container.
+  if [[ "${DOCKER}" == "1" ]]; then
+    echo "Docker detected, skipping adminer installation"
+    exit 0
+  fi
+
   if [[ $FORCE == 1 || ! -f ./../public/adminer/index.php ]]; then
     curl --create-dirs -Lso ./../public/adminer/adminer.php https://www.adminer.org/latest-mysql-en.php
     curl --create-dirs -Lso ./../public/adminer/plugins/plugin.php https://raw.github.com/vrana/adminer/master/plugins/plugin.php
