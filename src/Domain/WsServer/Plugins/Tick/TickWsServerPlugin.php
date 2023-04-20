@@ -27,7 +27,7 @@ class TickWsServerPlugin extends Plugin
         parent::__construct('tick' . $gameSessionId, $minIntervalSec);
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
         return tpf(function () {
             return $this->tick()

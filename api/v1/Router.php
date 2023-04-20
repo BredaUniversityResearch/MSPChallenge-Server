@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\ObjectMethod;
+use App\Domain\Helper\Util;
 use App\Domain\WsServer\ClientDisconnectedException;
 use Closure;
 use Exception;
@@ -167,19 +168,14 @@ class Router
         if (!self::AllowedClass($className)) {
             throw new Exception('Invalid class: '. $className);
         }
-
-        try {
-            // since the Router class itself is part of api version, we can just use the Router's class name spaced name
-            //   and replace the last name part
-            $fullClassName = str_replace('Router', $className, self::class);
-            $class = new $fullClassName($method);
-        } catch (\RuntimeException $e) {
-            // attempt class name with all upper case letters
-            $fullClassName = str_replace('Router', strtoupper($className), self::class);
-            $class = new $fullClassName($method);
-        }
-
-        return $class;
+        $fullClassName = match (strtolower($className)) {
+            "cel" => CEL::class,
+            "mel" => MEL::class,
+            "sel" => SEL::class,
+            "gamesession" => GameSession::class,
+            default => str_replace('Router', $className, self::class),
+        };
+        return new $fullClassName($method);
     }
 
     /**

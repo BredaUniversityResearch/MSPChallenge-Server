@@ -58,7 +58,7 @@ function CallServerAPI(url, data = {}, session_id = 0, token = '')
         return  $.ajax({
             url: url,
             method: "POST",
-            headers: { MSPAPIToken: token },
+            headers: { 'Msp-Api-Token': token },
             data: data,
             dataType: "json",
             success: function (result) {

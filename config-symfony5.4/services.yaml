@@ -37,6 +37,8 @@ services:
         arguments:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
 
+    ServerManager\ServerManager:
+
 when@dev:
     services:
         # make classes in src/DataFixtures available to be used as services
@@ -46,3 +48,10 @@ when@dev:
             tags:
                 - 'doctrine.fixture.orm'
                 - 'kernel.event_subscriber'
+
+        App\DataCollector\MSPDataCollector:
+            tags:
+                -
+                    name: data_collector
+                    id: 'App\DataCollector\MSPDataCollector'
+                    template: 'data_collector/msp.html.twig'

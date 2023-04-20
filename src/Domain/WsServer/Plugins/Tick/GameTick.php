@@ -132,7 +132,7 @@ class GameTick extends TickBase
                         $postValues['token'] = $token;
                         $postValues['session_id'] = $this->getGameSessionId();
                         $postValues['action'] = 'demoCheck';
-                        $url = GameSession::GetServerManagerApiRoot().'editGameSession.php';
+                        $url = GameSession::getServerManagerApiRoot().'editGameSession.php';
                         $browser = MSPBrowserFactory::create($url);
                         return $browser
                             ->post(

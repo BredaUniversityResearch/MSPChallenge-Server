@@ -105,8 +105,8 @@ class GameSession extends Base
         }
         $this->password_player = $this->CheckPasswordFormat('password_player', $this->password_player);
 
-        $log_dir = ServerManager::getInstance()->GetSessionLogBaseDirectory();
-        $log_path = $log_dir.ServerManager::getInstance()->GetSessionLogPrefix().$this->id.'.log';
+        $log_dir = ServerManager::getInstance()->getSessionLogBaseDirectory();
+        $log_path = $log_dir.ServerManager::getInstance()->getSessionLogPrefix().$this->id.'.log';
         if (file_exists($log_path)) {
             $log_contents = file_get_contents($log_path);
             if (false === $log_contents) {
@@ -173,7 +173,7 @@ class GameSession extends Base
                 'save_path' => $gamesave->getFullZipPath(),
                 'watchdog_address' => $watchdog->address,
                 'game_id' => $this->id,
-                'response_address' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSession.php',
+                'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php',
                 'allow_recreate' => $allow_recreate,
             ]
         );
@@ -206,7 +206,7 @@ class GameSession extends Base
             'password_player' => base64_encode($this->password_player),
             'watchdog_address' => $watchdog->address,
             'allow_recreate' => $allow_recreate,
-            'response_address' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSession.php',
+            'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php',
         ];
         $server_call = self::callServer(
             'GameSession/CreateGameSession',
@@ -240,7 +240,7 @@ class GameSession extends Base
         }
 
         // after a server upgrade the version might have changed since session was first created
-        $this->server_version = ServerManager::getInstance()->GetCurrentVersion();
+        $this->server_version = ServerManager::getInstance()->getCurrentVersion();
         $this->sendCreateRequest(1);
         $this->setToLoading();
 
@@ -473,7 +473,7 @@ class GameSession extends Base
 
     public function getList($where_array = []): array
     {
-        if (isset($_POST['client_timestamp']) && !ServerManager::getInstance()->IsClientAllowed(
+        if (isset($_POST['client_timestamp']) && !ServerManager::getInstance()->isClientAllowed(
             $_POST['client_timestamp']
         )) {
             return $this->mustUpdateBogusList();
@@ -484,8 +484,8 @@ class GameSession extends Base
             games.game_creation_time, games.game_start_year, games.game_end_month, games.game_current_month,
             games.game_running_til_time,
             games.session_state, games.game_state, games.game_visibility, games.players_active, games.players_past_hour,
-            '".ServerManager::getInstance()->GetServerURLBySessionId()."' AS game_server_address,
-            '".ServerManager::getInstance()->GetWsServerURLBySessionId()."' AS game_ws_server_address,
+            '".ServerManager::getInstance()->getServerURLBySessionId()."' AS game_server_address,
+            '".ServerManager::getInstance()->getWsServerURLBySessionId()."' AS game_ws_server_address,
             watchdogs.name AS watchdog_name, watchdogs.address AS watchdog_address, games.save_id, 
             CASE
                 WHEN games.save_id > 0 THEN 0
@@ -541,7 +541,7 @@ class GameSession extends Base
                         'session_state' => 'archived',
                         'region' => 'none', ];
         $return[1] = ['id' => 0,
-                        'name' => 'Please download and install '.ServerManager::getInstance()->GetCurrentVersion().
+                        'name' => 'Please download and install '.ServerManager::getInstance()->getCurrentVersion().
                             ' from www.mspchallenge.info.',
                         'session_state' => 'archived',
                         'region' => 'none', ];
@@ -554,8 +554,8 @@ class GameSession extends Base
         if ('archived' != $this->session_state) {
             return false;
         }
-        $file = ServerManager::getInstance()->GetSessionArchiveBaseDirectory().
-            ServerManager::getInstance()->GetSessionArchivePrefix();
+        $file = ServerManager::getInstance()->getSessionArchiveBaseDirectory().
+            ServerManager::getInstance()->getSessionArchivePrefix();
         $file .= $this->id.'.zip';
         if (file_exists($file)) {
             return $file;
@@ -583,7 +583,7 @@ class GameSession extends Base
 
     public function upgrade(): bool
     {
-        $upgrade = ServerManager::getInstance()->CheckForUpgrade($this->server_version);
+        $upgrade = ServerManager::getInstance()->checkForUpgrade($this->server_version);
         if (false !== $upgrade) {
             $server_call = self::callServer(
                 'update/'.$upgrade,
@@ -594,7 +594,7 @@ class GameSession extends Base
             if (!$server_call['success']) {
                 throw new ServerManagerAPIException($server_call['message']);
             }
-            $this->server_version = ServerManager::getInstance()->GetCurrentVersion();
+            $this->server_version = ServerManager::getInstance()->getCurrentVersion();
 
             return true;
         }
@@ -616,12 +616,12 @@ class GameSession extends Base
         }
         $server_call = self::callServer(
             'gamesession/ArchiveGameSession',
-            ['response_url' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSession.php'],
+            ['response_url' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php'],
             $this->id,
             $this->api_access_token
         );
         if (!$server_call['success']) {
-            throw new ServerManagerAPIException($server_call['message']);
+            throw new ServerManagerAPIException($server_call['message'] ?? 'unknown error');
         }
         $this->session_state = 'archived';
         $this->edit();
@@ -659,7 +659,7 @@ class GameSession extends Base
     public function processZip(): bool
     {
         if (isset($_POST['zippath']) && is_file($_POST['zippath'])) {
-            $outputDirectory = ServerManager::getInstance()->GetSessionArchiveBaseDirectory();
+            $outputDirectory = ServerManager::getInstance()->getSessionArchiveBaseDirectory();
             $storeFilePath = $outputDirectory.basename($_POST['zippath']);
             rename($_POST['zippath'], $storeFilePath);
 

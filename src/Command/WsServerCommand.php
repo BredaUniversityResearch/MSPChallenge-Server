@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Domain\Helper\Config;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Plugins\BootstrapWsServerPlugin;
 use App\Domain\WsServer\Plugins\PluginHelper;
@@ -31,23 +30,19 @@ class WsServerCommand extends Command
     protected static $defaultName = 'app:ws-server';
 
     private WsServer $wsServer;
-    private string $projectDir;
 
     public function __construct(
         WsServer $wsServer,
-        string $projectDir,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         SymfonyToLegacyHelper $helper,
         PluginHelper $pluginHelper
     ) {
         $this->wsServer = $wsServer;
-        $this->projectDir = $projectDir;
         parent::__construct();
     }
 
     protected function configure(): void
     {
-        require($this->projectDir . '/ServerManager/config.php'); // todo: move server manager config to .env
         $this
             ->setDescription('Run the websocket server for MSP Challenge')
             ->addOption(
@@ -55,7 +50,7 @@ class WsServerCommand extends Command
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'the server port to use',
-                (int)Config::get('ws_server/port') ?: 45001
+                (int)($_ENV['WS_SERVER_PORT'] ?? 45001)
             )
             ->addOption(
                 self::OPTION_ADDRESS,
@@ -150,13 +145,20 @@ class WsServerCommand extends Command
         // plugins
         $this->wsServer->registerPlugin(new BootstrapWsServerPlugin($input->getOption(self::OPTION_TABLE_OUTPUT)));
 
-        sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
-            switch ($event) {
-                case PHP_WINDOWS_EVENT_CTRL_C:
+        if (function_exists('\sapi_windows_set_ctrl_handler')) {
+            \sapi_windows_set_ctrl_handler(function (int $event) use ($server) {
+                if ($event == PHP_WINDOWS_EVENT_CTRL_C) {
                     $server->loop->stop();
-                    break;
-            }
-        });
+                }
+            });
+        }
+        if (function_exists('\pcntl_signal')) {
+            \pcntl_signal(SIGTERM, function (int $sigNo) use ($server) {
+                if ($sigNo == SIGTERM) {
+                    $server->loop->stop();
+                }
+            });
+        }
         $server->run();
 
         return Command::SUCCESS;

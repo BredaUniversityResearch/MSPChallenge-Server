@@ -146,8 +146,12 @@ class Batch extends Base
         return '';
     }
 
-    public function executeNextQueuedBatchFor(int $teamId, int $userId, string $serverId): PromiseInterface
-    {
+    public function executeNextQueuedBatchFor(
+        int $teamId,
+        int $userId,
+        string $serverId,
+        callable $onExecuteQueuedBatchesFunction
+    ): PromiseInterface {
         $deferred = new Deferred();
 
         // get batches to execute
@@ -166,10 +170,11 @@ class Batch extends Base
                 ->orderBy('api_batch_id') // first in, first out
                 ->setMaxResults(1)
         )
-        ->then(function (Result $result) use ($serverId) {
+        ->then(function (Result $result) use ($serverId, $onExecuteQueuedBatchesFunction) {
             if (null === $row = $result->fetchFirstRow()) {
                 return [];
             }
+            $onExecuteQueuedBatchesFunction();
             $batchGuid = $row['api_batch_guid'];
             return $this->executeQueuedBatch($batchGuid, $serverId)
                 ->otherwise(function ($reason) use ($batchGuid) {

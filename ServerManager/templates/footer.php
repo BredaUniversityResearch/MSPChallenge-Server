@@ -14,13 +14,13 @@
         <?php
         use ServerManager\ServerManager;
 
-        echo ServerManager::getInstance()->GetCurrentVersion();
+        echo ServerManager::getInstance()->getCurrentVersion();
         ?>
     </div>
     <div>
         Server Address:
         <?php
-        $address = ServerManager::getInstance()->GetTranslatedServerURL();
+        $address = ServerManager::getInstance()->getTranslatedServerURL();
         if ($address == "localhost") {
             $address .= "<br/>Translated automatically to ".gethostbyname(gethostname());
         }

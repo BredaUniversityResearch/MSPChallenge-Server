@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\WsServer\ClientHeaderKeys;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -292,10 +293,8 @@ class Security extends Base
         if (function_exists('apache_request_headers')) {
             $requestHeaders = apache_request_headers();
         }
-        $requestHeaders = array_change_key_case($requestHeaders, CASE_LOWER);
-
-        if (isset($requestHeaders["mspapitoken"])) {
-            return $requestHeaders["mspapitoken"];
+        if (isset($requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
+            return $requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN];
         }
         return null;
     }

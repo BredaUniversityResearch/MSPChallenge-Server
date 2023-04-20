@@ -12,7 +12,7 @@ $serverManager = ServerManager::getInstance();
 if ($user->isLoggedIn()) {
     if ($serverManager->freshInstall()) {
       // new installation, redirect to set up ServerManager database
-        Redirect::to($serverManager->GetServerManagerFolder().'install/install.php');
+        Redirect::to($serverManager->getAbsolutePathBase().'install/install.php');
     }
   // deprecated migrations...
 //    else {
@@ -21,8 +21,8 @@ if ($user->isLoggedIn()) {
 //        Redirect::to($serverManager->GetServerManagerFolder().'manager.php');
 //    }
 
-    Redirect::to($serverManager->GetServerManagerFolder().'manager.php');
+    Redirect::to($serverManager->getAbsolutePathBase().'manager.php');
 } else {
-    Redirect::to($serverManager->GetServerManagerFolder().'login.php');
+    Redirect::to($serverManager->getAbsolutePathBase().'login.php');
 }
 die();

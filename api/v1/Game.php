@@ -15,8 +15,8 @@ use function App\await;
 
 class Game extends Base
 {
-    private string $watchdog_address = '';
-    const WATCHDOG_PORT = 45000;
+    private ?string $watchdog_address = null;
+    const DEFAULT_WATCHDOG_PORT = 45000;
 
     private const ALLOWED = array(
         "AutoSaveDatabase",
@@ -527,27 +527,26 @@ class Game extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetWatchdogAddress(bool $withPort = false): string
+    public function GetWatchdogAddress(): string
     {
-        if (!empty($this->watchdog_address)) {
-            if ($withPort) {
-                return $this->watchdog_address.':'.self::WATCHDOG_PORT;
-            }
-            return $this->watchdog_address;
+        $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
+        if (null === $this->watchdog_address) {
+            return '';
         }
+        /** @noinspection HttpUrlsUsage */
+        $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
+        return $this->watchdog_address.':'.($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT);
+    }
 
+    private function getWatchdogAddressFromDb(): ?string
+    {
         $result = $this->getDatabase()->query(
             "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
         );
-        if (count($result) > 0) {
-            /** @noinspection HttpUrlsUsage */
-            $this->watchdog_address = 'http://'.$result[0]['game_session_watchdog_address'];
-            if ($withPort) {
-                return $this->watchdog_address.':'.self::WATCHDOG_PORT;
-            }
-            return $this->watchdog_address;
+        if (count($result) == 0) {
+            return null;
         }
-        return '';
+        return $result[0]['game_session_watchdog_address'];
     }
 
     /**
@@ -575,9 +574,19 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
     {
+        // no need to startup watchdog in docker, handled by supervisor.
+        if (getenv('DOCKER')) {
+            return;
+        }
+        // below code is only necessary for Windows
+        if (!str_starts_with(php_uname(), "Windows")) {
+            return;
+        }
         self::StartSimulationExe([
             'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/MSW/'
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/'.(
+                $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
+            )
         ]);
     }
 
@@ -587,16 +596,19 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function StartSimulationExe(array $params): void
     {
-        $apiEndpoint = GameSession::GetRequestApiRoot();
+        // below code is only necessary for Windows
+        if (!str_starts_with(php_uname(), "Windows")) {
+            return;
+        }
         $args = isset($params["args"])? $params["args"]." " : "";
-        $args = $args."APIEndpoint ".$apiEndpoint;
-
+        $args = $args."APIEndpoint=".GameSession::GetRequestApiRoot();
         $workingDirectory = "";
         if (isset($params["working_directory"])) {
             $workingDirectory = "cd ".$params["working_directory"]." & ";
         }
-
-        Database::execInBackground('start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"');
+        Database::execInBackground(
+            'start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"'
+        );
     }
 
     /**
@@ -605,7 +617,7 @@ class Game extends Base
     private function assureWatchdogAlive(): ?PromiseInterface
     {
         // note(MH): GetWatchdogAddress is not async, but it is cached once it has been retrieved once, so that's "fine"
-        $url = $this->GetWatchdogAddress(true);
+        $url = $this->GetWatchdogAddress();
         if (empty($url)) {
             return null;
         }
@@ -626,6 +638,8 @@ class Game extends Base
                 // so the Watchdog is off, and now it should be switched on
                 function (/*Exception $e*/) use ($deferred) {
                     self::StartWatchdog();
+                    // todo: do another watchdog alive test, with a repeat and failure mechanism ?
+                    sleep(10);
                     $deferred->resolve();
                 }
             );
@@ -677,7 +691,7 @@ class Game extends Base
                                     ) {
                                         // note(MH): GetWatchdogAddress is not async, but it is cached once it
                                         //   has been retrieved once, so that's "fine"
-                                        $url = $this->GetWatchdogAddress(true)."/Watchdog/UpdateState";
+                                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
                                         $browser = MSPBrowserFactory::create($url);
                                         $postValues = [
                                             'game_session_api' => $apiRoot,
