@@ -25,7 +25,7 @@ class Warning extends Base
 
     private function postHandleRemovals(array $removed): PromiseInterface
     {
-        $removed = filter_var_array($removed, FILTER_VALIDATE_INT);
+        $removed = array_map(fn($x) => (string)$x, filter_var_array($removed, FILTER_VALIDATE_INT));
         if (empty($removed)) {
             return resolveOnFutureTick(new Deferred())->promise();
         }
