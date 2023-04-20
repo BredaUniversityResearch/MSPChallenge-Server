@@ -8,11 +8,15 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: database
       ADMINER_PLUGINS: 'sql-log'
+      APP_ENV: ${APP_ENV:-dev}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
     ports:
       # run Adminer on port 8082 since 8080 will be used by mitmproxy
       - 8082:8080
     networks:
       - database
+    volumes:
+      - ./docker/adminer/index.php:/var/www/html/index.php:ro
 
   mitmproxy:
     image: mitmproxy/mitmproxy:9.0.1
