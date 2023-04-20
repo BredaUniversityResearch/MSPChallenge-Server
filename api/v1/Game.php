@@ -594,25 +594,19 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function StartSimulationExe(array $params): void
     {
+        // below code is only necessary for Windows
+        if (!str_starts_with(php_uname(), "Windows")) {
+            return;
+        }
         $args = isset($params["args"])? $params["args"]." " : "";
         $args = $args."APIEndpoint=".GameSession::GetRequestApiRoot();
         $workingDirectory = "";
-        if (str_starts_with(php_uname(), "Windows")) {
-            if (isset($params["working_directory"])) {
-                $workingDirectory = "cd ".$params["working_directory"]." & ";
-            }
-            Database::execInBackground(
-                'start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"'
-            );
-            return;
+        if (isset($params["working_directory"])) {
+            $workingDirectory = "cd ".$params["working_directory"]." & ";
         }
-
-        if (str_starts_with(php_uname(), "Linux")) {
-            if (isset($params["working_directory"])) {
-                $workingDirectory = "cd ".$params["working_directory"]." && ";
-            }
-            exec($workingDirectory.'./'.$params["exe"].' '.$args." >> /srv/app/log &");
-        }
+        Database::execInBackground(
+            'start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"'
+        );
     }
 
     /**
