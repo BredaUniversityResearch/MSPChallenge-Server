@@ -21670,10 +21670,10 @@
         {
           "layer_name": "NS_Oil_Gas_Offshore_Instalations",
           "layer_types": [
-            "Operational (100MW)",
-            "Decommissioned (0MW)",
-            "Closed (0MW)",
-            "Other (0MW)"
+            "Operational",
+            "Decommissioned",
+            "Closed",
+            "Other"
           ],
           "allowed_ships": [
             {
