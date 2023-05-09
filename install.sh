@@ -3,7 +3,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${SCRIPT_DIR}/tools/resolve-app-env.sh"
 
-bash set_symfony_version.sh
+bash set_symfony_version.sh "${@:1}"
 set -e
 
 if [[ -z $COMPOSER_BINARY ]]; then
