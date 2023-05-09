@@ -14,7 +14,7 @@ require_once 'config.php';
 require_once 'ServerManager/helpers.php';
 
 // let's get going!
-session_start();
+session_id() or session_start();
 
 // language setting
 checklanguage();
