@@ -2,19 +2,19 @@
 
 # to enable git-for-windows symlinks, see here: https://github.com/git-for-windows/git/pull/156
 export MSYS=winsymlinks:nativestrict
-VERSION_DEFAULT="5.4"
+SYMFONY_VERSION_DEFAULT="5.4"
 
 setSymfonyVersion() {
-  VERSION=$1
-  if [[ -z $1 || "$1" == "default" ]]; then
-    VERSION="$VERSION_DEFAULT"
+  [[ -z "${SYMFONY_VERSION}" ]] && SYMFONY_VERSION=$1
+  if [[ -z $SYMFONY_VERSION || "${SYMFONY_VERSION}" == "default" ]]; then
+    SYMFONY_VERSION="${SYMFONY_VERSION_DEFAULT}"
   fi
   COMPOSER_ARGS="${@:2}"
 
-  COMPOSER_JSON_FILE="composer-symfony${VERSION}.json"
-  COMPOSER_LOCK_FILE="composer-symfony${VERSION}.lock"
-  SYMFONY_LOCK_FILE="symfony${VERSION}.lock"
-  CONFIG_DIR="config-symfony${VERSION}"
+  COMPOSER_JSON_FILE="composer-symfony${SYMFONY_VERSION}.json"
+  COMPOSER_LOCK_FILE="composer-symfony${SYMFONY_VERSION}.lock"
+  SYMFONY_LOCK_FILE="symfony${SYMFONY_VERSION}.lock"
+  CONFIG_DIR="config-symfony${SYMFONY_VERSION}"
 
   if [[ ! -d $CONFIG_DIR ]]; then
     echo "Folder ${CONFIG_DIR} does not exist."
@@ -26,7 +26,7 @@ setSymfonyVersion() {
     exit 1
   fi
 
-  echo "Installing Symfony version ${VERSION}"
+  echo "Installing Symfony version ${SYMFONY_VERSION}"
 
   # if it's not a symlink yet, it is a folder that should become one, so remove it
   if [[ ! -L config ]]; then
@@ -46,12 +46,12 @@ setSymfonyVersion() {
 
   if [[ -f $COMPOSER_LOCK_FILE ]]; then
     rm -f composer.lock
-    ln -s "$COMPOSER_LOCK_FILE" composer.lock
+    ln -s "${COMPOSER_LOCK_FILE}" composer.lock
   fi
 
   if [[ -f $SYMFONY_LOCK_FILE ]]; then
     rm -f symfony.lock
-    ln -s "$SYMFONY_LOCK_FILE" symfony.lock
+    ln -s "${SYMFONY_LOCK_FILE}" symfony.lock
   fi
 }
 
