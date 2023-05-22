@@ -55,3 +55,4 @@ when@dev:
                     name: data_collector
                     id: 'App\DataCollector\MSPDataCollector'
                     template: 'data_collector/msp.html.twig'
+                - 'controller.service_arguments'

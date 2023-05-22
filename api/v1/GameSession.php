@@ -74,7 +74,7 @@ class GameSession extends Base
             $deferred = new Deferred();
             return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'])->promise();
         }
-        $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
+        $apiRoot = preg_replace('/(.*)\/(api|_profiler)\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
 
         $_SERVER['HTTPS'] ??= 'off';

@@ -3,6 +3,12 @@ when@dev:
         resource: '@WebProfilerBundle/Resources/config/routing/wdt.xml'
         prefix: /_wdt
 
+    web_profiler_msp_start_simulations:
+        path: /{session}/_profiler/msp_start_simulations
+        controller: App\DataCollector\MSPDataCollector::startSimulations
+        requirements:
+            session: '\d+'
+
     web_profiler_profiler:
         resource: '@WebProfilerBundle/Resources/config/routing/profiler.xml'
         prefix: /_profiler

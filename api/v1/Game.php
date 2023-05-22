@@ -719,22 +719,28 @@ class Game extends Base
                 $responseContent = $response->getBody()->getContents();
                 $decodedResponse = json_decode($responseContent, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    return $log->postEvent(
+                    $funcArgs = [
                         "Watchdog",
                         Log::ERROR,
                         "Received invalid response from watchdog. Response: \"".$responseContent."\"",
                         "changeWatchdogState()"
-                    );
+                    ];
+                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
+                        return $funcArgs;
+                    });
                 }
 
                 if ($decodedResponse["success"] != 1) {
-                    return $log->postEvent(
+                    $funcArgs = [
                         "Watchdog",
                         Log::ERROR,
                         "Watchdog responded with failure to change game state request. Response: \"".
                         $decodedResponse["message"]."\"",
                         "changeWatchdogState()"
-                    );
+                    ];
+                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
+                        return $funcArgs;
+                    });
                 }
                 return resolveOnFutureTick(new Deferred(), $decodedResponse)->promise();
             });
