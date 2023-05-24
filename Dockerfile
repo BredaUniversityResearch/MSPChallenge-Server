@@ -150,16 +150,15 @@ RUN set -eux; \
 RUN rm -f .env.local.php
 
 # Build Caddy with the Mercure and Vulcain modules
-FROM caddy:2.6-builder-alpine AS app_caddy_builder
+# Temporary fix for https://github.com/dunglas/mercure/issues/770
+FROM caddy:2.7-builder-alpine AS app_caddy_builder
 
-RUN xcaddy build \
-	--with github.com/dunglas/mercure \
+RUN xcaddy build v2.6.4 \
 	--with github.com/dunglas/mercure/caddy \
-	--with github.com/dunglas/vulcain \
 	--with github.com/dunglas/vulcain/caddy
 
 # Caddy image
-FROM caddy:2.6-alpine AS app_caddy
+FROM caddy:2-alpine AS app_caddy
 
 WORKDIR /srv/app
 
