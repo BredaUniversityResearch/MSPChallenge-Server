@@ -17,6 +17,7 @@ class Game extends Base
 {
     private ?string $watchdog_address = null;
     const DEFAULT_WATCHDOG_PORT = 45000;
+    const MIN_PLANNING_GAME_TIME = 12;
 
     private const ALLOWED = array(
         "AutoSaveDatabase",
@@ -805,8 +806,12 @@ class Game extends Base
             }
 
             $realtimePerEra = explode(",", $state["game_planning_era_realtime"]);
-            // todo: division by zero.
-            $currentEra = intval(floor($state["game_currentmonth"] / $state["game_planning_gametime"]));
+            $currentEra = intval(floor(
+                $state["game_currentmonth"] / min(
+                    $state["game_planning_gametime"],
+                    self::MIN_PLANNING_GAME_TIME
+                )
+            ));
             $realtimePerEra[$currentEra] = $state["game_planning_realtime"];
             $secondsPerMonthCurrentEra = round($state["game_planning_realtime"] / $state["game_eratime"]);
             $monthsRemainingCurrentEra = $state["game_eratime"] - $state["game_planning_monthsdone"];
