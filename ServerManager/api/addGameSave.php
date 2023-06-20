@@ -1,4 +1,12 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\DB;
+use ServerManager\GameConfig;
+use ServerManager\GameSave;
+use ServerManager\GameSession;
+use ServerManager\User;
+
 ini_set('upload_max_filesize', '200M');
 ini_set('post_max_size', '200M');
 
@@ -10,7 +18,7 @@ $gamesave = new GameSave;
 $gameconfig = new GameConfig;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 $gamesession->id = $_POST["session_id"] ?? 0;
 if ($gamesession->id == 0 && isset($_FILES['uploadedSaveFile']['tmp_name'])) {

@@ -29,6 +29,7 @@ class Log extends Base
     }
 
     /**
+     * called from SEL
      * @apiGroup Log
      * @apiDescription Posts an 'error' event in the server log.
      * @throws Exception
@@ -61,7 +62,7 @@ class Log extends Base
         )
         ->done(
             function () use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -104,7 +105,7 @@ class Log extends Base
         ob_start(function (string $message, int $phase) {
             return self::RecreateLoggingHandler($message, $phase);
         }, 16);
-        ob_implicit_flush(1);
+        ob_implicit_flush(true);
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

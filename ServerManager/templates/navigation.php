@@ -1,56 +1,48 @@
-
 <?php
-$url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
-?>
+// phpcs:ignoreFile Generic.Files.LineLength.TooLong
 
+use App\Domain\API\v1\Config;
+use ServerManager\ServerManager;
+use function ServerManager\err;
+
+$url_app_root = ServerManager::getInstance()->getAbsolutePathBase();
+
+$userLoggedIn = isset($user) && $user->isLoggedIn();
+$authBaseUrl = Config::GetInstance()->getMSPAuthBaseURL();
+$html =<<<"HTML"
 <div id="header-wrapper" >
+
     <nav class="navbar">
-      <a class="title" href="<?php echo $url_app_root;?>index.php" style="background-image: url('<?=$url_app_root?>images/logo.png');"> MSP Challenge Server Manager</a>
+      <div id="logo">
+        <img src="/ServerManager/images/MSP_Challenge_Icon-037c7c.png">
+      </div>
       <div id="header-menu-wrapper">
         <ul id="header-menu">
-          
-          
           <li id="main-menu-item">
-            <div id="main-menu-icon"></div> </a>
+            mspchallenge.info
             <ul id="main-menu">
-              <li><a href="https://www.mspchallenge.info" title="www.mspchallenge.info">Main MSP Challenge website</a></li>
-              <li><a href="https://community.mspchallenge.info/" title="community.mspchallenge.info">MSP Challenge Community Wiki</a></li>
-              <li><a href="https://knowledge.mspchallenge.info/" title="knowledge.mspchallenge.info">MSP Knowledge Base</a></li>
-              
+              <li><a href="https://www.mspchallenge.info" title="www.mspchallenge.info">Home</a></li>
+              <li><a href="https://community.mspchallenge.info/" title="community.mspchallenge.info">Community</a></li>
+              <li><a href="https://knowledge.mspchallenge.info/" title="knowledge.mspchallenge.info">Knowledge Base</a></li>
             </ul>
           </li>
-          <?php if($user->isLoggedIn()){ //anyone is logged in ?>
           <li id="user-menu-item">
-            <div id="user-menu-icon"></div> </a>
-            <ul id="user-menu">
-              <li><a href="https://auth.mspchallenge.info/users/account.php">My user details</a></li>
-              <li><a href="https://community.mspchallenge.info/wiki/Special:Preferences">Community Wiki preferences</a></li>
-              <li><a href="<?=$url_app_root?>logout.php">Logout</a></li>
-            </ul>
+            <a href="https://auth2.mspchallenge.info">Account</a>
           </li>
-          <?php } else { ?>
-          <li id="user-menu-item">
-            <div id="user-menu-icon"></div> </a>
-            <ul id="user-menu">
-              <li><a href="<?=$url_app_root?>login.php">Log in</a></li>
-              <li><a href="https://auth.mspchallenge.info/users/forgot_password.php">Reset password</a></li>
-              <li><a href="https://auth.mspchallenge.info/users/join.php">Create an account</a></li>
-            </ul>
-          </li>
-          <?php } ?>
         </ul>
       </div>
     </nav>
 
 </div>
+HTML;
 
-<?php
+echo $html;
 
-    if(isset($_GET['err'])){
-      err("<font color='red'>".$err."</font>");
-    }
+if (isset($_GET['err'])) {
+    err("<font color='red'>".$_GET['err']."</font>");
+}
 
-    if(isset($_GET['msg'])){
-      err($msg);
-    }
-?>
+if (isset($_GET['msg'])) {
+    err($_GET['msg']);
+}
+

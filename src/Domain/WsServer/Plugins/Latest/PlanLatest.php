@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
+use App\Domain\API\v1\PolicyType;
 use App\Domain\Common\CommonBase;
 use Drift\DBAL\Result;
 use Exception;
@@ -15,11 +16,12 @@ class PlanLatest extends CommonBase
     /**
      * initially, ask for all from time 0 to load in all user created data
      *
-     * @throws Exception
-     * @noinspection SpellCheckingInspection
+     * @param int $lastupdate
      * @return array|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
+     * @noinspection SpellCheckingInspection
      */
-    public function latest(int $lastupdate)/*: array|PromiseInterface // <-- php 8 */
+    public function latest(int $lastupdate): array|PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         //get all plans that have changed
@@ -151,8 +153,9 @@ class PlanLatest extends CommonBase
                             })
                             ->all();
 
-                        foreach ($d['grids'] as $gKey => &$g) {
-                            $toPromiseFunctions['energy' . $gKey] = tpf(function () use ($g) {
+                        foreach ($d['grids'] as $gKey => $g) {
+                            $gridId = $g['id'];
+                            $toPromiseFunctions['energy'.$pKey.'-'.$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
@@ -161,19 +164,19 @@ class PlanLatest extends CommonBase
                                             'grid_energy_expected as expected'
                                         )
                                         ->from('grid_energy')
-                                        ->where('grid_energy_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                        ->where('grid_energy_grid_id = ' . $qb->createPositionalParameter($gridId))
                                 );
                             });
-                            $toPromiseFunctions['sources' . $gKey] = tpf(function () use ($g) {
+                            $toPromiseFunctions['sources'.$pKey.'-'.$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
                                         ->select('grid_source_geometry_id as geometry_id')
                                         ->from('grid_source')
-                                        ->where('grid_source_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                        ->where('grid_source_grid_id = ' . $qb->createPositionalParameter($gridId))
                                 );
                             });
-                            $toPromiseFunctions['sockets' . $gKey] = tpf(function () use ($g) {
+                            $toPromiseFunctions['sockets'.$pKey.'-'.$gKey] = tpf(function () use ($gridId) {
                                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                                 return $this->getAsyncDatabase()->query(
                                     $qb
@@ -181,7 +184,7 @@ class PlanLatest extends CommonBase
                                             'grid_socket_geometry_id as geometry_id'
                                         )
                                         ->from('grid_socket')
-                                        ->where('grid_socket_grid_id = ' . $qb->createPositionalParameter($g['id']))
+                                        ->where('grid_socket_grid_id = ' . $qb->createPositionalParameter($gridId))
                                 );
                             });
                         }
@@ -204,16 +207,17 @@ class PlanLatest extends CommonBase
                     unset($d);
                     return parallel($toPromiseFunctions)
                         ->then(function (array $results) use (&$plans) {
-                            /** @var Result[] $results */
-                            foreach ($plans as &$d) {
+                            foreach ($plans as $pKey => &$d) {
                                 foreach ($d['grids'] as $gKey => &$g) {
-                                    $g['energy'] = $results['energy' . $gKey]->fetchAllRows();
-                                    $g['sources'] = $results['sources' . $gKey]->fetchAllRows();
-                                    $g['sockets'] = $results['sockets' . $gKey]->fetchAllRows();
+                                    /** @var Result[] $results */
+                                    $g['energy'] = $results['energy'.$pKey.'-'.$gKey]->fetchAllRows();
+                                    $g['sources'] = $results['sources'.$pKey.'-'.$gKey]->fetchAllRows();
+                                    $g['sockets'] = $results['sockets'.$pKey.'-'.$gKey]->fetchAllRows();
                                 }
                                 unset($g);
                             }
                             unset($d);
+                            $this->formatPlans($plans);
                             return $plans;
                         });
                 });
@@ -222,10 +226,71 @@ class PlanLatest extends CommonBase
     }
 
     /**
-     * @throws Exception
-     * @return array|PromiseInterface
+     * new format since new UI style (2022-11-24), see MSP-4142
+     *
+     * @param array $plans
+     * @return void
      */
-    public function getMessages(float $time)/*: array|PromiseInterface // <-- php 8 */
+    private function formatPlans(array &$plans): void
+    {
+        $plans = collect($plans)
+            ->map(function ($plan) {
+                $type = $plan['type'];
+                unset($plan['type']);
+
+                // PolicyUpdateEnergyPlan
+                if (($type & PolicyType::ENERGY) === PolicyType::ENERGY) {
+                    $policy['policy_type'] = 'energy';
+                    $policy['alters_energy_distribution'] = $plan['alters_energy_distribution'];
+                    if (!empty($plan['grids'])) {
+                        $policy['grids'] = $plan['grids'];
+                    }
+                    if (!empty($plan['deleted_grids'])) {
+                        $policy['deleted_grids'] = $plan['deleted_grids'];
+                    }
+                    if (!empty($plan['energy_error'])) {
+                        $policy['energy_error'] = $plan['energy_error'];
+                    }
+                    $plan['policies'][] = $policy;
+                }
+                unset(
+                    $policy,
+                    $plan['alters_energy_distribution'],
+                    $plan['grids'],
+                    $plan['deleted_grids'],
+                    $plan['energy_error']
+                );
+
+                // PolicyUpdateFishingPlan
+                if (($type & PolicyType::FISHING) === PolicyType::FISHING) {
+                    $policy['policy_type'] = 'fishing';
+                    if (!empty($plan['fishing'])) {
+                        $policy['fishing'] = $plan['fishing'];
+                    }
+                    $plan['policies'][] = $policy;
+                }
+                unset($policy, $plan['fishing']);
+
+                // PolicyUpdateShippingPlan
+                if (($type & PolicyType::SHIPPING) === PolicyType::SHIPPING) {
+                    $policy['policy_type'] = 'shipping';
+                    if (!empty($plan['restriction_settings'])) {
+                        $policy['restriction_settings'] = $plan['restriction_settings'];
+                    }
+                    $plan['policies'][] = $policy;
+                }
+                unset($policy, $plan['restriction_settings']);
+                return $plan;
+            })
+            ->all();
+    }
+
+    /**
+     * @param float $time
+     * @return array|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getMessages(float $time): array|PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $promise = $this->getAsyncDatabase()->query(

@@ -73,7 +73,39 @@ class ConnectionManager extends DatabaseDefaults
         if ($dbName !== null) {
             $config['dbname'] = $dbName;
         }
+        if (($_ENV['APP_ENV'] ?? null) !== 'test') {
+            return $config;
+        }
+        # "TEST_TOKEN" is typically set by ParaTest
+        $config['dbname_suffix'] = '_test%env(default::TEST_TOKEN)%';
         return $config;
+    }
+
+    public function getEntityManagerConfig(string $dbName): array
+    {
+        // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
+        $config['connection'] = $dbName;
+        $config['mappings']['App'] = [
+            'is_bundle' => false,
+            'dir' => '%kernel.project_dir%/src/Entity',
+            'prefix' => 'App\Entity',
+            'alias' => 'App'
+        ];
+        // @todo change default? In 6.2: doctrine.orm.naming_strategy.underscore_number_aware
+        $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore';
+        if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
+            return $config;
+        }
+        return array_merge($config, [
+            'query_cache_driver' => [
+                'type' => 'pool',
+                'pool' => 'doctrine.system_cache_pool'
+            ],
+            'result_cache_driver' => [
+                'type' => 'pool',
+                'pool' => 'doctrine.result_cache_pool'
+            ]
+        ]);
     }
 
     /**

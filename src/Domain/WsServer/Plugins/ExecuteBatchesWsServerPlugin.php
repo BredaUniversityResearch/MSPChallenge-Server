@@ -2,17 +2,19 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\API\v1\Batch;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ClientHeaderKeys;
 use App\Domain\WsServer\ExecuteBatchRejection;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
-use Closure;
+use Doctrine\DBAL\ArrayParameterType;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 use function App\parallel;
 use function App\tpf;
@@ -22,21 +24,25 @@ use function React\Promise\reject;
 class ExecuteBatchesWsServerPlugin extends Plugin
 {
     private bool $firstStart = true;
-    private const EXECUTE_BATCHES_MIN_INTERVAL_SEC = 1;
 
     /**
      * @var Batch[]
      */
     private array $batchesInstances = [];
 
-    public function __construct()
+    public static function getDefaultMinIntervalSec(): float
     {
-        parent::__construct('executeBatches', self::EXECUTE_BATCHES_MIN_INTERVAL_SEC);
+        return 1;
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    public function __construct(?float $minIntervalSec = null)
     {
-        return function () {
+        parent::__construct('executeBatches', $minIntervalSec);
+    }
+
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
+    {
+        return tpf(function () use ($executionId) {
             if ($this->firstStart) {
                 // allow clients to connect in the next 10 sec. todo: can we improve this?
                 $this->getLoop()->addTimer(10, function () {
@@ -45,14 +51,18 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                 $this->firstStart = false;
             }
 
-            return $this->executeBatches()
+            return $this->executeBatches($executionId)
                 ->then(function (array $clientToBatchResultContainer) {
-                    $this->addDebugOutput(
+                    $this->addOutput(
                         'just finished "executeBatches" for connections: ' .
-                        implode(', ', array_keys($clientToBatchResultContainer))
+                            implode(', ', array_keys($clientToBatchResultContainer)),
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
                     );
                     $clientToBatchResultContainer = array_filter($clientToBatchResultContainer);
-                    $this->addDebugOutput(json_encode($clientToBatchResultContainer));
+                    if (empty($clientToBatchResultContainer)) {
+                        return;
+                    }
+                    $this->addOutput(json_encode($clientToBatchResultContainer));
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -60,7 +70,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     }
                     return reject($reason);
                 });
-        };
+        });
     }
 
     /**
@@ -93,7 +103,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function executeBatches(): PromiseInterface
+    private function executeBatches(string $executionId): PromiseInterface
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
@@ -105,17 +115,33 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
                 $timeStart = microtime(true);
-                $this->addDebugOutput('Starting "executeBatches" for: ' . $connResourceId);
+                $this->addOutput(
+                    'Starting "executeBatches" for: ' . $connResourceId,
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
                 $promises[$connResourceId] = $this->getBatch($connResourceId)
                     ->executeNextQueuedBatchFor(
                         $clientInfo['team_id'],
                         $clientInfo['user'],
-                        $this->getWsServer()->getId()
+                        $this->getWsServer()->getId(),
+                        function () use ($executionId) {
+                            $this->dispatch(
+                                new NameAwareEvent(
+                                    self::EVENT_PLUGIN_EXECUTION_ENABLE_PROBE,
+                                    $this,
+                                    [self::EVENT_ARG_EXECUTION_ID => $executionId]
+                                ),
+                                self::EVENT_PLUGIN_EXECUTION_ENABLE_PROBE,
+                            );
+                        }
                     )
                 ->then(
-                    function (array $batchResultContainer) use ($connResourceId, $timeStart, $clientInfo) {
-                        $this->addDebugOutput('Created "executeBatches" payload for: ' . $connResourceId);
-                        $this->getClientConnectionResourceManager()->addToMeasurementCollection(
+                    function (array $batchResultContainer) use ($connResourceId, $timeStart) {
+                        $this->addOutput(
+                            'Created "executeBatches" payload for: ' . $connResourceId,
+                            OutputInterface::VERBOSITY_VERY_VERBOSE
+                        );
+                        $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                             $this->getName(),
                             $connResourceId,
                             microtime(true) - $timeStart
@@ -127,54 +153,64 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                             $connResourceId
                         )) {
                             // disconnected while running this async code, nothing was sent
-                            $this->addDebugOutput('disconnected while running this async code, nothing was sent');
+                            $this->addOutput('disconnected while running this async code, nothing was sent');
                             $e = new ClientDisconnectedException();
                             $e->setConnResourceId($connResourceId);
                             throw $e;
                         }
 
-                        $batchId = key($batchResultContainer);
+                        $batchGuid = key($batchResultContainer);
                         $batchResult = current($batchResultContainer);
 
-                        $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson([
+                        $data = [
                             'header_type' => 'Batch/ExecuteBatch',
                             'header_data' => [
-                                'batch_id' => $batchId,
+                                'batch_guid' => $batchGuid,
                             ],
                             'success' => true,
                             'message' => null,
                             'payload' => $batchResult
-                        ]);
+                        ];
+                        PluginHelper::getInstance()->dump($connResourceId, $data);
+                        $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson(
+                            $data
+                        );
 
-                        return $this->setBatchToCommunicated($connResourceId, $batchId, $batchResultContainer);
+                        return $this->setBatchToCommunicated($connResourceId, $batchGuid, $batchResultContainer);
                     },
                     function ($rejection) use ($connResourceId) {
                         $reason = $rejection;
                         if ($rejection instanceof ExecuteBatchRejection) {
-                            $batchId = $rejection->getBatchId();
+                            $batchGuid = $rejection->getBatchGuid();
                             $reason = $rejection->getReason();
                             $message = '';
                             if (is_string($reason)) {
                                 $message = $reason;
                             }
                             while ($reason instanceof Throwable) {
-                                $message .= $reason->getMessage() . PHP_EOL;
+                                $message .= $reason->getMessage().PHP_EOL.
+                                    (
+                                        // add the call-stack on dev/test environments
+                                        ($_ENV['APP_ENV'] ?? 'prod') !== 'prod' ?
+                                            $reason->getTraceAsString() . PHP_EOL : ''
+                                    );
                                 $reason = $reason->getPrevious();
                             }
+                            $data = [
+                                'header_type' => 'Batch/ExecuteBatch',
+                                'header_data' => [
+                                    'batch_guid' => $batchGuid,
+                                ],
+                                'success' => false,
+                                'message' => $message ?: 'Unknown reason',
+                                'payload' => null
+                            ];
+                            PluginHelper::getInstance()->dump($connResourceId, $data);
                             $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)
-                                ->sendAsJson([
-                                    'header_type' => 'Batch/ExecuteBatch',
-                                    'header_data' => [
-                                        'batch_id' => $batchId,
-                                    ],
-                                    'success' => false,
-                                    'message' => $message ?: 'Unknown reason',
-                                    'payload' => null
-                                ]);
-
+                                ->sendAsJson($data);
                             return $this->setBatchToCommunicated(
                                 $connResourceId,
-                                $batchId,
+                                $batchGuid,
                                 [] // do not propagate rejection, just resolve to empty batch results
                             );
                         }
@@ -189,11 +225,11 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function setBatchToCommunicated(int $connResourceId, int $batchId, $value = null): PromiseInterface
+    private function setBatchToCommunicated(int $connResourceId, string $batchGuid, $value = null): PromiseInterface
     {
         // set batch as "communicated"
         $deferred = new Deferred();
-        $this->getBatch($connResourceId)->setCommunicated($batchId)
+        $this->getBatch($connResourceId)->setCommunicated($batchGuid)
             ->done(
                 function (/* Result $result */) use ($deferred, $value) {
                     $deferred->resolve($value);
@@ -239,7 +275,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         $qb = $connection->createQueryBuilder();
         return $connection->query(
             $qb
-                ->select('b.api_batch_id, b.api_batch_user_id, b.api_batch_country_id')
+                ->select('b.api_batch_guid', 'b.api_batch_user_id', 'b.api_batch_country_id')
                 ->from('api_batch', 'b')
                 ->where(
                     $qb->expr()->and(
@@ -251,7 +287,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         )
         ->then(function (Result $result) use ($connection) {
             $batches = collect($result->fetchAllRows() ?? [])
-                ->keyBy('api_batch_id')
+                ->keyBy('api_batch_guid')
                 ->all();
             if (empty($batches)) {
                 return [];
@@ -261,9 +297,12 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                 $qb
                     ->update('api_batch', 'b')
                     ->set('b.api_batch_state', $qb->createPositionalParameter('Failed'))
-                    ->where($qb->expr()->in('b.api_batch_id', array_keys($batches)))
+                    ->where($qb->expr()->in(
+                        'b.api_batch_guid',
+                        $qb->createPositionalParameter($batches, ArrayParameterType::STRING)
+                    ))
             )
-            ->then(function (/* Result $result */) use ($connection, $batches) {
+            ->then(function (/* Result $result */) use ($batches) {
                 // find client connections matching these batches if any
                 $clientInfoContainer = $this->getClientConnectionResourceManager()
                     ->getClientInfoContainer();

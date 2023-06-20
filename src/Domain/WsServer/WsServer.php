@@ -134,6 +134,11 @@ class WsServer extends EventDispatcher implements
             })
             ->all();
 
+        wdo(
+            'Client headers:'.PHP_EOL.
+            implode(PHP_EOL, collect($headers)->mapWithKeys(fn($x, $k) => [$k => "$k=$x"])->all())
+        );
+
         if (!array_key_exists(self::HEADER_KEY_GAME_SESSION_ID, $headers) ||
             !array_key_exists(self::HEADER_KEY_MSP_API_TOKEN, $headers)) {
             // required headers are not there, do not allow connection
@@ -141,6 +146,7 @@ class WsServer extends EventDispatcher implements
             $conn->close();
             return;
         }
+
         $gameSessionId = $headers[self::HEADER_KEY_GAME_SESSION_ID];
         if (null != $this->gameSessionIdFilter && $this->gameSessionIdFilter != $gameSessionId) {
             // do not connect this client, client is from another game session
@@ -148,6 +154,8 @@ class WsServer extends EventDispatcher implements
             $conn->close();
             return;
         }
+
+        $headers[self::HEADER_KEY_GAME_SESSION_ID] = (int)$headers[self::HEADER_KEY_GAME_SESSION_ID];
 
         // since we need client headers to create a Base instances, set it before calling getSecurity(...)
         $this->clientHeaders[$conn->resourceId] = $headers;
@@ -287,7 +295,7 @@ class WsServer extends EventDispatcher implements
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    public function getGameSessionIds(bool $onlyPlaying = false): PromiseInterface
+    public function getGameSessionIds(bool $onlySimulable = false): PromiseInterface
     {
         $connection = $this->getServerManagerDbConnection();
         $qb = $connection->createQueryBuilder();
@@ -295,13 +303,15 @@ class WsServer extends EventDispatcher implements
             ->select('id')
             ->from('game_list')
             ->where($qb->expr()->eq('session_state', $qb->createPositionalParameter('healthy')));
-        if ($onlyPlaying) {
-            $qb->andWhere($qb->expr()->in(
-                'game_state',
-                $qb->createPositionalParameter([
-                    'play', 'fastforward' ,'simulation'
-                ])
-            ));
+        if ($onlySimulable) {
+            $qb->andWhere(
+                $qb->expr()->or(
+                    $qb->expr()->in(
+                        'game_state',
+                        $qb->createPositionalParameter(['play', 'fastforward' ,'simulation', 'pause', 'setup'])
+                    )
+                )
+            );
         }
         return $connection->query($qb);
     }
@@ -393,11 +403,11 @@ class WsServer extends EventDispatcher implements
         int $sessionId = 0,
         string $hostDefaultValue = 'localhost'
     ): string {
-        $addressModificationKey = 'ws_server/address_modification';
-        $addressModificationValue = Config::get($addressModificationKey) ?? 'none';
-        $port = Config::get('ws_server/port') ?: 45001;
-        $uri = Config::get('ws_server/uri');
-        switch ($addressModificationValue) {
+        $addressModificationEnvName = 'URL_WS_SERVER_ADDRESS_MODIFICATION';
+        $addressModificationEnvValue = ($_ENV['URL_WS_SERVER_ADDRESS_MODIFICATION'] ?? null) ?: 'none';
+        $port = ($_ENV['URL_WS_SERVER_PORT'] ?? null) ?: 45001;
+        $uri = $_ENV['URL_WS_SERVER_URI'] ?? '';
+        switch ($addressModificationEnvValue) {
             case self::WS_SERVER_ADDRESS_MODIFICATION_ADD_GAME_SESSION_ID_TO_PORT:
                 $port += $sessionId;
                 break;
@@ -409,15 +419,15 @@ class WsServer extends EventDispatcher implements
             default:
                 throw new \http\Exception\UnexpectedValueException(
                     sprintf(
-                        'Encountered unexpected value for config %s: %s. Value must be: %s',
-                        $addressModificationKey,
-                        $addressModificationValue,
+                        'Encountered unexpected value for environmental variable %s: %s. Value must be: %s',
+                        $addressModificationEnvName,
+                        $addressModificationEnvValue,
                         implode(', ', self::getConstants())
                     )
                 );
         }
-        return Config::get('ws_server/scheme') .
-            (Config::get('ws_server/host') ?: $hostDefaultValue) .
-            ':' . $port . $uri;
+        $scheme = ($_ENV['URL_WS_SERVER_SCHEME'] ?? null) ?: 'ws://';
+        $host = ($_ENV['URL_WS_SERVER_HOST'] ?? null) ?: $hostDefaultValue;
+        return $scheme.$host.':'.$port.$uri;
     }
 }

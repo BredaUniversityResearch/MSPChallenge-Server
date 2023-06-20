@@ -1,0 +1,7 @@
+<?php
+
+namespace Evenement;
+
+interface EventEmitterInterface
+{
+}

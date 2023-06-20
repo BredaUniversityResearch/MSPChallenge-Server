@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\DatabaseDefaults;
 use Exception;
 use PDO;
 use PDOException;
@@ -107,8 +108,10 @@ class Database
                 return false;
             }
             try {
+                $dsn = 'mysql:host='.$this->db_host.';dbname='.$this->db_name .
+                    ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
                 $this->conn = new PDO(
-                    'mysql:host='.$this->db_host.';dbname='.$this->db_name,
+                    $dsn,
                     $this->db_user,
                     $this->db_pass,
                     self::$PDOArgs
@@ -124,7 +127,9 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function CreateNewConnectionToConfiguredHost(string $user, string $password): PDO
     {
-        return new PDO("mysql:host=".$this->db_host, $user, $password, self::$PDOArgs);
+        $dsn = "mysql:host=".$this->db_host .
+            ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
+        return new PDO($dsn, $user, $password, self::$PDOArgs);
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -134,7 +139,9 @@ class Database
         string $password,
         string $dbName
     ): PDO {
-        $connection = new PDO("mysql:host=".$dbHost, $user, $password, self::$PDOArgs);
+        $dsn = "mysql:host=".$dbHost .
+            ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
+        $connection = new PDO($dsn, $user, $password, self::$PDOArgs);
         $connection->query("USE ".$dbName);
         return $connection;
     }
@@ -155,7 +162,7 @@ class Database
         string $statement,
         ?array $vars = null,
         bool $getId = false
-    ) {/*: array|string */ // <-- for php 8
+    ): array|string {
         if (!$this->connectToDatabase()) {
             return [];
         }
@@ -212,7 +219,7 @@ class Database
      * @return false|PDOStatement
      * @throws Exception
      */
-    private function executeQuery(string $statement, ?array $vars)/*: false|PDOStatement*/ // <<-- for php 8
+    private function executeQuery(string $statement, ?array $vars): false|PDOStatement
     {
         if (!$this->connectToDatabase()) {
             return false;
@@ -229,7 +236,7 @@ class Database
      * @param string $statement
      * @return false|PDOStatement
      */
-    public function prepareQuery(string $statement)/*: false|PDOStatement*/ // <<-- for php 8
+    public function prepareQuery(string $statement): false|PDOStatement
     {
         if (!$this->connectToDatabase()) {
             return false;
@@ -259,7 +266,7 @@ class Database
      * @param string $string
      * @return false|string
      */
-    public function quote(string $string)/*: false|string*/ // <<-- for php 8
+    public function quote(string $string): false|string
     {
         //Simple wrapper for PDO::Quote since that needs an instance of the connection...
         if (!$this->connectToDatabase()) {
@@ -281,7 +288,7 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SwitchToSessionDatabase(int $sessionId): void
     {
-        $this->SetupConfiguration($sessionId);
+        $this->SetupConfiguration();
         $this->SwitchDatabase($this->GetDatabaseName());
     }
 
@@ -291,7 +298,7 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SwitchDatabase(string $databaseName): void
     {
-        Database::GetInstance()->query("USE ".$databaseName);
+        $this->query("USE ".$databaseName);
         $this->db_name = $databaseName;
     }
 
@@ -307,9 +314,6 @@ class Database
             $dbConfig["multisession_create_password"]
         );
         $temporaryConnection->query("CREATE DATABASE IF NOT EXISTS ".$this->db_name);
-        $temporaryConnection->query(
-            "GRANT ALL PRIVILEGES ON `".str_replace("_", "\_", $this->db_name)."`.* TO ".$this->db_user."@localhost"
-        );
         $temporaryConnection = null;
 
         $this->connectToDatabase();
@@ -375,7 +379,7 @@ class Database
      * @return false|string
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Encrypt(string $string)/*: false|string*/ // <<-- for php 8
+    public function Encrypt(string $string): false|string
     {
         return hash_hmac('sha512', $string, $this->salt);
     }
@@ -383,7 +387,7 @@ class Database
     public static function execInBackground(string $cmd): void
     {
         if (substr(php_uname(), 0, 7) == "Windows") {
-            pclose(popen("start /B ". $cmd, "r"));
+            pclose(popen("start /B \"msp background task\" ". $cmd, "r"));
         } else {
             exec($cmd . " > /dev/null &");
         }
@@ -395,18 +399,27 @@ class Database
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function GetMysqlExecutableDirectory(): string
     {
-        $mysqlDir = Database::GetInstance()->query("SELECT @@basedir as mysql_home");
-        return $mysqlDir[0]["mysql_home"] ?? '';
+        $dbConfig = Config::GetInstance()->DatabaseConfig();
+        // todo: improve this by using ConnectionManager?
+        $temporaryConnection = Database::CreateTemporaryDBConnection(
+            $dbConfig["host"],
+            $dbConfig["user"],
+            $dbConfig["password"],
+            $dbConfig["database"]
+        );
+        $result = $temporaryConnection->query("SELECT @@basedir as mysql_home");
+        $mysqlDir = $result->fetch(PDO::FETCH_ASSOC);
+        $temporaryConnection = null;
+        return $mysqlDir["mysql_home"] ?? '';
     }
 
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function CreateMspDatabaseDump(string $outputFilePath, bool $blockUntilComplete): void
+    public function createMspDatabaseDump(string $outputFilePath, bool $blockUntilComplete): void
     {
         //Creates a database dump at the given path blocks until it's done.
-        $this->CreateDatabaseDump(
+        $this->createDatabaseDump(
             $outputFilePath,
             $blockUntilComplete,
             $this->db_host,
@@ -419,8 +432,7 @@ class Database
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function CreateDatabaseDump(
+    public function createDatabaseDump(
         string $outputFilePath,
         bool $blockUntilComplete,
         string $databaseHost,
@@ -428,9 +440,17 @@ class Database
         string $dbPassword,
         string $databaseName
     ): void {
-        $dumpCommand = $this->GetMysqlExecutableDirectory()."/bin/mysqldump --user=\"".$databaseUser."\" --password=\"".
-            $dbPassword."\" --host=\"".$databaseHost."\" \"".$databaseName."\" > \"".$outputFilePath."\"";
-        if ($blockUntilComplete == true) {
+        $dumpCommand = sprintf(
+            '"%s" --user="%s" --password="%s" --host="%s" --port="%d" "%s" > "%s"',
+            $this->GetMysqlExecutableDirectory().'/bin/mysqldump',
+            $databaseUser,
+            $dbPassword,
+            $databaseHost,
+            ($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT),
+            $databaseName,
+            $outputFilePath
+        );
+        if ($blockUntilComplete) {
             exec($dumpCommand);
         } else {
             self::execInBackground($dumpCommand);
@@ -466,9 +486,10 @@ class Database
         string $dbPassword,
         string $databaseName
     ): void {
-        $dumpCommand = $this->GetMysqlExecutableDirectory()."/bin/mysql --user=\"".$databaseUser."\" --password=\"".
-            $dbPassword."\" --host=\"".$databaseHost."\" \"".$databaseName."\" < \"".$importFilePath."\"";
-        if ($blockUntilComplete == true) {
+        $dumpCommand = "\"".$this->GetMysqlExecutableDirectory()."/bin/mysql\" --user=\"".
+            $databaseUser."\" --password=\"".$dbPassword."\" --host=\"".
+            $databaseHost."\" \"".$databaseName."\" < \"".$importFilePath."\"";
+        if ($blockUntilComplete) {
             exec($dumpCommand);
         } else {
             self::execInBackground($dumpCommand);

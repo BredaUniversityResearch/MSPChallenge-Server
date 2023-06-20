@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\WsServer\ClientHeaderKeys;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -21,7 +22,7 @@ class Security extends Base
     const TOKEN_LIFETIME_INFINITE = -1;
     const TOKEN_DELETE_AFTER_TIME = self::DEFAULT_TOKEN_LIFETIME_SECONDS + 30 * 60;
 
-    private const DISABLE_SECURITY_CHECK = false;
+    private static bool $debugSecurityCheckEnabled = true;
 
     private const ALLOWED = array(
         ["RequestToken", Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN],
@@ -98,13 +99,15 @@ class Security extends Base
     /**
      * Returns array of [token => TokenValue, valid_until => UnixTimestamp]
      *
-     * @throws Exception
+     * @param int $accessLevel
+     * @param int $lifetimeSeconds
      * @return array|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
      */
     public function generateToken(
         int $accessLevel = self::ACCESS_LEVEL_FLAG_FULL,
         int $lifetimeSeconds = self::DEFAULT_TOKEN_LIFETIME_SECONDS
-    )/*: array|PromiseInterface // <-- php 8 */ {
+    ): array|PromiseInterface {
         $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->delete('api_token')
@@ -173,10 +176,11 @@ class Security extends Base
     }
 
     /**
-     * @throws Exception
+     * @param int $accessLevel
      * @return string|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function getSpecialToken(int $accessLevel)/*: string|PromiseInterface // <-- php 8 */
+    public function getSpecialToken(int $accessLevel): string|PromiseInterface
     {
         $deferred = new Deferred();
         if ($accessLevel == self::ACCESS_LEVEL_FLAG_REQUEST_TOKEN ||
@@ -223,7 +227,7 @@ class Security extends Base
      */
     private function getTokenDetails(string $tokenValue): ?array
     {
-        $details = Database::GetInstance($this->getGameSessionId())->query(
+        $details = $this->getDatabase()->query(
             "SELECT api_token_scope, UNIX_TIMESTAMP(api_token_valid_until) as expiry_time,
             UNIX_TIMESTAMP(api_token_valid_until) - UNIX_TIMESTAMP(NOW()) as valid_time_remaining
             FROM api_token WHERE api_token_token = ?
@@ -253,7 +257,7 @@ class Security extends Base
         int &$tokenValidTimeRemaining = null,
         ?string $token = null
     ): bool {
-        if (self::DISABLE_SECURITY_CHECK) {
+        if (false === self::$debugSecurityCheckEnabled) {
             $tokenValidTimeRemaining = self::DEFAULT_TOKEN_LIFETIME_SECONDS;
             return true;
         }
@@ -289,10 +293,8 @@ class Security extends Base
         if (function_exists('apache_request_headers')) {
             $requestHeaders = apache_request_headers();
         }
-        $requestHeaders = array_change_key_case($requestHeaders, CASE_LOWER);
-
-        if (isset($requestHeaders["mspapitoken"])) {
-            return $requestHeaders["mspapitoken"];
+        if (isset($requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
+            return $requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN];
         }
         return null;
     }

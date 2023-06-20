@@ -20,9 +20,9 @@ class UnitTestSupport extends Base
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetIntermediateFolder(): ?string
+    public static function GetIntermediateFolder(int $gameSessionId): ?string
     {
-        $dbName = Database::GetInstance()->GetDatabaseName();
+        $dbName = Database::GetInstance($gameSessionId)->GetDatabaseName();
         if (empty($dbName)) {
             return null;
         }
@@ -61,7 +61,7 @@ class UnitTestSupport extends Base
             "result" => $result
         );
 
-        $outputFolder = self::GetIntermediateFolder();
+        $outputFolder = self::GetIntermediateFolder($this->getGameSessionId());
         if ($outputFolder != null) {
             if (!is_dir($outputFolder)) {
                 mkdir($outputFolder, 0666, true);
@@ -112,7 +112,7 @@ class UnitTestSupport extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function ReadAndReturnSummaryJSON()
     {
-        $outputFolder = self::GetIntermediateFolder();
+        $outputFolder = self::GetIntermediateFolder($this->getGameSessionId());
         $statFilePath = $outputFolder."summary.json";
         $data = array();
 

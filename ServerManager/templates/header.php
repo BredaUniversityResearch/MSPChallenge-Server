@@ -1,9 +1,11 @@
 <?php
 
+use ServerManager\ServerManager;
+
 $pageTitle = 'MSP Challenge Server Manager';
 
-$url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
-require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/security_headers.php';
+$url_app_root = ServerManager::getInstance()->getAbsolutePathBase();
+require_once ServerManager::getInstance()->getServerManagerRoot().'templates/security_headers.php';
 
 // from here on HTML will be included
 
@@ -14,7 +16,7 @@ require_once('header1_must_include.php'); ?>
 <!-- AKA Primary CSS -->
 <link href="<?=$url_app_root;?>css/color_schemes/bootstrap.min.css" rel="stylesheet">
 
-<?php require_once(ServerManager::getInstance()->GetServerManagerRoot() . 'templates/style.php'); ?>
+<?php require_once(ServerManager::getInstance()->getServerManagerRoot() . 'templates/style.php'); ?>
 
 <!-- Template CSS -->
 <!-- AKA Secondary CSS -->
@@ -37,6 +39,8 @@ require_once('header1_must_include.php'); ?>
 
 <link rel="stylesheet" href="<?=$url_app_root;?>css/timepicker.css">
 
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cabin">
+
 <?php /* END OF ALL CSS! */ ?>
 
 
@@ -45,7 +49,9 @@ require_once('header1_must_include.php'); ?>
 <!-- jQuery Fallback -->
 <script type="text/javascript">
 if (typeof jQuery == 'undefined') {
-	document.write(unescape("%3Cscript src='<?=$url_app_root;?>js/jquery-3.1.1.min.js' type='text/javascript'%3E%3C/script%3E"));
+    document.write(unescape(
+        "%3Cscript src='<?=$url_app_root;?>js/jquery-3.1.1.min.js' type='text/javascript'%3E%3C/script%3E"
+    ));
 }
 </script>
 
@@ -72,7 +78,7 @@ if (typeof jQuery == 'undefined') {
 
 </head>
 <body>
-  <?php //require_once('css/style.php'); ?>
-  <?php
-  require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/navigation.php';
-  ?>
+<?php //require_once('css/style.php'); ?>
+<?php
+require_once ServerManager::getInstance()->getServerManagerRoot().'templates/navigation.php';
+?>

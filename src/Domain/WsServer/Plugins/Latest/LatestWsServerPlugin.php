@@ -3,21 +3,24 @@
 namespace App\Domain\WsServer\Plugins\Latest;
 
 use App\Domain\API\v1\Security;
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ClientHeaderKeys;
 use App\Domain\WsServer\EPayloadDifferenceType;
 use App\Domain\WsServer\Plugins\Plugin;
+use App\Domain\WsServer\Plugins\PluginHelper;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
-use Closure;
 use Exception;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use function App\tpf;
 use function React\Promise\all;
 use function React\Promise\reject;
 
 class LatestWsServerPlugin extends Plugin
 {
-    private const LATEST_MIN_INTERVAL_SEC = 0.2;
     private const LATEST_CLIENT_UPDATE_SPEED = 60.0;
 
     /**
@@ -25,21 +28,30 @@ class LatestWsServerPlugin extends Plugin
      */
     private array $gameLatestInstances = [];
 
-    public function __construct()
+    public static function getDefaultMinIntervalSec(): float
     {
-        parent::__construct('latest', self::LATEST_MIN_INTERVAL_SEC);
+        return 0.2;
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    public function __construct(?float $minIntervalSec = null)
     {
-        return function () {
+        parent::__construct('latest', $minIntervalSec);
+    }
+
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
+    {
+        return tpf(function () {
             return $this->latest()
                 ->then(function (array $payloadContainer) {
-                    $this->addDebugOutput(
-                        'just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer))
+                    $this->addOutput(
+                        'just finished "latest" for connections: ' . implode(', ', array_keys($payloadContainer)),
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
                     );
                     $payloadContainer = array_filter($payloadContainer);
-                    $this->addDebugOutput(json_encode($payloadContainer));
+                    if (empty($payloadContainer)) {
+                        return;
+                    }
+                    $this->addOutput(json_encode($payloadContainer));
                 })
                 ->otherwise(function ($reason) {
                     if ($reason instanceof ClientDisconnectedException) {
@@ -47,13 +59,104 @@ class LatestWsServerPlugin extends Plugin
                     }
                     return reject($reason);
                 });
-        };
+        });
+    }
+
+    private function latestForClient(int $connResourceId, array $clientInfo): PromiseInterface
+    {
+        $latestTimeStart = microtime(true);
+        $this->addOutput('Starting "latest" for: ' . $connResourceId, OutputInterface::VERBOSITY_VERY_VERBOSE);
+        return $this->getGameLatest($connResourceId)->latest(
+            $clientInfo['team_id'],
+            $clientInfo['last_update_time'],
+            $clientInfo['user'],
+            $this->isDebugOutputEnabled()
+        )
+        ->then(function ($payload) use ($connResourceId, $latestTimeStart, $clientInfo) {
+            if ($payload === null) {
+                $this->addOutput('no payload', OutputInterface::VERBOSITY_VERY_VERBOSE);
+                return [];
+            }
+            $this->addOutput(
+                'Created "latest" payload for: ' . $connResourceId,
+                OutputInterface::VERBOSITY_VERY_VERBOSE
+            );
+            $this->getMeasurementCollectionManager()->addToMeasurementCollection(
+                $this->getName(),
+                (string)$connResourceId,
+                microtime(true) - $latestTimeStart
+            );
+            if (empty($payload)) {
+                $this->addOutput('empty payload', OutputInterface::VERBOSITY_VERY_VERBOSE);
+                return [];
+            }
+            if (null === $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)) {
+                // disconnected while running this async code, nothing was sent
+                $this->addOutput('disconnected while running this async code, nothing was sent');
+                $e = new ClientDisconnectedException();
+                $e->setConnResourceId($connResourceId);
+                throw $e;
+            }
+            $clientInfoContainer = $this->getClientConnectionResourceManager()->getClientInfo($connResourceId);
+            if ($clientInfo['last_update_time'] != $clientInfoContainer['last_update_time']) {
+                // encountered another issue: mismatch between the "used" client info's last_update_time
+                //   and the "latest", so this payload will not be accepted, and should not be sent anymore...
+                $this->addOutput(
+                    'mismatch between the "used" client info\'s last_update_time and the "latest"'
+                );
+                // just return empty payload, nothing was sent...
+                return [];
+            }
+
+            if (isset($clientInfoContainer['prev_payload']) &&
+                in_array(
+                    (string)$this->comparePayloads(
+                        $clientInfoContainer['prev_payload'],
+                        $payload
+                    ),
+                    [
+                        EPayloadDifferenceType::NO_DIFFERENCES,
+                        EPayloadDifferenceType::NONESSENTIAL_DIFFERENCES
+                    ]
+                )
+            ) {
+                // no essential payload differences compared to the previous one, no need to send it now
+                $this->addOutput(
+                    'no essential payload differences compared to the previous one, ' .
+                        'no need to send it now',
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
+                return []; // no need to send
+            }
+
+            $this->addOutput('send payload to: ' . $connResourceId);
+            $data = [
+                'header_type' => 'Game/Latest',
+                'header_data' => null,
+                'success' => true,
+                'message' => null,
+                'payload' => $payload
+            ];
+            PluginHelper::getInstance()->dump($connResourceId, $data);
+            $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson($data);
+            $this->getClientConnectionResourceManager()->setClientInfo(
+                $connResourceId,
+                'prev_payload',
+                $payload
+            );
+            $this->getClientConnectionResourceManager()->setClientInfo(
+                $connResourceId,
+                'last_update_time',
+                $payload['update_time']
+            );
+            return $payload;
+        });
     }
 
     /**
      * @throws Exception
      */
-    private function latest(): PromiseInterface
+    private function latest(): Promise
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
@@ -69,97 +172,22 @@ class LatestWsServerPlugin extends Plugin
                     Security::ACCESS_LEVEL_FLAG_FULL,
                     $accessTimeRemaining,
                     $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
-                        ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
+                    ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
                     ]
                 )) {
                     // Client's token has been expired, let the client re-connected with a new token
-                    $this->addDebugOutput(
+                    $this->addOutput(
                         'Client\'s token has been expired, let the client re-connected with a new token'
                     );
                     $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->close();
                     continue;
                 }
-                $latestTimeStart = microtime(true);
-                $this->addDebugOutput('Starting "latest" for: ' . $connResourceId);
-                $promises[$connResourceId] = $this->getGameLatest($connResourceId)->Latest(
-                    $clientInfo['team_id'],
-                    $clientInfo['last_update_time'],
-                    $clientInfo['user'],
-                    $this->isDebugOutputEnabled()
-                )
-                ->then(function ($payload) use ($connResourceId, $latestTimeStart, $clientInfo) {
-                    $this->addDebugOutput('Created "latest" payload for: ' . $connResourceId);
-                    $this->getMeasurementCollectionManager()->addToMeasurementCollection(
-                        $this->getName(),
-                        $connResourceId,
-                        microtime(true) - $latestTimeStart
-                    );
-                    if (empty($payload)) {
-                        $this->addDebugOutput('empty payload');
-                        return [];
-                    }
-                    if (null === $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)) {
-                        // disconnected while running this async code, nothing was sent
-                        $this->addDebugOutput('disconnected while running this async code, nothing was sent');
-                        $e = new ClientDisconnectedException();
-                        $e->setConnResourceId($connResourceId);
-                        throw $e;
-                    }
-                    $clientInfoContainer = $this->getClientConnectionResourceManager()->getClientInfo($connResourceId);
-                    if ($clientInfo['last_update_time'] != $clientInfoContainer['last_update_time']) {
-                        // encountered another issue: mismatch between the "used" client info's last_update_time
-                        //   and the "latest", so this payload will not be accepted, and should not be sent anymore...
-                        $this->addDebugOutput(
-                            'mismatch between the "used" client info\'s last_update_time and the "latest"'
-                        );
-                        // just return empty payload, nothing was sent...
-                        return [];
-                    }
-
-                    if (isset($clientInfoContainer['prev_payload']) &&
-                        in_array(
-                            (string)$this->comparePayloads(
-                                $clientInfoContainer['prev_payload'],
-                                $payload
-                            ),
-                            [
-                                EPayloadDifferenceType::NO_DIFFERENCES,
-                                EPayloadDifferenceType::NONESSENTIAL_DIFFERENCES
-                            ]
-                        )
-                    ) {
-                        // no essential payload differences compared to the previous one, no need to send it now
-                        $this->addDebugOutput(
-                            'no essential payload differences compared to the previous one, ' .
-                            'no need to send it now'
-                        );
-                        return []; // no need to send
-                    }
-
-                    $this->getClientConnectionResourceManager()->setClientInfo(
-                        $connResourceId,
-                        'prev_payload',
-                        $payload
-                    );
-                    $this->getClientConnectionResourceManager()->setClientInfo(
-                        $connResourceId,
-                        'last_update_time',
-                        $payload['update_time']
-                    );
-
-                    $this->addDebugOutput('send payload to: ' . $connResourceId);
-                    $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->sendAsJson([
-                        'header_type' => 'Game/Latest',
-                        'header_data' => null,
-                        'success' => true,
-                        'message' => null,
-                        'payload' => $payload
-                    ]);
-                    return $payload;
-                });
+                $promises[$connResourceId] = $this->latestForClient($connResourceId, $clientInfo);
             }
         }
-        return all($promises);
+        /** @var PromiseInterface&Promise $promise */
+        $promise = all($promises);
+        return $promise;
     }
 
     private function comparePayloads(array $p1, array $p2): EPayloadDifferenceType
@@ -174,16 +202,18 @@ class LatestWsServerPlugin extends Plugin
         $p2TickEraTimeleft = $p2['tick']['era_timeleft'] ?? 0;
         $eraTimeLeftDiff = abs($p1TickEraTimeleft - $p2TickEraTimeleft);
 
-        // if there are any other changes then "time" fields, it is essential
+        // if there are any other changes then "time" or "debug" fields, it is essential
         unset(
             $p1['prev_update_time'],
             $p1['update_time'],
             $p1TickEraTimeleft,
             $p1['tick']['era_timeleft'],
+            $p1['debug'],
             $p2['prev_update_time'],
             $p2['update_time'],
             $p2TickEraTimeleft,
-            $p2['tick']['era_timeleft']
+            $p2['tick']['era_timeleft'],
+            $p2['debug'],
         );
         if (0 != strcmp(json_encode($p1), json_encode($p2))) {
             return new EPayloadDifferenceType(EPayloadDifferenceType::ESSENTIAL_DIFFERENCES);

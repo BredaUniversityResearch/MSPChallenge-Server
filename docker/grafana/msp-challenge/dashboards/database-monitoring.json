@@ -1,0 +1,1439 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "$$hashKey": "object:1657",
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "limit": 100,
+        "name": "Annotations & Alerts",
+        "showIn": 0,
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "MSP Challenge database monitoring dashboard",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "gnetId": 7991,
+  "graphTooltip": 1,
+  "id": 6,
+  "links": [
+    {
+      "$$hashKey": "object:110",
+      "icon": "external link",
+      "includeVars": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Server Status Variables",
+      "type": "link",
+      "url": "https://mariadb.com/kb/en/server-status-variables/"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "id": 20,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  UNIX_TIMESTAMP(timest) as time_sec,\n  variable_value/600 as value\nFROM my2.status\nWHERE $__timeFilter(timest)\n  AND variable_name='CONNECTIONS-d'\n  AND variable_value>=0\nORDER BY timest ASC\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Connections/sec",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 2,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 0,
+        "y": 2
+      },
+      "hiddenSeries": false,
+      "id": 10,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.7",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "/_sec/",
+          "color": "#3f6833",
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  UNIX_TIMESTAMP(timest) as time,\n  variable_value+0 as value, variable_value/600 as value_sec,\n  variable_name as metric\nFROM my2.status\nWHERE $__timeFilter(timest)\n  and variable_name in ($MyStatistics)\nORDER BY timest ASC\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [
+        {
+          "colorMode": "gray",
+          "fill": true,
+          "fromDayOfWeek": 6,
+          "line": false,
+          "op": "time",
+          "toDayOfWeek": 7
+        }
+      ],
+      "title": "Custom Statistic",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "mysql",
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 10,
+        "y": 2
+      },
+      "hiddenSeries": false,
+      "id": 4,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 3,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.7",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "$$hashKey": "object:1850",
+          "alias": "SIZEDB.TOTAL",
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timest,'24h') as time,\n  variable_name as metric,\n  avg(variable_value+0) as value\nFROM my2.status\nWHERE $__timeFilter(timest)\n  and variable_name in ('SIZEDB.TOTAL')\nGROUP BY 1,2\nORDER BY 1 ASC\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": "5d",
+      "timeRegions": [
+        {
+          "$$hashKey": "object:1888",
+          "colorMode": "gray",
+          "fill": true,
+          "fromDayOfWeek": 6,
+          "line": false,
+          "op": "time",
+          "toDayOfWeek": 7
+        }
+      ],
+      "title": "Space usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:1863",
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        },
+        {
+          "$$hashKey": "object:1864",
+          "format": "decbytes",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "datasource": {
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 95
+              },
+              {
+                "color": "#299c46",
+                "value": 98
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 2
+      },
+      "id": 41,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroup(s1.timest,'30m') as time_sec,\n  avg(1-s1.variable_value/s2.variable_value)*100 as value\nFROM my2.status s1,  my2.status s2\nWHERE $__timeFilter(s1.timest)\n  AND s1.timest=s2.timest\n  AND s1.variable_name='INNODB_BUFFER_POOL_READS-d'\n  AND s2.variable_name='INNODB_BUFFER_POOL_READ_REQUESTS-d'\n  AND s2.variable_value>0\nGROUP BY 1\nORDER BY 1 ASC\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "InnoDB Cache Hit",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#d44a3a",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 30
+              },
+              {
+                "color": "#299c46",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 20,
+        "y": 6
+      },
+      "id": 43,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroup(s1.timest,'30m') as time_sec,\n  avg((s1.variable_value/(s1.variable_value+s2.variable_value))*100) as value\nFROM my2.status s1,  my2.status s2\nWHERE $__timeFilter(s1.timest)\n  AND s1.timest=s2.timest\n  AND s1.variable_name='QCACHE_HITS-d'\n  AND s2.variable_name='COM_SELECT-d'\n  AND s2.variable_value>0\nGROUP BY 1\nORDER BY 1 ASC\n\n\n\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Query Cache Hit",
+      "type": "gauge"
+    },
+    {
+      "aliasColors": {
+        "ABORTED_CLIENTS": "#bf1b00",
+        "ABORTED_CLIENTS-d": "#890f02",
+        "ABORTED_CONNECTS": "#f29191",
+        "Aborted_clients-d": "#c15c17",
+        "Aborted_connects-d": "#cca300",
+        "SLOW_QUERIES": "#e24d42",
+        "SLOW_QUERIES-d": "#cca300",
+        "Slow_queries": "#99440a",
+        "Slow_queries-d": "#890f02",
+        "THREADS_CONNECTED": "#3f6833",
+        "THREADS_RUNNING": "#cca300",
+        "Threads_connected": "#64b0c8"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 5,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 0,
+        "y": 8
+      },
+      "hiddenSeries": false,
+      "id": 2,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.7",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "$$hashKey": "object:730",
+          "alias": "SLOW_QUERIES",
+          "fill": 0,
+          "yaxis": 2
+        },
+        {
+          "$$hashKey": "object:731",
+          "alias": "ABORTED_CLIENTS",
+          "fill": 0,
+          "yaxis": 2
+        },
+        {
+          "$$hashKey": "object:732",
+          "alias": "ABORTED_CONNECTS",
+          "fill": 0,
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroup(timest, '10m') AS time,\n       variable_name as metric,\n       avg(variable_value+0) as value\n  FROM my2.status\n WHERE $__timeFilter(timest)\n   AND variable_name in ('THREADS_CONNECTED', 'THREADS_RUNNING')\n GROUP BY 1,2\n ORDER BY 1 ASC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timest, '10m') as time,\n  substr(variable_name,1,length(variable_name)-2) as metric,\n  avg(variable_value+0) as value\nFROM my2.status\nWHERE $__timeFilter(timest)\n  and variable_name in ('SLOW_QUERIES-d', 'ABORTED_CONNECTS-d','ABORTED_CLIENTS-d')\n  and variable_value>=0\nGROUP BY 1,2\nORDER BY 1 ASC\n",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [
+        {
+          "$$hashKey": "object:791",
+          "colorMode": "gray",
+          "fill": true,
+          "fromDayOfWeek": 6,
+          "line": false,
+          "op": "time",
+          "toDayOfWeek": 7
+        }
+      ],
+      "title": "Threads & Errors",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:763",
+          "decimals": 0,
+          "format": "short",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:764",
+          "format": "short",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 10,
+        "y": 8
+      },
+      "hiddenSeries": false,
+      "id": 8,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.7",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "BYTES_SENT-d",
+          "yaxis": 2
+        },
+        {
+          "alias": "BYTES_RECEIVED-d",
+          "transform": "negative-Y",
+          "yaxis": 2
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroup(timest, '10m') AS time,\n       variable_name as metric,\n       avg(variable_value+0)/600 as value\n  FROM my2.status\n WHERE $__timeFilter(timest)\n   and variable_name in ('Bytes_received-d', 'Bytes_sent-d')\n GROUP BY 1,2\n ORDER BY 1 ASC\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [
+        {
+          "colorMode": "gray",
+          "fill": true,
+          "fromDayOfWeek": 6,
+          "line": false,
+          "op": "time",
+          "toDayOfWeek": 7
+        }
+      ],
+      "title": "Network",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        },
+        {
+          "format": "Bps",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {
+        "DELETE": "#bf1b00",
+        "DELETE_MULTI": "#bf1b00",
+        "INSERT": "#629e51",
+        "INSERT_SELECT": "#3f6833",
+        "SELECT": "#5195ce",
+        "UPDATE": "#cca300",
+        "UPDATE_MULTI": "#f2c96d"
+      },
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 5,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 0,
+        "y": 14
+      },
+      "hiddenSeries": false,
+      "id": 6,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "9.1.7",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "SELECT",
+          "yaxis": 1
+        }
+      ],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroup(timest, '10m') AS time,\n       substr(variable_name,5,length(variable_name)-6) as metric,\n       avg(variable_value/600) as value\n  FROM my2.status\n WHERE $__timeFilter(timest)\n   and variable_name in ('COM_SELECT-d', 'COM_INSERT-d', 'COM_UPDATE-d', 'COM_DELETE-d')\n   and variable_value >=0\n GROUP BY 1,2\n ORDER BY 1 ASC\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [
+        {
+          "colorMode": "gray",
+          "fill": true,
+          "fromDayOfWeek": 6,
+          "line": false,
+          "op": "time",
+          "toDayOfWeek": 7
+        }
+      ],
+      "title": "SQL Commands /sec",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:118",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:119",
+          "format": "ops",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "cards": {},
+      "color": {
+        "cardColor": "#b4ff00",
+        "colorScale": "sqrt",
+        "colorScheme": "interpolateRdYlGn",
+        "exponent": 0.5,
+        "mode": "spectrum"
+      },
+      "dataFormat": "tsbuckets",
+      "datasource": {
+        "type": "mysql",
+        "uid": "msp-challenge-my2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 10,
+        "x": 10,
+        "y": 14
+      },
+      "heatmap": {},
+      "hideTimeOverride": false,
+      "hideZeroBuckets": false,
+      "highlightCards": true,
+      "id": 18,
+      "legend": {
+        "show": true
+      },
+      "links": [],
+      "options": {
+        "calculate": false,
+        "calculation": {},
+        "cellGap": 2,
+        "cellValues": {},
+        "color": {
+          "exponent": 0.5,
+          "fill": "#b4ff00",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "RdYlGn",
+          "steps": 128
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "le"
+        },
+        "showValue": "never",
+        "tooltip": {
+          "show": true,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false,
+          "unit": "short"
+        }
+      },
+      "pluginVersion": "9.1.7",
+      "reverseYBuckets": false,
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  $__timeGroup(timest, '24h') as time,\n  concat(' ',max(date_format(timest,'%H'))) as metric,\n  sum(variable_value)/3600 as value\nFROM my2.status\nWHERE variable_name='QUERIES-d'\n  and variable_value>0\n  and $__timeFilter(timest)\nGROUP BY $__timeGroup(timest, '1h'),$__timeGroup(timest, '24h')\nORDER BY $__timeGroup(timest, '1h'),$__timeGroup(timest, '24h')\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "14d",
+      "title": "Heatmap (Queries /sec)",
+      "tooltip": {
+        "show": true,
+        "showHistogram": false
+      },
+      "type": "heatmap",
+      "xAxis": {
+        "show": true
+      },
+      "yAxis": {
+        "format": "short",
+        "logBase": 1,
+        "show": true
+      },
+      "yBucketBound": "lower"
+    },
+    {
+      "datasource": {
+        "uid": "msp-challenge-my2"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 10,
+        "x": 0,
+        "y": 20
+      },
+      "id": 44,
+      "links": [],
+      "options": {
+        "content": "",
+        "mode": "html"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "msp-challenge-my2"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  c1 AS \"time\",\n  v1\nFROM mylog\nWHERE\n  $__timeFilter(c1)\nORDER BY c1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "v1"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "mylog",
+          "timeColumn": "c1",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "$MyVar2",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "iOkGSQV4k"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 10,
+        "x": 10,
+        "y": 20
+      },
+      "id": 46,
+      "links": [],
+      "options": {
+        "content": "<a href=\"https://github.com/meob/my2Collector\">Github</a>",
+        "mode": "html"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "iOkGSQV4k"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": false,
+          "rawSql": "SELECT\n  c1 AS \"time\",\n  v1\nFROM mylog\nWHERE\n  $__timeFilter(c1)\nORDER BY c1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "v1"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "mylog",
+          "timeColumn": "c1",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "This dashboard uses my2 collector (https://github.com/meob/my2Collector)",
+      "transparent": true,
+      "type": "text"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "COM_SELECT-d"
+          ],
+          "value": [
+            "COM_SELECT-d"
+          ]
+        },
+        "datasource": {
+          "uid": "msp-challenge-my2"
+        },
+        "definition": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Custom Statistic",
+        "multi": true,
+        "name": "MyStatistics",
+        "options": [],
+        "query": "select distinct variable_name from my2.status where variable_name is not null and variable_name <>'' order by 1",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "DESKTOP-U6O60I2:45002",
+          "value": "DESKTOP-U6O60I2:45002"
+        },
+        "datasource": {
+          "uid": "msp-challenge-my2"
+        },
+        "definition": "select concat( @@hostname,':', @@port)",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "MyVar",
+        "options": [],
+        "query": "select concat( @@hostname,':', @@port)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "isNone": true,
+          "selected": false,
+          "text": "None",
+          "value": ""
+        },
+        "datasource": {
+          "uid": "msp-challenge-my2"
+        },
+        "definition": "select concat('MySQL version: ',version(), '   Created at: ', date_format(min(create_time),'%Y-%m-%d %T') ,\n  '  Started at: ', date_format(date_sub(now(), INTERVAL variable_value second),'%Y-%m-%d %T')) info\n  from   information_schema.tables,performance_schema.global_status\n where variable_name='UPTIME'\n group by variable_value\n",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "MyVar2",
+        "options": [],
+        "query": "select concat('MySQL version: ',version(), '   Created at: ', date_format(min(create_time),'%Y-%m-%d %T') ,\n  '  Started at: ', date_format(date_sub(now(), INTERVAL variable_value second),'%Y-%m-%d %T')) info\n  from   information_schema.tables,performance_schema.global_status\n where variable_name='UPTIME'\n group by variable_value\n",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "",
+  "title": "MSP Challenge database monitoring dashboard",
+  "uid": "iKRJyX4Vk",
+  "version": 2,
+  "weekStart": ""
+}

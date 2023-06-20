@@ -22,3 +22,12 @@ when@test:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+
+when@prod:
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

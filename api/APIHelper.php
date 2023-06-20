@@ -2,6 +2,7 @@
 
 namespace App\Domain\API;
 
+use App\Domain\Common\DatabaseDefaults;
 use Exception;
 use PDO;
 use PDOException;
@@ -34,8 +35,7 @@ class APIHelper
         return self::$instance;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function GetGameSessionIdForCurrentRequest(): int
+    public function getGameSessionIdForCurrentRequest(): int
     {
         $sessionId = self::INVALID_SESSION_ID;
         if (isset($_GET['session'])) {
@@ -71,12 +71,14 @@ class APIHelper
         $dbPass = $dbConfig['password'];
         $dbHost = $dbConfig['host'];
 
-        $sessionId = $this->GetGameSessionIdForCurrentRequest();
+        $sessionId = $this->getGameSessionIdForCurrentRequest();
         if ($sessionId != self::INVALID_SESSION_ID) {
             $dbName = $dbConfig["multisession_database_prefix"] . $sessionId;
 
             try {
-                $db = new PDO("mysql:host=" . $dbHost . ";dbname=" . $dbName, $dbUser, $dbPass, array(
+                $dsn = "mysql:host=" . $dbHost . ";dbname=" . $dbName .
+                    ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
+                $db = new PDO($dsn, $dbUser, $dbPass, array(
                     PDO::MYSQL_ATTR_LOCAL_INFILE => true
                 ));
 

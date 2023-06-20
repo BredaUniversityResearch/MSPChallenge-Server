@@ -2,16 +2,31 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
+use App\Domain\API\v1\Game;
 use App\Domain\Common\CommonBase;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use function App\parallel;
+use function App\resolveOnFutureTick;
 use function App\tpf;
 
 class GameLatest extends CommonBase
 {
+    private bool $allowEnergyKpiUpdate = true;
+
+    private function newSimulationDataAvailable(array $tickData, float $lastUpdateTime): bool
+    {
+        if (($tickData['mel_lastupdate'] > $lastUpdateTime) ||
+            ($tickData['cel_lastupdate'] > $lastUpdateTime) ||
+            ($tickData['sel_lastupdate'] > $lastUpdateTime)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Gets the latest plans & messages from the server
      *
@@ -19,16 +34,23 @@ class GameLatest extends CommonBase
      * @param float $lastUpdateTime
      * @param int $user
      * @param bool $showDebug
-     * @return PromiseInterface
+     * @return ?PromiseInterface
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $teamId, float $lastUpdateTime, int $user, bool $showDebug = false): PromiseInterface
+    public function latest(int $teamId, float $lastUpdateTime, int $user, bool $showDebug = false): ?PromiseInterface
     {
         return $this->calculateUpdatedTime(
             $showDebug
         )
         ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
+            $game = new Game();
+            $this->asyncDataTransferTo($game);
+            $this->allowEnergyKpiUpdate =
+                (
+                    $game->areSimulationsUpToDate($tick) &&
+                    $this->newSimulationDataAvailable($tick, $lastUpdateTime)
+                ) ||
+                $lastUpdateTime < PHP_FLOAT_EPSILON; // first client update
             $newTime = microtime(true);
             $data = array();
             $data['prev_update_time'] = $lastUpdateTime;
@@ -85,9 +107,8 @@ class GameLatest extends CommonBase
                             $newTime,
                             &$data
                         ) {
-                            return $this->latestLevel6(
+                            return $this->latestLevel6( // energy
                                 $result,
-                                $lastUpdateTime,
                                 $newTime,
                                 $data
                             )
@@ -117,20 +138,19 @@ class GameLatest extends CommonBase
                                         $newTime,
                                         $data
                                     )
-                                    ->then(function (array $results) use (
+                                    ->then(function (Result $queryResult) use (
                                         $lastUpdateTime,
                                         $user,
                                         $newTime,
                                         &$data
                                     ) {
                                         return $this->latestLevel9(
-                                            $results,
+                                            $queryResult,
                                             $lastUpdateTime,
                                             $newTime,
                                             $data
                                         )
                                         ->then(function (Result $result) use (
-                                            $lastUpdateTime,
                                             $user,
                                             $newTime,
                                             &$data
@@ -146,6 +166,26 @@ class GameLatest extends CommonBase
                         });
                     });
                 });
+            });
+        })
+        // add debug data to payload, only to be dumped to log, see PluginHelper::dump()
+        ->then(function (array &$data) use ($lastUpdateTime) {
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->select(
+                        'api_batch_id',
+                        'api_batch_state',
+                        'api_batch_country_id',
+                        'api_batch_user_id',
+                        'api_batch_communicated'
+                    )
+                    ->from('api_batch')
+                    ->where($qb->expr()->gt('api_batch_lastupdate', $qb->createPositionalParameter($lastUpdateTime)))
+            )
+            ->then(function (Result $result) use (&$data) {
+                $data['debug']['batches'] = $result->fetchAllRows() ?: [];
+                return $data;
             });
         });
     }
@@ -169,6 +209,9 @@ class GameLatest extends CommonBase
                     'game_mel_lastmonth as mel_lastmonth',
                     'game_cel_lastmonth as cel_lastmonth',
                     'game_sel_lastmonth as sel_lastmonth',
+                    'game_mel_lastupdate as mel_lastupdate',
+                    'game_cel_lastupdate as cel_lastupdate',
+                    'game_sel_lastupdate as sel_lastupdate',
                     'game_eratime as era_time'
                 )
                 ->from('game')
@@ -184,7 +227,7 @@ class GameLatest extends CommonBase
                 $this->getAsyncDatabase()->query(
                     $qb
                         ->update('game')
-                        ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                        ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 )
                 ->done(
                     function (Result $result) use (&$tick, $assureGameLatestUpdate) {
@@ -220,26 +263,26 @@ class GameLatest extends CommonBase
                         }
 
                         if ($showDebug) {
-                            wdo("diff: " . $diff);
+                            wdo("diff: " . $diff, OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
 
                         if ($showDebug) {
-                            wdo("timeleft: " . $tick['era_timeleft']);
+                            wdo("timeleft: " . $tick['era_timeleft'], OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     } elseif ($state == "PAUSE" || $state == "SETUP") {
                         //[MSP-1116] Seems sensible?
                         $tick['era_timeleft'] = $tick['era_realtime'] - ($tick['era_monthsdone'] * $secondsPerMonth);
                         if ($showDebug) {
-                            echo "GAME PAUSED";
+                            wdo('GAME PAUSED', OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     } else {
                         if ($showDebug) {
-                            echo "GAME ENDED";
+                            wdo('GAME ENDED', OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
                     }
 
                     if ($showDebug) {
-                        wdo(json_encode($tick));
+                        wdo('Tick: ' . PHP_EOL . json_encode($tick));
                     }
 
                     return $tick;
@@ -254,7 +297,7 @@ class GameLatest extends CommonBase
     {
         $data['tick'] = $tick;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after tick<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after tick');
         }
         $plan = new PlanLatest();
         $this->asyncDataTransferTo($plan);
@@ -272,7 +315,7 @@ class GameLatest extends CommonBase
     ): PromiseInterface {
         $data['plan'] = $planData;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after plan<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after plan');
         }
 
         $layer = new LayerLatest();
@@ -302,7 +345,7 @@ class GameLatest extends CommonBase
             //only send the geometry when it's required
             $p['layers'] = $layersContainer[$key];
             if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-                echo (microtime(true) - $newTime) . " elapsed after layers<br />";
+                wdo((microtime(true) - $newTime) . ' elapsed after layers<br />');
             }
 
             if ((
@@ -332,7 +375,7 @@ class GameLatest extends CommonBase
     ): PromiseInterface {
         $data['planmessages'] = $queryResultRows;
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after plan messages<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after plan messages');
         }
 
         //return any raster layers that need to be updated
@@ -348,25 +391,27 @@ class GameLatest extends CommonBase
      */
     private function latestLevel6(
         Result $queryResult,
-        float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
         $data['raster'] = $queryResult->fetchAllRows();
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after raster<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after raster<br />');
         }
 
         $energy = new EnergyLatest();
         $this->asyncDataTransferTo($energy);
-        return $energy->latest(
-            $lastUpdateTime
-        );
+        $deferred = new Deferred();
+        $energy->fetchAll($this->allowEnergyKpiUpdate)->then(function (array $queryResults) use ($deferred) {
+            $energyData['connections'] = $queryResults[0]->fetchAllRows();
+            $energyData['output'] = $queryResults[1]->fetchAllRows();
+            $deferred->resolve($energyData);
+        });
+        return $deferred->promise();
     }
 
     /**
-     * @param Result[] $queryResults
-     * @param float $lastUpdateTime
+     * @param array $energyData
      * @param int $teamId
      * @param float $newTime
      * @param array $data
@@ -374,25 +419,32 @@ class GameLatest extends CommonBase
      * @throws Exception
      */
     private function latestLevel7(
-        array $queryResults,
+        array $energyData,
         int $teamId,
         float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['energy']['connections'] = $queryResults[0]->fetchAllRows();
-        $data['energy']['output'] = $queryResults[1]->fetchAllRows();
-
+        $data['policy_updates'][] = array_merge([
+            'policy_type' => 'energy',
+        ], $energyData);
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after energy<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after energy');
         }
 
         $kpi = new KpiLatest();
         $this->asyncDataTransferTo($kpi);
-        return $kpi->latest(
-            (int)$lastUpdateTime,
-            $teamId
-        );
+        $deferred = new Deferred();
+        $this->allowEnergyKpiUpdate ?
+            $kpi->latest((int)$lastUpdateTime, $teamId)->then(function (array $queryResultRows) use ($deferred) {
+                $deferred->resolve($queryResultRows);
+            }) :
+            resolveOnFutureTick($deferred, [
+                'ecology' => [],
+                'shipping' => [],
+                'energy' => []
+            ]);
+        return $deferred->promise();
     }
 
     /**
@@ -404,33 +456,41 @@ class GameLatest extends CommonBase
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['kpi'] = $queryResultRows;
+        $data['simulation_updates'][0] = [
+            'simulation_type' => 'CEL',
+            'kpi' => $queryResultRows['energy']
+        ];
+        $data['simulation_updates'][1] = [
+            'simulation_type' => 'MEL',
+            'kpi' => $queryResultRows['ecology']
+        ];
+        $data['simulation_updates'][2] = [
+            'simulation_type' => 'SEL',
+            'kpi' => $queryResultRows['shipping']
+        ];
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after kpi<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after kpi<br />');
         }
 
         $warning = new WarningLatest();
         $this->asyncDataTransferTo($warning);
-        return $warning->latest(
-            $lastUpdateTime
-        );
+        return $warning->latest();
     }
 
     /**
      * @throws Exception
      */
     private function latestLevel9(
-        array $queryResults,
+        Result $queryResult,
         float $lastUpdateTime,
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['warning']['plan_issues'] = $queryResults[0]->fetchAllRows();
-        $data['warning']['shipping_issues'] = $queryResults[1]->fetchAllRows();
+        $data['simulation_updates'][2]['shipping_issues'] = $queryResult->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after warning<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after warning<br />');
         }
 
         $objective = new ObjectiveLatest();
@@ -448,11 +508,11 @@ class GameLatest extends CommonBase
         int $user,
         float $newTime,
         array &$data
-    ): ?PromiseInterface {
+    ): PromiseInterface {
         $data['objectives'] = $result->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            echo (microtime(true) - $newTime) . " elapsed after objective<br />";
+            wdo((microtime(true) - $newTime) . ' elapsed after objective<br />');
         }
 
         //Add a slight fudge of 1ms to the update times to avoid rounding issues.
@@ -469,8 +529,7 @@ class GameLatest extends CommonBase
             empty($data['warning']) &&
             empty($data['raster']) &&
             empty($data['objectives'])) {
-            $data = '';
-            return null;
+            return resolveOnFutureTick(new Deferred(), '')->promise();
         }
 
         return $this->getAsyncDatabase()->update(

@@ -19,6 +19,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+use App\Domain\API\v1\Config;
+
+use ServerManager\Base;
+use ServerManager\DB;
+use ServerManager\ServerManager;
+use ServerManager\Session;
+use ServerManager\User;
+use Symfony\Component\Uid\Uuid;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\Setting;
+
 ob_start();
 ?>
 
@@ -40,48 +52,42 @@ $db = DB::getInstance();
 require_once __DIR__ . '/../templates/header.php';
 
 if ($servermanager->install($user)) {
-  //send it to the authoriser to store with successfully logged in user_id
-    $params = array(
-            "jwt" => Session::get("currentToken"),
-        "server_id" => $servermanager->GetServerID(),
-        "server_name" => $servermanager->GetServerName(),
-        "audience" => $servermanager->GetBareHost()
-    );
-    $freshinstall = Base::callAuthoriser("freshinstalljwt.php", $params);
-    if ($freshinstall["success"]) {
-        // @codingStandardsIgnoreStart
-        //echo 'settings sent <br/>';
-        ?>
+    $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+    $params = ["server" =>
+        [
+            "uuid" => $em->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid'])
+                ->getValue(),
+            "serverID" => $em->getRepository(Setting::class)->findOneBy(['name' => 'server_id'])
+                ->getValue(),
+            "password" => $em->getRepository(Setting::class)->findOneBy(['name' => 'server_password'])
+                ->getValue(),
+            "serverName" => $em->getRepository(Setting::class)->findOneBy(['name' => 'server_name'])
+                ->getValue()
+        ],
+        "user" => "/api/users/".$user->data()->account_id
+    ];
+    $servermanager->postCallAuthoriser("server_users", $params);
+    // @codingStandardsIgnoreStart
+    //echo 'settings sent <br/>';
+    ?>
       <div id="page-wrapper">
         <div class="container">
             <div id="infobox"></div>
           <h1>New installation</h1>
           <p>This is a new installation of the Server Manager application.</p>
           <p>You, <strong><?=$user->data()->username;?></strong>, are now the primary user of this Server Manager. This means that you can not only use this application,
-           but you can also add other users to it through the <a href="https://auth.mspchallenge.info">MSP Challenge Authoriser</a> application. You don't have to do this
+           but you can also add other users to it through Settings - User Access. You don't have to do this
            right now of course, or at all for that matter.</p>
-          <p>You can go ahead and <a href="<?php echo ServerManager::getInstance()->GetServerManagerFolder();?>manager.php">set up your first MSP Challenge server</a>.</p>
+          <p>You can go ahead and <a href="<?php echo ServerManager::getInstance()->getAbsolutePathBase();?>manager.php">set up your first MSP Challenge server</a>.</p>
           <p>We also recommend you enter your computer's proper IP address or full-qualified domain name under Settings.</p>
         </div>
       </div>
-        <?php
-        // @codingStandardsIgnoreEnd
-        // @codingStandardsIgnoreStart
-    } else {
-        ?>
-    <div id="page-wrapper">
-      <div class="container">
-        <div id="infobox"></div>
-        <h1>New installation</h1>
-        <p>Unfortunately, something went wrong. Please try again later or get in touch with us through <a href="http://community.mspchallenge.info">community.mspchallenge.info</a> to get support.</p>
-      </div>
-    </div>
-        <?php
-        // @codingStandardsIgnoreEnd
-    }
+    <?php
+    // @codingStandardsIgnoreEnd
+    // @codingStandardsIgnoreStart
 }
 ?>
 <!-- footers -->
 <?php
 // the final html footer copyright row + the external js calls
-require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/footer.php';
+require_once ServerManager::getInstance()->getServerManagerRoot().'templates/footer.php';

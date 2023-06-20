@@ -1,7 +1,13 @@
 @echo OFF
 setlocal
+set cwd=%cd%
+set scriptpath=%~dp0
+cd "%scriptpath%"
 
-set php=C:\xampp\php\php.exe
+if "%PHP_PATH%"=="" (
+  set PHP_PATH=C:\xampp\php\php.exe
+)
+set php="%PHP_PATH%"
 set service=MSPWsServer
 reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
 set exe=tools\Win\nssm\nssm-win64.exe
@@ -24,6 +30,7 @@ if not exist %php% (
     set ERRORLEVEL=1
     goto eof
 )
+call :FirewallAddRule
 %exe% status %service% 1>NUL 2>NUL
 IF %ERRORLEVEL% NEQ 0 (
     %exe% install %service% %php% bin/console app:ws-server %2 %3 %4 %5 %6 %7 %8 %9
@@ -33,7 +40,6 @@ IF %ERRORLEVEL% NEQ 0 (
 %php% bin/console cache:clear
 %exe% start %service%
 %exe% status %service%
-call :FirewallAddRule
 goto get
 
 :blank
@@ -75,7 +81,13 @@ call :FirewallRemoveRule
 goto eof
 
 :get
+set singleparam=0
 if not "%~2"=="" (
+  if not "%~1"=="install" (
+    set singleparam=1
+  )
+)
+if "%singleparam%"=="1" (
   echo %2:
   %exe% get %service% %2
 ) else (
@@ -91,6 +103,7 @@ if not "%~2"=="" (
 goto eof
 
 :eof
+cd "%cwd%"
 endlocal
 IF %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
@@ -105,4 +118,3 @@ exit /b 0
 :FirewallRemoveRule
 netsh advfirewall firewall delete rule name="MSP Websocket server"
 exit /b 0
-

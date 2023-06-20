@@ -2,6 +2,8 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\Setting;
 use Exception;
 use stdClass;
 
@@ -23,106 +25,92 @@ class Auth_MSP extends Auths
         return $this->name;
     }
 
-    private function getJsonWebTokenObject(): object
+    private function loginWithMSPChallengeAuth($username, $password): array
     {
-        // get a temp JWT from the Authoriser for further communication
-        try {
-            // for this we first need this MSP Challenge's server_id from the ServerManager
-            $serverManagerReturn = json_decode(
-                $this->CallBack(
-                    GameSession::GetServerManagerApiRoot()."readServerManager.php",
-                    array(
-                        "token" => (new Security())->getServerManagerToken(),
-                        "session_id" => $this->getGameSessionId()
-                    )
-                )
-            );
-            if (!$serverManagerReturn->success) {
-                throw new Exception();
-            }
-            // and we send the server_id through to the Authoriser to request a jwt (JSON web token)
-            $jwtReturn = json_decode(
-                $this->CallBack(
-                    Config::getInstance()->GetAuthJWTRetrieval(),
-                    array(
-                        "audience" => GameSession::GetRequestApiRoot(),
-                        "server_id" => $serverManagerReturn->servermanager->server_id
-                    ),
-                    array(), // no headers
-                    false, // synchronous, so wait
-                    true // post as json
-                )
-            );
-        } catch (Exception $e) {
-            $jwtReturn = new stdClass();
-            $jwtReturn->success = false;
-        }
-        return $jwtReturn;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function authenticate(string $username, string $password): string
-    {
-        $jwtReturn = $this->getJsonWebTokenObject();
-        if (!$jwtReturn->success) {
-            throw new Exception(
-                "Could not authenticate through ".$this->getName().
-                ". Try again later or get in touch with your facilitator."
-            );
-        }
-
-        $jwt = $jwtReturn->jwt;
-        // use the jwt to check the sent username and password at the Authoriser
-        $userCheckReturn = json_decode($this->CallBack(
-            Config::getInstance()->GetAuthJWTUserCheck(),
+        return json_decode($this->CallBack(
+            Config::getInstance()->GetAuthJWTRetrieval(),
             array(
-                "jwt" => $jwt,
-                "audience" => GameSession::GetRequestApiRoot(),
                 "username" => $username,
                 "password" => $password
             ),
             array(), // no headers
             false,  // synchronous, so wait
-            true
-        )); // post as json
-        if (!$userCheckReturn->success) {
-            throw new Exception("Username and/or password incorrect.");
-        }
-        return $userCheckReturn->username; //$userCheckReturn->email;
+            true // post as json
+        ), true);
+    }
+
+    private function getJsonWebTokenObject(): array
+    {
+        // get a temp JWT from the Authoriser for further communication
+        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $serverID = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_id']);
+        $serverPass = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_password']);
+        return $this->loginWithMSPChallengeAuth($serverID->getValue(), $serverPass->getValue());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function authenticate(string $username, string $password): bool
+    {
+        $this->loginWithMSPChallengeAuth($username, $password);
+        return true; //if authentication failed, an exception would have been thrown
     }
 
     /**
      * @throws Exception
      * @noinspection SpellCheckingInspection
      */
-    public function checkuser(string $username): array
+    public function checkUser(string $input): array
     {
+        $input = strtolower($input);
         $jwtReturn = $this->getJsonWebTokenObject();
-        if (!$jwtReturn->success) {
+        if (isset($jwtReturn['code'])) {
             throw new Exception(
                 "Could not authenticate through ".$this->getName().
-                ". Try again later or get in touch with your facilitator."
+                ": ".$jwtReturn['message']
             );
         }
-        $jwt = $jwtReturn->jwt;
+        $jwt = $jwtReturn['token'] ?? '';
+
         // use the jwt to check the sent username and password at the Authoriser
-        $usercheck_return = json_decode($this->CallBack(
-            Config::getInstance()->GetAuthJWTUserCheck(),
-            array(
-                "jwt" => $jwt,
-                "audience" => GameSession::GetRequestApiRoot(),
-                "username" => $username
+        $inputArray = explode("|", $input);
+
+        $userEmailCheckReturn = json_decode($this->CallBack(
+            sprintf(
+                '%s?%s',
+                Config::getInstance()->GetAuthJWTUserCheck(),
+                http_build_query(['email' => $inputArray])
             ),
-            array(), // no headers
-            false,  // synchronous, so wait
-            true
-        )); // post as json
-        if (!is_object($usercheck_return) || !property_exists($usercheck_return, 'success') ||
-            !$usercheck_return->success) {
-            throw new Exception("Users not found.");
+            array(),
+            array('Authorization: Bearer '.$jwt)
+        ), true);
+
+        $userNameCheckReturn = json_decode($this->CallBack(
+            sprintf(
+                '%s?%s',
+                Config::getInstance()->GetAuthJWTUserCheck(),
+                http_build_query(['username' => $inputArray])
+            ),
+            array(),
+            array('Authorization: Bearer '.$jwt)
+        ), true);
+
+        $userTotalCheck =
+            array_merge($userEmailCheckReturn['hydra:member'] ?? [], $userNameCheckReturn['hydra:member'] ?? []);
+
+        // since Auth2 API only returns usernames (for understandable privary/security reasons)
+        // when a user entered email addresses, we cannot know which of those were not found
+        // so, for now, if *anything* was found, keep 'notfound' simply empty
+        if (empty($userTotalCheck)) {
+            return ['found' => '', 'notfound' => $input];
         }
-        return array("found" => $usercheck_return->found, "notfound" => $usercheck_return->notfound);
+        foreach ($userTotalCheck as $user) {
+            $found[] = $user['username'];
+        }
+        return [
+            'found' => implode('|', array_unique($found)),
+            'notfound' => ''
+        ];
     }
 }

@@ -9,10 +9,8 @@ use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
-use http\Message;
 use IntlException;
 use MessageFormatter;
-use function msgfmt_create;
 
 abstract class MSPMigration extends AbstractMigration
 {
@@ -29,16 +27,17 @@ abstract class MSPMigration extends AbstractMigration
                 // nothing to validate
                 return;
             case MSPDatabaseType::DATABASE_TYPE_GAME_SESSION:
-                $this->abortIf(
+                $this->skipIf(
                     !Util::hasPrefix($schema->getName(), $_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_'),
-                    'This is no game session connection. Please use "--conn" to set the game session connection. ' .
-                    PHP_EOL . 'E.g. --conn=msp_session_1'
+                    'This migrations requires a game session database. ' .
+                    'Please use "--em" to set the game session entity manager. ' .
+                    PHP_EOL . 'E.g. --em=msp_session_1'
                 );
                 break;
             case MSPDatabaseType::DATABASE_TYPE_SERVER_MANAGER:
-                $this->abortIf(
-                    $schema->getName() != $_ENV['DBNAME_SERVER_MANAGER'],
-                    'This is no server manager connection. Please use --conn=' . $schema->getName()
+                $this->skipIf(
+                    $schema->getName() != ($_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager'),
+                    'This migrations requires a server manager database. Please use --em=' . $schema->getName()
                 );
                 break;
         }

@@ -5,22 +5,6 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd "${SCRIPT_DIR}" || exit 4
 
 DOWNLOAD_DIR="../var/tools/"
-DOTENV_FILE="../.env"
-DOTENV_LOCAL_FILE="../.env.local"
-if [[ ! -f $DOTENV_FILE ]]; then
-  echo "Could not find file ${DOTENV_FILE}"
-  exit 1
-fi
-
-# export all .env variables as environmental variables, e.g. APP_ENV
-if [[ -z "${APP_ENV}" ]]; then
-  echo "No APP_ENV enviromental variable found, checking .env file"
-  set -o allexport; source "${DOTENV_FILE}"; set +o allexport
-  if [[ -f $DOTENV_LOCAL_FILE ]]; then
-    echo "Checking .env.local file"
-    set -o allexport; source "${DOTENV_LOCAL_FILE}"; set +o allexport
-  fi
-fi
 
 FORCE=0
 while getopts ":fe:" opt; do
@@ -41,24 +25,15 @@ while getopts ":fe:" opt; do
   esac
 done
 
-case $APP_ENV in
-    prod|dev) echo "Environment: ${APP_ENV}" ;;
-    *) echo "Encountered invalid environment: ${APP_ENV}" ;;
-esac
+DOTENV_FILE="../.env"
+DOTENV_LOCAL_FILE="../.env.local"
+source resolve-app-env.sh
 
 if [[ $FORCE == 1 ]]; then
   echo 'Forcing download to latest versions...'
 fi
 
 function download() {
-  # install platform independent tools -- runs on both Linux Ubuntu or Windows Git bash
-  if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}phpcs.phar" ]]; then
-    curl --create-dirs -Lso "${DOWNLOAD_DIR}phpcs.phar" https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
-  fi
-  if [[ $FORCE == 1|| ! -f "${DOWNLOAD_DIR}phpcbf.phar" ]]; then
-    curl --create-dirs -Lso "${DOWNLOAD_DIR}phpcbf.phar" https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar
-  fi
-
   # install Windows tools
   if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
     # install Symfony cli
@@ -67,6 +42,17 @@ function download() {
         mkdir -p "${DOWNLOAD_DIR}Win/symfony-cli/"
       fi
       curl -Lso /tmp/symfony-cli_windows_386.zip https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_windows_386.zip && unzip -qqo /tmp/symfony-cli_windows_386.zip -d "${DOWNLOAD_DIR}Win/symfony-cli/" && rm /tmp/symfony-cli_windows_386.zip
+      rm -f ${DOWNLOAD_DIR}/symfony ; ln -s Win/symfony-cli/symfony.exe ${DOWNLOAD_DIR}/symfony
+    fi
+  # install Linux tools
+  elif [[ "$OSTYPE" == "linux-musl" ]]; then
+    # install Symfony cli
+    if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}Linux/symfony-cli/symfony" ]]; then
+      if [[ ! -d "${DOWNLOAD_DIR}Linux/symfony-cli/" ]]; then
+        mkdir -p "${DOWNLOAD_DIR}Linux/symfony-cli/"
+      fi
+      curl -Lso /tmp/symfony-cli_linux_amd64.tar.gz https://github.com/symfony-cli/symfony-cli/releases/latest/download/symfony-cli_linux_amd64.tar.gz && tar -zxf /tmp/symfony-cli_linux_amd64.tar.gz -C "${DOWNLOAD_DIR}Linux/symfony-cli/" && rm /tmp/symfony-cli_linux_amd64.tar.gz
+      rm -f ${DOWNLOAD_DIR}/symfony ; ln -s Linux/symfony-cli/symfony ${DOWNLOAD_DIR}/symfony
     fi
   fi
 
@@ -79,46 +65,61 @@ function downloadDevTools() {
     return
   fi
 
+  # we do not need adminer on docker, it has its own container.
+  if [[ "${DOCKER}" == "1" ]]; then
+    echo "Docker detected, skipping adminer installation"
+    exit 0
+  fi
+
   if [[ $FORCE == 1 || ! -f ./../public/adminer/index.php ]]; then
     curl --create-dirs -Lso ./../public/adminer/adminer.php https://www.adminer.org/latest-mysql-en.php
+    curl --create-dirs -Lso ./../public/adminer/plugins/plugin.php https://raw.github.com/vrana/adminer/master/plugins/plugin.php
+    curl --create-dirs -Lso ./../public/adminer/plugins/sql-log.php https://raw.github.com/vrana/adminer/master/plugins/sql-log.php
     cat > ./../public/adminer/index.php <<- CONTENT
 <?php
-function adminer_object() {
-    class MyAdminer extends Adminer {
-        function login(\$login, \$password) {
+use App\Domain\Common\DatabaseDefaults;
+use Symfony\Component\Dotenv\Dotenv;
+
+function adminer_object()
+{
+    include_once "./plugins/plugin.php";
+    foreach (glob("plugins/*.php") as \$filename) {
+        include_once "./\$filename";
+    }
+    \$plugins = [
+        new AdminerSqlLog(),
+    ];
+
+    class MyAdminer extends AdminerPlugin
+    {
+        public function login(\$login, \$password)
+        {
             return true;
         }
-        function credentials() {
+        public function credentials()
+        {
+            \$baseDir = __DIR__ . '/../../';
+            require_once \$baseDir.'vendor/autoload.php';
+            \$dotenv = new Dotenv();
+            call_user_func_array([\$dotenv, 'load'], glob(\$baseDir . '.env*') ?: []);
             // server, username and password for connecting to database
-            return array('localhost', 'root', '');
+            return array(
+                (
+                    \$_ENV['DATABASE_HOST'] ?? DatabaseDefaults::DEFAULT_DATABASE_HOST) . ':' .
+                    (\$_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT
+                ),
+                (\$_ENV['DATABASE_USER'] ?? DatabaseDefaults::DEFAULT_DATABASE_USER),
+                ''
+            );
         }
-  }
-  return new MyAdminer;
+    }
+    return new MyAdminer(\$plugins);
 }
+
 include "./adminer.php";
 CONTENT
   fi
 }
 
-function makeExecutable() {
-  TARGET_FILE="${DOWNLOAD_DIR}${1}"
-  cat > "${TARGET_FILE}" <<- CONTENT
-#!/bin/bash
-SCRIPT_DIR="\$( cd -- "\$( dirname -- "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-php "\${SCRIPT_DIR}/$1.phar" "\$@"
-CONTENT
-  chmod u+x "${TARGET_FILE}"
-}
-
-function makeExecutables() {
-  if [[ $FORCE == 1 || ! -f phpcs ]]; then
-    makeExecutable phpcs
-  fi
-  if [[ $FORCE == 1 || ! -f phpcbf ]]; then
-    makeExecutable phpcbf
-  fi
-}
-
 download
-makeExecutables
 cd "${CWD}" || exit 5

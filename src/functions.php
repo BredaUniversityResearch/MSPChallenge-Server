@@ -5,16 +5,25 @@ namespace App;
 use App\Domain\Common\ToPromiseFunction;
 use Closure;
 use Doctrine\DBAL\Exception\DriverException;
+use Doctrine\DBAL\Query\QueryBuilder;
+use Drift\DBAL\Connection;
 use Exception;
 use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
+use React\Promise\ExtendedPromiseInterface;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use React\Promise\Timer;
 use React\Promise\Timer\TimeoutException;
 use Symfony\Component\Yaml\Yaml;
 use Throwable;
 use function React\Promise\all;
+
+function query(Connection $connection, QueryBuilder $qb): Promise
+{
+    return $connection->query($qb);
+}
 
 function resolveOnFutureTick(Deferred $deferred, $resolveValue = null, ?LoopInterface $loop = null): Deferred
 {
@@ -28,22 +37,25 @@ function resolveOnFutureTick(Deferred $deferred, $resolveValue = null, ?LoopInte
     return $deferred;
 }
 
-function assertFulfilled(PromiseInterface $promise, ?Closure $onFullfulled = null): void
+function assertFulfilled(ExtendedPromiseInterface $promise, ?Closure $onFullfulled = null): void
 {
     $promise->done(
         $onFullfulled,
         function ($reason) {
             if (is_string($reason)) {
-                die($reason);
+                echo $reason;
+                exit(1);
             }
             if ($reason instanceof Throwable) {
-                die(
+                echo(
                     $reason->getMessage() . PHP_EOL . 'in ' .
                     $reason->getFile() . '@' . $reason->getLine() . PHP_EOL .
                     $reason->getTraceAsString()
                 );
+                exit(1);
             }
-            die('error, reason: ' . print_r($reason, true));
+            echo 'error, reason: ' . print_r($reason, true);
+            exit(1);
         }
     );
 }
@@ -56,7 +68,7 @@ function tpf(Closure $function): ToPromiseFunction
 /**
  * @param ToPromiseFunction[] $toPromiseFunctions
  */
-function chain(array $toPromiseFunctions): PromiseInterface
+function chain(array $toPromiseFunctions): Promise
 {
     $deferred = new Deferred();
     if (false === $toPromiseFunction = reset($toPromiseFunctions)) {
@@ -103,7 +115,7 @@ function chain(array $toPromiseFunctions): PromiseInterface
 /**
  * @param ToPromiseFunction[] $toPromiseFunctions
  */
-function parallel(array $toPromiseFunctions, ?int $numThreads = null): PromiseInterface
+function parallel(array $toPromiseFunctions, ?int $numThreads = null): Promise
 {
     // default is a thread per task
     if (null === $numThreads) {

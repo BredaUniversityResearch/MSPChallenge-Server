@@ -1,0 +1,9 @@
+<?php
+
+namespace React\Stream;
+
+use Evenement\EventEmitterInterface;
+
+interface ReadableStreamInterface extends EventEmitterInterface
+{
+}

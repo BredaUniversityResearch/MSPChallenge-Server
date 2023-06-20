@@ -1,4 +1,7 @@
 <?php
+
+namespace ServerManager;
+
 /*
 UserSpice 5
 An Open Source PHP User Management System
@@ -19,397 +22,492 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 use App\Domain\Helper\Config;
+use App\Domain\Common\DatabaseDefaults;
+use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use Exception;
+use PDO;
+use PDOException;
+use PDOStatement;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 
-class DB {
-	private static $_instance = null;
-	private $_pdo, $_query, $_error = false, $_errorInfo, $_results=[], $_resultsArray=[], $_count = 0, $_lastId, $_queryCount=0;
-	private $_host, $_dbname, $_user, $_pass;
+class DB
+{
+    private static ?DB $instance = null;
+    private PDO $pdo;
+    private PDOStatement|false|null $query = null;
+    private bool $error = false;
+    private $errorInfo;
+    private array $results=[];
+    private array $resultsArray=[];
+    private int $count = 0;
+    private $lastId;
+    private int $queryCount=0;
+    private $host;
+    private $dbname;
+    private $user;
+    private $pass;
 
-	private static $PDOArgs = array(
-		PDO::MYSQL_ATTR_LOCAL_INFILE => true,
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, 
-		PDO::ATTR_TIMEOUT => 5
-	);
+    private static array $PDOArgs = array(
+        PDO::MYSQL_ATTR_LOCAL_INFILE => true,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_TIMEOUT => 5
+    );
 
-	private function __construct($config = []){
-		if($config == []) {
-			$this->_host = Config::get('mysql/host');
-			$this->_dbname = Config::get('mysql/db');
-			$this->_user = Config::get('mysql/username');
-			$this->_pass =	Config::get('mysql/password');
-		}
-		else {
-			if(is_array($config) && count($config) == 1) {
-				$this->_host = Config::get($config[0].'/host');
-				$this->_dbname = Config::get($config[0].'/db');
-				$this->_user = Config::get($config[0].'/username');
-				$this->_pass = Config::get($config[0].'/password');
-			}
-			else {
-				$this->_host = $config[0];
-				$this->_dbname = $config[1];
-				$this->_user = $config[2];
-				$this->_pass = $config[3];
-			}
-		}
-		
-		try {
-			$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
-			// XAMPP doesn't seem to remove databases when it uninstalls MySQL (which means a reinstall could lead to problems because the dbase will still be there but maybe empty/outdated)
-			// so check if the server_id is available in the settings table - caught below if it doesn't
-			$server_id_attempt = $this->cell("settings.value", array("name", "=", "server_id"));
-            if (empty($server_id_attempt))
-            {
+    private function __construct($config = [])
+    {
+        if ($config == []) {
+            $this->host = Config::get('mysql/host');
+            $this->dbname = Config::get('mysql/db');
+            $this->user = Config::get('mysql/username');
+            $this->pass =  Config::get('mysql/password');
+        } else {
+            if (is_array($config) && count($config) == 1) {
+                $this->host = Config::get($config[0].'/host');
+                $this->dbname = Config::get($config[0].'/db');
+                $this->user = Config::get($config[0].'/username');
+                $this->pass = Config::get($config[0].'/password');
+            } else {
+                $this->host = $config[0];
+                $this->dbname = $config[1];
+                $this->user = $config[2];
+                $this->pass = $config[3];
+            }
+        }
+        
+        try {
+            $dsn = 'mysql:host='.$this->host.
+                    ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT).
+                    ';dbname='.$this->dbname;
+            $this->pdo = new PDO($dsn, $this->user, $this->pass, self::$PDOArgs);
+            // XAMPP doesn't seem to remove databases when it uninstalls MySQL (which means a reinstall could lead to
+            //problems because the dbase will still be there but maybe empty/outdated)
+            // so check if the server_id is available in the settings table - caught below if it doesn't
+            $server_id_attempt = $this->cell("settings.value", array("name", "=", "server_id"));
+            if (empty($server_id_attempt)) {
                 throw new Exception();
             }
-		} catch (Exception $e) { 
-			// assumes connection failed because the database doesn't exist yet, so attempt to create and fill it, thereby reattempting connection
-			$this->attempt_dbase_install();
-		}
-		
-	}
+        } catch (Exception $e) {
+            // assumes connection failed because the database doesn't exist yet, so attempt to create and fill it,
+            //thereby reattempting connection
+            $this->attempt_dbase_install();
+        }
+    }
 
-	public static function getInstance(){
-		if (!isset(self::$_instance)) {
-			self::$_instance = new DB();
-		}
-		return self::$_instance;
-	}
+    public static function getInstance(): ?DB
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new DB();
+        }
+        return self::$instance;
+    }
 
-	public static function getDB($config){
-			self::$_instance = new DB($config);
-		return self::$_instance;
-	}
+    public static function getDB($config)
+    {
+        self::$instance = new DB($config);
+        return self::$instance;
+    }
 
-	public function query($sql, $params = array()){
-		//echo "DEBUG: query(sql=$sql, params=".print_r($params,true).")<br />\n";
-		$this->_queryCount++;
-		$this->_error = false;
-		$this->_errorInfo = array(0, null, null); $this->_resultsArray=[]; $this->_count=0; $this->_lastId=0;
-		if ($this->_query = $this->_pdo->prepare($sql)) {
-			$x = 1;
-			if (count($params)) {
-				foreach ($params as $param) {
-					$this->_query->bindValue($x, $param);
-					$x++;
-				}
-			}
+    public function query($sql, $params = array()): self
+    {
+        //echo "DEBUG: query(sql=$sql, params=".print_r($params,true).")<br />\n";
+        $this->queryCount++;
+        $this->error = false;
+        $this->errorInfo = array(0, null, null);
+        $this->resultsArray=[];
+        $this->count=0;
+        $this->lastId=0;
+        if ($this->query = $this->pdo->prepare($sql)) {
+            $x = 1;
+            if (count($params)) {
+                foreach ($params as $param) {
+                    $this->query->bindValue($x, $param);
+                    $x++;
+                }
+            }
 
-			if ($this->_query->execute()) {
-				if ($this->_query->columnCount() > 0) {
-					$this->_results = $this->_query->fetchALL(PDO::FETCH_OBJ);
-					$this->_resultsArray = json_decode(json_encode($this->_results),true);
-				}
-				$this->_count = $this->_query->rowCount();
-				$this->_lastId = $this->_pdo->lastInsertId();
-			} else{
-				$this->_error = true;
-				$this->_errorInfo = $this->_query->errorInfo();
-			}
-		}
-		$this->_query->closeCursor();
-		return $this;
-	}
+            if ($this->query->execute()) {
+                if ($this->query->columnCount() > 0) {
+                    $this->results = $this->query->fetchALL(PDO::FETCH_OBJ);
+                    $this->resultsArray = json_decode(json_encode($this->results), true);
+                }
+                $this->count = $this->query->rowCount();
+                $this->lastId = $this->pdo->lastInsertId();
+            } else {
+                $this->error = true;
+                $this->errorInfo = $this->query->errorInfo();
+            }
+        }
+        $this->query->closeCursor();
+        return $this;
+    }
 
-	public function findAll($table){
-		return $this->action('SELECT *',$table);
-	}
+    public function findAll($table)
+    {
+        return $this->action('SELECT *', $table);
+    }
 
-	public function findById($id,$table){
-		return $this->action('SELECT *',$table,array('id','=',$id));
-	}
+    public function findById($id, $table)
+    {
+        return $this->action('SELECT *', $table, array('id','=',$id));
+    }
 
-	public function action($action, $table, $where = array(), $orderby = null){
-		$sql    = "{$action} FROM {$table}";
-		$values = array();
-		$is_ok  = true;
+    public function action($action, $table, $where = array(), $orderby = null)
+    {
+        $sql    = "{$action} FROM {$table}";
+        $values = array();
+        $is_ok  = true;
 
-		if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
-			$sql .= " WHERE $where_text";
+        if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok)) {
+            $sql .= " WHERE $where_text";
+        }
 
-		if (!is_null($orderby))
-			$sql .= " ORDER BY ".$orderby;
+        if (!is_null($orderby)) {
+            $sql .= " ORDER BY ".$orderby;
+        }
 
-		if ($is_ok)
-			if (!$this->query($sql, $values)->error())
-				return $this;
+        if ($is_ok) {
+            if (!$this->query($sql, $values)->error()) {
+                return $this;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private function _calcWhere($w, &$vals, $comboparg='and', &$is_ok=NULL) {
-		#echo "DEBUG: Entering _calcwhere(w=".print_r($w,true).",...)<br />\n";
-		if (is_array($w)) {
-				#echo "DEBUG: is_array - check<br />\n";
-			$comb_ops   = ['and', 'or', 'and not', 'or not'];
-			$valid_ops  = ['=', '<', '>', '<=', '>=', '<>', '!=', 'LIKE', 'NOT LIKE', 'ALIKE', 'NOT ALIKE', 'REGEXP', 'NOT REGEXP'];
-			$two_args   = ['IS NULL', 'IS NOT NULL'];
-			$four_args  = ['BETWEEN', 'NOT BETWEEN'];
-			$arr_arg    = ['IN', 'NOT IN'];
-			$nested_arg = ['ANY', 'ALL', 'SOME'];
-			$nested     = ['EXISTS', 'NOT EXISTS'];
-			$nestedIN   = ['IN SELECT', 'NOT IN SELECT'];
-			$wcount     = count($w);
+    // phpcs:ignore
+    private function _calcWhere($w, &$vals, $comboparg = 'and', &$is_ok = null): ?string
+    {
+        #echo "DEBUG: Entering _calcwhere(w=".print_r($w,true).",...)<br />\n";
+        if (is_array($w)) {
+                #echo "DEBUG: is_array - check<br />\n";
+            $comb_ops   = ['and', 'or', 'and not', 'or not'];
+            $valid_ops  = ['=', '<', '>', '<=', '>=', '<>', '!=', 'LIKE', 'NOT LIKE', 'ALIKE', 'NOT ALIKE', 'REGEXP',
+                'NOT REGEXP'];
+            $two_args   = ['IS NULL', 'IS NOT NULL'];
+            $four_args  = ['BETWEEN', 'NOT BETWEEN'];
+            $arr_arg    = ['IN', 'NOT IN'];
+            $nested_arg = ['ANY', 'ALL', 'SOME'];
+            $nested     = ['EXISTS', 'NOT EXISTS'];
+            $nestedIN   = ['IN SELECT', 'NOT IN SELECT'];
+            $wcount     = count($w);
 
-			if ($wcount == 0)
-				return "";
+            if ($wcount == 0) {
+                return "";
+            }
 
-			# believe it or not, this appears to be the fastest way to check
-			# sequential vs associative. Particularly with our expected short
-			# arrays it shouldn't impact memory usage
-			# https://gist.github.com/Thinkscape/1965669
-			if (array_values($w) === $w) { // sequential array
-						#echo "DEBUG: Sequential array - check!<br />\n";
-				if (in_array(strtolower($w[0]), $comb_ops)) {
-							#echo "DEBUG: w=".print_r($w,true)."<br />\n";
-					$sql = '';
-					$combop = '';
-					for ($i = 1; $i < $wcount; $i++) {
-						$sql .= ' '. $combop . ' ' . $this->_calcWhere($w[$i], $vals, "and", $is_ok);
-						$combop = $w[0];
-					}
-					return '('.$sql.')';
+            # believe it or not, this appears to be the fastest way to check
+            # sequential vs associative. Particularly with our expected short
+            # arrays it shouldn't impact memory usage
+            # https://gist.github.com/Thinkscape/1965669
+            if (array_values($w) === $w) { // sequential array
+                        #echo "DEBUG: Sequential array - check!<br />\n";
+                if (in_array(strtolower($w[0]), $comb_ops)) {
+                            #echo "DEBUG: w=".print_r($w,true)."<br />\n";
+                    $sql = '';
+                    $combop = '';
+                    for ($i = 1; $i < $wcount; $i++) {
+                        $sql .= ' '. $combop . ' ' . $this->_calcWhere($w[$i], $vals, "and", $is_ok);
+                        $combop = $w[0];
+                    }
+                    return '('.$sql.')';
+                } elseif ($wcount==3  &&  in_array($w[1], $valid_ops)) {
+                    #echo "DEBUG: normal condition w=".print_r($w,true)."<br />\n";
+                    $vals[] = $w[2];
+                    return "{$w[0]} {$w[1]} ?";
+                } elseif ($wcount==2  &&  in_array($w[1], $two_args)) {
+                    return "{$w[0]} {$w[1]}";
+                } elseif ($wcount==4  &&  in_array($w[1], $four_args)) {
+                    $vals[] = $w[2];
+                    $vals[] = $w[3];
+                    return "{$w[0]} {$w[1]} ? AND ?";
+                } elseif ($wcount==3  &&  in_array($w[1], $arr_arg)  &&  is_array($w[2])) {
+                    $vals = array_merge($vals, $w[2]);
+                    return "{$w[0]} {$w[1]} (" . substr(str_repeat(",?", count($w[2])), 1) . ")";
+                } elseif (($wcount==5 || $wcount==6 && is_array($w[5]))  &&  in_array($w[1], $valid_ops) &&
+                    in_array($w[2], $nested_arg)) {
+                    return  "{$w[0]} {$w[1]} {$w[2]}" . $this->get_subquery_sql($w[4], $w[3], $w[5], $vals, $is_ok);
+                } elseif (($wcount==3 || $wcount==4 && is_array($w[3]))  &&  in_array($w[0], $nested)) {
+                    return $w[0] . $this->get_subquery_sql($w[2], $w[1], $w[3], $vals, $is_ok);
+                } elseif (($wcount==4 || $wcount==5 && is_array($w[4]))  &&  in_array($w[1], $nestedIN)) {
+                    return "{$w[0]} " . substr($w[1], 0, -7) . $this->get_subquery_sql(
+                        $w[3],
+                        $w[2],
+                        $w[4],
+                        $vals,
+                        $is_ok
+                    );
+                } else {
+                    echo "ERROR: w=".print_r($w, true)."<br />\n";
+                    $is_ok = false;
+                    return null;
+                }
+            } else { // associative array ['field' => 'value']
+                #echo "DEBUG: Associative<br />\n";
+                $sql = '';
+                $combop = '';
+                foreach ($w as $k => $v) {
+                    if (in_array(strtolower($k), $comb_ops)) {
+                        #echo "DEBUG: A<br />\n";
+                        #echo "A: k=$k, v=".print_r($v,true)."<br />\n";
+                        $sql .= $combop . ' (' . $this->_calcWhere($v, $vals, $k, $is_ok) . ') ';
+                        $combop = $comboparg;
+                    } else {
+                        #echo "DEBUG: B<br />\n";
+                        #echo "B: k=$k, v=".print_r($v,true)."<br />\n";
+                        $vals[] = $v;
+                        if (in_array(substr($k, -1, 1), array('=', '<', '>'))) { // 'field !='=>'value'
+                            $sql .= $combop . ' ' . $k . ' ? ';
+                        } else { // 'field'=>'value'
+                            $sql .= $combop . ' ' . $k . ' = ? ';
+                        }
+                        $combop = $comboparg;
+                    }
+                }
+                return ' ('.$sql.') ';
+            }
+        } else {
+            echo "ERROR: No array in $w<br />\n";
+            $is_ok = false;
+            return null;
+        }
+    }
 
-				} elseif ($wcount==3  &&  in_array($w[1],$valid_ops)) {
-					#echo "DEBUG: normal condition w=".print_r($w,true)."<br />\n";
-					$vals[] = $w[2];
-					return "{$w[0]} {$w[1]} ?";
+    public function get($table, $where, $orderby = null): bool|static
+    {
+        return $this->action('SELECT *', $table, $where, $orderby);
+    }
 
-				} elseif ($wcount==2  &&  in_array($w[1],$two_args)) {
-					return "{$w[0]} {$w[1]}";
+    public function delete($table, $where): bool|static
+    {
+        return empty($where) ? false : $this->action('DELETE', $table, $where);
+    }
 
-				} elseif ($wcount==4  &&  in_array($w[1],$four_args)) {
-					$vals[] = $w[2];
-					$vals[] = $w[3];
-					return "{$w[0]} {$w[1]} ? AND ?";
+    public function deleteById($table, $id): bool|static
+    {
+        return $this->action('DELETE', $table, array('id','=',$id));
+    }
 
-				} elseif ($wcount==3  &&  in_array($w[1],$arr_arg)  &&  is_array($w[2])) {
-					$vals = array_merge($vals,$w[2]);
-					return "{$w[0]} {$w[1]} (" . substr( str_repeat(",?",count($w[2])), 1) . ")";
+    public function insert($table, $fields = [], $update = false): bool
+    {
+        $keys    = array_keys($fields);
+        $values  = [];
+        $records = 0;
 
-				} elseif (($wcount==5 || $wcount==6 && is_array($w[5]))  &&  in_array($w[1],$valid_ops)  &&  in_array($w[2],$nested_arg)) {
-					return  "{$w[0]} {$w[1]} {$w[2]}" . $this->get_subquery_sql($w[4],$w[3],$w[5],$vals,$is_ok);
+        foreach ($fields as $field) {
+            $count = is_array($field) ? count($field) : 1;
 
-				} elseif (($wcount==3 || $wcount==4 && is_array($w[3]))  &&  in_array($w[0],$nested)) {
-					return $w[0] . $this->get_subquery_sql($w[2],$w[1],$w[3],$vals,$is_ok);
+            if (!isset($first_time)  ||  $count<$records) {
+                $first_time = true;
+                $records    = $count;
+            }
+        }
 
-				} elseif (($wcount==4 || $wcount==5 && is_array($w[4]))  &&  in_array($w[1],$nestedIN)) {
-					return "{$w[0]} " . substr($w[1],0,-7) . $this->get_subquery_sql($w[3],$w[2],$w[4],$vals,$is_ok);
+        for ($i=0; $i<$records; $i++) {
+            foreach ($fields as $field) {
+                $values[] = is_array($field) ? $field[$i] : $field;
+            }
+        }
 
-				} else {
-					echo "ERROR: w=".print_r($w,true)."<br />\n";
-					$is_ok = false;
-				}
-			} else { // associative array ['field' => 'value']
-				#echo "DEBUG: Associative<br />\n";
-				$sql = '';
-				$combop = '';
-				foreach ($w as $k=>$v) {
-					if (in_array(strtolower($k), $comb_ops)) {
-						#echo "DEBUG: A<br />\n";
-						#echo "A: k=$k, v=".print_r($v,true)."<br />\n";
-						$sql .= $combop . ' (' . $this->_calcWhere($v, $vals, $k, $is_ok) . ') ';
-						$combop = $comboparg;
-					} else {
-						#echo "DEBUG: B<br />\n";
-						#echo "B: k=$k, v=".print_r($v,true)."<br />\n";
-						$vals[] = $v;
-						if (in_array(substr($k,-1,1), array('=', '<', '>'))) // 'field !='=>'value'
-							$sql .= $combop . ' ' . $k . ' ? ';
-						else // 'field'=>'value'
-							$sql .= $combop . ' ' . $k . ' = ? ';
-						$combop = $comboparg;
-					}
-				}
-				return ' ('.$sql.') ';
-			}
-		} else {
-			echo "ERROR: No array in $w<br />\n";
-			$is_ok = false;
-		}
-	}
+        $col = ",(" . substr(str_repeat(",?", count($fields)), 1) . ")";
+        $sql = "INSERT INTO {$table} (`". implode('`,`', $keys)."`) VALUES ". substr(str_repeat($col, $records), 1);
 
-	public function get($table, $where, $orderby = null){
-		return $this->action('SELECT *', $table, $where, $orderby);
-	}
+        if ($update) {
+            $sql .= " ON DUPLICATE KEY UPDATE";
 
-	public function delete($table, $where){
-		return empty($where) ? false : $this->action('DELETE', $table, $where);
-	}
+            foreach ($keys as $key) {
+                if ($key != "id") {
+                    $sql .= " `$key` = VALUES(`$key`),";
+                }
+            }
 
-	public function deleteById($table,$id){
-		return $this->action('DELETE',$table,array('id','=',$id));
-	}
+            if (!empty($keys)) {
+                $sql = substr($sql, 0, -1);
+            }
+        }
 
-	public function insert($table, $fields=[], $update=false) {
-		$keys    = array_keys($fields);
-		$values  = [];
-		$records = 0;
+        return !$this->query($sql, $values)->error();
+    }
 
-		foreach ($fields as $field) {
-			$count = is_array($field) ? count($field) : 1;
+    public function update($table, $id, $fields): bool
+    {
+        /** @noinspection SqlWithoutWhere */
+        $sql   = "UPDATE {$table} SET " . (empty($fields) ? "" : "`") . implode("` = ? , `", array_keys($fields)) .
+            (empty($fields) ? "" : "` = ? ");
+        $is_ok = true;
 
-			if (!isset($first_time)  ||  $count<$records) {
-				$first_time = true;
-				$records    = $count;
-			}
-		}
+        if (!is_array($id)) {
+            $sql     .= "WHERE id = ?";
+            $fields[] = $id;
+        } else {
+            if (empty($id)) {
+                return false;
+            }
 
-		for ($i=0; $i<$records; $i++)
-			foreach ($fields as $field)
-				$values[] = is_array($field) ? $field[$i] : $field;
+            if ($where_text = $this->_calcWhere($id, $fields, "and", $is_ok)) {
+                $sql .= "WHERE $where_text";
+            }
+        }
 
-		$col = ",(" . substr( str_repeat(",?",count($fields)), 1) . ")";
-		$sql = "INSERT INTO {$table} (`". implode('`,`', $keys)."`) VALUES ". substr( str_repeat($col,$records), 1);
+        if ($is_ok) {
+            if (!$this->query($sql, $fields)->error()) {
+                return true;
+            }
+        }
 
-		if ($update) {
-			$sql .= " ON DUPLICATE KEY UPDATE";
+        return false;
+    }
 
-			foreach ($keys as $key)
-				if ($key != "id")
-					$sql .= " `$key` = VALUES(`$key`),";
+    public function results($assoc = false): array
+    {
+        if ($assoc) {
+            return ($this->resultsArray) ? $this->resultsArray : [];
+        }
+        return ($this->results) ? $this->results : [];
+    }
 
-			if (!empty($keys))
-				$sql = substr($sql, 0, -1);
-		}
+    public function first($assoc = false)
+    {
+        return (!$assoc || $this->count()>0) ? $this->results($assoc)[0] : [];
+    }
 
-		return !$this->query($sql, $values)->error();
-	}
+    public function count(): int
+    {
+        return $this->count;
+    }
 
-	public function update($table, $id, $fields){
-		$sql   = "UPDATE {$table} SET " . (empty($fields) ? "" : "`") . implode("` = ? , `", array_keys($fields)) . (empty($fields) ? "" : "` = ? ");
-		$is_ok = true;
+    public function error(): bool
+    {
+        return $this->error;
+    }
 
-		if (!is_array($id)) {
-			$sql     .= "WHERE id = ?";
-			$fields[] = $id;
-		} else {
-			if (empty($id))
-				return false;
+    public function errorInfo()
+    {
+        return $this->errorInfo;
+    }
 
-			if ($where_text = $this->_calcWhere($id, $fields, "and", $is_ok))
-				$sql .= "WHERE $where_text";
-		}
+    public function errorString(): string
+    {
+        return 'ERROR #'.$this->errorInfo[0].': '.$this->errorInfo[2];
+    }
 
-		if ($is_ok)
-			if (!$this->query($sql, $fields)->error())
-				return true;
+    public function lastId()
+    {
+        return $this->lastId;
+    }
 
-		return false;
-	}
+    public function getQueryCount(): int
+    {
+        return $this->queryCount;
+    }
 
-	public function results($assoc = false){
-		if($assoc) return ($this->_resultsArray) ? $this->_resultsArray : [];
-		return ($this->_results) ? $this->_results : [];
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    private function get_subquery_sql($action, $table, $where, &$values, &$is_ok): string
+    {
+        $where_text = '';
+        if (is_array($where)) {
+            if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok)) {
+                $where_text = " WHERE $where_text";
+            }
+        }
 
-	public function first($assoc = false){
-		return (!$assoc || $assoc && $this->count()>0)  ?  $this->results($assoc)[0]  :  [];
-	}
+        return " (SELECT $action FROM $table$where_text)";
+    }
 
-	public function count(){
-		return $this->_count;
-	}
+    public function cell($tablecolumn, $id = [])
+    {
+        $input = explode(".", $tablecolumn, 2);
 
-	public function error(){
-		return $this->_error;
-	}
+        if (count($input) != 2) {
+            return null;
+        }
 
-	public function errorInfo() {
-		return $this->_errorInfo;
-	}
+        $result = $this->action("SELECT {$input[1]}", $input[0], (is_numeric($id) ? ["id","=",$id] : $id));
 
-	public function errorString() {
-		return 'ERROR #'.$this->_errorInfo[0].': '.$this->_errorInfo[2];
-	}
+        return ($result && $this->count>0)  ?  $this->resultsArray[0][$input[1]]  :  null;
+    }
 
-	public function lastId(){
-		return $this->_lastId;
-	}
+    public function getColCount(): int
+    {
+        return $this->query->columnCount();
+    }
 
-	public function getQueryCount(){
-		return $this->_queryCount;
-	}
+    public function getColMeta($counter): bool|array
+    {
+        return $this->query->getColumnMeta($counter);
+    }
 
-	private function get_subquery_sql($action, $table, $where, &$values, &$is_ok) {
-		if (is_array($where))
-			if ($where_text = $this->_calcWhere($where, $values, "and", $is_ok))
-				$where_text = " WHERE $where_text";
-
-		return " (SELECT $action FROM $table$where_text)";
-	}
-
-	public function cell($tablecolumn, $id=[]) {
-		$input = explode(".", $tablecolumn, 2);
-
-		if (count($input) != 2)
-			return null;
-
-		$result = $this->action("SELECT {$input[1]}", $input[0], (is_numeric($id) ? ["id","=",$id] : $id));
-
-		return ($result && $this->_count>0)  ?  $this->_resultsArray[0][$input[1]]  :  null;
-	}
-
-	public function getColCount(){
-		return $this->_query->columnCount();
-	}
-
-	public function getColMeta($counter){
-		return $this->_query->getColumnMeta($counter);
-	}
-	
-	public function dbase_migrate() {
-		// this function is called in index.php
-		$directory = ServerManager::getInstance()->GetServerManagerRoot()."install/migrations";
-		$files = array_diff(scandir($directory), array('..', '.'));
-		// for each file found, check if the filename is in the settings table
-		foreach ($files as $file) {
-			$this->query("SELECT value FROM settings WHERE name = ?", array($file));
-			if (empty($this->results(true))) {
-				// if it isn't then require_once and add it to the database
-				require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/migrations/".$file);
-				$sql = 
-				"START TRANSACTION;"
-				.$sql.
-	      		"INSERT INTO settings (name, value) VALUES (?, ?);
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function dbase_migrate(): void
+    {
+        // this function is called in index.php
+        $directory = ServerManager::getInstance()->getServerManagerRoot()."install/migrations";
+        $files = array_diff(scandir($directory), array('..', '.'));
+        // for each file found, check if the filename is in the settings table
+        foreach ($files as $file) {
+            $this->query("SELECT value FROM settings WHERE name = ?", array($file));
+            if (empty($this->results(true))) {
+                // if it isn't then require_once and add it to the database
+                $sql = '';
+                require_once(ServerManager::getInstance()->getServerManagerRoot()."install/migrations/".$file);
+                $sql =
+                "START TRANSACTION;"
+                .$sql.
+                "INSERT INTO settings (name, value) VALUES (?, ?);
 				COMMIT;";
-				$this->query($sql, array($file, date("Y-m-d H:i:s")));
-			}
-		}		
-	}
-	
-	public function attempt_dbase_install() {
-		try {
-			$this->_pdo = null;
-			$this->_pdo = new PDO('mysql:host='.$this->_host.';', $this->_user, $this->_pass, self::$PDOArgs);
-			$this->_pdo->exec("CREATE DATABASE IF NOT EXISTS `".$this->_dbname."` DEFAULT CHARACTER SET utf8;");
-			$this->_pdo = null;
-			$this->_pdo = new PDO('mysql:host='.$this->_host.';dbname='.$this->_dbname, $this->_user, $this->_pass, self::$PDOArgs);
-			require_once(ServerManager::getInstance()->GetServerManagerRoot()."install/mysql_structure.php");
-			$this->query($sqls);
-		}
-		catch (PDOException $e) {
-			// if the above connection attempt even fails, then assume MySQL cannot be connected to for another more general reason.
-			$this->_error = true;
-			$this->_errorInfo = $e->errorInfo;
-		}
-	}
+                $this->query($sql, array($file, date("Y-m-d H:i:s")));
+            }
+        }
+    }
 
-	public function ensure_unique_name($name, $column, $table) {
-		// ensures that $name is a unique value in the database, given the $table and $column to check
-		// will add (1) or (2) for example to ensure the $name is unique
-		$foundrecord = $this->cell($table.".".$column, [$column, "=", $name]);
-		if ($foundrecord == $name) {
-		  $counter = 0;
-		  do {
-			$counter++;
-			$nametocheck = $name." (".$counter.")";
-			$foundrecord = $this->cell($table.".".$column, [$column, "=", $nametocheck]);
-		  }
-		  while ($foundrecord == $nametocheck);
-		  $name = $nametocheck;
-		}
-		return $name;
-	}
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function attempt_dbase_install(): void
+    {
+        try {
+            $dsn = 'mysql:host='.$this->host.
+                ';port='.($_ENV['DATABASE_PORT'] ?? DatabaseDefaults::DEFAULT_DATABASE_PORT);
+            $this->pdo = new PDO($dsn, $this->user, $this->pass, self::$PDOArgs);
+            $this->pdo->exec("CREATE DATABASE IF NOT EXISTS `".$this->dbname."` DEFAULT CHARACTER SET utf8;");
+            $dsn .= ';dbname='.$this->dbname;
+            $this->pdo = new PDO($dsn, $this->user, $this->pass, self::$PDOArgs);
+        } catch (PDOException $e) {
+            // if the above connection attempt even fails, then assume MySQL cannot be connected to for another more
+            //  general reason.
+            $this->error = true;
+            $this->errorInfo = $e->errorInfo;
+            return;
+        }
 
+        $application = new Application(SymfonyToLegacyHelper::getInstance()->getKernel());
+        $application->setAutoExit(false);
+        $output = new BufferedOutput();
+        $returnCode = $application->run(
+            new StringInput('doctrine:migrations:migrate -vvv -n --em='.$this->dbname),
+            $output
+        );
+        if (0 !== $returnCode) {
+            $this->error = true;
+            $this->errorInfo = 'Failed to apply newest migrations to database: '.$this->dbname.PHP_EOL.$output->fetch();
+        }
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function ensure_unique_name($name, $column, $table)
+    {
+        // ensures that $name is a unique value in the database, given the $table and $column to check
+        // will add (1) or (2) for example to ensure the $name is unique
+        $foundrecord = $this->cell($table.".".$column, [$column, "=", $name]);
+        if ($foundrecord == $name) {
+            $counter = 0;
+            do {
+                $counter++;
+                $nametocheck = $name." (".$counter.")";
+                $foundrecord = $this->cell($table.".".$column, [$column, "=", $nametocheck]);
+            } while ($foundrecord == $nametocheck);
+            $name = $nametocheck;
+        }
+        return $name;
+    }
 }

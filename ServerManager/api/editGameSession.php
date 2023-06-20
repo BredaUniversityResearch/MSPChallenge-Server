@@ -1,18 +1,21 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\GameSession;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $gamesession = new GameSession;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 // first check if the session_id referred to can even be obtained
 $gamesession->id = $_POST["session_id"] ?? "";
 $gamesession->get();
 
-// this endpoint will need the JWT in case of recreate
-$gamesession->setJWT($_POST['jwt'] ?? "");
 // now optionally change all the object vars
 $gamesession->processPostedVars();
 

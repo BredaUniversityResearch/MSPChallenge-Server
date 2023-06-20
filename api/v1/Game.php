@@ -2,7 +2,8 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Common\MSPBrowser;
+use App\Domain\Common\MSPBrowserFactory;
+use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Drift\DBAL\Result;
 use Exception;
@@ -14,8 +15,8 @@ use function App\await;
 
 class Game extends Base
 {
-    private string $watchdog_address = '';
-    const WATCHDOG_PORT = 45000;
+    private ?string $watchdog_address = null;
+    const DEFAULT_WATCHDOG_PORT = 45000;
 
     private const ALLOWED = array(
         "AutoSaveDatabase",
@@ -34,7 +35,8 @@ class Game extends Base
         ["Setupfilename", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], // nominated for full security
         "Speed",
         ["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
-        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
+        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
+        "PolicySimSettings"
     );
 
     public function __construct(string $method = '')
@@ -61,7 +63,7 @@ class Game extends Base
         }
 
         $outputFile = $outputDirectory."AutoDump_".date("Y-m-d_H-i").".sql";
-        Database::GetInstance($this->getGameSessionId())->CreateMspDatabaseDump($outputFile, false);
+        $this->getDatabase()->createMspDatabaseDump($outputFile, false);
     }
 
     /**
@@ -75,28 +77,25 @@ class Game extends Base
     {
         $data = $this->GetGameConfigValues();
 
-        $configuredSimulations = array();
-        if (isset($data['MEL'])) {
-            $configuredSimulations[] = "MEL";
-        }
-        if (isset($data['SEL'])) {
-            $configuredSimulations[] = "SEL";
-        }
-        if (isset($data['CEL'])) {
-            $configuredSimulations[] = "CEL";
-        }
-
         foreach ($data as $key => $d) {
-            if ((is_object($d) || is_array($d)) && $key != "expertise_definitions" &&
-                $key != "dependencies"
+            if ((is_array($d)) && $key != "expertise_definitions" && $key != "dependencies"
             ) {
                 unset($data[$key]);
             }
         }
 
-        $data['configured_simulations'] = $configuredSimulations;
         if (!isset($data['wiki_base_url'])) {
-            $data['wiki_base_url'] = Config::GetInstance()->WikiConfig()['game_base_url'];
+            $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
+        }
+
+        if (!isset($data['edition_name'])) {
+            $data['edition_name'] = $_ENV['DEFAULT_EDITION_NAME'];
+        }
+        if (!isset($data['edition_colour'])) {
+            $data['edition_colour'] = $_ENV['DEFAULT_EDITION_COLOUR'];
+        }
+        if (!isset($data['edition_letter'])) {
+            $data['edition_letter'] = $_ENV['DEFAULT_EDITION_LETTER'];
         }
 
         $passwordchecks = (new GameSession)->CheckGameSessionPasswords();
@@ -117,7 +116,7 @@ class Game extends Base
     public function NextMonth(): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
+        $this->getDatabase()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
     }
 
     /**
@@ -127,7 +126,7 @@ class Game extends Base
     public function LoadConfigFile(string $filename = ''): string
     {
         if ($filename == "") {    //if there's no file given, use the one in the database
-            $data = Database::GetInstance($this->getGameSessionId())->query("SELECT game_configfile FROM game");
+            $data = $this->getDatabase()->query("SELECT game_configfile FROM game");
 
             $path = GameSession::getConfigDirectory() . $data[0]['game_configfile'];
         } else {
@@ -148,6 +147,9 @@ class Game extends Base
 
     /**
      * @throws Exception
+     * @todo: use https://github.com/karriereat/json-decoder "to convert your JSON data into an actual php class"
+     * phpcs:ignore Generic.Files.LineLength.TooLong
+     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameConfigValues(string $overrideFileName = ''): array
@@ -178,7 +180,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCurrentMonthAsId(): int
     {
-        $currentMonth = Database::GetInstance()->query("SELECT game_currentmonth, game_state FROM game")[0];
+        $currentMonth = $this->getDatabase()->query("SELECT game_currentmonth, game_state FROM game")[0];
         if ($currentMonth["game_state"] == "SETUP") {
             $currentMonth["game_currentmonth"] = -1;
         }
@@ -193,7 +195,7 @@ class Game extends Base
     public function Setupfilename(string $configFilename): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_configfile=?", array($configFilename));
+        $this->getDatabase()->query("UPDATE game SET game_configfile=?", array($configFilename));
     }
 
     /**
@@ -212,12 +214,12 @@ class Game extends Base
         }
 
         //Admin country.
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
             array(1, $adminColor, 1)
         );
         //Region manager country.
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
             array(2, $regionManagerColor, 1)
         );
@@ -226,7 +228,7 @@ class Game extends Base
             if ($layerMeta['layer_name'] == $configData['countries']) {
                 foreach ($layerMeta['layer_type'] as $country) {
                     $countryId = $country['value'];
-                    Database::GetInstance()->query(
+                    $this->getDatabase()->query(
                         "
                         INSERT INTO country (country_id, country_name, country_colour, country_is_manager)
                         VALUES (?, ?, ?, ?)
@@ -237,7 +239,7 @@ class Game extends Base
             }
         }
         //Setup Admin Test User so we have a default session we can use for testing.
-        Database::GetInstance()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
+        $this->getDatabase()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
     }
 
     /**
@@ -263,7 +265,7 @@ class Game extends Base
         $str = substr($str, 0, -1);
 
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query(
+        $this->getDatabase()->query(
             "UPDATE game SET game_planning_era_realtime=?, game_eratime=?",
             array($str, $data['era_total_months'])
         );
@@ -294,7 +296,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = false)
     {
-        Database::GetInstance()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
+        $this->getDatabase()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
 
         $activeQueryPart = "";
         if ($onlyActiveLayers) {
@@ -302,12 +304,12 @@ class Game extends Base
         }
 
         if ($sort) {
-            $data = Database::GetInstance()->query(
+            $data = $this->getDatabase()->query(
                 "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart." ORDER BY layer_name ASC",
                 array()
             );
         } else {
-            $data = Database::GetInstance()->query(
+            $data = $this->getDatabase()->query(
                 "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart,
                 array()
             );
@@ -316,8 +318,52 @@ class Game extends Base
         for ($i = 0; $i < sizeof($data); $i++) {
             Layer::FixupLayerMetaData($data[$i]);
         }
+        $this->addLayerDependenciesToMetaData($data);
 
         return $data;
+    }
+
+    /**
+     * This method adds "layer_dependencies" int[] field to a layer which holds all layer ids the layer depends on for
+     *   editing.
+     * Currently, that is, all the grey energy layers depend on the grey cable layer and all the green energy layers
+     *   on the green cable layer.
+     *
+     * @param array $meta input meta data from Meta()
+     * @return void
+     */
+    private function addLayerDependenciesToMetaData(array &$meta): void
+    {
+        // find cable layers
+        $cableLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'cable')->keyBy('layer_id');
+        if ($cableLayers->isEmpty()) {
+            return;
+        }
+        // if cable layers exists, go through all layers
+        foreach ($meta as &$layer) {
+            $layer['layer_dependencies'] = [];
+
+            // has to be a non-cable
+            if ($cableLayers->has($layer['layer_id'])) {
+                continue;
+            }
+            // if they have the required energy editing type: "transformer", "socket", "sourcepoint" or "sourcepolygon"
+            if (!in_array(
+                $layer['layer_editing_type'],
+                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
+            )) {
+                continue;
+            }
+
+            // find the corresponding green or grey cable layer
+            if (null === $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])) {
+                continue;
+            }
+
+            // add the associated cable layer id to their dependency
+            $layer['layer_dependencies'][] = $cableLayer['layer_id'];
+        }
+        unset($layer);
     }
 
     /**
@@ -331,7 +377,7 @@ class Game extends Base
     public function Planning(int $months): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_planning_gametime=?", array($months));
+        $this->getDatabase()->query("UPDATE game SET game_planning_gametime=?", array($months));
     }
 
     /**
@@ -345,7 +391,7 @@ class Game extends Base
     public function Realtime(int $realtime): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
+        $this->getDatabase()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
     }
 
     /**
@@ -355,7 +401,7 @@ class Game extends Base
     private function SetStartDate(int $a_startYear): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_start=?", array($a_startYear));
+        $this->getDatabase()->query("UPDATE game SET game_start=?", array($a_startYear));
     }
 
     /**
@@ -370,7 +416,7 @@ class Game extends Base
     public function FutureRealtime(string $realtime): void
     {
         /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
+        $this->getDatabase()->query("UPDATE game SET game_planning_era_realtime=?", array($realtime));
     }
 
     /**
@@ -383,23 +429,90 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function State(string $state): void
     {
-        $currentState = Database::GetInstance()->query("SELECT game_state FROM game")[0];
+        $state = strtoupper($state);
+        $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
         if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
             throw new Exception("Invalid current state of ".$currentState["game_state"]);
         }
 
+        // prepare update query using builder
+        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
+            ->createQueryBuilder();
+        $qb
+            ->update('game')
+            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+            ->set('game_state', $qb->createPositionalParameter($state));
         if ($currentState["game_state"] == "SETUP") {
             //Starting plans should be implemented when we any state "PLAY"
             $plan = new Plan();
             await($plan->updateLayerState(0));
+
+            if ($state == "PAUSE") {
+                $qb->set('game_currentmonth', $qb->createPositionalParameter(0));
+            }
+        }
+        $qb->executeQuery();
+
+        await($this->onGameStateUpdated($state));
+    }
+
+    /**
+     * @apiGroup Game
+     * @throws Exception
+     * @api {POST} /game/PolicySimSettings PolicySimSettings
+     * @apiDescription Get policy and simulation settings
+     * @apiSuccess {string} JSON object
+     * @noinspection PhpUnused
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function PolicySimSettings()
+    {
+        // just enable all policy types?
+        $policySettings[] = [
+            'policy_type' => 'fishing'
+        ];
+        $policySettings[] = [
+            'policy_type' => 'shipping'
+        ];
+        $policySettings[] = [
+            'policy_type' => 'energy'
+        ];
+
+        $simulationSettings = [];
+        $data = $this->GetGameConfigValues();
+        if (isset($data['MEL'])) {
+            $mel = new MEL();
+            $simulationSettings[] = [
+                'simulation_type' => 'MEL',
+                'content' => $mel->Config()
+            ];
+        }
+        if (isset($data['SEL'])) {
+            $sel = new SEL();
+            $selGameClientConfig = $sel->GetSELGameClientConfig();
+            if (is_object($selGameClientConfig)) {
+                $selGameClientConfig = get_object_vars($selGameClientConfig);
+            }
+            $simulationSettings[] = array_merge(
+                [
+                    'simulation_type' => 'SEL',
+                    'kpis' => $sel->GetKPIDefinition()
+                ],
+                // E.g. returns key directionality_icon_color
+                $selGameClientConfig
+            );
+        }
+        if (isset($data['CEL'])) {
+            $cel = new CEL();
+            $simulationSettings[] = array_merge([
+                'simulation_type' => 'CEL'
+            ], $cel->GetCELConfig());
         }
 
-        /** @noinspection SqlWithoutWhere */
-        Database::GetInstance()->query(
-            "UPDATE game SET game_lastupdate = ?, game_state=?",
-            array(microtime(true), $state)
-        );
-        await($this->onGameStateUpdated($state));
+        return [
+            'policy_settings' => $policySettings,
+            'simulation_settings' => $simulationSettings
+        ];
     }
 
     /**
@@ -414,27 +527,26 @@ class Game extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetWatchdogAddress(bool $withPort = false): string
+    public function GetWatchdogAddress(): string
     {
-        if (!empty($this->watchdog_address)) {
-            if ($withPort) {
-                return $this->watchdog_address.':'.self::WATCHDOG_PORT;
-            }
-            return $this->watchdog_address;
+        $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
+        if (null === $this->watchdog_address) {
+            return '';
         }
+        /** @noinspection HttpUrlsUsage */
+        $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
+        return $this->watchdog_address.':'.($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT);
+    }
 
-        $result = Database::GetInstance($this->getGameSessionId())->query(
+    private function getWatchdogAddressFromDb(): ?string
+    {
+        $result = $this->getDatabase()->query(
             "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
         );
-        if (count($result) > 0) {
-            /** @noinspection HttpUrlsUsage */
-            $this->watchdog_address = 'http://'.$result[0]['game_session_watchdog_address'];
-            if ($withPort) {
-                return $this->watchdog_address.':'.self::WATCHDOG_PORT;
-            }
-            return $this->watchdog_address;
+        if (count($result) == 0) {
+            return null;
         }
-        return '';
+        return $result[0]['game_session_watchdog_address'];
     }
 
     /**
@@ -462,9 +574,19 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
     {
+        // no need to startup watchdog in docker, handled by supervisor.
+        if (getenv('DOCKER')) {
+            return;
+        }
+        // below code is only necessary for Windows
+        if (!str_starts_with(php_uname(), "Windows")) {
+            return;
+        }
         self::StartSimulationExe([
             'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/MSW/'
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/'.(
+                $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
+            )
         ]);
     }
 
@@ -474,16 +596,19 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function StartSimulationExe(array $params): void
     {
-        $apiEndpoint = GameSession::GetRequestApiRoot();
+        // below code is only necessary for Windows
+        if (!str_starts_with(php_uname(), "Windows")) {
+            return;
+        }
         $args = isset($params["args"])? $params["args"]." " : "";
-        $args = $args."APIEndpoint ".$apiEndpoint;
-
+        $args = $args."APIEndpoint=".GameSession::GetRequestApiRoot();
         $workingDirectory = "";
         if (isset($params["working_directory"])) {
             $workingDirectory = "cd ".$params["working_directory"]." & ";
         }
-
-        Database::execInBackground('start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"');
+        Database::execInBackground(
+            'start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"'
+        );
     }
 
     /**
@@ -492,13 +617,13 @@ class Game extends Base
     private function assureWatchdogAlive(): ?PromiseInterface
     {
         // note(MH): GetWatchdogAddress is not async, but it is cached once it has been retrieved once, so that's "fine"
-        $url = $this->GetWatchdogAddress(true);
+        $url = $this->GetWatchdogAddress();
         if (empty($url)) {
             return null;
         }
 
         // we want to use the watchdog, but first we check if it is running
-        $browser = new MSPBrowser($url);
+        $browser = MSPBrowserFactory::create($url);
         $deferred = new Deferred();
         $browser
             // any response is acceptable, even 4xx or 5xx status codes
@@ -513,6 +638,8 @@ class Game extends Base
                 // so the Watchdog is off, and now it should be switched on
                 function (/*Exception $e*/) use ($deferred) {
                     self::StartWatchdog();
+                    // todo: do another watchdog alive test, with a repeat and failure mechanism ?
+                    sleep(10);
                     $deferred->resolve();
                 }
             );
@@ -548,7 +675,6 @@ class Game extends Base
                         $newAccessToken = json_encode($result);
                         return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
                             ->then(function (string $token) use (
-                                $security,
                                 $simulations,
                                 $apiRoot,
                                 $newWatchdogGameState,
@@ -557,7 +683,6 @@ class Game extends Base
                                 $recoveryToken = json_encode(['token' => $token]);
                                 return $this->getWatchdogSessionUniqueToken()
                                     ->then(function (string $watchdogSessionUniqueToken) use (
-                                        $security,
                                         $simulations,
                                         $apiRoot,
                                         $newWatchdogGameState,
@@ -566,8 +691,8 @@ class Game extends Base
                                     ) {
                                         // note(MH): GetWatchdogAddress is not async, but it is cached once it
                                         //   has been retrieved once, so that's "fine"
-                                        $url = $this->GetWatchdogAddress(true)."/Watchdog/UpdateState";
-                                        $browser = new MSPBrowser($url);
+                                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
+                                        $browser = MSPBrowserFactory::create($url);
                                         $postValues = [
                                             'game_session_api' => $apiRoot,
                                             'game_session_token' => $watchdogSessionUniqueToken,
@@ -594,22 +719,28 @@ class Game extends Base
                 $responseContent = $response->getBody()->getContents();
                 $decodedResponse = json_decode($responseContent, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    return $log->postEvent(
+                    $funcArgs = [
                         "Watchdog",
                         Log::ERROR,
                         "Received invalid response from watchdog. Response: \"".$responseContent."\"",
                         "changeWatchdogState()"
-                    );
+                    ];
+                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
+                        return $funcArgs;
+                    });
                 }
 
                 if ($decodedResponse["success"] != 1) {
-                    return $log->postEvent(
+                    $funcArgs = [
                         "Watchdog",
                         Log::ERROR,
                         "Watchdog responded with failure to change game state request. Response: \"".
                         $decodedResponse["message"]."\"",
                         "changeWatchdogState()"
-                    );
+                    ];
+                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
+                        return $funcArgs;
+                    });
                 }
                 return resolveOnFutureTick(new Deferred(), $decodedResponse)->promise();
             });
@@ -628,7 +759,7 @@ class Game extends Base
     public function GetActualDateForSimulatedMonth(int $simulated_month): array
     {
         $result = array("year" => -1, "month_of_year" => -1);
-        $startYear = Database::GetInstance()->query("SELECT game_start FROM game LIMIT 0,1");
+        $startYear = $this->getDatabase()->query("SELECT game_start FROM game LIMIT 0,1");
                 
         if (count($startYear) == 1) {
             $result["year"] = floor($simulated_month / 12) + $startYear[0]["game_start"];
@@ -642,7 +773,7 @@ class Game extends Base
      * @return array|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetGameDetails()/*: array|PromiseInterface // <-- php 8 */
+    public function GetGameDetails(): array|PromiseInterface
     {
         $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
@@ -674,6 +805,7 @@ class Game extends Base
             }
 
             $realtimePerEra = explode(",", $state["game_planning_era_realtime"]);
+            // todo: division by zero.
             $currentEra = intval(floor($state["game_currentmonth"] / $state["game_planning_gametime"]));
             $realtimePerEra[$currentEra] = $state["game_planning_realtime"];
             $secondsPerMonthCurrentEra = round($state["game_planning_realtime"] / $state["game_eratime"]);
@@ -705,6 +837,20 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCountries(): array
     {
-        return Database::GetInstance()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
+        return $this->getDatabase()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function areSimulationsUpToDate(array $tickData): bool
+    {
+        $config = $this->GetGameConfigValues();
+        if ((isset($config["MEL"]) && $tickData['month'] > $tickData['mel_lastmonth']) ||
+            (isset($config["CEL"]) && $tickData['month'] > $tickData['cel_lastmonth']) ||
+            (isset($config["SEL"]) && $tickData['month'] > $tickData['sel_lastmonth'])) {
+            return false;
+        }
+        return true;
     }
 }

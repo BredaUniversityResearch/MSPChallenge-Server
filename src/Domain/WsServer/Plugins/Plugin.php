@@ -2,20 +2,25 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
 use App\Domain\WsServer\MeasurementCollectionManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
+use App\Domain\WsServer\WsServerOutput;
 use Exception;
 use React\EventLoop\LoopInterface;
-use Closure;
 use App\Domain\Event\NameAwareEvent;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use function App\tpf;
 
-abstract class Plugin implements PluginInterface
+abstract class Plugin extends EventDispatcher implements PluginInterface
 {
     private string $name;
     private float $minIntervalSec;
     private bool $debugOutputEnabled;
+    private int $messageVerbosity = WsServerOutput::VERBOSITY_DEFAULT_MESSAGE;
     private ?int $gameSessionIdFilter = null;
     private bool $registeredToLoop = false;
 
@@ -27,12 +32,13 @@ abstract class Plugin implements PluginInterface
 
     public function __construct(
         string $name,
-        float $minIntervalSec,
-        bool $debugOutputEnabled = false
+        ?float $minIntervalSec = null,
+        bool $debugOutputEnabled = true
     ) {
         $this->name = $name;
-        $this->minIntervalSec = $minIntervalSec;
+        $this->minIntervalSec ??= $minIntervalSec ?? static::getDefaultMinIntervalSec();
         $this->debugOutputEnabled = $debugOutputEnabled;
+        parent::__construct();
     }
 
     public function getName(): string
@@ -55,10 +61,21 @@ abstract class Plugin implements PluginInterface
         $this->debugOutputEnabled = $debugOutputEnabled;
     }
 
-    public function addDebugOutput(string $output): self
+    public function getMessageVerbosity(): int
     {
+        return $this->messageVerbosity;
+    }
+
+    public function setMessageVerbosity(int $messageVerbosity): void
+    {
+        $this->messageVerbosity = $messageVerbosity;
+    }
+
+    public function addOutput(string $output, ?int $verbosity = null): self
+    {
+        $verbosity ??= $this->messageVerbosity;
         if ($this->isDebugOutputEnabled()) {
-            wdo($output);
+            wdo($output, $verbosity);
         }
         return $this;
     }
@@ -68,25 +85,41 @@ abstract class Plugin implements PluginInterface
         return $this->registeredToLoop;
     }
 
+    /**
+     * @throws Exception
+     */
     final public function registerToLoop(LoopInterface $loop)
     {
+        $this->dispatch(
+            new NameAwareEvent(self::EVENT_PLUGIN_REGISTERED, $this),
+            self::EVENT_PLUGIN_REGISTERED
+        );
         $this->registeredToLoop = true;
         $this->loop = $loop;
 
         // interval sec is zero, so no interval, no repeating
         if ($this->getMinIntervalSec() < PHP_FLOAT_EPSILON) {
-            $loop->futureTick($this->onCreatePromiseFunction());
+            $loop->futureTick($this->createPromiseFunction());
             return;
         }
-        $loop->addTimer(mt_rand() * $this->getMinIntervalSec() / mt_getrandmax(), PluginHelper::createRepeatedFunction(
-            $this,
-            $loop,
-            $this->onCreatePromiseFunction()
-        ));
+        $loop->addTimer(
+            mt_rand() * $this->getMinIntervalSec() / mt_getrandmax(),
+            PluginHelper::getInstance()->createRepeatedFunction(
+                $this,
+                $loop,
+                function () {
+                    return ($this->createPromiseFunction())();
+                }
+            )
+        );
     }
 
     final public function unregisterFromLoop(LoopInterface $loop)
     {
+        $this->dispatch(
+            new NameAwareEvent(self::EVENT_PLUGIN_UNREGISTERED, $this),
+            self::EVENT_PLUGIN_UNREGISTERED
+        );
         $this->registeredToLoop = false; // Note that PluginHelper will take care of the rest.
     }
     public function getGameSessionIdFilter(): ?int
@@ -109,6 +142,12 @@ abstract class Plugin implements PluginInterface
             throw new Exception('Attempt to retrieve unknown loop');
         }
         return $this->loop;
+    }
+
+    public function setLoop(LoopInterface $loop): self
+    {
+        $this->loop = $loop;
+        return $this;
     }
 
     /**
@@ -178,7 +217,38 @@ abstract class Plugin implements PluginInterface
         return $this;
     }
 
-    abstract protected function onCreatePromiseFunction(): Closure;
+    protected function createPromiseFunction(?string $executionId = null): ToPromiseFunction
+    {
+        return tpf(function () use ($executionId) {
+            $executionId ??= uniqid();
+            $this->dispatch(
+                new NameAwareEvent(
+                    self::EVENT_PLUGIN_EXECUTION_STARTED,
+                    $this,
+                    [self::EVENT_ARG_EXECUTION_ID => $executionId]
+                ),
+                self::EVENT_PLUGIN_EXECUTION_STARTED
+            );
+            $tpf = $this->onCreatePromiseFunction($executionId);
+            return ($tpf)()
+                ->then(function () use ($executionId) {
+                    $this->addOutput(
+                        'Plugin '.$this->getName().' just finished',
+                        OutputInterface::VERBOSITY_DEBUG
+                    );
+                    $this->dispatch(
+                        new NameAwareEvent(
+                            self::EVENT_PLUGIN_EXECUTION_FINISHED,
+                            $this,
+                            [self::EVENT_ARG_EXECUTION_ID => $executionId]
+                        ),
+                        self::EVENT_PLUGIN_EXECUTION_FINISHED
+                    );
+                });
+        });
+    }
+
+    abstract protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction;
 
     public function onWsServerEventDispatched(NameAwareEvent $event): void
     {

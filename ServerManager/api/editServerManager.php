@@ -1,16 +1,18 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\ServerManager;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $servermanager = ServerManager::getInstance();
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 $servermanager->get();
-
-// optionally change all the object vars
-$servermanager->setJWT($_POST['jwt'] ?? "");
 $servermanager->processPostedVars();
 
 // ready to do final actual update

@@ -51,7 +51,7 @@ class Geometry extends Base
         string $data = "",
         int $country = null,
         int $plan = -1
-    )/*: int|PromiseInterface // <-- php 8 */ {
+    ): int|PromiseInterface {
         if ($country == -1) {
             $country = null;
         }
@@ -84,7 +84,7 @@ class Geometry extends Base
                         return $this->getAsyncDatabase()->query(
                             $qb
                                 ->update('plan')
-                                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                                ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
                         );
                     });
@@ -106,7 +106,7 @@ class Geometry extends Base
                     return null;
                 }
 
-                return parallel($toPromiseFunctions)
+                parallel($toPromiseFunctions)
                     ->done(
                         function () use ($deferred, $newId) {
                             $deferred->resolve($newId);
@@ -178,7 +178,7 @@ class Geometry extends Base
         })
         ->done(
             function (/* ?Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -199,7 +199,7 @@ class Geometry extends Base
      * @return int|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Update(int $id, int $country, string $geometry)/*: int|PromiseInterface // <-- php 8 */
+    public function Update(int $id, int $country, string $geometry): int|PromiseInterface
     {
         $deferred = new Deferred();
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
@@ -245,7 +245,7 @@ class Geometry extends Base
         )
         ->done(
             function (Result $result) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -271,8 +271,8 @@ class Geometry extends Base
         $this->getAsyncDatabase()->query(
             $qb
                 ->update('geometry')
-                ->set('geometry_active', 0)
-                ->set('geometry_deleted', 1)
+                ->set('geometry_active', '0')
+                ->set('geometry_deleted', '1')
                 ->where(
                     $qb->expr()->or(
                         $qb->expr()->eq('geometry_id', $qb->createPositionalParameter($id))
@@ -282,7 +282,7 @@ class Geometry extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -313,7 +313,7 @@ class Geometry extends Base
         ])
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -349,7 +349,7 @@ class Geometry extends Base
         )
         ->done(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // return void, we do not care about the result
+                $deferred->resolve(); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);

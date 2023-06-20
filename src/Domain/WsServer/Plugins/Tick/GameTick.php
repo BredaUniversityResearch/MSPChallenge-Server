@@ -2,16 +2,18 @@
 
 namespace App\Domain\WsServer\Plugins\Tick;
 
-use App\Domain\API\v1\Config;
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Security;
-use App\Domain\Common\MSPBrowser;
+use App\Domain\Common\MSPBrowserFactory;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
+use React\Promise\Promise;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use function App\query;
 
 class GameTick extends TickBase
 {
@@ -24,14 +26,8 @@ class GameTick extends TickBase
      */
     public function tick(bool $showDebug = false): PromiseInterface
     {
-        $plan = new PlanTick();
-        $this->asyncDataTransferTo($plan);
-        // Plan tick first: to clean up plans
-        return $plan->tick()
-            // fetch game information, incl. state name
-            ->then(function (/*Result $result*/) {
-                return $this->getTickData();
-            })
+        // fetch game information, incl. state name
+        return $this->getTickData()
             ->then(function (Result $result) use ($showDebug) {
                 if (null !== $tickData = $result->fetchFirstRow()) {
                     if (null !== $promise = $this->tryTickServer($tickData, $showDebug)) {
@@ -88,24 +84,29 @@ class GameTick extends TickBase
             ($tickData['era_realtime'] / $tickData['era_gametime']);
         if ($diff <= $secondsPerMonth) {
             if ($showDebug) {
-                wdo("Waiting for update time " . ($secondsPerMonth - $diff) . " seconds remaining");
+                wdo(
+                    "Waiting for update time " . ($secondsPerMonth - $diff) . " seconds remaining",
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
             }
             return null;
         }
 
         // let's do the "tick" which updates server time and month
         if ($showDebug) {
-            wdo("Trying to tick the server");
+            wdo("Trying to tick the server", OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
 
-        if (!strstr($_SERVER['REQUEST_URI'], 'dev') || Config::GetInstance()->ShouldWaitForSimulationsInDev()) {
-            if (!$this->AreSimulationsUpToDate($tickData)) {
-                if ($showDebug) {
-                    wdo('Waiting for simulations to update.');
-                }
-                return null;
+
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        if (!$game->areSimulationsUpToDate($tickData)) {
+            if ($showDebug) {
+                wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
             }
+            return null;
         }
+
 
         return $this->serverTickInternal($showDebug)
             ->otherwise(function (SilentFailException $e) {
@@ -131,8 +132,8 @@ class GameTick extends TickBase
                         $postValues['token'] = $token;
                         $postValues['session_id'] = $this->getGameSessionId();
                         $postValues['action'] = 'demoCheck';
-                        $url = GameSession::GetServerManagerApiRoot().'editGameSession.php';
-                        $browser = new MSPBrowser($url);
+                        $url = GameSession::getServerManagerApiRoot().'editGameSession.php';
+                        $browser = MSPBrowserFactory::create($url);
                         return $browser
                             ->post(
                                 $url,
@@ -148,29 +149,13 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function AreSimulationsUpToDate(array $tickData): bool
-    {
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
-        $config = $game->GetGameConfigValues();
-        if ((isset($config["MEL"]) && $tickData['month'] > $tickData['mel_lastmonth']) ||
-            (isset($config["CEL"]) && $tickData['month'] > $tickData['cel_lastmonth']) ||
-            (isset($config["SEL"]) && $tickData['month'] > $tickData['sel_lastmonth'])) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function serverTickInternal(bool $showDebug): PromiseInterface
+    private function serverTickInternal(bool $showDebug): Promise
     {
         if ($showDebug) {
-            wdo('Ticking server.');
+            wdo('Ticking server.', OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
-        return $this->getAsyncDatabase()->query(
+        return query(
+            $this->getAsyncDatabase(),
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
                     'game_state as state',
@@ -220,9 +205,9 @@ class GameTick extends TickBase
         // set the default update query and its values
         $qb
             ->update('game')
-            ->set('game_lastupdate', microtime(true))
-            ->set('game_currentmonth', $currentMonth)
-            ->set('game_planning_monthsdone', $monthsDone);
+            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(4))')
+            ->set('game_currentmonth', (string)$currentMonth)
+            ->set('game_planning_monthsdone', (string)$monthsDone);
 
         if ($currentMonth >= ($tick['era_time'] * 4)) { //Hardcoded to 4 eras as designed.
             //Entire game is done.
@@ -240,7 +225,7 @@ class GameTick extends TickBase
             //planning phase is complete, move to the simulation phase
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set('game_planning_monthsdone', 0)
+                    ->set('game_planning_monthsdone', '0')
                     ->set('game_state', $qb->createPositionalParameter('SIMULATION'))
             )
             ->then(function (/*Result $result*/) {
@@ -255,7 +240,7 @@ class GameTick extends TickBase
             $era_realtime = explode(',', $tick['planning_era_realtime']);
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set('game_planning_monthsdone', 0)
+                    ->set('game_planning_monthsdone', '0')
                     ->set('game_state', $qb->createPositionalParameter('PLAY'))
                     ->set('game_planning_realtime', $era_realtime[$era])
             )

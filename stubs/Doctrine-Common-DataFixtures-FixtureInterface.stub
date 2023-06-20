@@ -1,0 +1,15 @@
+<?php
+
+namespace Doctrine\Common\DataFixtures;
+
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectManager;
+
+interface FixtureInterface
+{
+    /**
+     * @param ObjectManager&EntityManagerInterface $manager
+     * @return void
+     */
+    public function load(ObjectManager $manager);
+}

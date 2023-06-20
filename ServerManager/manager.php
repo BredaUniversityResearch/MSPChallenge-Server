@@ -19,17 +19,27 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+use App\Domain\API\v1\Config;
+use ServerManager\Base;
+use ServerManager\Redirect;
+use ServerManager\ServerManager;
+use ServerManager\Session;
+use ServerManager\User;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\Setting;
+
 require 'init.php';
 $user = new User();
 if (!$user->isAuthorised()) {
     if ($user->isLoggedIn()) {
-        Redirect::to(ServerManager::getInstance()->GetServerManagerFolder().'logout.php');
+        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'logout.php');
     } else {
-        Redirect::to(ServerManager::getInstance()->GetServerManagerFolder().'index.php');
+        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'index.php');
     }
 }
 
-require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/header.php';
+require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/header.php';
 // @codingStandardsIgnoreStart
 ?>
 <div id="page-wrapper">
@@ -224,7 +234,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                             <p class="card-text">The other users that should have access to this MSP Challenge server. Note that only this server's administrator(s) can change this.</p>
                         </div>
                         <div class="card-footer">
-                            <a href="https://auth.mspchallenge.info/usersc/server_manager.php" class="btn btn-primary" role="button">Change</a>
+                            <button type="button" id="btnUserAccess" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalUserAccess">Change</button>
                         </div>
                     </div>
                     <div class="card">
@@ -460,7 +470,7 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                     </div>
                     <div class="modal-body">
                         <p>When setting a password, anyone who has that password will be able to log on to your session as that user type. 
-                        When setting specific users, those authentication provider's users will be able to log on to your session as that user type (assuming they entered the correct username and password). 
+                        When setting specific users, those users will be able to log on to your session as that user type (assuming they entered the correct username and password).
                         </p>
                         <form class="form-horizontal" role="form" data-toggle="validator" id="formSessionUsers">
                             <div class="row">
@@ -485,6 +495,9 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                                                     Set users from
                                                 </label>
                                                 <select class="form-control-sm d-inline-block p-0 h-25" id="provider_admin_external"></select>
+                                                <small id="passwordHelpBlock" class="form-text text-muted">
+                                                    Enter one username or e-mail address per line, and click Find.
+                                                </small>
                                             </div>
                                         </div>
                                         <div id="adminUserFields">
@@ -518,6 +531,9 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                                                     Set users from
                                                 </label>
                                                 <select class="form-control-sm d-inline-block p-0 h-25" id="provider_region_external"></select>
+                                                <small id="passwordHelpBlock" class="form-text text-muted">
+                                                    Enter one username or e-mail address per line, and click Find.
+                                                </small>
                                             </div>
                                         </div>
                                         <div id="regionUserFields">
@@ -558,12 +574,15 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                                                     Set users from 
                                                 </label>
                                                 <select class="form-control-sm d-inline-block p-0 h-25" id="provider_player_external"></select>
+                                                <small id="passwordHelpBlock" class="form-text text-muted">
+                                                    Enter one username or e-mail address per line, and click Find.
+                                                </small>
                                             </div>
                                         </div>
                                         <div id="playerUserFields">
                                             <div class="input-group mb-3">
                                                 <div contenteditable="true" class="form-control" style="height: auto !important;" id="users_playerall"></div>
-                                                <script language="javascript">$("#users_playerall").on("change keydown paste input", function() {
+                                                <script type="text/javascript">$("#users_playerall").on("change keydown paste input", function() {
                                                     toggleDivs();
                                                 });</script>
                                                 <div class="input-group-append">
@@ -912,6 +931,54 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
                 </div>
             </div>
         </div>
+
+        <!-- Modal User Access -->
+        <div class="modal fade" id="modalUserAccess" tabindex="-1" role="dialog" aria-labelledby="UserAccessModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="UserAccessModalLabel">User Access</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            Note: if you are not an administrator for this Server Manager, then you'll only see your own
+                            account in the list below, and you won't be able to add other users to this Server Manager.
+                        </p>
+                        <table id="UserAccessTable" class="table table-sm table-hover">
+                            <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Administrator?</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody id="UserAccessBody">
+                            </tbody>
+                        </table>
+                        <form class="form-horizontal" role="form" data-toggle="validator" id="formNewUserAccess" enctype="multipart/form-data">
+                            <h5 id="WatchdogFormTitle">Add additional users</h5>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="newUserAccess">Username or e-mail address</label>
+                                    <input type="text" class="form-control" id="newUserAccess" required="required" placeholder="required">
+                                </div>
+                                <div class="col">
+                                    <label for="newUserAccessAdmin">Administrator</label>
+                                    <input type="checkbox" class="form-control" id="newUserAccessAdmin">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="UserAccessFormButton" onClick="submitNewUserAccess();">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
     </div>
 
@@ -951,11 +1018,17 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
         </div>
     </div>
 
+    <div id="auth2BaseURL" data-url="<?php
+    echo Config::GetInstance()->getMSPAuthBaseURL();
+    ?>"></div>
+
 </div>
 
 <!-- Place any per-page javascript here -->
 <script type="text/javascript">
     var currentToken = '<?php echo Session::get("currentToken"); ?>';
+    var serverUUID = '<?php echo SymfonyToLegacyHelper::getInstance()->getEntityManager()
+        ->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid'])->getValue(); ?>';
     regularupdateToken = setInterval(function() {
         updatecurrentToken();
     }, 30000);
@@ -1024,6 +1097,11 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
         $('#modalServerDetails').on('show.bs.modal', function (event) {
             GetServerAddr();
         });
+
+        // when showing modalUserAccess, update the values
+        $('#modalUserAccess').on('show.bs.modal', function (event) {
+            GetUserAccessList();
+        });
     });
 
     regularupdateTablesManager = setInterval(function() {
@@ -1040,4 +1118,4 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 <?php
 // @codingStandardsIgnoreEnd
 // the final html footer copyright row + the external js calls
-require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/footer.php';
+require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/footer.php';

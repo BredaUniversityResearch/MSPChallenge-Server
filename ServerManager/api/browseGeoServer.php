@@ -1,13 +1,16 @@
 <?php
+
+use ServerManager\API;
+use ServerManager\GeoServer;
+use ServerManager\User;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
 $geoserver = new GeoServer;
 $user = new User();
 
-$user->hastobeLoggedIn();
-
-$geoserver->setJWT($_POST['jwt'] ?? "");
+$user->hasToBeLoggedIn();
 
 $api->setPayload(["geoserverslist" => $geoserver->getList()]);
 $api->setStatusSuccess();

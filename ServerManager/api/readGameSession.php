@@ -1,5 +1,14 @@
 <?php
 
+use ServerManager\API;
+use ServerManager\GameConfig;
+use ServerManager\GameSave;
+use ServerManager\GameSession;
+use ServerManager\GeoServer;
+use ServerManager\ServerManager;
+use ServerManager\User;
+use ServerManager\Watchdog;
+
 require __DIR__ . '/../init.php';
 
 $api = new API;
@@ -9,7 +18,7 @@ $watchdog = new Watchdog;
 $geoserver = new GeoServer;
 $user = new User();
 
-$user->hastobeLoggedIn();
+$user->hasToBeLoggedIn();
 
 // first check if the session_id referred to can even be obtained
 $gamesession->id = $_POST["session_id"] ?? "";
@@ -44,7 +53,7 @@ if ($gamesession->game_geoserver_id > 0) {
 // ok, return everything
 $gamesession_vars = get_object_vars($gamesession);
 $gamesession_vars["gamearchive"] = $gamesession->getArchive();
-$gamesession_vars["gameupgradable"] = ServerManager::getInstance()->CheckForUpgrade($gamesession->server_version);
+$gamesession_vars["gameupgradable"] = ServerManager::getInstance()->checkForUpgrade($gamesession->server_version);
 $api->setPayload(["gamesession" => $gamesession_vars]);
 $api->setPayload(["gamesession_pretty" => $gamesession->getPrettyVars()]);
 $api->setPayload(["gamecountries" => $gamesession->getCountries()]);

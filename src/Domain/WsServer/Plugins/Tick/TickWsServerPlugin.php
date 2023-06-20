@@ -2,36 +2,42 @@
 
 namespace App\Domain\WsServer\Plugins\Tick;
 
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\WsServer\Plugins\Plugin;
-use Closure;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 use function App\resolveOnFutureTick;
+use function App\tpf;
 
 class TickWsServerPlugin extends Plugin
 {
-    private const TICK_MIN_INTERVAL_SEC = 2;
-
     private int $gameSessionId;
     private ?GameTick $gameTick = null;
 
-    public function __construct(int $gameSessionId)
+    public static function getDefaultMinIntervalSec(): float
     {
-        $this->gameSessionId = $gameSessionId;
-        parent::__construct('tick' . $gameSessionId, self::TICK_MIN_INTERVAL_SEC);
+        return 2;
     }
 
-    protected function onCreatePromiseFunction(): Closure
+    public function __construct(int $gameSessionId, ?float $minIntervalSec = null)
     {
-        return function () {
+        $this->gameSessionId = $gameSessionId;
+        parent::__construct('tick' . $gameSessionId, $minIntervalSec);
+    }
+
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
+    {
+        return tpf(function () {
             return $this->tick()
                 ->then(function (int $gameSessionId) {
-                    $this->addDebugOutput(
-                        'just finished tick for game session id: ' . $gameSessionId
+                    $this->addOutput(
+                        'just finished tick for game session id: ' . $gameSessionId,
+                        OutputInterface::VERBOSITY_VERY_VERBOSE
                     );
                 });
-        };
+        });
     }
 
     /**
@@ -47,7 +53,10 @@ class TickWsServerPlugin extends Plugin
             return resolveOnFutureTick(new Deferred(), $this->gameSessionId)->promise();
         }
 
-        $this->addDebugOutput('starting "tick" for game session: ' . $this->gameSessionId);
+        $this->addOutput(
+            'starting "tick" for game session: ' . $this->gameSessionId,
+            OutputInterface::VERBOSITY_VERY_VERBOSE
+        );
         $tickTimeStart = microtime(true);
         return $this->getGameTick($this->gameSessionId)->Tick(
             $this->isDebugOutputEnabled()
@@ -56,7 +65,7 @@ class TickWsServerPlugin extends Plugin
             function () use ($tickTimeStart) {
                 $this->getMeasurementCollectionManager()->addToMeasurementCollection(
                     $this->getName(),
-                    $this->gameSessionId,
+                    (string)$this->gameSessionId,
                     microtime(true) - $tickTimeStart
                 );
                 return $this->gameSessionId; // just to identify this tick
