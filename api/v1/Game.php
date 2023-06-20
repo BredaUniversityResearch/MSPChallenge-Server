@@ -17,7 +17,7 @@ class Game extends Base
 {
     private ?string $watchdog_address = null;
     const DEFAULT_WATCHDOG_PORT = 45000;
-    const MIN_PLANNING_GAME_TIME = 12;
+    const MIN_GAME_ERATIME = 12;
 
     private const ALLOWED = array(
         "AutoSaveDatabase",
@@ -249,26 +249,23 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetupGameTime(array $data): void
     {
-        $_POST['user'] = 1; // should this go at some point?
         $this->SetStartDate($data['start']);
 
-        //$_POST['months'] = $data['era_planning_months']; // this should definitely go at some point
         $this->Planning($data['era_planning_months']);
 
-        //$_POST['realtime'] = $data['era_planning_realtime'];
         $this->Realtime($data['era_planning_realtime']);
-
         $str = "";
-
         $totalEras = 4;
         $str .= str_repeat($data['era_planning_realtime'] . ",", $totalEras);
-
         $str = substr($str, 0, -1);
 
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query(
             "UPDATE game SET game_planning_era_realtime=?, game_eratime=?",
-            array($str, $data['era_total_months'])
+            array(
+                $str,
+                max($data['era_total_months'], self::MIN_GAME_ERATIME)
+            )
         );
     }
 
@@ -806,19 +803,11 @@ class Game extends Base
             }
 
             $realtimePerEra = explode(",", $state["game_planning_era_realtime"]);
-            $currentEra = intval(floor(
-                $state["game_currentmonth"] / min(
-                    $state["game_planning_gametime"],
-                    self::MIN_PLANNING_GAME_TIME
-                )
-            ));
-            $realtimePerEra[$currentEra] = $state["game_planning_realtime"];
-            $secondsPerMonthCurrentEra = round($state["game_planning_realtime"] / $state["game_eratime"]);
-            $monthsRemainingCurrentEra = $state["game_eratime"] - $state["game_planning_monthsdone"];
-            $totalRemainingTime = $monthsRemainingCurrentEra * $secondsPerMonthCurrentEra;
+            $totalRemainingTime = intval($state["game_planning_realtime"]);
+            $currentEra = intval($state["game_currentmonth"] / $state["game_eratime"]);
             $nextEra = $currentEra + 1;
             while (isset($realtimePerEra[$nextEra])) {
-                $totalRemainingTime += $realtimePerEra[$nextEra];
+                $totalRemainingTime += intval($realtimePerEra[$nextEra]);
                 $nextEra++;
             }
             $runningTilTime = time() + $totalRemainingTime;
