@@ -2,6 +2,7 @@
 
 use ServerManager\API;
 use ServerManager\GameSession;
+use ServerManager\ServerManager;
 use ServerManager\User;
 
 require __DIR__ . '/../init.php';
@@ -9,6 +10,8 @@ require __DIR__ . '/../init.php';
 $api = new API;
 $gamesession = new GameSession;
 $user = new User();
+$servermanager = ServerManager::getInstance();
+$servermanager->get();
 
 // security disabled because the client uses this endpoint too - $user->hastobeLoggedIn();
 
@@ -24,6 +27,9 @@ if (empty($demo_session)) {
     $where_array = array("AND", $where_array_session_state, $where_array_demo_session);
 }
 
-$api->setPayload(["sessionslist" => $gamesession->getList($where_array)]);
+$api->setPayload([
+    "sessionslist" => $gamesession->getList($where_array),
+    "server_description" => $servermanager->serverDescription
+]);
 $api->setStatusSuccess();
 $api->Return();
