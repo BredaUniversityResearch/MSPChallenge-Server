@@ -802,12 +802,15 @@ class Game extends Base
                 return [];
             }
 
-            $realtimePerEra = explode(",", $state["game_planning_era_realtime"]);
-            $totalRemainingTime = intval($state["game_planning_realtime"]);
+            $realtimePerEra = filter_var_array(
+                explode(',', $state["game_planning_era_realtime"]),
+                FILTER_VALIDATE_INT
+            );
+            $totalRemainingTime = $state["game_planning_realtime"]; // remaining time current era
             $currentEra = intval($state["game_currentmonth"] / $state["game_eratime"]);
             $nextEra = $currentEra + 1;
             while (isset($realtimePerEra[$nextEra])) {
-                $totalRemainingTime += intval($realtimePerEra[$nextEra]);
+                $totalRemainingTime += $realtimePerEra[$nextEra]; // add set remaining time next eras
                 $nextEra++;
             }
             $runningTilTime = time() + $totalRemainingTime;
