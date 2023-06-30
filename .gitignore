@@ -12,7 +12,7 @@
 ![Ss]erverManager/[Cc]onfigfiles/[Aa]driatic_Sea_basic/Adriatic_Sea_basic_1.json**
 [Ff]iles/**
 [Ss]cripts/**
-[Ss]imulations/**/*_[Ll]og.xml
+[Ss]imulations/**/*_[Ll]og.*
 
 #Stuff for Simulations
 Simulations/MEL/EwE/**

@@ -8,8 +8,7 @@
       }
     ],
     "configProperties": {
-      "System.Drawing.EnableUnixSupport": true,
-      "System.Reflection.Metadata.MetadataUpdater.IsSupported": false
+      "System.Drawing.EnableUnixSupport": true
     }
   }
 }

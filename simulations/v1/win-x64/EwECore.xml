@@ -11454,6 +11454,12 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 </remarks>
  ---------------------------------------------------------------------------
 </member>
+<member name="F:EwECore.cCoreInputOutputBase.m_iInstance">
+ <summary>DEBUG ONLY: instance tracker</summary>
+</member>
+<member name="F:EwECore.cCoreInputOutputBase.s_iNextInstance">
+ <summary>DEBUG ONLY: instance tracker</summary>
+</member>
 <member name="F:EwECore.cCoreInputOutputBase.m_bValidate">
  <summary>
  States whether <see cref="P:EwECore.ValueWrapper.cValue.AllowValidation">Variable validation</see> is enabled for this object.
@@ -23435,6 +23441,12 @@ min_B_QB: minimum B*QB.
  <param name="BtoUpdate">Biomass array to update to multistanza biomass</param>
  <remarks>BAvg and LossAvg are temporary variables any changes to them will be lost. To update biomass use BtoUpdate(ngroups)</remarks>
 </member>
+<member name="M:EwECore.Ecosim.cEcosimModel.debugTestRelQFishMGear">
+ <summary>
+ For Debugging. Test that relQ() and FishMGear have been set correctly. 
+ </summary>
+ <remarks>Only called during initialization of Ecosim. At other times during the run relQ() and FishMGear() may not be equal.</remarks>
+</member>
 <member name="M:EwECore.Ecosim.cEcosimModel.Run">
  <summary>
  Public Function to run the Ecosim Model 
@@ -31688,6 +31700,14 @@ pass in params that this method needs instead of obtaining them from the manager
 </member>
 <member name="M:EwECore.cMessageHandler.Dispose">
  <inheritdocs cref="M:System.IDisposable.Dispose"/>
+</member>
+<member name="P:EwECore.cMessageHandler.Name">
+ <summary>
+ Get/set the name of a message handler for ease of debugging.
+ </summary>
+ <remarks>
+ Property available in DEBUG mode only.
+ </remarks>
 </member>
 <member name="M:EwECore.cMessageHandler.SendMessage(EwECore.cMessage@)">
  <summary>

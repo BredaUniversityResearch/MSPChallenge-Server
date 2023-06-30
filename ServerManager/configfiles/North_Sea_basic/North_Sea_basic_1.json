@@ -273,18 +273,18 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Countries": [
-        {
-          "message": "Shipping routes should not cross over land.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "",
-          "endlayer": "NS_Countries",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+												  
+		 
+																   
+					   
+							
+													 
+						  
+									 
+						
+							 
+		 
+		
       "NS_Wind_Farms_Implemented|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of wind farms.",
@@ -327,48 +327,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wind_Farms_Implemented|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
+															   
+		 
+																						
+					   
+						  
+													
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+													
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+													
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+													
+						  
+												   
+						 
+							 
+		 
+		
       "NS_Wave_Farms|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of wave farms.",
@@ -411,48 +411,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
+												   
+		 
+																						
+					   
+						  
+										
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+										
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+										
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+										
+						  
+												   
+						 
+							 
+		 
+		
       "NS_Tidal_Farms|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
@@ -495,48 +495,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
+													
+		 
+																						 
+					   
+						  
+										 
+						  
+												   
+						 
+							 
+		  
+		 
+																						 
+					   
+						  
+										 
+						  
+												   
+						 
+							 
+		  
+		 
+																						 
+					   
+						  
+										 
+						  
+												   
+						 
+							 
+		  
+		 
+																						 
+					   
+						  
+										 
+						  
+												   
+						 
+							 
+		 
+		
       "NS_IMO_Routes|NS_Wind_Farms_Implemented": [
         {
           "message": "Wind farms physically obstruct the placement of shipping routes.",
@@ -579,48 +579,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Wind_Farms_Implemented": [
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+															   
+		 
+																						
+					   
+						  
+													 
+						   
+												  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+												  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+												  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+												  
+						
+							 
+		 
+		
       "NS_IMO_Routes|NS_Wave_Farms": [
         {
           "message": "Wave farms physically obstruct the placement of shipping routes.",
@@ -663,48 +663,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Wave_Farms": [
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+												   
+		 
+																						
+					   
+						  
+													 
+						   
+									  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+									  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+									  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+									  
+						
+							 
+		 
+		
       "NS_IMO_Routes|NS_Tidal_Farms": [
         {
           "message": "Tidal farms physically obstruct the placement of shipping routes.",
@@ -747,48 +747,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Tidal_Farms": [
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+													
+		 
+																						 
+					   
+						  
+													 
+						   
+									   
+						
+							 
+		  
+		 
+																						 
+					   
+						  
+													 
+						   
+									   
+						
+							 
+		  
+		 
+																						 
+					   
+						  
+													 
+						   
+									   
+						
+							 
+		  
+		 
+																						 
+					   
+						  
+													 
+						   
+									   
+						
+							 
+		 
+		
       "NS_IMO_Routes|NS_Bat_20_shipping": [
         {
           "message": "Bathymetry under 20m is not ideal for shipping.",
@@ -801,18 +801,18 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Bat_20_shipping": [
-        {
-          "message": "Bathymetry under 20m is not ideal for shipping.",
-          "value": 0.0,
-          "type": "INFO",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "",
-          "endlayer": "NS_Bat_20_shipping",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+														
+		 
+																	   
+					   
+						 
+													 
+						  
+										   
+						
+							 
+		 
+		
       "NS_Natura_2000|NS_Wind_Farms_Implemented": [
         {
           "message": "Wind Farms can cause bottom disturbance.",
@@ -1139,58 +1139,58 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_No_shipping_zones": [
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "3",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "4",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "4",
-          "sort": "Inclusion"
-        }
-      ],
+														  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		 
+		
       "NS_No_shipping_zones|NS_IMO_Routes": [
         {
           "message": "Cannot add Shipping Restriction on designated shipping route.",
@@ -1243,58 +1243,58 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_No_shipping_zones|NS_National_shipping_lanes": [
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "0",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "1",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "2",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "3",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "4",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "4",
-          "sort": "Inclusion"
-        }
-      ],
+														  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		 
+		
       "NS_Wind_Farms_Implemented|NS_Bathymetry_Raster": [
         {
           "message": "Too deep for this type of wind farm",
@@ -22398,6 +22398,11 @@
             {
               "name": "NS_Wind_Farms_Implemented",
               "influence": 0.5,
+              "construction": true
+            },
+			{
+              "name": "NS_Wind_Farms_Implemented",
+              "influence": 0.1,
               "construction": false
             },
             {
@@ -22482,6 +22487,11 @@
             },
             {
               "name": "NS_Telecom_Cables",
+              "influence": 0.1,
+              "construction": true
+            },
+			{
+              "name": "NS_Energy_Cables_Edit",
               "influence": 0.1,
               "construction": true
             },
@@ -22789,7 +22799,7 @@
           ]
         },
         {
-          "name": "Drift and fixed Nets",
+          "name": "Drift and Fixed Nets",
           "initialFishingDistribution": [
             {
               "country_id": 3,
@@ -22872,7 +22882,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Drift and fixed Nets Catch",
+          "name": "Drift and Fixed Nets Catch",
           "subcategory": "Fishery"
         },
         {
@@ -22991,7 +23001,7 @@
           "unit": "t/km2",
           "valueDefinitions": [
             {
-              "valueName": "Drift and fixed Nets Catch",
+              "valueName": "Drift and Fixed Nets Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -28160,7 +28170,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#B65F34FF",
-            "polygonPatternName": "6",
+            "polygonPatternName": "31",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -28188,7 +28198,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#5B2F1AFF",
-            "polygonPatternName": "6",
+            "polygonPatternName": "31",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -31520,7 +31530,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#72320CFF",
-            "polygonPatternName": "24",
+            "polygonPatternName": "28",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -37659,7 +37669,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "1": {
             "displayName": "Low",
@@ -37687,7 +37697,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "2": {
             "displayName": "Medium",
@@ -37715,7 +37725,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "3": {
             "displayName": "High",
@@ -37743,7 +37753,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "4": {
             "displayName": "Very High",
@@ -37771,7 +37781,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           }
         },
         "layer_info_properties": null
