@@ -273,18 +273,18 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Countries": [
-        {
-          "message": "Shipping routes should not cross over land.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "",
-          "endlayer": "NS_Countries",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+												  
+		 
+																   
+					   
+							
+													 
+						  
+									 
+						
+							 
+		 
+		
       "NS_Wind_Farms_Implemented|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of wind farms.",
@@ -327,48 +327,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wind_Farms_Implemented|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
+															   
+		 
+																						
+					   
+						  
+													
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+													
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+													
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+													
+						  
+												   
+						 
+							 
+		 
+		
       "NS_Wave_Farms|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of wave farms.",
@@ -411,48 +411,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
+												   
+		 
+																						
+					   
+						  
+										
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+										
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+										
+						  
+												   
+						 
+							 
+		  
+		 
+																						
+					   
+						  
+										
+						  
+												   
+						 
+							 
+		 
+		
       "NS_Tidal_Farms|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
@@ -495,48 +495,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
+													
+		 
+																						 
+					   
+						  
+										 
+						  
+												   
+						 
+							 
+		  
+		 
+																						 
+					   
+						  
+										 
+						  
+												   
+						 
+							 
+		  
+		 
+																						 
+					   
+						  
+										 
+						  
+												   
+						 
+							 
+		  
+		 
+																						 
+					   
+						  
+										 
+						  
+												   
+						 
+							 
+		 
+		
       "NS_IMO_Routes|NS_Wind_Farms_Implemented": [
         {
           "message": "Wind farms physically obstruct the placement of shipping routes.",
@@ -579,48 +579,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Wind_Farms_Implemented": [
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+															   
+		 
+																						
+					   
+						  
+													 
+						   
+												  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+												  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+												  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+												  
+						
+							 
+		 
+		
       "NS_IMO_Routes|NS_Wave_Farms": [
         {
           "message": "Wave farms physically obstruct the placement of shipping routes.",
@@ -663,48 +663,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Wave_Farms": [
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+												   
+		 
+																						
+					   
+						  
+													 
+						   
+									  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+									  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+									  
+						
+							 
+		  
+		 
+																						
+					   
+						  
+													 
+						   
+									  
+						
+							 
+		 
+		
       "NS_IMO_Routes|NS_Tidal_Farms": [
         {
           "message": "Tidal farms physically obstruct the placement of shipping routes.",
@@ -747,48 +747,48 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Tidal_Farms": [
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+													
+		 
+																						 
+					   
+						  
+													 
+						   
+									   
+						
+							 
+		  
+		 
+																						 
+					   
+						  
+													 
+						   
+									   
+						
+							 
+		  
+		 
+																						 
+					   
+						  
+													 
+						   
+									   
+						
+							 
+		  
+		 
+																						 
+					   
+						  
+													 
+						   
+									   
+						
+							 
+		 
+		
       "NS_IMO_Routes|NS_Bat_20_shipping": [
         {
           "message": "Bathymetry under 20m is not ideal for shipping.",
@@ -801,18 +801,18 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Bat_20_shipping": [
-        {
-          "message": "Bathymetry under 20m is not ideal for shipping.",
-          "value": 0.0,
-          "type": "INFO",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "",
-          "endlayer": "NS_Bat_20_shipping",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
+														
+		 
+																	   
+					   
+						 
+													 
+						  
+										   
+						
+							 
+		 
+		
       "NS_Natura_2000|NS_Wind_Farms_Implemented": [
         {
           "message": "Wind Farms can cause bottom disturbance.",
@@ -1139,58 +1139,58 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_No_shipping_zones": [
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "3",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "4",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "4",
-          "sort": "Inclusion"
-        }
-      ],
+														  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		  
+		 
+																				 
+					   
+						  
+													 
+						   
+											 
+						 
+							 
+		 
+		
       "NS_No_shipping_zones|NS_IMO_Routes": [
         {
           "message": "Cannot add Shipping Restriction on designated shipping route.",
@@ -1243,58 +1243,58 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_No_shipping_zones|NS_National_shipping_lanes": [
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "0",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "1",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "2",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "3",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "4",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "4",
-          "sort": "Inclusion"
-        }
-      ],
+														  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		  
+		 
+																					 
+					   
+						  
+											   
+						   
+												   
+						 
+							 
+		 
+		
       "NS_Wind_Farms_Implemented|NS_Bathymetry_Raster": [
         {
           "message": "Too deep for this type of wind farm",
@@ -15635,13 +15635,13 @@
               "link": "Bottom_Trawl_Catch"
             },
             {
-              "name": "Drift & Fixed Nets",
+              "name": "Drift and Fixed Nets",
               "id": 21,
               "multiline": false,
               "link": "Drift_and_Fixed_Nets_Catch"
             },
             {
-              "name": "Industrial & Pelagic Trawl",
+              "name": "Industrial and Pelagic Trawl",
               "id": 22,
               "multiline": true,
               "link": "Industrial_and_Pelagic_Trawl_Catch"
@@ -15751,13 +15751,13 @@
               "link": "Seals"
             },
             {
-              "name": "Windfarm avoiding seabirds",
+              "name": "Windfarm Avoiding Seabirds",
               "id": 37,
               "multiline": true,
               "link": "Windfarm_Avoiding_Seabirds"
             },
             {
-              "name": "Windfarm indifferent seabirds",
+              "name": "Windfarm Indifferent Seabirds",
               "id": 38,
               "multiline": true,
               "link": "Windfarm_Indifferent_Seabirds"
@@ -16244,127 +16244,127 @@
           "fromId": 13,
           "toId": 22,
           "severity": -3,
-          "description": "Industrial & pelagic trawlers always steer clear of known or popular cargo vessel routes. "
+          "description": "Industrial and pelagic trawlers always steer clear of known or popular cargo vessel routes. "
         },
         {
           "fromId": 14,
           "toId": 22,
           "severity": -3,
-          "description": "Industrial & pelagic always steer clear of known or popular ferry routes. "
+          "description": "Industrial and pelagic always steer clear of known or popular ferry routes. "
         },
         {
           "fromId": 15,
           "toId": 22,
           "severity": -3,
-          "description": "Industrial & pelagic trawlers always steer clear of known or popular maintenance vessel routes. "
+          "description": "Industrial and pelagic trawlers always steer clear of known or popular maintenance vessel routes. "
         },
         {
           "fromId": 16,
           "toId": 22,
           "severity": -3,
-          "description": "Industrial & pelagic trawlers always steer clear of known or popular passenger vessel routes. "
+          "description": "Industrial and pelagic trawlers always steer clear of known or popular passenger vessel routes. "
         },
         {
           "fromId": 17,
           "toId": 22,
           "severity": -3,
-          "description": "Industrial & pelagic trawlers always steer clear of known or popular tanker vessel routes. "
+          "description": "Industrial and pelagic trawlers always steer clear of known or popular tanker vessel routes. "
         },
         {
           "fromId": 9,
           "toId": 22,
           "severity": -3,
-          "description": "Industrial & pelagic trawlers never fish right next to or just outside of ports, they sail out a bit first. "
+          "description": "Industrial and pelagic trawlers never fish right next to or just outside of ports, they sail out a bit first. "
         },
         {
           "fromId": 24,
           "toId": 22,
           "severity": -3,
-          "description": "If desired, industrial & pelagic trawling can be banned from operating in a particular Marine Protected Area. "
+          "description": "If desired, industrial and pelagic trawling can be banned from operating in a particular Marine Protected Area. "
         },
         {
           "fromId": 5,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed nets in the water column during construction of an electricity cable are dangerous. Non-existent once completed. "
+          "description": "Drift and fixed nets in the water column during construction of an electricity cable are dangerous. Non-existent once completed. "
         },
         {
           "fromId": 4,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed nets in the water column at an operational oil or gas extraction platform are dangerous. "
+          "description": "Drift and fixed nets in the water column at an operational oil or gas extraction platform are dangerous. "
         },
         {
           "fromId": 6,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed nets in the water column during construction of a pipeline are dangerous. Non-existent once completed. "
+          "description": "Drift and fixed nets in the water column during construction of a pipeline are dangerous. Non-existent once completed. "
         },
         {
           "fromId": 3,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed nets in the water column at a tidal farm are dangerous. "
+          "description": "Drift and fixed nets in the water column at a tidal farm are dangerous. "
         },
         {
           "fromId": 2,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed nets in the water column at a wave farm are dangerous. "
+          "description": "Drift and fixed nets in the water column at a wave farm are dangerous. "
         },
         {
           "fromId": 1,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed nets in the water column during construction of a wind farm are dangerous. Non-existent once completed. "
+          "description": "Drift and fixed nets in the water column during construction of a wind farm are dangerous. Non-existent once completed. "
         },
         {
           "fromId": 7,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed nets in the water column during construction of a telecom cable are dangerous. Non-existent once completed. "
+          "description": "Drift and fixed nets in the water column during construction of a telecom cable are dangerous. Non-existent once completed. "
         },
         {
           "fromId": 13,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular cargo vessel routes. "
+          "description": "Drift and fixed net fishers always steer clear of known or popular cargo vessel routes. "
         },
         {
           "fromId": 14,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular ferry routes. "
+          "description": "Drift and fixed net fishers always steer clear of known or popular ferry routes. "
         },
         {
           "fromId": 15,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular maintenance vessel routes. "
+          "description": "Drift and fixed net fishers always steer clear of known or popular maintenance vessel routes. "
         },
         {
           "fromId": 16,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular passenger vessel routes. "
+          "description": "Drift and fixed net fishers always steer clear of known or popular passenger vessel routes. "
         },
         {
           "fromId": 17,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular tanker vessel routes. "
+          "description": "Drift and fixed net fishers always steer clear of known or popular tanker vessel routes. "
         },
         {
           "fromId": 9,
           "toId": 21,
           "severity": -3,
-          "description": "Drift & fixed net fishers never fish right next to or just outside of ports, they sail out a bit first. "
+          "description": "Drift and fixed net fishers never fish right next to or just outside of ports, they sail out a bit first. "
         },
         {
           "fromId": 24,
           "toId": 21,
           "severity": -3,
-          "description": "If desired, drift & fixed net fishers can be banned from operating in a particular Marine Protected Area. "
+          "description": "If desired, drift and fixed net fishers can be banned from operating in a particular Marine Protected Area. "
         },
         {
           "fromId": 19,
@@ -16760,49 +16760,49 @@
           "fromId": 37,
           "toId": 32,
           "severity": -1,
-          "description": "Windfarm avoiding seabirds prey on herring  "
+          "description": "Windfarm Avoiding Seabirds prey on herring  "
         },
         {
           "fromId": 37,
           "toId": 34,
           "severity": -2,
-          "description": "Windfarm avoiding seabirds prey on sandeel (and sprat)  "
+          "description": "Windfarm Avoiding Seabirds prey on sandeel (and sprat)  "
         },
         {
           "fromId": 37,
           "toId": 33,
           "severity": -1,
-          "description": "Windfarm avoiding seabirds prey on mackerel  "
+          "description": "Windfarm Avoiding Seabirds prey on mackerel  "
         },
         {
           "fromId": 37,
           "toId": 39,
           "severity": -2,
-          "description": "Windfarm avoiding seabirds prey on benthic invertebrates  "
+          "description": "Windfarm Avoiding Seabirds prey on benthic invertebrates  "
         },
         {
           "fromId": 38,
           "toId": 32,
           "severity": -1,
-          "description": "Windfarm indifferent seabirds prey on herring  "
+          "description": "Windfarm Indifferent Seabirds prey on herring  "
         },
         {
           "fromId": 38,
           "toId": 34,
           "severity": -2,
-          "description": "Windfarm indifferent seabirds prey on sandeel (and sprat)  "
+          "description": "Windfarm Indifferent Seabirds prey on sandeel (and sprat)  "
         },
         {
           "fromId": 38,
           "toId": 30,
           "severity": -1,
-          "description": "Windfarm indifferent seabirds prey on demersal fish  "
+          "description": "Windfarm Indifferent Seabirds prey on demersal fish  "
         },
         {
           "fromId": 38,
           "toId": 39,
           "severity": -1,
-          "description": "Windfarm indifferent seabirds prey on benthic invertebrates  "
+          "description": "Windfarm Indifferent Seabirds prey on benthic invertebrates  "
         },
         {
           "fromId": 29,
@@ -16844,37 +16844,37 @@
           "fromId": 30,
           "toId": 32,
           "severity": -2,
-          "description": "Demersal fish prey on herring  "
+          "description": "Demersal Fish prey on herring  "
         },
         {
           "fromId": 30,
           "toId": 30,
           "severity": -1,
-          "description": "Demersal fish prey on smaller demersal fish "
+          "description": "Demersal Fish prey on smaller demersal fish "
         },
         {
           "fromId": 30,
           "toId": 34,
           "severity": -3,
-          "description": "Demersal fish prey on sandeel "
+          "description": "Demersal Fish prey on sandeel "
         },
         {
           "fromId": 30,
           "toId": 33,
           "severity": -1,
-          "description": "Demersal fish prey on mackerel "
+          "description": "Demersal Fish prey on mackerel "
         },
         {
           "fromId": 30,
           "toId": 31,
           "severity": -1,
-          "description": "Demersal fish prey on flatfish "
+          "description": "Demersal Fish prey on flatfish "
         },
         {
           "fromId": 30,
           "toId": 39,
           "severity": -2,
-          "description": "Demersal fish prey on benthic invertebrates"
+          "description": "Demersal Fish prey on benthic invertebrates"
         },
         {
           "fromId": 32,
@@ -16922,7 +16922,7 @@
           "fromId": 39,
           "toId": 39,
           "severity": -3,
-          "description": "Benthic invertebrates prey on each other"
+          "description": "Benthic Invertebrates prey on each other"
         },
         {
           "fromId": 20,
@@ -16952,43 +16952,43 @@
           "fromId": 22,
           "toId": 32,
           "severity": -2,
-          "description": "Industrial and pelagic trawlers catch herring "
+          "description": "Industrial and Pelagic Trawlers catch herring "
         },
         {
           "fromId": 22,
           "toId": 34,
           "severity": -2,
-          "description": "Industrial and pelagic trawlers catch sandeel "
+          "description": "Industrial and Pelagic Trawlers catch sandeel "
         },
         {
           "fromId": 22,
           "toId": 33,
           "severity": -1,
-          "description": "Industrial and pelagic trawlers catch mackerel "
+          "description": "Industrial and Pelagic Trawlers catch mackerel "
         },
         {
           "fromId": 21,
           "toId": 35,
           "severity": -1,
-          "description": "Drift and fixed nets catch cetaceans as by-catch "
+          "description": "Drift and Fixed Nets catch cetaceans as by-catch "
         },
         {
           "fromId": 21,
           "toId": 29,
           "severity": -1,
-          "description": "Drift and fixed nets catch cod "
+          "description": "Drift and Fixed Nets catch cod "
         },
         {
           "fromId": 21,
           "toId": 31,
           "severity": -2,
-          "description": "Drift and fixed nets catch flatfish "
+          "description": "Drift and Fixed Nets catch flatfish "
         },
         {
           "fromId": 21,
           "toId": 39,
           "severity": -1,
-          "description": "Drift and fixed nets catch benthic invertebrates "
+          "description": "Drift and Fixed Nets catch benthic invertebrates "
         }
       ]
     },
@@ -22398,6 +22398,11 @@
             {
               "name": "NS_Wind_Farms_Implemented",
               "influence": 0.5,
+              "construction": true
+            },
+			{
+              "name": "NS_Wind_Farms_Implemented",
+              "influence": 0.1,
               "construction": false
             },
             {
@@ -22485,6 +22490,11 @@
               "influence": 0.1,
               "construction": true
             },
+			{
+              "name": "NS_Energy_Cables_Edit",
+              "influence": 0.1,
+              "construction": true
+            },
             {
               "name": "NS_Pipelines",
               "influence": 0.05,
@@ -22493,7 +22503,7 @@
           ]
         },
         {
-          "name": "Protection bottom trawl",
+          "name": "Protection Bottom Trawl",
           "layers": [
             {
               "name": "NS_Oil_Gas_Offshore_Instalations",
@@ -22578,7 +22588,7 @@
           ]
         },
         {
-          "name": "Protection industrial trawl",
+          "name": "Protection Industrial Trawl",
           "layers": [
             {
               "name": "NS_Oil_Gas_Offshore_Instalations",
@@ -22648,7 +22658,7 @@
           ]
         },
         {
-          "name": "Protection nets",
+          "name": "Protection Nets",
           "layers": [
             {
               "name": "NS_Pipelines",
@@ -22789,7 +22799,7 @@
           ]
         },
         {
-          "name": "Drift and fixed Nets",
+          "name": "Drift and Fixed Nets",
           "initialFishingDistribution": [
             {
               "country_id": 3,
@@ -22836,7 +22846,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Demersal fish",
+          "name": "Demersal Fish",
           "subcategory": "Biomass"
         },
         {
@@ -22852,7 +22862,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Benthic invertebrates",
+          "name": "Benthic Invertebrates",
           "subcategory": "Biomass"
         },
         {
@@ -22864,15 +22874,15 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Windfarm avoiding seabird",
+          "name": "Windfarm Avoiding Seabird",
           "subcategory": "Biomass"
         },
         {
-          "name": "Windfarm indifferent seabird",
+          "name": "Windfarm Indifferent Seabird",
           "subcategory": "Biomass"
         },
         {
-          "name": "Drift and fixed Nets Catch",
+          "name": "Drift and Fixed Nets Catch",
           "subcategory": "Fishery"
         },
         {
@@ -22880,7 +22890,7 @@
           "subcategory": "Fishery"
         },
         {
-          "name": "Bottom trawl Catch",
+          "name": "Bottom Trawl Catch",
           "subcategory": "Fishery"
         },
         {
@@ -22911,7 +22921,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Demersal fish",
+              "valueName": "Demersal Fish",
               "valueColor": "#CEFF73FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -22935,7 +22945,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Benthic invertebrates",
+              "valueName": "Benthic Invertebrates",
               "valueColor": "#737DFFFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -22953,13 +22963,13 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Windfarm avoiding seabird",
+              "valueName": "Windfarm Avoiding Seabird",
               "valueColor": "#FFC773FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Windfarm indifferent seabird",
+              "valueName": "Windfarm Indifferent Seabird",
               "valueColor": "#CEFF73FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -22991,7 +23001,7 @@
           "unit": "t/km2",
           "valueDefinitions": [
             {
-              "valueName": "Drift and fixed Nets Catch",
+              "valueName": "Drift and Fixed Nets Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -23003,7 +23013,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Bottom trawl Catch",
+              "valueName": "Bottom Trawl Catch",
               "valueColor": "#FF0079FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -23016,12 +23026,11 @@
           "unit": "km2",
           "valueDefinitions": [
             {
-              "valueName": "No Protection",
-              "valueColor": "#FF7272FF",
+              "valueName": "No protection",
+              "valueColor": "#FFC773FF",
               "unit": "km2",
               "valueDependentCountry": -1
-            },
-            {
+            },            {
               "valueName": "Habitats Directive",
               "valueColor": "#FFC773FF",
               "unit": "km2",
@@ -23034,25 +23043,25 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "No protection",
+              "valueName": "No Protection",
               "valueColor": "#73FFBCFF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "No bottom trawl fleets",
+              "valueName": "No Bottom Trawl Fleets",
               "valueColor": "#73D9FFFF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "No industrial and pelagic trawl fleets",
+              "valueName": "No Industrial and Pelagic Trawl Fleets",
               "valueColor": "#FF0079FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "No drift and fixed nets fleets",
+              "valueName": "No Drift and Fixed Nets Fleets",
               "valueColor": "#737DFFFF",
               "unit": "km2",
               "valueDependentCountry": -1
@@ -28160,7 +28169,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#B65F34FF",
-            "polygonPatternName": "6",
+            "polygonPatternName": "31",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -28188,7 +28197,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#5B2F1AFF",
-            "polygonPatternName": "6",
+            "polygonPatternName": "31",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -31520,7 +31529,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#72320CFF",
-            "polygonPatternName": "24",
+            "polygonPatternName": "28",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -36464,7 +36473,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No Protection",
+            "displayName": "No protection",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -36792,7 +36801,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No protection",
+            "displayName": "No Protection",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -36820,7 +36829,7 @@
             "media": "wiki://Marine_Protected_Areas"
           },
           "1": {
-            "displayName": "No bottom trawl fleets",
+            "displayName": "No Bottom Trawl Fleets",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -36848,7 +36857,7 @@
             "media": "wiki://Marine_Protected_Areas"
           },
           "2": {
-            "displayName": "No industrial and pelagic trawl fleets",
+            "displayName": "No Industrial and Pelagic Trawl Fleets",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -36876,7 +36885,7 @@
             "media": "wiki://Marine_Protected_Areas"
           },
           "3": {
-            "displayName": "No drift and fixed nets fleets",
+            "displayName": "No Drift and Fixed Nets Fleets",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -37659,7 +37668,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "1": {
             "displayName": "Low",
@@ -37687,7 +37696,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "2": {
             "displayName": "Medium",
@@ -37715,7 +37724,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "3": {
             "displayName": "High",
@@ -37743,7 +37752,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "4": {
             "displayName": "Very High",
@@ -37771,7 +37780,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           }
         },
         "layer_info_properties": null
@@ -37964,7 +37973,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Protection_industrial_trawl",
+        "layer_name": "mel_Protection_Industrial_Trawl",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Protection Industrial Trawl Fleet (Simulated)",
@@ -38151,7 +38160,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Protection_bottom_trawl",
+        "layer_name": "mel_Protection_Bottom_Trawl",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Protection Bottom Trawl Fleet (Simulated)",
@@ -38338,7 +38347,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Protection_nets",
+        "layer_name": "mel_Protection_Nets",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Protection Nets Fleets (Simulated)",
@@ -38525,7 +38534,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Benthic_invertebrates",
+        "layer_name": "mel_Benthic_Invertebrates",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Benthic Invertebrates (Simulated)",
@@ -38899,7 +38908,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Demersal_fish",
+        "layer_name": "mel_Demersal_Fish",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Demersal Fish (Simulated)",
@@ -39834,7 +39843,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Windfarm_indifferent_seabird",
+        "layer_name": "mel_Windfarm_Indifferent_Seabird",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Windfarm Indifferent Seabirds (Simulated)",
@@ -40021,7 +40030,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Windfarm_avoiding_seabird",
+        "layer_name": "mel_Windfarm_Avoiding_Seabird",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Windfarm Avoiding Seabirds (Simulated)",
@@ -40657,7 +40666,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Bottom_trawl_Catch",
+        "layer_name": "mel_Bottom_Trawl_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Bottom Trawl Catch (Simulated)",
@@ -40844,7 +40853,7 @@
         "layer_info_properties": null
       },
       {
-        "layer_name": "mel_Drift_and_fixed_Nets_Catch",
+        "layer_name": "mel_Drift_and_Fixed_Nets_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Drift and Fixed Nets Catch (Simulated)",
