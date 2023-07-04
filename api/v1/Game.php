@@ -792,6 +792,7 @@ class Game extends Base
             ->then(function (ResponseInterface $response) {
                 $log = new Log();
                 $this->asyncDataTransferTo($log);
+                $log->setAsync(true); // force async in this context
 
                 $responseContent = $response->getBody()->getContents();
                 $decodedResponse = json_decode($responseContent, true);
