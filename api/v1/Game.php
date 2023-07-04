@@ -3,15 +3,21 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowserFactory;
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use Closure;
 use Drift\DBAL\Result;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
+use React\EventLoop\Loop;
+use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use function App\assertFulfilled;
 use function App\resolveOnFutureTick;
 use function App\await;
+use function App\tpf;
 
 class Game extends Base
 {
@@ -609,6 +615,88 @@ class Game extends Base
         );
     }
 
+    private function createWatchdogRequestPromiseFunction(string $url): ToPromiseFunction
+    {
+        return tpf(function () use ($url) {
+            $browser = MSPBrowserFactory::create($url);
+            $deferred = new Deferred();
+            $browser
+                // any response is acceptable, even 4xx or 5xx status codes
+                ->withRejectErrorResponse(false)
+                ->withTimeout(1)
+                ->request('GET', $url)
+                ->done(
+                    // watchdog is running
+                    function (/*ResponseInterface $response*/) use ($deferred) {
+                        $deferred->resolve(true); // we have a response
+                    },
+                    // so the Watchdog is off, and now it should be switched on
+                    function (/*Exception $e*/) use ($deferred) {
+                        $deferred->resolve(false); // no response yet..
+                    }
+                );
+            return $deferred->promise();
+        });
+    }
+
+    private function createWatchdogRequestRepeatedOnFulfilledFunction(
+        LoopInterface $loop,
+        Deferred $deferred,
+        Closure $repeatedFunction,
+        int &$numAttemptsLeft,
+        int $maxAttempts
+    ): Closure {
+        // so if the "promise function" is fulfilled, it gets repeated.
+        return function (bool $requestSucceeded) use (
+            $loop,
+            $deferred,
+            $repeatedFunction,
+            &$numAttemptsLeft,
+            $maxAttempts
+        ) {
+            if ($requestSucceeded) {
+                $deferred->resolve();
+                return;
+            }
+            if ($numAttemptsLeft == $maxAttempts) { // first attempt
+                self::StartWatchdog(); // try to start watchdog if the first attempt fails.
+            }
+            $numAttemptsLeft--;
+            if ($numAttemptsLeft <= 0) {
+                $deferred->resolve();
+                return; // do not repeat anymore, even if the watchdog is not alive
+            }
+            $loop->futureTick($repeatedFunction);
+        };
+    }
+
+    private function createWatchdogRequestRepeatedFunction(
+        LoopInterface $loop,
+        Deferred $deferred,
+        Closure $promiseFunction,
+        int &$numAttemptsLeft,
+        int $maxAttempts
+    ): Closure {
+        return function () use ($loop, $deferred, $promiseFunction, &$numAttemptsLeft, $maxAttempts) {
+            assertFulfilled(
+                $promiseFunction(),
+                $this->createWatchdogRequestRepeatedOnFulfilledFunction(
+                    $loop,
+                    $deferred,
+                    $this->createWatchdogRequestRepeatedFunction(
+                        $loop,
+                        $deferred,
+                        $promiseFunction,
+                        $numAttemptsLeft,
+                        $maxAttempts
+                    ),
+                    $numAttemptsLeft,
+                    $maxAttempts
+                )
+            );
+        };
+    }
+
     /**
      * @throws Exception
      */
@@ -619,28 +707,19 @@ class Game extends Base
         if (empty($url)) {
             return null;
         }
-
-        // we want to use the watchdog, but first we check if it is running
-        $browser = MSPBrowserFactory::create($url);
         $deferred = new Deferred();
-        $browser
-            // any response is acceptable, even 4xx or 5xx status codes
-            ->withRejectErrorResponse(false)
-            ->withTimeout(1)
-            ->request('GET', $url)
-            ->done(
-                // watchdog is running
-                function (/*ResponseInterface $response*/) use ($deferred) {
-                    $deferred->resolve();
-                },
-                // so the Watchdog is off, and now it should be switched on
-                function (/*Exception $e*/) use ($deferred) {
-                    self::StartWatchdog();
-                    // todo: do another watchdog alive test, with a repeat and failure mechanism ?
-                    sleep(10);
-                    $deferred->resolve();
-                }
-            );
+        $loop = Loop::get();
+        $maxAttempts = 4;
+        $numAttemptsLeft = $maxAttempts;
+        $loop->futureTick($this->createWatchdogRequestRepeatedFunction(
+            $loop,
+            $deferred,
+            function () use ($url) {
+                return ($this->createWatchdogRequestPromiseFunction($url))();
+            },
+            $numAttemptsLeft,
+            $maxAttempts
+        ));
         return $deferred->promise();
     }
 
