@@ -35190,7 +35190,7 @@
         "layer_name": "mel_Benthos_Biomass",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Benthic_Invertebrates(Simulated)",
+        "layer_short": "Benthic Invertebrates(Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "macrobenthos",
         "layer_download_from_geoserver": 0,
