@@ -184,7 +184,10 @@ function UpdateLogToastContents(session_id)
     }
     logElapsedSec += logUpdateIntervalSec;
     $.when(CallAPI(url, data)).done(function (results) {
-        log_array = results.gamesession.log.slice(-5);
+        log_array = [];
+        if (null != results.gamesession.log) {
+            log_array = results.gamesession.log.slice(-5);
+        }
         log_array.forEach(LogToastContentItemCleanUp);
         var log_concise_new = log_array.join("");
         if (logElapsedSec > logCleanupIntervalSec) {

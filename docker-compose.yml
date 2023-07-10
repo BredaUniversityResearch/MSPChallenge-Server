@@ -42,6 +42,7 @@ services:
     restart: unless-stopped
     volumes:
       - php_socket:/var/run/php
+      - ./public/:/srv/app/public/:ro
     networks:
       - database
       - php
@@ -124,6 +125,7 @@ services:
       - php_socket:/var/run/php
       - caddy_data:/data
       - caddy_config:/config
+      - ./public/:/srv/app/public/:ro
     ports:
       # HTTP
       - target: 80
