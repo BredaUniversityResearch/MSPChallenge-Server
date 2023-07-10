@@ -537,12 +537,12 @@ class GameSession extends Base
     private function mustUpdateBogusList(): array
     {
         $return[0] = ['id' => 0,
-                        'name' => 'You are using a version of MSP Challenge incompatible with this server.',
+                        'name' => 'Version incompatible with this server.',
                         'session_state' => 'archived',
                         'region' => 'none', ];
         $return[1] = ['id' => 0,
-                        'name' => 'Please download and install '.ServerManager::getInstance()->getCurrentVersion().
-                            ' from www.mspchallenge.info.',
+                        'name' => 'Download '.ServerManager::getInstance()->getCurrentVersion().
+                            ' from mspchallenge.info.',
                         'session_state' => 'archived',
                         'region' => 'none', ];
 
