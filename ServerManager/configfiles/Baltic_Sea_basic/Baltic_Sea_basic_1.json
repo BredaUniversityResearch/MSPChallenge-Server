@@ -34631,7 +34631,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Seal Biomass (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "mammals",
+        "layer_subcategory": "birds_and_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 75,
         "layer_height": 91,
