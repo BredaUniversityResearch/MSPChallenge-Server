@@ -33,13 +33,13 @@ require 'init.php';
 $user = new User();
 if (!$user->isAuthorised()) {
     if ($user->isLoggedIn()) {
-        Redirect::to(ServerManager::getInstance()->GetServerManagerFolder().'logout.php');
+        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'logout.php');
     } else {
-        Redirect::to(ServerManager::getInstance()->GetServerManagerFolder().'index.php');
+        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'index.php');
     }
 }
 
-require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/header.php';
+require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/header.php';
 // @codingStandardsIgnoreStart
 ?>
 <div id="page-wrapper">
@@ -1118,4 +1118,4 @@ require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/h
 <?php
 // @codingStandardsIgnoreEnd
 // the final html footer copyright row + the external js calls
-require_once ServerManager::getInstance()->GetServerManagerRoot() . 'templates/footer.php';
+require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/footer.php';

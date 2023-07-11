@@ -12,6 +12,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 interface PluginInterface
 {
+    public const EVENT_PLUGIN_REGISTERED = 'PLUGIN_REGISTERED';
+    public const EVENT_PLUGIN_EXECUTION_STARTED = 'PLUGIN_EXECUTION_STARTED';
+    public const EVENT_PLUGIN_EXECUTION_ENABLE_PROBE = 'PLUGIN_EXECUTION_ENABLE_PROFILE';
+    public const EVENT_PLUGIN_EXECUTION_FINISHED = 'PLUGIN_EXECUTION_FINISHED';
+    public const EVENT_PLUGIN_UNREGISTERED = 'PLUGIN_UNREGISTERED';
+    public const EVENT_ARG_EXECUTION_ID = 'executionId';
+
     public static function getDefaultMinIntervalSec(): float;
 
     public function getName(): string;

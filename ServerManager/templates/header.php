@@ -4,8 +4,8 @@ use ServerManager\ServerManager;
 
 $pageTitle = 'MSP Challenge Server Manager';
 
-$url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
-require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/security_headers.php';
+$url_app_root = ServerManager::getInstance()->getAbsolutePathBase();
+require_once ServerManager::getInstance()->getServerManagerRoot().'templates/security_headers.php';
 
 // from here on HTML will be included
 
@@ -16,7 +16,7 @@ require_once('header1_must_include.php'); ?>
 <!-- AKA Primary CSS -->
 <link href="<?=$url_app_root;?>css/color_schemes/bootstrap.min.css" rel="stylesheet">
 
-<?php require_once(ServerManager::getInstance()->GetServerManagerRoot() . 'templates/style.php'); ?>
+<?php require_once(ServerManager::getInstance()->getServerManagerRoot() . 'templates/style.php'); ?>
 
 <!-- Template CSS -->
 <!-- AKA Secondary CSS -->
@@ -80,5 +80,5 @@ if (typeof jQuery == 'undefined') {
 <body>
 <?php //require_once('css/style.php'); ?>
 <?php
-require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/navigation.php';
+require_once ServerManager::getInstance()->getServerManagerRoot().'templates/navigation.php';
 ?>

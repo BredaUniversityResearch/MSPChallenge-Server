@@ -53,7 +53,7 @@ if ($gamesession->game_geoserver_id > 0) {
 // ok, return everything
 $gamesession_vars = get_object_vars($gamesession);
 $gamesession_vars["gamearchive"] = $gamesession->getArchive();
-$gamesession_vars["gameupgradable"] = ServerManager::getInstance()->CheckForUpgrade($gamesession->server_version);
+$gamesession_vars["gameupgradable"] = ServerManager::getInstance()->checkForUpgrade($gamesession->server_version);
 $api->setPayload(["gamesession" => $gamesession_vars]);
 $api->setPayload(["gamesession_pretty" => $gamesession->getPrettyVars()]);
 $api->setPayload(["gamecountries" => $gamesession->getCountries()]);

@@ -34,11 +34,10 @@ class GameLatest extends CommonBase
      * @param float $lastUpdateTime
      * @param int $user
      * @param bool $showDebug
-     * @return PromiseInterface
+     * @return ?PromiseInterface
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Latest(int $teamId, float $lastUpdateTime, int $user, bool $showDebug = false): PromiseInterface
+    public function latest(int $teamId, float $lastUpdateTime, int $user, bool $showDebug = false): ?PromiseInterface
     {
         return $this->calculateUpdatedTime(
             $showDebug
@@ -228,7 +227,7 @@ class GameLatest extends CommonBase
                 $this->getAsyncDatabase()->query(
                     $qb
                         ->update('game')
-                        ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                        ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 )
                 ->done(
                     function (Result $result) use (&$tick, $assureGameLatestUpdate) {

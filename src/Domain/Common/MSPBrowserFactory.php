@@ -14,7 +14,7 @@ class MSPBrowserFactory
     /**
      * @throws Exception
      */
-    public static function create(string $targetUrl): Browser
+    public static function create(string $targetUrl, string $proxy = null): Browser
     {
         // any proxy required for the external calls of any kind
         //  (MSP Authoriser, BUas GeoServer, or any other GeoServer)

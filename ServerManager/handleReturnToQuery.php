@@ -24,9 +24,9 @@ function handleReturnToQuery(ServerManager $serverManager, array &$errors, array
         $msg = lang("SIGNIN_FAIL");
         $msg2 = "Something went wrong. Please try again later.";
         $errors[] = '<strong>'.$msg.'</strong>'.$msg2;
-        $link["href"] = $serverManager->GetFullSelfAddress().'logout.php';
+        $link["href"] = $serverManager->getAbsoluteUrlBase().'logout.php';
         $link["text"] = "You are being redirected. Click here if this doesn't work and nothing happens.";
-        Redirect::to($serverManager->GetFullSelfAddress().'logout.php');
+        Redirect::to($serverManager->getAbsoluteUrlBase().'logout.php');
         return;
     }
 

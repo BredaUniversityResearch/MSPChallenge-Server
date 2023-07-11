@@ -49,12 +49,12 @@ class GameSave extends Base
 
     public function getStore(): string
     {
-        return ServerManager::getInstance()->GetSessionSavesBaseDirectory();
+        return ServerManager::getInstance()->getSessionSavesBaseDirectory();
     }
 
     public function getPrefix(): string
     {
-        return ServerManager::getInstance()->GetSessionSavesPrefix();
+        return ServerManager::getInstance()->getSessionSavesPrefix();
     }
 
     private function validateVars(): bool|string
@@ -176,6 +176,7 @@ class GameSave extends Base
 
     public function createZip(GameSession $gameSession): bool
     {
+        $urlBase = ServerManager::getInstance()->getAbsoluteUrlBase();
         $server_call = self::callServer(
             'GameSession/SaveSession',
             [
@@ -184,7 +185,7 @@ class GameSave extends Base
                 'preferredname' => ('layers' == $this->save_type) ? 'temp_'.$this->getPrefix() : $this->getPrefix(),
                 'preferredfolder' => $this->getStore(),
                 'nooverwrite' => true,
-                'response_url' => ServerManager::getInstance()->GetFullSelfAddress().'api/editGameSave.php',
+                'response_url' => $urlBase.'api/editGameSave.php',
             ],
             $gameSession->id,
             $gameSession->api_access_token

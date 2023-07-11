@@ -146,8 +146,12 @@ class Batch extends Base
         return '';
     }
 
-    public function executeNextQueuedBatchFor(int $teamId, int $userId, string $serverId): PromiseInterface
-    {
+    public function executeNextQueuedBatchFor(
+        int $teamId,
+        int $userId,
+        string $serverId,
+        callable $onExecuteQueuedBatchesFunction
+    ): PromiseInterface {
         $deferred = new Deferred();
 
         // get batches to execute
@@ -166,10 +170,11 @@ class Batch extends Base
                 ->orderBy('api_batch_id') // first in, first out
                 ->setMaxResults(1)
         )
-        ->then(function (Result $result) use ($serverId) {
+        ->then(function (Result $result) use ($serverId, $onExecuteQueuedBatchesFunction) {
             if (null === $row = $result->fetchFirstRow()) {
                 return [];
             }
+            $onExecuteQueuedBatchesFunction();
             $batchGuid = $row['api_batch_guid'];
             return $this->executeQueuedBatch($batchGuid, $serverId)
                 ->otherwise(function ($reason) use ($batchGuid) {
@@ -307,7 +312,7 @@ class Batch extends Base
                         $qb
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Success'))
-                            ->set('api_batch_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                            ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                             ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
                     )
                     ->then(function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
@@ -330,7 +335,7 @@ class Batch extends Base
                         $qb
                             ->update('api_batch')
                             ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
-                            ->set('api_batch_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                            ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                             ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
                     );
                     // Propagate by returning rejection

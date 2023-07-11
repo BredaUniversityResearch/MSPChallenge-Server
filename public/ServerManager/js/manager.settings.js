@@ -337,9 +337,9 @@ function GetServerAddr()
 {
     var url = "api/readServerManager.php";
     $.when(CallAPI(url)).done(function (results) {
-        $('#ServerName').val(results.servermanager.server_name);
-        $('#ServerDescription').val(results.servermanager.server_description);
-        $('#ServerAddress').val(results.servermanager.server_address);
+        $('#ServerName').val(results.servermanager.serverName);
+        $('#ServerDescription').val(results.servermanager.serverDescription);
+        $('#ServerAddress').val(results.servermanager.serverAddress);
     });
 }
 
@@ -351,9 +351,9 @@ function editServerManager()
     if ([name, address, description].every(Boolean)) {
         var url = "api/editServerManager.php";
         var data = {
-            server_name: name,
-            server_address: address,
-            server_description: description,
+            serverName: name,
+            serverAddress: address,
+            serverDescription: description,
             jwt: currentToken
         }
         $.when(CallAPI(url, data)).done(function (results) {
