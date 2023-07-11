@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "4/13/2023",
-    "data_model_hash": "59BDFCDE2171656A3D3504A65B67CD8B5394BE680EF9FC5BC37FF4FD6432FF0E",
+    "date_modified": "7/5/2023",
+    "data_model_hash": "6DA99AC2E8DD6DCC6B970AF74A0A321C833BFEDE89AC811D9190A31DFF725F40",
     "errors": 0,
     "editor_version": 0.0,
     "min_supported_client": "",
@@ -273,18 +273,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Countries": [
-        {
-          "message": "Shipping routes should not cross over land.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "",
-          "endlayer": "NS_Countries",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_Wind_Farms_Implemented|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of wind farms.",
@@ -323,48 +311,6 @@
           "startlayer": "NS_Wind_Farms_Implemented",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Wind_Farms_Implemented|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wind farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wind_Farms_Implemented",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
           "endtype": "3",
           "sort": "Inclusion"
         }
@@ -411,48 +357,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of wave farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_Tidal_Farms|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
@@ -495,48 +399,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_National_shipping_lanes": [
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Shipping routes physically obstruct the placement of tidal farms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
-          "starttype": "",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_IMO_Routes|NS_Wind_Farms_Implemented": [
         {
           "message": "Wind farms physically obstruct the placement of shipping routes.",
@@ -573,48 +435,6 @@
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
-          "starttype": "3",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_National_shipping_lanes|NS_Wind_Farms_Implemented": [
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wind farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
           "starttype": "3",
           "endlayer": "NS_Wind_Farms_Implemented",
           "endtype": "",
@@ -663,48 +483,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Wave_Farms": [
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Wave farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_Wave_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_IMO_Routes|NS_Tidal_Farms": [
         {
           "message": "Tidal farms physically obstruct the placement of shipping routes.",
@@ -747,66 +525,12 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_Tidal_Farms": [
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Tidal farms physically obstruct the placement of shipping routes.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_Tidal_Farms",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_IMO_Routes|NS_Bat_20_shipping": [
         {
           "message": "Bathymetry under 20m is not ideal for shipping.",
           "value": 0.0,
           "type": "INFO",
           "startlayer": "NS_IMO_Routes",
-          "starttype": "",
-          "endlayer": "NS_Bat_20_shipping",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_National_shipping_lanes|NS_Bat_20_shipping": [
-        {
-          "message": "Bathymetry under 20m is not ideal for shipping.",
-          "value": 0.0,
-          "type": "INFO",
-          "startlayer": "NS_National_shipping_lanes",
           "starttype": "",
           "endlayer": "NS_Bat_20_shipping",
           "endtype": "",
@@ -1139,58 +863,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_National_shipping_lanes|NS_No_shipping_zones": [
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "0",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "1",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "2",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "3",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "3",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Route on designated restriction zone.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_National_shipping_lanes",
-          "starttype": "4",
-          "endlayer": "NS_No_shipping_zones",
-          "endtype": "4",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_No_shipping_zones|NS_IMO_Routes": [
         {
           "message": "Cannot add Shipping Restriction on designated shipping route.",
@@ -1239,58 +911,6 @@
           "startlayer": "NS_No_shipping_zones",
           "starttype": "4",
           "endlayer": "NS_IMO_Routes",
-          "endtype": "4",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_No_shipping_zones|NS_National_shipping_lanes": [
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "0",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "0",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "1",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "1",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "2",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "2",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "3",
-          "endlayer": "NS_National_shipping_lanes",
-          "endtype": "3",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "Cannot add Shipping Restriction on designated shipping route.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_No_shipping_zones",
-          "starttype": "4",
-          "endlayer": "NS_National_shipping_lanes",
           "endtype": "4",
           "sort": "Inclusion"
         }
@@ -21670,10 +21290,10 @@
         {
           "layer_name": "NS_Oil_Gas_Offshore_Instalations",
           "layer_types": [
-            "Operational (100MW)",
-            "Decommissioned (0MW)",
-            "Closed (0MW)",
-            "Other (0MW)"
+            "Operational",
+            "Decommissioned",
+            "Closed",
+            "Other"
           ],
           "allowed_ships": [
             {
@@ -22398,6 +22018,11 @@
             {
               "name": "NS_Wind_Farms_Implemented",
               "influence": 0.5,
+              "construction": true
+            },
+            {
+              "name": "NS_Wind_Farms_Implemented",
+              "influence": 0.1,
               "construction": false
             },
             {
@@ -22482,6 +22107,11 @@
             },
             {
               "name": "NS_Telecom_Cables",
+              "influence": 0.1,
+              "construction": true
+            },
+            {
+              "name": "NS_Energy_Cables_Edit",
               "influence": 0.1,
               "construction": true
             },
@@ -22713,6 +22343,9 @@
           ]
         }
       ],
+      "fishing_policy_settings": {
+        "all_country_approval": true
+      },
       "fishing": [
         {
           "name": "Bottom Trawl",
@@ -24340,16 +23973,16 @@
             "approval": "EEZ",
             "value": 3,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00FF81FF",
+            "displayPolygon": 0,
+            "polygonColor": "#007A03FF",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
+            "innerGlowEnabled": 0,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#00FF81FF",
+            "displayLines": 1,
+            "lineColor": "#007A03FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24368,16 +24001,16 @@
             "approval": "EEZ",
             "value": 4,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF2A2AFF",
+            "displayPolygon": 0,
+            "polygonColor": "#DC2D2AFF",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
+            "innerGlowEnabled": 0,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#FF2A2AFF",
+            "displayLines": 1,
+            "lineColor": "#DC2D2AFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24396,16 +24029,16 @@
             "approval": "EEZ",
             "value": 5,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF5CEDFF",
+            "displayPolygon": 0,
+            "polygonColor": "#E252BBFF",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
+            "innerGlowEnabled": 0,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#FF5CEDFF",
+            "displayLines": 1,
+            "lineColor": "#E252BBFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24420,20 +24053,20 @@
             "media": "wiki://Pink"
           },
           "3": {
-            "displayName": "Yellow",
+            "displayName": "Blue",
             "approval": "EEZ",
             "value": 6,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FFF071FF",
+            "displayPolygon": 0,
+            "polygonColor": "#4778F8FF",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
+            "innerGlowEnabled": 0,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#FFF071FF",
+            "displayLines": 1,
+            "lineColor": "#4778F8FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24445,23 +24078,23 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Yellow"
+            "media": "wiki://Blue"
           },
           "4": {
             "displayName": "Orange",
             "approval": "EEZ",
             "value": 7,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FFC86FFF",
+            "displayPolygon": 0,
+            "polygonColor": "#FF7B2CFF",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
+            "innerGlowEnabled": 0,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#FFC86FFF",
+            "displayLines": 1,
+            "lineColor": "#FF7B2CFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24476,20 +24109,20 @@
             "media": "wiki://Orange"
           },
           "5": {
-            "displayName": "Brown",
+            "displayName": "Navy",
             "approval": "EEZ",
             "value": 8,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#7A5134FF",
+            "displayPolygon": 0,
+            "polygonColor": "#0B2B81FF",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
+            "innerGlowEnabled": 0,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#7A5134FF",
+            "displayLines": 1,
+            "lineColor": "#0B2B81FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24501,51 +24134,51 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Brown"
+            "media": "wiki://Navy"
           },
           "6": {
-            "displayName": "Blue",
+            "displayName": "Yellow",
             "approval": "EEZ",
             "value": 9,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#2ED0FFFF",
+            "displayPolygon": 0,
+            "polygonColor": "#FECC2FFF",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
+            "innerGlowEnabled": 0,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#2ED0FFFF",
+            "displayLines": 1,
+            "lineColor": "#FECC2FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#66E1E9FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Blue"
+            "media": "wiki://Yellow"
           },
           "7": {
             "displayName": "Purple",
             "approval": "EEZ",
             "value": 10,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#AB5FFFFF",
+            "displayPolygon": 0,
+            "polygonColor": "#932385FF",
             "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
+            "innerGlowEnabled": 0,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#AB5FFFFF",
+            "displayLines": 1,
+            "lineColor": "#932385FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24627,15 +24260,15 @@
             "value": 3,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#00FF81FF",
+            "polygonColor": "#007A03FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#00FF81FF",
+            "displayLines": 0,
+            "lineColor": "#007A03FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24655,15 +24288,15 @@
             "value": 4,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FF2A2AFF",
+            "polygonColor": "#DC2D2AFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#FF2A2AFF",
+            "displayLines": 0,
+            "lineColor": "#DC2D2AFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24683,7 +24316,7 @@
             "value": 5,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FF5CEDFF",
+            "polygonColor": "#E252BBFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
@@ -24691,7 +24324,7 @@
             "innerGlowMultiplier": 1.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FF5CEDFF",
+            "lineColor": "#E252BBFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24706,20 +24339,20 @@
             "media": "wiki://Pink"
           },
           "3": {
-            "displayName": "Yellow",
+            "displayName": "Blue",
             "approval": "EEZ",
             "value": 6,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FFF071FF",
+            "polygonColor": "#4778F8FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#FFF071FF",
+            "displayLines": 0,
+            "lineColor": "#4778F8FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24731,7 +24364,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Yellow"
+            "media": "wiki://Blue"
           },
           "4": {
             "displayName": "Orange",
@@ -24739,15 +24372,15 @@
             "value": 7,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FFC86FFF",
+            "polygonColor": "#FF7B2CFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FFC86FFF",
+            "lineColor": "#FF7B2CFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24762,20 +24395,20 @@
             "media": "wiki://Orange"
           },
           "5": {
-            "displayName": "Brown",
+            "displayName": "Navy",
             "approval": "EEZ",
             "value": 8,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#7A5134FF",
+            "polygonColor": "#0B2B81FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#7A5134FF",
+            "displayLines": 0,
+            "lineColor": "#0B2B81FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24787,23 +24420,23 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Brown"
+            "media": "wiki://Navy"
           },
           "6": {
-            "displayName": "Blue",
+            "displayName": "Yellow",
             "approval": "EEZ",
             "value": 9,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#2ED0FFFF",
+            "polygonColor": "#FECC2FFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#2ED0FFFF",
+            "displayLines": 0,
+            "lineColor": "#FECC2FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24815,7 +24448,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Blue"
+            "media": "wiki://Yellow"
           },
           "7": {
             "displayName": "Purple",
@@ -24823,15 +24456,15 @@
             "value": 10,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#AB5FFFFF",
+            "polygonColor": "#932385FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.0,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#AB5FFFFF",
+            "lineColor": "#932385FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -26914,8 +26547,8 @@
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Sand & Gravel Availability",
-        "layer_category": "management",
-        "layer_subcategory": "natural_resources",
+        "layer_category": "activities",
+        "layer_subcategory": "mining_&_aggregate_extraction",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -27319,7 +26952,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Telecom Cables",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -27591,7 +27224,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Unused Cables",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -28115,7 +27748,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Disposal Sites",
         "layer_category": "activities",
-        "layer_subcategory": "shipping",
+        "layer_subcategory": "mining_&_aggregate_extraction",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -28160,7 +27793,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#B65F34FF",
-            "polygonPatternName": "6",
+            "polygonPatternName": "31",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -28188,7 +27821,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#5B2F1AFF",
-            "polygonPatternName": "6",
+            "polygonPatternName": "31",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -29136,7 +28769,7 @@
         "layer_green": 0,
         "layer_tooltip": "Areas identified as having potential for wind energy production",
         "layer_information": "",
-        "layer_media": "wiki://Wind_Farms_-_Areas_of_Search",
+        "layer_media": "wiki://Potential_Wind_Farms",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -29176,14 +28809,14 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#7EA77480",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Wind_Farms_-_Areas_of_Search"
+            "media": "wiki://Potential_Wind_Farms"
           }
         },
         "layer_info_properties": [
@@ -29380,7 +29013,7 @@
         "layer_green": 0,
         "layer_tooltip": "Areas identified as having potential for wave energy production",
         "layer_information": "",
-        "layer_media": "wiki://Wave_Farms_-_Areas_of_Search",
+        "layer_media": "wiki://Potential_Wave_Farms",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -29407,7 +29040,7 @@
             "value": -12,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#6CFF1C80",
+            "polygonColor": "#7EA77480",
             "polygonPatternName": "33",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -29415,19 +29048,19 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#7AC943FF",
+            "lineColor": "#7EA77480",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#7EA77480",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Wave_Farms_-_Areas_of_Search"
+            "media": "wiki://Potential_Wave_Farms"
           }
         },
         "layer_info_properties": [
@@ -29596,7 +29229,7 @@
         "layer_green": 0,
         "layer_tooltip": "Areas identified as having potential for tidal energy production",
         "layer_information": "",
-        "layer_media": "wiki://Tidal_Farms_-_Areas_of_Search",
+        "layer_media": "wiki://Potential_Tidal_Farms",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -29623,7 +29256,7 @@
             "value": -12,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#6CFF1C80",
+            "polygonColor": "#7EA77480",
             "polygonPatternName": "38",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -29631,19 +29264,19 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#7AC943FF",
+            "lineColor": "#7EA77480",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#7EA77480",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Tidal_Farms_-_Areas_of_Search"
+            "media": "wiki://Potential_Tidal_Farms"
           }
         },
         "layer_info_properties": [
@@ -29795,7 +29428,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Energy Cables",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 0,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -30037,7 +29670,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Cable Corridors",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 0,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -30855,7 +30488,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Pipelines",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -30945,7 +30578,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Pipelines",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -31475,7 +31108,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Sand & Gravel Extraction",
         "layer_category": "activities",
-        "layer_subcategory": "shipping",
+        "layer_subcategory": "mining_&_aggregate_extraction",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -31520,7 +31153,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#72320CFF",
-            "polygonPatternName": "24",
+            "polygonPatternName": "28",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -37659,7 +37292,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "1": {
             "displayName": "Low",
@@ -37687,7 +37320,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "2": {
             "displayName": "Medium",
@@ -37715,7 +37348,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "3": {
             "displayName": "High",
@@ -37743,7 +37376,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           },
           "4": {
             "displayName": "Very High",
@@ -37771,7 +37404,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbace"
+            "media": "wiki://Bottom_Disturbance"
           }
         },
         "layer_info_properties": null
@@ -39839,7 +39472,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Windfarm Indifferent Seabirds (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "birds_and_mammals",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 114,
         "layer_height": 85,
@@ -40026,7 +39659,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Windfarm Avoiding Seabirds (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "birds_and_mammals",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 114,
         "layer_height": 85,
@@ -40213,7 +39846,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Cetaceans (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "birds_and_mammals",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 114,
         "layer_height": 85,
@@ -40400,7 +40033,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Seals (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "birds_and_mammals",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 114,
         "layer_height": 85,
@@ -41743,7 +41376,7 @@
     "user_region_manager_name": "Region Manager",
     "user_admin_color": "#FF00FFFF",
     "user_region_manager_color": "#00FFFFFF",
-    "region_base_url": "https://knowledge.mspchallenge.info/wiki/EEZ",
+    "team_info_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "restriction_point_size": 1.0,
     "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "windfarm_data_api_url": null

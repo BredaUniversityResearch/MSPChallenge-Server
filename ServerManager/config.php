@@ -8,15 +8,6 @@ $codeBranch = '/';
 
 /** @noinspection HttpUrlsUsage */
 $GLOBALS['config'] = array(
-    'ws_server' => [
-        'scheme' => 'ws://',
-        // if "host" is not set, ServerManager::getInstance()->GetTranslatedServerURL() is used,
-        //   which is the same host as the api server.
-        // 'host' => 'localhost',
-        'port' => 45001,
-        'uri' => '',
-        'address_modification' => 'none' // none, add_game_session_id_to_port, add_game_session_id_to_uri
-    ],
     'code_branch' => $codeBranch,
     'mysql' => array_merge($connectionConfig, [
         'db' => $_ENV['DBNAME_SERVER_MANAGER'] ?? DatabaseDefaults::DEFAULT_DBNAME_SERVER_MANAGER,
@@ -36,7 +27,7 @@ $GLOBALS['config'] = array(
         'with_proxy' => ''
     ),
     // change to https to go secure with all background connections to your MSP Challenge servers
-    'msp_server_protocol'   => 'http://',
+    'msp_server_protocol'   => $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http://',
     // change to https to go secure with all background connections to your MSP Challenge Server Manager
-    'msp_servermanager_protocol' => 'http://'
+    'msp_servermanager_protocol' => $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http://'
 );

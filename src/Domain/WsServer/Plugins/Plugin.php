@@ -17,8 +17,6 @@ use function App\tpf;
 
 abstract class Plugin extends EventDispatcher implements PluginInterface
 {
-    public const EVENT_PLUGIN_EXECUTION_FINISHED = 'EVENT_PLUGIN_EXECUTION_FINISHED';
-
     private string $name;
     private float $minIntervalSec;
     private bool $debugOutputEnabled;
@@ -92,6 +90,10 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
      */
     final public function registerToLoop(LoopInterface $loop)
     {
+        $this->dispatch(
+            new NameAwareEvent(self::EVENT_PLUGIN_REGISTERED, $this),
+            self::EVENT_PLUGIN_REGISTERED
+        );
         $this->registeredToLoop = true;
         $this->loop = $loop;
 
@@ -114,6 +116,10 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
 
     final public function unregisterFromLoop(LoopInterface $loop)
     {
+        $this->dispatch(
+            new NameAwareEvent(self::EVENT_PLUGIN_UNREGISTERED, $this),
+            self::EVENT_PLUGIN_UNREGISTERED
+        );
         $this->registeredToLoop = false; // Note that PluginHelper will take care of the rest.
     }
     public function getGameSessionIdFilter(): ?int
@@ -211,25 +217,38 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this;
     }
 
-    protected function createPromiseFunction(): ToPromiseFunction
+    protected function createPromiseFunction(?string $executionId = null): ToPromiseFunction
     {
-        return tpf(function () {
-            $tpf = $this->onCreatePromiseFunction();
+        return tpf(function () use ($executionId) {
+            $executionId ??= uniqid();
+            $this->dispatch(
+                new NameAwareEvent(
+                    self::EVENT_PLUGIN_EXECUTION_STARTED,
+                    $this,
+                    [self::EVENT_ARG_EXECUTION_ID => $executionId]
+                ),
+                self::EVENT_PLUGIN_EXECUTION_STARTED
+            );
+            $tpf = $this->onCreatePromiseFunction($executionId);
             return ($tpf)()
-                ->then(function () {
+                ->then(function () use ($executionId) {
                     $this->addOutput(
                         'Plugin '.$this->getName().' just finished',
                         OutputInterface::VERBOSITY_DEBUG
                     );
                     $this->dispatch(
-                        new NameAwareEvent(self::EVENT_PLUGIN_EXECUTION_FINISHED, $this),
+                        new NameAwareEvent(
+                            self::EVENT_PLUGIN_EXECUTION_FINISHED,
+                            $this,
+                            [self::EVENT_ARG_EXECUTION_ID => $executionId]
+                        ),
                         self::EVENT_PLUGIN_EXECUTION_FINISHED
                     );
                 });
         });
     }
 
-    abstract protected function onCreatePromiseFunction(): ToPromiseFunction;
+    abstract protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction;
 
     public function onWsServerEventDispatched(NameAwareEvent $event): void
     {

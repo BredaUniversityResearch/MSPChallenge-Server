@@ -21,7 +21,7 @@ class LoopStatsWsServerPlugin extends Plugin
         parent::__construct('loop');
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
         return tpf(function () {
             $latestTimeStart = microtime(true);

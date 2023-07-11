@@ -78,7 +78,7 @@ if ($servermanager->install($user)) {
           <p>You, <strong><?=$user->data()->username;?></strong>, are now the primary user of this Server Manager. This means that you can not only use this application,
            but you can also add other users to it through Settings - User Access. You don't have to do this
            right now of course, or at all for that matter.</p>
-          <p>You can go ahead and <a href="<?php echo ServerManager::getInstance()->GetServerManagerFolder();?>manager.php">set up your first MSP Challenge server</a>.</p>
+          <p>You can go ahead and <a href="<?php echo ServerManager::getInstance()->getAbsolutePathBase();?>manager.php">set up your first MSP Challenge server</a>.</p>
           <p>We also recommend you enter your computer's proper IP address or full-qualified domain name under Settings.</p>
         </div>
       </div>
@@ -90,4 +90,4 @@ if ($servermanager->install($user)) {
 <!-- footers -->
 <?php
 // the final html footer copyright row + the external js calls
-require_once ServerManager::getInstance()->GetServerManagerRoot().'templates/footer.php';
+require_once ServerManager::getInstance()->getServerManagerRoot().'templates/footer.php';

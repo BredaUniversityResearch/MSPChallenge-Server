@@ -3,48 +3,56 @@
 namespace ServerManager;
 
 use App\Domain\Helper\Config;
-use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\WsServer;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\Setting;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Uid\Uuid;
 
 class ServerManager extends Base
 {
+    private const SERVER_MANAGER_ROOT_SUB_DIR = 'ServerManager/';
+
     private static ?ServerManager $instance = null;
     private ?ServerManager $old = null;
-    private $db;
     private array $serverVersions = [];
     private array $serverAcceptedClients = [];
     private string|false $serverCurrentVersion = false;
-    private $serverRoot;
-    private string $serverManagerRoot = '';
+    private string $serverManagerRoot;
     private array $serverUpgrades = [];
-    public $server_uuid;
-    public $server_id;
-    public ?string $server_name = null;
-    public $server_address;
-    public $server_description;
+    public ?string $serverUuid = null;
+    public ?string $serverId = null;
+    public ?string $serverName = null;
+    public ?string $serverAddress = null;
+    public ?string $serverDescription = null;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    public function __construct()
-    {
+    public function __construct(
+        private readonly string $projectDir,
+        private readonly EntityManagerInterface $em,
+        private readonly UrlGeneratorInterface $urlGenerator
+    ) {
+        self::$instance = $this;
         $this->serverVersions = [
           '4.0-beta7',
           '4.0-beta8',
           '4.0-beta9',
           '4.0-beta10',
           '4.0-rc1',
-          '4.0-rc2'
+          '4.0-rc2',
+          '4.0-rc3'
         ];
         $this->serverAcceptedClients = [
           '4.0-beta8' => '2021-04-20 13:54:41Z',
           '4.0-beta9' => '2021-11-08 08:13:08Z',
           '4.0-beta10' => '2022-05-24 00:00:00Z',
           '4.0-rc1' => '2023-02-02 00:00:00Z',
-          '4.0-rc2' => '2023-02-02 00:00:00Z'
+          '4.0-rc2' => '2023-02-02 00:00:00Z',
+          '4.0-rc3' => '2023-07-10 00:00:00Z'
         ];
         $this->serverCurrentVersion = end($this->serverVersions);
         $this->serverUpgrades = [ // make sure these functions exist in server API update class and is actually
@@ -55,57 +63,38 @@ class ServerManager extends Base
           'From40beta8To40beta10',
           'From40beta9To40beta10'
         ];
-        $this->setRootVars();
+        $this->serverManagerRoot = $this->projectDir.'/'.self::SERVER_MANAGER_ROOT_SUB_DIR;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function CompletePropertiesFromDB()
+    private function completePropertiesFromDB()
     {
-        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $manager = $this->em;
         $settings = $manager->getRepository(Setting::class)->findAll();
         foreach ($settings as $setting) {
             $name = $setting->getName();
-            if (property_exists($this, $name)) {
-                $this->$name = $setting->getValue();
+            // snake to lower camel case
+            $propertyName = lcfirst(str_replace('_', '', ucwords($name, '_')));
+            if (property_exists($this, $propertyName)) {
+                $this->$propertyName = $setting->getValue();
             }
         }
 
-        $this->server_address = $manager->getRepository(GameServer::class)->findOneBy(['id' => 1])->getAddress();
+        $this->serverAddress = $manager->getRepository(GameServer::class)->findOneBy(['id' => 1])->getAddress();
 
         $this->old = clone $this;
     }
 
-    /**
-     * @throws \Exception
-     */
-    private function setRootVars()
+    public static function getInstance(): self
     {
-        $server_root = SymfonyToLegacyHelper::getInstance()->getProjectDir();
-        $server_manager_root = '';
-        $self_path = explode('/', $_SERVER['PHP_SELF']);
-        $self_path_length = count($self_path);
-        for ($i = 1; $i < $self_path_length; ++$i) {
-            array_splice($self_path, $self_path_length - $i, $i);
-            $server_manager_root = implode('/', $self_path).'/';
-            if (file_exists($server_root.$server_manager_root.'init.php')) {
-                break;
-            }
+        if (null === self::$instance) {
+            throw new Exception(
+                'Instance is unavailable. It should be set by first constructor call, using Symfony services.'
+            );
         }
-        $this->serverRoot = $server_root.'/';
-        $this->serverManagerRoot = ltrim($server_manager_root, '/');
-    }
-
-    public static function getInstance(): ?ServerManager
-    {
-        if (!isset(self::$instance)) {
-            self::$instance = new ServerManager();
-        }
-
         return self::$instance;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function CheckForUpgrade($versiondetermined): array|bool|string|null
+    public function checkForUpgrade($versiondetermined): array|bool|string|null
     {
         if (!empty($versiondetermined)) {
             // migration support was added with beta7
@@ -127,10 +116,9 @@ class ServerManager extends Base
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function IsClientAllowed($timestamp): bool
+    public function isClientAllowed($timestamp): bool
     {
         if (!isset($this->serverAcceptedClients[$this->serverCurrentVersion])) {
             return true;
@@ -147,8 +135,7 @@ class ServerManager extends Base
         return true;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetMSPAuthAPI(): string
+    public function getMSPAuthAPI(): string
     {
         return $this->getMSPAuthBaseURL().($_ENV['AUTH_SERVER_API_BASE_PATH'] ?? '/api/');
     }
@@ -158,59 +145,48 @@ class ServerManager extends Base
         return \App\Domain\API\v1\Config::GetInstance()->getMSPAuthBaseURL();
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetAllVersions(): array
-    {
-        return $this->serverVersions;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetCurrentVersion(): bool|string
+    public function getCurrentVersion(): bool|string
     {
         return $this->serverCurrentVersion;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerID()
+    public function getServerId(): ?string
     {
-        if (is_null($this->server_id)) {
-            $this->CompletePropertiesFromDB();
+        if (is_null($this->serverId)) {
+            $this->completePropertiesFromDB();
         }
 
-        return $this->server_id;
+        return $this->serverId;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerPassword()
+    public function getServerPassword()
     {
-        return SymfonyToLegacyHelper::getInstance()->getEntityManager()
+        return $this->em
             ->getRepository(Setting::class)->findOneBy(['name' => 'server_password'])
             ->getValue();
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerUUID()
+    public function getServerUuid(): ?string
     {
-        if (is_null($this->server_uuid)) {
-            $this->CompletePropertiesFromDB();
+        if (is_null($this->serverUuid)) {
+            $this->completePropertiesFromDB();
         }
 
-        return $this->server_uuid;
+        return $this->serverUuid;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerName()
+    public function getServerName(): ?string
     {
-        if (empty($this->server_name)) {
-            $this->CompletePropertiesFromDB();
+        if (empty($this->serverName)) {
+            $this->completePropertiesFromDB();
         }
 
-        return $this->server_name;
+        return $this->serverName;
     }
 
     public function freshInstall(): bool
     {
-        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $manager = $this->em;
         $settings = $manager->getRepository(Setting::class)->findBy(['name' => 'server_id']);
         return empty($settings);
     }
@@ -218,12 +194,13 @@ class ServerManager extends Base
     public function install($user = null): bool
     {
         if ($this->freshInstall()) {
-            $this->SetServerID();
-            $this->SetServerName($user);
-            $this->SetServerDescription();
+            $this->setServerId();
+            $this->setServerName($user);
+            $this->setServerDescription();
 
-            $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
-            $settingServerUUID = new Setting('server_uuid', Uuid::v4());
+            $manager = $this->em;
+            $this->serverUuid = Uuid::v4();
+            $settingServerUUID = new Setting('server_uuid', $this->serverUuid);
             $manager->persist($settingServerUUID);
             $settingServerPassword = new Setting('server_password', (string) time());
             $manager->persist($settingServerPassword);
@@ -235,86 +212,81 @@ class ServerManager extends Base
         return false;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetServerAddress($user = null)
+    public function setServerAddress(): ?string
     {
-        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $manager = $this->em;
         $serverAddress = $manager->getRepository(GameServer::class)->findOneBy(['id' => 1]);
-        $serverAddress->setAddress($this->server_address);
+        $serverAddress->setAddress($this->serverAddress);
         $manager->persist($serverAddress);
         $manager->flush();
 
-        return $this->server_address;
+        return $this->serverAddress;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function SetServerID(): string
+    private function setServerId(): string
     {
-        if (empty($this->server_id)) {
-            $this->server_id = uniqid('', true);
-            $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
-            $settingServerID = new Setting('server_id', $this->server_id);
+        if (empty($this->serverId)) {
+            $this->serverId = uniqid('', true);
+            $manager = $this->em;
+            $settingServerID = new Setting('server_id', $this->serverId);
             $manager->persist($settingServerID);
             $manager->flush();
         }
-        return $this->server_id;
+        return $this->serverId;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetServerName($user = null): bool|string
+    public function setServerName($user = null): bool|string
     {
-        if (empty($this->server_name)) {
+        if (empty($this->serverName)) {
             if (empty($user)) {
                 return false;
             }
-            $this->server_name = $user->data()->username.'_'.date('Ymd');
+            $this->serverName = $user->data()->username.'_'.date('Ymd');
         }
 
         if ($this->old !== null &&
-            $this->old->server_name == $this->server_name) {
-            return $this->server_name; // no need to do anything if nothing changes
+            $this->old->serverName == $this->serverName) {
+            return $this->serverName; // no need to do anything if nothing changes
         }
 
-        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $manager = $this->em;
         $settingServerAddress = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_name']);
         if (is_null($settingServerAddress)) {
             $settingServerAddress = new Setting();
             $settingServerAddress->setName('server_name');
         }
-        $settingServerAddress->setValue($this->server_name);
+        $settingServerAddress->setValue($this->serverName);
         $manager->persist($settingServerAddress);
         $manager->flush();
-        return $this->server_name;
+        return $this->serverName;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetServerDescription(): string
+    public function setServerDescription(): string
     {
-        if (empty($this->server_description)) {
-            $this->server_description = 'This is a new MSP Challenge server installation. The administrator has not '.
+        if (empty($this->serverDescription)) {
+            $this->serverDescription = 'This is a new MSP Challenge server installation. The administrator has not '.
                 'changed this default description yet. This can be done through the ServerManager.';
         }
 
-        $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+        $manager = $this->em;
         $settingServerDesc = $manager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         if (is_null($settingServerDesc)) {
             $settingServerDesc = new Setting();
             $settingServerDesc->setName('server_description');
         }
-        $settingServerDesc->setValue($this->server_description);
+        $settingServerDesc->setValue($this->serverDescription);
         $manager->persist($settingServerDesc);
         $manager->flush();
-        return $this->server_description;
+        return $this->serverDescription;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerURLBySessionId($sessionId = ''): string
+    public function getServerURLBySessionId($sessionId = ''): string
     {
         // e.g. http://localhost/1
         // use this one if you just want the full URL of a Server's session
-        $url = Config::get('msp_server_protocol').$this->GetTranslatedServerURL().Config::get('code_branch');
+        $url = Config::get('msp_server_protocol').$this->getTranslatedServerURL().Config::get('code_branch');
         if (!empty($sessionId)) {
-            $url .= '/'.$sessionId;
+            $url = rtrim($url, '/').'/'.$sessionId;
         }
 
         return $url;
@@ -327,68 +299,53 @@ class ServerManager extends Base
         return WsServer::getWsServerURLBySessionId($sessionId, $urlParts['host'] ?: 'localhost');
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetFullSelfAddress(): string
+    public function getAbsoluteUrlBase(): string
     {
         // e.g. http://localhost/ServerManager/
         // use this one if you just want the full URL of the ServerManager
-        return $this->GetBareHost().Config::get('code_branch').$this->serverManagerRoot;
+        return $this->urlGenerator->generate('server_manager_index', [], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetBareHost(): string
+    public function getAbsolutePathBase(): string
     {
-        // e.g. http://localhost
-        return Config::get('msp_servermanager_protocol').$this->GetTranslatedServerURL();
+        // e.g. /ServerManager/
+        return $this->urlGenerator->generate('server_manager_index');
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetTranslatedServerURL(): string
+    public function getTranslatedServerURL(): string
     {
-        if (empty($this->server_address)) {
+        $port = $_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80;
+        if (($_ENV['URL_WEB_SERVER_HOST'] ?? null) !== null) {
+            return $_ENV['URL_WEB_SERVER_HOST'].':'.$port;
+        }
+
+        if (empty($this->serverAddress)) {
             try {
-                $this->CompletePropertiesFromDB();
-            } catch (\Exception $e) {
+                $this->completePropertiesFromDB();
+            } catch (Exception $e) {
                 // silent fail.
             }
         }
         // e.g. localhost
         if (!empty($_SERVER['SERVER_NAME'])) {
-            if ($_SERVER['SERVER_NAME'] != $this->server_address) {
-                return $_SERVER['SERVER_NAME'].':'.($_ENV['WEB_SERVER_PORT'] ?? 80);
+            if ($_SERVER['SERVER_NAME'] != $this->serverAddress) {
+                return $_SERVER['SERVER_NAME'].':'.$port;
             }
         }
 
-        return $this->server_address.':'.($_ENV['WEB_SERVER_PORT'] ?? 80);
+        return $this->serverAddress.':'.$port;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerRoot()
-    {
-        // e.g. C:/Program Files/MSP Challenge/Server/
-        // use this if you just want the folder location of the Server
-        return $this->serverRoot;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerManagerRoot(): string
+    public function getServerManagerRoot(): string
     {
         // e.g. C:/Program Files/MSP Challenge/Server/ServerManager/
         // use this if you just want the folder location of the ServerManager
-        return $this->serverRoot.$this->serverManagerRoot;
+        return $this->serverManagerRoot;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerManagerFolder(): string
+    public function getConfigBaseDirectory(): string
     {
-        // e.g. /ServerManager/
-        return '/'.$this->serverManagerRoot;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetConfigBaseDirectory(): string
-    {
-        $dir = $this->GetServerManagerRoot().'configfiles/';
+        $dir = $this->getServerManagerRoot().'configfiles/';
         if (!is_dir($dir)) {
             mkdir($dir, 0777);
         }
@@ -396,10 +353,9 @@ class ServerManager extends Base
         return $dir;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSessionArchiveBaseDirectory(): string
+    public function getSessionArchiveBaseDirectory(): string
     {
-        $dir = $this->GetServerManagerRoot().'session_archive/';
+        $dir = $this->getServerManagerRoot().'session_archive/';
         if (!is_dir($dir)) {
             mkdir($dir, 0777);
         }
@@ -407,16 +363,14 @@ class ServerManager extends Base
         return $dir;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSessionArchivePrefix(): string
+    public function getSessionArchivePrefix(): string
     {
         return 'session_archive_';
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSessionSavesBaseDirectory(): string
+    public function getSessionSavesBaseDirectory(): string
     {
-        $dir = $this->GetServerManagerRoot().'saves/';
+        $dir = $this->getServerManagerRoot().'saves/';
         if (!is_dir($dir)) {
             mkdir($dir, 0777);
         }
@@ -424,16 +378,14 @@ class ServerManager extends Base
         return $dir;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSessionSavesPrefix(): string
+    public function getSessionSavesPrefix(): string
     {
         return 'save_';
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSessionLogBaseDirectory(): string
+    public function getSessionLogBaseDirectory(): string
     {
-        $dir = $this->GetServerManagerRoot().'log/';
+        $dir = $this->getServerManagerRoot().'log/';
         if (!is_dir($dir)) {
             mkdir($dir, 0777);
         }
@@ -441,62 +393,30 @@ class ServerManager extends Base
         return $dir;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetSessionLogPrefix(): string
+    public function getSessionLogPrefix(): string
     {
         return 'log_session_';
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerConfigBaseDirectory(): string
-    {
-        $dir = $this->GetServerRoot().'running_session_config/';
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777);
-        }
-
-        return $dir;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerRasterBaseDirectory(): string
-    {
-        $dir = $this->GetServerRoot().'raster/';
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777);
-        }
-
-        return $dir;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetServerSessionArchiveBaseDirectory(): string
-    {
-        $dir = $this->GetServerRoot().'session_archive/';
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777);
-        }
-
-        return $dir;
-    }
-
+    /**
+     * @throws HydraErrorException
+     */
     public function edit()
     {
-
-        $this->SetServerName();
-        $this->SetServerAddress();
-        $this->SetServerDescription();
+        $this->setServerName();
+        $this->setServerAddress();
+        $this->setServerDescription();
 
         $this->putCallAuthoriser( // doing this here because JWT won't be available elsewhere
             sprintf('servers/%s', $this->GetServerUUID()),
             [
-                'serverName' => $this->GetServerName(),
+                'serverName' => $this->getServerName(),
             ]
         );
     }
 
     public function get()
     {
-        $this->CompletePropertiesFromDB();
+        $this->completePropertiesFromDB();
     }
 }

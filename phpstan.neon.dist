@@ -7,7 +7,7 @@ parameters:
     - src
     - ServerManager
   ignoreErrors:
-    - '#has an unused parameter \$(helper|pluginHelper|apiHelper|connectionManager)#'
+    - '#has an unused parameter \$(helper|pluginHelper|apiHelper|connectionManager|serverManager)#'
     - '#^Access to an undefined property Ratchet\\ConnectionInterface\:\:\$httpRequest\.$#'
     - '#^Access to an undefined property Ratchet\\ConnectionInterface\:\:\$resourceId\.$#'
   stubFiles:

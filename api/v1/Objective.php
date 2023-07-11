@@ -59,9 +59,9 @@ class Objective extends Base
                 INSERT INTO objective (
                     objective_country_id, objective_title, objective_description, objective_deadline,
                     objective_lastupdate
-                ) VALUES (?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(NOW(6)))
                 ",
-                array($country, $title, $description, $deadline, microtime(true)),
+                array($country, $title, $description, $deadline),
                 true
             );
 
@@ -99,8 +99,8 @@ class Objective extends Base
     public function Delete(int $id): void
     {
         $this->getDatabase()->query(
-            "UPDATE objective SET objective_active=?, objective_lastupdate=? WHERE objective_id=?",
-            array(0, microtime(true), $id)
+            "UPDATE objective SET objective_active=?, objective_lastupdate=UNIX_TIMESTAMP(NOW(6)) WHERE objective_id=?",
+            array(0, $id)
         );
     }
 
@@ -116,8 +116,9 @@ class Objective extends Base
     public function SetCompleted(int $objective_id, int $completed): void
     {
         $this->getDatabase()->query(
-            "UPDATE objective SET objective_complete = ?, objective_lastupdate = ? WHERE objective_id = ?",
-            array($completed, microtime(true), $objective_id)
+            "UPDATE objective SET objective_complete=?, objective_lastupdate=UNIX_TIMESTAMP(NOW(6)) ".
+                "WHERE objective_id=?",
+            array($completed, $objective_id)
         );
     }
 

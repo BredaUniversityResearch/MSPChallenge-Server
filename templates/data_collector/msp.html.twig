@@ -1,0 +1,52 @@
+{# templates/data_collector/template.html.twig #}
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set icon %}
+        <img src="\favicon.ico" /></span><span class="sf-toolbar-value">{{ collector.data|length }}</span>
+    {% endset %}
+    {% set text %}
+        {% for name, value in collector.data %}
+            <div class="sf-toolbar-info-piece">
+                <b>{{ name }}</b>
+                <span class="sf-toolbar-status">{{ value|slice(0,30) }}... {% if value|length > 30 %}+{{ value|slice(30)|length }} chars{% endif %}</span>
+            </div>
+        {% endfor %}
+        <div class="sf-toolbar-info-piece">
+            <b><label for="session_id">Session ID:</label> <input id="session_id" type="number" value="1" style="width: 60px" /></b>
+            <button id="simulations_start" type="button" onClick="(function(){
+     $.ajax(
+        '/' + document.getElementById('session_id').value + '/_profiler/msp_start_simulations',
+        function(result){
+           console.log(result);
+        }
+     );
+     return false;
+})();return false;">Start simulations</button>
+        </div>
+    {% endset %}
+
+    {# the 'link' value set to 'false' means that this panel doesn't
+       show a section in the web profiler #}
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: true }) }}
+{% endblock %}
+
+{% block menu %}
+    {# This left-hand menu appears when using the full-screen profiler. #}
+    <span class="label">
+        <span class="icon"><img src="\favicon.ico" /></span>
+        <strong>MSP Challenge</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>MSP Challenge</h2>
+    <table>
+        {% for name, value in collector.data %}
+        <tr>
+            <td>{{ name }}</td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

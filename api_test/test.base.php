@@ -1,5 +1,7 @@
 <?php
 
+use App\Domain\WsServer\ClientHeaderKeys;
+
 // phpcs:ignore PSR1.Classes.ClassDeclaration.MissingNamespace
 class TestBase
 {
@@ -72,8 +74,14 @@ class TestBase
         $ch = curl_init(self::TARGET_SERVER_BASE_URL."/".self::$ms_targetSession."/".$endpoint);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array("mspapitoken: ".$this->m_securityToken,
-            "msp_force_no_call_log: true"));
+        curl_setopt(
+            $ch,
+            CURLOPT_HTTPHEADER,
+            [
+                ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.$this->m_securityToken,
+                "msp_force_no_call_log: true"
+            ]
+        );
         $response = curl_exec($ch);
         if ($response === false) {
             throw new Exception(

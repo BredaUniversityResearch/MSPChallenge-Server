@@ -1,0 +1,2300 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "$DataSourceInstance"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Admin"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ff00ff",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Blue"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#2ed0ff",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Brown"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7a5134",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Green"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#00ff81",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Orange"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ffc86f",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pink"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ff5ced",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Purple"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ab5fff",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Red"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#ff2a2a",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Yellow"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#fff071",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 3,
+        "x": 0,
+        "y": 0
+      },
+      "id": 37,
+      "options": {
+        "displayLabels": [
+          "name",
+          "value"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "$DataSourceInstance"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  now() as time_sec,\r\n  c.country_name as metric,\r\n  COUNT(u.user_id) as value\r\nFROM user u\r\ninner join country c on u.user_country_id=c.country_id \r\nwhere c.country_is_manager=0 and c.country_name is not null and u.user_loggedoff=0 and u.user_name is not null\r\n  and u.user_lastupdate >\r\n    -- timestamp of today at 00.00\r\n    UNIX_TIMESTAMP(NOW(6)) - TIME_TO_SEC(\r\n      TIMEDIFF(\r\n        TIME(NOW()),'00:00:00'\r\n      )\r\n    )\r\ngroup by c.country_name",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "now()",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "14d",
+      "title": "Number of users per country",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "$DataSourceInstance"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#ccccdc",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 5,
+        "x": 3,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "displayLabels": [
+          "name",
+          "value"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "$DataSourceInstance"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  now() as time_sec,\r\n  plan_state as metric,\r\n  COUNT(plan_id) as value\r\nFROM plan p\r\ninner join country c on c.country_id = p.plan_country_id\r\nwhere c.country_name IN ($Team) and p.plan_state != 'DELETED'\r\nGROUP by plan_state",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "now()",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "14d",
+      "title": "Number of plans per state",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "color-text",
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "Admin": {
+                  "color": "#ff00ff",
+                  "index": 8
+                },
+                "Blue": {
+                  "color": "#2ed0ffff",
+                  "index": 6
+                },
+                "Brown": {
+                  "color": "#7a5134ff",
+                  "index": 5
+                },
+                "Green": {
+                  "color": "#00ff81ff",
+                  "index": 1
+                },
+                "Orange": {
+                  "color": "#ffc86fff",
+                  "index": 4
+                },
+                "Pink": {
+                  "color": "#ff5cedff",
+                  "index": 2
+                },
+                "Purple": {
+                  "color": "#ab5fffff",
+                  "index": 7
+                },
+                "Red": {
+                  "color": "#ff2a2aff",
+                  "index": 0
+                },
+                "Yellow": {
+                  "color": "#fff071ff",
+                  "index": 3
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "max": -1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "country_name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Country"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 78
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Farm"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 292
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Number of cables"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 139
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cables GW"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 89
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Max capacity GW"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 132
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 15,
+        "w": 13,
+        "x": 8,
+        "y": 0
+      },
+      "id": 36,
+      "options": {
+        "footer": {
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select\r\nc.country_name as Country,\r\nCONCAT(p.plan_name, ' farm #',g.geometry_id) as Farm,\r\neo.energy_output_maxcapacity/1000000000 as 'Max capacity GW',\r\nIFNULL(SUM(eo2.energy_output_maxcapacity),0)/1000000000 as 'Cables GW',\r\nSUM(IF(JSON_CONTAINS_PATH(g2.geometry_data, 'one', '$.NumberCables'),JSON_EXTRACT(g2.geometry_data, '$.NumberCables')+0,0)) as 'Number of cables',\r\nCONCAT(GROUP_CONCAT((eo2.energy_output_maxcapacity/1000000000) SEPARATOR ' + ')) as 'Cable GW distribution'\r\nfrom geometry g\r\ninner join layer l on l.layer_id=g.geometry_layer_id and l.layer_original_id is NOT NULL\r\ninner join layer ol on l.layer_original_id=ol.layer_id AND ol.layer_editing_type='sourcepolygon'\r\ninner join plan_layer pl on pl.plan_layer_layer_id=l.layer_id\r\ninner join plan p on p.plan_id=pl.plan_layer_plan_id and p.plan_state != 'DELETED'\r\ninner join country c on c.country_id=p.plan_country_id\r\ninner join energy_output eo on g.geometry_id=eo.energy_output_geometry_id\r\nleft join energy_connection ec on ec.energy_connection_start_id=g.geometry_id OR ec.energy_connection_end_id=g.geometry_id\r\nleft join geometry g2 on g2.geometry_id=ec.energy_connection_cable_id and g2.geometry_active=1\r\nleft join energy_output eo2 on eo2.energy_output_geometry_id=g2.geometry_id\r\nwhere c.country_name IN ($Team) AND g.geometry_active=1\r\ngroup by g.geometry_id\r\norder by FIELD(p.plan_state,'DESIGN','CONSULTATION','APPROVAL','APPROVED','IMPLEMENTED'), p.plan_id DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Energy distribution overview",
+      "transformations": [],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 21,
+        "y": 0
+      },
+      "id": 24,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  count(g.geometry_id)\r\nfrom geometry g\r\ninner join layer l on l.layer_id=g.geometry_layer_id and l.layer_original_id is NOT NULL\r\ninner join layer ol on l.layer_original_id=ol.layer_id AND ol.layer_editing_type='sourcepolygon'\r\ninner join plan_layer pl on pl.plan_layer_layer_id=l.layer_id\r\ninner join plan p on p.plan_id=pl.plan_layer_plan_id and p.plan_state != 'DELETED'\r\ninner join country c on c.country_id=p.plan_country_id\r\nwhere c.country_name IN ($Team) and g.geometry_active=1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Number of energy farms",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 21,
+        "y": 4
+      },
+      "id": 28,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  IFNULL(sum(eo.energy_output_maxcapacity),0)/1000000000\r\nfrom energy_output eo\r\ninner join geometry g on g.geometry_id=eo.energy_output_geometry_id\r\ninner join layer l on l.layer_id=g.geometry_layer_id and l.layer_original_id is NOT NULL\r\ninner join layer ol on l.layer_original_id=ol.layer_id AND ol.layer_editing_type='sourcepolygon'\r\ninner join plan_layer pl on pl.plan_layer_layer_id=l.layer_id\r\ninner join plan p on p.plan_id=pl.plan_layer_plan_id and p.plan_state NOT IN('DELETED', 'ARCHIVED')\r\ninner join country c on c.country_id=p.plan_country_id\r\nwhere c.country_name IN ($Team)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total max. capacity GW",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "columns": [],
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "color-text",
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "Admin": {
+                  "color": "#ff00ff",
+                  "index": 8
+                },
+                "Blue": {
+                  "color": "#2ed0ff",
+                  "index": 6
+                },
+                "Brown": {
+                  "color": "#7a5134",
+                  "index": 5
+                },
+                "Green": {
+                  "color": "#00ff81",
+                  "index": 1
+                },
+                "Orange": {
+                  "color": "#ffc86f",
+                  "index": 4
+                },
+                "Pink": {
+                  "color": "#ff5ced",
+                  "index": 2
+                },
+                "Purple": {
+                  "color": "#ab5fff",
+                  "index": 7
+                },
+                "Red": {
+                  "color": "#ff2a2a",
+                  "index": 0
+                },
+                "Yellow": {
+                  "color": "#fff071",
+                  "index": 3
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 210
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-text"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "pattern": "Yellow:(.+)",
+                      "result": {
+                        "color": "#fff071ff",
+                        "index": 0,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Red:(.+)",
+                      "result": {
+                        "color": "#ff2a2aff",
+                        "index": 1,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Purple:(.+)",
+                      "result": {
+                        "color": "#ab5fffff",
+                        "index": 2,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Pink:(.+)",
+                      "result": {
+                        "color": "#ff5cedff",
+                        "index": 3,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Orange:(.+)",
+                      "result": {
+                        "color": "#ffc86fff",
+                        "index": 4,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Green:(.+)",
+                      "result": {
+                        "color": "#00ff81ff",
+                        "index": 5,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Brown:(.+)",
+                      "result": {
+                        "color": "#7a5134ff",
+                        "index": 6,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Blue:(.+)",
+                      "result": {
+                        "color": "#2ed0ffff",
+                        "index": 7,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Admin:(.+)",
+                      "result": {
+                        "color": "#ff00ff",
+                        "index": 8,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 19,
+        "w": 3,
+        "x": 0,
+        "y": 7
+      },
+      "id": 20,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "footer": {
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.1.7",
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "$$hashKey": "object:180",
+          "alias": "Time",
+          "align": "auto",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "link": false,
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "$$hashKey": "object:181",
+          "alias": "",
+          "align": "left",
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "alias": "",
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select CONCAT(c.country_name, ':', u.user_name, ' (', u.user_id ,')')  as name\r\nfrom user u\r\ninner join country c on c.country_id=u.user_country_id\r\nwhere c.country_is_manager=0 and c.country_name is not null and u.user_loggedoff=0 and u.user_name is not null\r\n  and u.user_lastupdate >\r\n    -- timestamp of today at 00.00\r\n    UNIX_TIMESTAMP(NOW(6)) - TIME_TO_SEC(\r\n      TIMEDIFF(\r\n        TIME(NOW()),'00:00:00'\r\n      )\r\n    )\r\n  and c.country_name IN ($Team)\r\ngroup by u.user_id\r\norder by u.user_id DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Users",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 21,
+        "y": 7
+      },
+      "id": 30,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  IFNULL(SUM(eo2.energy_output_maxcapacity),0)/1000000000\r\nfrom geometry g\r\ninner join layer l on l.layer_id=g.geometry_layer_id and l.layer_original_id is NOT NULL\r\ninner join layer ol on l.layer_original_id=ol.layer_id AND ol.layer_editing_type='sourcepolygon'\r\ninner join plan_layer pl on pl.plan_layer_layer_id=l.layer_id\r\ninner join plan p on p.plan_id=pl.plan_layer_plan_id and p.plan_state NOT IN ('DELETED', 'ARCHIVED')\r\ninner join country c on c.country_id=p.plan_country_id\r\ninner join energy_output eo on g.geometry_id=eo.energy_output_geometry_id\r\nleft join energy_connection ec on ec.energy_connection_start_id=g.geometry_id OR ec.energy_connection_end_id=g.geometry_id\r\nleft join geometry g2 on g2.geometry_id=ec.energy_connection_cable_id and g2.geometry_active=1\r\nleft join energy_output eo2 on eo2.energy_output_geometry_id=g2.geometry_id\r\nwhere c.country_name IN ($Team) and g.geometry_active=1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total  cables GW",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "$DataSourceInstance"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "pattern": "Red",
+                "result": {
+                  "color": "red",
+                  "index": 1
+                }
+              },
+              "type": "regex"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "state"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "pattern": "Yellow:(.+)",
+                      "result": {
+                        "color": "#fff071",
+                        "index": 0,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Red:(.+)",
+                      "result": {
+                        "color": "#ff2a2a",
+                        "index": 1,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Purple:(.+)",
+                      "result": {
+                        "color": "#ab5fff",
+                        "index": 2,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Pink:(.+)",
+                      "result": {
+                        "color": "#ff5ced",
+                        "index": 3,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Orange:(.+)",
+                      "result": {
+                        "color": "#ffc86f",
+                        "index": 4,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Green:(.+)",
+                      "result": {
+                        "color": "#00ff81",
+                        "index": 5,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Brown:(.+)",
+                      "result": {
+                        "color": "#7a5134",
+                        "index": 6,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Blue:(.+)",
+                      "result": {
+                        "color": "#2ed0ff",
+                        "index": 7,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Admin:(.+)",
+                      "result": {
+                        "color": "#ff00ff",
+                        "index": 8,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  }
+                ]
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-text"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 5,
+        "x": 3,
+        "y": 10
+      },
+      "id": 4,
+      "options": {
+        "footer": {
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "count"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "$DataSourceInstance"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select\r\n  CONCAT(c.country_name, ':', IF(plan_name='',CONCAT('plan ', plan_id),plan_name)) as name,\r\n  plan_state as state,\r\n  TIMEDIFF(now(), plan_time) as lifetime\r\nfrom plan p\r\ninner join country c on c.country_id = p.plan_country_id\r\nwhere plan_state IN ('DESIGN','CONSULTATION','APPROVAL') and TIMESTAMPDIFF(DAY, plan_time, now()) = 0 and c.country_name IN ($Team)\r\nORDER BY plan_time",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Plan duration until approved TODAY",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 21,
+        "y": 10
+      },
+      "id": 32,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT IFNULL(SUM(i.max_gw)-SUM(least(i.max_gw,i.cables_gw)),0)/1000000000 as missing_gw\r\nfrom\r\n(\r\n  SELECT\r\n    eo.energy_output_maxcapacity as max_gw,IFNULL(SUM(eo2.energy_output_maxcapacity),0) as cables_gw\r\n  from geometry g\r\n  inner join layer l on l.layer_id=g.geometry_layer_id and l.layer_original_id is NOT NULL\r\n  inner join layer ol on l.layer_original_id=ol.layer_id AND ol.layer_editing_type='sourcepolygon'\r\n  inner join plan_layer pl on pl.plan_layer_layer_id=l.layer_id\r\n  inner join plan p on p.plan_id=pl.plan_layer_plan_id and p.plan_state != 'DELETED'\r\n  inner join country c on c.country_id=p.plan_country_id\r\n  inner join energy_output eo on g.geometry_id=eo.energy_output_geometry_id\r\n  left join energy_connection ec on ec.energy_connection_start_id=g.geometry_id OR ec.energy_connection_end_id=g.geometry_id\r\n  left join geometry g2 on g2.geometry_id=ec.energy_connection_cable_id and G2.geometry_active=1\r\n  left join energy_output eo2 on eo2.energy_output_geometry_id=g2.geometry_id\r\n  where c.country_name IN ($Team) and g.geometry_active=1\r\n  group by g.geometry_id\r\n) as i",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total  missing capacity GW",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 21,
+        "y": 14
+      },
+      "id": 34,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  IFNULL(sum(eo.energy_output_capacity),0)/1000000000\r\nfrom energy_output eo\r\ninner join geometry g on g.geometry_id=eo.energy_output_geometry_id\r\ninner join layer l on l.layer_id=g.geometry_layer_id and l.layer_original_id is NOT NULL\r\ninner join layer ol on l.layer_original_id=ol.layer_id AND ol.layer_editing_type='sourcepolygon'\r\ninner join plan_layer pl on pl.plan_layer_layer_id=l.layer_id\r\ninner join plan p on p.plan_id=pl.plan_layer_plan_id and p.plan_state = 'IMPLEMENTED'\r\ninner join country c on c.country_id=p.plan_country_id\r\nwhere c.country_name IN ($Team)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total used capacity GW",
+      "transformations": [],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Benthic invertebrates | 507.701"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#73BF69",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 13,
+        "x": 8,
+        "y": 15
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  -- how to detect starting year? hard-coded to 2018...\r\n  UNIX_TIMESTAMP(\r\n    CONCAT(\r\n      -- note that we merge setup month with first month\r\n      2018+FLOOR(if(k.kpi_month=-1,0,k.kpi_month)/12),\r\n      '-',\r\n      (if(k.kpi_month=-1,0,k.kpi_month) % 12)+1,\r\n      '-1 00:00:00'\r\n    )\r\n  ) as time,\r\n  CONCAT(k.kpi_name,' | ', ks.starting_value) as metric,\r\n  k.kpi_value-ks.starting_value as value\r\nFROM kpi k\r\ninner join\r\n  (\r\n    select kpi_name, kpi_country_id, kpi_value as starting_value from kpi\r\n      where kpi_type='ECOLOGY' and kpi_month=-1\r\n  ) ks on ks.kpi_name=k.kpi_name and ks.kpi_country_id=k.kpi_country_id\r\nWHERE\r\n  kpi_type='ECOLOGY'\r\n-- note that we merge setup month with first month\r\ngroup by k.kpi_name, k.kpi_country_id, IF(k.kpi_month=-1,0,k.kpi_month)\r\norder by kpi_month",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "kpi_month"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "kpi",
+          "timeColumn": "kpi_lastupdate",
+          "timeColumnType": "double",
+          "where": [
+            {
+              "name": "$__unixEpochFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Biomass change relative to starting value",
+      "transformations": [],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "red",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 21,
+        "y": 17
+      },
+      "id": 26,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  count(w.warning_id)\r\n from warning w\r\ninner join layer l on w.warning_layer_id=l.layer_id\r\ninner join plan_layer pl on pl.plan_layer_layer_id=l.layer_id\r\ninner join plan p on p.plan_id=pl.plan_layer_plan_id and p.plan_state != 'DELETED'\r\ninner join country c on c.country_id=p.plan_country_id\r\nwhere w.warning_active=1 and warning_issue_type='Error' and c.country_name IN ($Team)",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Number of errors",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "$DataSourceInstance"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "color-text",
+            "inspect": false
+          },
+          "mappings": [],
+          "noValue": "test",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "state"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 96
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "name"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 197
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-text"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "pattern": "Yellow:(.+)",
+                      "result": {
+                        "color": "#fff071",
+                        "index": 0,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Red:(.+)",
+                      "result": {
+                        "color": "#ff2a2a",
+                        "index": 1,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Purple:(.+)",
+                      "result": {
+                        "color": "#ab5fff",
+                        "index": 2,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Pink:(.+)",
+                      "result": {
+                        "color": "#ff5ced",
+                        "index": 3,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Orange:(.+)",
+                      "result": {
+                        "color": "#ffc86f",
+                        "index": 4,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Green:(.+)",
+                      "result": {
+                        "color": "#00ff81",
+                        "index": 5,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Brown:(.+)",
+                      "result": {
+                        "color": "#7a5134",
+                        "index": 6,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Blue:(.+)",
+                      "result": {
+                        "color": "#2ed0ff",
+                        "index": 7,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  },
+                  {
+                    "options": {
+                      "pattern": "Admin:(.+)",
+                      "result": {
+                        "color": "#ff00ff",
+                        "index": 8,
+                        "text": "$1"
+                      }
+                    },
+                    "type": "regex"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 3,
+        "y": 20
+      },
+      "id": 6,
+      "options": {
+        "footer": {
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "$DataSourceInstance"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select\r\n  CONCAT(c.country_name, ':', IF(plan_name='',CONCAT('plan id: ', plan_id),plan_name)) as name,\r\n  plan_state as state,\r\n  TIMEDIFF(now(), plan_time) as lifetime\r\nfrom plan p\r\ninner join country c on c.country_id = p.plan_country_id\r\nwhere plan_state IN ('DESIGN','CONSULTATION','APPROVAL') and TIMESTAMPDIFF(DAY, plan_time, now()) > 0 and c.country_name IN ($Team)\r\nORDER BY plan_time",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "api_token_valid_until",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Old unapproved plans BEFORE TODAY",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "${DataSourceInstance}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "always",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Benthic invertebrates | 507.701"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#73BF69",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 13,
+        "x": 0,
+        "y": 26
+      },
+      "id": 38,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "${DataSourceInstance}"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  -- how to detect starting year? hard-coded to 2018...\r\n  UNIX_TIMESTAMP(\r\n    CONCAT(\r\n      -- note that we merge setup month with first month\r\n      2018+FLOOR(if(k.kpi_month=-1,0,k.kpi_month)/12),\r\n      '-',\r\n      (if(k.kpi_month=-1,0,k.kpi_month) % 12)+1,\r\n      '-1 00:00:00'\r\n    )\r\n  ) as time,\r\n  CONCAT(k.kpi_name,' | ', ks.starting_value) as metric,\r\n  k.kpi_value-ks.starting_value as value\r\nFROM kpi k\r\ninner join\r\n  (\r\n    select kpi_name, kpi_country_id, kpi_value as starting_value from kpi\r\n      where kpi_type='SHIPPING' and kpi_month=-1\r\n  ) ks on ks.kpi_name=k.kpi_name and ks.kpi_country_id=k.kpi_country_id\r\ninner join\r\n  (\r\n    select kpi_name, kpi_country_id, MAX(kpi_value) as max_value, MIN(kpi_value) as min_value from kpi\r\n      where kpi_type='SHIPPING' group by kpi_name, kpi_country_id\r\n  ) km on km.kpi_name=k.kpi_name and km.kpi_country_id=k.kpi_country_id\r\nWHERE\r\n  kpi_type='SHIPPING' and kpi_unit='%' and (ABS(ks.starting_value-km.max_value)>0.0001 or ABS(ks.starting_value-km.min_value)>0.0001) \r\n-- note that we merge setup month with first month\r\ngroup by k.kpi_name, k.kpi_country_id, IF(k.kpi_month=-1,0,k.kpi_month)\r\norder by kpi_month",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "kpi_month"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "kpi",
+          "timeColumn": "kpi_lastupdate",
+          "timeColumnType": "double",
+          "where": [
+            {
+              "name": "$__unixEpochFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Shipping intensity change relative to starting value",
+      "transformations": [],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "$DataSourceInstance"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "#ccccdc",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "hidden",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 11,
+        "x": 13,
+        "y": 26
+      },
+      "id": 39,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "9.1.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "$DataSourceInstance"
+          },
+          "format": "time_series",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  now() as time_sec,\n  r.restriction_message as metric,\n  count(r.restriction_id) as value\nfrom warning w\ninner join layer l on w.warning_layer_id=l.layer_id\ninner join plan_layer pl on pl.plan_layer_layer_id=l.layer_id\ninner join plan p on p.plan_id=pl.plan_layer_plan_id and p.plan_state != 'DELETED'\ninner join country c on c.country_id=p.plan_country_id\ninner join restriction r on w.warning_restriction_id=r.restriction_id\nwhere w.warning_active=1 and warning_issue_type='Error' and c.country_name IN ($Team)\ngroup by r.restriction_message\norder by value DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "api_token_id"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "api_token",
+          "timeColumn": "now()",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "timeFrom": "14d",
+      "title": "Errors",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "msp_session_1",
+          "value": "msp_session_1"
+        },
+        "hide": 1,
+        "includeAll": false,
+        "multi": false,
+        "name": "DataSourceInstance",
+        "options": [],
+        "query": "mysql",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "/msp_session_.*/",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": [
+            "Orange",
+            "Red",
+            "Green",
+            "Blue",
+            "Purple",
+            "Pink",
+            "Yellow",
+            "Lime",
+            "Aqua"
+          ],
+          "value": [
+            "Orange",
+            "Red",
+            "Green",
+            "Blue",
+            "Purple",
+            "Pink",
+            "Yellow",
+            "Lime",
+            "Aqua"
+          ]
+        },
+        "datasource": {
+          "type": "mysql",
+          "uid": "${DataSourceInstance}"
+        },
+        "definition": "select country_name from country where country_is_manager = 0",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Country",
+        "multi": true,
+        "name": "Team",
+        "options": [],
+        "query": "select country_name from country where country_is_manager = 0",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "2017-12-31T23:00:00.000Z",
+    "to": "2029-12-31T23:00:00.000Z"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "MSP Challenge session monitoring dashboard",
+  "uid": "k5fkOrVVz",
+  "version": 8,
+  "weekStart": ""
+}
