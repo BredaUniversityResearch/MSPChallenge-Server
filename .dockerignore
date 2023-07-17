@@ -1,0 +1,35 @@
+**/*.log
+**/*.md
+**/*.php~
+**/*.dist.php
+**/*.dist
+**/*.cache
+**/._*
+**/.dockerignore
+**/.DS_Store
+**/.git/
+**/.gitattributes
+**/.gitignore
+**/.gitmodules
+**/docker-compose.*.yaml
+**/docker-compose.*.yml
+**/docker-compose.yaml
+**/docker-compose.yml
+**/Dockerfile
+**/Thumbs.db
+.github/
+docs/
+public/bundles/
+tests/
+var/
+vendor/
+.editorconfig
+.env.*.local
+# dunglas Symfony Docker suggest to ignore .env.local, see: https://github.com/dunglas/symfony-docker/issues/284
+#   However, for MSP we use Windows as a host, and the .env.local file are ideal to setup the system env variables
+#   And: the system environmental variable do not get through to php's $_ENV (only getenv..) so we need the .env.local
+#   Note that docker-aliases.sh's alias "ede" exposes all dotenv vars to docker to set real environment variable
+#     using the export on app:export-dotenv-vars with docker/php/dotenv-vars.sh
+#.env.local
+.env.local.php
+.env.test

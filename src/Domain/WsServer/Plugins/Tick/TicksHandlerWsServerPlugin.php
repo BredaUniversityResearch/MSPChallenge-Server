@@ -24,7 +24,7 @@ class TicksHandlerWsServerPlugin extends Plugin
         parent::__construct('ticks handler', $minIntervalSec);
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
         return tpf(function () {
             return $this->getServerManager()->getGameSessionIds(true)

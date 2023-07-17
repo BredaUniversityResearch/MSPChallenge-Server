@@ -1,4 +1,10 @@
 #!/bin/bash
+
+if [[ "${DOCKER}" == "1" ]]; then
+  echo "Docker detected, canceling cghooks installation"
+  exit 0
+fi
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 DOTENV_FILE="../.env"
 DOTENV_LOCAL_FILE="../.env.local"

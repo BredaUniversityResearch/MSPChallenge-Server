@@ -6,8 +6,8 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Domain\WsServer\ClientHeaderKeys;
 use App\Entity\ServerManager\GameList;
-use App\Entity\ServerManager\GameSave;
 use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;
@@ -16,7 +16,6 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use ReflectionClass;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 use ZipArchive;
@@ -64,6 +63,8 @@ class GameSession extends Base
     }
 
     /**
+     * used to communicate "game_session_api" URL to the watchdog
+     *
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
@@ -73,12 +74,12 @@ class GameSession extends Base
             $deferred = new Deferred();
             return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'])->promise();
         }
-
-        $apiRoot = preg_replace('/(.*)\/api\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
+        $apiRoot = preg_replace('/(.*)\/(api|_profiler)\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
+
         $_SERVER['HTTPS'] ??= 'off';
         /** @noinspection HttpUrlsUsage */
-        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : "http://";
+        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
 
         $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
         return $connection->query(
@@ -87,15 +88,16 @@ class GameSession extends Base
                 ->from('game_servers')
                 ->setMaxResults(1)
         )
-            ->then(
-                function (Result $result) use ($protocol, $apiRoot) {
-                    $row = $result->fetchFirstRow() ?? [];
-                    $serverName = $row['address'] ?? $_SERVER["SERVER_NAME"] ?? gethostname();
-                    $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
-                    $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$port.$apiRoot;
-                    return $GLOBALS['RequestApiRoot'];
-                }
-            );
+        ->then(
+            function (Result $result) use ($protocol, $apiRoot) {
+                $row = $result->fetchFirstRow() ?? [];
+                $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row['address'] ?? $_SERVER["SERVER_NAME"] ??
+                    gethostname();
+                $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+                $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$port.$apiRoot;
+                return $GLOBALS['RequestApiRoot'];
+            }
+        );
     }
 
     /**
@@ -109,18 +111,22 @@ class GameSession extends Base
         return await(self::getRequestApiRootAsync());
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetServerManagerApiRoot(): string
+    /**
+     * Used by GameTick to generate a server manager URL towards editGameSession.php
+     *
+     * @return string
+     */
+    public static function getServerManagerApiRoot(): string
     {
         if (isset($GLOBALS['ServerManagerApiRoot'])) {
             return $GLOBALS['ServerManagerApiRoot'];
         }
 
-        $server_name = $_SERVER["SERVER_NAME"] ?? gethostname();
+        $serverName = $_SERVER["SERVER_NAME"] ?? gethostname();
+
         /** @noinspection HttpUrlsUsage */
-        $protocol = isset($_SERVER['HTTPS'])? "https://" : "http://";
+        $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
         $apiFolder = "/ServerManager/api/";
-        
         $dbConfig = Config::GetInstance()->DatabaseConfig();
         $temporaryConnection = Database::CreateTemporaryDBConnection(
             $dbConfig["host"],
@@ -128,13 +134,13 @@ class GameSession extends Base
             $dbConfig["password"],
             $dbConfig["database"]
         );
-        $port = ':' . ($_ENV['WEB_SERVER_PORT'] ?? 80);
+        $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
-            $server_name = $row["address"];
-            //if ($server_name == "localhost") $server_name = getHostByName(getHostName());
-            $GLOBALS['ServerManagerApiRoot'] = $protocol.$server_name.$port.$apiFolder;
+            $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row["address"];
+            //if ($serverName == "localhost") $serverName = getHostByName(getHostName());
+            $GLOBALS['ServerManagerApiRoot'] = $protocol.$serverName.$port.$apiFolder;
         }
-        return $protocol.$server_name.$port.$apiFolder;
+        return $protocol.$serverName.$port.$apiFolder;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -728,8 +734,9 @@ class GameSession extends Base
 
         $requestHeader = apache_request_headers();
         $headers = array();
-        if (isset($requestHeader["MSPAPIToken"])) {
-            $headers[] = "MSPAPIToken: ".$requestHeader["MSPAPIToken"];
+        if (isset($requestHeader[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
+            $headers[] = ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.
+                $requestHeader[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN];
         }
         
         $this->CallBack($baseUrl.$apiUrl, $postValues, $headers, $async);

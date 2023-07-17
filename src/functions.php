@@ -43,16 +43,19 @@ function assertFulfilled(ExtendedPromiseInterface $promise, ?Closure $onFullfull
         $onFullfulled,
         function ($reason) {
             if (is_string($reason)) {
-                die($reason);
+                echo $reason;
+                exit(1);
             }
             if ($reason instanceof Throwable) {
-                die(
+                echo(
                     $reason->getMessage() . PHP_EOL . 'in ' .
                     $reason->getFile() . '@' . $reason->getLine() . PHP_EOL .
                     $reason->getTraceAsString()
                 );
+                exit(1);
             }
-            die('error, reason: ' . print_r($reason, true));
+            echo 'error, reason: ' . print_r($reason, true);
+            exit(1);
         }
     );
 }

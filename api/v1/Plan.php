@@ -121,7 +121,7 @@ class Plan extends Base
                     'plan_country_id' => $qb->createPositionalParameter($country),
                     'plan_name' => $qb->createPositionalParameter($name),
                     'plan_gametime' => $qb->createPositionalParameter($time),
-                    'plan_lastupdate' => $qb->createPositionalParameter(microtime(true)),
+                    'plan_lastupdate' => 'UNIX_TIMESTAMP(NOW(6))',
                     'plan_type' => $qb->createPositionalParameter(self::convertToNewPlanType($type)),
                     'plan_alters_energy_distribution' => $qb->createPositionalParameter($alters_energy_distribution)
                 ])
@@ -222,8 +222,8 @@ class Plan extends Base
     public function Delete(int $id): void
     {
         $this->getDatabase()->query(
-            "UPDATE plan SET plan_active=?, plan_lastupdate=? WHERE plan_id=?",
-            array(0, microtime(true), $id)
+            "UPDATE plan SET plan_active=?, plan_lastupdate=UNIX_TIMESTAMP(NOW(6)) WHERE plan_id=?",
+            array(0, $id)
         );
     }
 
@@ -257,10 +257,14 @@ class Plan extends Base
                 return $this->getAsyncDatabase()->delete('grid', ['grid_plan_id' => $plan]);
             });
             $toPromiseFunctions[] = tpf(function () use ($plan) {
-                return $this->getAsyncDatabase()->update('plan', ['plan_id' => $plan], [
-                    'plan_lastupdate' => microtime(true),
-                    'plan_energy_error' => 0
-                ]);
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->update('plan')
+                        ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                        ->set('plan_energy_error', $qb->createPositionalParameter(0))
+                        ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
+                );
             });
             return parallel($toPromiseFunctions);
         })
@@ -331,8 +335,9 @@ class Plan extends Base
                 }
             }
             return $this->getAsyncDatabase()->queryBySQL(
-                'UPDATE plan SET plan_lastupdate=?, plan_constructionstart=plan_gametime-? WHERE plan_id=?',
-                [microtime(true), $highest, $planId]
+                'UPDATE plan SET plan_lastupdate=UNIX_TIMESTAMP(NOW(6)), plan_constructionstart=plan_gametime-? '.
+                    'WHERE plan_id=?',
+                [$highest, $planId]
             )->then(function (Result $result) {
                 return (int)$result->getAffectedRows();
             });
@@ -400,14 +405,12 @@ class Plan extends Base
                 if (null === $planId = ($results[0] ?? null)) {
                     return null;
                 }
-                return $this->getAsyncDatabase()->update(
-                    'plan',
-                    [
-                        'plan_id' => $planId
-                    ],
-                    [
-                        'plan_lastupdate' => microtime(true)
-                    ]
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->update('plan')
+                        ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                        ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($planId)))
                 );
             });
         return $this->isAsync() ? $promise : await($promise);
@@ -488,7 +491,7 @@ class Plan extends Base
                     }
                     if ($performEnergyOverlapCheck) {
                         $toPromiseFunctions[] = tpf(function () use ($energy, $id, &$erroringEnergyPlans) {
-                            return $energy->FindOverlappingEnergyPlans($id, $erroringEnergyPlans);
+                            return $energy->findOverlappingEnergyPlans($id, $erroringEnergyPlans);
                         });
                     }
 
@@ -500,11 +503,12 @@ class Plan extends Base
                                     return $this->getAsyncDatabase()->queryBySQL(
                                         '
                                         UPDATE plan
-                                        SET plan_previousstate = plan_state, plan_state = ?, plan_lastupdate = ?,
+                                        SET plan_previousstate = plan_state, plan_state = ?,
+                                            plan_lastupdate = UNIX_TIMESTAMP(NOW(6)),
                                             plan_energy_error = 1
                                         WHERE plan_id = ? AND plan_state <> "DELETED"
                                         ',
-                                        ['DESIGN', microtime(true), $planId]
+                                        ['DESIGN', $planId]
                                     )
                                     ->then(function (/*Result $result*/) use (&$currentPlanData, $planId) {
                                         return $this->Message(
@@ -576,15 +580,13 @@ class Plan extends Base
         // set all plans to deleted when it has not been approved or implemented yet and the start construction date has
         //   already passed
         $toPromiseFunctions[] = tpf(function () use ($planId) {
-            return $this->getAsyncDatabase()->update(
-                'plan',
-                [
-                    'plan_id' => $planId
-                ],
-                [
-                    'plan_lastupdate' => microtime(true),
-                    'plan_state' => 'DELETED'
-                ]
+            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+            return $this->getAsyncDatabase()->query(
+                $qb
+                    ->update('plan')
+                    ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                    ->set('plan_state', $qb->createPositionalParameter('DELETED'))
+                    ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($planId)))
             );
         });
         $toPromiseFunctions[] = tpf(function () use ($planId, $planName) {
@@ -603,7 +605,7 @@ class Plan extends Base
         $energy = new Energy();
         $this->asyncDataTransferTo($energy);
         $energy->findDependentEnergyPlans($planId, $dependentPlans)
-            ->then(function () use ($planName, &$dependentPlans) {
+            ->then(function (/* array $result */) use ($planName, &$dependentPlans) {
                 $toPromiseFunctions = [];
                 foreach ($dependentPlans as $erroredPlanId) {
                     $toPromiseFunctions[$erroredPlanId] = tpf(function () use ($erroredPlanId, $planName) {
@@ -614,7 +616,7 @@ class Plan extends Base
                                 ->set('p.plan_energy_error', '1')
                                 ->set('p.plan_previousstate', 'p.plan_state')
                                 ->set('p.plan_state', $qb->createPositionalParameter('DESIGN'))
-                                ->set('p.plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                                ->set('p.plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                                 ->where('p.plan_id = ' . $qb->createPositionalParameter($erroredPlanId))
                         )
                         ->then(function (/*Result $result*/) use ($planName, $erroredPlanId) {
@@ -683,15 +685,13 @@ class Plan extends Base
         }
         
         //plan is implemented, set plan to IMPLEMENTED and handle energy grid
-        return $this->getAsyncDatabase()->update(
-            'plan',
-            [
-                'plan_id' => $planObject['plan_id']
-            ],
-            [
-                'plan_lastupdate' => microtime(true),
-                'plan_state' => 'IMPLEMENTED'
-            ]
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->update('plan')
+                ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                ->set('plan_state', $qb->createPositionalParameter('IMPLEMENTED'))
+                ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($planObject['plan_id'])))
         )
         ->then(function (/*Result $result*/) use ($planObject) {
             $toPromiseFunctions[] = tpf(function () use ($planObject) {
@@ -1094,16 +1094,31 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Vote(int $country, int $plan, int $vote): void
+    public function Vote(int $country, int $plan, int $vote): ?PromiseInterface
     {
-        $this->getDatabase()->query(
+        $deferred = new Deferred();
+        // todo: convert to createQueryBuilder.
+        $this->getAsyncDatabase()->queryBySQL(
             "UPDATE approval SET approval_vote=? WHERE approval_country_id=? AND approval_plan_id=?",
             array($vote, $country, $plan)
+        )
+        ->then(function (/* Result $result */) use ($plan) {
+            // todo: convert to createQueryBuilder.
+            return $this->getAsyncDatabase()->queryBySQL(
+                "UPDATE plan SET plan_lastupdate=UNIX_TIMESTAMP(NOW(6)) WHERE plan_id=?",
+                array($plan)
+            );
+        })
+        ->done(
+            function (/* Result $result */) use ($deferred) {
+                $deferred->resolve(); // we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
         );
-        $this->getDatabase()->query(
-            "UPDATE plan SET plan_lastupdate=? WHERE plan_id=?",
-            array(microtime(true), $plan)
-        );
+        $promise = $deferred->promise();
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -1983,15 +1998,17 @@ class Plan extends Base
      */
     public function messageAsync(int $plan, int $teamId, string $userName, string $text): PromiseInterface
     {
-        return $this->getAsyncDatabase()->insert(
-            'plan_message',
-            [
-                'plan_message_plan_id' => $plan,
-                'plan_message_country_id' => $teamId,
-                'plan_message_user_name' => $userName,
-                'plan_message_text' => $text,
-                'plan_message_time' => microtime(true)
-            ]
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->insert('plan_message')
+                ->values([
+                    'plan_message_plan_id' => $qb->createPositionalParameter($plan),
+                    'plan_message_country_id' => $qb->createPositionalParameter($teamId),
+                    'plan_message_user_name' => $qb->createPositionalParameter($userName),
+                    'plan_message_text' => $qb->createPositionalParameter($text),
+                    'plan_message_time' => 'UNIX_TIMESTAMP(NOW(6))'
+                ])
         );
     }
 
@@ -2028,8 +2045,9 @@ class Plan extends Base
     public function Lock(int $id, int $user): void
     {
         $changedRows = $this->getDatabase()->queryReturnAffectedRowCount(
-            "UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=? WHERE plan_id=? AND plan_lock_user_id IS NULL",
-            array($user, microtime(true), $id)
+            "UPDATE plan SET plan_lock_user_id=?, plan_lastupdate=UNIX_TIMESTAMP(NOW(6)) WHERE plan_id=? AND ".
+                "plan_lock_user_id IS NULL",
+            array($user, $id)
         );
         if ($changedRows != 1) {
             throw new Exception(
@@ -2054,7 +2072,7 @@ class Plan extends Base
             $qb
                 ->update('plan')
                 ->set('plan_name', $qb->createPositionalParameter($name))
-                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
         )
         ->then(function (/* Result $result */) {
@@ -2079,7 +2097,7 @@ class Plan extends Base
             $qb
                 ->update('plan')
                 ->set('plan_gametime', $qb->createPositionalParameter($date))
-                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
         )
         ->then(function (/* Result $result */) use ($id) {
@@ -2108,7 +2126,7 @@ class Plan extends Base
             $qb
                 ->update('plan')
                 ->set('plan_description', $qb->createPositionalParameter($description))
-                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
         )
         ->done(
@@ -2136,8 +2154,8 @@ class Plan extends Base
     public function Type(int $id, string $type): void
     {
         $this->getDatabase()->query(
-            "UPDATE plan SET plan_type=?, plan_lastupdate=? WHERE plan_id=?",
-            array(self::convertToNewPlanType($type), microtime(true), $id)
+            "UPDATE plan SET plan_type=?, plan_lastupdate=UNIX_TIMESTAMP(NOW(6)) WHERE plan_id=?",
+            array(self::convertToNewPlanType($type), $id)
         );
     }
 
@@ -2151,36 +2169,50 @@ class Plan extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetRestrictionAreas(int $plan_id, array $settings): ?PromiseInterface
+    public function SetRestrictionAreas(int $plan_id, array $settings = []): ?PromiseInterface
     {
-        $toPromiseFunctions = [];
-        foreach ($settings as $setting) {
-            $toPromiseFunctions[] = tpf(function () use ($plan_id, $setting) {
-                return $this->getAsyncDatabase()->queryBySQL(
-                    'INSERT INTO plan_restriction_area (
-                    plan_restriction_area_plan_id, plan_restriction_area_layer_id, plan_restriction_area_country_id,
-                    plan_restriction_area_entity_type, plan_restriction_area_size
-                    ) VALUES(?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE plan_restriction_area_size = ?',
-                    [
-                        $plan_id, $setting["layer_id"], $setting["team_id"], $setting["entity_type_id"],
-                        $setting["restriction_size"], $setting["restriction_size"]
-                    ]
-                );
-            });
-        }
-        $toPromiseFunctions[] = tpf(function () use ($plan_id) {
-            $qb = $this->getAsyncDatabase()->createQueryBuilder();
-            return $this->getAsyncDatabase()->query(
-                $qb
-                    ->update('plan')
-                    ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
-                    ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan_id)))
-            );
-        });
-        $promise = parallel($toPromiseFunctions)
-            ->then(function (/* array $results */) {
-                return null; // we do not care about the result
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $qb->delete('plan_restriction_area')
+            ->where($qb->expr()->eq('plan_restriction_area_plan_id', $qb->createPositionalParameter($plan_id)));
+        $promise = $this->getAsyncDatabase()->query($qb)
+            ->then(function (/* array $results */) use ($settings, $plan_id) {
+                if (!empty($settings)) {
+                    $settingsMapper = [
+                        'layer_id' => 'plan_restriction_area_layer_id',
+                        'team_id' => 'plan_restriction_area_country_id',
+                        'entity_type_id' => 'plan_restriction_area_entity_type',
+                        'restriction_size' => 'plan_restriction_area_size'
+                    ];
+                    foreach ($settings as $record => $setting) {
+                        $transformedSetting = [];
+                        array_walk(
+                            $setting,
+                            function ($value, $key) use (&$transformedSetting, $settingsMapper) {
+                                $transformedSetting[($settingsMapper[$key] ?? $key)] = $value;
+                            }
+                        );
+                        $transformedSetting['plan_restriction_area_plan_id'] = $plan_id;
+                        $toPromiseFunctions[] = tpf(function () use ($transformedSetting) {
+                            $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                            $qb->insert('plan_restriction_area')
+                                ->values($transformedSetting);
+                            return $this->getAsyncDatabase()->query($qb);
+                        });
+                    }
+                }
+                $toPromiseFunctions[] = tpf(function () use ($plan_id) {
+                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                    return $this->getAsyncDatabase()->query(
+                        $qb
+                            ->update('plan')
+                        ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                            ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan_id)))
+                    );
+                });
+                return parallel($toPromiseFunctions)
+                    ->then(function (/* array $results */) {
+                        return null; // we do not care about the result
+                    });
             });
         return $this->isAsync() ? $promise : await($promise);
     }
@@ -2214,7 +2246,7 @@ class Plan extends Base
             $qb = $this->getAsyncDatabase()->createQueryBuilder();
             $qb->update('plan')
                 ->set('plan_lock_user_id', $qb->createPositionalParameter(null))
-                ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)));
+                ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))');
             $where = $qb->expr()->and($qb->expr()->eq('plan_id', $id));
             if ($force_unlock == 0) {
                 $where = $where->with($qb->expr()->eq('plan_lock_user_id', $qb->createPositionalParameter($user)));
@@ -2351,7 +2383,7 @@ class Plan extends Base
                 return $this->getAsyncDatabase()->query(
                     $qb
                         ->update('plan')
-                        ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                        ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                         ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
                 );
             })
@@ -2413,7 +2445,7 @@ class Plan extends Base
                 $qb
                     ->update('plan')
                     ->set('plan_energy_error', $qb->createPositionalParameter($error))
-                    ->set('plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                    ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                     ->where($qb->expr()->eq('plan_id', $id))
             )
             ->then(function (/* Result $result */) use ($error, $id, $planName, $check_dependent_plans) {

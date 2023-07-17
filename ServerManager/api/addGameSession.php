@@ -13,7 +13,6 @@ $user = new User();
 
 $user->hasToBeLoggedIn();
 
-$gamesession->setJWT($_POST['jwt'] ?? "");
 $gamesession->processPostedVars();
 $gamesession->id = -1;
 $gamesession->game_server_id = 1;
@@ -30,7 +29,7 @@ $gamesession->players_past_hour = 0;
 $gamesession->demo_session = 0;
 $gamesession->api_access_token = 0;
 $gamesession->save_id = 0;
-$gamesession->server_version = ServerManager::getInstance()->GetCurrentVersion();
+$gamesession->server_version = ServerManager::getInstance()->getCurrentVersion();
 
 $gamesession->add();
 $gamesession->sendCreateRequest();

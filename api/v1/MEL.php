@@ -29,12 +29,14 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Config(): ?array
     {
-        $game = new Game();
-        $tmp = $game->GetGameConfigValues();
-        if (isset($tmp['MEL'])) {
-            return $tmp['MEL'];
-        }
-        return null;
+        $game = (new Game())->GetGameConfigValues();
+        return $game['MEL'] ?? null;
+    }
+
+    public function getFishingPolicySettings(): array
+    {
+        $mel = $this->Config();
+        return $mel['fishing_policy_settings'] ?? [];
     }
 
     /**
@@ -237,8 +239,8 @@ class MEL extends Base
     public function UpdateLayer(string $layer_name): void
     {
         $this->getDatabase()->query(
-            "UPDATE layer SET layer_lastupdate=? WHERE layer_name=?",
-            array(microtime(true), $layer_name)
+            "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)) WHERE layer_name=?",
+            array($layer_name)
         );
     }
 
@@ -299,8 +301,7 @@ class MEL extends Base
     {
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query(
-            'UPDATE game SET game_mel_lastmonth=game_currentmonth, game_mel_lastupdate=?',
-            [microtime(true)]
+            'UPDATE game SET game_mel_lastmonth=game_currentmonth, game_mel_lastupdate=UNIX_TIMESTAMP(NOW(6))'
         );
     }
 

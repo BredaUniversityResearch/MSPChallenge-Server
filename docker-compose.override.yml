@@ -1,8 +1,70 @@
-version: '3'
+version: "3.7"
 
+# Development environment override
 services:
-###> symfony/mercure-bundle ###
-  mercure:
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+      ADMINER_PLUGINS: 'sql-log'
+      APP_ENV: ${APP_ENV:-dev}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
     ports:
-      - "80"
+      # run Adminer on port 8082 since 8080 will be used by mitmproxy
+      - 8082:8080
+    networks:
+      - database
+    volumes:
+      - ./docker/adminer/index.php:/var/www/html/index.php:ro
+
+  mitmproxy:
+    image: mitmproxy/mitmproxy:9.0.1
+    container_name: mitmproxy
+    entrypoint: "mitmweb --web-host 0.0.0.0 --mode reverse:http://caddy --set websocket=true"
+    networks:
+      - php
+    ports:
+      - '8080:8080'
+      - '8081:8081'
+    depends_on:
+      - caddy
+
+  php:
+    build:
+      target: app_php_dev
+    volumes:
+      - ./:/srv/app
+      - ./docker/php/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
+      # If you develop on Mac or Windows you can remove the vendor/ directory
+      #  from the bind-mount for better performance by enabling the next line:
+      - /srv/app/vendor
+    networks:
+      - mitmproxy
+    environment:
+      WEB_SERVER_HOST: mitmproxy
+      URL_WEB_SERVER_HOST: mitmproxy
+      URL_WS_SERVER_HOST: mitmproxy
+      # force web(socket) server over 8080 (mitmproxy reverse proxy)
+      WEB_SERVER_PORT: 8080
+      URL_WEB_SERVER_PORT: 8080
+      URL_WS_SERVER_PORT: 8080
+
+      # See https://xdebug.org/docs/all_settings#mode
+      XDEBUG_MODE: "${XDEBUG_MODE:-off}"
+    extra_hosts:
+      # Ensure that host.docker.internal is correctly defined on Linux
+      - host.docker.internal:host-gateway
+
+  caddy:
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-:80}
+    volumes:
+      - ./public:/srv/app/public:ro
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+
+###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
+
+networks:
+  mitmproxy:

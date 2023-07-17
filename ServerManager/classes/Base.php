@@ -3,37 +3,37 @@
 namespace ServerManager;
 
 use App\Domain\Helper\Config;
+use App\Domain\WsServer\ClientHeaderKeys;
 
 class Base
 {
-    protected ?string $jwt = null;
-
-    public function setJWT($jwt): void
+    public function hasJWT(): bool
     {
-        $this->jwt = $jwt;
+        return Session::get("currentToken") !== null;
     }
 
     public function getJWT(): string
     {
-        $this->jwt = Session::get("currentToken");
-        if (null === $this->jwt) {
+        if (null === Session::get("currentToken")) {
             // this will only happen if this is called without a logged-in user on ServerManager
             // meaning: when the WebSocket server recreates a demo session that reached the end
             try {
                 $vars = array(
-                    "username" => ServerManager::getInstance()->GetServerID(),
-                    "password" => ServerManager::getInstance()->GetServerPassword()
+                    "username" => ServerManager::getInstance()->getServerId(),
+                    "password" => ServerManager::getInstance()->getServerPassword()
                 );
                 $authoriserCall = $this->postCallAuthoriser(
                     "login_check",
                     $vars
                 );
-                $this->jwt = $authoriserCall["token"] ?? "";
+                if (null !== $authoriserCall["token"]) {
+                    Session::put('currentToken', $authoriserCall["token"]);
+                }
             } catch (\Exception $e) {
-                $this->jwt = null;
+                // nothing to do.
             }
         }
-        return $this->jwt;
+        return Session::get("currentToken") ?? '';
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -80,13 +80,15 @@ class Base
     }
 
     // needs a function to call server API
-    public static function callServer($endpoint, $data2send = false, $session_id = "", $api_access_token = "")
+    public static function callServer($endpoint, $data2send = false, $sessionId = "", $api_access_token = "")
     {
+        $url = ServerManager::getInstance()->getServerURLBySessionId($sessionId);
+        $url = rtrim($url, '/').'/api/'.$endpoint;
         $call_return = self::callAPI(
             "POST",
-            ServerManager::getInstance()->GetServerURLBySessionId($session_id)."/api/".$endpoint,
+            $url,
             $data2send,
-            array("MSPAPIToken: ".$api_access_token),
+            array(ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.$api_access_token),
             false
         );
         return json_decode($call_return, true);
@@ -122,12 +124,13 @@ class Base
      */
     public function callAuthoriser(string $method, string $endpoint, array $data2send = [])
     {
-        $headers = [
-            'Authorization: Bearer '.$this->getJWT()
-        ];
+        $headers = [];
+        if ($this->hasJWT()) {
+            $headers[] = 'Authorization: Bearer ' . $this->getJWT();
+        }
         $callReturn = self::callAPI(
             $method,
-            ServerManager::getInstance()->GetMSPAuthAPI().$endpoint,
+            ServerManager::getInstance()->getMSPAuthAPI().$endpoint,
             $data2send,
             $headers
         );
@@ -171,7 +174,7 @@ class Base
         // any proxy required for the external calls to the MSP Authoriser? (which are the only kind of external calls
         //   done by ServerManager)
         $proxy = Config::get('msp_auth/with_proxy');
-        if (!empty($proxy) && str_contains($url, ServerManager::getInstance()->GetMSPAuthAPI()) && PHPCanProxy()) {
+        if (!empty($proxy) && str_contains($url, ServerManager::getInstance()->getMSPAuthAPI()) && PHPCanProxy()) {
             curl_setopt($curl, CURLOPT_PROXY, $proxy);
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
             curl_setopt($curl, CURLOPT_MAXREDIRS, 1);

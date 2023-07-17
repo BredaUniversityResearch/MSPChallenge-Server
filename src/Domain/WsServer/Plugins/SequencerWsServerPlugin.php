@@ -3,10 +3,12 @@
 namespace App\Domain\WsServer\Plugins;
 
 use App\Domain\Common\ToPromiseFunction;
+use App\Domain\Event\NameAwareEvent;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use function App\chain;
 use function App\tpf;
 
-class SequencerWsServerPlugin extends Plugin
+class SequencerWsServerPlugin extends Plugin implements EventSubscriberInterface
 {
     /**
      * @var Plugin[] array
@@ -38,6 +40,7 @@ class SequencerWsServerPlugin extends Plugin
             $constructorParams['minIntervalSec'] = 0;
             /** @var Plugin $plugin */
             $plugin = new ($class)(...($constructorParams));
+            $plugin->addSubscriber($this);
             $this->plugins[] = $plugin;
         }
 
@@ -55,10 +58,10 @@ class SequencerWsServerPlugin extends Plugin
         );
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function () {
-            $toPromiseFunctions = collect($this->plugins)->map(function (Plugin $p) {
+        return tpf(function () use ($executionId) {
+            $toPromiseFunctions = collect($this->plugins)->map(function (Plugin $p) use ($executionId) {
                 $p
                     ->setLoop($this->getLoop())
                     ->setGameSessionIdFilter($this->getGameSessionIdFilter())
@@ -66,9 +69,24 @@ class SequencerWsServerPlugin extends Plugin
                     ->setClientConnectionResourceManager($this->getClientConnectionResourceManager())
                     ->setServerManager($this->getServerManager())
                     ->setWsServer($this->getWsServer());
-                return $p->createPromiseFunction();
+                return $p->createPromiseFunction($executionId);
             })->all();
             return chain($toPromiseFunctions);
         });
+    }
+
+    public function onPluginExecutionEnableProbe(NameAwareEvent $event): void
+    {
+        $this->dispatch(
+            new NameAwareEvent(self::EVENT_PLUGIN_EXECUTION_ENABLE_PROBE, $this, $event->getArguments()),
+            self::EVENT_PLUGIN_EXECUTION_ENABLE_PROBE
+        );
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            self::EVENT_PLUGIN_EXECUTION_ENABLE_PROBE => 'onPluginExecutionEnableProbe'
+        ];
     }
 }

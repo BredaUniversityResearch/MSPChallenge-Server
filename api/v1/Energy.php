@@ -201,10 +201,10 @@ class Energy extends Base
     {
         $this->getDatabase()->query(
             "
-            UPDATE energy_output SET energy_output_maxcapacity=?, energy_output_lastupdate=?
+            UPDATE energy_output SET energy_output_maxcapacity=?, energy_output_lastupdate=UNIX_TIMESTAMP(NOW(6))
             WHERE energy_output_geometry_id=?
             ",
-            array($maxcapacity, microtime(true), $id)
+            array($maxcapacity, $id)
         );
     }
 
@@ -242,7 +242,7 @@ class Energy extends Base
             $qb
                 ->update('energy_output')
                 ->set('energy_output_active', $qb->createPositionalParameter(0))
-                ->set('energy_output_lastupdate', sprintf('%.4f', microtime(true)))
+                ->set('energy_output_lastupdate', 'UNIX_TIMESTAMP(NOW(4))')
                 ->where($qb->expr()->eq('energy_output_geometry_id', $id))
         )
         ->done(
@@ -269,10 +269,13 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateGridName(int $id, string $name): ?PromiseInterface
     {
-        $promise = $this->getAsyncDatabase()->update(
-            'grid',
-            ['grid_id' => $id],
-            ['grid_name' => $name, 'grid_lastupdate' => microtime(true)]
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->update('grid')
+                ->set('grid_name', $qb->createPositionalParameter($name))
+                ->set('grid_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                ->where($qb->expr()->eq('grid_id', $qb->createPositionalParameter($id)))
         )
         ->then(function (Result $result) {
             return null; // we do not care about the result
@@ -323,7 +326,7 @@ class Energy extends Base
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 return $qb
                     ->update('plan', 'p')
-                    ->set('p.plan_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                    ->set('p.plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                     ->where($qb->expr()->in('p.plan_id', $planIds));
             });
         });
@@ -362,7 +365,7 @@ class Energy extends Base
         int $plan,
         bool $distribution_only,
         int $persistent = -1
-    ) {/*: int|PromiseInterface // <-- php 8 */
+    ): int|PromiseInterface {
         $deferred = new Deferred();
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $this->getAsyncDatabase()->query(
@@ -527,7 +530,7 @@ class Energy extends Base
                     'energy_connection_end_id' => $qb->createPositionalParameter($end),
                     'energy_connection_cable_id' => $qb->createPositionalParameter($cable),
                     'energy_connection_start_coordinates' => $qb->createPositionalParameter($coords),
-                    'energy_connection_lastupdate' => $qb->createPositionalParameter(microtime(true))
+                    'energy_connection_lastupdate' => 'UNIX_TIMESTAMP(NOW(6))'
                 ])
         )
         ->done(
@@ -564,7 +567,7 @@ class Energy extends Base
                 ->set('energy_connection_start_id', $qb->createPositionalParameter($start))
                 ->set('energy_connection_end_id', $qb->createPositionalParameter($end))
                 ->set('energy_connection_start_coordinates', $qb->createPositionalParameter($coords))
-                ->set('energy_connection_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->set('energy_connection_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->eq('energy_connection_cable_id', $qb->createPositionalParameter($cable)))
         )
         ->done(
@@ -595,7 +598,7 @@ class Energy extends Base
         $this->getAsyncDatabase()->query(
             $qb
                 ->update('energy_connection')
-                ->set('energy_connection_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                ->set('energy_connection_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->set('energy_connection_active', '0')
                 ->where(
                     $qb->expr()->and(
@@ -705,7 +708,7 @@ class Energy extends Base
                             'energy_output_geometry_id' => $qb->createPositionalParameter($id),
                             'energy_output_capacity' => $qb->createPositionalParameter($capacity),
                             'energy_output_maxcapacity' => $qb->createPositionalParameter($maxcapacity),
-                            'energy_output_lastupdate' => $qb->createPositionalParameter(microtime(true))
+                            'energy_output_lastupdate' => 'UNIX_TIMESTAMP(NOW(6))'
                         ])
                 );
             }
@@ -716,7 +719,7 @@ class Energy extends Base
                     ->set('energy_output_capacity', $qb->createPositionalParameter($capacity))
                     ->set('energy_output_maxcapacity', $qb->createPositionalParameter($maxcapacity))
                     ->set('energy_output_active', '1')
-                    ->set('energy_output_lastupdate', $qb->createPositionalParameter(microtime(true)))
+                    ->set('energy_output_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                     ->where($qb->expr()->eq('energy_output_geometry_id', $qb->createPositionalParameter($id)))
             );
         })
@@ -775,12 +778,12 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetDependentEnergyPlans(int $plan_id): array
+    public function GetDependentEnergyPlans(int $plan_id): array|PromiseInterface
     {
         $planId = $plan_id;
         $result = array();
-        await($this->findDependentEnergyPlans($planId, $result));
-        return $result;
+        $promise = $this->findDependentEnergyPlans($planId, $result);
+        return $this->isAsync() ? $promise : await($promise);
     }
 
     /**
@@ -992,6 +995,9 @@ class Energy extends Base
                     });
                 });
             });
+        })
+        ->then(function (/* array $results */) use (&$result) {
+            return $result;
         });
     }
 
@@ -1005,10 +1011,12 @@ class Energy extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetOverlappingEnergyPlans(int $plan_id): array
+    public function GetOverlappingEnergyPlans(int $plan_id): array|PromiseInterface
     {
         $result = array();
-        $this->FindOverlappingEnergyPlans($plan_id, $result);
+        if (null !== $promise = $this->findOverlappingEnergyPlans($plan_id, $result)) {
+            return $promise;
+        }
         return $result;
     }
 
@@ -1017,9 +1025,9 @@ class Energy extends Base
      *
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function FindOverlappingEnergyPlans(int $planId, array &$result): ?PromiseInterface
+    public function findOverlappingEnergyPlans(int $planId, array &$result): ?PromiseInterface
     {
+        // todo: convert to createQueryBuilder.
         $promise = $this->getAsyncDatabase()->queryBySQL(
             '
             SELECT COALESCE(
@@ -1105,7 +1113,7 @@ class Energy extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetPreviousOverlappingPlans(int $plan_id): int
     {
-        $isOverlappingPlan = $this->FindPreviousOverlappingPlans($plan_id);
+        $isOverlappingPlan = $this->findPreviousOverlappingPlans($plan_id);
 
         return $isOverlappingPlan ? 1 : 0;
     }
@@ -1115,8 +1123,7 @@ class Energy extends Base
      *
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function FindPreviousOverlappingPlans(int $planId): bool
+    private function findPreviousOverlappingPlans(int $planId): bool
     {
         $planData = $this->getDatabase()->query(
             "SELECT plan_gametime FROM plan WHERE plan_id = ?",

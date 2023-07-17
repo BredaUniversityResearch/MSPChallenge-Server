@@ -58,7 +58,7 @@ function CallServerAPI(url, data = {}, session_id = 0, token = '')
         return  $.ajax({
             url: url,
             method: "POST",
-            headers: { MSPAPIToken: token },
+            headers: { 'Msp-Api-Token': token },
             data: data,
             dataType: "json",
             success: function (result) {
@@ -184,7 +184,10 @@ function UpdateLogToastContents(session_id)
     }
     logElapsedSec += logUpdateIntervalSec;
     $.when(CallAPI(url, data)).done(function (results) {
-        log_array = results.gamesession.log.slice(-5);
+        log_array = [];
+        if (null != results.gamesession.log) {
+            log_array = results.gamesession.log.slice(-5);
+        }
         log_array.forEach(LogToastContentItemCleanUp);
         var log_concise_new = log_array.join("");
         if (logElapsedSec > logCleanupIntervalSec) {

@@ -110,8 +110,8 @@ class CEL extends Base
     {
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query(
-            'UPDATE game SET game_cel_lastmonth=?, game_cel_lastupdate=?',
-            [$month, microtime(true)]
+            'UPDATE game SET game_cel_lastmonth=?, game_cel_lastupdate=UNIX_TIMESTAMP(NOW(6))',
+            [$month]
         );
     }
 
@@ -247,10 +247,10 @@ class CEL extends Base
         foreach ($values as $value) {
             $this->getDatabase()->query(
                 "
-                UPDATE energy_output SET energy_output_capacity=?, energy_output_lastupdate=?
+                UPDATE energy_output SET energy_output_capacity=?, energy_output_lastupdate=UNIX_TIMESTAMP(NOW(6))
                 WHERE energy_output_geometry_id=?
                 ",
-                array($value['capacity'], microtime(true), $value['id'])
+                array($value['capacity'], $value['id'])
             );
         }
     }
@@ -271,8 +271,6 @@ class CEL extends Base
             "SELECT game_currentmonth FROM game WHERE game_id = 1"
         )[0]["game_currentmonth"];
 
-        $timestamp = microtime(true);
-
         $values = json_decode($kpiValues, true);
         foreach ($values as $value) {
             $this->getDatabase()->query(
@@ -281,12 +279,11 @@ class CEL extends Base
                     energy_kpi_grid_id, energy_kpi_month, energy_kpi_country_id, energy_kpi_actual,
                     energy_kpi_lastupdate
                 ) 
-                VALUES (?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE energy_kpi_actual = ?, energy_kpi_lastupdate = ?
+                VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(NOW(6)))
+                ON DUPLICATE KEY UPDATE energy_kpi_actual = ?, energy_kpi_lastupdate = UNIX_TIMESTAMP(NOW(6))
                 ",
                 array(
-                    $value['grid'], $gameMonth, $value['country'], $value['actual'], $timestamp, $value['actual'],
-                    $timestamp
+                    $value['grid'], $gameMonth, $value['country'], $value['actual'], $value['actual']
                 )
             );
         }

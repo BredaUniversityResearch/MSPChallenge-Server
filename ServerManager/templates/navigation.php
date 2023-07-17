@@ -5,7 +5,7 @@ use App\Domain\API\v1\Config;
 use ServerManager\ServerManager;
 use function ServerManager\err;
 
-$url_app_root = ServerManager::getInstance()->GetServerManagerFolder();
+$url_app_root = ServerManager::getInstance()->getAbsolutePathBase();
 
 $userLoggedIn = isset($user) && $user->isLoggedIn();
 $authBaseUrl = Config::GetInstance()->getMSPAuthBaseURL();
@@ -14,7 +14,7 @@ $html =<<<"HTML"
 
     <nav class="navbar">
       <div id="logo">
-        <img src="images/MSP_Challenge_Icon-037c7c.png">
+        <img src="/ServerManager/images/MSP_Challenge_Icon-037c7c.png">
       </div>
       <div id="header-menu-wrapper">
         <ul id="header-menu">
@@ -39,10 +39,10 @@ HTML;
 echo $html;
 
 if (isset($_GET['err'])) {
-    err("<font color='red'>".($_GET['err'] ?? '')."</font>");
+    err("<font color='red'>".$_GET['err']."</font>");
 }
 
 if (isset($_GET['msg'])) {
-    err($_GET['msg'] ?? '');
+    err($_GET['msg']);
 }
 

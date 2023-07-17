@@ -30,6 +30,7 @@ if not exist %php% (
     set ERRORLEVEL=1
     goto eof
 )
+call :FirewallAddRule
 %exe% status %service% 1>NUL 2>NUL
 IF %ERRORLEVEL% NEQ 0 (
     %exe% install %service% %php% bin/console app:ws-server %2 %3 %4 %5 %6 %7 %8 %9
@@ -39,7 +40,6 @@ IF %ERRORLEVEL% NEQ 0 (
 %php% bin/console cache:clear
 %exe% start %service%
 %exe% status %service%
-call :FirewallAddRule
 goto get
 
 :blank
@@ -81,7 +81,13 @@ call :FirewallRemoveRule
 goto eof
 
 :get
+set singleparam=0
 if not "%~2"=="" (
+  if not "%~1"=="install" (
+    set singleparam=1
+  )
+)
+if "%singleparam%"=="1" (
   echo %2:
   %exe% get %service% %2
 ) else (
@@ -112,4 +118,3 @@ exit /b 0
 :FirewallRemoveRule
 netsh advfirewall firewall delete rule name="MSP Websocket server"
 exit /b 0
-

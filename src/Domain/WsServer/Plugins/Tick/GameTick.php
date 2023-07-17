@@ -132,7 +132,7 @@ class GameTick extends TickBase
                         $postValues['token'] = $token;
                         $postValues['session_id'] = $this->getGameSessionId();
                         $postValues['action'] = 'demoCheck';
-                        $url = GameSession::GetServerManagerApiRoot().'editGameSession.php';
+                        $url = GameSession::getServerManagerApiRoot().'editGameSession.php';
                         $browser = MSPBrowserFactory::create($url);
                         return $browser
                             ->post(
@@ -205,7 +205,7 @@ class GameTick extends TickBase
         // set the default update query and its values
         $qb
             ->update('game')
-            ->set('game_lastupdate', sprintf('%.4f', microtime(true)))
+            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(4))')
             ->set('game_currentmonth', (string)$currentMonth)
             ->set('game_planning_monthsdone', (string)$monthsDone);
 

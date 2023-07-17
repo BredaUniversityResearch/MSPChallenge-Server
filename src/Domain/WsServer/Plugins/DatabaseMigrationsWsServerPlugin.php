@@ -26,7 +26,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
         $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
     }
 
-    protected function onCreatePromiseFunction(): ToPromiseFunction
+    protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
         return tpf(function () {
             return $this->getServerManager()->getGameSessionIds()

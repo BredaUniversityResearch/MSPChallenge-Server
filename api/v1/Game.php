@@ -3,20 +3,27 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowserFactory;
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use Closure;
 use Drift\DBAL\Result;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
+use React\EventLoop\Loop;
+use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use function App\assertFulfilled;
 use function App\resolveOnFutureTick;
 use function App\await;
+use function App\tpf;
 
 class Game extends Base
 {
-    private string $watchdog_address = '';
-    const WATCHDOG_PORT = 45000;
+    private ?string $watchdog_address = null;
+    const DEFAULT_WATCHDOG_PORT = 45000;
+    const MIN_GAME_ERATIME = 12;
 
     private const ALLOWED = array(
         "AutoSaveDatabase",
@@ -87,6 +94,9 @@ class Game extends Base
         if (!isset($data['wiki_base_url'])) {
             $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
         }
+        if (!isset($data['team_info_base_url'])) {
+            $data['team_info_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
+        }
 
         if (!isset($data['edition_name'])) {
             $data['edition_name'] = $_ENV['DEFAULT_EDITION_NAME'];
@@ -149,7 +159,7 @@ class Game extends Base
      * @throws Exception
      * @todo: use https://github.com/karriereat/json-decoder "to convert your JSON data into an actual php class"
      * phpcs:ignore Generic.Files.LineLength.TooLong
-     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
+     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing_policy_settings: array}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameConfigValues(string $overrideFileName = ''): array
@@ -248,26 +258,23 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetupGameTime(array $data): void
     {
-        $_POST['user'] = 1; // should this go at some point?
         $this->SetStartDate($data['start']);
 
-        //$_POST['months'] = $data['era_planning_months']; // this should definitely go at some point
         $this->Planning($data['era_planning_months']);
 
-        //$_POST['realtime'] = $data['era_planning_realtime'];
         $this->Realtime($data['era_planning_realtime']);
-
         $str = "";
-
         $totalEras = 4;
         $str .= str_repeat($data['era_planning_realtime'] . ",", $totalEras);
-
         $str = substr($str, 0, -1);
 
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query(
             "UPDATE game SET game_planning_era_realtime=?, game_eratime=?",
-            array($str, $data['era_total_months'])
+            array(
+                $str,
+                max($data['era_total_months'], self::MIN_GAME_ERATIME)
+            )
         );
     }
 
@@ -440,7 +447,7 @@ class Game extends Base
             ->createQueryBuilder();
         $qb
             ->update('game')
-            ->set('game_lastupdate', $qb->createPositionalParameter(microtime(true)))
+            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
             ->set('game_state', $qb->createPositionalParameter($state));
         if ($currentState["game_state"] == "SETUP") {
             //Starting plans should be implemented when we any state "PLAY"
@@ -465,23 +472,19 @@ class Game extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function PolicySimSettings()
+    public function PolicySimSettings(): array
     {
-        // just enable all policy types?
-        $policySettings[] = [
-            'policy_type' => 'fishing'
+        $policySettings = [
+            [ 'policy_type' => 'fishing' ], // key 0
+            [ 'policy_type' => 'shipping' ], // key 1
+            [ 'policy_type' => 'energy' ] // key 2
         ];
-        $policySettings[] = [
-            'policy_type' => 'shipping'
-        ];
-        $policySettings[] = [
-            'policy_type' => 'energy'
-        ];
-
         $simulationSettings = [];
+
         $data = $this->GetGameConfigValues();
         if (isset($data['MEL'])) {
             $mel = new MEL();
+            $policySettings[0] += $mel->getFishingPolicySettings();
             $simulationSettings[] = [
                 'simulation_type' => 'MEL',
                 'content' => $mel->Config()
@@ -527,27 +530,26 @@ class Game extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetWatchdogAddress(bool $withPort = false): string
+    public function GetWatchdogAddress(): string
     {
-        if (!empty($this->watchdog_address)) {
-            if ($withPort) {
-                return $this->watchdog_address.':'.self::WATCHDOG_PORT;
-            }
-            return $this->watchdog_address;
+        $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
+        if (null === $this->watchdog_address) {
+            return '';
         }
+        /** @noinspection HttpUrlsUsage */
+        $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
+        return $this->watchdog_address.':'.($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT);
+    }
 
+    private function getWatchdogAddressFromDb(): ?string
+    {
         $result = $this->getDatabase()->query(
             "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
         );
-        if (count($result) > 0) {
-            /** @noinspection HttpUrlsUsage */
-            $this->watchdog_address = 'http://'.$result[0]['game_session_watchdog_address'];
-            if ($withPort) {
-                return $this->watchdog_address.':'.self::WATCHDOG_PORT;
-            }
-            return $this->watchdog_address;
+        if (count($result) == 0) {
+            return null;
         }
-        return '';
+        return $result[0]['game_session_watchdog_address'];
     }
 
     /**
@@ -575,9 +577,19 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
     {
+        // no need to startup watchdog in docker, handled by supervisor.
+        if (getenv('DOCKER')) {
+            return;
+        }
+        // below code is only necessary for Windows
+        if (!str_starts_with(php_uname(), "Windows")) {
+            return;
+        }
         self::StartSimulationExe([
             'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/simulations/MSW/'
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/'.(
+                $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
+            )
         ]);
     }
 
@@ -587,16 +599,101 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function StartSimulationExe(array $params): void
     {
-        $apiEndpoint = GameSession::GetRequestApiRoot();
+        // below code is only necessary for Windows
+        if (!str_starts_with(php_uname(), "Windows")) {
+            return;
+        }
         $args = isset($params["args"])? $params["args"]." " : "";
-        $args = $args."APIEndpoint ".$apiEndpoint;
-
+        $args = $args."APIEndpoint=".GameSession::GetRequestApiRoot();
         $workingDirectory = "";
         if (isset($params["working_directory"])) {
             $workingDirectory = "cd ".$params["working_directory"]." & ";
         }
+        Database::execInBackground(
+            'start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"'
+        );
+    }
 
-        Database::execInBackground('start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"');
+    private function createWatchdogRequestPromiseFunction(string $url): ToPromiseFunction
+    {
+        return tpf(function () use ($url) {
+            $browser = MSPBrowserFactory::create($url);
+            $deferred = new Deferred();
+            $browser
+                // any response is acceptable, even 4xx or 5xx status codes
+                ->withRejectErrorResponse(false)
+                ->withTimeout(1)
+                ->request('GET', $url)
+                ->done(
+                    // watchdog is running
+                    function (/*ResponseInterface $response*/) use ($deferred) {
+                        $deferred->resolve(true); // we have a response
+                    },
+                    // so the Watchdog is off, and now it should be switched on
+                    function (/*Exception $e*/) use ($deferred) {
+                        $deferred->resolve(false); // no response yet..
+                    }
+                );
+            return $deferred->promise();
+        });
+    }
+
+    private function createWatchdogRequestRepeatedOnFulfilledFunction(
+        LoopInterface $loop,
+        Deferred $deferred,
+        Closure $repeatedFunction,
+        int &$numAttemptsLeft,
+        int $maxAttempts
+    ): Closure {
+        // so if the "promise function" is fulfilled, it gets repeated.
+        return function (bool $requestSucceeded) use (
+            $loop,
+            $deferred,
+            $repeatedFunction,
+            &$numAttemptsLeft,
+            $maxAttempts
+        ) {
+            if ($requestSucceeded) {
+                $deferred->resolve();
+                return;
+            }
+            if ($numAttemptsLeft == $maxAttempts) { // first attempt
+                self::StartWatchdog(); // try to start watchdog if the first attempt fails.
+            }
+            $numAttemptsLeft--;
+            if ($numAttemptsLeft <= 0) {
+                $deferred->resolve();
+                return; // do not repeat anymore, even if the watchdog is not alive
+            }
+            $loop->futureTick($repeatedFunction);
+        };
+    }
+
+    private function createWatchdogRequestRepeatedFunction(
+        LoopInterface $loop,
+        Deferred $deferred,
+        Closure $promiseFunction,
+        int &$numAttemptsLeft,
+        int $maxAttempts
+    ): Closure {
+        return function () use ($loop, $deferred, $promiseFunction, &$numAttemptsLeft, $maxAttempts) {
+            assertFulfilled(
+                $promiseFunction(),
+                $this->createWatchdogRequestRepeatedOnFulfilledFunction(
+                    $loop,
+                    $deferred,
+                    $this->createWatchdogRequestRepeatedFunction(
+                        $loop,
+                        $deferred,
+                        $promiseFunction,
+                        $numAttemptsLeft,
+                        $maxAttempts
+                    ),
+                    $numAttemptsLeft,
+                    $maxAttempts
+                )
+            );
+        };
     }
 
     /**
@@ -605,30 +702,23 @@ class Game extends Base
     private function assureWatchdogAlive(): ?PromiseInterface
     {
         // note(MH): GetWatchdogAddress is not async, but it is cached once it has been retrieved once, so that's "fine"
-        $url = $this->GetWatchdogAddress(true);
+        $url = $this->GetWatchdogAddress();
         if (empty($url)) {
             return null;
         }
-
-        // we want to use the watchdog, but first we check if it is running
-        $browser = MSPBrowserFactory::create($url);
         $deferred = new Deferred();
-        $browser
-            // any response is acceptable, even 4xx or 5xx status codes
-            ->withRejectErrorResponse(false)
-            ->withTimeout(1)
-            ->request('GET', $url)
-            ->done(
-                // watchdog is running
-                function (/*ResponseInterface $response*/) use ($deferred) {
-                    $deferred->resolve();
-                },
-                // so the Watchdog is off, and now it should be switched on
-                function (/*Exception $e*/) use ($deferred) {
-                    self::StartWatchdog();
-                    $deferred->resolve();
-                }
-            );
+        $loop = Loop::get();
+        $maxAttempts = 4;
+        $numAttemptsLeft = $maxAttempts;
+        $loop->futureTick($this->createWatchdogRequestRepeatedFunction(
+            $loop,
+            $deferred,
+            function () use ($url) {
+                return ($this->createWatchdogRequestPromiseFunction($url))();
+            },
+            $numAttemptsLeft,
+            $maxAttempts
+        ));
         return $deferred->promise();
     }
 
@@ -677,7 +767,7 @@ class Game extends Base
                                     ) {
                                         // note(MH): GetWatchdogAddress is not async, but it is cached once it
                                         //   has been retrieved once, so that's "fine"
-                                        $url = $this->GetWatchdogAddress(true)."/Watchdog/UpdateState";
+                                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
                                         $browser = MSPBrowserFactory::create($url);
                                         $postValues = [
                                             'game_session_api' => $apiRoot,
@@ -701,26 +791,33 @@ class Game extends Base
             ->then(function (ResponseInterface $response) {
                 $log = new Log();
                 $this->asyncDataTransferTo($log);
+                $log->setAsync(true); // force async in this context
 
                 $responseContent = $response->getBody()->getContents();
                 $decodedResponse = json_decode($responseContent, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    return $log->postEvent(
+                    $funcArgs = [
                         "Watchdog",
                         Log::ERROR,
                         "Received invalid response from watchdog. Response: \"".$responseContent."\"",
                         "changeWatchdogState()"
-                    );
+                    ];
+                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
+                        return $funcArgs;
+                    });
                 }
 
                 if ($decodedResponse["success"] != 1) {
-                    return $log->postEvent(
+                    $funcArgs = [
                         "Watchdog",
                         Log::ERROR,
                         "Watchdog responded with failure to change game state request. Response: \"".
                         $decodedResponse["message"]."\"",
                         "changeWatchdogState()"
-                    );
+                    ];
+                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
+                        return $funcArgs;
+                    });
                 }
                 return resolveOnFutureTick(new Deferred(), $decodedResponse)->promise();
             });
@@ -753,7 +850,7 @@ class Game extends Base
      * @return array|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetGameDetails()/*: array|PromiseInterface // <-- php 8 */
+    public function GetGameDetails(): array|PromiseInterface
     {
         $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
@@ -784,16 +881,15 @@ class Game extends Base
                 return [];
             }
 
-            $realtimePerEra = explode(",", $state["game_planning_era_realtime"]);
-            // todo: division by zero.
-            $currentEra = intval(floor($state["game_currentmonth"] / $state["game_planning_gametime"]));
-            $realtimePerEra[$currentEra] = $state["game_planning_realtime"];
-            $secondsPerMonthCurrentEra = round($state["game_planning_realtime"] / $state["game_eratime"]);
-            $monthsRemainingCurrentEra = $state["game_eratime"] - $state["game_planning_monthsdone"];
-            $totalRemainingTime = $monthsRemainingCurrentEra * $secondsPerMonthCurrentEra;
+            $realtimePerEra = filter_var_array(
+                explode(',', $state["game_planning_era_realtime"]),
+                FILTER_VALIDATE_INT
+            );
+            $totalRemainingTime = $state["game_planning_realtime"]; // remaining time current era
+            $currentEra = intval($state["game_currentmonth"] / $state["game_eratime"]);
             $nextEra = $currentEra + 1;
             while (isset($realtimePerEra[$nextEra])) {
-                $totalRemainingTime += $realtimePerEra[$nextEra];
+                $totalRemainingTime += $realtimePerEra[$nextEra]; // add set remaining time next eras
                 $nextEra++;
             }
             $runningTilTime = time() + $totalRemainingTime;

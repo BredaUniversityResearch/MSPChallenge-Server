@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "27/04/2022",
-    "data_model_hash": "209F9BD84D73DC5B7D6C120DFC87DC8DF9B722D0112BEAC21416EA995FBF6B0E",
+    "date_modified": "7/5/2023",
+    "data_model_hash": "41055308F59B88FD1642B0B6EAF07E7DB6DDD8E4786D9749026ACD51C94B8F89",
     "errors": 0,
     "editor_version": 0.0,
     "min_supported_client": "",
@@ -141,7 +141,7 @@
       ],
       "BS_Fairways|BS_Countries": [
         {
-          "message": "Can't place fairways on land",
+          "message": "Can't place Fairways on land",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "BS_Fairways",
@@ -647,7 +647,7 @@
       ],
       "BS_Main_Transmission_Lines|BS_Main_Transmission_Lines": [
         {
-          "message": "Be aware of crossing transmission lines",
+          "message": "Be aware of crossing interconnectors",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "BS_Main_Transmission_Lines",
@@ -659,7 +659,7 @@
       ],
       "BS_Main_Transmission_Lines|BS_Pipelines": [
         {
-          "message": "Be aware of transmission lines crossing pipelines",
+          "message": "Be aware of interconnectors crossing pipelines",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "BS_Main_Transmission_Lines",
@@ -671,7 +671,7 @@
       ],
       "BS_Main_Transmission_Lines|BS_Pipelines_Edit": [
         {
-          "message": "Be aware of transmission lines crossing pipelines",
+          "message": "Be aware of interconnectors crossing pipelines",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "BS_Main_Transmission_Lines",
@@ -683,7 +683,7 @@
       ],
       "BS_Main_Transmission_Lines|BS_Cables_Edit": [
         {
-          "message": "Be aware of transmission lines crossing energy cables",
+          "message": "Be aware of interconnectors crossing energy cables",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "BS_Main_Transmission_Lines",
@@ -719,7 +719,7 @@
       ],
       "BS_Pipelines|BS_Main_Transmission_Lines": [
         {
-          "message": "Be aware of pipelines crossing transmission lines",
+          "message": "Be aware of pipelines crossing interconnectors",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "BS_Pipelines",
@@ -755,7 +755,7 @@
       ],
       "BS_Cables_Edit|BS_Main_Transmission_Lines": [
         {
-          "message": "Be aware of energy cables crossing transmission lines",
+          "message": "Be aware of energy cables crossing interconnectors",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "BS_Cables_Edit",
@@ -7037,133 +7037,133 @@
                 "x": 4696.57,
                 "y": 3752.12,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4699.13,
                 "y": 3748.94,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4344.96,
                 "y": 3798.56,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4353.56,
                 "y": 3698.77,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4367.81,
                 "y": 3584.32,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4411.44,
                 "y": 3525.33,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4410.23,
                 "y": 3525.05,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4429.75,
                 "y": 3502.77,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4477.94,
                 "y": 3622.49,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4471.53,
                 "y": 3617.3,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4557.56,
                 "y": 3452.17,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4573.18,
                 "y": 3497.21,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4474.55,
                 "y": 3469.52,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4485.35,
                 "y": 3498.56,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4504.17,
                 "y": 3524.76,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4471.14,
                 "y": 3574.21,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4503.39,
                 "y": 3556.26,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4471.1,
                 "y": 3573.96,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
                 "x": 4503.45,
                 "y": 3555.94,
                 "source_plan_id": 2,
-                "restriction_message": "Be aware of energy cables crossing transmission lines"
+                "restriction_message": "Be aware of energy cables crossing interconnectors"
               },
               {
                 "issue_type": "Warning",
@@ -7653,773 +7653,942 @@
       }
     ],
     "dependencies": {
-      "groups": [{
-        "name": "Energy",
-        "entries": [{
-          "name": "Renewable Energy Sources",
-          "id": 1,
-          "multiline": true,
-          "link": null
-        }, {
-          "name": "Oil & Gas Platforms",
-          "id": 2,
-          "multiline": true,
-          "link": "Energy:Oil_%26_Gas_Installations"
-        }]
-      }, {
-        "name": "Cables and Pipelines",
-        "entries": [{
-          "name": "Energy Cables",
-          "id": 3,
-          "multiline": false,
-          "link": "Energy_Cables"
-        }, {
-          "name": "Pipelines",
-          "id": 4,
-          "multiline": false,
-          "link": "Pipelines"
-        }, {
-          "name": "Other Cables",
-          "id": 5,
-          "multiline": false,
-          "link": "cables_and_pipelines"
-        }]
-      }, {
-        "name": "Shipping",
-        "entries": [{
-          "name": "Ports",
-          "id": 6,
-          "multiline": false,
-          "link": "Ports"
-        }, {
-          "name": "Dredging Deposit Sites",
-          "id": 7,
-          "multiline": true,
-          "link": "Dumping_areas"
-        }, {
-          "name": "Sand & Gravel Extraction",
-          "id": 8,
-          "multiline": true,
-          "link": "Sand_and_Gravel_Extraction"
-        }, {
-          "name": "No Shipping Zones",
-          "id": 9,
-          "multiline": true,
-          "link": "No_shipping_zones"
-        }, {
-          "name": "IMO Shipping Lanes",
-          "id": 35,
-          "multiline": true,
-          "link": "IMO_Routes"
-        }, {
-          "name": "National Shipping Lanes",
-          "id": 36,
-          "multiline": true,
-          "link": "National_Shipping_Lanes"
-        }, {
-          "name": "Dredging Sites",
-          "id": 37,
-          "multiline": true,
-          "link": "Dredging_Sites"
-        }]
-      }, {
-        "name": "Shipping Intensity",
-        "entries": [{
-          "name": "Cargo Intensity",
-          "id": 10,
-          "multiline": false,
-          "link": "Cargo_Intensity"
-        }, {
-          "name": "Passenger Intensity",
-          "id": 11,
-          "multiline": true,
-          "link": "Shipping_Intensity"
-        }, {
-          "name": "Maintenance Intensity",
-          "id": 12,
-          "multiline": true,
-          "link": "Maintenance_Intensity"
-        }, {
-          "name": "Tanker Intensity",
-          "id": 13,
-          "multiline": false,
-          "link": "Tanker_Intensity"
-        }, {
-          "name": "Automated Vessel Intensity",
-          "id": 14,
-          "multiline": true,
-          "link": "Automated_Vessel_Intensity"
-        }]
-      }, {
-        "name": "Other human activities",
-        "entries": [{
-          "name": "Finfish Farms",
-          "id": 15,
-          "multiline": false,
-          "link": "Aquaculture"
-        }, {
-          "name": "Shellfish Farms",
-          "id": 16,
-          "multiline": false,
-          "link": "Shellfish_Farms"
-        }, {
-          "name": "Military Areas",
-          "id": 17,
-          "multiline": false,
-          "link": "Military_Areas"
-        }, {
-          "name": "Bathing Sites",
-          "id": 18,
-          "multiline": false,
-          "link": "Bathing_Sites"
-        }, {
-          "name": "Recreational Fishing",
-          "id": 19,
-          "multiline": true,
-          "link": "Recreational_Fishing"
-        }]
-      }, {
-        "name": "Fishing",
-        "entries": [{
-          "name": "Active Demersal Catch",
-          "id": 20,
-          "multiline": true,
-          "link": "Active_Demersal_Catch"
-        }, {
-          "name": "Passive Demersal Catch",
-          "id": 21,
-          "multiline": true,
-          "link": "Passive_Demersal_Catch"
-        }, {
-          "name": "Pelagic Catch",
-          "id": 22,
-          "multiline": false,
-          "link": "Pelagic_Catch"
-        }]
-      }, {
-        "name": "Environment\n& Protection",
-        "entries": [{
-          "name": "Bathymetry",
-          "id": 23,
-          "multiline": false,
-          "link": "Bathymetry"
-        }, {
-          "name": "Marine Protected Area",
-          "id": 24,
-          "multiline": true,
-          "link": "Marine_Protected_Areas"
-        }, {
-          "name": "Fisheries Closure",
-          "id": 38,
-          "multiline": false,
-          "link": "Fisheries_closure"
-        }, {
-          "name": "Cod Fisheries Closure",
-          "id": 39,
-          "multiline": true,
-          "link": "Cod_Fisheries_Closure"
-        }]
-      }, {
-        "name": "Pressures",
-        "entries": [{
-          "name": "Artificial Substrate",
-          "id": 25,
-          "multiline": false,
-          "link": "Artificial_Substrate"
-        }, {
-          "name": "Bottom Disturbance",
-          "id": 26,
-          "multiline": true,
-          "link": "Bottom_Disturbace"
-        }, {
-          "name": "Noise",
-          "id": 27,
-          "multiline": false,
-          "link": "Noise"
-        }, {
-          "name": "Surface Disturbance",
-          "id": 28,
-          "multiline": true,
-          "link": "Surface_Disturbance"
-        }]
-      }, {
-        "name": "Fish",
-        "entries": [{
-          "name": "Cod",
-          "id": 29,
-          "multiline": false,
-          "link": "Cod"
-        }, {
-          "name": "Herring Baltic Proper",
-          "id": 30,
-          "multiline": true,
-          "link": "Herring"
-        }, {
-          "name": "Sprat",
-          "id": 31,
-          "multiline": false,
-          "link": "Sprat"
-        }, {
-          "name": "Herring Bothnian Sea",
-          "id": 32,
-          "multiline": true,
-          "link": "Herring"
-        }]
-      }, {
-        "name": "Birds, Mammals, Benthos",
-        "entries": [{
-          "name": "Seal",
-          "id": 33,
-          "multiline": false,
-          "link": "Seals"
-        }, {
-          "name": "Benthos",
-          "id": 34,
-          "multiline": false,
-          "link": "Benthic_Invertebrates"
-        }]
-      }],
-      "links": [{
-        "fromId": 1,
-        "toId": 25,
-        "severity": 2,
-        "description": "Wind turbine pylons in the water as well as their foundations on the seabed. "
-      }, {
-        "fromId": 2,
-        "toId": 25,
-        "severity": 2,
-        "description": "Oil & gas rig pylons in the water as well as their foundations on the seabed. "
-      }, {
-        "fromId": 4,
-        "toId": 25,
-        "severity": 1,
-        "description": "Pipelines laid on the seabed (so not dug into it). "
-      }, {
-        "fromId": 15,
-        "toId": 25,
-        "severity": 2,
-        "description": "Fish pond / tank components in the water. "
-      }, {
-        "fromId": 16,
-        "toId": 25,
-        "severity": 2,
-        "description": "Fish pond / tank components in the water. "
-      }, {
-        "fromId": 6,
-        "toId": 25,
-        "severity": 3,
-        "description": "All the port infrastructure in the water and on the seabed. "
-      }, {
-        "fromId": 8,
-        "toId": 27,
-        "severity": 3,
-        "description": "Cranes, shovels and pipes in the water and on the seabed. "
-      }, {
-        "fromId": 37,
-        "toId": 27,
-        "severity": 3,
-        "description": "Cranes, shovels and pipes in the water and on the seabed. "
-      }, {
-        "fromId": 17,
-        "toId": 27,
-        "severity": 1,
-        "description": "Military exercises or dumping of ammunitions. "
-      }, {
-        "fromId": 2,
-        "toId": 27,
-        "severity": 2,
-        "description": "Drill pipes in the water and drill bits on the seabed. "
-      }, {
-        "fromId": 4,
-        "toId": 27,
-        "severity": 2,
-        "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
-      }, {
-        "fromId": 1,
-        "toId": 27,
-        "severity": 3,
-        "description": "Wind energy turbine construction in water and on the seabed. Diminished once completed. "
-      }, {
-        "fromId": 1,
-        "toId": 27,
-        "severity": 1,
-        "description": "Residual wind energy turbine vibrations in water and seabed. "
-      }, {
-        "fromId": 10,
-        "toId": 27,
-        "severity": 3,
-        "description": "Larger container or bulk cargo vessels sailing at sea. "
-      }, {
-        "fromId": 12,
-        "toId": 27,
-        "severity": 3,
-        "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas installations. "
-      }, {
-        "fromId": 11,
-        "toId": 27,
-        "severity": 3,
-        "description": "Ocean liners or cruise ships sailing at sea. "
-      }, {
-        "fromId": 14,
-        "toId": 27,
-        "severity": 3,
-        "description": "Automated vessels ships sailing at sea. "
-      }, {
-        "fromId": 13,
-        "toId": 27,
-        "severity": 3,
-        "description": "Large tankers typically transporting oil or gas. "
-      }, {
-        "fromId": 6,
-        "toId": 27,
-        "severity": 3,
-        "description": "Vessels arriving and departing, loading and unloading cargo and passengers. "
-      }, {
-        "fromId": 6,
-        "toId": 27,
-        "severity": 3,
-        "description": "Vessels arriving and departing, loading and unloading cargo and passengers. "
-      }, {
-        "fromId": 2,
-        "toId": 28,
-        "severity": 2,
-        "description": "Oil & gas rig pylons and drilling operations in the water. "
-      }, {
-        "fromId": 1,
-        "toId": 28,
-        "severity": 2,
-        "description": "Wind energy turbine construction on the seabed. Diminished once completed. "
-      }, {
-        "fromId": 1,
-        "toId": 28,
-        "severity": 1,
-        "description": "Wind energy turbine operation. "
-      }, {
-        "fromId": 10,
-        "toId": 28,
-        "severity": 3,
-        "description": "Larger container or bulk cargo vessels sailing at sea. "
-      }, {
-        "fromId": 12,
-        "toId": 28,
-        "severity": 3,
-        "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas installations. "
-      }, {
-        "fromId": 11,
-        "toId": 28,
-        "severity": 3,
-        "description": "Ocean liners or cruise ships sailing at sea. "
-      }, {
-        "fromId": 13,
-        "toId": 28,
-        "severity": 3,
-        "description": "Large tankers typically transporting oil or gas. "
-      }, {
-        "fromId": 14,
-        "toId": 28,
-        "severity": 3,
-        "description": "Automated vessels. "
-      }, {
-        "fromId": 16,
-        "toId": 28,
-        "severity": 1,
-        "description": "Fish pond / tank components in the water. "
-      }, {
-        "fromId": 15,
-        "toId": 28,
-        "severity": 1,
-        "description": "Fish pond / tank components in the water. "
-      }, {
-        "fromId": 17,
-        "toId": 28,
-        "severity": 1,
-        "description": "Military exercise contributes to surface disturbance. "
-      }, {
-        "fromId": 8,
-        "toId": 26,
-        "severity": 3,
-        "description": "Shovels and pipes scraping and extracting from the seabed. "
-      }, {
-        "fromId": 3,
-        "toId": 26,
-        "severity": 1,
-        "description": "Electricity cable laid on or dug into the seabed. Non-existent once completed. "
-      }, {
-        "fromId": 2,
-        "toId": 26,
-        "severity": 2,
-        "description": "Oil & gas rig drilling and extraction operations on the seabed. "
-      }, {
-        "fromId": 4,
-        "toId": 26,
-        "severity": 2,
-        "description": "Pipelines laid on the seabed or dug into it. Almost non-existent once completed. "
-      }, {
-        "fromId": 4,
-        "toId": 26,
-        "severity": 1,
-        "description": "Pipelines laid on the seabed or dug into it "
-      }, {
-        "fromId": 7,
-        "toId": 26,
-        "severity": 3,
-        "description": "Materials (sand, gravel) being dump on the seabed. "
-      }, {
-        "fromId": 37,
-        "toId": 26,
-        "severity": 3,
-        "description": "Shovels and pipes scraping and extracting from the seabed. Non-existent once completed. "
-      }, {
-        "fromId": 1,
-        "toId": 26,
-        "severity": 3,
-        "description": "Wind energy turbine construction on the seabed. Non-existent once completed. "
-      }, {
-        "fromId": 1,
-        "toId": 20,
-        "severity": -3,
-        "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. "
-      }, {
-        "fromId": 35,
-        "toId": 20,
-        "severity": -3,
-        "description": "Active demersal fleets always steer clear of known or popular shipping routes. "
-      }, {
-        "fromId": 6,
-        "toId": 20,
-        "severity": -3,
-        "description": "Bottom trawlers never fish right next to or just outside of ports, they sail out a bit first. "
-      }, {
-        "fromId": 24,
-        "toId": 20,
-        "severity": -3,
-        "description": "If desired, active demersal fleets can be banned from operating in a particular Marine Protected Area. "
-      }, {
-        "fromId": 38,
-        "toId": 20,
-        "severity": -3,
-        "description": "Active demersal fleets are banned from operating in fisheries closure. "
-      }, {
-        "fromId": 39,
-        "toId": 20,
-        "severity": -3,
-        "description": "Active demersal fleets are banned from operating in cod fisheries closure. "
-      }, {
-        "fromId": 1,
-        "toId": 21,
-        "severity": -3,
-        "description": "Passive demersal catch in the water column at a wind farm are dangerous. "
-      }, {
-        "fromId": 38,
-        "toId": 21,
-        "severity": -3,
-        "description": "Passive demersal catch are banned from operating in fisheries closure. "
-      }, {
-        "fromId": 39,
-        "toId": 21,
-        "severity": -3,
-        "description": "Passive demersal catch are banned from operating in cod fisheries closure. "
-      }, {
-        "fromId": 24,
-        "toId": 21,
-        "severity": -3,
-        "description": "If desired, passive demersal fleets can be banned from operating in a particular Marine Protected Area. "
-      }, {
-        "fromId": 35,
-        "toId": 21,
-        "severity": -3,
-        "description": "Passive demersal fleets always steer clear of known or popular shipping routes. "
-      }, {
-        "fromId": 38,
-        "toId": 22,
-        "severity": -3,
-        "description": "Pelagic catch not allowed in fisheries closure. "
-      }, {
-        "fromId": 24,
-        "toId": 22,
-        "severity": -3,
-        "description": "If desired, passive demersal fleets can be banned from operating in a particular Marine Protected Area. "
-      }, {
-        "fromId": 1,
-        "toId": 22,
-        "severity": -3,
-        "description": "Fishing in wind parks is not allowed. "
-      }, {
-        "fromId": 35,
-        "toId": 22,
-        "severity": -3,
-        "description": "Pelagic fleets always steer clear of known or popular shipping routes. "
-      }, {
-        "fromId": 1,
-        "toId": 12,
-        "severity": 1,
-        "description": "The existance of wind farms increases maintenance shipping "
-      }, {
-        "fromId": 1,
-        "toId": 10,
-        "severity": -3,
-        "description": "Cargo vessels not allowed in wind farms "
-      }, {
-        "fromId": 1,
-        "toId": 11,
-        "severity": -3,
-        "description": "Passenger ships not allowed in wind farms "
-      }, {
-        "fromId": 1,
-        "toId": 13,
-        "severity": -3,
-        "description": "Tanker vessels not allowed in wind farms "
-      }, {
-        "fromId": 1,
-        "toId": 14,
-        "severity": -3,
-        "description": "Automated vessels not allowed in wind farms "
-      }, {
-        "fromId": 2,
-        "toId": 12,
-        "severity": 1,
-        "description": "The existance of oil and gas installations increases maintenance shipping "
-      }, {
-        "fromId": 2,
-        "toId": 10,
-        "severity": -3,
-        "description": "Cargo vessels not allowed to cross oil and gas installations "
-      }, {
-        "fromId": 2,
-        "toId": 11,
-        "severity": -3,
-        "description": "Passenger ships not allowed to cross oil and gas installations "
-      }, {
-        "fromId": 2,
-        "toId": 13,
-        "severity": -3,
-        "description": "Tanker vessels not allowed to cross oil and gas installations "
-      }, {
-        "fromId": 2,
-        "toId": 14,
-        "severity": -3,
-        "description": "Automated vessels not allowed to cross oil and gas installations "
-      }, {
-        "fromId": 9,
-        "toId": 10,
-        "severity": -3,
-        "description": "There is no cargo shipping in no shipping zones for cargo vessels "
-      }, {
-        "fromId": 9,
-        "toId": 11,
-        "severity": -3,
-        "description": "There is no passenger shipping in no shipping zones for passenger vessels "
-      }, {
-        "fromId": 9,
-        "toId": 13,
-        "severity": -3,
-        "description": "There is no tanker shipping in no shipping zones for tanker vessels "
-      }, {
-        "fromId": 9,
-        "toId": 12,
-        "severity": -3,
-        "description": "There is no maintenance shipping in no shipping zones for maintenance vessels "
-      }, {
-        "fromId": 9,
-        "toId": 14,
-        "severity": -3,
-        "description": "There is no automated vessel shipping in no shipping zones for automated vessel vessels "
-      }, {
-        "fromId": 23,
-        "toId": 10,
-        "severity": -1,
-        "description": "Cargo shipping avoids shallow waters "
-      }, {
-        "fromId": 23,
-        "toId": 11,
-        "severity": -1,
-        "description": "Passenger vessels avoid shallow waters "
-      }, {
-        "fromId": 23,
-        "toId": 13,
-        "severity": -1,
-        "description": "Tanker vessels avoid shallow waters "
-      }, {
-        "fromId": 35,
-        "toId": 10,
-        "severity": 2,
-        "description": "Cargo vessels prefer IMO Routes "
-      }, {
-        "fromId": 35,
-        "toId": 13,
-        "severity": 2,
-        "description": "Tanker vessels prefer IMO Routes "
-      }, {
-        "fromId": 35,
-        "toId": 11,
-        "severity": 2,
-        "description": "Passenger vessels prefer IMO Routes "
-      }, {
-        "fromId": 36,
-        "toId": 13,
-        "severity": 2,
-        "description": "Tanker vessels prefer national shipping lanes "
-      }, {
-        "fromId": 36,
-        "toId": 10,
-        "severity": 2,
-        "description": "Cargo vessels prefer national shipping lanes "
-      }, {
-        "fromId": 27,
-        "toId": 29,
-        "severity": -2,
-        "description": "Cod avoids noisy areas "
-      }, {
-        "fromId": 26,
-        "toId": 29,
-        "severity": -2,
-        "description": "Cod avoids bottom disturbance "
-      }, {
-        "fromId": 28,
-        "toId": 29,
-        "severity": -2,
-        "description": "Cod avoids surface disturbance "
-      }, {
-        "fromId": 27,
-        "toId": 33,
-        "severity": -1,
-        "description": "Seals avoid noise "
-      }, {
-        "fromId": 28,
-        "toId": 33,
-        "severity": -1,
-        "description": "Seals avoid surface disturbance "
-      }, {
-        "fromId": 27,
-        "toId": 30,
-        "severity": -2,
-        "description": "Herring in Baltic Proper avoids noisy areas "
-      }, {
-        "fromId": 28,
-        "toId": 30,
-        "severity": -3,
-        "description": "Herring in Baltic Proper avoids surface disturbance "
-      }, {
-        "fromId": 27,
-        "toId": 32,
-        "severity": -2,
-        "description": "Herring in Bothnian Sea avoids noisy areas "
-      }, {
-        "fromId": 28,
-        "toId": 32,
-        "severity": -3,
-        "description": "Herring in Bothnian Sea avoids surface disturbance "
-      }, {
-        "fromId": 27,
-        "toId": 31,
-        "severity": -2,
-        "description": "Sprat avoids noisy areas "
-      }, {
-        "fromId": 28,
-        "toId": 31,
-        "severity": -3,
-        "description": "Sprat avoids surface disturbance "
-      }, {
-        "fromId": 26,
-        "toId": 34,
-        "severity": -3,
-        "description": "Benthos avoids bottom disturbance "
-      }, {
-        "fromId": 34,
-        "toId": 34,
-        "severity": -1,
-        "description": "Species of benthos preys among each other "
-      }, {
-        "fromId": 30,
-        "toId": 34,
-        "severity": -1,
-        "description": "Herring (Baltic Proper) feeds on benthos species "
-      }, {
-        "fromId": 32,
-        "toId": 34,
-        "severity": -1,
-        "description": "Herring (Bothnian Sea) feeds on benthos species "
-      }, {
-        "fromId": 29,
-        "toId": 34,
-        "severity": -2,
-        "description": "Cod feeds on benthos species "
-      }, {
-        "fromId": 29,
-        "toId": 31,
-        "severity": -1,
-        "description": "Cod feeds on sprat "
-      }, {
-        "fromId": 33,
-        "toId": 31,
-        "severity": -1,
-        "description": "Seals feed on sprat "
-      }, {
-        "fromId": 29,
-        "toId": 30,
-        "severity": -1,
-        "description": "Cod feeds on herring from the Baltic Proper "
-      }, {
-        "fromId": 33,
-        "toId": 30,
-        "severity": -2,
-        "description": "Seals feed on herring from the Baltic Proper "
-      }, {
-        "fromId": 33,
-        "toId": 32,
-        "severity": -1,
-        "description": "Seals feed on herring from the Bothnian Sea "
-      }, {
-        "fromId": 33,
-        "toId": 29,
-        "severity": -1,
-        "description": "Seals feed on cod "
-      }, {
-        "fromId": 20,
-        "toId": 31,
-        "severity": -1,
-        "description": "Active demersal fleets catch sprat "
-      }, {
-        "fromId": 22,
-        "toId": 31,
-        "severity": -3,
-        "description": "Pelagic fleets catch sprat "
-      }, {
-        "fromId": 20,
-        "toId": 30,
-        "severity": -2,
-        "description": "Active demersal fleets catch herring from the Baltic Proper "
-      }, {
-        "fromId": 21,
-        "toId": 30,
-        "severity": -1,
-        "description": "Passive demersal fleets catch herring from the Baltic Proper "
-      }, {
-        "fromId": 22,
-        "toId": 30,
-        "severity": -3,
-        "description": "Pelagic fleets catch herring from the Baltic Proper "
-      }, {
-        "fromId": 22,
-        "toId": 32,
-        "severity": -2,
-        "description": "Pelagic fleets catch herring from the Bothnian Sea"
-      }, {
-        "fromId": 20,
-        "toId": 29,
-        "severity": -2,
-        "description": "Active demersal fleets catch cod "
-      }, {
-        "fromId": 21,
-        "toId": 29,
-        "severity": -2,
-        "description": "Passive demersal fleets catch cod "
-      }, {
-        "fromId": 22,
-        "toId": 29,
-        "severity": -2,
-        "description": "Pelagic fleets catch cod "
-      }]
+      "groups": [
+        {
+          "name": "Energy",
+          "entries": [
+            {
+              "name": "Wind Farms",
+              "id": 1,
+              "multiline": true,
+              "link": null
+            },
+            {
+              "name": "Oil & Gas Platforms",
+              "id": 2,
+              "multiline": true,
+              "link": "Energy:Oil_%26_Gas_Installations"
+            }
+          ]
+        },
+        {
+          "name": "Cables and Pipelines",
+          "entries": [
+            {
+              "name": "Energy Cables",
+              "id": 3,
+              "multiline": false,
+              "link": "Energy_Cables"
+            },
+            {
+              "name": "Pipelines",
+              "id": 4,
+              "multiline": false,
+              "link": "Pipelines"
+            },
+            {
+              "name": "Other Cables",
+              "id": 5,
+              "multiline": false,
+              "link": "cables_and_pipelines"
+            }
+          ]
+        },
+        {
+          "name": "Shipping",
+          "entries": [
+            {
+              "name": "Ports",
+              "id": 6,
+              "multiline": false,
+              "link": "Ports"
+            },
+            {
+              "name": "Disposal Sites",
+              "id": 7,
+              "multiline": true,
+              "link": "Dumping_areas"
+            },
+            {
+              "name": "Sand & Gravel Extraction",
+              "id": 8,
+              "multiline": true,
+              "link": "Sand_and_Gravel_Extraction"
+            },
+            {
+              "name": "No Shipping Zones",
+              "id": 9,
+              "multiline": true,
+              "link": "No_shipping_zones"
+            },
+            {
+              "name": "IMO Routes",
+              "id": 35,
+              "multiline": true,
+              "link": "IMO_Routes"
+            },
+            {
+              "name": "National Shipping Lanes",
+              "id": 36,
+              "multiline": true,
+              "link": "National_Shipping_Lanes"
+            },
+            {
+              "name": "Dredging Sites",
+              "id": 37,
+              "multiline": true,
+              "link": "Dredging_Sites"
+            }
+          ]
+        },
+        {
+          "name": "Shipping Intensity",
+          "entries": [
+            {
+              "name": "Cargo Intensity",
+              "id": 10,
+              "multiline": false,
+              "link": "Cargo_Intensity"
+            },
+            {
+              "name": "Passenger Intensity",
+              "id": 11,
+              "multiline": true,
+              "link": "Shipping_Intensity"
+            },
+            {
+              "name": "Maintenance Intensity",
+              "id": 12,
+              "multiline": true,
+              "link": "Maintenance_Intensity"
+            },
+            {
+              "name": "Tanker Intensity",
+              "id": 13,
+              "multiline": false,
+              "link": "Tanker_Intensity"
+            },
+            {
+              "name": "Automated Vessel Intensity",
+              "id": 14,
+              "multiline": true,
+              "link": "Automated_Vessel_Intensity"
+            }
+          ]
+        },
+        {
+          "name": "Other human activities",
+          "entries": [
+            {
+              "name": "Fish Farms",
+              "id": 15,
+              "multiline": false,
+              "link": "Aquaculture"
+            },
+            {
+              "name": "Shellfish Farms",
+              "id": 16,
+              "multiline": false,
+              "link": "Shellfish_Farms"
+            },
+            {
+              "name": "Military Areas",
+              "id": 17,
+              "multiline": false,
+              "link": "Military_Areas"
+            },
+            {
+              "name": "Bathing Waters",
+              "id": 18,
+              "multiline": false,
+              "link": "Bathing_Sites"
+            },
+            {
+              "name": "Recreational Fishing",
+              "id": 19,
+              "multiline": true,
+              "link": "Recreational_Fishing"
+            }
+          ]
+        },
+        {
+          "name": "Fishing",
+          "entries": [
+            {
+              "name": "Active Demersal Catch",
+              "id": 20,
+              "multiline": true,
+              "link": "Active_Demersal_Catch"
+            },
+            {
+              "name": "Passive Demersal Catch",
+              "id": 21,
+              "multiline": true,
+              "link": "Passive_Demersal_Catch"
+            },
+            {
+              "name": "Pelagic Catch",
+              "id": 22,
+              "multiline": false,
+              "link": "Pelagic_Catch"
+            }
+          ]
+        },
+        {
+          "name": "Environment\n& Protection",
+          "entries": [
+            {
+              "name": "Bathymetry",
+              "id": 23,
+              "multiline": false,
+              "link": "Bathymetry"
+            },
+            {
+              "name": "Marine Protected Area",
+              "id": 24,
+              "multiline": true,
+              "link": "Marine_Protected_Areas"
+            },
+            {
+              "name": "Fisheries Closure",
+              "id": 38,
+              "multiline": false,
+              "link": "Fisheries_closure"
+            },
+            {
+              "name": "Cod Fisheries Closure",
+              "id": 39,
+              "multiline": true,
+              "link": "Cod_Fisheries_Closure"
+            }
+          ]
+        },
+        {
+          "name": "Pressures",
+          "entries": [
+            {
+              "name": "Artificial Substrate",
+              "id": 25,
+              "multiline": false,
+              "link": "Artificial_Substrate"
+            },
+            {
+              "name": "Bottom Disturbance",
+              "id": 26,
+              "multiline": true,
+              "link": "Bottom_Disturbace"
+            },
+            {
+              "name": "Noise",
+              "id": 27,
+              "multiline": false,
+              "link": "Noise"
+            },
+            {
+              "name": "Surface Disturbance",
+              "id": 28,
+              "multiline": true,
+              "link": "Surface_Disturbance"
+            }
+          ]
+        },
+        {
+          "name": "Fish",
+          "entries": [
+            {
+              "name": "Cod",
+              "id": 29,
+              "multiline": false,
+              "link": "Cod"
+            },
+            {
+              "name": "Herring Baltic Proper",
+              "id": 30,
+              "multiline": true,
+              "link": "Herring"
+            },
+            {
+              "name": "Sprat",
+              "id": 31,
+              "multiline": false,
+              "link": "Sprat"
+            },
+            {
+              "name": "Herring Bothnian Sea",
+              "id": 32,
+              "multiline": true,
+              "link": "Herring"
+            }
+          ]
+        },
+        {
+          "name": "Birds, Mammals, Benthos",
+          "entries": [
+            {
+              "name": "Seal",
+              "id": 33,
+              "multiline": false,
+              "link": "Seals"
+            },
+            {
+              "name": "Benthos",
+              "id": 34,
+              "multiline": false,
+              "link": "Benthic_Invertebrates"
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "fromId": 1,
+          "toId": 25,
+          "severity": 2,
+          "description": "Wind turbine pylons in the water as well as their foundations on the seabed. "
+        },
+        {
+          "fromId": 2,
+          "toId": 25,
+          "severity": 2,
+          "description": "Oil & gas rig pylons in the water as well as their foundations on the seabed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 25,
+          "severity": 1,
+          "description": "Pipelines laid on the seabed (so not dug into it). "
+        },
+        {
+          "fromId": 15,
+          "toId": 25,
+          "severity": 2,
+          "description": "Fish pond / tank components in the water. "
+        },
+        {
+          "fromId": 16,
+          "toId": 25,
+          "severity": 2,
+          "description": "Fish pond / tank components in the water. "
+        },
+        {
+          "fromId": 6,
+          "toId": 25,
+          "severity": 3,
+          "description": "All the port infrastructure in the water and on the seabed. "
+        },
+        {
+          "fromId": 8,
+          "toId": 27,
+          "severity": 3,
+          "description": "Cranes, shovels and pipes in the water and on the seabed. "
+        },
+        {
+          "fromId": 37,
+          "toId": 27,
+          "severity": 3,
+          "description": "Cranes, shovels and pipes in the water and on the seabed. "
+        },
+        {
+          "fromId": 17,
+          "toId": 27,
+          "severity": 1,
+          "description": "Military exercises or dumping of ammunitions. "
+        },
+        {
+          "fromId": 2,
+          "toId": 27,
+          "severity": 2,
+          "description": "Drill pipes in the water and drill bits on the seabed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 27,
+          "severity": 2,
+          "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 27,
+          "severity": 3,
+          "description": "Wind energy turbine construction in water and on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 27,
+          "severity": 1,
+          "description": "Residual wind energy turbine vibrations in water and seabed. "
+        },
+        {
+          "fromId": 10,
+          "toId": 27,
+          "severity": 3,
+          "description": "Larger container or bulk cargo vessels sailing at sea. "
+        },
+        {
+          "fromId": 12,
+          "toId": 27,
+          "severity": 3,
+          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas installations. "
+        },
+        {
+          "fromId": 11,
+          "toId": 27,
+          "severity": 3,
+          "description": "Ocean liners or cruise ships sailing at sea. "
+        },
+        {
+          "fromId": 14,
+          "toId": 27,
+          "severity": 3,
+          "description": "Automated vessels ships sailing at sea. "
+        },
+        {
+          "fromId": 13,
+          "toId": 27,
+          "severity": 3,
+          "description": "Large tankers typically transporting oil or gas. "
+        },
+        {
+          "fromId": 6,
+          "toId": 27,
+          "severity": 3,
+          "description": "Vessels arriving and departing, loading and unloading cargo and passengers. "
+        },
+        {
+          "fromId": 6,
+          "toId": 27,
+          "severity": 3,
+          "description": "Vessels arriving and departing, loading and unloading cargo and passengers. "
+        },
+        {
+          "fromId": 2,
+          "toId": 28,
+          "severity": 2,
+          "description": "Oil & gas rig pylons and drilling operations in the water. "
+        },
+        {
+          "fromId": 1,
+          "toId": 28,
+          "severity": 2,
+          "description": "Wind energy turbine construction on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 28,
+          "severity": 1,
+          "description": "Wind energy turbine operation. "
+        },
+        {
+          "fromId": 10,
+          "toId": 28,
+          "severity": 3,
+          "description": "Larger container or bulk cargo vessels sailing at sea. "
+        },
+        {
+          "fromId": 12,
+          "toId": 28,
+          "severity": 3,
+          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas installations. "
+        },
+        {
+          "fromId": 11,
+          "toId": 28,
+          "severity": 3,
+          "description": "Ocean liners or cruise ships sailing at sea. "
+        },
+        {
+          "fromId": 13,
+          "toId": 28,
+          "severity": 3,
+          "description": "Large tankers typically transporting oil or gas. "
+        },
+        {
+          "fromId": 14,
+          "toId": 28,
+          "severity": 3,
+          "description": "Automated vessels. "
+        },
+        {
+          "fromId": 16,
+          "toId": 28,
+          "severity": 1,
+          "description": "Fish pond / tank components in the water. "
+        },
+        {
+          "fromId": 15,
+          "toId": 28,
+          "severity": 1,
+          "description": "Fish pond / tank components in the water. "
+        },
+        {
+          "fromId": 17,
+          "toId": 28,
+          "severity": 1,
+          "description": "Military exercise contributes to surface disturbance. "
+        },
+        {
+          "fromId": 8,
+          "toId": 26,
+          "severity": 3,
+          "description": "Shovels and pipes scraping and extracting from the seabed. "
+        },
+        {
+          "fromId": 3,
+          "toId": 26,
+          "severity": 1,
+          "description": "Electricity cable laid on or dug into the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 2,
+          "toId": 26,
+          "severity": 2,
+          "description": "Oil & gas rig drilling and extraction operations on the seabed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 26,
+          "severity": 2,
+          "description": "Pipelines laid on the seabed or dug into it. Almost non-existent once completed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 26,
+          "severity": 1,
+          "description": "Pipelines laid on the seabed or dug into it "
+        },
+        {
+          "fromId": 7,
+          "toId": 26,
+          "severity": 3,
+          "description": "Materials (sand, gravel) being dump on the seabed. "
+        },
+        {
+          "fromId": 37,
+          "toId": 26,
+          "severity": 3,
+          "description": "Shovels and pipes scraping and extracting from the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 26,
+          "severity": 3,
+          "description": "Wind energy turbine construction on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 20,
+          "severity": -3,
+          "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. "
+        },
+        {
+          "fromId": 35,
+          "toId": 20,
+          "severity": -3,
+          "description": "Active demersal fleets always steer clear of known or popular shipping routes. "
+        },
+        {
+          "fromId": 6,
+          "toId": 20,
+          "severity": -3,
+          "description": "Bottom trawlers never fish right next to or just outside of ports, they sail out a bit first. "
+        },
+        {
+          "fromId": 24,
+          "toId": 20,
+          "severity": -3,
+          "description": "If desired, active demersal fleets can be banned from operating in a particular Marine Protected Area. "
+        },
+        {
+          "fromId": 38,
+          "toId": 20,
+          "severity": -3,
+          "description": "Active demersal fleets are banned from operating in fisheries closure. "
+        },
+        {
+          "fromId": 39,
+          "toId": 20,
+          "severity": -3,
+          "description": "Active demersal fleets are banned from operating in cod fisheries closure. "
+        },
+        {
+          "fromId": 1,
+          "toId": 21,
+          "severity": -3,
+          "description": "Passive demersal catch in the water column at a wind farm are dangerous. "
+        },
+        {
+          "fromId": 38,
+          "toId": 21,
+          "severity": -3,
+          "description": "Passive demersal catch are banned from operating in fisheries closure. "
+        },
+        {
+          "fromId": 39,
+          "toId": 21,
+          "severity": -3,
+          "description": "Passive demersal catch are banned from operating in cod fisheries closure. "
+        },
+        {
+          "fromId": 24,
+          "toId": 21,
+          "severity": -3,
+          "description": "If desired, passive demersal fleets can be banned from operating in a particular Marine Protected Area. "
+        },
+        {
+          "fromId": 35,
+          "toId": 21,
+          "severity": -3,
+          "description": "Passive demersal fleets always steer clear of known or popular shipping routes. "
+        },
+        {
+          "fromId": 38,
+          "toId": 22,
+          "severity": -3,
+          "description": "Pelagic catch not allowed in fisheries closure. "
+        },
+        {
+          "fromId": 24,
+          "toId": 22,
+          "severity": -3,
+          "description": "If desired, passive demersal fleets can be banned from operating in a particular Marine Protected Area. "
+        },
+        {
+          "fromId": 1,
+          "toId": 22,
+          "severity": -3,
+          "description": "Fishing in wind parks is not allowed. "
+        },
+        {
+          "fromId": 35,
+          "toId": 22,
+          "severity": -3,
+          "description": "Pelagic fleets always steer clear of known or popular shipping routes. "
+        },
+        {
+          "fromId": 1,
+          "toId": 12,
+          "severity": 1,
+          "description": "The existance of wind farms increases maintenance shipping "
+        },
+        {
+          "fromId": 1,
+          "toId": 10,
+          "severity": -3,
+          "description": "Cargo vessels not allowed in wind farms "
+        },
+        {
+          "fromId": 1,
+          "toId": 11,
+          "severity": -3,
+          "description": "Passenger ships not allowed in wind farms "
+        },
+        {
+          "fromId": 1,
+          "toId": 13,
+          "severity": -3,
+          "description": "Tanker vessels not allowed in wind farms "
+        },
+        {
+          "fromId": 1,
+          "toId": 14,
+          "severity": -3,
+          "description": "Automated vessels not allowed in wind farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 12,
+          "severity": 1,
+          "description": "The existance of oil and gas installations increases maintenance shipping "
+        },
+        {
+          "fromId": 2,
+          "toId": 10,
+          "severity": -3,
+          "description": "Cargo vessels not allowed to cross oil and gas installations "
+        },
+        {
+          "fromId": 2,
+          "toId": 11,
+          "severity": -3,
+          "description": "Passenger ships not allowed to cross oil and gas installations "
+        },
+        {
+          "fromId": 2,
+          "toId": 13,
+          "severity": -3,
+          "description": "Tanker vessels not allowed to cross oil and gas installations "
+        },
+        {
+          "fromId": 2,
+          "toId": 14,
+          "severity": -3,
+          "description": "Automated vessels not allowed to cross oil and gas installations "
+        },
+        {
+          "fromId": 9,
+          "toId": 10,
+          "severity": -3,
+          "description": "There is no cargo shipping in no shipping zones for cargo vessels "
+        },
+        {
+          "fromId": 9,
+          "toId": 11,
+          "severity": -3,
+          "description": "There is no passenger shipping in no shipping zones for passenger vessels "
+        },
+        {
+          "fromId": 9,
+          "toId": 13,
+          "severity": -3,
+          "description": "There is no tanker shipping in no shipping zones for tanker vessels "
+        },
+        {
+          "fromId": 9,
+          "toId": 12,
+          "severity": -3,
+          "description": "There is no maintenance shipping in no shipping zones for maintenance vessels "
+        },
+        {
+          "fromId": 9,
+          "toId": 14,
+          "severity": -3,
+          "description": "There is no automated vessel shipping in no shipping zones for automated vessel vessels "
+        },
+        {
+          "fromId": 23,
+          "toId": 10,
+          "severity": -1,
+          "description": "Cargo shipping avoids shallow waters "
+        },
+        {
+          "fromId": 23,
+          "toId": 11,
+          "severity": -1,
+          "description": "Passenger vessels avoid shallow waters "
+        },
+        {
+          "fromId": 23,
+          "toId": 13,
+          "severity": -1,
+          "description": "Tanker vessels avoid shallow waters "
+        },
+        {
+          "fromId": 35,
+          "toId": 10,
+          "severity": 2,
+          "description": "Cargo vessels prefer IMO Routes "
+        },
+        {
+          "fromId": 35,
+          "toId": 13,
+          "severity": 2,
+          "description": "Tanker vessels prefer IMO Routes "
+        },
+        {
+          "fromId": 35,
+          "toId": 11,
+          "severity": 2,
+          "description": "Passenger vessels prefer IMO Routes "
+        },
+        {
+          "fromId": 36,
+          "toId": 13,
+          "severity": 2,
+          "description": "Tanker vessels prefer national shipping lanes "
+        },
+        {
+          "fromId": 36,
+          "toId": 10,
+          "severity": 2,
+          "description": "Cargo vessels prefer national shipping lanes "
+        },
+        {
+          "fromId": 27,
+          "toId": 29,
+          "severity": -2,
+          "description": "Cod avoids noisy areas "
+        },
+        {
+          "fromId": 26,
+          "toId": 29,
+          "severity": -2,
+          "description": "Cod avoids bottom disturbance "
+        },
+        {
+          "fromId": 28,
+          "toId": 29,
+          "severity": -2,
+          "description": "Cod avoids surface disturbance "
+        },
+        {
+          "fromId": 27,
+          "toId": 33,
+          "severity": -1,
+          "description": "Seals avoid noise "
+        },
+        {
+          "fromId": 28,
+          "toId": 33,
+          "severity": -1,
+          "description": "Seals avoid surface disturbance "
+        },
+        {
+          "fromId": 27,
+          "toId": 30,
+          "severity": -2,
+          "description": "Herring in Baltic Proper avoids noisy areas "
+        },
+        {
+          "fromId": 28,
+          "toId": 30,
+          "severity": -3,
+          "description": "Herring in Baltic Proper avoids surface disturbance "
+        },
+        {
+          "fromId": 27,
+          "toId": 32,
+          "severity": -2,
+          "description": "Herring in Bothnian Sea avoids noisy areas "
+        },
+        {
+          "fromId": 28,
+          "toId": 32,
+          "severity": -3,
+          "description": "Herring in Bothnian Sea avoids surface disturbance "
+        },
+        {
+          "fromId": 27,
+          "toId": 31,
+          "severity": -2,
+          "description": "Sprat avoids noisy areas "
+        },
+        {
+          "fromId": 28,
+          "toId": 31,
+          "severity": -3,
+          "description": "Sprat avoids surface disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 34,
+          "severity": -3,
+          "description": "Benthos avoids bottom disturbance "
+        },
+        {
+          "fromId": 34,
+          "toId": 34,
+          "severity": -1,
+          "description": "Species of benthos preys among each other "
+        },
+        {
+          "fromId": 30,
+          "toId": 34,
+          "severity": -1,
+          "description": "Herring (Baltic Proper) feeds on benthos species "
+        },
+        {
+          "fromId": 32,
+          "toId": 34,
+          "severity": -1,
+          "description": "Herring (Bothnian Sea) feeds on benthos species "
+        },
+        {
+          "fromId": 29,
+          "toId": 34,
+          "severity": -2,
+          "description": "Cod feeds on benthos species "
+        },
+        {
+          "fromId": 29,
+          "toId": 31,
+          "severity": -1,
+          "description": "Cod feeds on sprat "
+        },
+        {
+          "fromId": 33,
+          "toId": 31,
+          "severity": -1,
+          "description": "Seals feed on sprat "
+        },
+        {
+          "fromId": 29,
+          "toId": 30,
+          "severity": -1,
+          "description": "Cod feeds on herring from the Baltic Proper "
+        },
+        {
+          "fromId": 33,
+          "toId": 30,
+          "severity": -2,
+          "description": "Seals feed on herring from the Baltic Proper "
+        },
+        {
+          "fromId": 33,
+          "toId": 32,
+          "severity": -1,
+          "description": "Seals feed on herring from the Bothnian Sea "
+        },
+        {
+          "fromId": 33,
+          "toId": 29,
+          "severity": -1,
+          "description": "Seals feed on cod "
+        },
+        {
+          "fromId": 20,
+          "toId": 31,
+          "severity": -1,
+          "description": "Active demersal fleets catch sprat "
+        },
+        {
+          "fromId": 22,
+          "toId": 31,
+          "severity": -3,
+          "description": "Pelagic fleets catch sprat "
+        },
+        {
+          "fromId": 20,
+          "toId": 30,
+          "severity": -2,
+          "description": "Active demersal fleets catch herring from the Baltic Proper "
+        },
+        {
+          "fromId": 21,
+          "toId": 30,
+          "severity": -1,
+          "description": "Passive demersal fleets catch herring from the Baltic Proper "
+        },
+        {
+          "fromId": 22,
+          "toId": 30,
+          "severity": -3,
+          "description": "Pelagic fleets catch herring from the Baltic Proper "
+        },
+        {
+          "fromId": 22,
+          "toId": 32,
+          "severity": -2,
+          "description": "Pelagic fleets catch herring from the Bothnian Sea"
+        },
+        {
+          "fromId": 20,
+          "toId": 29,
+          "severity": -2,
+          "description": "Active demersal fleets catch cod "
+        },
+        {
+          "fromId": 21,
+          "toId": 29,
+          "severity": -2,
+          "description": "Passive demersal fleets catch cod "
+        },
+        {
+          "fromId": 22,
+          "toId": 29,
+          "severity": -2,
+          "description": "Pelagic fleets catch cod "
+        }
+      ]
     },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
@@ -19168,9 +19337,7 @@
           "layer_types": [
             "6MW Wind",
             "6MW Floating Wind",
-            "10MW Wind",
-            "3MW Tidal",
-            "3MW Wave"
+            "10MW Wind"
           ],
           "allowed_ships": [
             {
@@ -19611,8 +19778,8 @@
       "cellsize": 15000,
       "x_min": 4294450,
       "y_min": 3442827,
-      "y_max": 4807827,
       "x_max": 5419450,
+      "y_max": 4807827,
       "initialFishingMapping": 0.5,
       "fishingDisplayScale": 100,
       "pressures": [
@@ -19765,6 +19932,11 @@
               "construction": true
             },
             {
+              "name": "BS_Cables_Other",
+              "influence": 0.2,
+              "construction": true
+            },
+            {
               "name": "BS_Oil_Gas_Platforms",
               "influence": 0.5,
               "construction": false
@@ -19892,6 +20064,9 @@
           ]
         }
       ],
+      "fishing_policy_settings": {
+        "all_country_approval": true
+      },
       "fishing": [
         {
           "name": "Fishing intensity Active Demersal",
@@ -20135,7 +20310,7 @@
               "unit": "km2",
               "valueDependentCountry": -1
             },
-			{
+            {
               "valueName": "No protection against fisheries",
               "valueColor": "#73FFBCFF",
               "unit": "km2",
@@ -20159,19 +20334,19 @@
               "unit": "km2",
               "valueDependentCountry": -1
             },
-			{
+            {
               "valueName": "Birds directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
-			{
+            {
               "valueName": "Habitats Directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
-			{
+            {
               "valueName": "Habitat and Birds Directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
@@ -20632,7 +20807,7 @@
         "layer_name": "BS_EEZ_BSH",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Exclusive Economic Zone",
+        "layer_short": "EEZ",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -20649,7 +20824,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 1,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Exclusive Economic Zone",
         "layer_information": "",
         "layer_media": "wiki://EEZ",
         "layer_text_info": null,
@@ -20673,53 +20848,53 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Orange",
-            "approval": "NotDependent",
+            "displayName": "Pink",
+            "approval": "EEZ",
             "value": 3,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FFC86FFF",
+            "polygonColor": "#E252BBFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#FFC86FFF",
+            "displayLines": 0,
+            "lineColor": "#E252BBFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#FFC86FFF",
+            "pointColor": "#E06A7EFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Orange"
+            "media": "wiki://Pink"
           },
           "1": {
             "displayName": "Red",
-            "approval": "NotDependent",
+            "approval": "EEZ",
             "value": 4,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FF6E77FF",
+            "polygonColor": "#DC2D2AFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#FF6E77FF",
+            "displayLines": 0,
+            "lineColor": "#DC2D2AFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#FF6E77FF",
+            "pointColor": "#DC2D2AFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -20730,24 +20905,24 @@
           },
           "2": {
             "displayName": "Green",
-            "approval": "NotDependent",
+            "approval": "EEZ",
             "value": 5,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#00A854FF",
+            "polygonColor": "#007A03FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#00A854FF",
+            "displayLines": 0,
+            "lineColor": "#007A03FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#00A854FF",
+            "pointColor": "#76B129FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -20758,24 +20933,24 @@
           },
           "3": {
             "displayName": "Blue",
-            "approval": "NotDependent",
+            "approval": "EEZ",
             "value": 6,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#6DDEFFFF",
+            "polygonColor": "#4778F8FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#6DDEFFFF",
+            "lineColor": "#4778F8FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#6DDEFFFF",
+            "pointColor": "#3061E1FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -20785,81 +20960,25 @@
             "media": "wiki://Blue"
           },
           "4": {
-            "displayName": "Purple",
-            "approval": "NotDependent",
+            "displayName": "Yellow",
+            "approval": "EEZ",
             "value": 7,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#AB5FFFFF",
+            "polygonColor": "#FECC2FFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#AB5FFFFF",
+            "lineColor": "#FECC2FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#AB5FFFFF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Purple"
-          },
-          "5": {
-            "displayName": "Pink",
-            "approval": "NotDependent",
-            "value": 8,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF5CEDFF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
-            "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#FF5CEDFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FF5CEDFF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Pink"
-          },
-          "6": {
-            "displayName": "Yellow",
-            "approval": "NotDependent",
-            "value": 9,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FFF071FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
-            "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#FFF071FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFF071FF",
+            "pointColor": "#FECC2FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -20868,61 +20987,117 @@
             "availability": -12,
             "media": "wiki://Yellow"
           },
-          "7": {
-            "displayName": "Aqua",
-            "approval": "NotDependent",
-            "value": 11,
+          "5": {
+            "displayName": "Navy",
+            "approval": "EEZ",
+            "value": 8,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#0E78ABFF",
+            "polygonColor": "#0B2B81FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#0E78ABFF",
+            "lineColor": "#0B2B81FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#0E78ABFF",
+            "pointColor": "#011E6AFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://EEZ"
+            "media": "wiki://Navy"
+          },
+          "6": {
+            "displayName": "Orange",
+            "approval": "EEZ",
+            "value": 9,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#FF7B2CFF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 1,
+            "innerGlowRadius": 2,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 0,
+            "lineColor": "#FF7B2CFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#66E1E9FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Orange"
+          },
+          "7": {
+            "displayName": "Black",
+            "approval": "EEZ",
+            "value": 11,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#141214FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 1,
+            "innerGlowRadius": 2,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 0,
+            "lineColor": "#141214FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#932385FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Black"
           },
           "8": {
-            "displayName": "Lime",
+            "displayName": "Purple",
             "approval": "NotDependent",
             "value": 10,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#95FF22FF",
+            "polygonColor": "#932385FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 1,
             "innerGlowRadius": 2,
-            "innerGlowIterations": 5,
-            "innerGlowMultiplier": 1.5,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#95FF22FF",
+            "lineColor": "#932385FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#95FF22FF",
+            "pointColor": "#7A5134FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://EEZ"
+            "media": "wiki://Purple"
           }
         },
         "layer_info_properties": [
@@ -21189,12 +21364,12 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Orange",
+            "displayName": "Pink",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FFC86FFF",
+            "displayPolygon": 0,
+            "polygonColor": "#E252BBFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -21202,19 +21377,19 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FFC86FFF",
+            "lineColor": "#E252BBFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#7AC943FF",
+            "pointColor": "#E06A7EFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Orange"
+            "media": "wiki://Pink"
           },
           "1": {
             "displayName": "Red",
@@ -21222,7 +21397,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FF6E77FF",
+            "polygonColor": "#DC2D2AFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -21230,12 +21405,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FF6E77FF",
+            "lineColor": "#DC2D2AFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#DC2D2AFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -21249,8 +21424,8 @@
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00A854FF",
+            "displayPolygon": 0,
+            "polygonColor": "#007A03FF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -21258,12 +21433,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#00A854FF",
+            "lineColor": "#007A03FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#00A854FF",
+            "pointColor": "#76B129FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -21277,8 +21452,8 @@
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF00FFFF",
+            "displayPolygon": 0,
+            "polygonColor": "#4778F8FF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -21286,12 +21461,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#6DDEFFFF",
+            "lineColor": "#4778F8FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#3061E1FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -21301,68 +21476,12 @@
             "media": "wiki://Blue"
           },
           "4": {
-            "displayName": "Purple",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#AB5FFFFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#AB5FFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Purple"
-          },
-          "5": {
-            "displayName": "Pink",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF5CEDFF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#FF5CEDFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Pink"
-          },
-          "6": {
             "displayName": "Yellow",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FFF071FF",
+            "polygonColor": "#FECC2FFF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -21370,12 +21489,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FFF071FF",
+            "lineColor": "#FECC2FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#8080FF80",
+            "pointColor": "#FECC2FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -21384,13 +21503,13 @@
             "availability": -12,
             "media": "wiki://Yellow"
           },
-          "7": {
-            "displayName": "Aqua",
+          "5": {
+            "displayName": "Navy",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#0E78ABFF",
+            "polygonColor": "#0B2B81FF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -21398,27 +21517,83 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#0E78ABFF",
+            "lineColor": "#0B2B81FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#0E78ABFF",
+            "pointColor": "#011E6AFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Territorial_Waters"
+            "media": "wiki://Navy"
+          },
+          "6": {
+            "displayName": "Orange",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 0,
+            "polygonColor": "#FF7B2CFF",
+            "polygonPatternName": "5",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#FF7B2CFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#66E1E9FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Orange"
+          },
+          "7": {
+            "displayName": "Black",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 0,
+            "polygonColor": "#141214FF",
+            "polygonPatternName": "5",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#141214FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#932385FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Black"
           },
           "8": {
-            "displayName": "Lime",
+            "displayName": "Purple",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#95FF22FF",
+            "displayPolygon": 0,
+            "polygonColor": "#932385FF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -21426,19 +21601,19 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#95FF22FF",
+            "lineColor": "#932385FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#95FF22FF",
+            "pointColor": "#7A5134FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Territorial_Waters"
+            "media": "wiki://Purple"
           }
         },
         "layer_info_properties": [
@@ -21462,7 +21637,7 @@
         "layer_name": "BS_Populated_Places",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Populated Places",
+        "layer_short": "Main Cities",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -21474,9 +21649,9 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 1,
+        "layer_selectable": 0,
         "layer_editable": 0,
-        "layer_toggleable": 1,
+        "layer_toggleable": 0,
         "layer_active_on_start": 1,
         "layer_green": 0,
         "layer_tooltip": "Places with population above 100.000 inhabitants",
@@ -21515,7 +21690,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Cities",
+            "displayName": "Main Cities",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -22078,7 +22253,7 @@
         "layer_name": "BS_Wave_Height",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Wave height",
+        "layer_short": "Wave Height",
         "layer_category": "management",
         "layer_subcategory": "environmental_conditions",
         "layer_download_from_geoserver": 1,
@@ -22362,7 +22537,7 @@
             "media": "wiki://Sediments"
           },
           "1": {
-            "displayName": "Mud and Clay",
+            "displayName": "Mud & Clay",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -23284,7 +23459,7 @@
       {
         "layer_name": "BS_Topography",
         "layer_geotype": "raster",
-        "layer_entity_value_max": 1000,
+        "layer_entity_value_max": 1000.0,
         "layer_short": "Topography",
         "layer_category": "management",
         "layer_subcategory": "governance",
@@ -23340,7 +23515,7 @@
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
             "lineColor": "#EAFEBC00",
-            "lineWidth": 0,
+            "lineWidth": 0.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -23538,28 +23713,28 @@
         "layer_editing_type": "",
         "layer_special_entity_type": "Default",
         "layer_depth": -2,
-        "layer_property_as_type": null,
+        "layer_property_as_type": "Type_1",
         "layer_type": {
           "0": {
-            "displayName": "Bad",
+            "displayName": "Good Status",
             "approval": "NotDependent",
             "value": 0,
-            "map_type": null,
+            "map_type": "Good",
             "displayPolygon": 1,
-            "polygonColor": "#FF535380",
+            "polygonColor": "#039E1F60",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#FF535380",
+            "displayLines": 1,
+            "lineColor": "#039E1F60",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#E8740060",
+            "pointColor": "#039E1F60",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -23569,25 +23744,25 @@
             "media": "wiki://Eutrophication_Status"
           },
           "1": {
-            "displayName": "Moderate",
+            "displayName": "Moderate Status",
             "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
+            "value": 1,
+            "map_type": "Moderate",
             "displayPolygon": 1,
-            "polygonColor": "#FDE11E80",
+            "polygonColor": "#00E10060",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#FDE11E80",
+            "displayLines": 1,
+            "lineColor": "#00E10060",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#FDE11E80",
+            "pointColor": "#00E10060",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -23597,25 +23772,25 @@
             "media": "wiki://Eutrophication_Status"
           },
           "2": {
-            "displayName": "Good",
+            "displayName": "Poor Status",
             "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
+            "value": 2,
+            "map_type": "Poor",
             "displayPolygon": 1,
-            "polygonColor": "#238B4580",
+            "polygonColor": "#FF952B60",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#238B4580",
+            "displayLines": 1,
+            "lineColor": "#FF952B60",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#74C47680",
+            "pointColor": "#FF952B60",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -23625,25 +23800,53 @@
             "media": "wiki://Eutrophication_Status"
           },
           "3": {
-            "displayName": "Not Assessed",
+            "displayName": "Bad Status",
             "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
+            "value": 3,
+            "map_type": "Bad",
             "displayPolygon": 1,
-            "polygonColor": "#E3E3E380",
+            "polygonColor": "#D80A0A60",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#9E9E9E80",
+            "displayLines": 1,
+            "lineColor": "#D80A0A60",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#027B1780",
+            "pointColor": "#D80A0A60",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Eutrophication_Status"
+          },
+          "4": {
+            "displayName": "Not Assessed",
+            "approval": "NotDependent",
+            "value": 4,
+            "map_type": "Not Assessed",
+            "displayPolygon": 1,
+            "polygonColor": "#FFFFFF60",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#FFFFFF60",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#FFFFFF60",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -23890,7 +24093,7 @@
         "layer_name": "BS_Bathing_sites",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Bathing Sites",
+        "layer_short": "Bathing Waters",
         "layer_category": "activities",
         "layer_subcategory": "recreational",
         "layer_download_from_geoserver": 1,
@@ -23907,7 +24110,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Bathing sites with water quality",
+        "layer_tooltip": "Water quality of bathing waters",
         "layer_information": "",
         "layer_media": "wiki://Bathing_Sites",
         "layer_text_info": null,
@@ -23935,7 +24138,7 @@
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
+            "displayPolygon": 0,
             "polygonColor": "#6CFF1C80",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
@@ -23943,15 +24146,15 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#6CFF1C80",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#EFEDF5FF",
+            "pointColor": "#D7191CB4",
             "pointSize": 0.4,
-            "pointSpriteName": "None",
+            "pointSpriteName": "Bathing",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -23963,7 +24166,7 @@
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
+            "displayPolygon": 0,
             "polygonColor": "#BCBDDCFF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
@@ -23971,15 +24174,15 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#45C60080",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#BCBDDCFF",
+            "displayPoints": 1,
+            "pointColor": "#FEFE12B4",
             "pointSize": 0.4,
-            "pointSpriteName": "None",
+            "pointSpriteName": "Bathing",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -23991,7 +24194,7 @@
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
+            "displayPolygon": 0,
             "polygonColor": "#33910080",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
@@ -23999,15 +24202,15 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#33910080",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#756BB1FF",
+            "pointColor": "#0090F5FF",
             "pointSize": 0.4,
-            "pointSpriteName": "None",
+            "pointSpriteName": "Bathing",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -24268,7 +24471,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Military Areas",
         "layer_category": "management",
-        "layer_subcategory": "restricted_zones",
+        "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -24530,7 +24733,7 @@
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
+            "displayPolygon": 0,
             "polygonColor": "#000000FF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
@@ -24538,14 +24741,14 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#000000FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.6,
+            "displayPoints": 1,
+            "pointColor": "#1156A2FF",
+            "pointSize": 0.8,
             "pointSpriteName": "Ship",
             "description": "",
             "capacity": 0,
@@ -24631,7 +24834,7 @@
         "layer_name": "BS_Shipping_Lanes",
         "layer_geotype": "line",
         "layer_entity_value_max": null,
-        "layer_short": "IMO Shipping Lanes",
+        "layer_short": "IMO Routes",
         "layer_category": "activities",
         "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 1,
@@ -24677,7 +24880,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#4776E6FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -24685,7 +24888,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#4776E6FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 2.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24705,7 +24908,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#586DE6FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -24713,7 +24916,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#586DE6FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 2.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24733,7 +24936,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#6A65E7FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -24741,7 +24944,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#6A65E7FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 2.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24761,7 +24964,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#7C5CE8FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -24769,7 +24972,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#7C5CE8FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 2.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24789,7 +24992,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#8E54E9FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -24797,7 +25000,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#8E54E9FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 2.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -24991,7 +25194,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#4776E6FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -24999,7 +25202,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#4776E6FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -25019,7 +25222,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#586DE6FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25027,7 +25230,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#586DE6FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -25047,7 +25250,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#6A65E7FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25055,7 +25258,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#6A65E7FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -25075,7 +25278,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#7C5CE8FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25083,7 +25286,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#7C5CE8FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -25103,7 +25306,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#8E54E9FF",
+            "polygonColor": "#1156A2FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25111,7 +25314,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#8E54E9FF",
+            "lineColor": "#00346EFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -25202,12 +25405,12 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Cargo",
+            "displayName": "default",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FF512FFF",
+            "polygonColor": "#39FF63FF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25215,130 +25418,18 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#FF512FFF",
+            "lineColor": "#39FF63FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#006A15FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": " Container, Liquid Bulk, Dry Bulk & Cargo",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Fairways"
-          },
-          "1": {
-            "displayName": "Passenger",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#F64540FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#F64540FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "Cruise & Passenger",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Fairways"
-          },
-          "2": {
-            "displayName": "Maintenance",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#EE3A52FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#EE3A52FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Fairways"
-          },
-          "3": {
-            "displayName": "Tanker",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#E52F64FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#E52F64FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "Oil & Gas",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Fairways"
-          },
-          "4": {
-            "displayName": "Automated Vessels",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#DD2476FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#DD2476FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "All Automated Vessels",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 360,
             "media": "wiki://Fairways"
           }
         },
@@ -25437,7 +25528,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#000080FF",
+            "polygonColor": "#2B8FFFFF",
             "polygonPatternName": "26",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25445,12 +25536,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#000080FF",
+            "lineColor": "#210B2CFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#55286FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -25465,7 +25556,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#0000D0FF",
+            "polygonColor": "#2B8FFFFF",
             "polygonPatternName": "26",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25473,12 +25564,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#0000D0FF",
+            "lineColor": "#210B2CFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#55286FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -25493,7 +25584,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#2020FFFF",
+            "polygonColor": "#2B8FFFFF",
             "polygonPatternName": "26",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25501,12 +25592,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#2020FFFF",
+            "lineColor": "#210B2CFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#55286FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -25521,7 +25612,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#6A6AFFFF",
+            "polygonColor": "#2B8FFFFF",
             "polygonPatternName": "26",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25529,12 +25620,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#6A6AFFFF",
+            "lineColor": "#210B2CFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#55286FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -25549,7 +25640,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#B5B5FFFF",
+            "polygonColor": "#2B8FFFFF",
             "polygonPatternName": "26",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -25557,12 +25648,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#B5B5FFFF",
+            "lineColor": "#210B2CFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#000000FF",
+            "pointColor": "#55286FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -26446,7 +26537,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#A0522DFF",
-            "polygonPatternName": "1",
+            "polygonPatternName": "28",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -26587,7 +26678,7 @@
         "layer_name": "BS_Sand_Gravel_Extraction",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Sand and Gravel Extraction",
+        "layer_short": "Sand & Gravel Extraction",
         "layer_category": "activities",
         "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 1,
@@ -26634,7 +26725,7 @@
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#A0522DFF",
-            "polygonPatternName": "6",
+            "polygonPatternName": "28",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -26662,7 +26753,7 @@
         "layer_name": "BS_Dredging_Deposit_Sites",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Dredging Deposit Sites",
+        "layer_short": "Disposal Sites",
         "layer_category": "activities",
         "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 1,
@@ -26703,13 +26794,13 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Deposit",
+            "displayName": "Disposal Site",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#A0522DFF",
-            "polygonPatternName": "1",
+            "polygonPatternName": "31",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -26864,9 +26955,9 @@
         "layer_name": "BS_Shipping_Intensity_Total_Raster",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Shipping Intensity Total",
+        "layer_short": "Total Shipping Intensity",
         "layer_category": "activities",
-        "layer_subcategory": "shipping_activity",
+        "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
@@ -27051,9 +27142,9 @@
         "layer_name": "BS_Shipping_Intensity_raster",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Shipping Intensity",
+        "layer_short": "Total Shipping Intensity (Simulated)",
         "layer_category": "activities",
-        "layer_subcategory": "shipping_activity",
+        "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
@@ -27068,7 +27159,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "The sum of all shipping intensity in the sea basin",
+        "layer_tooltip": "Simulation of the sum of all shipping intensity in the sea basin",
         "layer_information": "",
         "layer_media": "wiki://Shipping_Intensity",
         "layer_text_info": null,
@@ -27238,9 +27329,9 @@
         "layer_name": "BS_Cargo_Intensity_Raster",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cargo Intensity",
+        "layer_short": "Cargo Shipping Intensity (Simulated)",
         "layer_category": "activities",
-        "layer_subcategory": "shipping_activity",
+        "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
@@ -27255,7 +27346,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "General Cargo, Containers & Bulk Intensity",
+        "layer_tooltip": "Simulated shipping intensity of General Cargo, Containers & Bulk vessels",
         "layer_information": "",
         "layer_media": "wiki://Cargo_Intensity",
         "layer_text_info": null,
@@ -27425,9 +27516,9 @@
         "layer_name": "BS_Passenger_Intensity_Raster",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Passenger Intensity",
+        "layer_short": "Passenger Shipping Intensity (Simulated)",
         "layer_category": "activities",
-        "layer_subcategory": "shipping_activity",
+        "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
@@ -27442,7 +27533,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Passenger ship & Cruise liners",
+        "layer_tooltip": "Simulation of Passenger ship & Cruise liners shipping intensity",
         "layer_information": "",
         "layer_media": "wiki://Passenger_Intensity",
         "layer_text_info": null,
@@ -27612,9 +27703,9 @@
         "layer_name": "BS_Maintenance_Intensity_Raster",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Maintenance Intensity",
+        "layer_short": "Maintenance Shipping Intensity (Simulated)",
         "layer_category": "activities",
-        "layer_subcategory": "shipping_activity",
+        "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
@@ -27629,7 +27720,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Maintenance ship traversing between high maintenance items & the nearest port",
+        "layer_tooltip": "Simulation of maintenance ship traversing between high maintenance items & the nearest port",
         "layer_information": "",
         "layer_media": "wiki://Maintenance_Intensity",
         "layer_text_info": null,
@@ -27799,9 +27890,9 @@
         "layer_name": "BS_Tanker_Intensity_Raster",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Tanker Intensity",
+        "layer_short": "Tanker Shipping Intensity (Simulated)",
         "layer_category": "activities",
-        "layer_subcategory": "shipping_activity",
+        "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
@@ -27816,7 +27907,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Intensity of tanker vessels (Liquidbulk)",
+        "layer_tooltip": "Simulation of the shipping intensity of tanker vessels (Liquidbulk)",
         "layer_information": "",
         "layer_media": "wiki://Tanker_Intensity",
         "layer_text_info": null,
@@ -27986,9 +28077,9 @@
         "layer_name": "BS_AutomatedVessels_Intensity_Raster",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Automated Vessel Intensity",
+        "layer_short": "Automated Vessels Shipping Intensity (Simulated)",
         "layer_category": "activities",
-        "layer_subcategory": "shipping_activity",
+        "layer_subcategory": "shipping",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
@@ -28003,7 +28094,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Automated Vessel Intensity",
+        "layer_tooltip": "Simulation of Automated Vessel Shipping Intensity",
         "layer_information": "",
         "layer_media": "wiki://Automated_Vessel_Intensity",
         "layer_text_info": null,
@@ -28173,7 +28264,7 @@
         "layer_name": "BS_Wind_Farms_existing",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Renewable Energy Sources",
+        "layer_short": "Wind Farms",
         "layer_category": "activities",
         "layer_subcategory": "energy",
         "layer_download_from_geoserver": 1,
@@ -28305,62 +28396,6 @@
             "pointSpriteName": "None",
             "description": "",
             "capacity": 10000000,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Wind_Farms"
-          },
-          "3": {
-            "displayName": "3MW Wave",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#F09C2B95",
-            "polygonPatternName": "12",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#A8C210FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 3000000,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Wind_Farms"
-          },
-          "4": {
-            "displayName": "3MW Tidal",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#F09C2B95",
-            "polygonPatternName": "12",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#CFED23FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 3000000,
             "investmentCost": 0.0,
             "availability": -12,
             "media": "wiki://Wind_Farms"
@@ -28515,7 +28550,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Energy Cables",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -28913,7 +28948,7 @@
         "layer_name": "BS_Transformers_Edit",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Converter Station",
+        "layer_short": "Converter Stations",
         "layer_category": "activities",
         "layer_subcategory": "energy",
         "layer_download_from_geoserver": 1,
@@ -29043,7 +29078,7 @@
         "layer_name": "BS_Oil_Gas_Platforms",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Oil and Gas Platforms",
+        "layer_short": "Oil & Gas Platforms",
         "layer_category": "activities",
         "layer_subcategory": "energy",
         "layer_download_from_geoserver": 1,
@@ -29084,7 +29119,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Operational (0MW)",
+            "displayName": "Operational",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -29112,12 +29147,12 @@
             "media": "wiki://Oil_%26_Gas_Installations"
           },
           "1": {
-            "displayName": "Decommissioned (0MW)",
+            "displayName": "Decommissioned",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#0000B3FF",
+            "polygonColor": "#3F3F3FFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -29125,12 +29160,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#0000B3FF",
+            "lineColor": "#3F3F3FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#0000B3FF",
+            "pointColor": "#3F3F3FFF",
             "pointSize": 0.5,
             "pointSpriteName": "Oilrigclosed",
             "description": "",
@@ -29140,7 +29175,7 @@
             "media": "wiki://Oil_%26_Gas_Installations"
           },
           "2": {
-            "displayName": "Closed (0MW)",
+            "displayName": "Closed",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -29168,12 +29203,12 @@
             "media": "wiki://Oil_%26_Gas_Installations"
           },
           "3": {
-            "displayName": "Other (0MW)",
+            "displayName": "Other",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FF8080FF",
+            "polygonColor": "#1F1F1FFF",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -29181,12 +29216,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#FF8080FF",
+            "lineColor": "#1F1F1FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#FF8080FF",
+            "pointColor": "#1F1F1FFF",
             "pointSize": 0.5,
             "pointSpriteName": "Oilrigclosed",
             "description": "",
@@ -29231,7 +29266,7 @@
         "layer_name": "BS_Oil_Gas_Terminals",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Oil and Gas Terminals ",
+        "layer_short": "Oil & Gas Terminals ",
         "layer_category": "activities",
         "layer_subcategory": "energy",
         "layer_download_from_geoserver": 1,
@@ -29337,7 +29372,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Pipelines",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -29427,7 +29462,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Pipelines",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -29479,12 +29514,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#5F5F5FFF",
+            "lineColor": "#3B3939FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#2E2E2EFF",
+            "pointColor": "#3B3939FF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -29507,12 +29542,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#8C8C8CFF",
+            "lineColor": "#5F5F5FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "LongDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#2E2E2EFF",
+            "pointColor": "#5F5F5FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -29535,12 +29570,40 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#8C8C8CFF",
+            "lineColor": "#5F5F5FFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "LongDash",
+            "displayPoints": 0,
+            "pointColor": "#5F5F5FFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Pipelines"
+          },
+          "3": {
+            "displayName": "Unused",
+            "approval": "NotDependent",
+            "value": 2,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#5F5F5FFF",
+            "polygonPatternName": "5",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#5F5F5FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "ShortDash",
             "displayPoints": 0,
-            "pointColor": "#2E2E2EFF",
+            "pointColor": "#5F5F5FFF",
             "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
@@ -29627,7 +29690,7 @@
         "layer_name": "BS_Wind_Farms_planned",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Potential Wind Farms (RI.SE)",
+        "layer_short": "Potential Wind Farms",
         "layer_category": "activities",
         "layer_subcategory": "energy",
         "layer_download_from_geoserver": 1,
@@ -29644,9 +29707,9 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Areas identified as having potential for wind energy production",
         "layer_information": "",
-        "layer_media": "wiki://Potential_Wind_Farms_(RI.SE)",
+        "layer_media": "wiki://Potential_Wind_Farms",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -29693,7 +29756,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Wind_Farms_(RI.SE)"
+            "media": "wiki://Potential_Wind_Farms"
           },
           "1": {
             "displayName": "2030",
@@ -29721,7 +29784,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Wind_Farms_(RI.SE)"
+            "media": "wiki://Potential_Wind_Farms"
           },
           "2": {
             "displayName": "2035",
@@ -29749,7 +29812,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Wind_Farms_(RI.SE)"
+            "media": "wiki://Potential_Wind_Farms"
           },
           "3": {
             "displayName": "2040",
@@ -29777,7 +29840,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Wind_Farms_(RI.SE)"
+            "media": "wiki://Potential_Wind_Farms"
           },
           "4": {
             "displayName": "2045",
@@ -29805,7 +29868,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Wind_Farms_(RI.SE)"
+            "media": "wiki://Potential_Wind_Farms"
           },
           "5": {
             "displayName": "2050",
@@ -29833,7 +29896,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Wind_Farms_(RI.SE)"
+            "media": "wiki://Potential_Wind_Farms"
           },
           "6": {
             "displayName": "2060",
@@ -29861,7 +29924,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Wind_Farms_(RI.SE)"
+            "media": "wiki://Potential_Wind_Farms"
           }
         },
         "layer_info_properties": [
@@ -30263,9 +30326,9 @@
         "layer_name": "BS_Cables_Wind_Farms_planned",
         "layer_geotype": "line",
         "layer_entity_value_max": null,
-        "layer_short": "Potential Cables (RI.SE)",
+        "layer_short": "Potential Energy Cables",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -30280,9 +30343,9 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Cables that were planned to serve the planned wind farms",
+        "layer_tooltip": "Potential cables for the potential wind farms",
         "layer_information": "",
-        "layer_media": "wiki://Potential_Cables_(RI.SE)",
+        "layer_media": "wiki://Potential_Energy_Cables",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -30329,7 +30392,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Cables_(RI.SE)"
+            "media": "wiki://Potential_Energy_Cables"
           },
           "1": {
             "displayName": "2030",
@@ -30357,7 +30420,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Cables_(RI.SE)"
+            "media": "wiki://Potential_Energy_Cables"
           },
           "2": {
             "displayName": "2035",
@@ -30385,7 +30448,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Cables_(RI.SE)"
+            "media": "wiki://Potential_Energy_Cables"
           },
           "3": {
             "displayName": "2040",
@@ -30413,7 +30476,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Cables_(RI.SE)"
+            "media": "wiki://Potential_Energy_Cables"
           },
           "4": {
             "displayName": "2045",
@@ -30441,7 +30504,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Cables_(RI.SE)"
+            "media": "wiki://Potential_Energy_Cables"
           },
           "5": {
             "displayName": "2050",
@@ -30469,7 +30532,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Potential_Cables_(RI.SE)"
+            "media": "wiki://Potential_Energy_Cables"
           }
         },
         "layer_info_properties": [
@@ -30591,7 +30654,7 @@
         "layer_name": "BS_Energy_Transformers",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Energy Transformers (Land Grid)",
+        "layer_short": "Converter Stations (Land Grid)",
         "layer_category": "activities",
         "layer_subcategory": "energy",
         "layer_download_from_geoserver": 1,
@@ -30610,7 +30673,7 @@
         "layer_green": 0,
         "layer_tooltip": "",
         "layer_information": "",
-        "layer_media": "wiki://Energy_Transformers_(Land_Grid)",
+        "layer_media": "wiki://Converter_Station",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -30632,7 +30695,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Transformers",
+            "displayName": "Converter Stations (Land Grid)",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -30652,12 +30715,12 @@
             "displayPoints": 0,
             "pointColor": "#FF006AFF",
             "pointSize": 0.4,
-            "pointSpriteName": "None",
+            "pointSpriteName": "Transformer",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Energy_Transformers_(Land_Grid)"
+            "media": "wiki://Converter_Station"
           }
         },
         "layer_info_properties": [
@@ -30765,9 +30828,9 @@
         "layer_name": "BS_Main_Transmission_Lines",
         "layer_geotype": "line",
         "layer_entity_value_max": null,
-        "layer_short": "Transmission Lines (Land Grid)",
+        "layer_short": "Interconnectors(Land Grid)",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -30784,7 +30847,7 @@
         "layer_green": 0,
         "layer_tooltip": "",
         "layer_information": "",
-        "layer_media": "wiki://Transmission_Lines_(Land_Grid)",
+        "layer_media": "wiki://Interconnectors_(Land_Grid)",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -30806,7 +30869,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Tranmission Lines",
+            "displayName": "Interconnectors",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -30831,7 +30894,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 2010,
-            "media": "wiki://Transmission_Lines_(Land_Grid)"
+            "media": "wiki://Interconnectors_(Land_Grid)"
           }
         },
         "layer_info_properties": [
@@ -31357,7 +31420,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Cables Other",
         "layer_category": "activities",
-        "layer_subcategory": "cables_and_pipelines",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -31681,7 +31744,7 @@
             "availability": -12,
             "media": "wiki://Natura_2000"
           },
-		  "1": {
+          "1": {
             "displayName": "Birds directive",
             "approval": "NotDependent",
             "value": 1,
@@ -32337,7 +32400,7 @@
         "layer_name": "BS_Finfish_Farms",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Finfish Farms",
+        "layer_short": "Fish Farms",
         "layer_category": "activities",
         "layer_subcategory": "aquaculture",
         "layer_download_from_geoserver": 1,
@@ -32354,7 +32417,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Aquaculture sites (Finfish production)",
+        "layer_tooltip": "Aquaculture sites (fish production)",
         "layer_information": "",
         "layer_media": "wiki://Finfish_Farms",
         "layer_text_info": null,
@@ -32378,7 +32441,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Finfish Farm",
+            "displayName": "Fish Farm",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
@@ -33070,7 +33133,7 @@
         "layer_name": "mel_Bottom_disturbance",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Bottom disturbance",
+        "layer_short": "Bottom Disturbance (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "pressure",
         "layer_download_from_geoserver": 0,
@@ -33087,7 +33150,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated production of bottom disturbance pressure",
         "layer_information": "",
         "layer_media": "wiki://Bottom_Disturbance",
         "layer_text_info": null,
@@ -33257,7 +33320,7 @@
         "layer_name": "mel_Artificial_substrate",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Artificial Substrate",
+        "layer_short": "Artificial Substrate (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "pressure",
         "layer_download_from_geoserver": 0,
@@ -33274,7 +33337,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated production of artificial substrate pressure",
         "layer_information": "",
         "layer_media": "wiki://Artificial_Substrate",
         "layer_text_info": null,
@@ -33444,7 +33507,7 @@
         "layer_name": "mel_Noise",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Noise",
+        "layer_short": "Noise (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "pressure",
         "layer_download_from_geoserver": 0,
@@ -33461,7 +33524,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated production of noise pressure",
         "layer_information": "",
         "layer_media": "wiki://Noise",
         "layer_text_info": null,
@@ -33631,7 +33694,7 @@
         "layer_name": "mel_Surface_disturbance",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Surface disturbance",
+        "layer_short": "Surface Disturbance (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "pressure",
         "layer_download_from_geoserver": 0,
@@ -33648,7 +33711,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated production of surface disturbance pressure",
         "layer_information": "",
         "layer_media": "wiki://Surface_Disturbance",
         "layer_text_info": null,
@@ -33818,7 +33881,7 @@
         "layer_name": "mel_Protection_Active_Demersal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Active Demersal",
+        "layer_short": "Protection Active Demersal (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -33835,7 +33898,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated areas of protection from active demersal fleets",
         "layer_information": "",
         "layer_media": "wiki://Protection_Active_Demersal",
         "layer_text_info": null,
@@ -34005,7 +34068,7 @@
         "layer_name": "mel_Protection_Passive_Demersal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Passive Demersal",
+        "layer_short": "Protection Passive Demersal (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -34022,7 +34085,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated areas of protection from passive demersal fleets",
         "layer_information": "",
         "layer_media": "wiki://Protection_Passive_Demersal",
         "layer_text_info": null,
@@ -34192,7 +34255,7 @@
         "layer_name": "mel_Protection_Pelagic",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Pelagic",
+        "layer_short": "Protection Pelagic (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -34209,7 +34272,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated areas of protection from pelagic fleets",
         "layer_information": "",
         "layer_media": "wiki://Protection_Pelagic",
         "layer_text_info": null,
@@ -34379,7 +34442,7 @@
         "layer_name": "mel_Cod_Biomass",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cod Biomass",
+        "layer_short": "Cod Biomass (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -34396,7 +34459,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated distribution of cod",
         "layer_information": "",
         "layer_media": "wiki://Cod",
         "layer_text_info": null,
@@ -34566,9 +34629,9 @@
         "layer_name": "mel_Seals_Biomass",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Seal Biomass",
+        "layer_short": "Seal Biomass (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "mammals",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 75,
         "layer_height": 91,
@@ -34583,7 +34646,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated distribution of seals",
         "layer_information": "",
         "layer_media": "wiki://Seal",
         "layer_text_info": null,
@@ -34753,7 +34816,7 @@
         "layer_name": "mel_Herring_Biomass_-_Baltic_Proper",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Herring Biomass - Baltic Proper",
+        "layer_short": "Herring Biomass - Baltic Proper (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -34770,7 +34833,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Baltic Proper population of Herring",
+        "layer_tooltip": "Simulated distribution of Baltic Proper population of Herring",
         "layer_information": "",
         "layer_media": "wiki://Herring",
         "layer_text_info": null,
@@ -34940,7 +35003,7 @@
         "layer_name": "mel_Herring_Biomass_-_Bothnian_Sea",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Herring Biomass - Bothnian Sea ",
+        "layer_short": "Herring Biomass - Bothnian Sea (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -34957,7 +35020,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Population of Herring from the Bothnian Sea",
+        "layer_tooltip": "Simulated distribution of the Bothnian Sea herring population",
         "layer_information": "",
         "layer_media": "wiki://Herring",
         "layer_text_info": null,
@@ -35127,7 +35190,7 @@
         "layer_name": "mel_Benthos_Biomass",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Benthos Biomass",
+        "layer_short": "Benthic Invertebrates (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "macrobenthos",
         "layer_download_from_geoserver": 0,
@@ -35144,7 +35207,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated distribution of benthic invertebrates",
         "layer_information": "",
         "layer_media": "wiki://Benthic_invertebrates",
         "layer_text_info": null,
@@ -35314,7 +35377,7 @@
         "layer_name": "mel_Sprat_Biomass",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Sprat Biomass",
+        "layer_short": "Sprat Biomass (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -35331,7 +35394,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Simulated distribution of sprat",
         "layer_information": "",
         "layer_media": "wiki://Sprat",
         "layer_text_info": null,
@@ -35501,7 +35564,7 @@
         "layer_name": "mel_Active_Demersal_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Active Demersal Catch",
+        "layer_short": "Active Demersal Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -35518,7 +35581,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "A heatmap of where and how densely the active demersal fleet actually caught its fish.",
+        "layer_tooltip": "Simulated heatmap of where and how densely the active demersal fleet actually catch fish",
         "layer_information": "",
         "layer_media": "wiki://Active_Demersal_Catch",
         "layer_text_info": null,
@@ -35688,7 +35751,7 @@
         "layer_name": "mel_Passive_Demersal_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Passive Demersal Catch",
+        "layer_short": "Passive Demersal Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -35705,7 +35768,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "A heatmap of where and how densely the passive demersal fleet actually caught its fish.",
+        "layer_tooltip": "Simulated heatmap of where and how densely the passive demersal fleet actually catch fish.",
         "layer_information": "",
         "layer_media": "wiki://Passive_Demersal_Catch",
         "layer_text_info": null,
@@ -35875,7 +35938,7 @@
         "layer_name": "mel_Pelagic_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Pelagic Catch",
+        "layer_short": "Pelagic Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -35892,7 +35955,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "A heatmap of where and how densely the pelagic fleet actually caught its fish.",
+        "layer_tooltip": "Simulation heatmap of where and how densely the pelagic fleet catch fish.",
         "layer_information": "",
         "layer_media": "wiki://Pelagic_Catch",
         "layer_text_info": null,
@@ -36225,7 +36288,7 @@
       }
     ],
     "edition_name": "Baltic Sea edition",
-    "edition_colour": "#ff7979ff",
+    "edition_colour": "#FF7979FF",
     "edition_letter": "B",
     "region": "balticline",
     "start": 2018,
@@ -36240,7 +36303,7 @@
     "user_region_manager_name": "Region Manager",
     "user_admin_color": "#FF00FFFF",
     "user_region_manager_color": "#00FFFFFF",
-    "region_base_url": "https://knowledge.mspchallenge.info/wiki/EEZ",
+    "team_info_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "restriction_point_size": 5.0,
     "wiki_base_url": "https://knowledge.mspchallenge.info/wiki/",
     "windfarm_data_api_url": null
