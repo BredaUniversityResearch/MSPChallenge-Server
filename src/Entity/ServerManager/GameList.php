@@ -8,8 +8,10 @@ use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\ServerManager\Listeners\GameListListener;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
+#[ORM\EntityListeners([GameListListener::class])]
 class GameList
 {
     #[ORM\Id]
@@ -37,7 +39,7 @@ class GameList
     private ?GameWatchdogServer $gameWatchdogServer = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $gameCreationTime = null;
+    private ?int $gameCreationTime = null;
 
     #[ORM\Column]
     private ?int $gameStartYear = null;
@@ -46,15 +48,15 @@ class GameList
     private ?int $gameEndMonth = null;
 
     #[ORM\Column]
-    private ?int $gameCurrentMonth = null;
+    private int $gameCurrentMonth = 0;
 
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $gameRunningTilTime = null;
+    private ?int $gameRunningTilTime = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $passwordAdmin = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $passwordPlayer = null;
 
     #[ORM\Column(length: 255)]
@@ -73,17 +75,25 @@ class GameList
     private ?int $playersPastHour = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $demoSession = null;
+    private int $demoSession = 0;
 
-    #[ORM\Column(length: 32)]
+    #[ORM\Column(length: 32, nullable: true)]
     private ?string $apiAccessToken = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(name: 'save_id', nullable: true, options: ['default' => null])]
     private ?GameSave $gameSave = null;
 
-    #[ORM\Column(length: 45)]
+    #[ORM\Column(length: 45, nullable: true)]
     private ?string $serverVersion = null;
+
+    /**
+     * @param string|null $name
+     */
+    public function __construct(?string $name)
+    {
+        $this->name = $name;
+    }
 
     public function getId(): ?int
     {
@@ -150,12 +160,12 @@ class GameList
         return $this;
     }
 
-    public function getGameCreationTime(): ?string
+    public function getGameCreationTime(): ?int
     {
         return $this->gameCreationTime;
     }
 
-    public function setGameCreationTime(string $gameCreationTime): self
+    public function setGameCreationTime(int $gameCreationTime): self
     {
         $this->gameCreationTime = $gameCreationTime;
 
@@ -186,7 +196,7 @@ class GameList
         return $this;
     }
 
-    public function getGameCurrentMonth(): ?int
+    public function getGameCurrentMonth(): int
     {
         return $this->gameCurrentMonth;
     }
@@ -198,12 +208,12 @@ class GameList
         return $this;
     }
 
-    public function getGameRunningTilTime(): ?string
+    public function getGameRunningTilTime(): ?int
     {
         return $this->gameRunningTilTime;
     }
 
-    public function setGameRunningTilTime(string $gameRunningTilTime): self
+    public function setGameRunningTilTime(int $gameRunningTilTime): self
     {
         $this->gameRunningTilTime = $gameRunningTilTime;
 
@@ -303,7 +313,7 @@ class GameList
         return $this;
     }
 
-    public function getDemoSession(): ?int
+    public function getDemoSession(): int
     {
         return $this->demoSession;
     }

@@ -14,6 +14,10 @@ use MessageFormatter;
 
 abstract class MSPMigration extends AbstractMigration
 {
+    private const DBNAME_SESSION_PREFIX = 'msp_session_';
+    private const DBNAME_SESSION_TEST_APPEND = 'test_';
+    private const DBNAME_SERVER_MANAGER = 'msp_server_manager';
+    private const DBNAME_SERVER_MANAGER_TEST_APPEND = '_test';
     private ?MSPDatabaseType $databaseType = null;
 
     private function validateSchema(Schema $schema): void
@@ -27,16 +31,31 @@ abstract class MSPMigration extends AbstractMigration
                 // nothing to validate
                 return;
             case MSPDatabaseType::DATABASE_TYPE_GAME_SESSION:
+                $databasePrefix = ($_ENV['APP_ENV'] != 'test') ?
+                    $_ENV['DBNAME_SESSION_PREFIX'] :
+                    $_ENV['DBNAME_SESSION_PREFIX'].self::DBNAME_SESSION_TEST_APPEND;
+                $defaultDatabasePrefix = ($_ENV['APP_ENV'] != 'test') ?
+                    self::DBNAME_SESSION_PREFIX :
+                    self::DBNAME_SESSION_PREFIX.self::DBNAME_SESSION_TEST_APPEND;
                 $this->skipIf(
-                    !Util::hasPrefix($schema->getName(), $_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_'),
+                    !Util::hasPrefix(
+                        $schema->getName(),
+                        $databasePrefix ?? $defaultDatabasePrefix
+                    ),
                     'This migrations requires a game session database. ' .
                     'Please use "--em" to set the game session entity manager. ' .
                     PHP_EOL . 'E.g. --em=msp_session_1'
                 );
                 break;
             case MSPDatabaseType::DATABASE_TYPE_SERVER_MANAGER:
+                $databaseName = ($_ENV['APP_ENV'] != 'test') ?
+                    $_ENV['DBNAME_SERVER_MANAGER'] :
+                    $_ENV['DBNAME_SERVER_MANAGER'].self::DBNAME_SERVER_MANAGER_TEST_APPEND;
+                $defaultDatabaseName = ($_ENV['APP_ENV'] != 'test') ?
+                    self::DBNAME_SERVER_MANAGER :
+                    self::DBNAME_SERVER_MANAGER.self::DBNAME_SERVER_MANAGER_TEST_APPEND;
                 $this->skipIf(
-                    $schema->getName() != ($_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager'),
+                    $schema->getName() != ($databaseName ?? $defaultDatabaseName),
                     'This migrations requires a server manager database. Please use --em=' . $schema->getName()
                 );
                 break;

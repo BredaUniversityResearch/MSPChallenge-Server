@@ -81,7 +81,7 @@
                                         <th class="text-center">Quick Actions</th>
                                     </tr>
                                     </thead>
-                                    <tbody id="sessionsListtbody" {{ turbo_stream_listen('GameList') }}>
+                                    <tbody id="sessionsListtbody">
                                         {% for game in gameList %}
                                         {{ include('new_server_manager/snippets/gamelist.html.twig', {game}) }}
                                         {% endfor %}
