@@ -132,10 +132,7 @@
             "branch": "main",
             "version": "1.0",
             "ref": "d74d4d719d5f53856c9c13544aa22d44144b1819"
-        },
-        "files": [
-            "./phpstan.neon"
-        ]
+        }
     },
     "phpunit/phpunit": {
         "version": "9.6",
@@ -317,16 +314,16 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
-    "symfony/mercure-bundle": {
-        "version": "0.3",
+    "symfony/messenger": {
+        "version": "5.4",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "0.3",
-            "ref": "851667ac03fd113c5bd2215fb743974f6709bc62"
+            "version": "5.4",
+            "ref": "8bd5f27013fb1d7217191c548e340f0bdb11912c"
         },
         "files": [
-            "./config/packages/mercure.yaml"
+            "./config/packages/messenger.yaml"
         ]
     },
     "symfony/monolog-bundle": {
@@ -461,7 +458,7 @@
         ]
     },
     "symfony/ux-turbo": {
-        "version": "v2.7.1"
+        "version": "v2.10.0"
     },
     "symfony/var-dumper": {
         "version": "v5.4.0"

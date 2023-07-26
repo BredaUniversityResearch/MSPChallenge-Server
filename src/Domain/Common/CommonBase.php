@@ -7,10 +7,13 @@ use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Log;
 use App\Domain\API\v1\Security;
 use App\Domain\Services\ConnectionManager;
+use Doctrine\DBAL\ParameterType;
 use Drift\DBAL\Connection;
+use Drift\DBAL\Result;
 use Exception;
 use React\EventLoop\Loop;
 use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
 use function App\await;
 use function App\resolveOnFutureTick;
 
@@ -117,5 +120,142 @@ abstract class CommonBase
             $this->asyncDataTransferTo($this->logger);
         }
         return $this->logger;
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public function selectRowsFromTable(
+        string $table,
+        array $whereColumnData,
+        bool $forceFirstRow = false // but note if only one row is found, that first row is still returned
+    ): array|null|PromiseInterface {
+        if (count($whereColumnData) == 2) {
+            throw new \Exception(
+                'whereColumnData needs to contain 1 or at least 3 elements: and/or, and 2+ columns-value pairs.'
+            );
+        } elseif (count($whereColumnData) > 2 &&
+            (empty($whereColumnData[0]) || ($whereColumnData[0] != 'or' && $whereColumnData[0] != 'and'))
+        ) {
+            throw new \Exception('whereColumnData 1st element needs to be "or" or "and".');
+        }
+        $andOrWhere = 'orWhere';
+        if (!empty($whereColumnData[0])) {
+            $andOrWhere = $whereColumnData[0].'Where';
+            array_shift($whereColumnData);
+        }
+        $firstLetter = substr($table, 0, 1);
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $query = $qb->select($firstLetter.'.*')
+                    ->from($table, $firstLetter);
+        $firstWhereColumn = true;
+        foreach ($whereColumnData as $key => $val) {
+            if ($firstWhereColumn) {
+                $query->where($qb->expr()->eq($key, $qb->createPositionalParameter($val)));
+                $firstWhereColumn = false;
+            } else {
+                $query->$andOrWhere($qb->expr()->eq($key, $qb->createPositionalParameter($val)));
+            }
+        }
+        $promise = $this->getAsyncDatabase()->query($query)->then(function (Result $result) use ($forceFirstRow) {
+            $allRows = $result->fetchAllRows();
+            if (empty($allRows)) {
+                return null;
+            }
+            if (count($allRows) == 1 || $forceFirstRow) {
+                return $allRows[0];
+            }
+            return $allRows;
+        });
+        return $this->isAsync() ? $promise : await($promise);
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public function insertRowIntoTable(string $table, array $columns): int|null|PromiseInterface
+    {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $query = $qb->insert($table);
+        foreach ($columns as $column => $value) {
+            if (!str_ends_with($value, '()')) { // allowing SQL functions
+                $columns[$column] = $qb->createPositionalParameter($value);
+            }
+        }
+        $query->values($columns);
+        $promise = $this->getAsyncDatabase()->query($query)
+            ->then(function (Result $result) {
+                return $result->getLastInsertedId();
+            });
+        return $this->isAsync() ? $promise : await($promise);
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public function updateRowInTable(
+        string|array $table,
+        array $columns,
+        array $whereColumnData
+    ): int|null|PromiseInterface {
+        return $this->updateOrDeleteRowInTable('update', $table, $whereColumnData, $columns);
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public function deleteRowFromTable(
+        string|array $table,
+        array $whereColumnData
+    ): int|null|PromiseInterface {
+        return $this->updateOrDeleteRowInTable('delete', $table, $whereColumnData);
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    private function updateOrDeleteRowInTable(
+        string $updateOrDelete,
+        string|array $table,
+        array $whereColumnData,
+        array $columns = []
+    ): int|null|PromiseInterface {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        if (is_array($table)) {
+            if (count($table) != 2) {
+                throw new \Exception('Table arrays need to contain exactly two values: name and alias');
+            }
+            $query = $qb->$updateOrDelete($table[0], $table[1]);
+        } else {
+            $query = $qb->$updateOrDelete($table);
+        }
+        foreach ($columns as $column => $value) {
+            if (str_ends_with($value, '()') ||
+                (is_array($table) && isset($table[1]) && substr($value, 1, 1) == '.' &&
+                    substr($value, 0, 1) == $table[1])
+            ) {
+                $query->set($column, $value); // allowing SQL functions and column references in SET clause
+            } else {
+                $query->set($column, $qb->createPositionalParameter($value));
+            }
+        }
+        if (is_null(current($whereColumnData))) {
+            $query->where($qb->expr()->isNull(key($whereColumnData)));
+        } else {
+            $query->where($qb->expr()->eq(
+                key($whereColumnData),
+                $qb->createPositionalParameter(current($whereColumnData))
+            ));
+        }
+        $promise = $this->getAsyncDatabase()->query($query)
+            ->then(function (Result $result) {
+                return $result->getAffectedRows();
+            });
+        return $this->isAsync() ? $promise : await($promise);
     }
 }

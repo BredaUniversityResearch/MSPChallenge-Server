@@ -5,8 +5,7 @@ namespace App\Domain\API\v1;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
-use function App\parallel;
-use function App\tpf;
+use function App\await;
 
 class Layer extends Base
 {
@@ -373,6 +372,9 @@ class Layer extends Base
     private function metaValueValidation(string $key, $val)
     {
         // all key-based validation first
+        if ($key == 'layer_type') {
+            return json_encode($val, JSON_FORCE_OBJECT);
+        }
         $convertZeroToNull = [
             'layer_entity_value_max' // float - used to convert 0.0 to null
         ];
@@ -400,7 +402,7 @@ class Layer extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function ImportMetaForLayer(array $layerData, int $dbLayerId)
+    public function ImportMetaForLayer(array $layerData, int $dbLayerId)
     {
         //these meta vars are to be ignored in the importer
         $ignoreList = array(
@@ -475,6 +477,63 @@ class Layer extends Base
             "UPDATE layer SET layer_type=? WHERE layer_id=?",
             array(json_encode($layerData['layer_type'], JSON_FORCE_OBJECT), $dbLayerId)
         );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function setupMetaForLayer(array $layerData)
+    {
+        $dbLayerId = $this->selectRowsFromTable('layer', ['layer_name' => $layerData['layer_name'] ?? ''])['layer_id']
+            ?? throw new Exception('Could not find layer in the database, so cannot continue.');
+        //these meta vars are to be ignored in the importer (in addition to those that don't exist in the db anyway)
+        $ignoreList = [
+            "layer_id",
+            "layer_name",
+            "layer_original_id",
+            "layer_raster"
+        ];
+        $layerColumns = [];
+        foreach (await($this->getAsyncDatabase()->queryBySQL("DESCRIBE layer")->then(function (Result $qResult) {
+                return $qResult->fetchAllRows();
+        })) as $returnedRow) {
+            $layerColumns[] = $returnedRow['Field'];
+        }
+        $layerUpdateArray = [];
+        foreach ($layerData as $key => $val) {
+            if (!in_array($key, $ignoreList) && in_array($key, $layerColumns)) {
+                $layerUpdateArray[$key] = $this->metaValueValidation($key, $val);
+            }
+        }
+        $this->updateRowInTable('layer', $layerUpdateArray, ['layer_id' => $dbLayerId]);
+        //Import raster specific information.
+        if ($layerData["layer_geotype"] == "raster") {
+            $layerRaster = $this->selectRowsFromTable('layer', ['layer_id' => $dbLayerId])['layer_raster'] ?? null;
+            $existingRasterInfo = json_decode($layerRaster, true);
+
+            if (isset($layerData["layer_raster_material"])) {
+                $existingRasterInfo["layer_raster_material"] = $layerData["layer_raster_material"];
+            }
+            if (isset($layerData["layer_raster_pattern"])) {
+                $existingRasterInfo["layer_raster_pattern"] = $layerData["layer_raster_pattern"];
+            }
+            if (isset($layerData["layer_raster_minimum_value_cutoff"])) {
+                $existingRasterInfo["layer_raster_minimum_value_cutoff"] =
+                    $layerData["layer_raster_minimum_value_cutoff"];
+            }
+            if (isset($layerData["layer_raster_color_interpolation"])) {
+                $existingRasterInfo["layer_raster_color_interpolation"] =
+                    $layerData["layer_raster_color_interpolation"];
+            }
+            if (isset($layerData["layer_raster_filter_mode"])) {
+                $existingRasterInfo["layer_raster_filter_mode"] = $layerData["layer_raster_filter_mode"];
+            }
+            $this->updateRowInTable(
+                'layer',
+                ['layer_raster' => json_encode($existingRasterInfo)],
+                ['layer_id' => $dbLayerId]
+            );
+        }
     }
 
     /**
@@ -775,5 +834,20 @@ class Layer extends Base
         $data['layer_info_properties'] = (isset($data['layer_info_properties'])) ?
             json_decode($data['layer_info_properties']) : null;
         $data['layer_text_info'] = (isset($data['layer_text_info'])) ? json_decode($data['layer_text_info']) : null;
+    }
+
+    public function getIdOrAdd(
+        array $layerColumns
+    ): int {
+        $this->setAsync(true);
+        return await(
+            $this->selectRowsFromTable('layer', ['layer_name' => $layerColumns['layer_name'] ?? ''])
+                ->then(function (array|null $result) use ($layerColumns) {
+                    if (is_null($result)) {
+                        return $this->insertRowIntoTable('layer', $layerColumns);
+                    }
+                    return $result['layer_id'];
+                })
+        );
     }
 }

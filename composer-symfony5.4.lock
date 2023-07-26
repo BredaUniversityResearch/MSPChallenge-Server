@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "806e48b3c3d6e159b942456b6792e7c5",
+    "content-hash": "8dc1922cfed1913babe3a5933ad2af54",
     "packages": [
         {
             "name": "blackfire/php-sdk",
@@ -2843,59 +2843,6 @@
             "time": "2023-04-04T09:50:52+00:00"
         },
         {
-            "name": "psr/link",
-            "version": "1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-fig/link.git",
-                "reference": "846c25f58a1f02b93a00f2404e3626b6bf9b7807"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/link/zipball/846c25f58a1f02b93a00f2404e3626b6bf9b7807",
-                "reference": "846c25f58a1f02b93a00f2404e3626b6bf9b7807",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Psr\\Link\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
-                }
-            ],
-            "description": "Common interfaces for HTTP links",
-            "homepage": "https://github.com/php-fig/link",
-            "keywords": [
-                "http",
-                "http-link",
-                "link",
-                "psr",
-                "psr-13",
-                "rest"
-            ],
-            "support": {
-                "source": "https://github.com/php-fig/link/tree/1.1.1"
-            },
-            "time": "2021-03-11T22:59:13+00:00"
-        },
-        {
             "name": "psr/log",
             "version": "2.0.0",
             "source": {
@@ -3461,24 +3408,23 @@
         },
         {
             "name": "react/promise",
-            "version": "v3.0.0",
+            "version": "v2.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "c86753c76fd3be465d93b308f18d189f01a22be4"
+                "reference": "f913fb8cceba1e6644b7b90c4bfb678ed8a3ef38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/c86753c76fd3be465d93b308f18d189f01a22be4",
-                "reference": "c86753c76fd3be465d93b308f18d189f01a22be4",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/f913fb8cceba1e6644b7b90c4bfb678ed8a3ef38",
+                "reference": "f913fb8cceba1e6644b7b90c4bfb678ed8a3ef38",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1.0"
+                "php": ">=5.4.0"
             },
             "require-dev": {
-                "phpstan/phpstan": "1.10.20 || 1.4.10",
-                "phpunit/phpunit": "^9.5 || ^7.5"
+                "phpunit/phpunit": "^9.5 || ^5.7 || ^4.8.36"
             },
             "type": "library",
             "autoload": {
@@ -3522,7 +3468,7 @@
             ],
             "support": {
                 "issues": "https://github.com/reactphp/promise/issues",
-                "source": "https://github.com/reactphp/promise/tree/v3.0.0"
+                "source": "https://github.com/reactphp/promise/tree/v2.10.0"
             },
             "funding": [
                 {
@@ -3530,7 +3476,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2023-07-11T16:12:49+00:00"
+            "time": "2023-05-02T15:15:43+00:00"
         },
         {
             "name": "react/promise-stream",
@@ -3912,6 +3858,75 @@
                 "source": "https://github.com/ringcentral/psr7/tree/master"
             },
             "time": "2018-05-29T20:21:04+00:00"
+        },
+        {
+            "name": "symfony/amqp-messenger",
+            "version": "v5.4.22",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/amqp-messenger.git",
+                "reference": "6343af983ba7460f7ea984aacb95d1ed382f6e40"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/amqp-messenger/zipball/6343af983ba7460f7ea984aacb95d1ed382f6e40",
+                "reference": "6343af983ba7460f7ea984aacb95d1ed382f6e40",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.5",
+                "symfony/deprecation-contracts": "^2.1|^3",
+                "symfony/messenger": "^5.3|^6.0"
+            },
+            "require-dev": {
+                "symfony/event-dispatcher": "^4.4|^5.0|^6.0",
+                "symfony/process": "^4.4|^5.0|^6.0",
+                "symfony/property-access": "^4.4|^5.0|^6.0",
+                "symfony/serializer": "^4.4|^5.0|^6.0"
+            },
+            "type": "symfony-messenger-bridge",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Messenger\\Bridge\\Amqp\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony AMQP extension Messenger Bridge",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/amqp-messenger/tree/v5.4.22"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2023-03-10T09:58:14+00:00"
         },
         {
             "name": "symfony/asset",
@@ -4612,6 +4627,79 @@
                 }
             ],
             "time": "2023-06-06T12:36:44+00:00"
+        },
+        {
+            "name": "symfony/doctrine-messenger",
+            "version": "v5.4.25",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/doctrine-messenger.git",
+                "reference": "96bd1e093bfa8587205f4413193545c6685d7cd6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/doctrine-messenger/zipball/96bd1e093bfa8587205f4413193545c6685d7cd6",
+                "reference": "96bd1e093bfa8587205f4413193545c6685d7cd6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.5",
+                "symfony/messenger": "^5.1|^6.0",
+                "symfony/service-contracts": "^1.1|^2|^3"
+            },
+            "conflict": {
+                "doctrine/dbal": "<2.13",
+                "doctrine/persistence": "<1.3"
+            },
+            "require-dev": {
+                "doctrine/dbal": "^2.13|^3.0",
+                "doctrine/persistence": "^1.3|^2|^3",
+                "symfony/property-access": "^4.4|^5.0|^6.0",
+                "symfony/serializer": "^4.4|^5.0|^6.0"
+            },
+            "type": "symfony-messenger-bridge",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Messenger\\Bridge\\Doctrine\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Doctrine Messenger Bridge",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/doctrine-messenger/tree/v5.4.25"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2023-06-22T08:06:06+00:00"
         },
         {
             "name": "symfony/dotenv",
@@ -5718,52 +5806,59 @@
             "time": "2023-06-26T05:58:08+00:00"
         },
         {
-            "name": "symfony/mercure",
-            "version": "v0.6.3",
+            "name": "symfony/messenger",
+            "version": "v5.4.25",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/mercure.git",
-                "reference": "af2953ae60e77628339659a31b8b2a9e40ca1dd9"
+                "url": "https://github.com/symfony/messenger.git",
+                "reference": "e3ba2b2fa84bf54923fe71bd8725968ecaaf117c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mercure/zipball/af2953ae60e77628339659a31b8b2a9e40ca1dd9",
-                "reference": "af2953ae60e77628339659a31b8b2a9e40ca1dd9",
+                "url": "https://api.github.com/repos/symfony/messenger/zipball/e3ba2b2fa84bf54923fe71bd8725968ecaaf117c",
+                "reference": "e3ba2b2fa84bf54923fe71bd8725968ecaaf117c",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1.3",
-                "symfony/deprecation-contracts": "^2.0|^3.0",
-                "symfony/http-client": "^4.4|^5.0|^6.0",
-                "symfony/http-foundation": "^4.4|^5.0|^6.0",
-                "symfony/polyfill-php80": "^1.22",
-                "symfony/web-link": "^4.4|^5.0|^6.0"
+                "php": ">=7.2.5",
+                "psr/log": "^1|^2|^3",
+                "symfony/amqp-messenger": "^5.1|^6.0",
+                "symfony/deprecation-contracts": "^2.1|^3",
+                "symfony/doctrine-messenger": "^5.1|^6.0",
+                "symfony/polyfill-php80": "^1.16",
+                "symfony/redis-messenger": "^5.1|^6.0"
+            },
+            "conflict": {
+                "symfony/event-dispatcher": "<4.4",
+                "symfony/framework-bundle": "<4.4",
+                "symfony/http-kernel": "<4.4",
+                "symfony/serializer": "<5.0"
             },
             "require-dev": {
-                "lcobucci/jwt": "^3.4|^4.0|^5.0",
+                "psr/cache": "^1.0|^2.0|^3.0",
+                "symfony/console": "^5.4|^6.0",
+                "symfony/dependency-injection": "^5.3|^6.0",
                 "symfony/event-dispatcher": "^4.4|^5.0|^6.0",
                 "symfony/http-kernel": "^4.4|^5.0|^6.0",
-                "symfony/phpunit-bridge": "^5.2|^6.0",
+                "symfony/process": "^4.4|^5.0|^6.0",
+                "symfony/property-access": "^4.4|^5.0|^6.0",
+                "symfony/routing": "^4.4|^5.0|^6.0",
+                "symfony/serializer": "^5.0|^6.0",
+                "symfony/service-contracts": "^1.1|^2|^3",
                 "symfony/stopwatch": "^4.4|^5.0|^6.0",
-                "twig/twig": "^2.0|^3.0"
+                "symfony/validator": "^4.4|^5.0|^6.0"
             },
             "suggest": {
-                "symfony/stopwatch": "Integration with the profiler performances"
+                "enqueue/messenger-adapter": "For using the php-enqueue library as a transport."
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "0.5.x-dev"
-                },
-                "thanks": {
-                    "name": "dunglas/mercure",
-                    "url": "https://github.com/dunglas/mercure"
-                }
-            },
             "autoload": {
                 "psr-4": {
-                    "Symfony\\Component\\Mercure\\": "src/"
-                }
+                    "Symfony\\Component\\Messenger\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -5771,118 +5866,34 @@
             ],
             "authors": [
                 {
-                    "name": "Kévin Dunglas",
-                    "email": "dunglas@gmail.com"
+                    "name": "Samuel Roze",
+                    "email": "samuel.roze@gmail.com"
                 },
                 {
                     "name": "Symfony Community",
                     "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "Symfony Mercure Component",
+            "description": "Helps applications send and receive messages to/from other applications or via message queues",
             "homepage": "https://symfony.com",
-            "keywords": [
-                "mercure",
-                "push",
-                "sse",
-                "updates"
-            ],
             "support": {
-                "issues": "https://github.com/symfony/mercure/issues",
-                "source": "https://github.com/symfony/mercure/tree/v0.6.3"
+                "source": "https://github.com/symfony/messenger/tree/v5.4.25"
             },
             "funding": [
                 {
-                    "url": "https://github.com/dunglas",
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
                     "type": "github"
                 },
                 {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/mercure",
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-06T22:43:27+00:00"
-        },
-        {
-            "name": "symfony/mercure-bundle",
-            "version": "v0.3.7",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/mercure-bundle.git",
-                "reference": "d2d67f89536dd274b6cdf10659660af8a2d80be0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mercure-bundle/zipball/d2d67f89536dd274b6cdf10659660af8a2d80be0",
-                "reference": "d2d67f89536dd274b6cdf10659660af8a2d80be0",
-                "shasum": ""
-            },
-            "require": {
-                "lcobucci/jwt": "^3.4|^4.0|^5.0",
-                "php": ">=7.1.3",
-                "symfony/config": "^4.4|^5.0|^6.0",
-                "symfony/dependency-injection": "^4.4|^5.4|^6.0",
-                "symfony/http-kernel": "^4.4|^5.0|^6.0",
-                "symfony/mercure": "^0.6.1",
-                "symfony/web-link": "^4.4|^5.0|^6.0"
-            },
-            "require-dev": {
-                "symfony/phpunit-bridge": "^4.3.7|^5.0|^6.0",
-                "symfony/stopwatch": "^4.3.7|^5.0|^6.0",
-                "symfony/ux-turbo": "*",
-                "symfony/var-dumper": "^4.3.7|^5.0|^6.0"
-            },
-            "suggest": {
-                "symfony/messenger": "To use the Messenger integration"
-            },
-            "type": "symfony-bundle",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "0.3.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Bundle\\MercureBundle\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Kévin Dunglas",
-                    "email": "dunglas@gmail.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony MercureBundle",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "mercure",
-                "push",
-                "sse",
-                "updates"
-            ],
-            "support": {
-                "issues": "https://github.com/symfony/mercure-bundle/issues",
-                "source": "https://github.com/symfony/mercure-bundle/tree/v0.3.7"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/dunglas",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/mercure-bundle",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2023-05-23T16:31:37+00:00"
+            "time": "2023-06-14T08:23:01+00:00"
         },
         {
             "name": "symfony/monolog-bridge",
@@ -7014,6 +7025,73 @@
                 }
             ],
             "time": "2023-02-16T09:33:00+00:00"
+        },
+        {
+            "name": "symfony/redis-messenger",
+            "version": "v5.4.23",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/redis-messenger.git",
+                "reference": "d9c0a6d7e3e925817f1ce7ec7416cc0e29b331e1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/redis-messenger/zipball/d9c0a6d7e3e925817f1ce7ec7416cc0e29b331e1",
+                "reference": "d9c0a6d7e3e925817f1ce7ec7416cc0e29b331e1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.5",
+                "symfony/deprecation-contracts": "^2.1|^3",
+                "symfony/messenger": "^5.1|^6.0"
+            },
+            "require-dev": {
+                "symfony/property-access": "^4.4|^5.0|^6.0",
+                "symfony/serializer": "^4.4|^5.0|^6.0"
+            },
+            "type": "symfony-messenger-bridge",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Messenger\\Bridge\\Redis\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Redis extension Messenger Bridge",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/redis-messenger/tree/v5.4.23"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2023-04-18T09:57:31+00:00"
         },
         {
             "name": "symfony/routing",
@@ -8200,93 +8278,6 @@
                 }
             ],
             "time": "2023-04-21T08:48:44+00:00"
-        },
-        {
-            "name": "symfony/web-link",
-            "version": "v5.4.21",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/web-link.git",
-                "reference": "57c03a5e89ed7c2d7a1a09258dfec12f95f95adb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/web-link/zipball/57c03a5e89ed7c2d7a1a09258dfec12f95f95adb",
-                "reference": "57c03a5e89ed7c2d7a1a09258dfec12f95f95adb",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2.5",
-                "psr/link": "^1.0",
-                "symfony/polyfill-php80": "^1.16"
-            },
-            "conflict": {
-                "symfony/http-kernel": "<5.3"
-            },
-            "provide": {
-                "psr/link-implementation": "1.0"
-            },
-            "require-dev": {
-                "symfony/http-kernel": "^5.3|^6.0"
-            },
-            "suggest": {
-                "symfony/http-kernel": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\WebLink\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Kévin Dunglas",
-                    "email": "dunglas@gmail.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Manages links between resources",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "dns-prefetch",
-                "http",
-                "http2",
-                "link",
-                "performance",
-                "prefetch",
-                "preload",
-                "prerender",
-                "psr13",
-                "push"
-            ],
-            "support": {
-                "source": "https://github.com/symfony/web-link/tree/v5.4.21"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2023-02-14T08:03:56+00:00"
         },
         {
             "name": "symfony/webpack-encore-bundle",

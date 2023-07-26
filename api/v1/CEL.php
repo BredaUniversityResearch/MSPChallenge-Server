@@ -288,4 +288,10 @@ class CEL extends Base
             );
         }
     }
+
+    public function onSessionSetup(array $dataModel): array|bool
+    {
+        //CEL does not need anything here to make it work
+        return true;
+    }
 }

@@ -6,6 +6,6 @@ use App\Domain\Common\Enum;
 
 class GameConfigVersionVisibilityValue extends Enum
 {
-    public const VISIBLE = 'visible';
+    public const ACTIVE = 'active';
     public const ARCHIVED = 'archived';
 }

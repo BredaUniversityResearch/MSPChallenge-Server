@@ -8,10 +8,8 @@ use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\ServerManager\Listeners\GameListListener;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
-#[ORM\EntityListeners([GameListListener::class])]
 class GameList
 {
     #[ORM\Id]
@@ -88,11 +86,11 @@ class GameList
     private ?string $serverVersion = null;
 
     /**
-     * @param string|null $name
+     * @param int|null $id
      */
-    public function __construct(?string $name)
+    public function __construct(?int $id = null)
     {
-        $this->name = $name;
+        $this->id = $id;
     }
 
     public function getId(): ?int

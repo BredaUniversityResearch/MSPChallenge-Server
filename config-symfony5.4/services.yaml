@@ -37,6 +37,41 @@ services:
         arguments:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
 
+    App\Entity\ServerManager\Listeners\GameListListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList' }
+
+    App\Entity\ServerManager\Listeners\GameConfigVersionListener:
+        arguments:
+            $kernel: '@Symfony\Component\HttpKernel\KernelInterface'
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion' }
+
+    App\Entity\ServerManager\Listeners\GameGeoServerListener:
+        arguments:
+            $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameGeoServer' }
+
+    App\Logger\GameSessionLogger:
+        arguments:
+            $kernelLogsDir: '%kernel.logs_dir%'
+            $kernelProjectDir: '%kernel.project_dir%'
+
+    App\Repository\ServerManager\GameListRepository:
+        factory: ['@doctrine.orm.msp_server_manager_entity_manager', getRepository]
+        arguments:
+            - App\Entity\ServerManager\GameList
+
+    App\MessageHandler\SessionCreationHandler:
+        arguments:
+            $mspServerManagerEntityManager: '@Doctrine\ORM\EntityManagerInterface'
+            $gameListRepository: '@App\Repository\ServerManager\GameListRepository'
+            $kernel: '@Symfony\Component\HttpKernel\KernelInterface'
+            $gameSessionChannelLogger: '@monolog.logger.game_session_channel'
+            $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+
     ServerManager\ServerManager:
 
 when@dev:
@@ -56,3 +91,13 @@ when@dev:
                     id: 'App\DataCollector\MSPDataCollector'
                     template: 'data_collector/msp.html.twig'
                 - 'controller.service_arguments'
+
+when@test:
+    services:
+        # make classes in src/DataFixtures available to be used as services
+        # and have a tag that allows actions to type-hint services
+        App\DataFixtures\:
+            resource: '../fixtures/'
+            tags:
+                - 'doctrine.fixture.orm'
+                - 'kernel.event_subscriber'

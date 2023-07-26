@@ -11,7 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: GameConfigVersionRepository::class)]
 class GameConfigVersion
 {
-    private const CONFIG_FILE_PATH_PREFIX = 'ServerManager/configfiles/';
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -62,6 +61,8 @@ class GameConfigVersion
      */
     #[ORM\Column(length: 45)]
     private ?string $clientVersions = null;
+
+    private ?array $gameConfigComplete = null;
 
     public function getId(): ?int
     {
@@ -191,14 +192,15 @@ class GameConfigVersion
         return $this;
     }
 
-    public function getContents(): ?array
+    public function getGameConfigComplete(): ?array
     {
-        if (is_file(self::CONFIG_FILE_PATH_PREFIX.$this->getFilePath())) {
-            return json_decode(
-                file_get_contents(self::CONFIG_FILE_PATH_PREFIX.$this->getFilePath()),
-                true
-            );
-        }
-        return null;
+        return $this->gameConfigComplete;
+    }
+
+    public function setGameConfigComplete(?array $gameConfigComplete): self
+    {
+        $this->gameConfigComplete = $gameConfigComplete;
+
+        return $this;
     }
 }

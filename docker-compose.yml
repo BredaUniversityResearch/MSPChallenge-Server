@@ -144,15 +144,11 @@ services:
       - php
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
 
 volumes:
   php_socket:
   caddy_data:
   caddy_config:
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
 
 ###> doctrine/doctrine-bundle ###
   db-data:

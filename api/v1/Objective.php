@@ -2,8 +2,10 @@
 
 namespace App\Domain\API\v1;
 
+use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
+use function App\await;
 
 class Objective extends Base
 {
@@ -162,6 +164,25 @@ class Objective extends Base
                 ",
                 array($objective['country_id'], $objective['title'], $objective['description'], $objective['deadline']),
                 true
+            );
+        }
+    }
+
+    public function setupObjectives($dataModel): void
+    {
+        if (!isset($dataModel['objectives'])) {
+            return;
+        }
+        foreach ($dataModel['objectives'] as $objective) {
+            $this->insertRowIntoTable(
+                'objective',
+                [
+                    'objective_country_id' => $objective['country_id'],
+                    'objective_title' => $objective['title'],
+                    'objective_description' => $objective['description'],
+                    'objective_deadline' => $objective['deadline'],
+                    'objective_lastupdate' => true
+                ]
             );
         }
     }

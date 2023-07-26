@@ -18,6 +18,7 @@ use function App\assertFulfilled;
 use function App\resolveOnFutureTick;
 use function App\await;
 use function App\tpf;
+use function App\parallel;
 
 class Game extends Base
 {
@@ -256,6 +257,72 @@ class Game extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function setupGameCountries(array $configData): void
+    {
+        $adminColor = "#FF00FFFF";
+        if (array_key_exists("user_admin_color", $configData)) {
+            $adminColor = $configData["user_admin_color"];
+        }
+        $regionManagerColor = "#00FFFFFF";
+        if (array_key_exists("user_region_manager_color", $configData)) {
+            $regionManagerColor = $configData["user_region_manager_color"];
+        }
+        $this->setAsync(true);
+        $deferred = new Deferred();
+        //Admin country.
+        $toPromiseFunctions[] = tpf(function () use ($adminColor) {
+            return $this->insertRowIntoTable(
+                'country',
+                [
+                    'country_id' => 1,
+                    'country_colour' => $adminColor,
+                    'country_is_manager' => 1
+                ]
+            );
+        });
+        //Region manager country.
+        $toPromiseFunctions[] = tpf(function () use ($regionManagerColor) {
+            return $this->insertRowIntoTable(
+                'country',
+                [
+                    'country_id' => 2,
+                    'country_colour' => $regionManagerColor,
+                    'country_is_manager' => 1
+                ]
+            );
+        });
+        foreach ($configData['meta'] as $layerMeta) {
+            if ($layerMeta['layer_name'] == $configData['countries']) {
+                foreach ($layerMeta['layer_type'] as $country) {
+                    $toPromiseFunctions[] = tpf(function () use ($country) {
+                        return $this->insertRowIntoTable(
+                            'country',
+                            [
+                                'country_id' => $country['value'],
+                                'country_name' => $country['displayName'],
+                                'country_colour' => $country['polygonColor'],
+                                'country_is_manager' => 0
+                            ]
+                        );
+                    });
+                }
+            }
+        }
+        parallel($toPromiseFunctions)->done(
+            function (/* ?Result $result */) use ($deferred) {
+                $deferred->resolve(); // we do not care about the result
+            },
+            function ($reason) use ($deferred) {
+                $deferred->reject($reason);
+            }
+        );
+        await($deferred->promise());
+    }
+
+    /**
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetupGameTime(array $data): void
     {
         $this->SetStartDate($data['start']);
@@ -275,6 +342,34 @@ class Game extends Base
                 $str,
                 max($data['era_total_months'], self::MIN_GAME_ERATIME)
             )
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function setupGame(array $data): void
+    {
+        if (!isset($data['start']) || !isset($data['era_planning_months']) ||
+            !isset($data['era_planning_realtime']) || !isset($data['era_total_months'])) {
+            return;
+        }
+        $eraRealtimeString = "";
+        $totalEras = 4;
+        $eraRealtimeString .= str_repeat($data['era_planning_realtime'] . ",", $totalEras);
+        $eraRealtimeString = substr($eraRealtimeString, 0, -1);
+
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $this->insertRowIntoTable(
+            'game',
+            [
+                'game_start' => $data['start'],
+                'game_planning_gametime' => $data['era_planning_months'],
+                'game_planning_realtime' => $data['era_planning_realtime'],
+                'game_planning_era_realtime' => $eraRealtimeString,
+                'game_eratime' => max($data['era_total_months'], self::MIN_GAME_ERATIME)
+            ]
         );
     }
 
@@ -383,8 +478,15 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Planning(int $months): void
     {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_planning_gametime=?", array($months));
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        await(
+            $this->getAsyncDatabase()->query(
+                $qb->update('game')
+                   ->set('game_planning_gametime', $qb->createPositionalParameter($months))
+            )->then(function (Result $result) {
+                return ($result->getAffectedRows() === 1);
+            })
+        );
     }
 
     /**
@@ -397,8 +499,15 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Realtime(int $realtime): void
     {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        await(
+            $this->getAsyncDatabase()->query(
+                $qb->update('game')
+                    ->set('game_planning_realtime', $qb->createPositionalParameter($realtime))
+            )->then(function (Result $result) {
+                    return ($result->getAffectedRows() === 1);
+            })
+        );
     }
 
     /**
@@ -407,8 +516,15 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function SetStartDate(int $a_startYear): void
     {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_start=?", array($a_startYear));
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        await(
+            $this->getAsyncDatabase()->query(
+                $qb->update('game')
+                   ->set('game_start', $qb->createPositionalParameter($a_startYear))
+            )->then(function (Result $result) {
+                return ($result->getAffectedRows() === 1);
+            })
+        );
     }
 
     /**
@@ -852,31 +968,29 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameDetails(): array|PromiseInterface
     {
-        $promise = $this->getAsyncDatabase()->query(
-            $this->getAsyncDatabase()->createQueryBuilder()
-                ->select(
-                    'g.game_start',
-                    'g.game_eratime',
-                    'g.game_currentmonth',
-                    'g.game_state',
-                    'g.game_planning_realtime',
-                    'g.game_planning_era_realtime',
-                    'g.game_planning_gametime',
-                    'g.game_planning_monthsdone',
-                    'COUNT(u.user_id) total',
-                    '
+        $query = $this->getAsyncDatabase()->createQueryBuilder()
+            ->select(
+                'g.game_start',
+                'g.game_eratime',
+                'g.game_currentmonth',
+                'g.game_state',
+                'g.game_planning_realtime',
+                'g.game_planning_era_realtime',
+                'g.game_planning_gametime',
+                'g.game_planning_monthsdone',
+                'COUNT(u.user_id) total',
+                '
                     sum(
                         IF(UNIX_TIMESTAMP() - u.user_lastupdate < 3600 and u.user_loggedoff = 0, 1, 0)
                     ) active_last_hour',
-                    '
+                '
                     sum(
                         IF(UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0, 1, 0)
                     ) active_last_minute'
-                )
-                ->from('game', 'g')
-                ->join('g', 'user', 'u')
-        )
-        ->then(function (Result $result) {
+            )
+            ->from('game', 'g')
+            ->join('g', 'user', 'u');
+        $promise = $this->getAsyncDatabase()->query($query)->then(function (Result $result) {
             if (null === $state = $result->fetchFirstRow()) {
                 return [];
             }
@@ -913,7 +1027,16 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCountries(): array
     {
-        return $this->getDatabase()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return await(
+            $this->getAsyncDatabase()->query(
+                $qb->select('c.*')
+                   ->from('country', 'c')
+                   ->where('country_name IS NOT NULL')
+            )->then(function (Result $result) {
+                return $result->fetchAllRows();
+            })
+        );
     }
 
     /**
@@ -928,5 +1051,10 @@ class Game extends Base
             return false;
         }
         return true;
+    }
+
+    private function getConfigFilePath(): string
+    {
+        return 'session_config_'.$this->getGameSessionId().'.json';
     }
 }

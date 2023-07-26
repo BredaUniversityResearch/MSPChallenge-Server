@@ -2,6 +2,8 @@
 
 namespace App\Domain\API\v1;
 
+use Drift\DBAL\Result;
+use function App\await;
 use Exception;
 
 class MEL extends Base
@@ -114,44 +116,92 @@ class MEL extends Base
     /**
      * @throws Exception
      */
+    public function onSessionSetup(array $dataModel): bool|array
+    {
+        $game = new Game();
+        $game->setGameSessionId($this->getGameSessionId());
+        $layer = new Layer();
+        $layer->setGameSessionId($this->getGameSessionId());
+        $config = $dataModel['MEL'];
+        if (isset($config["fishing"])) {
+            $countries = $game->GetCountries();
+            foreach ($config["fishing"] as $fleet) {
+                if (isset($fleet["initialFishingDistribution"])) {
+                    foreach ($countries as $country) {
+                        $foundCountry = false;
+                        foreach ($fleet["initialFishingDistribution"] as $distribution) {
+                            if ($distribution["country_id"] == $country["country_id"]) {
+                                $foundCountry = true;
+                                break;
+                            }
+                        }
+                        if (!$foundCountry) {
+                            $return[] = "Country with ID ".$country["country_id"].
+                                " is missing a distribution entry in the initialFishingDistribution table for fleet ".
+                                $fleet["name"]." for MEL.";
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach ($config['pressures'] as $pressure) {
+            $pressureId = $this->SetupMELLayer($pressure['name'], $config);
+            if ($pressureId != -1) {
+                foreach ($pressure['layers'] as $pressureLayer) {
+                    $layerId = $layer->selectRowsFromTable(
+                        'layer',
+                        ['layer_name' => $pressureLayer['name']]
+                    )['layer_id'] ?? null;
+                    if (!empty($layerId)) {
+                        //add a layer to the mel_layer table for faster accessing
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        await(
+                            $this->getAsyncDatabase()->query(
+                                $qb->insert('mel_layer')
+                                   ->values([
+                                       'mel_layer_pressurelayer' => $qb->createPositionalParameter($pressureId),
+                                       'mel_layer_layer_id' => $qb->createPositionalParameter($layerId)
+                                   ])
+                            )->then(function (Result $result) {
+                                return $result->getLastInsertedId();
+                            })
+                        );
+                    }
+                }
+            }
+        }
+
+        foreach ($config['outcomes'] as $outcome) {
+            $this->SetupMELLayer($outcome['name'], $config);
+        }
+        return $return ?? true;
+    }
+
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function SetupMELLayer(string $melLayerName, array $config): int
     {
         $layerName = "mel_" . str_replace(" ", "_", $melLayerName);
-        $data = $this->getDatabase()->query(
-            "SELECT layer_id, layer_raster FROM layer WHERE layer_name=?",
-            array($layerName)
-        );
-                
-        $rasterProperties = array(
+        $layer = new Layer();
+        $layer->setGameSessionId($this->getGameSessionId());
+        $layerRow = $layer->selectRowsFromTable('layer', ['layer_name' => $layerName]);
+        $layerId = $layerRow['layer_id']
+            ?? throw new \Exception(
+                'Could not set up MEL layer metadata because the layer does not exist: '.$layerName
+            );
+        $rasterProperties = [
             "url" => "$layerName.tif",
-            "boundingbox" => array(
-                array($config["x_min"], $config["y_min"]), array($config["x_max"], $config["y_max"])
-            )
-        );
-
-        if (empty($data)) {
-            //create new layer
-            $rasterFormat = json_encode($rasterProperties);
-            $layerId = $this->getDatabase()->query(
-                "
-                INSERT INTO layer (
-                    layer_name, layer_short, layer_geotype, layer_group, layer_category, layer_subcategory, layer_raster
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
-                ",
-                array($layerName, $melLayerName, "raster", $config['region'], "Ecology", "pressure", $rasterFormat),
-                true
-            );
-        } else {
-            $layerId = $data[0]['layer_id'];
-            $existingRasterProperties = json_decode($data[0]['layer_raster'], true);
-            $rasterProperties = array_merge($existingRasterProperties ?? array(), $rasterProperties);
-            $rasterFormat = json_encode($rasterProperties);
-            $this->getDatabase()->query(
-                "UPDATE layer SET layer_raster=? WHERE layer_id = ?",
-                array($rasterFormat, $layerId)
-            );
-        }
+            "boundingbox" => [
+                [$config["x_min"], $config["y_min"]], [$config["x_max"], $config["y_max"]]
+            ]
+        ];
+        $existingRasterProperties = json_decode($layerRow['layer_raster'], true);
+        $rasterProperties = array_merge($existingRasterProperties ?? [], $rasterProperties);
+        $rasterFormat = json_encode($rasterProperties);
+        $layer->updateRowInTable('layer', ['layer_raster' => $rasterFormat], ['layer_id' => $layerId]);
         return $layerId;
     }
 
