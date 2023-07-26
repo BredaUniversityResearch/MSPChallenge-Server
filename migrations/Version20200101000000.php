@@ -23,6 +23,7 @@ final class Version20200101000000 extends MSPMigration
      */
     protected function onUp(Schema $schema): void
     {
+        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $sql = <<< 'SQL'
 CREATE TABLE IF NOT EXISTS `country` (
   `country_id` INT NOT NULL AUTO_INCREMENT,
