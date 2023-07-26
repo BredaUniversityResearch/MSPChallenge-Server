@@ -1052,9 +1052,4 @@ class Game extends Base
         }
         return true;
     }
-
-    private function getConfigFilePath(): string
-    {
-        return 'session_config_'.$this->getGameSessionId().'.json';
-    }
 }
