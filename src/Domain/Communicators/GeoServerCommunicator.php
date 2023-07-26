@@ -13,7 +13,12 @@ class GeoServerCommunicator extends AbstractCommunicator
         $this->client = $client;
     }
 
-    public function getResource($endPoint, $asArray = true): string|array
+    /**
+     * @param string $endPoint
+     * @param bool $asArray
+     * @return string|array
+     */
+    public function getResource(string $endPoint, bool $asArray = true): string|array
     {
         if (is_null($this->getUsername()) || is_null($this->getPassword()) || is_null($this->getBasePath())) {
             return [];
@@ -28,6 +33,12 @@ class GeoServerCommunicator extends AbstractCommunicator
         );
     }
 
+    /**
+     * @param string $workspace
+     * @param string $layerName
+     * @return string
+     * @throws \Exception
+     */
     public function getRasterMetaData(string $workspace, string $layerName): string
     {
         $metaCheckType = $this->getResource("rest/workspaces/" . $workspace . "/layers/" . $layerName);
@@ -75,6 +86,13 @@ class GeoServerCommunicator extends AbstractCommunicator
         return json_encode($rasterMeta);
     }
 
+    /**
+     * @param string $workspace
+     * @param array $layerMetaData
+     * @param string $rasterMetaData
+     * @return string
+     * @throws \Exception
+     */
     public function getRasterDataThroughMetaData(
         string $workspace,
         array $layerMetaData,
@@ -107,6 +125,12 @@ class GeoServerCommunicator extends AbstractCommunicator
         );
     }
 
+    /**
+     * @param string $workspace
+     * @param string $layerName
+     * @return array
+     * @throws \Exception
+     */
     public function getLayerDescription(string $workspace, string $layerName): array
     {
         $response = $this->getResource(
@@ -120,7 +144,11 @@ class GeoServerCommunicator extends AbstractCommunicator
             ?? throw new \Exception('Could not obtain layer description from GeoServer.');
     }
 
-    public function getLayerGeometry(string $workspace, string $layerName): array
+    /**
+     * @param string $layerName
+     * @return array
+     */
+    public function getLayerGeometry(string $layerName): array
     {
         return $this->getResource(
             "/ows?service=WFS&version=1.0.0&outputFormat=json&request=GetFeature&typeName=".

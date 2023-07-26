@@ -118,7 +118,7 @@ class SessionCreationHandler
         );
     }
 
-    private function migrateSessionDatabase($gameSession): void
+    private function migrateSessionDatabase(GameList $gameSession): void
     {
         $em = $this->connectionManager->getGameSessionDbName($gameSession->getId());
 
@@ -278,6 +278,7 @@ class SessionCreationHandler
     /**
      * @throws Exception
      * @throws \Exception
+     * @param array<string, string> $layerMetaData
      */
     private function importLayerRasterData(
         GameList $gameSession,
@@ -349,6 +350,7 @@ class SessionCreationHandler
 
     /**
      * @throws \Exception
+     * @param array<string, string> $layerMetaData
      */
     private function importLayerGeometryData(
         GameList $gameSession,
@@ -368,15 +370,9 @@ class SessionCreationHandler
                 'layer_geotype' => $layerMetaData['layer_geotype'],
                 'layer_group' => $region
             ]);
-            $layersContainer = $geoServerCommunicator->getLayerDescription(
-                $region,
-                $layerMetaData['layer_name']
-            );
+            $layersContainer = $geoServerCommunicator->getLayerDescription($region, $layerMetaData['layer_name']);
             foreach ($layersContainer as $layerWithin) {
-                $geometryData = $geoServerCommunicator->getLayerGeometry(
-                    $region,
-                    $layerWithin['layerName']
-                );
+                $geometryData = $geoServerCommunicator->getLayerGeometry($layerWithin['layerName']);
                 $features = $geometryData['features']
                     ?? throw new \Exception(
                         'Geometry data call did not return a features variable, so something must be wrong.'
