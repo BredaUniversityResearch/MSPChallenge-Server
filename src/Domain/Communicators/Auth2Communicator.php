@@ -34,5 +34,4 @@ class Auth2Communicator extends AbstractCommunicator
             $endPoint
         );
     }
-
 }
