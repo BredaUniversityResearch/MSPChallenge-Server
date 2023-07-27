@@ -31,6 +31,8 @@ class GameListHandler
 {
     private readonly ConnectionManager $connectionManager;
     private string $rootToWrite;
+    
+    private GameList $gameSession;
 
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager,
@@ -47,39 +49,40 @@ class GameListHandler
 
     public function __invoke(GameList $gameList): void
     {
-        $gameSession = $this->gameListRepository->find($gameList->getId());
-        if ((string) $gameSession->getSessionState() == 'request') {
-            if (!is_null($gameSession->getGameConfigVersion())) {
-                $this->setupSession($gameSession);
+        $this->gameSession = $this->gameListRepository->find($gameList->getId());
+        if ((string) $this->gameSession->getSessionState() == 'request') {
+            if (!is_null($this->gameSession->getGameConfigVersion())) {
+                $this->setupSession();
                 return;
             }
-            if (!is_null($gameSession->getGameSave())) {
-                $this->loadSession($gameSession);
+            if (!is_null($this->gameSession->getGameSave())) {
+                $this->loadSession();
                 return;
             }
             return;
         }
-        if ((string) $gameSession->getSessionState() == 'archived') {
-            $this->archiveSession($gameSession);
+        if ((string) $this->gameSession->getSessionState() == 'archived') {
+            $this->archiveSession();
             return;
         }
-        if ((string) $gameSession->getSessionState() == 'healthy' && (!is_null($gameSession->getGameSave()))) {
-            $this->saveSession($gameSession);
+        if ((string) $this->gameSession->getSessionState() == 'healthy' &&
+            (!is_null($this->gameSession->getGameSave()))) {
+            $this->saveSession();
             return;
         }
     }
 
-    private function saveSession(GameList $gameSession): void
+    private function saveSession(): void
     {
         return;
     }
 
-    private function archiveSession(GameList $gameSession): void
+    private function archiveSession(): void
     {
         return;
     }
 
-    private function loadSession(GameList $gameSession): void
+    private function loadSession(): void
     {
         // will need to use the mysql command to load the dumped SQL
         // as doctrine dropped support for doing it through doctrine:database:import on the CLI
@@ -87,44 +90,44 @@ class GameListHandler
         return;
     }
 
-    private function setupSession(GameList $gameSession): void
+    private function setupSession(): void
     {
         try {
             $this->gameSessionChannelLogger->notice(
                 'Session {name} creation initiated. This might take a while.',
-                ['name' => $gameSession->getName(), 'gameSession' => $gameSession->getId()]
+                ['name' => $this->gameSession->getName(), 'gameSession' => $this->gameSession->getId()]
             );
-            $this->createSessionDatabase($gameSession);
-            $this->migrateSessionDatabase($gameSession);
-            $this->resetSessionRasterStore($gameSession);
-            $this->createSessionRunningConfig($gameSession);
-            $this->finaliseSession($gameSession);
+            $this->createSessionDatabase();
+            $this->migrateSessionDatabase();
+            $this->resetSessionRasterStore();
+            $this->createSessionRunningConfig();
+            $this->finaliseSession();
             $this->gameSessionChannelLogger->notice(
                 'Session {name} created and ready for use.',
-                ['name' => $gameSession->getName(), 'gameSession' => $gameSession->getId()]
+                ['name' => $this->gameSession->getName(), 'gameSession' => $this->gameSession->getId()]
             );
         } catch (\Exception $e) {
             $this->gameSessionChannelLogger->error(
                 'Session {name} failed to create. Try to resolve the problem and retry. Problem: {problem}',
                 [
-                    'name' => $gameSession->getName(),
+                    'name' => $this->gameSession->getName(),
                     'problem' => $e->getMessage(),
-                    'gameSession' => $gameSession->getId()
+                    'gameSession' => $this->gameSession->getId()
                 ]
             );
-            $gameSession->setSessionState(new GameSessionStateValue('failed'));
-            $this->mspServerManagerEntityManager->persist($gameSession);
+            $this->gameSession->setSessionState(new GameSessionStateValue('failed'));
+            $this->mspServerManagerEntityManager->persist($this->gameSession);
             $this->mspServerManagerEntityManager->flush();
         }
 
-        $gameSession->setSessionState(new GameSessionStateValue('healthy'));
-        $this->mspServerManagerEntityManager->persist($gameSession);
+        $this->gameSession->setSessionState(new GameSessionStateValue('healthy'));
+        $this->mspServerManagerEntityManager->persist($this->gameSession);
         $this->mspServerManagerEntityManager->flush();
     }
 
-    private function createSessionDatabase(GameList $gameSession): void
+    private function createSessionDatabase(): void
     {
-        $conn = $this->connectionManager->getGameSessionDbName($gameSession->getId());
+        $conn = $this->connectionManager->getGameSessionDbName($this->gameSession->getId());
 
         $app = new Application($this->kernel);
 
@@ -141,7 +144,7 @@ class GameListHandler
         $app->doRun($input0, $output0);
         $this->gameSessionChannelLogger->info(
             $output0->fetch(),
-            ['gameSession' => $gameSession->getId()]
+            ['gameSession' => $this->gameSession->getId()]
         );
 
         $input = new ArrayInput([
@@ -155,13 +158,13 @@ class GameListHandler
         $app->doRun($input, $output);
         $this->gameSessionChannelLogger->info(
             $output->fetch(),
-            ['gameSession' => $gameSession->getId()]
+            ['gameSession' => $this->gameSession->getId()]
         );
     }
 
-    private function migrateSessionDatabase(GameList $gameSession): void
+    private function migrateSessionDatabase(): void
     {
-        $em = $this->connectionManager->getGameSessionDbName($gameSession->getId());
+        $em = $this->connectionManager->getGameSessionDbName($this->gameSession->getId());
 
         $app = new Application($this->kernel);
         $input = new ArrayInput([
@@ -174,13 +177,13 @@ class GameListHandler
         $app->doRun($input, $output);
         $this->gameSessionChannelLogger->info(
             $output->fetch(),
-            ['gameSession' => $gameSession->getId()]
+            ['gameSession' => $this->gameSession->getId()]
         );
     }
 
-    private function resetSessionRasterStore(GameList $gameSession): void
+    private function resetSessionRasterStore(): void
     {
-        $sessionRasterStore = $this->rootToWrite.'/raster/'.$gameSession->getId();
+        $sessionRasterStore = $this->rootToWrite.'/raster/'.$this->gameSession->getId();
         $fileSystem = new Filesystem();
         if ($fileSystem->exists($sessionRasterStore)) {
             $fileSystem->remove($sessionRasterStore);
@@ -189,85 +192,79 @@ class GameListHandler
         $fileSystem->mkdir($sessionRasterStore . '/archive');
         $this->gameSessionChannelLogger->info(
             'Reset the session raster store at {sessionRasterStore}',
-            ['gameSession' => $gameSession->getId(), 'sessionRasterStore' => $sessionRasterStore]
+            ['gameSession' => $this->gameSession->getId(), 'sessionRasterStore' => $sessionRasterStore]
         );
     }
 
-    private function createSessionRunningConfig(GameList $gameSession): void
+    private function createSessionRunningConfig(): void
     {
         $sessionConfigStore = $this->rootToWrite.
-            '/running_session_config/session_config_'.$gameSession->getId().'.json';
+            '/running_session_config/session_config_'.$this->gameSession->getId().'.json';
         $fileSystem = new Filesystem();
         $fileSystem->copy(
             $this->kernel->getProjectDir().
-            '/ServerManager/configfiles/'.$gameSession->getGameConfigVersion()->getFilePath(),
+            '/ServerManager/configfiles/'.$this->gameSession->getGameConfigVersion()->getFilePath(),
             $sessionConfigStore
         );
         $this->gameSessionChannelLogger->info(
             'Created the running session config file at {sessionConfigStore}',
-            ['gameSession' => $gameSession->getId(), 'sessionConfigStore' => $sessionConfigStore]
+            ['gameSession' => $this->gameSession->getId(), 'sessionConfigStore' => $sessionConfigStore]
         );
     }
 
     /**
      * @throws \Exception
      */
-    private function finaliseSession(GameList $gameSession): void
+    private function finaliseSession(): void
     {
-        $this->setupGame($gameSession);
-        $this->setupGameCountries($gameSession);
-        $this->setupUser($gameSession);
-        $this->setupSecurityTokens($gameSession);
-        $this->importLayerData($gameSession);
-        $this->setupLayerMeta($gameSession);
-        $this->setupRestrictions($gameSession);
-        $this->setupSimulations($gameSession);
-        $this->setupObjectives($gameSession);
-        $this->setupPlans($gameSession);
-        $this->setupGameWatchdogAndAccess($gameSession);
+        $this->setupGame();
+        $this->setupGameCountries();
+        $this->setupSecurityTokens();
+        $this->importLayerData();
+        $this->setupLayerMeta();
+        $this->setupRestrictions();
+        $this->setupSimulations();
+        $this->setupObjectives();
+        $this->setupPlans();
+        $this->setupGameWatchdogAndAccess();
     }
 
     /**
      * @throws Exception
      */
-    private function setupSecurityTokens(GameList $gameSession): void
+    private function setupSecurityTokens(): void
     {
         $security = new Security();
-        $security->setGameSessionId($gameSession->getId());
-        $security->generateToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN, Security::TOKEN_LIFETIME_INFINITE);
-        $security->generateToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER, Security::TOKEN_LIFETIME_INFINITE);
+        $security->setGameSessionId($this->gameSession->getId());
+        $security->generateToken(
+            Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN,
+            Security::TOKEN_LIFETIME_INFINITE
+        );
+        $managerToken =
+            $security->generateToken(
+                Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER,
+                Security::TOKEN_LIFETIME_INFINITE
+            )['token'] ?? 0;
+        $this->gameSession->setApiAccessToken($managerToken);
+        
         $this->gameSessionChannelLogger->info(
             'Security tokens set up.',
-            ['gameSession' => $gameSession->getId()]
+            ['gameSession' => $this->gameSession->getId()]
         );
     }
 
     /**
      * @throws \Exception
      */
-    private function setupGameCountries(GameList $gameSession): void
+    private function setupGameCountries(): void
     {
-        $dataModel = $gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
+        $dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
         $game = new Game();
-        $game->setGameSessionId($gameSession->getId());
+        $game->setGameSessionId($this->gameSession->getId());
         $game->setupGameCountries($dataModel);
         $this->gameSessionChannelLogger->info(
             'All countries set up.',
-            ['gameSession' => $gameSession->getId()]
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function setupUser(GameList $gameSession): void
-    {
-        $user = new User();
-        $user->setGameSessionId($gameSession->getId());
-        $user->setupUser();
-        $this->gameSessionChannelLogger->info(
-            'First base admin user set up.',
-            ['gameSession' => $gameSession->getId()]
+            ['gameSession' => $this->gameSession->getId()]
         );
     }
 
@@ -275,32 +272,28 @@ class GameListHandler
      * @throws Exception
      * @throws \Exception
      */
-    private function importLayerData(GameList $gameSession): void
+    private function importLayerData(): void
     {
-        $dataModel = $gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
+        $dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
         $geoServerCommunicator = new GeoServerCommunicator($this->client);
-        $geoServerCommunicator->setBasePath($gameSession->getGameGeoServer()->getAddress());
-        $geoServerCommunicator->setUsername($gameSession->getGameGeoServer()->getUsername());
-        $geoServerCommunicator->setPassword($gameSession->getGameGeoServer()->getPassword());
+        $geoServerCommunicator->setBasePath($this->gameSession->getGameGeoServer()->getAddress());
+        $geoServerCommunicator->setUsername($this->gameSession->getGameGeoServer()->getUsername());
+        $geoServerCommunicator->setPassword($this->gameSession->getGameGeoServer()->getPassword());
 
         foreach ($dataModel['meta'] as $layerMetaData) {
             $this->gameSessionChannelLogger->info(
                 'Starting import of layer {layerName}...',
-                ['gameSession' => $gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
+                ['gameSession' => $this->gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
             );
             $startTime = microtime(true);
 
             if ($layerMetaData['layer_geotype'] == "raster") {
                 $this->importLayerRasterData(
-                    $gameSession,
-                    $dataModel['region'],
                     $layerMetaData,
                     $geoServerCommunicator
                 );
             } else {
                 $this->importLayerGeometryData(
-                    $gameSession,
-                    $dataModel['region'],
                     $layerMetaData,
                     $geoServerCommunicator
                 );
@@ -308,7 +301,7 @@ class GameListHandler
             $this->gameSessionChannelLogger->info(
                 'Imported layer {layerName} in {seconds} seconds.',
                 [
-                    'gameSession' => $gameSession->getId(),
+                    'gameSession' => $this->gameSession->getId(),
                     'layerName' => $layerMetaData['layer_name'],
                     'seconds' => (microtime(true) - $startTime)
                 ]
@@ -322,14 +315,13 @@ class GameListHandler
      * @param array<string, string> $layerMetaData
      */
     private function importLayerRasterData(
-        GameList $gameSession,
-        string $region,
         array $layerMetaData,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
+        $region = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel']['region'] ?? [];
         $layer = new Layer();
-        $layer->setGameSessionId($gameSession->getId());
-        $rasterFileName = $this->rootToWrite.'/raster/'.$gameSession->getId().'/'.
+        $layer->setGameSessionId($this->gameSession->getId());
+        $rasterFileName = $this->rootToWrite.'/raster/'.$this->gameSession->getId().'/'.
             $layerMetaData['layer_name'].
             '.png';
         if (!array_key_exists('layer_download_from_geoserver', $layerMetaData) ||
@@ -362,7 +354,7 @@ class GameListHandler
             $this->gameSessionChannelLogger->info(
                 'Successfully retrieved {layerName} and stored the raster file at {rasterFileName}.',
                 [
-                    'gameSession' => $gameSession->getId(),
+                    'gameSession' => $this->gameSession->getId(),
                     'layerName' => $layerMetaData['layer_name'],
                     'rasterFileName' => $rasterFileName
                 ]
@@ -382,7 +374,7 @@ class GameListHandler
         $this->gameSessionChannelLogger->info(
             'Successfully retrieved {layerName} without storing a raster file, as requested.',
             [
-                'gameSession' => $gameSession->getId(),
+                'gameSession' => $this->gameSession->getId(),
                 'layerName' => $layerMetaData['layer_name'],
                 'rasterFileName' => $rasterFileName
             ]
@@ -394,15 +386,14 @@ class GameListHandler
      * @param array<string, string> $layerMetaData
      */
     private function importLayerGeometryData(
-        GameList $gameSession,
-        string $region,
         array $layerMetaData,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
+        $region = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel']['region'] ?? [];
         $layer = new Layer();
-        $layer->setGameSessionId($gameSession->getId());
+        $layer->setGameSessionId($this->gameSession->getId());
         $geometry = new Geometry();
-        $geometry->setGameSessionId($gameSession->getId());
+        $geometry->setGameSessionId($this->gameSession->getId());
         if (!array_key_exists('layer_download_from_geoserver', $layerMetaData) ||
             $layerMetaData['layer_download_from_geoserver']
         ) {
@@ -432,7 +423,7 @@ class GameListHandler
                                     0,
                                     80
                                 ),
-                                'gameSession' => $gameSession->getId()
+                                'gameSession' => $this->gameSession->getId()
                             ]
                         );
                         continue;
@@ -449,7 +440,7 @@ class GameListHandler
                                     0,
                                     80
                                 ),
-                                'gameSession' => $gameSession->getId()
+                                'gameSession' => $this->gameSession->getId()
                             ]
                         );
                     }
@@ -457,7 +448,7 @@ class GameListHandler
             }
             $this->gameSessionChannelLogger->info(
                 'Successfully retrieved {layerName} and stored the geometry in the database.',
-                ['gameSession' => $gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
+                ['gameSession' => $this->gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
             );
             return;
         }
@@ -472,22 +463,22 @@ class GameListHandler
             ) ?? throw new \Exception('Unable to store retrieved layer information in the database.');
         $this->gameSessionChannelLogger->info(
             'Successfully retrieved {layerName} without storing geometry in the database, as requested.',
-            ['gameSession' => $gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
+            ['gameSession' => $this->gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
         );
     }
 
     /**
      * @throws \Exception
      */
-    private function setupLayerMeta(GameList $gameSession): void
+    private function setupLayerMeta(): void
     {
-        $layers = $gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel']['meta'] ?? [];
+        $layers = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel']['meta'] ?? [];
         $layer = new Layer();
-        $layer->setGameSessionId($gameSession->getId());
+        $layer->setGameSessionId($this->gameSession->getId());
         if (empty($layers)) {
             $this->gameSessionChannelLogger->info(
                 'No layer metadata to set up.',
-                ['gameSession' => $gameSession->getId()]
+                ['gameSession' => $this->gameSession->getId()]
             );
         }
         foreach ($layers as $layerMetaData) {
@@ -495,22 +486,22 @@ class GameListHandler
         }
         $this->gameSessionChannelLogger->info(
             'Layer metadata set up.',
-            ['gameSession' => $gameSession->getId()]
+            ['gameSession' => $this->gameSession->getId()]
         );
     }
 
     /**
      * @throws \Exception
      */
-    private function setupRestrictions(GameList $gameSession): void
+    private function setupRestrictions(): void
     {
-        $dataModel = $gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
+        $dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
         $plan = new Plan();
-        $plan->setGameSessionId($gameSession->getId());
+        $plan->setGameSessionId($this->gameSession->getId());
         if (empty($dataModel['restrictions'])) {
             $this->gameSessionChannelLogger->info(
                 'No layer restrictions to set up.',
-                ['gameSession' => $gameSession->getId()]
+                ['gameSession' => $this->gameSession->getId()]
             );
         }
         $setupReturn = $plan->setupRestrictions($dataModel);
@@ -518,33 +509,33 @@ class GameListHandler
             foreach ($setupReturn as $returnedWarning) {
                 $this->gameSessionChannelLogger->warning(
                     $returnedWarning,
-                    ['gameSession' => $gameSession->getId()]
+                    ['gameSession' => $this->gameSession->getId()]
                 );
             }
         }
         $this->gameSessionChannelLogger->info(
             'Layer restrictions set up.',
-            ['gameSession' => $gameSession->getId()]
+            ['gameSession' => $this->gameSession->getId()]
         );
     }
 
     /**
      * @throws \Exception
      */
-    private function setupGame(GameList $gameSession): void
+    private function setupGame(): void
     {
-        $dataModel = $gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
+        $dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
         $game = new Game();
-        $game->setGameSessionId($gameSession->getId());
+        $game->setGameSessionId($this->gameSession->getId());
         $game->setupGame($dataModel);
         $this->gameSessionChannelLogger->info(
             'Basic game parameters set up.',
-            ['gameSession' => $gameSession->getId()]
+            ['gameSession' => $this->gameSession->getId()]
         );
     }
-    private function setupSimulations(GameList $gameSession): void
+    private function setupSimulations(): void
     {
-        $dataModel = $gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
+        $dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
         $nameSpaceName = (new \ReflectionClass(Simulations::class))->getNamespaceName();
         $simulationsDone = [];
         foreach (Simulations::POSSIBLE_SIMULATIONS as $possibleSim) {
@@ -556,10 +547,10 @@ class GameListHandler
             ) {
                 $this->gameSessionChannelLogger->info(
                     'Setting up simulation {simulation}...',
-                    ['simulation' => $possibleSim, 'gameSession' => $gameSession->getId()]
+                    ['simulation' => $possibleSim, 'gameSession' => $this->gameSession->getId()]
                 );
                 $simulation = new ($nameSpaceName.'\\'.$possibleSim)();
-                $simulation->setGameSessionId($gameSession->getId());
+                $simulation->setGameSessionId($this->gameSession->getId());
                 $return = $simulation->onSessionSetup($dataModel);
                 if (is_array($return)) {
                     foreach ($return as $message) {
@@ -568,14 +559,14 @@ class GameListHandler
                             [
                                 'simulation' => $possibleSim,
                                 'message' => $message,
-                                'gameSession' => $gameSession->getId()
+                                'gameSession' => $this->gameSession->getId()
                             ]
                         );
                     }
                 }
                 $this->gameSessionChannelLogger->info(
                     'Finished setting up simulation {simulation}.',
-                    ['simulation' => $possibleSim, 'gameSession' => $gameSession->getId()]
+                    ['simulation' => $possibleSim, 'gameSession' => $this->gameSession->getId()]
                 );
                 $simulationsDone[] = $possibleSim;
             }
@@ -585,7 +576,7 @@ class GameListHandler
             if (key_exists($remainingSim, $dataModel)) {
                 $this->gameSessionChannelLogger->error(
                     'Unable to set up {simulation}.',
-                    ['simulation' => $remainingSim, 'gameSession' => $gameSession->getId()]
+                    ['simulation' => $remainingSim, 'gameSession' => $this->gameSession->getId()]
                 );
             }
         }
@@ -594,50 +585,50 @@ class GameListHandler
     /**
      * @throws \Exception
      */
-    private function setupPlans(GameList $gameSession): void
+    private function setupPlans(): void
     {
-        $dataModel = $gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
+        $dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
         $plan = new Plan();
-        $plan->setGameSessionId($gameSession->getId());
+        $plan->setGameSessionId($this->gameSession->getId());
         $return = $plan->setupPlans($dataModel);
         if (is_array($return)) {
             foreach ($return as $message) {
                 $this->gameSessionChannelLogger->warning(
                     'Plan setup returned the message: {message}',
-                    ['message' => $message, 'gameSession' => $gameSession->getId()]
+                    ['message' => $message, 'gameSession' => $this->gameSession->getId()]
                 );
             }
         } else {
             $this->gameSessionChannelLogger->info(
                 'Plan setup was successful',
-                ['gameSession' => $gameSession->getId()]
+                ['gameSession' => $this->gameSession->getId()]
             );
         }
     }
 
-    private function setupObjectives(GameList $gameSession): void
+    private function setupObjectives(): void
     {
-        $dataModel = $gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
+        $dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'] ?? [];
         $objective = new Objective();
-        $objective->setGameSessionId($gameSession->getId());
+        $objective->setGameSessionId($this->gameSession->getId());
         $objective->setupObjectives($dataModel);
     }
 
     /**
      * @throws \Exception
      */
-    private function setupGameWatchdogAndAccess(GameList $gameSession): void
+    private function setupGameWatchdogAndAccess(): void
     {
         // get the watchdog and end-user log-on in order
         $game = new Game();
-        $game->setGameSessionId($gameSession->getId());
+        $game->setGameSessionId($this->gameSession->getId());
             $game->insertRowIntoTable(
                 'game_session',
                 [
-                    'game_session_watchdog_address' => $gameSession->getGameWatchdogServer()->getAddress(),
+                    'game_session_watchdog_address' => $this->gameSession->getGameWatchdogServer()->getAddress(),
                     'game_session_watchdog_token' => 'UUID_SHORT()',
-                    'game_session_password_admin' => $gameSession->getPasswordAdmin(),
-                    'game_session_password_player' => $gameSession->getPasswordPlayer() ?? ''
+                    'game_session_password_admin' => $this->gameSession->getPasswordAdmin(),
+                    'game_session_password_player' => $this->gameSession->getPasswordPlayer() ?? ''
                 ]
             ) ?? throw new \Exception('Unable to store Watchdog address and user access passwords.');
         if ($_ENV['APP_ENV'] !== 'test') {
@@ -648,7 +639,7 @@ class GameListHandler
                 await($promise);
                 $this->gameSessionChannelLogger->info(
                     'Watchdog and user access set up successfully.',
-                    ['gameSession' => $gameSession->getId()]
+                    ['gameSession' => $this->gameSession->getId()]
                 );
                 return;
             };
@@ -656,7 +647,7 @@ class GameListHandler
         } else {
             $this->gameSessionChannelLogger->info(
                 'User access set up successfully, but Watchdog was not started as you are in test mode.',
-                ['gameSession' => $gameSession->getId()]
+                ['gameSession' => $this->gameSession->getId()]
             );
         }
     }

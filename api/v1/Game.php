@@ -990,7 +990,7 @@ class Game extends Base
                     ) active_last_minute'
             )
             ->from('game', 'g')
-            ->join('g', 'user', 'u');
+            ->leftJoin('g', 'user', 'u', '1=1');
         $promise = $this->getAsyncDatabase()->query($query)->then(function (Result $result) {
             if (null === $state = $result->fetchFirstRow()) {
                 return [];
