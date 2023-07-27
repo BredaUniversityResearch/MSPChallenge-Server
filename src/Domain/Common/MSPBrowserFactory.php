@@ -20,8 +20,7 @@ class MSPBrowserFactory
         //  (MSP Authoriser, BUas GeoServer, or any other GeoServer)
         $connector = null;
         $proxy = Config::GetInstance()->GetAuthWithProxy();
-        if (!empty($proxy) && !str_contains($targetUrl, GameSession::GetRequestApiRoot()) &&
-            !str_contains($targetUrl, "localhost") && Base::PHPCanProxy()
+        if (!empty($proxy) && !str_contains($targetUrl, "localhost") && Base::PHPCanProxy()
         ) {
             $connector = new ProxyConnector($proxy);
         }

@@ -10,6 +10,7 @@ use Exception;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -25,6 +26,8 @@ class SymfonyToLegacyHelper
     private Kernel $kernel;
     private TranslatorInterface $translator;
     private ?Closure $fnControllerForwarder = null;
+
+    private MessageBusInterface $messageBus;
     private EntityManagerInterface $em;
 
     public function __construct(
@@ -35,6 +38,7 @@ class SymfonyToLegacyHelper
         Kernel $kernel,
         TranslatorInterface $translator,
         EntityManagerInterface $em,
+        MessageBusInterface $messageBus,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
         ConnectionManager $connectionManager
@@ -46,6 +50,7 @@ class SymfonyToLegacyHelper
         $this->kernel = $kernel;
         $this->translator = $translator;
         $this->em = $em;
+        $this->messageBus = $messageBus;
         self::$instance = $this;
     }
 
@@ -62,6 +67,14 @@ class SymfonyToLegacyHelper
     public function getTranslator(): TranslatorInterface
     {
         return $this->translator;
+    }
+
+    /**
+     * @return MessageBusInterface
+     */
+    public function getMessageBus(): MessageBusInterface
+    {
+        return $this->messageBus;
     }
 
     public function getEntityManager(): EntityManagerInterface

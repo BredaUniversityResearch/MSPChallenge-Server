@@ -137,9 +137,15 @@ class Game extends Base
     public function LoadConfigFile(string $filename = ''): string
     {
         if ($filename == "") {    //if there's no file given, use the one in the database
-            $data = $this->getDatabase()->query("SELECT game_configfile FROM game");
-
-            $path = GameSession::getConfigDirectory() . $data[0]['game_configfile'];
+            /*$data = $this->selectRowsFromTable('game', [], true);
+            if ($this->isAsync()) {
+                $data = await($data);
+            }
+            $path = GameSession::getConfigDirectory() . ($data['game_configfile']
+                ?? 'session_config_'.$this->getGameSessionId().'.json');*/
+            // storing the path in the session database's game table is rather nonsensical.
+            // we still do it during session creation, for backwards compatibility
+            $path = GameSession::getConfigDirectory() . 'session_config_'.$this->getGameSessionId().'.json';
         } else {
             $path = GameSession::getConfigDirectory() . $filename;
         }
@@ -359,8 +365,6 @@ class Game extends Base
         $totalEras = 4;
         $eraRealtimeString .= str_repeat($data['era_planning_realtime'] . ",", $totalEras);
         $eraRealtimeString = substr($eraRealtimeString, 0, -1);
-
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $this->insertRowIntoTable(
             'game',
             [
@@ -368,7 +372,9 @@ class Game extends Base
                 'game_planning_gametime' => $data['era_planning_months'],
                 'game_planning_realtime' => $data['era_planning_realtime'],
                 'game_planning_era_realtime' => $eraRealtimeString,
-                'game_eratime' => max($data['era_total_months'], self::MIN_GAME_ERATIME)
+                'game_eratime' => max($data['era_total_months'], self::MIN_GAME_ERATIME),
+                'game_configfile' => 'session_config_'.$this->getGameSessionId().'.json',
+                'game_autosave_month_interval' => $_ENV['GAME_AUTOSAVE_INTERVAL'] ?? 120
             ]
         );
     }
@@ -659,13 +665,8 @@ class Game extends Base
 
     private function getWatchdogAddressFromDb(): ?string
     {
-        $result = $this->getDatabase()->query(
-            "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
-        );
-        if (count($result) == 0) {
-            return null;
-        }
-        return $result[0]['game_session_watchdog_address'];
+        return $this->selectRowsFromTable('game_session', [], true)['game_session_watchdog_address']
+            ?? null;
     }
 
     /**
@@ -701,7 +702,7 @@ class Game extends Base
         if (!str_starts_with(php_uname(), "Windows")) {
             return;
         }
-        self::StartSimulationExe([
+        $this->StartSimulationExe([
             'exe' => 'MSW.exe',
             'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/'.(
                 $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
@@ -713,14 +714,14 @@ class Game extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private static function StartSimulationExe(array $params): void
+    private function StartSimulationExe(array $params): void
     {
         // below code is only necessary for Windows
         if (!str_starts_with(php_uname(), "Windows")) {
             return;
         }
         $args = isset($params["args"])? $params["args"]." " : "";
-        $args = $args."APIEndpoint=".GameSession::GetRequestApiRoot();
+        $args = $args."APIEndpoint=".$this->GetRequestApiRoot();
         $workingDirectory = "";
         if (isset($params["working_directory"])) {
             $workingDirectory = "cd ".$params["working_directory"]." & ";
@@ -848,7 +849,7 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
-                return GameSession::getRequestApiRootAsync();
+                return $this->getRequestApiRootAsync();
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
                 $simulationsHelper = new Simulations();

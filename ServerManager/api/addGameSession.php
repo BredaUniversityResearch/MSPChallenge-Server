@@ -4,6 +4,8 @@ use ServerManager\API;
 use ServerManager\GameSession;
 use ServerManager\ServerManager;
 use ServerManager\User;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\GameList;
 
 require __DIR__ . '/../init.php';
 
@@ -33,6 +35,9 @@ $gamesession->server_version = ServerManager::getInstance()->getCurrentVersion()
 
 $gamesession->add();
 $gamesession->sendCreateRequest();
+// alternative to the above:
+//$test = SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch((new GameList($gamesession->id)));
+// but note that the dispatch will be immediate though because of how we set this up
 
 $api->setStatusSuccess();
 $api->setPayload(["gamesession" => get_object_vars($gamesession)]);

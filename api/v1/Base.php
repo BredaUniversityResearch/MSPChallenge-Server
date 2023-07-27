@@ -253,7 +253,7 @@ abstract class Base extends CommonBase
         // any proxy required for the external calls of any kind
         //  (MSP Authoriser, BUas GeoServer, or any other GeoServer)
         $proxy = Config::GetInstance()->GetAuthWithProxy();
-        if (!empty($proxy) && strstr($url, GameSession::GetRequestApiRoot()) === false &&
+        if (!empty($proxy) && strstr($url, $this->GetRequestApiRoot()) === false &&
             strstr($url, "localhost") === false && self::PHPCanProxy()
         ) {
             curl_setopt($ch, CURLOPT_PROXY, $proxy);
