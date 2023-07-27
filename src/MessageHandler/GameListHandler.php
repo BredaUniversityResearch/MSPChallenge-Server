@@ -27,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function App\await;
 
 #[AsMessageHandler]
-class SessionCreationHandler
+class GameListHandler
 {
     private readonly ConnectionManager $connectionManager;
     private string $rootToWrite;
@@ -48,6 +48,47 @@ class SessionCreationHandler
     public function __invoke(GameList $gameList): void
     {
         $gameSession = $this->gameListRepository->find($gameList->getId());
+        if ((string) $gameSession->getSessionState() == 'request') {
+            if (!is_null($gameSession->getGameConfigVersion())) {
+                $this->setupSession($gameSession);
+                return;
+            }
+            if (!is_null($gameSession->getGameSave())) {
+                $this->loadSession($gameSession);
+                return;
+            }
+            return;
+        }
+        if ((string) $gameSession->getSessionState() == 'archived') {
+            $this->archiveSession($gameSession);
+            return;
+        }
+        if ((string) $gameSession->getSessionState() == 'healthy' && (!is_null($gameSession->getGameSave()))) {
+            $this->saveSession($gameSession);
+            return;
+        }
+    }
+
+    private function saveSession(GameList $gameSession): void
+    {
+        return;
+    }
+
+    private function archiveSession(GameList $gameSession): void
+    {
+        return;
+    }
+
+    private function loadSession(GameList $gameSession): void
+    {
+        // will need to use the mysql command to load the dumped SQL
+        // as doctrine dropped support for doing it through doctrine:database:import on the CLI
+        // and also through doctrine:query:sql it didn't work when I tested it
+        return;
+    }
+
+    private function setupSession(GameList $gameSession): void
+    {
         try {
             $this->gameSessionChannelLogger->notice(
                 'Session {name} creation initiated. This might take a while.',

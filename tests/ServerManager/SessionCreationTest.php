@@ -60,7 +60,7 @@ class SessionCreationTest extends KernelTestCase
         $this->assertSame('healthy', (string) $gameSession->getSessionState());
         $this->assertFileExists(
             $kernel->getLogDir().'/log_session_'.$gameSession->getId().'.log',
-            'Log file not created, suggesting SessionCreationHandler was unsuccessful.'
+            'Log file does not exist, suggesting SessionCreationHandler was unsuccessful.'
         );
     }
 

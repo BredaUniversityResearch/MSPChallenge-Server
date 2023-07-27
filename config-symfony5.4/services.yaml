@@ -64,7 +64,7 @@ services:
         arguments:
             - App\Entity\ServerManager\GameList
 
-    App\MessageHandler\SessionCreationHandler:
+    App\MessageHandler\GameListHandler:
         arguments:
             $mspServerManagerEntityManager: '@Doctrine\ORM\EntityManagerInterface'
             $gameListRepository: '@App\Repository\ServerManager\GameListRepository'
