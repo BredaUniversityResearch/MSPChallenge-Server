@@ -122,6 +122,9 @@
     "illuminate/macroable": {
         "version": "v8.83.3"
     },
+    "knplabs/knp-menu-bundle": {
+        "version": "v3.2.0"
+    },
     "laminas/laminas-code": {
         "version": "4.5.1"
     },

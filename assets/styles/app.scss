@@ -1,0 +1,221 @@
+@import '~bootstrap';
+@import '~font-awesome';
+
+$light: #ffffff;
+$lightAlternate1: #f5f5f5;
+$lightAlternate2: #f7a02b;
+
+$dark: #037c7c;
+$darkAlternate1: #055d63;
+$darkAlternate2: #001a1f;
+
+$lightAlpha: #ffffffff;
+$darkAlpha: #037c7c77;
+$darkAlternateAlpha: #00000000;
+
+$input-border-radius: 3rem;
+
+html, body {
+    height:100%;
+    display:flex;
+    flex-direction:column;
+}
+
+body {
+    background-color: $light;
+    font-family: "Cabin", sans-serif;
+    font-size: 16px;
+}
+
+body > * {
+    flex-shrink: 0;
+}
+
+h1 {
+    font-size: 26px;
+    color: $darkAlternate1;
+    padding: 0 0 10px 0;
+}
+
+h2 {
+    font-size: 21px;
+    padding: 0 0 10px 0;
+}
+
+h3 {
+    font-size: 16px;
+    padding: 0 0 10px 0;
+}
+
+h4 {
+    font-size: 11px;
+    padding: 0 0 10px 0;
+}
+
+#header-wrapper {
+    padding: 25px 0 25px 0;
+    border: none;
+    background-image: url("../images/MSP_Challenge_Imagery-Darken.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 50.00% 23.67%;
+    background-color: $darkAlternate2;
+}
+
+#header {
+    background: -moz-linear-gradient(90deg, $darkAlternateAlpha 0%, $darkAlpha 30%, $lightAlpha 65%);
+    background: -webkit-linear-gradient(90deg, $darkAlternateAlpha 0%, $darkAlpha 30%, $lightAlpha 65%);
+    background: linear-gradient(90deg, $darkAlternateAlpha 0%, $darkAlpha 30%, $lightAlpha 65%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="$dark",endColorstr="$lightAlternate1",GradientType=1);
+    margin: auto;
+    height: 67px;
+    padding: 10px 40px 0 40px;
+}
+
+#logo-wrapper {
+    float: left;
+}
+
+#logo {
+    color: $light;
+    padding-top: 7px;
+}
+
+#logo img {
+    width: 35px;
+    height: 35px;
+    margin-right: 20px;
+}
+
+@media (max-width:770px){
+    #logo {
+        width: 110px;
+    }
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; // remove the gap so it doesn't close
+width: 170px;
+    left: 0;
+    border: 0;
+}
+
+.dropdown-toggle::after {
+    content: none;
+}
+
+#menu {
+    float: right;
+    height: 46px;
+    margin: 0;
+    padding: 10px 0 0 0;
+}
+
+#menu-user {
+    float: right;
+    margin: 0;
+}
+
+#menu li, #menu-user li {
+    display: inline-block;
+    padding: 0 20px;
+    font-weight: 700;
+}
+
+#menu li ul li {
+    display: block;
+    margin: 30px 0;
+}
+
+a {
+    text-decoration: none;
+    color: $darkAlternate1;
+}
+
+a:hover {
+    color: $dark;
+}
+
+a:active {
+    color: $lightAlternate2;
+}
+
+.current a {
+    color: $lightAlternate2;
+}
+
+#alert-wrapper {
+    z-index: 10;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
+.btn {
+    @include button-size(
+    0, //padding-y
+    20px, //padding-x
+    20px, //font-size
+    $input-border-radius //border-radius
+    );
+}
+
+input.form-control {
+    border-radius: $input-border-radius;
+}
+
+.btn-primary {
+    @include button-variant(
+    $darkAlternate1, //background
+    $darkAlternate1, //border
+    $light, //color
+    $dark, //hover-background
+    $dark, //hover-border
+    $light, //hover-color
+    $lightAlternate2, //active-background
+    $lightAlternate2, //active-border
+    $light //active-color
+    //disabled-background
+    //disabled-border
+    //disabled-color
+    );
+}
+
+.btn-lg {
+    height: 32px;
+}
+
+#content-wrapper {
+    background-color: $lightAlternate1;
+    flex-grow: 1;
+}
+
+#content {
+    max-width: 1000px;
+    padding: 20px 30px 30px 30px;
+    margin: auto;
+}
+
+#delete_account_deleteconfirmed, #registration_form_agreeTerms {
+    height: 20px;
+    width: 20px;
+}
+
+#footer-wrapper {
+    padding: 20px 0 30px 0;
+    font-size: 15px;
+    color: $light;
+    background-color: $darkAlternate1;
+}
+
+#footer, #footer-extra {
+    max-width: 1000px;
+    margin: auto;
+    padding: 10px 0px;
+    text-align: center;
+}
+
+#footer-extra img {
+    width: 40px;
+}

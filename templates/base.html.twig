@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
-        {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cabin">
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
@@ -14,6 +14,19 @@
         {% endblock %}
     </head>
     <body>
+        <div id="header-wrapper">
+            <div id="header">
+                <div id="logo-wrapper">
+                    <div id="logo">
+                        <img src="{{ asset('build/images/MSP_Challenge_Icon-037c7c.png') }}"  alt="MSP Challenge logo"/>
+                    </div>
+                </div>
+                <div id="menu">
+                    {{ knp_menu_render('mainMenu') }}
+                </div>
+            </div>
+        </div>
+        <div id="alert-wrapper">
         {% for message in app.flashes('success') %}
             <div {{ stimulus_controller('flashes', {
                 success: message,
@@ -26,7 +39,65 @@
             }) }}
             ></div>
         {%  endfor %}
+        </div>
+        <div id="content-wrapper">
+            <div id="content">
+                <div id="menu-user">
+                    {{ knp_menu_render('subMenu') }}
+                </div>
+                {% if block('title') is defined %}
+                    <h1>{{ block('title') }}</h1>
+                {% endif %}
+                {% if block('subtitle') is defined %}
+                    <h2>{{ block('subtitle') }}</h2>
+                {% endif %}
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+        <div id="footer-wrapper">
+            <div id="footer">
+                MSP Challenge is a community-based, open source and not for profit initiative, since 2011.
+            </div>
+            <div id="footer-extra">
+                <img src="{{ asset('build/images/EU_flag_yellow_high.jpg') }}" />
+                Co-funded by the European Union.
+            </div>
+        </div>
 
-        {% block body %}{% endblock %}
+        <!-- Modal Error Details -->
+
+        <div class="modal fade" id="errorDetail" tabindex="-1" role="dialog" aria-labelledby="errorModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="errorModalCenterTitle">Error Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="divErrorDetail">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div role="status" aria-live="polite" id="LogToast" aria-atomic="true" class="toast hide" data-autohide="false" data-autoclose="false" style="max-width: 650px !important; width: 650px; position: fixed; bottom: 0; right: 0;">
+            <div class="toast-header">
+                <strong class="mr-auto" id="LogToastHeader"></strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body" id="LogToastBody">
+
+            </div>
+        </div>
     </body>
 </html>

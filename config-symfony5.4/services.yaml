@@ -72,6 +72,13 @@ services:
             $gameSessionChannelLogger: '@monolog.logger.game_session_channel'
             $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
 
+    app.menu_builder:
+        class: App\Menu\Builder
+        arguments: [ "@knp_menu.factory" ]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: mainMenu }
+            - { name: knp_menu.menu_builder, method: createSubMenu, alias: subMenu }
+
     ServerManager\ServerManager:
 
 when@dev:

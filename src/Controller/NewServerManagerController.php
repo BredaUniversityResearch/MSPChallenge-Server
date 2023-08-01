@@ -16,7 +16,7 @@ class NewServerManagerController extends AbstractController
     public function index(EntityManagerInterface $entityManager): Response
     {
         $gameList = $entityManager->getRepository(GameList::class)->findAll();
-        return $this->render('new_server_manager/index.html.twig', [
+        return $this->render('new_server_manager/sessions.html.twig', [
             'gameList' => $gameList
         ]);
     }
