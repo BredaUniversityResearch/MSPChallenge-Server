@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Entity\ServerManager\GameList;
 use App\Form\NewSessionFormType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,13 +14,30 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class NewServerManagerController extends AbstractController
 {
-    #[Route('/manager', name: 'app_new_server_manager')]
-    public function index(EntityManagerInterface $entityManager): Response
+
+    #[Route('/manager', name: 'app_new_server_manger')]
+    public function index(): Response
     {
-        $gameList = $entityManager->getRepository(GameList::class)->findAll();
-        return $this->render('new_server_manager/sessions.html.twig', [
-            'gameList' => $gameList
-        ]);
+        return $this->render('new_server_manager/sessions.html.twig');
+    }
+
+    #[Route(
+        '/manager/gamelist/{sessionState}',
+        name: 'app_new_server_manager_game_list',
+        requirements: ['sessionState' => '\w+']
+    )]
+    public function gameList(
+        EntityManagerInterface $entityManager,
+        Request $request,
+        string $sessionState = 'public'
+    ): Response {
+        if (!is_null($request->headers->get('Turbo-Frame'))) {
+            $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
+            return $this->render('new_server_manager/snippets/gamelist.html.twig', [
+                'gameList' => $gameList
+            ]);
+        }
+        return $this->redirectToRoute('app_new_server_manger');
     }
 
     #[Route('/manager/gamelist/add', name: 'app_new_server_manager_gamelist_add')]

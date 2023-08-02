@@ -1,10 +1,34 @@
-<tr>
-    <td>{{ game.id }}</td>
-    <td>{{ game.name }}</td>
-    <td>gameconfig filename</td>
-    <td>{{ game.playersPastHour }}</td>
-    <td>{{ game.gameState }}</td>
-    <td>{{ game.gameCurrentMonth }} </td>
-    <td>{{ game.gameEndMonth }}</td>
-    <td class="text-center">icons here</td>
-</tr>
+<turbo-frame id="sessionsTable">
+    <table class="table table-hover table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Session Name</th>
+            <th>Configuration</th>
+            <th>Players</th>
+            <th>State</th>
+            <th>Current Month</th>
+            <th>Ending Month</th>
+            <th class="text-center">Quick Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for game in gameList %}
+            <tr>
+                <td>{{ game.id }}</td>
+                <td>{{ game.name }}</td>
+                <td>{% if (game.gameConfigVersion) %}
+                        {{ game.gameConfigVersion.gameConfigFile.filename }}
+                    {% elseif (game.gameSave) %}
+                        {{ game.gameSave.gameConfigFilesFilename }}
+                    {% endif %}</td>
+                <td>{{ game.playersPastHour }}</td>
+                <td>{{ game.gameState }}</td>
+                <td>{{ game.gameCurrentMonthPretty }} </td>
+                <td>{{ game.getGameEndMonthPretty }}</td>
+                <td class="text-center">icons here</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</turbo-frame>

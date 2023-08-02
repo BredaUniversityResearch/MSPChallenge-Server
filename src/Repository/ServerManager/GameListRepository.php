@@ -2,6 +2,7 @@
 
 namespace App\Repository\ServerManager;
 
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Entity\ServerManager\GameList;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -32,20 +33,24 @@ class GameListRepository extends EntityRepository
         }
     }
 
-//    /**
-//     * @return GameList[] Returns an array of GameList objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('g')
-//            ->andWhere('g.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('g.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return GameList[] Returns an array of GameList objects by session state, archived or not archived (active)
+     */
+    public function findBySessionState(string $value): array
+    {
+        $qb = $this->createQueryBuilder('g');
+        if ($value == 'archived') {
+            $qb->andWhere($qb->expr()->eq('g.sessionState', ':val'))
+                ->setParameter('val', new GameSessionStateValue('archived'));
+        } else {
+            $qb->andWhere($qb->expr()->neq('g.sessionState', ':val'))
+                ->setParameter('val', new GameSessionStateValue('archived'));
+        }
+        return $qb->orderBy('g.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 
 //    public function findOneBySomeField($value): ?GameList
 //    {
