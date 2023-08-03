@@ -145,6 +145,53 @@ a:active {
     color: $lightAlternate2;
 }
 
+.state_fastforward {
+    color: darkorchid !important;
+    font-weight: bold;
+}
+
+.state_play {
+    color: green !important;
+    font-weight: bold;
+}
+.state_pause {
+    color: orange !important;
+    font-weight: bold;
+}
+.state_end {
+    color: navy !important;
+    font-weight: bold;
+}
+.state_archived {
+    color: grey !important;
+    font-weight: bold;
+}
+.state_healthy {
+    color: green !important;
+    font-weight: bold;
+}
+.state_failed {
+    color: red !important;
+    font-weight: bold;
+}
+.state_simulation {
+    color: deepskyblue !important;
+    font-weight: bold;
+}
+.state_request {
+    color: orchid !important;
+    font-weight: bold;
+}
+.state_initializing {
+    color: darkseagreen !important;
+    font-weight: bold;
+}
+
+.state_setup {
+    color: steelblue !important;
+    font-weight: bold;
+}
+
 .form-group {
     padding: 10px 0px;
 }

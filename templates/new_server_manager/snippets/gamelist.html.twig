@@ -23,10 +23,21 @@
                         {{ game.gameSave.gameConfigFilesFilename }}
                     {% endif %}</td>
                 <td>{{ game.playersPastHour }}</td>
-                <td>{{ game.gameState }}</td>
+                <td class="state_{{ game.gameState }}">
+                    {{ game.gameState }}
+                    {% if (game.gameState == 'request') %}
+                        <i class="fa fa-spinner fa-pulse" title="Your session is being created."></i>
+                    {% elseif (game.gameState == 'setup') %}
+                        <i class="fa fa-check" title="This session is ready."></i>
+                    {% endif %}
+                </td>
                 <td>{{ game.gameCurrentMonthPretty }} </td>
                 <td>{{ game.getGameEndMonthPretty }}</td>
-                <td class="text-center">icons here</td>
+                <td class="text-center">
+                    <button {{ stimulus_controller('game') }} data-state="pause" data-action="game#setState">
+                        test
+                    </button>
+                </td>
             </tr>
         {% endfor %}
         </tbody>

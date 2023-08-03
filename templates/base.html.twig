@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
@@ -88,15 +88,17 @@
         </div>
 
 
-        <div role="status" aria-live="polite" id="LogToast" aria-atomic="true" class="toast hide" data-autohide="false" data-autoclose="false" style="max-width: 650px !important; width: 650px; position: fixed; bottom: 0; right: 0;">
+        <div id="logToast" role="status" aria-live="polite" aria-atomic="true" class="toast hide"
+            data-session="" style="max-width: 650px !important; width: 650px; position: fixed; bottom: 0; right: 0;"
+             {{ stimulus_controller('logtoast') }} data-action="session-changing@window->logtoast#showToast">
             <div class="toast-header">
-                <strong class="mr-auto" id="LogToastHeader"></strong>
-                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <strong class="me-auto" id="logToastTitle"></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" data-action="logtoast#hideToast">
                 </button>
             </div>
-            <div class="toast-body" id="LogToastBody">
-
+            <div class="toast-body" id="logToastBody">
+                <turbo-frame id="logToastBodyTurboFrame" src="">
+                </turbo-frame>
             </div>
         </div>
     </body>

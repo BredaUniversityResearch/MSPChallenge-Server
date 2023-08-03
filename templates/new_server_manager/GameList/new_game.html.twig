@@ -1,60 +1,63 @@
-{% for flash_error in app.flashes('new_session_error') %}
-    <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-{% endfor %}
-
-{{ form_start(newSessionForm) }}
-    <div class="modal-body">
-        <div class="form-group">
-            {{ form_label(newSessionForm.name, 'Session Name', {'label_attr': {'class': 'form-label'}}) }}
-            <div class="text-danger">
-                {{ form_errors(newSessionForm.name) }}
+<turbo-frame id="sessionsAddForm">
+    <div data-modal-default-target="modalBody">
+        {{ form_start(newSessionForm) }}
+    {% for flash_error in app.flashes('new_session_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+        <div class="modal-body">
+            <div class="form-group">
+                {{ form_label(newSessionForm.name, 'Session Name', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(newSessionForm.name) }}
+                </div>
+                {{ form_widget(newSessionForm.name, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(newSessionForm.name) }}</div>
             </div>
-            {{ form_widget(newSessionForm.name, {'attr': {'class': 'form-control'}}) }}
-            <div class="small text-muted">{{ form_help(newSessionForm.name) }}</div>
-        </div>
-        <div class="form-group">
-            {{ form_label(newSessionForm.gameConfigVersion, 'Configuration Version', {'label_attr': {'class': 'form-label'}}) }}
-            <div class="text-danger">
-                {{ form_errors(newSessionForm.gameConfigVersion) }}
+            <div class="form-group">
+                {{ form_label(newSessionForm.gameConfigVersion, 'Configuration Version', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(newSessionForm.gameConfigVersion) }}
+                </div>
+                {{ form_widget(newSessionForm.gameConfigVersion, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(newSessionForm.gameConfigVersion) }}</div>
             </div>
-            {{ form_widget(newSessionForm.gameConfigVersion, {'attr': {'class': 'form-control'}}) }}
-            <div class="small text-muted">{{ form_help(newSessionForm.gameConfigVersion) }}</div>
-        </div>
-        <div class="form-group">
-            {{ form_label(newSessionForm.gameGeoServer, 'GeoServer', {'label_attr': {'class': 'form-label'}}) }}
-            <div class="text-danger">
-                {{ form_errors(newSessionForm.gameGeoServer) }}
+            <div class="form-group">
+                {{ form_label(newSessionForm.gameGeoServer, 'GeoServer', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(newSessionForm.gameGeoServer) }}
+                </div>
+                {{ form_widget(newSessionForm.gameGeoServer, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(newSessionForm.gameGeoServer) }}</div>
             </div>
-            {{ form_widget(newSessionForm.gameGeoServer, {'attr': {'class': 'form-control'}}) }}
-            <div class="small text-muted">{{ form_help(newSessionForm.gameGeoServer) }}</div>
-        </div>
-        <div class="form-group">
-            {{ form_label(newSessionForm.gameWatchdogServer, 'Simulation Server', {'label_attr': {'class': 'form-label'}}) }}
-            <div class="text-danger">
-                {{ form_errors(newSessionForm.gameWatchdogServer) }}
+            <div class="form-group">
+                {{ form_label(newSessionForm.gameWatchdogServer, 'Simulation Server', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(newSessionForm.gameWatchdogServer) }}
+                </div>
+                {{ form_widget(newSessionForm.gameWatchdogServer, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(newSessionForm.gameWatchdogServer) }}</div>
             </div>
-            {{ form_widget(newSessionForm.gameWatchdogServer, {'attr': {'class': 'form-control'}}) }}
-            <div class="small text-muted">{{ form_help(newSessionForm.gameWatchdogServer) }}</div>
-        </div>
-        <div class="form-group">
-            {{ form_label(newSessionForm.passwordAdmin, 'Admin Password', {'label_attr': {'class': 'form-label'}}) }}
-            <div class="text-danger">
-                {{ form_errors(newSessionForm.passwordAdmin) }}
+            <div class="form-group">
+                {{ form_label(newSessionForm.passwordAdmin, 'Admin Password', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(newSessionForm.passwordAdmin) }}
+                </div>
+                {{ form_widget(newSessionForm.passwordAdmin, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(newSessionForm.passwordAdmin) }}</div>
             </div>
-            {{ form_widget(newSessionForm.passwordAdmin, {'attr': {'class': 'form-control'}}) }}
-            <div class="small text-muted">{{ form_help(newSessionForm.passwordAdmin) }}</div>
-        </div>
-        <div class="form-group">
-            {{ form_label(newSessionForm.passwordPlayer, 'Player Password', {'label_attr': {'class': 'form-label'}}) }}
-            <div class="text-danger">
-                {{ form_errors(newSessionForm.passwordPlayer) }}
+            <div class="form-group">
+                {{ form_label(newSessionForm.passwordPlayer, 'Player Password', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(newSessionForm.passwordPlayer) }}
+                </div>
+                {{ form_widget(newSessionForm.passwordPlayer, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(newSessionForm.passwordPlayer) }}</div>
             </div>
-            {{ form_widget(newSessionForm.passwordPlayer, {'attr': {'class': 'form-control'}}) }}
-            <div class="small text-muted">{{ form_help(newSessionForm.passwordPlayer) }}</div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModal">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-default#submitFormNewSession">Create session</button>
+        </div>
+        {{ form_end(newSessionForm) }}
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-action="modal-default#closeModal">Cancel</button>
-        <button type="submit" class="btn btn-primary">Create session</button>
-    </div>
-{{ form_end(newSessionForm) }}
+</turbo-frame>

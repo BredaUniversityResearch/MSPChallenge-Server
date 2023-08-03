@@ -3,15 +3,16 @@
 {% block title %}New Server Manager{% endblock %}
 
 {% block body %}
-    <div class="py-1" {{ stimulus_controller('modal-default') }}>
-        <button type="button" id="btnCreateServer" class="btn btn-primary" data-action="modal-default#openModal">
+    <div class="py-1" {{ stimulus_controller('modal-default') }} data-turboframe="sessionsAddForm">
+        <button type="button" id="modalNewSession" class="btn btn-primary" data-action="modal-default#openModal">
             <i class="fa fa-plus-circle" title="Create new session"></i>
             New Session
         </button>
-        {{ include('new_server_manager/_modal_form.html.twig',
+        {{ include('new_server_manager/_modal_default.html.twig',
             {
                 'modalTitle': 'Create New Session',
-                'formController': 'App\\Controller\\NewServerManagerController::newSessionForm'
+                'modalTurboFrameId': 'sessionsAddForm',
+                'modalTurboFrameSrcRoute': 'app_new_server_manager_gamelist_add'
             }
         )}}
     </div>
@@ -20,12 +21,12 @@
             <span id="radioFilter">
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="public" checked
-                           {{ stimulus_controller('gamelist') }} data-action="gamelist#applyFilter" data-href="{{ path('app_new_server_manager_game_list') }}">
+                            {{ stimulus_controller('gamelist-filter') }} data-action="gamelist-filter#applyFilter" data-href="{{ path('app_new_server_manager_game_list') }}">
                     <label class="form-check-label" for="inlineRadio1">Active</label>
                 </div>
-                <div class="form-check form-check-inline">
+                <div class="form-check form-check-inline mx-0">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="archived"
-                           {{ stimulus_controller('gamelist') }} data-action="gamelist#applyFilter" data-href="{{ path('app_new_server_manager_game_list', {'sessionState': 'archived'}) }}">
+                           {{ stimulus_controller('gamelist-filter') }} data-action="gamelist-filter#applyFilter" data-href="{{ path('app_new_server_manager_game_list', {'sessionState': 'archived'}) }}">
                     <label class="form-check-label" for="inlineRadio3">Archived</label>
                 </div>
             </span>
@@ -36,7 +37,8 @@
     </div>
     <div class="col-md-12">
         <div class="table-responsive">
-            <turbo-frame id="sessionsTable" src="{{ path('app_new_server_manager_game_list') }}">
+            <turbo-frame id="sessionsTable" src="{{ path('app_new_server_manager_game_list') }}"
+                {{ stimulus_controller('gamelist') }}>
             </turbo-frame>
         </div>
     </div>
@@ -124,7 +126,7 @@
                                     </tr>
                                     <tr class="table-info">
                                         <td colspan="4" class="text-left">
-                                            <button id="sessionInfoButtonServerLog" onclick="toggleSessionInfoLog()" class="btn btn-secondary btn-sm"><i class="fa fa-bars" aria-hidden="true"></i></i> Show/Hide Session Creation Log</button>
+                                            <button id="sessionInfoButtonServerLog" onclick="" class="btn btn-secondary btn-sm"><i class="fa fa-bars" aria-hidden="true"></i></i> Show/Hide Session Creation Log</button>
                                         </td>
                                     </tr>
                                     <tr>

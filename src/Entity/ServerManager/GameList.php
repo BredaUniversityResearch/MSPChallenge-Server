@@ -8,6 +8,7 @@ use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
 class GameList
@@ -17,9 +18,11 @@ class GameList
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 128)]
     private ?string $name = null;
 
+    #[Assert\NotNull]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
     private ?GameConfigVersion $gameConfigVersion = null;
@@ -51,6 +54,7 @@ class GameList
     #[ORM\Column(type: Types::BIGINT)]
     private ?int $gameRunningTilTime = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $passwordAdmin = null;
 

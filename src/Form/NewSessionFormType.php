@@ -21,6 +21,7 @@ class NewSessionFormType extends AbstractType
         $builder
             ->add('name')
             ->add('gameConfigVersion', ChoiceType::class, [
+                'placeholder' => 'Choose an option by clicking here...',
                 'choices' => [$entityManager->getRepository(GameConfigVersion::class)->findAll()],
                 'choice_value' => 'id',
                 'choice_label' => function (?GameConfigVersion $gameConfigVersion) {
@@ -54,7 +55,8 @@ class NewSessionFormType extends AbstractType
             ])
             ->add('passwordPlayer', TextType::class, [
                 'help' => 'This and more sophisticated user access settings can always be changed after the session 
-                has been successfully created.'
+                has been successfully created.',
+                'required' => false
             ])
         ;
     }
