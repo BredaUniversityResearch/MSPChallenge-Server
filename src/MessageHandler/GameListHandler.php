@@ -118,6 +118,7 @@ class GameListHandler
             $this->gameSession->setSessionState(new GameSessionStateValue('failed'));
             $this->mspServerManagerEntityManager->persist($this->gameSession);
             $this->mspServerManagerEntityManager->flush();
+            return;
         }
 
         $this->gameSession->setSessionState(new GameSessionStateValue('healthy'));

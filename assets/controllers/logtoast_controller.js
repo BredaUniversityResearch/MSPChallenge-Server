@@ -3,12 +3,14 @@ import $ from 'jquery';
 
 export default class extends Controller {
 
+    static timeout;
+
     showToast()
     {
-        $('#logToastBodyTurboFrame').attr('src', '/manager/game/' + this.element.dataset.session +'/log');
         $('#logToastTitle').html('Creating session ' + this.element.dataset.session);
+        $('#logToastBodyTurboFrame').attr('src', '/manager/game/' + this.element.dataset.session +'/log');
         $('#logToast').show();
-        setInterval(function () {
+        this.timeout = setInterval(function () {
             document.querySelector('turbo-frame#logToastBodyTurboFrame').reload();
         }, 2000);
     }
@@ -16,6 +18,7 @@ export default class extends Controller {
     hideToast()
     {
         $('#logToast').hide();
+        clearInterval(this.timeout);
     }
 
 }

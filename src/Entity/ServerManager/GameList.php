@@ -246,7 +246,7 @@ class GameList
 
     public function setPasswordAdmin(string $passwordAdmin): self
     {
-        $this->passwordAdmin = $passwordAdmin;
+        $this->passwordAdmin = $this->checkPasswordFormat('password_admin', $passwordAdmin);
 
         return $this;
     }
@@ -258,7 +258,7 @@ class GameList
 
     public function setPasswordPlayer(string $passwordPlayer): self
     {
-        $this->passwordPlayer = $passwordPlayer;
+        $this->passwordPlayer = $this->checkPasswordFormat('password_player', $passwordPlayer);
 
         return $this;
     }
@@ -378,5 +378,90 @@ class GameList
         $this->serverVersion = $serverVersion;
 
         return $this;
+    }
+
+    private function checkPasswordFormat(string $adminorplayer, string $string): bool|string
+    {
+        if (is_object(json_decode($string))) {
+            // backwards compatibility
+            $stringDecoded = json_decode($string, true);
+            if (isset($stringDecoded['admin'])) {
+                if (isset($stringDecoded['admin']['password'])) {
+                    $stringDecoded['admin']['value'] = $stringDecoded['admin']['password'];
+                    unset($stringDecoded['admin']['password']);
+                } elseif (isset($stringDecoded['admin']['users'])) {
+                    if (is_array($stringDecoded['admin']['users'])) {
+                        $stringDecoded['admin']['users'] = implode(' ', $stringDecoded['admin']['users']);
+                    }
+                    $stringDecoded['admin']['value'] = $stringDecoded['admin']['users'];
+                    unset($stringDecoded['admin']['users']);
+                }
+                if (isset($stringDecoded['region']['password'])) {
+                    $stringDecoded['region']['value'] = $stringDecoded['region']['password'];
+                    unset($stringDecoded['region']['password']);
+                } elseif (isset($stringDecoded['region']['users'])) {
+                    if (is_array($stringDecoded['region']['users'])) {
+                        $stringDecoded['region']['users'] = implode(' ', $stringDecoded['region']['users']);
+                    }
+                    $stringDecoded['region']['value'] = $stringDecoded['region']['users'];
+                    unset($stringDecoded['region']['users']);
+                }
+            } elseif (isset($stringDecoded['password'])) {
+                $stringDecoded['value'] = $stringDecoded['password'];
+                unset($stringDecoded['password']);
+            } elseif (isset($stringDecoded['users'])) {
+                if (is_array($stringDecoded['users'])) {
+                    $stringDecoded['users'] = implode(' ', $stringDecoded['users']);
+                }
+                $stringDecoded['value'] = $stringDecoded['users'];
+                unset($stringDecoded['users']);
+            }
+
+            return json_encode($stringDecoded);
+        }
+
+        // only used when creating new session or loading a save from pre-beta8
+        if ('password_admin' == $adminorplayer) {
+            $newArray['admin']['provider'] = 'local';
+            $newArray['admin']['value'] = (string) $string;
+            $newArray['region']['provider'] = 'local';
+            $newArray['region']['value'] = (string) $string;
+        } else {
+            $newArray['provider'] = 'local';
+            $countries = $this->getCountries();
+            foreach ($countries as $country_data) {
+                $newArray['value'][$country_data['country_id']] = (string) $string;
+            }
+        }
+
+        return json_encode($newArray);
+    }
+
+    private function getCountries(): array
+    {
+        if (!is_null($this->getGameSave())) { // session eminates from a save
+            $configData = []; // to do
+        } else { // session eminates from a config file, so from scratch
+            $configData = $this->getGameConfigVersion()->getGameConfigComplete();
+        }
+
+        $countries = [];
+        if (!isset($configData['datamodel']) || !isset($configData['datamodel']['meta'])) {
+            return $countries;
+        }
+
+        foreach ($configData['datamodel']['meta'] as $layerMeta) {
+            if ($layerMeta['layer_name'] == $configData['datamodel']['countries']) {
+                foreach ($layerMeta['layer_type'] as $country) {
+                    $countries[] = [
+                        'country_id' => $country['value'],
+                        'country_name' => $country['displayName'],
+                        'country_colour' => $country['polygonColor'],
+                    ];
+                }
+            }
+        }
+
+        return $countries;
     }
 }
