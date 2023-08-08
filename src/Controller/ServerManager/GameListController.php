@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\ServerManager;
 
-use App\Domain\API\v1\Game;
 use App\Entity\ServerManager\GameList;
-use App\Form\NewSessionFormType;
+use App\Form\GameListFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
@@ -14,13 +13,13 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-class NewServerManagerController extends AbstractController
+class GameListController extends AbstractController
 {
 
     #[Route('/manager', name: 'app_new_server_manager')]
     public function index(): Response
     {
-        return $this->render('manager/sessions.html.twig');
+        return $this->render('manager/gamelist_page.html.twig');
     }
 
     #[Route(
@@ -35,49 +34,55 @@ class NewServerManagerController extends AbstractController
     ): Response {
         if (!is_null($request->headers->get('Turbo-Frame'))) {
             $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
-            return $this->render('manager/snippets/gamelist.html.twig', [
+            return $this->render('manager/GameList/gamelist.html.twig', [
                 'gameList' => $gameList
             ]);
         }
         return $this->redirectToRoute('app_new_server_manager');
     }
 
-    #[Route('/manager/game/add', name: 'app_new_server_manager_gamelist_add')]
-    public function newSessionForm(
+    #[Route(
+        '/manager/game/{id}',
+        name: 'app_new_server_manager_gamelist_handler',
+        requirements: ['id' => '\d+']
+    )]
+    public function gameSessionForm(
         Request $request,
         EntityManagerInterface $entityManager,
-        MessageBusInterface $messageBus
+        MessageBusInterface $messageBus,
+        int $id = 0
     ): Response {
-        $newGameSession = new GameList();
-        $form = $this->createForm(NewSessionFormType::class, $newGameSession, [
+        $gameSession = new GameList();
+        if ($id > 0) {
+            $gameSession = $entityManager->getRepository(GameList::class)->find($id);
+        }
+        $form = $this->createForm(GameListFormType::class, $gameSession, [
             'entity_manager' => $entityManager,
-            'action' => $this->generateUrl('app_new_server_manager_gamelist_add')
+            'action' => $this->generateUrl('app_new_server_manager_gamelist_handler')
         ]);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
-            $newGameSession = $form->getData();
-            $entityManager->persist($newGameSession);
+            $gameSession = $form->getData();
+            $entityManager->persist($gameSession);
             $entityManager->flush();
-            $messageBus->dispatch((new GameList($newGameSession->getId())));
-            if ($request->isXmlHttpRequest()) {
-                return new Response($newGameSession->getId(), 200);
-            }
-            $this->addFlash(
-                'success',
-                'Successfully added a new session. Please wait for it to be finalised.'
-            );
-            return $this->redirectToRoute('app_new_server_manager');
+            $messageBus->dispatch((new GameList($gameSession->getId())));
+            return new Response($gameSession->getId(), 200);
         }
-        return $this->render('manager/GameList/new_game.html.twig', [
-            'newSessionForm' => $form->createView()
-        ], new Response(
-            null,
-            $form->isSubmitted() && !$form->isValid() ? 422 : 200,
-        ));
+        return $this->render(
+            $id === 0 ? 'manager/GameList/new_game.html.twig': 'manager/GameList/existing_game.html.twig',
+            ['gameSessionForm' => $form->createView()],
+            new Response(
+                null,
+                $form->isSubmitted() && !$form->isValid() ? 422 : 200
+            )
+        );
     }
 
-    #[Route('/manager/game/{id}/log', name: 'app_new_server_manager_game_log', requirements: ['id' => '\d+'])]
+    #[Route(
+        '/manager/game/{id}/log',
+        name: 'app_new_server_manager_game_log',
+        requirements: ['id' => '\d+']
+    )]
     public function getSessionLog(KernelInterface $kernel, int $id = 1): Response
     {
         $fileSystem = new FileSystem();
@@ -85,10 +90,11 @@ class NewServerManagerController extends AbstractController
         if ($fileSystem->exists($logPath)) {
             $logArray = explode('<br />', nl2br(trim(file_get_contents($logPath))));
             $logArray = array_slice($logArray, -5);
-            return $this->render('manager/GameList/sessionlog.html.twig', [
+            return $this->render('manager/GameList/game_log.html.twig', [
                 'logToastBody' => $logArray
             ]);
         }
         return new Response(null, 422);
     }
+
 }

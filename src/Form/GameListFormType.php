@@ -13,7 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class NewSessionFormType extends AbstractType
+class GameListFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -58,6 +58,7 @@ class NewSessionFormType extends AbstractType
                 has been successfully created.',
                 'required' => false
             ])
+            // to do: add different buttons for changing states, (un)setting demo mode, archiving, etc.
         ;
     }
 

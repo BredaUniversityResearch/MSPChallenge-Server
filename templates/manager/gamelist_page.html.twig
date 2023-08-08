@@ -8,11 +8,11 @@
             <i class="fa fa-plus-circle" title="Create new session"></i>
             New Session
         </button>
-        {{ include('manager/_modal_default.html.twig',
+        {{ include('manager/modal_default.html.twig',
             {
                 'modalTitle': 'Create New Session',
                 'modalTurboFrameId': 'sessionsAddForm',
-                'modalTurboFrameSrcRoute': 'app_new_server_manager_gamelist_add'
+                'modalTurboFrameSrcRoute': 'app_new_server_manager_gamelist_handler'
             }
         )}}
     </div>
