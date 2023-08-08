@@ -96,5 +96,4 @@ class GameListController extends AbstractController
         }
         return new Response(null, 422);
     }
-
 }
