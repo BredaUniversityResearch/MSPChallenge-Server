@@ -5,10 +5,12 @@ namespace App\Entity\ServerManager;
 use App\Repository\ServerManager\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Table(name: 'users')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -36,6 +38,16 @@ class User
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @param int|null $id
+     */
+    public function setId(?int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getUsername(): ?string
@@ -108,5 +120,31 @@ class User
         $this->accountId = $accountId;
 
         return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function getPassword(): string
+    {
+        return '';
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // irrelevant
+        return;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) (null !== $this->username) ? $this->username : Uuid::v4();
     }
 }

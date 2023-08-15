@@ -21,6 +21,16 @@ class Auth2Communicator extends AbstractCommunicator
 
     public function getResource($endPoint): array
     {
+        $this->tokenCheck();
+
+        return $this->call(
+            'GET',
+            $endPoint
+        );
+    }
+
+    private function tokenCheck(): void
+    {
         if (is_null($this->getToken()) && !is_null($this->getUsername()) && !is_null($this->getPassword())) {
             $this->setToken($this->call(
                 'POST',
@@ -28,10 +38,16 @@ class Auth2Communicator extends AbstractCommunicator
                 ['username' => $this->username, 'password' => $this->password]
             )["token"] ?? '');
         }
+    }
+
+    public function postResource($endPoint, $data): array
+    {
+        $this->tokenCheck();
 
         return $this->call(
-            'GET',
-            $endPoint
+            'POST',
+            $endPoint,
+            $data
         );
     }
 }

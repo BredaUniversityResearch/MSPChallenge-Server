@@ -1,0 +1,18 @@
+security:
+    enable_authenticator_manager: true
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    providers:
+        local_users:
+            entity:
+                class: 'App\Entity\ServerManager\User'
+                property: 'username'
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            pattern: ^/manager
+            provider: local_users
+            lazy: true
+            custom_authenticators:
+                - App\Security\MSPAuth2Authenticator

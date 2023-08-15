@@ -2,6 +2,11 @@
 
 namespace App\Domain\Communicators;
 
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 abstract class AbstractCommunicator
@@ -13,6 +18,13 @@ abstract class AbstractCommunicator
     protected ?string $password = null;
     protected ?string $token = null;
 
+    /**
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     */
     protected function call($method, $endPoint, $data = [], $headers = [], $asArray = true): string|array
     {
         if (!empty($this->getToken())) {

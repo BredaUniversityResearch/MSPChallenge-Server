@@ -79,6 +79,8 @@ services:
             - { name: knp_menu.menu_builder, method: createMainMenu, alias: mainMenu }
             - { name: knp_menu.menu_builder, method: createSubMenu, alias: subMenu }
 
+    App\Security\MSPAuth2Authenticator:
+
     ServerManager\ServerManager:
 
 when@dev:
