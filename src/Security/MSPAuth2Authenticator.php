@@ -53,7 +53,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
     public function authenticate(Request $request): Passport
     {
         // get the token from Session or GET
-        $apiToken = $request->getSession()->get('token') ?? $request->get('token') ?? null;
+        $apiToken = $request->get('token') ?? $request->getSession()->get('token') ?? null;
         if (empty($apiToken)) {
             throw new MSPAuth2RedirectException();
         }
@@ -74,12 +74,13 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         $user->setId($unencryptedToken->claims()->get('id'));
         // do authorization check with auth2.mspchallenge.info using the token
         if (!$this->authorized($user, $request)) {
+            $request->getSession()->remove('token');
             throw new AccessDeniedHttpException(
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
         }
         // add token to session storage if still required
-        if (empty($request->getSession()->get('token'))) {
+        if ($request->getSession()->get('token') !== $apiToken) {
             $request->getSession()->set('token', $apiToken);
         }
         // UserBadge parameters are purely to get Symfony to continue
@@ -145,6 +146,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         try {
             $this->auth2Communicator->postResource("server_users", $params);
         } catch (ExceptionInterface $e) {
+            $request->getSession()->remove('token');
             throw new AccessDeniedHttpException(
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
@@ -154,7 +156,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             'success',
             'You, '.$user->getUsername().', are now the primary user of this Server Manager. '.
             'This means that you can use this application, and optionally add other users to it through '.
-            'Settings - User Access. Go ahead and set up your first MSP Challenge session through "New Session".'
+            'Settings - User Access. Set up your first MSP Challenge session through the "New Session" button.'
         );
         return $serverUuid;
     }
@@ -167,15 +169,8 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        $data = [
-            // you may want to customize or obfuscate the message first
-            'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
-
-            // or to translate this message
-            // $this->translator->trans($exception->getMessageKey(), $exception->getMessageData())
-        ];
-
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        // not returning a Response here just to keep the code cleaner
+        throw new AccessDeniedHttpException($exception->getMessage());
     }
 
     public function start(Request $request, AuthenticationException $authException = null): Response
