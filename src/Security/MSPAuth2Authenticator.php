@@ -149,7 +149,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
         }
-        // @phpstan-ignore-next-line "Call to an undefined method Symfony\Component\HttpFoundation\Session\SessionInterface::getFlashBag()."
+        // @phpstan-ignore-next-line "Call to an undefined method"
         $request->getSession()->getFlashBag()->add(
             'success',
             'You, '.$user->getUsername().', are now the primary user of this Server Manager. '.
