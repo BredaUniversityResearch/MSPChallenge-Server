@@ -12,12 +12,10 @@ use Lcobucci\JWT\Exception;
 use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
-use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 use Lcobucci\JWT\Validation\Validator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -37,8 +35,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
 
     public function __construct(
         private readonly HttpClientInterface $client,
-        private readonly EntityManagerInterface $mspServerManagerEntityManager,
-        private readonly FlashBagInterface $flashBag
+        private readonly EntityManagerInterface $mspServerManagerEntityManager
     ) {
         $this->auth2Communicator = new Auth2Communicator($this->client);
     }
@@ -76,7 +73,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         $user->setUsername($unencryptedToken->claims()->get('username'));
         $user->setId($unencryptedToken->claims()->get('id'));
         // do authorization check with auth2.mspchallenge.info using the token
-        if (!$this->authorized($user)) {
+        if (!$this->authorized($user, $request)) {
             throw new AccessDeniedHttpException(
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
@@ -93,14 +90,14 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         );
     }
 
-    private function authorized(User $user): bool
+    private function authorized(User $user, Request $request): bool
     {
         try {
             $serverUUID = $this->mspServerManagerEntityManager
                 ->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid']);
             if (is_null($serverUUID)) {
                 // including first-time Server Manager use registration, if still required
-                $serverUUID = $this->register($user);
+                $serverUUID = $this->register($user, $request);
             }
             $response = collect(
                 collect($this->auth2Communicator->getResource(
@@ -118,7 +115,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         }
     }
 
-    private function register(User $user): Setting
+    private function register(User $user, Request $request): Setting
     {
         $serverId = new Setting('server_id', uniqid('', true));
         $serverName = new Setting('server_name', $user->getUsername().'_'.date('Ymd'));
@@ -152,7 +149,12 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
         }
-        $this->flashBag->add('notice', 'First-time use');
+        $request->getSession()->getFlashBag()->add(
+            'success',
+            'You, '.$user->getUsername().', are now the primary user of this Server Manager. '.
+            'This means that you can use this application, and optionally add other users to it through '.
+            'Settings - User Access. Go ahead and set up your first MSP Challenge session through "New Session".'
+        );
         return $serverUuid;
     }
 
