@@ -332,6 +332,4 @@ abstract class CommonBase
 
         return $this;
     }
-
-
 }

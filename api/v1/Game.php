@@ -148,7 +148,8 @@ class Game extends Base
                 ?? 'session_config_'.$this->getGameSessionId().'.json');*/
             // storing the path in the session database's game table is rather nonsensical.
             // we still do it during session creation, for backwards compatibility
-            $path = $this->getProjectDir(). '/' .GameSession::CONFIG_DIRECTORY . 'session_config_'.$this->getGameSessionId().'.json';
+            $path = $this->getProjectDir(). '/' .GameSession::CONFIG_DIRECTORY
+                . 'session_config_'.$this->getGameSessionId().'.json';
         } else {
             $path = $this->getProjectDir(). '/' .GameSession::CONFIG_DIRECTORY . $filename;
         }
