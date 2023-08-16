@@ -84,7 +84,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             $request->getSession()->set('token', $apiToken);
         }
         // UserBadge parameters are purely to get Symfony to continue
-        // first is a user identifier, second is the object with which user is actually identified
+        // first is a user identifier, second is the UserInterface object with which user is actually identified
         return new SelfValidatingPassport(
             new UserBadge($user->getUsername(), fn() => $user),
             [new PreAuthenticatedUserBadge()]
