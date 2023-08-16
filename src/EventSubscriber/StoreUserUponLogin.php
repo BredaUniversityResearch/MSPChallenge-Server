@@ -19,6 +19,7 @@ class StoreUserUponLogin implements EventSubscriberInterface
 
     public function onCheckPassport(CheckPassportEvent $event): void
     {
+        // @phpstan-ignore-next-line "Call to an undefined method"
         $user = $event->getPassport()->getUser();
         if ($user instanceof User) {
             $storedUser = $this->mspServerManagerEntityManager->getRepository(User::class)->find($user->getId());
