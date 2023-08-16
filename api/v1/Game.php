@@ -136,6 +136,9 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function LoadConfigFile(string $filename = ''): string
     {
+        if (empty($this->getProjectDir())) {
+            $this->setProjectDir(SymfonyToLegacyHelper::getInstance()->getProjectDir());
+        }
         if ($filename == "") {    //if there's no file given, use the one in the database
             /*$data = $this->selectRowsFromTable('game', [], true);
             if ($this->isAsync()) {
@@ -145,9 +148,9 @@ class Game extends Base
                 ?? 'session_config_'.$this->getGameSessionId().'.json');*/
             // storing the path in the session database's game table is rather nonsensical.
             // we still do it during session creation, for backwards compatibility
-            $path = GameSession::getConfigDirectory() . 'session_config_'.$this->getGameSessionId().'.json';
+            $path = $this->getProjectDir(). '/' .GameSession::CONFIG_DIRECTORY . 'session_config_'.$this->getGameSessionId().'.json';
         } else {
-            $path = GameSession::getConfigDirectory() . $filename;
+            $path = $this->getProjectDir(). '/' .GameSession::CONFIG_DIRECTORY . $filename;
         }
 
         // 5 min cache. why 5min? Such that the websocket server will refresh the config once in a while
@@ -702,9 +705,12 @@ class Game extends Base
         if (!str_starts_with(php_uname(), "Windows")) {
             return;
         }
+        if (empty($this->getProjectDir())) {
+            $this->setProjectDir(SymfonyToLegacyHelper::getInstance()->getProjectDir());
+        }
         $this->StartSimulationExe([
             'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/'.(
+            'working_directory' => $this->getProjectDir().'/'.(
                 $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
             )
         ]);

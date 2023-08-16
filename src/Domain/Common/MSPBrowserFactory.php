@@ -19,7 +19,7 @@ class MSPBrowserFactory
         // any proxy required for the external calls of any kind
         //  (MSP Authoriser, BUas GeoServer, or any other GeoServer)
         $connector = null;
-        $proxy = Config::GetInstance()->GetAuthWithProxy();
+        $proxy = $_ENV['PROXY_FOR_EXTERNAL_CONNECTIONS']; //Config::GetInstance()->GetAuthWithProxy();
         if (!empty($proxy) && !str_contains($targetUrl, "localhost") && Base::PHPCanProxy()
         ) {
             $connector = new ProxyConnector($proxy);

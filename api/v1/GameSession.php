@@ -40,7 +40,7 @@ class GameSession extends Base
 
     const INVALID_SESSION_ID = -1;
     const ARCHIVE_DIRECTORY = "session_archive/";
-    private const CONFIG_DIRECTORY = "running_session_config/";
+    public const CONFIG_DIRECTORY = "running_session_config/";
     const EXPORT_DIRECTORY = "export/";
     const SECONDS_PER_MINUTE = 60;
     const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE * 60;

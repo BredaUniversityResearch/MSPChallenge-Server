@@ -83,6 +83,10 @@ services:
 
     ServerManager\ServerManager:
 
+    App\EventSubscriber\StoreUserUponLogin:
+        tags:
+            - 'kernel.event_subscriber'
+
 when@dev:
     services:
         # make classes in src/DataFixtures available to be used as services

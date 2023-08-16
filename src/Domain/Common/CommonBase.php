@@ -24,6 +24,7 @@ abstract class CommonBase
     private ?string $token = null;
     private bool $async = false;
     private ?Log $logger = null;
+    private ?string $projectDir = null;
 
     protected function getDatabase(): Database
     {
@@ -162,6 +163,7 @@ abstract class CommonBase
         $other->setAsyncDatabase($this->getAsyncDatabase());
         $other->setToken($this->getToken());
         $other->setAsync($this->isAsync());
+        $other->setProjectDir($this->getProjectDir());
     }
 
     /**
@@ -312,4 +314,24 @@ abstract class CommonBase
             });
         return $this->isAsync() ? $promise : await($promise);
     }
+
+    /**
+     * @return string|null
+     */
+    public function getProjectDir(): ?string
+    {
+        return $this->projectDir;
+    }
+
+    /**
+     * @param string|null $projectDir
+     */
+    public function setProjectDir(?string $projectDir): self
+    {
+        $this->projectDir = $projectDir;
+
+        return $this;
+    }
+
+
 }

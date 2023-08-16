@@ -39,6 +39,12 @@
             }) }}
             ></div>
         {%  endfor %}
+        {% for message in app.flashes('notice') %}
+            <div {{ stimulus_controller('flashes', {
+                notice: message,
+            }) }}
+            ></div>
+        {%  endfor %}
         </div>
         <div id="content-wrapper">
             <div id="content">

@@ -153,10 +153,10 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         }
         // @phpstan-ignore-next-line "Call to an undefined method"
         $request->getSession()->getFlashBag()->add(
-            'success',
+            'notice',
             'You, '.$user->getUsername().', are now the primary user of this Server Manager. '.
             'This means that you can use this application, and optionally add other users to it through '.
-            'Settings - User Access. Set up your first MSP Challenge session through the "New Session" button.'
+            '"Settings" - "User Access". Set up your first MSP Challenge session through the "New Session" button.'
         );
         return $serverUuid;
     }

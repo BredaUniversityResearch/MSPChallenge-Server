@@ -8,7 +8,6 @@ use App\Domain\API\v1\Objective;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Security;
 use App\Domain\API\v1\Simulations;
-use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Communicators\GeoServerCommunicator;
 use App\Domain\Services\ConnectionManager;
@@ -111,7 +110,7 @@ class GameListHandler
                 'Session {name} failed to create. Try to resolve the problem and retry. Problem: {problem}',
                 [
                     'name' => $this->gameSession->getName(),
-                    'problem' => $e->getMessage(),
+                    'problem' => $e->getMessage().' '.$e->getTraceAsString(),
                     'gameSession' => $this->gameSession->getId()
                 ]
             );
@@ -138,29 +137,33 @@ class GameListHandler
             '--no-interaction' => true,
             '--if-exists' => true,
             '--connection' => $conn,
-            '--env' => 'test'
+            '--env' => $_ENV['APP_ENV']
         ]);
         $input0->setInteractive(false);
         $output0 = new BufferedOutput();
         $app->doRun($input0, $output0);
         $this->gameSessionChannelLogger->info(
-            $output0->fetch(),
+            (string) $input0.' resulted in: '.$output0->fetch(),
             ['gameSession' => $this->gameSession->getId()]
         );
+
+        sleep(2);
 
         $input = new ArrayInput([
             'command' => 'doctrine:database:create',
             '--connection' => $conn,
             '--if-not-exists' => true,
-            '--env' => 'test'
+            '--env' => $_ENV['APP_ENV']
         ]);
         $input->setInteractive(false);
         $output = new BufferedOutput();
         $app->doRun($input, $output);
         $this->gameSessionChannelLogger->info(
-            $output->fetch(),
+            (string) $input.' resulted in: '.$output->fetch(),
             ['gameSession' => $this->gameSession->getId()]
         );
+
+        sleep(2);
     }
 
     private function migrateSessionDatabase(): void
@@ -171,13 +174,14 @@ class GameListHandler
         $input = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
             '--em' => $em,
-            '--env' => 'test'
+            '--env' => $_ENV['APP_ENV'],
+            '--no-interaction' => true
         ]);
         $input->setInteractive(false);
         $output = new BufferedOutput();
         $app->doRun($input, $output);
         $this->gameSessionChannelLogger->info(
-            $output->fetch(),
+            (string) $input.' resulted in: '.$output->fetch(),
             ['gameSession' => $this->gameSession->getId()]
         );
     }
@@ -623,15 +627,16 @@ class GameListHandler
         // get the watchdog and end-user log-on in order
         $game = new Game();
         $game->setGameSessionId($this->gameSession->getId());
-            $game->insertRowIntoTable(
-                'game_session',
-                [
-                    'game_session_watchdog_address' => $this->gameSession->getGameWatchdogServer()->getAddress(),
-                    'game_session_watchdog_token' => 'UUID_SHORT()',
-                    'game_session_password_admin' => $this->gameSession->getPasswordAdmin(),
-                    'game_session_password_player' => $this->gameSession->getPasswordPlayer() ?? ''
-                ]
-            ) ?? throw new \Exception('Unable to store Watchdog address and user access passwords.');
+        $game->setProjectDir($this->kernel->getProjectDir());
+        $game->insertRowIntoTable(
+            'game_session',
+            [
+                'game_session_watchdog_address' => $this->gameSession->getGameWatchdogServer()->getAddress(),
+                'game_session_watchdog_token' => 'UUID_SHORT()',
+                'game_session_password_admin' => $this->gameSession->getPasswordAdmin(),
+                'game_session_password_player' => $this->gameSession->getPasswordPlayer() ?? ''
+            ]
+        ) ?? throw new \Exception('Unable to store Watchdog address and user access passwords.');
         if ($_ENV['APP_ENV'] !== 'test') {
             //Notify the simulation that the game has been set up so we start the simulations.
             //This is needed because MEL needs to be run before the game to setup the initial fishing values.
