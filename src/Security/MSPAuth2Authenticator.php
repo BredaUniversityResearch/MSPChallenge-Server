@@ -65,6 +65,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             $validator = new Validator();
             $validator->assert($unencryptedToken, new LooseValidAt(new FrozenClock(new \DateTimeImmutable())));
         } catch (Exception $e) {
+            $request->getSession()->remove('token');
             throw new MSPAuth2RedirectException();
         }
         $this->auth2Communicator->setToken($apiToken);
@@ -72,9 +73,8 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         $user = new User();
         $user->setUsername($unencryptedToken->claims()->get('username'));
         $user->setId($unencryptedToken->claims()->get('id'));
-        // do authorization check with auth2.mspchallenge.info using the token
-        if (!$this->authorized($user, $request)) {
-            $request->getSession()->remove('token');
+        // authorization through auth2.mspchallenge.info using the token, but only when first obtained through GET
+        if (empty($request->getSession()->get('token')) && !$this->authorized($user, $request)) {
             throw new AccessDeniedHttpException(
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
