@@ -4,6 +4,7 @@ namespace App\Controller\ServerManager;
 
 use App\Entity\ServerManager\GameList;
 use App\Form\GameListFormType;
+use App\Messages\GameListSessionCreation;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
@@ -65,7 +66,9 @@ class GameListController extends AbstractController
             $gameSession = $form->getData();
             $entityManager->persist($gameSession);
             $entityManager->flush();
-            $messageBus->dispatch((new GameList($gameSession->getId())));
+            if ($gameSession->getSessionState() == 'request' && !is_null($gameSession->getGameConfigVersion())) {
+                $messageBus->dispatch((new GameListSessionCreation($gameSession->getId())));
+            }
             return new Response($gameSession->getId(), 200);
         }
         return $this->render(

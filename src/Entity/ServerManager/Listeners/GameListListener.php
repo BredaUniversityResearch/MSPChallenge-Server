@@ -9,6 +9,7 @@ use App\Entity\ServerManager\GameGeoServer;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\ServerManager\GameList;
+use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 
 class GameListListener

@@ -29,23 +29,27 @@
                         {{ game.gameSave.gameConfigFilesFilename }}
                     {% endif %}
                 </td>
-                <td>{{ game.playersPastHour }}</td>
-                <td class="state_{{ game.sessionState }}">
-                    {% if (game.sessionState == 'request') %}
-                        requesting <i class="fa fa-spinner fa-pulse" title="Your session is being created."></i>
-                    {% elseif (game.sessionState == 'healthy' and game.gameState == 'setup') %}
-                        setup <i class="fa fa-check" title="This session is ready."></i>
-                    {% elseif (game.sessionState == 'failed') %}
-                        failed
-                    {% else %}
-                        {{ game.gameState }}
+                <td>{{ game.playersPastHour|default(0) }}</td>
+                {% if game.sessionState == 'request' or game.sessionState == 'failed' %}
+                    {% set showState = game.sessionState %}
+                {% else %}
+                    {% set showState = game.gameState %}
+                {% endif %}
+                <td class="state_{{ showState }}">
+                    {{ showState }}
+                    {% if (showState == 'request') %}
+                        <i class="fa fa-spinner fa-pulse" title="Your session is being created."></i>
+                    {% elseif (showState == 'setup') %}
+                        <i class="fa fa-check" title="This session is ready."></i>
                     {% endif %}
                 </td>
                 <td>{{ game.gameCurrentMonthPretty }} </td>
                 <td>{{ game.getGameEndMonthPretty }}</td>
                 <td class="text-center">
-                    <button {{ stimulus_controller('game') }} data-state="pause" data-action="game#setState">
-                        test
+                    <button class="btn btn-secondary btn-sm"
+                            {{ stimulus_controller('game', { state: 'pause' }) }}
+                            data-action="game#setState">
+                        <i class="fa fa-pause"></i>
                     </button>
                 </td>
             </tr>

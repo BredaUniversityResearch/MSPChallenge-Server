@@ -37,6 +37,10 @@ services:
         arguments:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
 
+    App\Entity\ServerManager\Listeners\DatabaseFlushListener:
+        tags:
+            - { name: 'doctrine.event_listener', event: 'onFlush' }
+
     App\Entity\ServerManager\Listeners\GameListListener:
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList' }
@@ -64,7 +68,7 @@ services:
         arguments:
             - App\Entity\ServerManager\GameList
 
-    App\MessageHandler\GameListHandler:
+    App\MessageHandler\GameListSessionCreationHandler:
         arguments:
             $mspServerManagerEntityManager: '@Doctrine\ORM\EntityManagerInterface'
             $gameListRepository: '@App\Repository\ServerManager\GameListRepository'

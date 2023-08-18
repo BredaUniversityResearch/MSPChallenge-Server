@@ -146,7 +146,6 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         try {
             $this->auth2Communicator->postResource("server_users", $params);
         } catch (ExceptionInterface $e) {
-            $request->getSession()->remove('token');
             throw new AccessDeniedHttpException(
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );

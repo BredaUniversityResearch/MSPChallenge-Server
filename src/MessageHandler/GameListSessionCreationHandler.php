@@ -12,6 +12,7 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Communicators\GeoServerCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
+use App\Messages\GameListSessionCreation;
 use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function App\await;
 
 #[AsMessageHandler]
-class GameListHandler
+class GameListSessionCreationHandler
 {
     private readonly ConnectionManager $connectionManager;
     private string $rootToWrite;
@@ -46,51 +47,9 @@ class GameListHandler
             $this->kernel->getLogDir();
     }
 
-    public function __invoke(GameList $gameList): void
+    public function __invoke(GameListSessionCreation $gameList): void
     {
         $this->gameSession = $this->gameListRepository->find($gameList->getId());
-        if ((string) $this->gameSession->getSessionState() == 'request') {
-            if (!is_null($this->gameSession->getGameConfigVersion())) {
-                $this->setupSession();
-                return;
-            }
-            if (!is_null($this->gameSession->getGameSave())) {
-                $this->loadSession();
-                return;
-            }
-            return;
-        }
-        if ((string) $this->gameSession->getSessionState() == 'archived') {
-            $this->archiveSession();
-            return;
-        }
-        if ((string) $this->gameSession->getSessionState() == 'healthy' &&
-            (!is_null($this->gameSession->getGameSave()))) {
-            $this->saveSession();
-            return;
-        }
-    }
-
-    private function saveSession(): void
-    {
-        return;
-    }
-
-    private function archiveSession(): void
-    {
-        return;
-    }
-
-    private function loadSession(): void
-    {
-        // will need to use the mysql command to load the dumped SQL
-        // as doctrine dropped support for doing it through doctrine:database:import on the CLI
-        // and also through doctrine:query:sql it didn't work when I tested it
-        return;
-    }
-
-    private function setupSession(): void
-    {
         try {
             $this->gameSessionChannelLogger->notice(
                 'Session {name} creation initiated. This might take a while.',

@@ -11,6 +11,9 @@ $darkAlpha: #037c7c77;
 $darkAlternateAlpha: #00000000;
 
 $input-border-radius: 3rem;
+$btn-border-radius: 3rem;
+$btn-border-radius-sm: 3rem;
+
 $modal-md: 750px;
 
 @import '~bootstrap';
@@ -203,15 +206,6 @@ a:active {
     left: 50%;
 }
 
-.btn {
-    @include button-size(
-        0, //padding-y
-        20px, //padding-x
-        20px, //font-size
-        $input-border-radius //border-radius
-    );
-}
-
 #radioFilter {
     border: solid thin darkgrey;
     border-radius: $input-border-radius;
@@ -219,6 +213,23 @@ a:active {
 }
 
 .btn-primary {
+    @include button-variant(
+        $darkAlternate1, //background
+        $darkAlternate1, //border
+        $light, //color
+        $dark, //hover-background
+        $dark, //hover-border
+        $light, //hover-color
+        $lightAlternate2, //active-background
+        $lightAlternate2, //active-border
+        $light //active-color
+        //disabled-background
+        //disabled-border
+        //disabled-color
+    );
+}
+
+.btn-secondary {
     @include button-variant(
         $darkAlternate1, //background
         $darkAlternate1, //border
