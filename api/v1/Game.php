@@ -564,7 +564,6 @@ class Game extends Base
     {
         $state = strtoupper($state);
         $currentState = $this->selectRowsFromTable('game');
-        file_put_contents('test.tmp', var_export($currentState, true));
         //$this->getDatabase()->query("SELECT game_state FROM game")[0];
         if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
             throw new Exception("Invalid current state of ".$currentState["game_state"]);
@@ -578,7 +577,8 @@ class Game extends Base
             ->set('game_state', $qb->createPositionalParameter($state));
         if ($currentState["game_state"] == "SETUP") {
             //Starting plans should be implemented when we any state "PLAY"
-            $plan = (new Plan())->setGameSessionId($this->getGameSessionId());
+            $plan = new Plan();
+            $plan->setGameSessionId($this->getGameSessionId());
             await($plan->updateLayerState(0));
 
             if ($state == "PAUSE") {

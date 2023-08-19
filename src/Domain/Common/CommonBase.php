@@ -124,11 +124,9 @@ abstract class CommonBase
             );
     }
 
-    public function setGameSessionId(?int $gameSessionId): self
+    public function setGameSessionId(?int $gameSessionId): void
     {
         $this->gameSessionId = $gameSessionId;
-
-        return $this;
     }
 
     public function getToken(): ?string
