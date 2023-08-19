@@ -563,21 +563,22 @@ class Game extends Base
     public function State(string $state): void
     {
         $state = strtoupper($state);
-        $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
+        $currentState = $this->selectRowsFromTable('game');
+        file_put_contents('test.tmp', var_export($currentState, true));
+        //$this->getDatabase()->query("SELECT game_state FROM game")[0];
         if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
             throw new Exception("Invalid current state of ".$currentState["game_state"]);
         }
 
         // prepare update query using builder
-        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
-            ->createQueryBuilder();
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $qb
             ->update('game')
             ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
             ->set('game_state', $qb->createPositionalParameter($state));
         if ($currentState["game_state"] == "SETUP") {
             //Starting plans should be implemented when we any state "PLAY"
-            $plan = new Plan();
+            $plan = (new Plan())->setGameSessionId($this->getGameSessionId());
             await($plan->updateLayerState(0));
 
             if ($state == "PAUSE") {

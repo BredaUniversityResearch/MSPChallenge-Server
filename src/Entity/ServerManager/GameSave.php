@@ -99,6 +99,20 @@ class GameSave
     #[ORM\Column(length: 45)]
     private ?string $serverVersion = null;
 
+    /**
+     * @param int|null $id
+     */
+    public function __construct(?int $id = null)
+    {
+        $this->id = $id;
+    }
+
+    public function createFromGameList(GameList $gameList): self
+    {
+        //todo: create this object's props based on $gameList's props
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

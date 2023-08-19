@@ -4,7 +4,7 @@ namespace App\Messages;
 
 use App\Entity\ServerManager\GameList;
 
-class GameListSessionCreation extends GameList
+class GameListSessionCreate extends GameList
 {
     public function __construct(int $id)
     {

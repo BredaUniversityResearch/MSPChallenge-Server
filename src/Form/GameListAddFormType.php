@@ -9,11 +9,12 @@ use App\Entity\ServerManager\GameWatchdogServer;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class GameListFormType extends AbstractType
+class GameListAddFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -25,7 +26,8 @@ class GameListFormType extends AbstractType
                 'choices' => [$entityManager->getRepository(GameConfigVersion::class)->findAll()],
                 'choice_value' => 'id',
                 'choice_label' => function (?GameConfigVersion $gameConfigVersion) {
-                    return '#'.$gameConfigVersion->getVersion().': '.$gameConfigVersion->getVersionMessage();
+                    return $gameConfigVersion->getGameConfigFile()->getFilename().
+                        ' v'.$gameConfigVersion->getVersion().': '.$gameConfigVersion->getVersionMessage();
                 },
                 'group_by' => function ($choice, $key, $value) {
                     return $choice->getGameConfigFile()->getFilename();
@@ -59,6 +61,12 @@ class GameListFormType extends AbstractType
                 'required' => false
             ])
             // to do: add different buttons for changing states, (un)setting demo mode, archiving, etc.
+            ->add('play', SubmitType::class, [
+                'attr' => ['class' => 'btn btn-secondary btn-sm']
+            ])
+            ->add('pause', SubmitType::class, [
+                'attr' => ['class' => 'btn btn-secondary btn-sm']
+            ])
         ;
     }
 

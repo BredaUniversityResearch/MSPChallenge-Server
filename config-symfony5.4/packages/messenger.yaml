@@ -13,7 +13,7 @@ framework:
 
         routing:
             # Route your messages to the transports
-            'App\Messages\GameListSessionCreation': async
+            'App\Messages\GameListSessionCreate': async
 
 when@test:
     framework:

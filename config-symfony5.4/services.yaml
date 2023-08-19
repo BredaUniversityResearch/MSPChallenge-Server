@@ -28,6 +28,8 @@ services:
     App\Domain\WsServer\WsServer:
 
     App\Domain\API\APIHelper:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
 
     App\EventListener\ExceptionListener:
         tags:
@@ -36,10 +38,6 @@ services:
     App\Domain\WsServer\Plugins\PluginHelper:
         arguments:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
-
-    App\Entity\ServerManager\Listeners\DatabaseFlushListener:
-        tags:
-            - { name: 'doctrine.event_listener', event: 'onFlush' }
 
     App\Entity\ServerManager\Listeners\GameListListener:
         tags:
@@ -68,7 +66,7 @@ services:
         arguments:
             - App\Entity\ServerManager\GameList
 
-    App\MessageHandler\GameListSessionCreationHandler:
+    App\MessageHandler\GameListSessionCreateHandler:
         arguments:
             $mspServerManagerEntityManager: '@Doctrine\ORM\EntityManagerInterface'
             $gameListRepository: '@App\Repository\ServerManager\GameListRepository'

@@ -124,9 +124,11 @@ abstract class CommonBase
             );
     }
 
-    public function setGameSessionId(?int $gameSessionId): void
+    public function setGameSessionId(?int $gameSessionId): self
     {
         $this->gameSessionId = $gameSessionId;
+
+        return $this;
     }
 
     public function getToken(): ?string
@@ -185,7 +187,7 @@ abstract class CommonBase
     public function selectRowsFromTable(
         string $table,
         array $whereColumnData = [],
-        bool $forceFirstRow = false // but note if only one row is found, that first row is still returned
+        bool $forceMultiRow = false
     ): array|null|PromiseInterface {
         if (count($whereColumnData) == 2) {
             throw new \Exception(
@@ -208,18 +210,18 @@ abstract class CommonBase
         $firstWhereColumn = true;
         foreach ($whereColumnData as $key => $val) {
             if ($firstWhereColumn) {
-                $query->where($qb->expr()->eq($key, $qb->createPositionalParameter($val)));
+                $query->where($qb->expr()->eq($firstLetter.'.'.$key, $qb->createPositionalParameter($val)));
                 $firstWhereColumn = false;
             } else {
-                $query->$andOrWhere($qb->expr()->eq($key, $qb->createPositionalParameter($val)));
+                $query->$andOrWhere($qb->expr()->eq($firstLetter.'.'.$key, $qb->createPositionalParameter($val)));
             }
         }
-        $promise = $this->getAsyncDatabase()->query($query)->then(function (Result $result) use ($forceFirstRow) {
+        $promise = $this->getAsyncDatabase()->query($query)->then(function (Result $result) use ($forceMultiRow) {
             $allRows = $result->fetchAllRows();
             if (empty($allRows)) {
                 return null;
             }
-            if (count($allRows) == 1 || $forceFirstRow) {
+            if (count($allRows) == 1 && !$forceMultiRow) {
                 return $allRows[0];
             }
             return $allRows;

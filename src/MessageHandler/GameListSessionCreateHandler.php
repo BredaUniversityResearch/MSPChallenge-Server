@@ -12,7 +12,7 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Communicators\GeoServerCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
-use App\Messages\GameListSessionCreation;
+use App\Messages\GameListSessionCreate;
 use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function App\await;
 
 #[AsMessageHandler]
-class GameListSessionCreationHandler
+class GameListSessionCreateHandler
 {
     private readonly ConnectionManager $connectionManager;
     private string $rootToWrite;
@@ -47,7 +47,7 @@ class GameListSessionCreationHandler
             $this->kernel->getLogDir();
     }
 
-    public function __invoke(GameListSessionCreation $gameList): void
+    public function __invoke(GameListSessionCreate $gameList): void
     {
         $this->gameSession = $this->gameListRepository->find($gameList->getId());
         try {

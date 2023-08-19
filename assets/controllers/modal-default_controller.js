@@ -52,11 +52,7 @@ export default class extends Controller {
                     }
                 }
             });
-            success(
-                'Success',
-                successMessage,
-                { position: 'mm', duration: 10000 }
-            );
+            success('Success', successMessage, { position: 'mm', duration: 10000 });
             this.modal.hide();
         } catch (e) {
             this.modalBodyTarget.innerHTML = e.responseText;
