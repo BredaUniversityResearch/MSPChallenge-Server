@@ -12,7 +12,7 @@
             {
                 'modalTitle': 'Create New Session',
                 'modalTurboFrameId': 'sessionsAddForm',
-                'modalTurboFrameSrcRoute': 'app_new_server_manager_gamelist_handler'
+                'modalTurboFrameSrcRoute': 'manager_game_form'
             }
         )}}
     </div>
@@ -21,12 +21,12 @@
             <span id="radioFilter">
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="public" checked
-                            {{ stimulus_controller('gamelist-filter') }} data-action="gamelist-filter#applyFilter" data-href="{{ path('app_new_server_manager_game_list') }}">
+                            {{ stimulus_controller('gamelist-filter') }} data-action="gamelist-filter#applyFilter" data-href="{{ path('manager_gamelist') }}">
                     <label class="form-check-label" for="inlineRadio1">Active</label>
                 </div>
                 <div class="form-check form-check-inline mx-0">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="archived"
-                           {{ stimulus_controller('gamelist-filter') }} data-action="gamelist-filter#applyFilter" data-href="{{ path('app_new_server_manager_game_list', {'sessionState': 'archived'}) }}">
+                           {{ stimulus_controller('gamelist-filter') }} data-action="gamelist-filter#applyFilter" data-href="{{ path('manager_gamelist', {'sessionState': 'archived'}) }}">
                     <label class="form-check-label" for="inlineRadio3">Archived</label>
                 </div>
             </span>
@@ -37,7 +37,7 @@
     </div>
     <div class="col-md-12">
         <div class="table-responsive">
-            <turbo-frame id="sessionsTable" src="{{ path('app_new_server_manager_game_list') }}"
+            <turbo-frame id="sessionsTable" src="{{ path('manager_gamelist') }}"
                 {{ stimulus_controller('gamelist') }}>
             </turbo-frame>
         </div>

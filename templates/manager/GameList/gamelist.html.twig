@@ -15,7 +15,7 @@
         <tbody>
         {% if gameList is empty %}
             <tr>
-                <td colspan="8">No sessions yet. Click on "New Session" to get started.</td>
+                <td colspan="8">No sessions yet. Click on "New Session" to create a new session.</td>
             </tr>
         {% endif %}
         {% for game in gameList %}
@@ -46,11 +46,53 @@
                 <td>{{ game.gameCurrentMonthPretty }} </td>
                 <td>{{ game.getGameEndMonthPretty }}</td>
                 <td class="text-center">
-                    <button class="btn btn-secondary btn-sm"
-                            {{ stimulus_controller('game', { state: 'pause' }) }}
-                            data-action="game#setState">
-                        <i class="fa fa-pause"></i>
-                    </button>
+                    {% if game.sessionState == 'failed' %}
+                        <button class="btn btn-secondary btn-sm"
+                                {{ stimulus_controller('game', { id: game.id }) }}
+                                data-action="game#sessionRecreate">
+                            <i class="fa fa-repeat" title="Retry session creation"></i>
+                        </button>
+                        <button class="btn btn-secondary btn-sm"
+                                {{ stimulus_controller('game', { id: game.id }) }}
+                                data-action="game#sessionArchive">
+                            <i class="fa fa-archive" title="Archive"></i>
+                        </button>
+                    {% elseif game.sessionState == 'archived' %}
+                        <button class="btn btn-secondary btn-sm"
+                                {{ stimulus_controller('game', { id: game.id }) }}
+                                data-action="game#sessionDownload">
+                            <i class="fa fa-download" title="Download"></i>
+                        </button>
+                    {% elseif game.sessionState == 'healthy' %}
+                        {% if game.gameState == 'pause' or game.gameState == 'setup' %}
+                            <button class="btn btn-secondary btn-sm"
+                                    {{ stimulus_controller('game', { id: game.id, state: 'play' }) }}
+                                    data-action="game#sessionState">
+                                <i class="fa fa-play" title="Play"></i>
+                            </button>
+                            <button class="btn btn-secondary btn-sm"
+                                    {{ stimulus_controller('game', { id: game.id, type: 'full' }) }}
+                                    data-action="game#sessionSave">
+                                <i class="fa fa-save" title="Save"></i>
+                            </button>
+                        {% elseif game.gameState == 'play' or game.gameState == 'fastforward' %}
+                            <button class="btn btn-secondary btn-sm"
+                                    {{ stimulus_controller('game', { id: game.id, state: 'pause' }) }}
+                                    data-action="game#sessionState">
+                                <i class="fa fa-pause" title="Pause"></i>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                <i class="fa fa-save" title="Pause before you can save"></i>
+                            </button>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                <i class="fa fa-ban" title="State change not available in this state"></i>
+                            </button>
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                <i class="fa fa-ban" title="Save not available in this state"></i>
+                            </button>
+                        {% endif %}
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

@@ -55,6 +55,7 @@ class GameListSessionCreateHandler
                 'Session {name} creation initiated. This might take a while.',
                 ['name' => $this->gameSession->getName(), 'gameSession' => $this->gameSession->getId()]
             );
+            $this->dropSessionDatabase();
             $this->createSessionDatabase();
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
@@ -84,34 +85,14 @@ class GameListSessionCreateHandler
         $this->mspServerManagerEntityManager->flush();
     }
 
-    private function createSessionDatabase(): void
+    private function dropSessionDatabase(): void
     {
         $conn = $this->connectionManager->getGameSessionDbName($this->gameSession->getId());
-
         $app = new Application($this->kernel);
-
-        $input0 = new ArrayInput([
+        $input = new ArrayInput([
             'command' => 'doctrine:database:drop',
             '--force' => true,
-            '--no-interaction' => true,
-            '--if-exists' => true,
             '--connection' => $conn,
-            '--env' => $_ENV['APP_ENV']
-        ]);
-        $input0->setInteractive(false);
-        $output0 = new BufferedOutput();
-        $app->doRun($input0, $output0);
-        $this->gameSessionChannelLogger->info(
-            (string) $input0.' resulted in: '.$output0->fetch(),
-            ['gameSession' => $this->gameSession->getId()]
-        );
-
-        sleep(2);
-
-        $input = new ArrayInput([
-            'command' => 'doctrine:database:create',
-            '--connection' => $conn,
-            '--if-not-exists' => true,
             '--env' => $_ENV['APP_ENV']
         ]);
         $input->setInteractive(false);
@@ -121,8 +102,26 @@ class GameListSessionCreateHandler
             (string) $input.' resulted in: '.$output->fetch(),
             ['gameSession' => $this->gameSession->getId()]
         );
+        sleep(1);
+    }
 
-        sleep(2);
+    private function createSessionDatabase(): void
+    {
+        $conn = $this->connectionManager->getGameSessionDbName($this->gameSession->getId());
+        $app = new Application($this->kernel);
+        $input = new ArrayInput([
+            'command' => 'doctrine:database:create',
+            '--connection' => $conn,
+            '--env' => $_ENV['APP_ENV']
+        ]);
+        $input->setInteractive(false);
+        $output = new BufferedOutput();
+        $app->doRun($input, $output);
+        $this->gameSessionChannelLogger->info(
+            (string) $input.' resulted in: '.$output->fetch(),
+            ['gameSession' => $this->gameSession->getId()]
+        );
+        sleep(1);
     }
 
     private function migrateSessionDatabase(): void
@@ -133,8 +132,7 @@ class GameListSessionCreateHandler
         $input = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
             '--em' => $em,
-            '--env' => $_ENV['APP_ENV'],
-            '--no-interaction' => true
+            '--env' => $_ENV['APP_ENV']
         ]);
         $input->setInteractive(false);
         $output = new BufferedOutput();
@@ -143,6 +141,7 @@ class GameListSessionCreateHandler
             (string) $input.' resulted in: '.$output->fetch(),
             ['gameSession' => $this->gameSession->getId()]
         );
+        sleep(1);
     }
 
     private function resetSessionRasterStore(): void

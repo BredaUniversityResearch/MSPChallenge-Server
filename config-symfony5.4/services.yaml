@@ -28,8 +28,6 @@ services:
     App\Domain\WsServer\WsServer:
 
     App\Domain\API\APIHelper:
-        arguments:
-            $projectDir: '%kernel.project_dir%'
 
     App\EventListener\ExceptionListener:
         tags:
@@ -83,11 +81,11 @@ services:
 
     App\Security\MSPAuth2Authenticator:
 
-    ServerManager\ServerManager:
-
     App\EventSubscriber\StoreUserUponLogin:
         tags:
             - 'kernel.event_subscriber'
+
+    ServerManager\ServerManager:
 
 when@dev:
     services:

@@ -60,13 +60,6 @@ class GameListAddFormType extends AbstractType
                 has been successfully created.',
                 'required' => false
             ])
-            // to do: add different buttons for changing states, (un)setting demo mode, archiving, etc.
-            ->add('play', SubmitType::class, [
-                'attr' => ['class' => 'btn btn-secondary btn-sm']
-            ])
-            ->add('pause', SubmitType::class, [
-                'attr' => ['class' => 'btn btn-secondary btn-sm']
-            ])
         ;
     }
 

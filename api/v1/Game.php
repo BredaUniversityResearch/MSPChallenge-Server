@@ -140,7 +140,7 @@ class Game extends Base
             $this->setProjectDir(SymfonyToLegacyHelper::getInstance()->getProjectDir());
         }
         if ($filename == "") {    //if there's no file given, use the one in the database
-            /*$data = $this->selectRowsFromTable('game', [], true);
+            /*$data = $this->selectRowsFromTable('game', []);
             if ($this->isAsync()) {
                 $data = await($data);
             }
@@ -670,7 +670,7 @@ class Game extends Base
 
     private function getWatchdogAddressFromDb(): ?string
     {
-        return $this->selectRowsFromTable('game_session', [], true)['game_session_watchdog_address']
+        return $this->selectRowsFromTable('game_session', [])['game_session_watchdog_address']
             ?? null;
     }
 
