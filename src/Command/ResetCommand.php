@@ -46,6 +46,7 @@ class ResetCommand extends Command
             'This will reset your Server Manager. Are you sure you want to continue?',
             false
         );
+        // @phpstan-ignore-next-line "Call to an undefined method"
         if (!$helper->ask($input, $output, $question)) {
             return Command::SUCCESS;
         }
@@ -77,7 +78,7 @@ class ResetCommand extends Command
             $this->mspServerManagerEntityManager->remove($session);
             $this->mspServerManagerEntityManager->flush();
         }
-        
+
         $io = new SymfonyStyle($input, $output);
         $io->success('Server reset complete.');
 
