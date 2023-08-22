@@ -81,13 +81,22 @@ class ResetCommand extends Command
                 $this->kernel->getProjectDir()."/raster/{$session->getId()}/",
                 $this->kernel->getProjectDir()."/running_session_config/session_config_{$session->getId()}.json"
             ];
-            $io->info('Removing the following files: '.var_export($fileArray, true));
+            if ($io->isDebug()) {
+                $io->info('Removing the following files: '.var_export($fileArray, true));
+            }
             $filesystem->remove($fileArray);
-
+            if ($io->isDebug()) {
+                $io->info("Removing the msp_session_{$session->getId()} database");
+            }
             $this->dropDatabase($session->getId());
-
+            if ($io->isDebug()) {
+                $io->info("Removing game_list record with id {$session->getId()} from the msp_server_manager database");
+            }
             $this->mspServerManagerEntityManager->remove($session);
             $this->mspServerManagerEntityManager->flush();
+            if ($io->isDebug()) {
+                $io->info("========================================");
+            }
         }
 
 
