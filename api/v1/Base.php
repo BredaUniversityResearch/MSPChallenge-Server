@@ -24,9 +24,10 @@ abstract class Base extends CommonBase
 
     public static string $public = "dbfc9c465c3ed8394049f848344f4ab8";
 
-    private readonly string $method;
-    private readonly ?bool $isValid;
-    private readonly array $allowed;
+    // @phpstan-ignore-next-line
+    private string $method;
+    // @phpstan-ignore-next-line
+    private array $allowed;
 
     /**
      * @throws Exception
