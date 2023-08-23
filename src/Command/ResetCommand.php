@@ -21,11 +21,12 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 #[AsCommand(
     name: 'app:reset',
-    description: 'Add a short description for your command',
+    description: 'Reset your Server Manager. You have options to selectively or completely remove data.',
 )]
 class ResetCommand extends Command
 {
 
+    private SymfonyStyle $io;
 
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager,
@@ -41,26 +42,26 @@ class ResetCommand extends Command
             ->addArgument(
                 'sessions',
                 InputArgument::OPTIONAL,
-                'A range of sessions to delete, using a min-max notation, e.g. 1-12 or 4-29.'
+                'An optional range of sessions to only delete, using a min-max notation, e.g. 1-12 or 4-29.'
             );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io = new SymfonyStyle($input, $output);
-        $sessionRange[0] = 1;
-        $sessionRange[1] = 99;
+        $this->io = new SymfonyStyle($input, $output);
         $sessionRangeInput = $input->getArgument('sessions');
         if ($sessionRangeInput) {
             $sessionRange = explode('-', $sessionRangeInput);
             if (count($sessionRange) !== 2) {
                 throw new \Exception('Please specify a sessions range in the format min-max, like this: 1-10');
             }
-            $io->info("Only removing sessions {$sessionRange[0]} through {$sessionRange[1]}.");
+            $this->io->info("Only removing sessions {$sessionRange[0]} through {$sessionRange[1]}, nothing more.");
+        } else {
+            $this->io->info("This would be a hard reset. The server manager database will be completely reinstalled.");
         }
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion(
-            'This will reset your Server Manager. Are you sure you want to continue?',
+            'Are you sure you want to continue?',
             false
         );
         // @phpstan-ignore-next-line "Call to an undefined method"
@@ -68,6 +69,32 @@ class ResetCommand extends Command
             return Command::SUCCESS;
         }
 
+        if ($sessionRangeInput) {
+            $this->selectiveSessionReset($sessionRange);
+        } else {
+            $this->hardReset();
+        }
+
+        $this->io->success('Server reset complete.');
+
+        return Command::SUCCESS;
+    }
+
+    public function dropDatabase($connection): void
+    {
+        $app = new Application($this->kernel);
+        $input = new ArrayInput([
+            'command' => 'doctrine:database:drop',
+            '--force' => true,
+            '--connection' => $connection,
+            '--env' => $_ENV['APP_ENV']
+        ]);
+        $input->setInteractive(false);
+        $app->doRun($input, new NullOutput());
+    }
+
+    public function selectiveSessionReset(array $sessionRange): void
+    {
         for ($id = $sessionRange[0]; $id <= $sessionRange[1]; $id++) {
             $session = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($id);
             if (is_null($session)) {
@@ -81,41 +108,32 @@ class ResetCommand extends Command
                 $this->kernel->getProjectDir()."/raster/{$session->getId()}/",
                 $this->kernel->getProjectDir()."/running_session_config/session_config_{$session->getId()}.json"
             ];
-            if ($io->isDebug()) {
-                $io->info('Removing the following files: '.var_export($fileArray, true));
+            if ($this->io->isDebug()) {
+                $this->io->info('Removing the following files: '.var_export($fileArray, true));
             }
             $filesystem->remove($fileArray);
-            if ($io->isDebug()) {
-                $io->info("Removing the msp_session_{$session->getId()} database");
+            $connection = $this->connectionManager->getGameSessionDbName($session->getId());
+            if ($this->io->isDebug()) {
+                $this->io->info("Removing {$connection} database");
             }
-            $this->dropDatabase($session->getId());
-            if ($io->isDebug()) {
-                $io->info("Removing game_list record with id {$session->getId()} from the msp_server_manager database");
+            $this->dropDatabase($connection);
+            if ($this->io->isDebug()) {
+                $this->io->info("Removing game_list record {$session->getId()} from the msp_server_manager database");
             }
             $this->mspServerManagerEntityManager->remove($session);
             $this->mspServerManagerEntityManager->flush();
-            if ($io->isDebug()) {
-                $io->info("========================================");
+            if ($this->io->isDebug()) {
+                $this->io->info("========================================");
             }
         }
-
-
-        $io->success('Server reset complete.');
-
-        return Command::SUCCESS;
     }
 
-    public function dropDatabase($id): void
+    public function hardReset(): void
     {
-        $conn = $this->connectionManager->getGameSessionDbName($id);
-        $app = new Application($this->kernel);
-        $input = new ArrayInput([
-            'command' => 'doctrine:database:drop',
-            '--force' => true,
-            '--connection' => $conn,
-            '--env' => $_ENV['APP_ENV']
-        ]);
-        $input->setInteractive(false);
-        $app->doRun($input, new NullOutput());
+        $this->io->info("This feature has not been implemented yet. Please add a sessions range for now (see --help).");
+        //get a list of msp_session_% databases
+        //remove all of them
+        //empty directories
+        //reinstall msp_server_manager database
     }
 }
