@@ -24,9 +24,9 @@ abstract class Base extends CommonBase
 
     public static string $public = "dbfc9c465c3ed8394049f848344f4ab8";
 
-    private string $method = '';
-    private ?bool $isValid = null;
-    private array $allowed;
+    private readonly string $method;
+    private readonly ?bool $isValid;
+    private readonly array $allowed;
 
     /**
      * @throws Exception

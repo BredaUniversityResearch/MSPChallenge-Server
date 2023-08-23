@@ -282,25 +282,33 @@ class User extends Base implements UserInterface
 
     // all of the below is boilerplate to work with Symfony Security
     // todo: getUserName() and __call() could actually be implemented, allowing the use of Security service (getUser())
-    public function getRoles()
+    public function getRoles(): array
     {
         return ['ROLE_USER'];
     }
 
-    public function getPassword()
+    public function getPassword(): ?string
     {
+        return null;
     }
 
-    public function getSalt()
+    public function getSalt(): ?string
     {
+        return null;
     }
 
     public function eraseCredentials()
     {
     }
 
-    public function getUserIdentifier()
+    public function getUserIdentifier(): ?string
     {
+        return null;
+    }
+
+    public function getUsername(): ?string
+    {
+        return null;
     }
 
     public function __call(string $name, array $arguments)
