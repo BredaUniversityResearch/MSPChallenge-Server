@@ -39,6 +39,8 @@ services:
 
     ServerManager\ServerManager:
 
+    App\Security\ApiKeyAuthenticator:
+
 when@dev:
     services:
         # make classes in src/DataFixtures available to be used as services

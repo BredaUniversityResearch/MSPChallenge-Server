@@ -6,9 +6,10 @@ use DateTime;
 use DateTimeInterface;
 use Drift\DBAL\Result;
 use Exception;
+use Symfony\Component\Security\Core\User\UserInterface;
 use function App\await;
 
-class User extends Base
+class User extends Base implements UserInterface
 {
     private const ALLOWED = array(
         ["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE],
@@ -36,8 +37,8 @@ class User extends Base
     public function RequestSession(
         string $build_timestamp,
         int $country_id,
-        string $country_password = "",
-        string $user_name = ""
+        string $user_name,
+        string $country_password = ""
     ): array {
         $response = array();
         $this->CheckVersion($build_timestamp);
@@ -143,7 +144,7 @@ class User extends Base
             } catch (Exception $e) {
                 throw new Exception(
                     "Could not log you in. Please check with your session administrator." .
-                    "This session might need upgrading."
+                    " This session might need upgrading.".$e->getMessage()
                 );
             }
         } else {
@@ -277,5 +278,32 @@ class User extends Base
             return $call_provider->authenticate($username, $password);
         }
         throw new Exception("Could not work with authentication provider '".$provider."'.");
+    }
+
+    // all of the below is boilerplate to work with Symfony Security
+    // todo: getUserName() and __call() could actually be implemented, allowing the use of Security service (getUser())
+    public function getRoles()
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function getPassword()
+    {
+    }
+
+    public function getSalt()
+    {
+    }
+
+    public function eraseCredentials()
+    {
+    }
+
+    public function getUserIdentifier()
+    {
+    }
+
+    public function __call(string $name, array $arguments)
+    {
     }
 }
