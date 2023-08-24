@@ -11,7 +11,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         api_token:
-            pattern: ^/\d+/api/User/RequestSession$
+            pattern: ^/\d+/api/(User/RequestSession|GameSession/CreateGameSession|GameSession/CreateGameSessionAndSignal)$
             security: false
         main:
             pattern: ^/\d+/api/\w+/\w+$

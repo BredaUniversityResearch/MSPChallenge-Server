@@ -2,12 +2,15 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\ConnectionManager;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\DBAL\ParameterType;
 use Drift\DBAL\Result;
 use Exception;
 use Symfony\Component\Security\Core\User\UserInterface;
 use function App\await;
+use function App\query;
 
 class User extends Base implements UserInterface
 {
@@ -41,11 +44,12 @@ class User extends Base implements UserInterface
         string $country_password = ""
     ): array {
         $response = array();
+        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $this->CheckVersion($build_timestamp);
-            
-        $passwords = $this->getDatabase()->query(
-            "SELECT game_session_password_admin, game_session_password_player FROM game_session"
-        );
+        $qb = $connection->createQueryBuilder()
+            ->select('game_session_password_admin', 'game_session_password_player')
+            ->from('game_session');
+        $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
         $password_admin = $passwords[0]["game_session_password_admin"];
         $password_player = $passwords[0]["game_session_password_player"];
         if (!parent::isNewPasswordFormat($password_admin) || !parent::isNewPasswordFormat($password_player)) {
@@ -99,12 +103,19 @@ class User extends Base implements UserInterface
                 }
             }
             // all is well!
-            $response["session_id"] = $this->getDatabase()->query(
-                "INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)",
-                array($user_name, $country_id),
-                true
-            );
+            $qb = $connection->createQueryBuilder()
+                ->insert('user')
+                ->values([
+                    'user_name' => '?',
+                    'user_lastupdate' => 0,
+                    'user_country_id' => '?'
+                ])
+                ->setParameter(0, $user_name)
+                ->setParameter(1, $country_id);
+            $connection->executeQuery($qb->getSQL(), $qb->getParameters());
+            $response['session_id'] = $connection->lastInsertId();
             $security = new Security();
+            $security->setGameSessionId($this->getGameSessionId());
             $response["api_access_token"] = $security->generateToken()["token"];
             $response["api_access_recovery_token"] = $security->getRecoveryToken();
         }
@@ -121,9 +132,11 @@ class User extends Base implements UserInterface
         string $userName = ""
     ): array {
         $response = array();
-        $passwords = $this->getDatabase()->query(
-            "SELECT game_session_password_admin, game_session_password_player FROM game_session"
-        );
+        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $qb = $connection->createQueryBuilder()
+            ->select('game_session_password_admin', 'game_session_password_player')
+            ->from('game_session');
+        $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
         $hasCorrectPassword = true;
         if (count($passwords) > 0) {
             $password =  ($countryId < 3) ?
@@ -133,11 +146,17 @@ class User extends Base implements UserInterface
 
         if ($hasCorrectPassword) {
             try {
-                $response["session_id"] = $this->getDatabase()->query(
-                    "INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)",
-                    array($userName, $countryId),
-                    true
-                );
+                $qb = $connection->createQueryBuilder()
+                    ->insert('user')
+                    ->values([
+                        'user_name' => '?',
+                        'user_lastupdate' => 0,
+                        'user_country_id' => '?'
+                    ])
+                    ->setParameter(0, $userName)
+                    ->setParameter(1, $countryId);
+                $connection->executeQuery($qb->getSQL(), $qb->getParameters());
+                $response['session_id'] = $connection->lastInsertId();
                 $security = new Security();
                 $response["api_access_token"] = $security->generateToken()["token"];
                 $response["api_access_recovery_token"] = $security->getRecoveryToken();
