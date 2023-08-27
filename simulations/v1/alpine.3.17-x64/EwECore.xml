@@ -11454,6 +11454,12 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 </remarks>
  ---------------------------------------------------------------------------
 </member>
+<member name="F:EwECore.cCoreInputOutputBase.m_iInstance">
+ <summary>DEBUG ONLY: instance tracker</summary>
+</member>
+<member name="F:EwECore.cCoreInputOutputBase.s_iNextInstance">
+ <summary>DEBUG ONLY: instance tracker</summary>
+</member>
 <member name="F:EwECore.cCoreInputOutputBase.m_bValidate">
  <summary>
  States whether <see cref="P:EwECore.ValueWrapper.cValue.AllowValidation">Variable validation</see> is enabled for this object.
@@ -12162,11 +12168,11 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="M:EwECore.Database.cEwEAccessDatabase.GetAdapter(System.String)">
  -------------------------------------------------------------------
  <summary>
- Obtains and configures a <see cref="T:System.Data.OleDb.OleDbDataAdapter">OleDbDataAdapter</see>
+ Obtains and configures a <see cref="!:OleDbDataAdapter">OleDbDataAdapter</see>
  for the current M$ Access database.
  </summary>
  <param name="strSQL">The SQL query to obtain the adapter for.</param>
- <returns>A <see cref="T:System.Data.OleDb.OleDbDataAdapter">OleDbDataAdapter</see> if
+ <returns>A <see cref="!:OleDbDataAdapter">OleDbDataAdapter</see> if
  successful, or Nothing when an error occurred.</returns>
  <remarks>
  <para>The returned adapter is initialized with default insert, update 
@@ -23435,6 +23441,12 @@ min_B_QB: minimum B*QB.
  <param name="BtoUpdate">Biomass array to update to multistanza biomass</param>
  <remarks>BAvg and LossAvg are temporary variables any changes to them will be lost. To update biomass use BtoUpdate(ngroups)</remarks>
 </member>
+<member name="M:EwECore.Ecosim.cEcosimModel.debugTestRelQFishMGear">
+ <summary>
+ For Debugging. Test that relQ() and FishMGear have been set correctly. 
+ </summary>
+ <remarks>Only called during initialization of Ecosim. At other times during the run relQ() and FishMGear() may not be equal.</remarks>
+</member>
 <member name="M:EwECore.Ecosim.cEcosimModel.Run">
  <summary>
  Public Function to run the Ecosim Model 
@@ -27888,10 +27900,10 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="F:EwECore.cSpaceSolver.WaitHandle">
  <summary>
- Wait handle 
+ Wait handle
  </summary>
  <remarks>
- When the Solve() thread is running (SignalState in a non-signaled state SignalState.Reset()) 
+ When the Solve() thread is running (SignalState in a non-signaled state SignalState.Reset())
  calls to SignalState.WaitOne() will block until Solve() has completed (SignalState in a signaled state SignalState.Set())
  </remarks>
 </member>
@@ -27959,14 +27971,14 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cSpaceSolver.Solve(System.Object)">
  <summary>
- This is the method that the ThreadPool calls. 
+ This is the method that the ThreadPool calls.
  It must have the object argument to match the Delegate signature required by ThreadPool.QueueUserWorkItem()
  </summary>
  <remarks></remarks>
 </member>
 <member name="M:EwECore.cSpaceSolver.SetRelaSwitch(System.Single[])">
  <summary>
- Sets RelaSwitch() 
+ Sets RelaSwitch()
  </summary>
  <param name="B">Biomass at this time step for this spatial cell</param>
  <remarks>Sets RelaSwitch() using local B() and  Ecosim.A(), Ecosim.SwitchPower(), Ecosim.BaseTimeSwitch()  </remarks>
@@ -27995,7 +28007,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cSpaceSolver.accumCatchData(System.Int32,System.Int32,System.Single[],System.Single[],System.Int32,System.Int32)">
  <summary>
- Accumulate the fisheries data (catch) for a single group for this map cell. 
+ Accumulate the fisheries data (catch) for a single group for this map cell.
  This is called before DerivtRed(), in the time step, so it is the condition at the start of the time step.
  </summary>
  <param name="Biomass">Biomass for all the groups at this time step</param>
@@ -31688,6 +31700,14 @@ pass in params that this method needs instead of obtaining them from the manager
 </member>
 <member name="M:EwECore.cMessageHandler.Dispose">
  <inheritdocs cref="M:System.IDisposable.Dispose"/>
+</member>
+<member name="P:EwECore.cMessageHandler.Name">
+ <summary>
+ Get/set the name of a message handler for ease of debugging.
+ </summary>
+ <remarks>
+ Property available in DEBUG mode only.
+ </remarks>
 </member>
 <member name="M:EwECore.cMessageHandler.SendMessage(EwECore.cMessage@)">
  <summary>
