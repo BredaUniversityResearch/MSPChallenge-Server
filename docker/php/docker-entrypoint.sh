@@ -8,7 +8,7 @@ fi
 
 if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 
-  echo Running $1...
+    echo Running $1...
 
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX config
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX config
@@ -22,12 +22,6 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	bash install.sh
 
 	if grep -q ^DATABASE_URL= .env; then
-		# After the installation, the following block can be deleted
-		if [ "$CREATION" = "1" ]; then
-			echo "To finish the installation please press Ctrl+C to stop Docker Compose and run: docker compose up --build"
-			sleep infinity
-		fi
-
 		echo "Waiting for db to be ready..."
 		ATTEMPTS_LEFT_TO_REACH_DATABASE=60
 		until [ $ATTEMPTS_LEFT_TO_REACH_DATABASE -eq 0 ] || DATABASE_ERROR=$(php bin/console dbal:run-sql "SELECT 1" 2>&1); do

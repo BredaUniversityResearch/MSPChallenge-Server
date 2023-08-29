@@ -32,7 +32,8 @@ services:
 
   php:
     build:
-      target: app_php_dev
+      context: .
+      target: php_dev
     volumes:
       - ./:/srv/app
       - ./docker/php/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
@@ -57,11 +58,17 @@ services:
       - host.docker.internal:host-gateway
 
   caddy:
+    command: [ "caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile", "--watch" ]
+    build:
+      context: .
+      target: caddy_base  
     environment:
       SERVER_NAME: ${SERVER_NAME:-:80}
     volumes:
       - ./public:/srv/app/public:ro
       - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    environment:
+      MERCURE_EXTRA_DIRECTIVES: demo
 
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
