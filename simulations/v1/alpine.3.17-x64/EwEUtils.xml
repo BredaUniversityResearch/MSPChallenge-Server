@@ -5573,10 +5573,6 @@ types.</remarks>
 <member name="F:EwEUtils.Database.cEwEDatabase.cOOPStorable.m_bInUpdate">
  <summary>Flag preventing looped updates.</summary>
 </member>
-<member name="F:EwEUtils.Database.cEwEDatabase.cOOPStorable.m_bDeleted">
- <summary>Flag stating whether the object is deleted from the database.</summary>
- <remarks>This flag is deliberately only available at debug time.</remarks>
-</member>
 <member name="F:EwEUtils.Database.cEwEDatabase.cOOPStorable.cDBID_INVALID">
  <summary>Default ID for newly created cOOPStorable instances.</summary>
 </member>
@@ -5620,17 +5616,6 @@ types.</remarks>
  Helper method, states whether the content of an instance has
  been modified externally.
  </summary>
- ---------------------------------------------------------------
-</member>
-<member name="P:EwEUtils.Database.cEwEDatabase.cOOPStorable.Deleted">
- ---------------------------------------------------------------
- <summary>
- Helper method, states whether the object has been deleted from 
- the database and thus cannot be saved.
- </summary>
- <remarks>
- This method is only available at debug time.
- </remarks>
  ---------------------------------------------------------------
 </member>
 <member name="T:EwEUtils.Database.cEwEDatabase.cOOPStorableList">
