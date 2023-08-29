@@ -3,7 +3,7 @@
         MSP Challenge is a community-based, open source and not for profit initiative, since 2011.
     </div>
     <div id="footer-extra">
-        <img src="images/EU_flag_yellow_high.jpg" style="width: 40px;"/>
+        <img src="/ServerManager/images/EU_flag_yellow_high.jpg" style="width: 40px;"/>
         Co-funded by the European Union.
     </div>
     <div>

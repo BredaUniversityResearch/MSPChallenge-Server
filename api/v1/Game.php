@@ -3,15 +3,21 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\MSPBrowserFactory;
+use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use Closure;
 use Drift\DBAL\Result;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
+use React\EventLoop\Loop;
+use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use function App\assertFulfilled;
 use function App\resolveOnFutureTick;
 use function App\await;
+use function App\tpf;
 
 class Game extends Base
 {
@@ -88,6 +94,9 @@ class Game extends Base
         if (!isset($data['wiki_base_url'])) {
             $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
         }
+        if (!isset($data['team_info_base_url'])) {
+            $data['team_info_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
+        }
 
         if (!isset($data['edition_name'])) {
             $data['edition_name'] = $_ENV['DEFAULT_EDITION_NAME'];
@@ -150,7 +159,7 @@ class Game extends Base
      * @throws Exception
      * @todo: use https://github.com/karriereat/json-decoder "to convert your JSON data into an actual php class"
      * phpcs:ignore Generic.Files.LineLength.TooLong
-     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
+     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing_policy_settings: array}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameConfigValues(string $overrideFileName = ''): array
@@ -463,23 +472,19 @@ class Game extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function PolicySimSettings()
+    public function PolicySimSettings(): array
     {
-        // just enable all policy types?
-        $policySettings[] = [
-            'policy_type' => 'fishing'
+        $policySettings = [
+            [ 'policy_type' => 'fishing' ], // key 0
+            [ 'policy_type' => 'shipping' ], // key 1
+            [ 'policy_type' => 'energy' ] // key 2
         ];
-        $policySettings[] = [
-            'policy_type' => 'shipping'
-        ];
-        $policySettings[] = [
-            'policy_type' => 'energy'
-        ];
-
         $simulationSettings = [];
+
         $data = $this->GetGameConfigValues();
         if (isset($data['MEL'])) {
             $mel = new MEL();
+            $policySettings[0] += $mel->getFishingPolicySettings();
             $simulationSettings[] = [
                 'simulation_type' => 'MEL',
                 'content' => $mel->Config()
@@ -609,6 +614,88 @@ class Game extends Base
         );
     }
 
+    private function createWatchdogRequestPromiseFunction(string $url): ToPromiseFunction
+    {
+        return tpf(function () use ($url) {
+            $browser = MSPBrowserFactory::create($url);
+            $deferred = new Deferred();
+            $browser
+                // any response is acceptable, even 4xx or 5xx status codes
+                ->withRejectErrorResponse(false)
+                ->withTimeout(1)
+                ->request('GET', $url)
+                ->done(
+                    // watchdog is running
+                    function (/*ResponseInterface $response*/) use ($deferred) {
+                        $deferred->resolve(true); // we have a response
+                    },
+                    // so the Watchdog is off, and now it should be switched on
+                    function (/*Exception $e*/) use ($deferred) {
+                        $deferred->resolve(false); // no response yet..
+                    }
+                );
+            return $deferred->promise();
+        });
+    }
+
+    private function createWatchdogRequestRepeatedOnFulfilledFunction(
+        LoopInterface $loop,
+        Deferred $deferred,
+        Closure $repeatedFunction,
+        int &$numAttemptsLeft,
+        int $maxAttempts
+    ): Closure {
+        // so if the "promise function" is fulfilled, it gets repeated.
+        return function (bool $requestSucceeded) use (
+            $loop,
+            $deferred,
+            $repeatedFunction,
+            &$numAttemptsLeft,
+            $maxAttempts
+        ) {
+            if ($requestSucceeded) {
+                $deferred->resolve();
+                return;
+            }
+            if ($numAttemptsLeft == $maxAttempts) { // first attempt
+                self::StartWatchdog(); // try to start watchdog if the first attempt fails.
+            }
+            $numAttemptsLeft--;
+            if ($numAttemptsLeft <= 0) {
+                $deferred->resolve();
+                return; // do not repeat anymore, even if the watchdog is not alive
+            }
+            $loop->futureTick($repeatedFunction);
+        };
+    }
+
+    private function createWatchdogRequestRepeatedFunction(
+        LoopInterface $loop,
+        Deferred $deferred,
+        Closure $promiseFunction,
+        int &$numAttemptsLeft,
+        int $maxAttempts
+    ): Closure {
+        return function () use ($loop, $deferred, $promiseFunction, &$numAttemptsLeft, $maxAttempts) {
+            assertFulfilled(
+                $promiseFunction(),
+                $this->createWatchdogRequestRepeatedOnFulfilledFunction(
+                    $loop,
+                    $deferred,
+                    $this->createWatchdogRequestRepeatedFunction(
+                        $loop,
+                        $deferred,
+                        $promiseFunction,
+                        $numAttemptsLeft,
+                        $maxAttempts
+                    ),
+                    $numAttemptsLeft,
+                    $maxAttempts
+                )
+            );
+        };
+    }
+
     /**
      * @throws Exception
      */
@@ -619,28 +706,19 @@ class Game extends Base
         if (empty($url)) {
             return null;
         }
-
-        // we want to use the watchdog, but first we check if it is running
-        $browser = MSPBrowserFactory::create($url);
         $deferred = new Deferred();
-        $browser
-            // any response is acceptable, even 4xx or 5xx status codes
-            ->withRejectErrorResponse(false)
-            ->withTimeout(1)
-            ->request('GET', $url)
-            ->done(
-                // watchdog is running
-                function (/*ResponseInterface $response*/) use ($deferred) {
-                    $deferred->resolve();
-                },
-                // so the Watchdog is off, and now it should be switched on
-                function (/*Exception $e*/) use ($deferred) {
-                    self::StartWatchdog();
-                    // todo: do another watchdog alive test, with a repeat and failure mechanism ?
-                    sleep(10);
-                    $deferred->resolve();
-                }
-            );
+        $loop = Loop::get();
+        $maxAttempts = 4;
+        $numAttemptsLeft = $maxAttempts;
+        $loop->futureTick($this->createWatchdogRequestRepeatedFunction(
+            $loop,
+            $deferred,
+            function () use ($url) {
+                return ($this->createWatchdogRequestPromiseFunction($url))();
+            },
+            $numAttemptsLeft,
+            $maxAttempts
+        ));
         return $deferred->promise();
     }
 
@@ -713,6 +791,7 @@ class Game extends Base
             ->then(function (ResponseInterface $response) {
                 $log = new Log();
                 $this->asyncDataTransferTo($log);
+                $log->setAsync(true); // force async in this context
 
                 $responseContent = $response->getBody()->getContents();
                 $decodedResponse = json_decode($responseContent, true);
