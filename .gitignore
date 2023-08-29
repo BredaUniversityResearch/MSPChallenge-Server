@@ -13,6 +13,7 @@
 [Ff]iles/**
 [Ss]cripts/**
 [Ss]imulations/**/*_[Ll]og.*
+[Ss]imulations/v1/win-x64/mel-ewe-dump/**
 
 #Stuff for Simulations
 Simulations/MEL/EwE/**
