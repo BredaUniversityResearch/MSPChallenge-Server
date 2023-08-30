@@ -68,14 +68,21 @@ class GameSession extends Base
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public static function getRequestApiRootAsync(): PromiseInterface
+    public static function getRequestApiRootAsync(bool $forDocker = false): PromiseInterface
     {
-        if (isset($GLOBALS['RequestApiRoot'])) {
+        if (isset($GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0])) {
             $deferred = new Deferred();
-            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'])->promise();
+            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0])->promise();
         }
         $apiRoot = preg_replace('/(.*)\/(api|_profiler)\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
+
+        // this is always called from inside the docker environment,so just use http://caddy:80/...
+        if ($forDocker) {
+            $deferred = new Deferred();
+            $GLOBALS['RequestApiRoot'][1] = 'http://caddy:80'.$apiRoot;
+            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][1])->promise();
+        }
 
         $_SERVER['HTTPS'] ??= 'off';
         /** @noinspection HttpUrlsUsage */
@@ -89,13 +96,13 @@ class GameSession extends Base
                 ->setMaxResults(1)
         )
         ->then(
-            function (Result $result) use ($protocol, $apiRoot) {
+            function (Result $result) use ($protocol, $apiRoot, $forDocker) {
                 $row = $result->fetchFirstRow() ?? [];
                 $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row['address'] ?? $_SERVER["SERVER_NAME"] ??
                     gethostname();
                 $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
-                $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$port.$apiRoot;
-                return $GLOBALS['RequestApiRoot'];
+                $GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0] = $protocol.$serverName.$port.$apiRoot;
+                return $GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0];
             }
         );
     }
@@ -116,10 +123,10 @@ class GameSession extends Base
      *
      * @return string
      */
-    public static function getServerManagerApiRoot(): string
+    public static function getServerManagerApiRoot(bool $forDocker = false): string
     {
-        if (isset($GLOBALS['ServerManagerApiRoot'])) {
-            return $GLOBALS['ServerManagerApiRoot'];
+        if (isset($GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0])) {
+            return $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0];
         }
 
         $serverName = $_SERVER["SERVER_NAME"] ?? gethostname();
@@ -127,6 +134,13 @@ class GameSession extends Base
         /** @noinspection HttpUrlsUsage */
         $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
         $apiFolder = "/ServerManager/api/";
+
+        // this is always called from inside the docker environment,so just use http://caddy:80/...
+        if ($forDocker) {
+            $GLOBALS['ServerManagerApiRoot'][1] = 'http://caddy:80'.$apiFolder;
+            return $GLOBALS['ServerManagerApiRoot'][1];
+        }
+
         $dbConfig = Config::GetInstance()->DatabaseConfig();
         $temporaryConnection = Database::CreateTemporaryDBConnection(
             $dbConfig["host"],
@@ -135,12 +149,12 @@ class GameSession extends Base
             $dbConfig["database"]
         );
         $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+        $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0] = $protocol.$serverName.$port.$apiFolder;
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
             $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row["address"];
-            //if ($serverName == "localhost") $serverName = getHostByName(getHostName());
-            $GLOBALS['ServerManagerApiRoot'] = $protocol.$serverName.$port.$apiFolder;
+            $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0] = $protocol.$serverName.$port.$apiFolder;
         }
-        return $protocol.$serverName.$port.$apiFolder;
+        return $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0];
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

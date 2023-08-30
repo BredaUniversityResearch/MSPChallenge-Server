@@ -82,7 +82,7 @@ class Base
     // needs a function to call server API
     public static function callServer($endpoint, $data2send = false, $sessionId = "", $api_access_token = "")
     {
-        $url = ServerManager::getInstance()->getServerURLBySessionId($sessionId);
+        $url = ServerManager::getInstance()->getServerURLBySessionId($sessionId, getenv('DOCKER'));
         $url = rtrim($url, '/').'/api/'.$endpoint;
         $call_return = self::callAPI(
             "POST",

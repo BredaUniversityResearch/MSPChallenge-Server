@@ -61,13 +61,12 @@ services:
     command: [ "caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile", "--watch" ]
     build:
       context: .
-      target: caddy_base  
-    environment:
-      SERVER_NAME: ${SERVER_NAME:-:80}
+      target: caddy_base
     volumes:
       - ./public:/srv/app/public:ro
       - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
     environment:
+      SERVER_NAME: ${SERVER_NAME:-:80}
       MERCURE_EXTRA_DIRECTIVES: demo
 
 ###> symfony/mercure-bundle ###

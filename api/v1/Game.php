@@ -732,7 +732,7 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
-                return GameSession::getRequestApiRootAsync();
+                return GameSession::getRequestApiRootAsync(getenv('DOCKER')); // $apiRoot is passed to watchdog
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
                 $simulationsHelper = new Simulations();

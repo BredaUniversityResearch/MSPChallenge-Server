@@ -176,7 +176,10 @@ class GameSave extends Base
 
     public function createZip(GameSession $gameSession): bool
     {
-        $urlBase = ServerManager::getInstance()->getAbsoluteUrlBase();
+        $urlBase = (
+            // this is always called from inside the docker environment,so just use http://caddy:80/...
+            getenv('DOCKER') ? 'http://caddy:80' : ''
+        ).ServerManager::getInstance()->getAbsoluteUrlBase();
         $server_call = self::callServer(
             'GameSession/SaveSession',
             [
