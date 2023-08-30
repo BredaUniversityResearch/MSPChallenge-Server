@@ -96,13 +96,14 @@ class GameSession extends Base
                 ->setMaxResults(1)
         )
         ->then(
-            function (Result $result) use ($protocol, $apiRoot, $forDocker) {
+            function (Result $result) use ($protocol, $apiRoot) {
                 $row = $result->fetchFirstRow() ?? [];
                 $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row['address'] ?? $_SERVER["SERVER_NAME"] ??
                     gethostname();
                 $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
-                $GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0] = $protocol.$serverName.$port.$apiRoot;
-                return $GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0];
+                $apiRoot = $protocol.$serverName.$port.$apiRoot;
+                $GLOBALS['RequestApiRoot'][0] = $apiRoot;
+                return $apiRoot;
             }
         );
     }
@@ -149,12 +150,13 @@ class GameSession extends Base
             $dbConfig["database"]
         );
         $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
-        $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0] = $protocol.$serverName.$port.$apiFolder;
+        $apiRoot = $protocol.$serverName.$port.$apiFolder;
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
             $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row["address"];
-            $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0] = $protocol.$serverName.$port.$apiFolder;
+            $apiRoot = $protocol.$serverName.$port.$apiFolder;
         }
-        return $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0];
+        $GLOBALS['ServerManagerApiRoot'][0] = $apiRoot;
+        return $apiRoot;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
