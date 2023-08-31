@@ -349,14 +349,16 @@ class User extends Base implements JWTUserInterface
         return $user;
     }
 
-    public function getPassword(): void
+    public function getPassword(): string|null
     {
         // irrelevant, but required function
+        return null;
     }
 
-    public function getSalt(): void
+    public function getSalt(): string|null
     {
         // irrelevant, but required function
+        return null;
     }
 
     public function eraseCredentials(): void
