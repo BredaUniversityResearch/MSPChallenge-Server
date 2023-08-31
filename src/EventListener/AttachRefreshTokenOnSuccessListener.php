@@ -32,41 +32,16 @@ class AttachRefreshTokenOnSuccessListener
     {
         $data = $event->getData();
         $user = $event->getUser();
-        $parser = new Parser(new JoseEncoder());
         $pathArray = explode('/', ltrim($this->requestStack->getCurrentRequest()->getPathInfo(), '/'));
         $connection = $this->connectionManager->getCachedGameSessionDbConnection((int) $pathArray[0]);
-        // extract refresh token from POST if it exists
-        $currentRefreshToken = $this->requestStack->getCurrentRequest()->get('api_refresh_token');
-        if (!is_null($currentRefreshToken)) {
-            // if it exists, but it is not valid or we don't know about it, then don't continue
-            try {
-                /** @var UnencryptedToken $unencryptedToken */
-                $unencryptedToken = $parser->parse($currentRefreshToken);
-                $validator = new Validator();
-                $validator->assert($unencryptedToken, new LooseValidAt(new FrozenClock(new \DateTimeImmutable())));
-                $query = $connection->createQueryBuilder();
-                $query->select('art.*')
-                    ->from('api_refresh_token', 'art')
-                    ->where('art.refresh_token = :rt')
-                    ->setParameter('rt', $currentRefreshToken);
-                $result = $connection->executeQuery($query->getSQL(), $query->getParameters())->fetchAllAssociative();
-                if (empty($result)) {
-                    throw new ConstraintViolation('Refresh token unknown to us');
-                }
-            } catch (Exception $e) {
-                return;
-            }
-        }
         $query = $connection->createQueryBuilder();
-        if (!is_null($currentRefreshToken)) {
-            // attempt to delete refresh token from the db table
-            $query->delete('api_refresh_token')
-                ->where($query->expr()->eq(
-                    'user_id',
-                    $query->createPositionalParameter($user->getUserIdentifier())
-                ));
-            $connection->executeQuery($query->getSQL(), $query->getParameters());
-        }
+        // delete user's refresh token from the db table (won't exist upon first login using RequestSession)
+        $query->delete('api_refresh_token')
+            ->where($query->expr()->eq(
+                'user_id',
+                $query->createPositionalParameter($user->getUserIdentifier())
+            ));
+        $connection->executeQuery($query->getSQL(), $query->getParameters());
         // create new refresh token and add to the db table
         $expiration = new \DateTime('+1 day');
         $data['exp'] = $expiration->getTimestamp();

@@ -5,6 +5,12 @@ namespace App\Controller\SessionAPI;
 use App\Domain\API\v1\User;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use Lcobucci\Clock\FrozenClock;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\Parser;
+use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
+use Lcobucci\JWT\Validation\ConstraintViolation;
+use Lcobucci\JWT\Validation\Validator;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -36,7 +42,14 @@ class UserController extends AbstractController
             return $this->requestSession($sessionId, $request, $symfonyToLegacyHelper, $authenticationSuccessHandler);
         }
         if (strtolower($method) == 'requesttoken') {
-            return $this->requestToken($tokenStorageInterface, $jwtManager, $authenticationSuccessHandler);
+            return $this->requestToken(
+                $sessionId,
+                $request,
+                $connectionManager,
+                $tokenStorageInterface,
+                $jwtManager,
+                $authenticationSuccessHandler
+            );
         }
         return new Response();
     }
@@ -52,9 +65,9 @@ class UserController extends AbstractController
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
         AuthenticationSuccessHandler $authenticationSuccessHandler
     ): Response {
-        $user = new User();
-        $user->setGameSessionId($sessionId);
         try {
+            $user = new User();
+            $user->setGameSessionId($sessionId);
             $payload = $user->RequestSession(
                 $request->get('build_timestamp'),
                 $request->get('country_id'),
@@ -69,7 +82,10 @@ class UserController extends AbstractController
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
             return new JsonResponse($this->wrapPayloadForResponse($payload));
         } catch (\Exception $e) {
-            return new JsonResponse($this->wrapPayloadForResponse([], $e->getMessage().$e->getTraceAsString()));
+            return new JsonResponse(
+                $this->wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                500
+            );
         }
     }
 
@@ -79,11 +95,36 @@ class UserController extends AbstractController
         requirements: ['sessionId' => '\d+']
     )]
     public function requestToken(
+        int $sessionId,
+        Request $request,
+        ConnectionManager $connectionManager,
         TokenStorageInterface $tokenStorageInterface,
         JWTTokenManagerInterface $jwtManager,
         AuthenticationSuccessHandler $authenticationSuccessHandler
     ): Response {
         try {
+            // if refresh does not exist, or is not valid, or we don't know about it, then don't continue
+            $currentRefreshToken = $request->get('api_refresh_token');
+            if (is_null($currentRefreshToken)) {
+                throw new \Exception('Cannot continue without a refresh token');
+            }
+            $connection = $connectionManager->getCachedGameSessionDbConnection($sessionId);
+            $parser = new Parser(new JoseEncoder());
+            // this might throw an exception because refresh token is not a valid JWT
+            $unencryptedToken = $parser->parse($currentRefreshToken);
+            $validator = new Validator();
+            // this might throw an exception because refresh token is no longer valid
+            $validator->assert($unencryptedToken, new LooseValidAt(new FrozenClock(new \DateTimeImmutable())));
+            $query = $connection->createQueryBuilder();
+            $query->select('art.*')
+                ->from('api_refresh_token', 'art')
+                ->where('art.refresh_token = :rt')
+                ->setParameter('rt', $currentRefreshToken);
+            $result = $connection->executeQuery($query->getSQL(), $query->getParameters())->fetchAllAssociative();
+            if (empty($result)) {
+                throw new \Exception('Refresh token unknown to us');
+            }
+            // ok, ready to create new tokens!
             $decodedJwtToken = $jwtManager->decode($tokenStorageInterface->getToken());
             $user = new User();
             $user->setUserId($decodedJwtToken['uid']);
@@ -94,7 +135,10 @@ class UserController extends AbstractController
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
             return new JsonResponse($this->wrapPayloadForResponse($payload));
         } catch (\Exception $e) {
-            return new JsonResponse($this->wrapPayloadForResponse([], $e->getMessage().$e->getTraceAsString()));
+            return new JsonResponse(
+                $this->wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                500
+            );
         }
     }
 
