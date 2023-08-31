@@ -306,7 +306,7 @@ class User extends Base implements JWTUserInterface
         return ['ROLE_USER'];
     }
 
-    public function getUserIdentifier(): ?string
+    public function getUserIdentifier(): ?int
     {
         return $this->user_id;
     }
@@ -349,17 +349,17 @@ class User extends Base implements JWTUserInterface
         return $user;
     }
 
-    public function getPassword()
+    public function getPassword(): void
     {
         // irrelevant, but required function
     }
 
-    public function getSalt()
+    public function getSalt(): void
     {
         // irrelevant, but required function
     }
 
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // irrelevant, but required function
     }
