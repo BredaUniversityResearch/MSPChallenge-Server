@@ -317,7 +317,7 @@ class ServerManager extends Base
     public function getTranslatedServerURL(): string
     {
         $port = $_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80;
-        if (($_ENV['URL_WEB_SERVER_HOST'] ?? null) !== null) {
+        if (($_ENV['URL_WEB_SERVER_HOST'] ?? '') !== '') {
             return $_ENV['URL_WEB_SERVER_HOST'].':'.$port;
         }
 

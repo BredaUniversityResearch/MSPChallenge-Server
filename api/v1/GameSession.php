@@ -98,7 +98,7 @@ class GameSession extends Base
         ->then(
             function (Result $result) use ($protocol, $apiRoot) {
                 $row = $result->fetchFirstRow() ?? [];
-                $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row['address'] ?? $_SERVER["SERVER_NAME"] ??
+                $serverName = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $row['address'] ?? $_SERVER["SERVER_NAME"] ??
                     gethostname();
                 $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
                 $apiRoot = $protocol.$serverName.$port.$apiRoot;
@@ -152,7 +152,7 @@ class GameSession extends Base
         $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
         $apiRoot = $protocol.$serverName.$port.$apiFolder;
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
-            $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row["address"];
+            $serverName = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $row["address"];
             $apiRoot = $protocol.$serverName.$port.$apiFolder;
         }
         $GLOBALS['ServerManagerApiRoot'][0] = $apiRoot;
