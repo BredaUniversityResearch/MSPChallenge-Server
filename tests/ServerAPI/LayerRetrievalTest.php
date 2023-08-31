@@ -8,16 +8,34 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class LayerRetrievalTest extends WebTestCase
 {
 
-    private const SESSION_ID = 6;
-    private const LEGACY_SWITCH = true;
+    private const SESSION_ID = 1;
     private KernelBrowser $client;
-    private ?int $token;
+    private ?string $access_token;
+
+    private ?string $refresh_token;
 
     public function testLayerRetrieval(): void
     {
         $this->client = static::createClient();
+        $this->obtainAPIToken();
+        $this->assertNotNull($this->access_token);
         $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 1], false);
         $this->assertResponseStatusCodeSame(401);
+        $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 1]);
+        $this->assertMSPServerSuccessWithPayloadResponse();
+        sleep(2);
+        $this->requestMSPEndpoint(
+            'POST',
+            'User/RequestToken',
+            ['api_refresh_token' => $this->refresh_token]
+        );
+        $this->assertMSPServerSuccessWithPayloadResponse();
+        // reset access & refresh tokens, and check
+        $oldAccessToken = $this->access_token;
+        $oldRefreshToken = $this->refresh_token;
+        $this->setAccessAndRefreshTokens();
+        $this->assertNotSame($oldAccessToken, $this->access_token, 'Access token was not renewed');
+        $this->assertNotSame($oldRefreshToken, $this->refresh_token, 'Refresh token was not renewed');
         $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 1]);
         $this->assertMSPServerSuccessWithPayloadResponse();
     }
@@ -25,9 +43,7 @@ class LayerRetrievalTest extends WebTestCase
 
     private function requestMSPEndpoint($method, $endPoint, $data = [], $useToken = true): void
     {
-        $headers = $useToken ? [
-            self::LEGACY_SWITCH ? 'HTTP_MSP_API_TOKEN' : 'HTTP_AUTHORIZATION' => $this->getToken()
-        ] : [];
+        $headers = $useToken ? ['HTTP_AUTHORIZATION' => 'Bearer '.$this->getToken()] : [];
         $this->client->request(
             $method,
             sprintf('/%d/api/%s', self::SESSION_ID, $endPoint),
@@ -37,12 +53,12 @@ class LayerRetrievalTest extends WebTestCase
         );
     }
 
-    private function getToken(): ?int
+    private function getToken(): ?string
     {
-        if (empty($this->token)) {
+        if (empty($this->access_token)) {
             $this->obtainAPIToken();
         }
-        return $this->token;
+        return $this->access_token;
     }
 
     private function obtainAPIToken(): void
@@ -58,8 +74,14 @@ class LayerRetrievalTest extends WebTestCase
             false
         );
         $this->assertMSPServerSuccessWithPayloadResponse();
+        $this->setAccessAndRefreshTokens();
+    }
+
+    private function setAccessAndRefreshTokens(): void
+    {
         $responseArr = json_decode($this->client->getResponse()->getContent(), true);
-        $this->token = $responseArr['payload']['api_access_token'] ?? null;
+        $this->access_token = $responseArr['payload']['api_access_token'] ?? null;
+        $this->refresh_token = $responseArr['payload']['api_refresh_token'] ?? null;
     }
 
     private function assertMSPServerResponse(): void

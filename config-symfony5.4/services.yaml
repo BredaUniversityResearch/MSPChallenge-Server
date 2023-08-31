@@ -33,13 +33,19 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
+    App\EventListener\AttachRefreshTokenOnSuccessListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success }
+
+    App\EventListener\AddUserIdToTokens:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created }
+
     App\Domain\WsServer\Plugins\PluginHelper:
         arguments:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
 
     ServerManager\ServerManager:
-
-    App\Security\ApiKeyAuthenticator:
 
 when@dev:
     services:

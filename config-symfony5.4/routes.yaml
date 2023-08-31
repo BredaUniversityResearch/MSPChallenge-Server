@@ -14,9 +14,9 @@ apidoc:
   requirements:
     anything: '.*'
 
-new_user_request_session:
-  path: '/{sessionId}/api/User/RequestSession'
-  controller: App\Controller\MSPAPIController::requestSession
+session_api_user_controller:
+  path: '/{sessionId}/api/User/{method}'
+  controller: App\Controller\SessionAPI\UserController
 
 # per session support
 # RewriteRule ^([0-9]+)/api/(.*)$	index.php?session=$1&query=$2 [NC,L]

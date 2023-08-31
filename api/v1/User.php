@@ -5,14 +5,12 @@ namespace App\Domain\API\v1;
 use App\Domain\Services\ConnectionManager;
 use DateTime;
 use DateTimeInterface;
-use Doctrine\DBAL\ParameterType;
 use Drift\DBAL\Result;
 use Exception;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use function App\await;
-use function App\query;
 
-class User extends Base implements UserInterface
+class User extends Base implements JWTUserInterface
 {
     private const ALLOWED = array(
         ["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE],
@@ -21,6 +19,9 @@ class User extends Base implements UserInterface
         ["checkExists", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
         "List"
     );
+
+    private ?string $user_name;
+    private ?int $user_id;
 
     public function __construct(string $method = '')
     {
@@ -114,10 +115,10 @@ class User extends Base implements UserInterface
                 ->setParameter(1, $country_id);
             $connection->executeQuery($qb->getSQL(), $qb->getParameters());
             $response['session_id'] = $connection->lastInsertId();
-            $security = new Security();
-            $security->setGameSessionId($this->getGameSessionId());
-            $response["api_access_token"] = $security->generateToken()["token"];
-            $response["api_access_recovery_token"] = $security->getRecoveryToken();
+            //$security = new Security();
+            //$security->setGameSessionId($this->getGameSessionId());
+            //$response["api_access_token"] = $security->generateToken()["token"];
+            //$response["api_access_recovery_token"] = $security->getRecoveryToken();
         }
         return $response;
     }
@@ -299,38 +300,67 @@ class User extends Base implements UserInterface
         throw new Exception("Could not work with authentication provider '".$provider."'.");
     }
 
-    // all of the below is boilerplate to work with Symfony Security
-    // todo: getUserName() and __call() could actually be implemented, allowing the use of Security service (getUser())
+    // all of the below is boilerplate to work with Symfony Security through LexikJWTAuthenticationBundle
     public function getRoles(): array
     {
         return ['ROLE_USER'];
     }
 
-    public function getPassword(): ?string
-    {
-        return null;
-    }
-
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    public function eraseCredentials()
-    {
-    }
-
     public function getUserIdentifier(): ?string
     {
-        return null;
+        return $this->user_id;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getUserId(): ?int
+    {
+        return $this->user_id;
+    }
+
+    /**
+     * @param int|null $user_id
+     */
+    public function setUserId(?int $user_id): self
+    {
+        $this->user_id = $user_id;
+
+        return $this;
     }
 
     public function getUsername(): ?string
     {
-        return null;
+        return $this->user_name;
     }
 
-    public function __call(string $name, array $arguments)
+    public function setUsername(string $user_name): self
     {
+        $this->user_name = $user_name;
+
+        return $this;
+    }
+
+    public static function createFromPayload($username, array $payload): User
+    {
+        $user = new self;
+        $user->setUserId($payload['user_id']);
+        $user->setUsername($username);
+        return $user;
+    }
+
+    public function getPassword()
+    {
+        // irrelevant, but required function
+    }
+
+    public function getSalt()
+    {
+        // irrelevant, but required function
+    }
+
+    public function eraseCredentials()
+    {
+        // irrelevant, but required function
     }
 }
