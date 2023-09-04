@@ -9,7 +9,6 @@ use Lcobucci\Clock\FrozenClock;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
-use Lcobucci\JWT\Validation\ConstraintViolation;
 use Lcobucci\JWT\Validation\Validator;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -141,6 +140,4 @@ class UserController extends AbstractController
             );
         }
     }
-
-
 }
