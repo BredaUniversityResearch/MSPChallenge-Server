@@ -11,8 +11,8 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         public: false       # Allows optimizing the container by removing unused services; this also means
-                            # fetching services directly from the container via $container->get() won't work.
-                            # The best practice is to be explicit about your dependencies anyway.
+          # fetching services directly from the container via $container->get() won't work.
+        # The best practice is to be explicit about your dependencies anyway.
         bind:
             string $projectDir: '%kernel.project_dir%'
 
@@ -32,6 +32,18 @@ services:
     App\EventListener\ExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+    App\EventListener\AttachRefreshTokenOnSuccessListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success }
+
+    App\EventListener\CustomiseResponseOnFailureListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_failure }
+
+    App\EventListener\AddUserIdToTokens:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created }
 
     App\Domain\WsServer\Plugins\PluginHelper:
         arguments:
@@ -55,3 +67,4 @@ when@dev:
                     name: data_collector
                     id: 'App\DataCollector\MSPDataCollector'
                     template: 'data_collector/msp.html.twig'
+                - 'controller.service_arguments'

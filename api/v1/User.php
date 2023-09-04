@@ -2,13 +2,15 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\ConnectionManager;
 use DateTime;
 use DateTimeInterface;
 use Drift\DBAL\Result;
 use Exception;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use function App\await;
 
-class User extends Base
+class User extends Base implements JWTUserInterface
 {
     private const ALLOWED = array(
         ["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE],
@@ -17,6 +19,9 @@ class User extends Base
         ["checkExists", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
         "List"
     );
+
+    private ?string $user_name;
+    private ?int $user_id;
 
     public function __construct(string $method = '')
     {
@@ -36,15 +41,16 @@ class User extends Base
     public function RequestSession(
         string $build_timestamp,
         int $country_id,
-        string $country_password = "",
-        string $user_name = ""
+        string $user_name,
+        string $country_password = ""
     ): array {
         $response = array();
+        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $this->CheckVersion($build_timestamp);
-            
-        $passwords = $this->getDatabase()->query(
-            "SELECT game_session_password_admin, game_session_password_player FROM game_session"
-        );
+        $qb = $connection->createQueryBuilder()
+            ->select('game_session_password_admin', 'game_session_password_player')
+            ->from('game_session');
+        $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
         $password_admin = $passwords[0]["game_session_password_admin"];
         $password_player = $passwords[0]["game_session_password_player"];
         if (!parent::isNewPasswordFormat($password_admin) || !parent::isNewPasswordFormat($password_player)) {
@@ -98,14 +104,22 @@ class User extends Base
                 }
             }
             // all is well!
-            $response["session_id"] = $this->getDatabase()->query(
-                "INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)",
-                array($user_name, $country_id),
-                true
-            );
-            $security = new Security();
-            $response["api_access_token"] = $security->generateToken()["token"];
-            $response["api_access_recovery_token"] = $security->getRecoveryToken();
+            $qb = $connection->createQueryBuilder()
+                ->insert('user')
+                ->values([
+                    'user_name' => '?',
+                    'user_lastupdate' => 0,
+                    'user_country_id' => '?'
+                ])
+                ->setParameter(0, $user_name)
+                ->setParameter(1, $country_id);
+            $connection->executeQuery($qb->getSQL(), $qb->getParameters());
+            $response['session_id'] = $connection->lastInsertId();
+            // @todo
+            //$security = new Security();
+            //$security->setGameSessionId($this->getGameSessionId());
+            //$response["api_access_token"] = $security->generateToken()["token"];
+            //$response["api_access_recovery_token"] = $security->getRecoveryToken();
         }
         return $response;
     }
@@ -120,9 +134,11 @@ class User extends Base
         string $userName = ""
     ): array {
         $response = array();
-        $passwords = $this->getDatabase()->query(
-            "SELECT game_session_password_admin, game_session_password_player FROM game_session"
-        );
+        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $qb = $connection->createQueryBuilder()
+            ->select('game_session_password_admin', 'game_session_password_player')
+            ->from('game_session');
+        $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
         $hasCorrectPassword = true;
         if (count($passwords) > 0) {
             $password =  ($countryId < 3) ?
@@ -132,18 +148,24 @@ class User extends Base
 
         if ($hasCorrectPassword) {
             try {
-                $response["session_id"] = $this->getDatabase()->query(
-                    "INSERT INTO user(user_name, user_lastupdate, user_country_id) VALUES (?, 0, ?)",
-                    array($userName, $countryId),
-                    true
-                );
+                $qb = $connection->createQueryBuilder()
+                    ->insert('user')
+                    ->values([
+                        'user_name' => '?',
+                        'user_lastupdate' => 0,
+                        'user_country_id' => '?'
+                    ])
+                    ->setParameter(0, $userName)
+                    ->setParameter(1, $countryId);
+                $connection->executeQuery($qb->getSQL(), $qb->getParameters());
+                $response['session_id'] = $connection->lastInsertId();
                 $security = new Security();
                 $response["api_access_token"] = $security->generateToken()["token"];
                 $response["api_access_recovery_token"] = $security->getRecoveryToken();
             } catch (Exception $e) {
                 throw new Exception(
                     "Could not log you in. Please check with your session administrator." .
-                    "This session might need upgrading."
+                    " This session might need upgrading.".$e->getMessage()
                 );
             }
         } else {
@@ -277,5 +299,71 @@ class User extends Base
             return $call_provider->authenticate($username, $password);
         }
         throw new Exception("Could not work with authentication provider '".$provider."'.");
+    }
+
+    // all of the below is boilerplate to work with Symfony Security through LexikJWTAuthenticationBundle
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function getUserIdentifier(): ?int
+    {
+        return $this->user_id;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getUserId(): ?int
+    {
+        return $this->user_id;
+    }
+
+    /**
+     * @param int|null $user_id
+     */
+    public function setUserId(?int $user_id): self
+    {
+        $this->user_id = $user_id;
+
+        return $this;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->user_name;
+    }
+
+    public function setUsername(string $user_name): self
+    {
+        $this->user_name = $user_name;
+
+        return $this;
+    }
+
+    public static function createFromPayload($username, array $payload): User
+    {
+        $user = new self;
+        $user->setUserId($payload['user_id']);
+        $user->setUsername($username);
+        return $user;
+    }
+
+    public function getPassword(): string|null
+    {
+        // irrelevant, but required function
+        return null;
+    }
+
+    public function getSalt(): string|null
+    {
+        // irrelevant, but required function
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // irrelevant, but required function
     }
 }

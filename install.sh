@@ -25,5 +25,10 @@ if [ $? -ne 0 ]; then
   echo "Could not install tools."
   exit 1
 fi
+eval "php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+if [ $? -ne 0 ]; then
+  echo "Could not install JWT encoding key pair."
+  exit 1
+fi
 source docker-aliases.sh
 exit 0
