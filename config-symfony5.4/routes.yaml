@@ -14,6 +14,10 @@ apidoc:
   requirements:
     anything: '.*'
 
+session_api_user_controller:
+  path: '/{sessionId}/api/User/{method}'
+  controller: App\Controller\SessionAPI\UserController
+
 # per session support
 # RewriteRule ^([0-9]+)/api/(.*)$	index.php?session=$1&query=$2 [NC,L]
 legacy_api_session:

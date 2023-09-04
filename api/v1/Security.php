@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\ClientHeaderKeys;
 use Drift\DBAL\Result;
 use Exception;
@@ -293,8 +294,13 @@ class Security extends Base
         if (function_exists('apache_request_headers')) {
             $requestHeaders = apache_request_headers();
         }
+        $token = SymfonyToLegacyHelper::getInstance()
+            ->getRequest()
+            ->headers->get(ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN);
         if (isset($requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
             return $requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN];
+        } elseif (!is_null($token)) {
+            return $token;
         }
         return null;
     }

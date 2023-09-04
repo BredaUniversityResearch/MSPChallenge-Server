@@ -24,8 +24,9 @@ abstract class Base extends CommonBase
 
     public static string $public = "dbfc9c465c3ed8394049f848344f4ab8";
 
-    private string $method = '';
-    private ?bool $isValid = null;
+    // @phpstan-ignore-next-line
+    private string $method;
+    // @phpstan-ignore-next-line
     private array $allowed;
 
     /**
@@ -39,6 +40,10 @@ abstract class Base extends CommonBase
 
     public function isValid(): bool
     {
+        // !!! DISABLES legacy Security in favour of Symfony Security
+        // @todo
+        return true;
+        /*
         if (null === $this->isValid) {
             $this->isValid = false;
             if ($this->method !== '') {
@@ -46,6 +51,7 @@ abstract class Base extends CommonBase
             }
         }
         return $this->isValid;
+        */
     }
 
     /**
@@ -325,7 +331,7 @@ abstract class Base extends CommonBase
         }
     }
 
-    public static function isNewPasswordFormat(string $string): bool
+    public static function isNewPasswordFormat(?string $string): bool
     {
         if (base64_encode(base64_decode($string, true)) === $string) {
             if (isJsonObject(base64_decode($string))) {

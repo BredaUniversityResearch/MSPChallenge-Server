@@ -135,12 +135,11 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function LoadConfigFile(string $filename = ''): string
     {
+        $path = SymfonyToLegacyHelper::getInstance()->getProjectDir().$_ENV['SESSION_CONFIG_PATH'];
         if ($filename == "") {    //if there's no file given, use the one in the database
-            $data = $this->getDatabase()->query("SELECT game_configfile FROM game");
-
-            $path = GameSession::getConfigDirectory() . $data[0]['game_configfile'];
+            $path .= sprintf($_ENV['SESSION_CONFIG_FILE'], $this->getGameSessionId());
         } else {
-            $path = GameSession::getConfigDirectory() . $filename;
+            $path .= $filename;
         }
 
         // 5 min cache. why 5min? Such that the websocket server will refresh the config once in a while
