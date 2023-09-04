@@ -66,8 +66,15 @@ services:
       - ./public:/srv/app/public:ro
       - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
     environment:
-      SERVER_NAME: ${SERVER_NAME:-:80}
+      # this forces non-ssl
+      SERVER_NAME: :80
       MERCURE_EXTRA_DIRECTIVES: demo
+    # on dev the internal and external web server port need to match because of mitmproxy reserve proxy
+    ports:
+      # HTTP
+      - target: 80
+        published: 80
+        protocol: tcp
 
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
