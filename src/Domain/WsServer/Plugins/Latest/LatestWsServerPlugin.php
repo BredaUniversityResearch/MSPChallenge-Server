@@ -12,6 +12,11 @@ use App\Domain\WsServer\Plugins\Plugin;
 use App\Domain\WsServer\Plugins\PluginHelper;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
 use Exception;
+use Lcobucci\Clock\FrozenClock;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\Parser;
+use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
+use Lcobucci\JWT\Validation\Validator;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -167,17 +172,25 @@ class LatestWsServerPlugin extends Plugin
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
-                $accessTimeRemaining = 0; // not used
-                if (false === $this->getClientConnectionResourceManager()->getSecurity($connResourceId)->validateAccess(
-                    Security::ACCESS_LEVEL_FLAG_FULL,
-                    $accessTimeRemaining,
-                    $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
-                    ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
-                    ]
-                )) {
-                    // Client's token has been expired, let the client re-connected with a new token
+                try {
+                    // this might throw an exception because token is not a valid JWT, or just non-existent
+                    $unencryptedToken = (new Parser(new JoseEncoder()))->parse(
+                        str_replace(
+                            'Bearer ',
+                            '',
+                            $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
+                                ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
+                            ]
+                        )
+                    );
+                    // this might throw an exception because token is no longer valid
+                    (new Validator())->assert(
+                        $unencryptedToken,
+                        new LooseValidAt(new FrozenClock(new \DateTimeImmutable()))
+                    );
+                } catch (\Exception $e) {
                     $this->addOutput(
-                        'Client\'s token has been expired, let the client re-connected with a new token'
+                        'Client\'s token has  expired, let the client re-connect with a new token'
                     );
                     $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->close();
                     continue;

@@ -7,6 +7,7 @@ use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Security;
 use App\Domain\Common\MSPBrowserFactory;
+use App\Domain\Services\ConnectionManager;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
@@ -122,11 +123,15 @@ class GameTick extends TickBase
     private function UpdateGameDetailsAtServerManager(): PromiseInterface
     {
         $game = new Game();
-        $this->asyncDataTransferTo($game);
+        $game->setGameSessionId($this->getGameSessionId());
+        $game->setAsyncDatabase($this->getAsyncDatabase());
+        $game->setAsync($this->isAsync());
         return $game->getGameDetails()
             ->then(function (array $postValues) {
                 $security = new Security();
-                $this->asyncDataTransferTo($security);
+                $security->setGameSessionId($this->getGameSessionId());
+                $security->setAsyncDatabase($this->getAsyncDatabase());
+                $security->setAsync($this->isAsync());
                 return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
                     ->then(function (string $token) use ($postValues) {
                         $postValues['token'] = $token;
