@@ -122,15 +122,11 @@ class GameTick extends TickBase
     private function UpdateGameDetailsAtServerManager(): PromiseInterface
     {
         $game = new Game();
-        $game->setGameSessionId($this->getGameSessionId());
-        $game->setAsyncDatabase($this->getAsyncDatabase());
-        $game->setAsync($this->isAsync());
+        $this->asyncDataTransferTo($game);
         return $game->getGameDetails()
             ->then(function (array $postValues) {
                 $security = new Security();
-                $security->setGameSessionId($this->getGameSessionId());
-                $security->setAsyncDatabase($this->getAsyncDatabase());
-                $security->setAsync($this->isAsync());
+                $this->asyncDataTransferTo($security);
                 return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
                     ->then(function (string $token) use ($postValues) {
                         $postValues['token'] = $token;
