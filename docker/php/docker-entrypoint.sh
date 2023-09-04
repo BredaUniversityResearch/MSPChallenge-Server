@@ -8,7 +8,7 @@ fi
 
 if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 
-    echo Running $1...
+  echo Running $1...
 
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX config
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX config
@@ -64,6 +64,7 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX session_archive
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
+	chmod 777 simulations/v1/alpine.3.17-x64/MSW
 
   echo "Starting supervisor..."
   rm -f /run/supervisord.sock ; /usr/bin/supervisord -c /etc/supervisord.conf
