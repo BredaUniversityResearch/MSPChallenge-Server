@@ -14,7 +14,6 @@ use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
 use function App\assertFulfilled;
 use function App\resolveOnFutureTick;
 use function App\await;
