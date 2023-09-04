@@ -7,7 +7,6 @@ use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Security;
 use App\Domain\Common\MSPBrowserFactory;
-use App\Domain\Services\ConnectionManager;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
