@@ -41,6 +41,7 @@ abstract class Base extends CommonBase
     public function isValid(): bool
     {
         // !!! DISABLES legacy Security in favour of Symfony Security
+        // @todo
         return true;
         /*
         if (null === $this->isValid) {
