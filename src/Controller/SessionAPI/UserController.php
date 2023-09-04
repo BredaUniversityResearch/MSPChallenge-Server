@@ -56,7 +56,8 @@ class UserController extends AbstractController
     #[Route(
         '/{sessionId}/api/User/RequestSession/',
         name: 'session_api_user_request_session',
-        requirements: ['sessionId' => '\d+']
+        requirements: ['sessionId' => '\d+'],
+        methods: ['POST']
     )]
     public function requestSession(
         int $sessionId,
@@ -91,7 +92,8 @@ class UserController extends AbstractController
     #[Route(
         '/{sessionId}/api/User/RequestToken/',
         name: 'session_api_user_request_token',
-        requirements: ['sessionId' => '\d+']
+        requirements: ['sessionId' => '\d+'],
+        methods: ['POST']
     )]
     public function requestToken(
         int $sessionId,
@@ -123,11 +125,14 @@ class UserController extends AbstractController
             if (empty($result)) {
                 throw new \Exception('Refresh token unknown to us');
             }
+            $decodedJwtToken = $unencryptedToken->claims();
+            if (!$decodedJwtToken->has('uid') || !$decodedJwtToken->has('username')) {
+                throw new \Exception('Refresh token has no or the wrong payload');
+            }
             // ok, ready to create new tokens!
-            $decodedJwtToken = $jwtManager->decode($tokenStorageInterface->getToken());
             $user = new User();
-            $user->setUserId($decodedJwtToken['uid']);
-            $user->setUsername($decodedJwtToken['username']);
+            $user->setUserId($decodedJwtToken->get('uid'));
+            $user->setUsername($decodedJwtToken->get('username'));
             $jsonResponse = $authenticationSuccessHandler->handleAuthenticationSuccess($user);
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;

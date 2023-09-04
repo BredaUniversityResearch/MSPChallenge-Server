@@ -30,13 +30,12 @@ class LayerRetrievalTest extends WebTestCase
         $this->assertMSPServerSuccessWithPayloadResponse();
         sleep(2);
         $this->requestMSPEndpoint('POST', 'User/RequestToken', [], false);
-        $this->assertResponseStatusCodeSame(401);
-        $this->requestMSPEndpoint('POST', 'User/RequestToken');
         $this->assertResponseStatusCodeSame(500);
         $this->requestMSPEndpoint(
             'POST',
             'User/RequestToken',
-            ['api_refresh_token' => $this->refresh_token]
+            ['api_refresh_token' => $this->refresh_token],
+            false
         );
         $this->assertMSPServerSuccessWithPayloadResponse();
         // reset access & refresh tokens, and check
