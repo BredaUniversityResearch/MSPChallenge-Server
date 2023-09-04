@@ -115,6 +115,7 @@ class User extends Base implements JWTUserInterface
                 ->setParameter(1, $country_id);
             $connection->executeQuery($qb->getSQL(), $qb->getParameters());
             $response['session_id'] = $connection->lastInsertId();
+            // @todo
             //$security = new Security();
             //$security->setGameSessionId($this->getGameSessionId());
             //$response["api_access_token"] = $security->generateToken()["token"];
