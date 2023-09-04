@@ -80,10 +80,10 @@ class UserController extends AbstractController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse($this->wrapPayloadForResponse($payload));
+            return new JsonResponse(BaseController::wrapPayloadForResponse($payload));
         } catch (\Exception $e) {
             return new JsonResponse(
-                $this->wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                BaseController::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
                 500
             );
         }
@@ -133,23 +133,14 @@ class UserController extends AbstractController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse($this->wrapPayloadForResponse($payload));
+            return new JsonResponse(BaseController::wrapPayloadForResponse($payload));
         } catch (\Exception $e) {
             return new JsonResponse(
-                $this->wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                BaseController::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
                 500
             );
         }
     }
 
-    private function wrapPayloadForResponse(array $payload, ?string $message = null): array
-    {
-        return [
-            'header_type' => '',
-            'header_data' => '',
-            'success' => is_null($message),
-            'message' => $message,
-            'payload' => $payload
-        ];
-    }
+
 }
