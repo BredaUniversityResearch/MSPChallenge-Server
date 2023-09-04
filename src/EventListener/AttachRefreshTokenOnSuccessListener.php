@@ -40,6 +40,10 @@ class AttachRefreshTokenOnSuccessListener
             ->where($query->expr()->eq(
                 'user_id',
                 $query->createPositionalParameter($user->getUserIdentifier())
+            ))
+            ->orWhere($query->expr()->lte(
+                'valid',
+                $query->createPositionalParameter(date("Y-m-d H:i:s"))
             ));
         $connection->executeQuery($query->getSQL(), $query->getParameters());
         // create new refresh token and add to the db table
