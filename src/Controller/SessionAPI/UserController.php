@@ -125,6 +125,7 @@ class UserController extends AbstractController
             if (empty($result)) {
                 throw new \Exception('Refresh token unknown to us');
             }
+            // @phpstan-ignore-next-line 'Call to an undefined method Lcobucci\JWT\Token::claims()'
             $decodedJwtToken = $unencryptedToken->claims();
             if (!$decodedJwtToken->has('uid') || !$decodedJwtToken->has('username')) {
                 throw new \Exception('Refresh token has no or the wrong payload');
