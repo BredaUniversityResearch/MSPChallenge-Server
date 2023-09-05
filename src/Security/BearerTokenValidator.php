@@ -4,6 +4,7 @@ namespace App\Security;
 use Lcobucci\Clock\FrozenClock;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token;
+use Lcobucci\JWT\Token\DataSet;
 use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Validator;
@@ -61,7 +62,7 @@ class BearerTokenValidator
         }
     }
 
-    public function getClaims(): Token\DataSet
+    public function getClaims(): DataSet
     {
         // @phpstan-ignore-next-line 'Call to an undefined method Lcobucci\JWT\Token::claims()'
         return $this->unencryptedToken->claims();
