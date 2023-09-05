@@ -2,7 +2,6 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\Security;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientDisconnectedException;
@@ -13,11 +12,6 @@ use App\Domain\WsServer\Plugins\PluginHelper;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
 use App\Security\BearerTokenValidator;
 use Exception;
-use Lcobucci\Clock\FrozenClock;
-use Lcobucci\JWT\Encoding\JoseEncoder;
-use Lcobucci\JWT\Token\Parser;
-use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
-use Lcobucci\JWT\Validation\Validator;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
