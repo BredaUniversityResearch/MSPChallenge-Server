@@ -11,6 +11,7 @@ use App\Domain\WsServer\EPayloadDifferenceType;
 use App\Domain\WsServer\Plugins\Plugin;
 use App\Domain\WsServer\Plugins\PluginHelper;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
+use App\Security\BearerTokenValidator;
 use Exception;
 use Lcobucci\Clock\FrozenClock;
 use Lcobucci\JWT\Encoding\JoseEncoder;
@@ -172,23 +173,12 @@ class LatestWsServerPlugin extends Plugin
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
-                try {
-                    // this might throw an exception because token is not a valid JWT, or just non-existent
-                    $unencryptedToken = (new Parser(new JoseEncoder()))->parse(
-                        str_replace(
-                            'Bearer ',
-                            '',
-                            $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
-                                ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
-                            ]
-                        )
-                    );
-                    // this might throw an exception because token is no longer valid
-                    (new Validator())->assert(
-                        $unencryptedToken,
-                        new LooseValidAt(new FrozenClock(new \DateTimeImmutable()))
-                    );
-                } catch (\Exception $e) {
+                if (!(new BearerTokenValidator())->setTokenFromHeader(
+                    $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
+                        ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
+                    ]
+                )->validate()
+                ) {
                     $this->addOutput(
                         'Client\'s token has  expired, let the client re-connect with a new token'
                     );

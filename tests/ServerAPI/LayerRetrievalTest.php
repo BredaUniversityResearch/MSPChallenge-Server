@@ -28,7 +28,8 @@ class LayerRetrievalTest extends WebTestCase
         $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 3]);
         $this->assertMSPServerSuccessWithPayloadResponse();
-        sleep(2);
+        // required because otherwise there's a risk that the newly created tokens are identical to the old ones
+        sleep(1);
         $this->requestMSPEndpoint('POST', 'User/RequestToken', [], false);
         $this->assertResponseStatusCodeSame(500);
         $this->requestMSPEndpoint(

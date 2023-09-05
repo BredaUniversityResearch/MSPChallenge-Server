@@ -9,6 +9,7 @@ use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\DoctrineMigrationsDependencyFactoryHelper;
 use App\Domain\WsServer\Plugins\PluginInterface;
+use App\Security\BearerTokenValidator;
 use Drift\DBAL\Connection;
 use Exception;
 use GuzzleHttp\Psr7\Request;
@@ -161,14 +162,7 @@ class WsServer extends EventDispatcher implements
         }
         $headers[self::HEADER_KEY_GAME_SESSION_ID] = (int)$headers[self::HEADER_KEY_GAME_SESSION_ID];
 
-        try {
-            // this might throw an exception because token is not a valid JWT, or just non-existent
-            $unencryptedToken = (new Parser(new JoseEncoder()))->parse(
-                str_replace('Bearer ', '', $headers[self::HEADER_KEY_MSP_API_TOKEN])
-            );
-            // this might throw an exception because token is no longer valid
-            (new Validator())->assert($unencryptedToken, new LooseValidAt(new FrozenClock(new \DateTimeImmutable())));
-        } catch (\Exception $e) {
+        if (!(new BearerTokenValidator())->setTokenFromHeader($headers[self::HEADER_KEY_MSP_API_TOKEN])->validate()) {
             wdo('not a valid token, connection not allowed');
             $conn->close();
             return;
