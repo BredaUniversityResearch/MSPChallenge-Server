@@ -20,15 +20,22 @@ class LayerRetrievalTest extends WebTestCase
         $this->obtainAPIToken();
         $this->assertNotNull($this->access_token);
         $this->assertNotNull($this->refresh_token);
-        $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 1], false);
+        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 1], false);
         $this->assertResponseStatusCodeSame(401);
         $this->requestMSPEndpoint('POST', 'Game/Config', [], false);
         $this->assertMSPServerSuccessWithPayloadResponse();
-        $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 1]);
+        $this->requestMSPEndpoint('POST', 'Layer/MetaByName', ['name' => 'NS_EEZ'], false);
         $this->assertMSPServerSuccessWithPayloadResponse();
-        $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 2]);
+        $temp = $this->getToken();
+        $this->access_token = '';
+        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 1]);
+        $this->assertResponseStatusCodeSame(401);
+        $this->access_token = $temp;
+        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 1]);
         $this->assertMSPServerSuccessWithPayloadResponse();
-        $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 3]);
+        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 2]);
+        $this->assertMSPServerSuccessWithPayloadResponse();
+        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 3]);
         $this->assertMSPServerSuccessWithPayloadResponse();
         // required because otherwise there's a risk that the newly created tokens are identical to the old ones
         sleep(1);
@@ -66,9 +73,6 @@ class LayerRetrievalTest extends WebTestCase
 
     private function getToken(): ?string
     {
-        if (empty($this->access_token)) {
-            $this->obtainAPIToken();
-        }
         return $this->access_token;
     }
 
