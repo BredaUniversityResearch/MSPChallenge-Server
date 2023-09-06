@@ -182,6 +182,7 @@ class User extends Base implements JWTUserInterface
     private function CheckVersion(string $build_timestamp): void
     {
         $game = new Game();
+        $this->asyncDataTransferTo($game);
         $config = $game->GetGameConfigValues();
 
         if (array_key_exists("application_versions", $config)) {
