@@ -155,7 +155,7 @@ class WsServer extends EventDispatcher implements
             return;
         }
         $headers[self::HEADER_KEY_GAME_SESSION_ID] = (int)$headers[self::HEADER_KEY_GAME_SESSION_ID];
-
+        $this->clientHeaders[$conn->resourceId] = $headers;
         if (!(new BearerTokenValidator())->setTokenFromHeader($headers[self::HEADER_KEY_MSP_API_TOKEN])->validate()) {
             wdo('not a valid token, connection not allowed');
             $conn->close();

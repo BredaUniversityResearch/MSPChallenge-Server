@@ -26,11 +26,13 @@ class LayerRetrievalTest extends WebTestCase
         $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Layer/MetaByName', ['name' => 'NS_EEZ'], false);
         $this->assertMSPServerSuccessWithPayloadResponse();
-        $temp = $this->getToken();
+        // this tests a partial Authorization header
+        $temp = $this->access_token;
         $this->access_token = '';
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 1]);
         $this->assertResponseStatusCodeSame(401);
         $this->access_token = $temp;
+        // end of partial Authorization header test
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 1]);
         $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 2]);
@@ -61,7 +63,7 @@ class LayerRetrievalTest extends WebTestCase
 
     private function requestMSPEndpoint($method, $endPoint, $data = [], $useToken = true): void
     {
-        $headers = $useToken ? ['HTTP_AUTHORIZATION' => 'Bearer '.$this->getToken()] : [];
+        $headers = $useToken ? ['HTTP_AUTHORIZATION' => 'Bearer '.$this->access_token] : [];
         $this->client->request(
             $method,
             sprintf('/%d/api/%s', self::SESSION_ID, $endPoint),
@@ -69,11 +71,6 @@ class LayerRetrievalTest extends WebTestCase
             [],
             $headers
         );
-    }
-
-    private function getToken(): ?string
-    {
-        return $this->access_token;
     }
 
     private function obtainAPIToken(): void
