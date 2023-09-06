@@ -25,9 +25,11 @@ class AttachRefreshTokenOnSuccessListener
     {
         $data = $event->getData();
         $user = $event->getUser();
-        $connection = $this->connectionManager->getCachedGameSessionDbConnection(
-            $this->requestStack->getCurrentRequest()->get('sessionId')
-        );
+        $gameSessionId = $this->requestStack->getCurrentRequest()->get('sessionId');
+        if (is_null($gameSessionId) && !empty($_REQUEST['session'])) {
+            $gameSessionId = $_REQUEST['session'];
+        }
+        $connection = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId);
         $query = $connection->createQueryBuilder();
         // delete user's refresh token from the db table (won't exist upon first login using RequestSession)
         $query->delete('api_refresh_token')

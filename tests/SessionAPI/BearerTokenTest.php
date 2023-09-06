@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Tests\ServerAPI;
+namespace App\Tests\SessionAPI;
 
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class LayerRetrievalTest extends WebTestCase
+class BearerTokenTest extends WebTestCase
 {
 
     private const SESSION_ID = 1;
@@ -17,6 +17,7 @@ class LayerRetrievalTest extends WebTestCase
     public function testLayerRetrieval(): void
     {
         $this->client = static::createClient();
+        // @todo: add check that there is a game session with ID 1, and that it's a North Sea edition
         $this->obtainAPIToken();
         $this->assertNotNull($this->access_token);
         $this->assertNotNull($this->refresh_token);
@@ -39,7 +40,9 @@ class LayerRetrievalTest extends WebTestCase
         $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 3]);
         $this->assertMSPServerSuccessWithPayloadResponse();
-        // required because otherwise there's a risk that the newly created tokens are identical to the old ones
+        $this->requestMSPEndpoint('POST', 'Simulations/GetWatchdogTokenForServer', [], false);
+        $this->assertMSPServerSuccessWithSpecificPayloadStringsResponse(['watchdog_token', 'watchdog_refresh_token']);
+        // sleep required because otherwise there's a risk that the newly created tokens are identical to the old ones
         sleep(1);
         $this->requestMSPEndpoint('POST', 'User/RequestToken', [], false);
         $this->assertResponseStatusCodeSame(500);
@@ -96,7 +99,7 @@ class LayerRetrievalTest extends WebTestCase
         $this->refresh_token = $responseArr['payload']['api_refresh_token'] ?? null;
     }
 
-    private function assertMSPServerResponse(): void
+    private function assertMSPServerResponse(): array
     {
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(200);
@@ -106,27 +109,44 @@ class LayerRetrievalTest extends WebTestCase
         $this->assertArrayHasKey('success', $returnArr);
         $this->assertArrayHasKey('message', $returnArr);
         $this->assertArrayHasKey('payload', $returnArr);
+        return $returnArr;
     }
 
-    private function assertMSPServerSuccessResponse(): void
+    private function assertMSPServerSuccessResponse(): array
     {
-        $this->assertMSPServerResponse();
-        $responseArr = json_decode($this->client->getResponse()->getContent(), true);
+        $responseArr = $this->assertMSPServerResponse();
         $this->assertSame(
             true,
             $responseArr['success'],
             "{$this->client->getRequest()->getUri()} was valid, but returned success false, with message".
             PHP_EOL."{$responseArr['message']}."
         );
+        return $responseArr;
     }
 
-    private function assertMSPServerSuccessWithPayloadResponse(): void
+    private function assertMSPServerSuccessWithPayloadResponse(): array
     {
-        $this->assertMSPServerSuccessResponse();
-        $responseArr = json_decode($this->client->getResponse()->getContent(), true);
+        $responseArr = $this->assertMSPServerSuccessResponse();
         $this->assertNotNull(
             $responseArr['payload'],
             "{$this->client->getRequest()->getUri()} was valid, but payload was unexpectedly null."
         );
+        return $responseArr;
+    }
+
+    private function assertMSPServerSuccessWithSpecificPayloadStringsResponse(array $payloadVariables): void
+    {
+        $responseArr = $this->assertMSPServerSuccessWithPayloadResponse();
+        foreach ($payloadVariables as $payloadVariable) {
+            $this->assertArrayHasKey(
+                $payloadVariable,
+                $responseArr['payload'],
+                "{$this->client->getRequest()->getUri()} was valid, but expected payload was missing."
+            );
+            $this->assertNotNull(
+                $responseArr['payload'][$payloadVariable],
+                "{$this->client->getRequest()->getUri()} was valid, but expected payload was null."
+            );
+        }
     }
 }

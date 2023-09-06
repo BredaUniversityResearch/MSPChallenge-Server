@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 
 class Simulations extends Base
@@ -54,11 +55,18 @@ class Simulations extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetWatchdogTokenForServer(): array
     {
-        $token = null;
+        /*$token = null;
         $data = $this->getDatabase()->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
         if (count($data) > 0) {
             $token = $data[0]["game_session_watchdog_token"];
         }
-        return array("watchdog_token" => $token);
+        return array("watchdog_token" => $token);*/
+        $user = new User();
+        $user->setUserId(999999);
+        $user->setUsername('Watchdog');
+        $jsonResponse = SymfonyToLegacyHelper::getInstance()->getAuthenticationSuccessHandler()
+            ->handleAuthenticationSuccess($user);
+        $responseData = json_decode($jsonResponse->getContent());
+        return ['watchdog_token' => $responseData->token, 'watchdog_refresh_token' => $responseData->api_refresh_token];
     }
 }
