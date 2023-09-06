@@ -12,7 +12,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         none:
-            pattern: ^/\d+/api/(User/RequestToken|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config)
+            pattern: ^/\d+/api/(User/RequestToken|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName)
             security: false
         login:
             pattern: ^/\d+/api/User/RequestSession$

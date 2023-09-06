@@ -22,6 +22,8 @@ class LayerRetrievalTest extends WebTestCase
         $this->assertNotNull($this->refresh_token);
         $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 1], false);
         $this->assertResponseStatusCodeSame(401);
+        $this->requestMSPEndpoint('POST', 'Game/Config', [], false);
+        $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 1]);
         $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 2]);
