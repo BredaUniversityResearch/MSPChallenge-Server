@@ -4,8 +4,75 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "063ded675b78d6ba31b8ae125f1c91e7",
+    "content-hash": "97ea671a7b2e5fed3652ce26dfab9b29",
     "packages": [
+        {
+            "name": "beberlei/assert",
+            "version": "v3.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/beberlei/assert.git",
+                "reference": "cb70015c04be1baee6f5f5c953703347c0ac1655"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/beberlei/assert/zipball/cb70015c04be1baee6f5f5c953703347c0ac1655",
+                "reference": "cb70015c04be1baee6f5f5c953703347c0ac1655",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-simplexml": "*",
+                "php": "^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "*",
+                "phpstan/phpstan": "*",
+                "phpunit/phpunit": ">=6.0.0",
+                "yoast/phpunit-polyfills": "^0.1.0"
+            },
+            "suggest": {
+                "ext-intl": "Needed to allow Assertion::count(), Assertion::isCountable(), Assertion::minCount(), and Assertion::maxCount() to operate on ResourceBundles"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "lib/Assert/functions.php"
+                ],
+                "psr-4": {
+                    "Assert\\": "lib/Assert"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Benjamin Eberlei",
+                    "email": "kontakt@beberlei.de",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Richard Quadling",
+                    "email": "rquadling@gmail.com",
+                    "role": "Collaborator"
+                }
+            ],
+            "description": "Thin assertion library for input validation in business models.",
+            "keywords": [
+                "assert",
+                "assertion",
+                "validation"
+            ],
+            "support": {
+                "issues": "https://github.com/beberlei/assert/issues",
+                "source": "https://github.com/beberlei/assert/tree/v3.3.2"
+            },
+            "time": "2021-12-16T21:41:27+00:00"
+        },
         {
             "name": "blackfire/php-sdk",
             "version": "v1.35.0",
@@ -2646,6 +2713,67 @@
             "time": "2016-12-05T07:27:31+00:00"
         },
         {
+            "name": "nikolaposa/version",
+            "version": "4.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikolaposa/version.git",
+                "reference": "f6bdd64be914940529b843a67335d6386d980cec"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikolaposa/version/zipball/f6bdd64be914940529b843a67335d6386d980cec",
+                "reference": "f6bdd64be914940529b843a67335d6386d980cec",
+                "shasum": ""
+            },
+            "require": {
+                "beberlei/assert": "^3.2",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.17",
+                "phpstan/phpstan": "^0.12.10",
+                "phpstan/phpstan-beberlei-assert": "^0.12.2",
+                "phpstan/phpstan-phpunit": "^0.12.6",
+                "phpunit/phpunit": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Version\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nikola Poša",
+                    "email": "posa.nikola@gmail.com",
+                    "homepage": "https://www.nikolaposa.in.rs"
+                }
+            ],
+            "description": "Value Object that represents a SemVer-compliant version number.",
+            "homepage": "https://github.com/nikolaposa/version",
+            "keywords": [
+                "semantic",
+                "semver",
+                "version",
+                "versioning"
+            ],
+            "support": {
+                "issues": "https://github.com/nikolaposa/version/issues",
+                "source": "https://github.com/nikolaposa/version/tree/4.1.1"
+            },
+            "time": "2023-08-04T17:13:40+00:00"
+        },
+        {
             "name": "psr/cache",
             "version": "2.0.0",
             "source": {
@@ -3980,6 +4108,66 @@
                 "source": "https://github.com/ringcentral/psr7/tree/master"
             },
             "time": "2018-05-29T20:21:04+00:00"
+        },
+        {
+            "name": "shivas/versioning-bundle",
+            "version": "4.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shivas/versioning-bundle.git",
+                "reference": "88d8fe08f7be8ce7b802adecc71a90f40b7bb8e4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shivas/versioning-bundle/zipball/88d8fe08f7be8ce7b802adecc71a90f40b7bb8e4",
+                "reference": "88d8fe08f7be8ce7b802adecc71a90f40b7bb8e4",
+                "shasum": ""
+            },
+            "require": {
+                "nikolaposa/version": "^4",
+                "php": "^7.2 || ^8",
+                "symfony/console": "^3.4 || ^4 || ^5 || ^6",
+                "symfony/framework-bundle": "^3.4 || ^4 || ^5 || ^6",
+                "symfony/process": "^3.4 || ^4 || ^5 || ^6"
+            },
+            "require-dev": {
+                "mikey179/vfsstream": "^2",
+                "nyholm/symfony-bundle-test": "1.x-dev",
+                "phpunit/phpunit": "^8.5.27",
+                "symfony/phpunit-bridge": "^5 || ^6",
+                "twig/twig": "^2 || ^3"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Shivas\\VersioningBundle\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Audrius Karabanovas",
+                    "email": "audrius@karabanovas.net",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Symfony application versioning, simple console command to manage version (with providers e.g. git tag) of your application using Semantic Versioning 2.0.0 recommendations",
+            "homepage": "https://github.com/shivas/versioning-bundle",
+            "keywords": [
+                "semantic",
+                "semver",
+                "version",
+                "versioning"
+            ],
+            "support": {
+                "issues": "https://github.com/shivas/versioning-bundle/issues",
+                "source": "https://github.com/shivas/versioning-bundle/tree/4.0.3",
+                "wiki": "https://github.com/shivas/versioning-bundle/wiki"
+            },
+            "time": "2023-07-30T17:15:29+00:00"
         },
         {
             "name": "symfony/cache",
@@ -6581,6 +6769,68 @@
                 }
             ],
             "time": "2022-11-03T14:55:06+00:00"
+        },
+        {
+            "name": "symfony/process",
+            "version": "v5.4.28",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "45261e1fccad1b5447a8d7a8e67aa7b4a9798b7b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/45261e1fccad1b5447a8d7a8e67aa7b4a9798b7b",
+                "reference": "45261e1fccad1b5447a8d7a8e67aa7b4a9798b7b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.5",
+                "symfony/polyfill-php80": "^1.16"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Process\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Executes commands in sub-processes",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/process/tree/v5.4.28"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2023-08-07T10:36:04+00:00"
         },
         {
             "name": "symfony/property-access",
