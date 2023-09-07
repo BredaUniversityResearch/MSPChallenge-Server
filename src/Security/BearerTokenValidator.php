@@ -64,6 +64,9 @@ class BearerTokenValidator
 
     public function getClaims(): DataSet
     {
+        if (empty($this->unencryptedToken)) {
+            $this->unencryptedToken = (new Parser(new JoseEncoder()))->parse($this->token);
+        }
         // @phpstan-ignore-next-line 'Call to an undefined method Lcobucci\JWT\Token::claims()'
         return $this->unencryptedToken->claims();
     }

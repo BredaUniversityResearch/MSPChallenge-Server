@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Domain\API\v1\User;
 use App\Domain\Services\ConnectionManager;
 use Doctrine\DBAL\Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
@@ -25,10 +26,10 @@ class AttachRefreshTokenOnSuccessListener
     {
         $data = $event->getData();
         $user = $event->getUser();
-        $gameSessionId = $this->requestStack->getCurrentRequest()->get('sessionId');
-        if (is_null($gameSessionId) && !empty($_REQUEST['session'])) {
-            $gameSessionId = $_REQUEST['session'];
+        if (!$user instanceof User) {
+            return;
         }
+        $gameSessionId = $this->requestStack->getCurrentRequest()->get('sessionId');
         $connection = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId);
         $query = $connection->createQueryBuilder();
         // delete user's refresh token from the db table (won't exist upon first login using RequestSession)

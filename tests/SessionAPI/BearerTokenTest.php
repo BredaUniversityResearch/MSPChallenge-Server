@@ -38,10 +38,13 @@ class BearerTokenTest extends WebTestCase
         $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 2]);
         $this->assertMSPServerSuccessWithPayloadResponse();
-        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 3]);
-        $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Simulations/GetWatchdogTokenForServer', [], false);
-        $this->assertMSPServerSuccessWithSpecificPayloadStringsResponse(['watchdog_token', 'watchdog_refresh_token']);
+        $this->assertMSPServerSuccessWithSpecificPayloadStringsResponse(['watchdog_token']);
+        $this->setAccessAndRefreshTokens('watchdog_token');
+        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 2]);
+        $this->assertResponseStatusCodeSame(401);
+        $this->requestMSPEndpoint('POST', 'Simulations/CheckAccess', []);
+        $this->assertMSPServerSuccessWithSpecificPayloadStringsResponse(['status', 'time_remaining']);
         // sleep required because otherwise there's a risk that the newly created tokens are identical to the old ones
         sleep(1);
         $this->requestMSPEndpoint('POST', 'User/RequestToken', [], false);
@@ -56,7 +59,7 @@ class BearerTokenTest extends WebTestCase
         // reset access & refresh tokens, and check
         $oldAccessToken = $this->access_token;
         $oldRefreshToken = $this->refresh_token;
-        $this->setAccessAndRefreshTokens();
+        $this->setAccessAndRefreshTokens('api_access_token', 'api_refresh_token');
         $this->assertNotSame($oldAccessToken, $this->access_token, 'Access token was not renewed');
         $this->assertNotSame($oldRefreshToken, $this->refresh_token, 'Refresh token was not renewed');
         $this->requestMSPEndpoint('POST', 'Layer/get', ['layer_id' => 1]);
@@ -89,14 +92,18 @@ class BearerTokenTest extends WebTestCase
             false
         );
         $this->assertMSPServerSuccessWithPayloadResponse();
-        $this->setAccessAndRefreshTokens();
+        $this->setAccessAndRefreshTokens('api_access_token', 'api_refresh_token');
     }
 
-    private function setAccessAndRefreshTokens(): void
-    {
+    private function setAccessAndRefreshTokens(
+        string $accessTokenStringName,
+        ?string $refreshTokenStringName = null
+    ): void {
         $responseArr = json_decode($this->client->getResponse()->getContent(), true);
-        $this->access_token = $responseArr['payload']['api_access_token'] ?? null;
-        $this->refresh_token = $responseArr['payload']['api_refresh_token'] ?? null;
+        $this->access_token = $responseArr['payload'][$accessTokenStringName] ?? null;
+        if (!is_null($refreshTokenStringName)) {
+            $this->refresh_token = $responseArr['payload'][$refreshTokenStringName] ?? null;
+        }
     }
 
     private function assertMSPServerResponse(): array

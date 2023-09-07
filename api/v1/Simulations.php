@@ -3,9 +3,11 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Security\BearerTokenValidator;
 use Exception;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 
-class Simulations extends Base
+class Simulations extends Base implements JWTUserInterface
 {
     private const ALLOWED = array(
         "GetConfiguredSimulationTypes",
@@ -61,12 +63,75 @@ class Simulations extends Base
             $token = $data[0]["game_session_watchdog_token"];
         }
         return array("watchdog_token" => $token);*/
-        $user = new User();
-        $user->setUserId(999999);
-        $user->setUsername('Watchdog');
+        $user = new self;
         $jsonResponse = SymfonyToLegacyHelper::getInstance()->getAuthenticationSuccessHandler()
             ->handleAuthenticationSuccess($user);
         $responseData = json_decode($jsonResponse->getContent());
-        return ['watchdog_token' => $responseData->token, 'watchdog_refresh_token' => $responseData->api_refresh_token];
+        return ['watchdog_token' => $responseData->token];
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function CheckAccess(): array
+    {
+        $bearerToken = SymfonyToLegacyHelper::getInstance()->getRequest()->headers->get('Authorization');
+        $validator = (new BearerTokenValidator())->setTokenFromHeader($bearerToken);
+        $timeRemaining = (int) $validator->getClaims()->get('exp')->format('U') - time();
+        if ($timeRemaining > 900) {
+            $result = 'Valid';
+        } else {
+            $result = 'UpForRenewal';
+        }
+        // returning 'Expired' does not make sense, because in that case you wouldn't get here
+        return ['status' => $result, 'time_remaining' => $timeRemaining];
+    }
+
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function getUserIdentifier(): ?int
+    {
+        return $this->getUserId();
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getUserId(): ?int
+    {
+        return 999999;
+    }
+
+    public function getUsername(): ?string
+    {
+        return 'Simulation Watchdog';
+    }
+
+    public function setUsername(?string $user_name): self
+    {
+        return $this;
+    }
+
+    public static function createFromPayload($username, array $payload): Simulations
+    {
+        return new self;
+    }
+
+    public function getPassword(): string|null
+    {
+        // irrelevant, but required function
+        return null;
+    }
+
+    public function getSalt(): string|null
+    {
+        // irrelevant, but required function
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // irrelevant, but required function
     }
 }

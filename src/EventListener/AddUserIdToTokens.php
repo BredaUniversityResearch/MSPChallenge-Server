@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Domain\API\v1\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 
 class AddUserIdToTokens
@@ -15,8 +16,10 @@ class AddUserIdToTokens
     public function __invoke(JWTCreatedEvent $event): void
     {
         $payload = $event->getData();
-        $payload['uid'] = $event->getUser()->getUserIdentifier();
-
+        $user = $event->getUser();
+        if ($user instanceof User) {
+            $payload['uid'] = $event->getUser()->getUserIdentifier();
+        }
         $event->setData($payload);
     }
 }
