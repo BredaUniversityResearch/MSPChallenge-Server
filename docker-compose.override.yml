@@ -3,7 +3,10 @@ version: "3.7"
 # Development environment override
 services:
   adminer:
-    image: adminer
+    image: mspserver-adminer
+    build:
+      context: .
+      target: adminer_base
     restart: always
     environment:
       ADMINER_DEFAULT_SERVER: database
@@ -19,7 +22,10 @@ services:
       - ./docker/adminer/index.php:/var/www/html/index.php:ro
 
   mitmproxy:
-    image: mitmproxy/mitmproxy:9.0.1
+    image: mspserver-mitmproxy
+    build:
+      context: .
+      target: mitmproxy_base
     container_name: mitmproxy
     entrypoint: "mitmweb --web-host 0.0.0.0 --mode reverse:http://caddy --set websocket=true"
     networks:

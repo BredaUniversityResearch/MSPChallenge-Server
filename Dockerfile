@@ -161,3 +161,8 @@ COPY --link docker/caddy/Caddyfile /etc/caddy/Caddyfile
 FROM caddy_base AS caddy_prod
 
 COPY --from=php_prod --link /srv/app/public public/
+
+FROM mariadb:10.4.25 AS mariadb_base
+FROM blackfire/blackfire:2 AS blackfire_base
+FROM adminer AS adminer_base
+FROM mitmproxy/mitmproxy:9.0.1 as mitmproxy_base
