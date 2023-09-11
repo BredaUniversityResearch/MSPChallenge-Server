@@ -2,7 +2,6 @@
 namespace App;
 
 use Shivas\VersioningBundle\Provider\ProviderInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Version\Exception\InvalidVersionString;
 use Version\Version;
@@ -75,22 +74,22 @@ class VersionsProvider implements ProviderInterface
         if ($serverVersion->getMajor() == $clientVersion->getMajor()
             && $serverVersion->getMinor() == $clientVersion->getMinor()
         ) {
-            // just a patch difference between client and server, fine!
+            // just a patch difference between client and server: fine!
             return true;
         }
         if ($clientVersion->isGreaterOrEqualTo($this->lowestClientVersion)
             && $serverVersion->isGreaterOrEqualTo($clientVersion)
             && $serverVersion->getMajor() == $clientVersion->getMajor()
         ) {
-            // so client is equal or lower than server, but above minimum required and of the same major, fine!
+            // so client is equal or lower than server, but above minimum required and of the same major: fine!
             return true;
         }
         return false;
     }
 
-    private function setVersion(?Version $version = null): void
+    private function setVersion(?Version $override = null): void
     {
-        $this->version = $version ?? $this->getFormattedVersion(
+        $this->version = $override ?? $this->getFormattedVersion(
             'Server',
             $this->getVersionTxtContents($this->kernel->getProjectDir() . DIRECTORY_SEPARATOR)
         );
