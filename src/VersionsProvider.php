@@ -1,42 +1,36 @@
 <?php
 namespace App;
 
-use Shivas\VersioningBundle\Formatter\GitDescribeFormatter;
 use Shivas\VersioningBundle\Provider\ProviderInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Version\Exception\InvalidVersionString;
 use Version\Version;
 
 class VersionsProvider implements ProviderInterface
 {
+    private Version $version;
     private array $components;
-    private string $configVersion = '1.0';
-    private string $lowestClientVersion = '4.0.0';
+    private array $componentsVersions; // will be an array of Version objects
+    private Version $configVersion;
+    private Version $lowestClientVersion;
 
     public function __construct(
-        private readonly KernelInterface $kernel
+        private readonly KernelInterface $kernel,
+        ?Version $override = null
     ) {
+        $this->setVersion($override);
         // all components must have the same sub-array structure
         // and must have a version.txt file with a SemVer 2.0.0 compliant version in it
         $this->components = [
-            'MSW' => [
-                'sessionApiEndpoint' => '/api/Simulations/', // preceded by session ID, proceeded by method
-                'folder' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH']
-            ],
-            'MEL' => [
-                'sessionApiEndpoint' => '/api/MEL/', // preceded by session ID, proceeded by method
-                'folder' => 'simulations/.NETFramework/MEL/v1/'
-            ],
-            'SEL' => [
-                'sessionApiEndpoint' => '/api/SEL/', // preceded by session ID, proceeded by method
-                'folder' => 'simulations/.NETFramework/SEL/v1/'
-            ],
-            'CEL' => [
-                'sessionApiEndpoint' => '/api/CEL/', // preceded by session ID, proceeded by method
-                'folder' => 'simulations/.NETFramework/CEL/v1/'
-            ]
+            'MSW' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'],
+            'MEL' => str_replace('MSW', 'MEL/v1', $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH']),
+            'SEL' => str_replace('MSW', 'SEL/v1', $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH']),
+            'CEL' => str_replace('MSW', 'CEL/v1', $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH']),
         ];
-        $this->getComponentsVersions();
+        $this->setComponentsVersions();
+        $this->configVersion = Version::fromString('1.0.0');
+        $this->lowestClientVersion = Version::fromString('4.0.0');
     }
 
     public function isSupported(): bool
@@ -46,23 +40,32 @@ class VersionsProvider implements ProviderInterface
 
     public function getVersion(): string
     {
-        return $this->getVersionTxtContents($this->kernel->getProjectDir() . DIRECTORY_SEPARATOR);
+        return (string) $this->getVersionObject();
     }
 
-    /**
-     * @return array
-     */
-    public function getComponents(): array
+    public function getVersionObject(): Version
     {
-        return $this->components;
+        return $this->version;
     }
 
-    /**
-     * @return string
-     */
     public function getConfigVersion(): string
     {
         return $this->configVersion;
+    }
+
+    public function getLowestClientVersion(): string
+    {
+        return $this->lowestClientVersion;
+    }
+
+    public function getComponentsVersions(): array
+    {
+        return $this->componentsVersions;
+    }
+
+    public function getComponents(): array
+    {
+        return $this->components;
     }
 
     public function isCompatibleClient(string $clientVersion): bool
@@ -72,39 +75,41 @@ class VersionsProvider implements ProviderInterface
         if ($serverVersion->getMajor() == $clientVersion->getMajor()
             && $serverVersion->getMinor() == $clientVersion->getMinor()
         ) {
-            // just a patch difference, fine!
+            // just a patch difference between client and server, fine!
             return true;
         }
         if ($clientVersion->isGreaterOrEqualTo($this->lowestClientVersion)
-            && $serverVersion->isGreaterOrEqualTo($clientVersion)) {
-            // so client is lower, but not too low, fine!
+            && $serverVersion->isGreaterOrEqualTo($clientVersion)
+            && $serverVersion->getMajor() == $clientVersion->getMajor()
+        ) {
+            // so client is equal or lower than server, but above minimum required and of the same major, fine!
             return true;
         }
         return false;
     }
 
-    /**
-     * @return string
-     */
-    public function getLowestClientVersion(): string
+    private function setVersion(?Version $version = null): void
     {
-        return $this->lowestClientVersion;
+        $this->version = $version ?? $this->getFormattedVersion(
+            'Server',
+            $this->getVersionTxtContents($this->kernel->getProjectDir() . DIRECTORY_SEPARATOR)
+        );
     }
 
-    private function getComponentsVersions(): void
+    private function setComponentsVersions(): void
     {
         $root = $this->kernel->getProjectDir() . DIRECTORY_SEPARATOR;
-        foreach ($this->components as $component => $componentArr) {
-            $this->components[$component]['version'] = $this->getFormattedVersion(
+        foreach ($this->components as $component => $folder) {
+            $this->componentsVersions[$component] = $this->getFormattedVersion(
                 $component,
                 $this->getVersionTxtContents(
-                    $root . $componentArr['folder']
+                    $root . $folder
                 )
             );
         }
     }
 
-    private function getVersionTxtContents($path): string
+    private function getVersionTxtContents(string $path): string
     {
         $result = file_get_contents($path . 'version.txt');
         if (false === $result) {
@@ -114,14 +119,13 @@ class VersionsProvider implements ProviderInterface
         return rtrim($result);
     }
 
-    private function getFormattedVersion(string $component, string $versionString): string
+    private function getFormattedVersion(string $component, string $versionString): Version
     {
         try {
             if (str_starts_with(strtolower($versionString), 'v')) {
                 $versionString = substr($versionString, 1);
             }
-            $version = Version::fromString($versionString);
-            return (new GitDescribeFormatter)->format($version);
+            return Version::fromString($versionString);
         } catch (InvalidVersionString $e) {
             throw new \RuntimeException(
                 "{$component} version {$versionString} does not follow SemVer standards"

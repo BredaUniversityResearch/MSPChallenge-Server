@@ -49,6 +49,10 @@ services:
         arguments:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
 
+    App\VersionsProvider:
+        tags:
+            - { name: shivas_versioning.provider, alias: versions_provider, priority: 200 }
+
     ServerManager\ServerManager:
 
 when@dev:

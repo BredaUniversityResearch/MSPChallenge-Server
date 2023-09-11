@@ -50,8 +50,9 @@ services:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
 
     App\VersionsProvider:
+        public: true
         tags:
-            - { name: shivas_versioning.provider, alias: versions_provider, priority: 0 }
+            - { name: shivas_versioning.provider, alias: versions_provider, priority: 200 }
 
     ServerManager\ServerManager:
 
