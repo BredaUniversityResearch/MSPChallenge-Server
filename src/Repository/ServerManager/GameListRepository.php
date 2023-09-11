@@ -43,7 +43,7 @@ class GameListRepository extends EntityRepository
             ->select([
                 'g.id', 'g.name', 'gcv.id as game_config_version_id', 'gcv.version as config_version_version',
                 'gcv.versionMessage as config_version_message', 'gcf.filename as config_file_name', 'gcv.region',
-                
+
             ])
             ->leftJoin('g.gameConfigVersion', 'gcv')
             ->leftJoin('gcv.gameConfigFile', 'gcf')
