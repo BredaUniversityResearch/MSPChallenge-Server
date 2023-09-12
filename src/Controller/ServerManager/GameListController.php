@@ -36,7 +36,10 @@ class GameListController extends AbstractController
         } catch (IncompatibleClientException $e) {
             return new JsonResponse(
                 BaseController::wrapPayloadForResponse(
-                    ['clients_url' => 'https://community.mspchallenge.info/wiki/Download'],
+                    [
+                        'clients_url' => 'https://community.mspchallenge.info/wiki/Download',
+                        'server_version' => $provider->getVersion()
+                    ],
                     $e->getMessage()
                 ),
                 403
