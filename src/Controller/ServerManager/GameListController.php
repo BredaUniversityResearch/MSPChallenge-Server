@@ -3,12 +3,18 @@
 namespace App\Controller\ServerManager;
 
 use App\Controller\SessionAPI\BaseController;
+<<<<<<< HEAD
 use App\Domain\Services\SymfonyToLegacyHelper;
+=======
+>>>>>>> e2838c0de1629eebcaba35d7c5c81cb629a93aa0
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\Setting;
 use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
+<<<<<<< HEAD
 use ServerManager\ServerManager;
+=======
+>>>>>>> e2838c0de1629eebcaba35d7c5c81cb629a93aa0
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +33,7 @@ class GameListController extends AbstractController
         EntityManagerInterface $entityManager,
         VersionsProvider $provider,
         Request $request,
+<<<<<<< HEAD
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
         string $sessionState = 'public'
     ): Response {
@@ -39,6 +46,20 @@ class GameListController extends AbstractController
                     $e->getMessage()
                 ),
                 400
+=======
+        string $sessionState = 'public'
+    ): Response {
+        try {
+            $clientVersion = $request->get('client_version');
+            // might throw InvalidVersionString exception
+            if (is_null($clientVersion) || !$provider->isCompatibleClient($clientVersion)) {
+                //throw new \Exception('This client is incompatible.');
+            }
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                BaseController::wrapPayloadForResponse([], $e->getMessage()),
+                500
+>>>>>>> e2838c0de1629eebcaba35d7c5c81cb629a93aa0
             );
         }
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
