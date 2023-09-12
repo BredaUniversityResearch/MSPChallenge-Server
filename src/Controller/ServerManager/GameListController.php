@@ -6,6 +6,7 @@ use App\Controller\SessionAPI\BaseController;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\Setting;
+use App\IncompatibleClientException;
 use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,6 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Version\Exception\InvalidVersionString;
 
 class GameListController extends AbstractController
 {
@@ -31,14 +33,16 @@ class GameListController extends AbstractController
     ): Response {
         try {
             $provider->checkCompatibleClient($request->headers->get('MSP-Client-Version'));
-        } catch (\Exception $e) {
+        } catch (IncompatibleClientException $e) {
             return new JsonResponse(
                 BaseController::wrapPayloadForResponse(
                     ['clients_url' => 'https://community.mspchallenge.info/wiki/Download'],
                     $e->getMessage()
                 ),
-                400
+                403
             );
+        } catch (InvalidVersionString $e) {
+            return new JsonResponse(BaseController::wrapPayloadForResponse([], $e->getMessage()), 400);
         }
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
@@ -46,7 +50,8 @@ class GameListController extends AbstractController
             $this->json(BaseController::wrapPayloadForResponse([
                 'sessionslist' => $gameList,
                 'server_description' => $serverDesc->getValue(),
-                'server_version' => $provider->getVersion()
+                'server_version' => $provider->getVersion(),
+                'server_components_versions' => $provider->getComponentsVersions()
             ])) :
             new Response('', 500); // for later! MSP-3820
     }

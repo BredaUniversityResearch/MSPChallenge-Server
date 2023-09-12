@@ -68,7 +68,7 @@ class VersionsProvider implements ProviderInterface
     }
 
     /**
-     * @throws \Exception
+     * @throws IncompatibleClientException
      * @throws InvalidVersionString
      */
     public function checkCompatibleClient(?string $clientVersion): bool
@@ -85,13 +85,12 @@ class VersionsProvider implements ProviderInterface
             return true;
         }
         if ($clientVersion->isGreaterOrEqualTo($this->lowestClientVersion)
-            && $serverVersion->isGreaterOrEqualTo($clientVersion)
             && $serverVersion->getMajor() == $clientVersion->getMajor()
         ) {
-            // so client is equal or lower than server, but above minimum required and of the same major: fine!
+            // so client is above minimum required and of the same major: fine!
             return true;
         }
-        throw new \Exception('Client not compatible');
+        throw new IncompatibleClientException('Client not compatible');
     }
 
     private function setVersion(?Version $override = null): void
