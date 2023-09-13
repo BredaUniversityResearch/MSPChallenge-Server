@@ -179,6 +179,11 @@ class GameList
         return $this->gameEndMonth;
     }
 
+    public function getGameEndMonthPretty(): string
+    {
+        return $this->makeDatePretty($this->gameEndMonth);
+    }
+
     public function setGameEndMonth(int $gameEndMonth): self
     {
         $this->gameEndMonth = $gameEndMonth;
@@ -189,6 +194,18 @@ class GameList
     public function getGameCurrentMonth(): ?int
     {
         return $this->gameCurrentMonth;
+    }
+
+    public function getGameCurrentMonthPretty(): string
+    {
+        return $this->makeDatePretty($this->gameCurrentMonth);
+    }
+
+    private function makeDatePretty($month): string
+    {
+        return \DateTimeImmutable::createFromFormat('m Y', '1 '.$this->gameStartYear)
+            ->add(\DateInterval::createFromDateString($month.' month'))
+            ->format('M Y');
     }
 
     public function setGameCurrentMonth(int $gameCurrentMonth): self

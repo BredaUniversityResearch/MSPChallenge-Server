@@ -5,14 +5,11 @@ namespace App\Repository\ServerManager;
 use App\Domain\API\v1\Game;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\WsServer\WsServer;
-use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameServer;
-use App\Entity\ServerManager\Setting;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use ServerManager\ServerManager;
 
 class GameListRepository extends EntityRepository
 {
@@ -78,14 +75,19 @@ class GameListRepository extends EntityRepository
         return $sessionList;
     }
 
+    /**
+     * @throws \Exception
+     */
     private function amendSessionList(array &$sessionList): void
     {
         $scheme = $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http://';
         $port = $_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80;
         $host = $_ENV['URL_WEB_SERVER_HOST'] ?? null;
-        $server = $this->getEntityManager()->getRepository(GameServer::class)->find(1);
-        if (!is_null($server) && is_null($host)) {
-            $host = $server->getAddress();
+        if (is_null($host)) {
+            $server = $this->getEntityManager()->getRepository(GameServer::class)->find(1);
+            if (!is_null($server)) {
+                $host = $server->getAddress();
+            }
         }
         foreach ($sessionList as $key => $session) {
             // get session's config file contents and decode the json
@@ -98,7 +100,14 @@ class GameListRepository extends EntityRepository
             // complete the server and websocket server addresses
             $session['game_server_address'] = $scheme.$host.':'.$port;
             $session['game_ws_server_address'] = WsServer::getWsServerURLBySessionId($session['id'], $host);
-
+            $gameList = new GameList();
+            $session['current_month_formatted'] = $gameList
+                ->setGameStartYear($session['game_start_year'])
+                ->setGameCurrentMonth($session['game_current_month'])
+                ->getGameCurrentMonthPretty();
+            $session['end_month_formatted'] = $gameList
+                ->setGameEndMonth($session['game_end_month'])
+                ->getGameEndMonthPretty();
             $sessionList[$key] = $session;
         }
     }
