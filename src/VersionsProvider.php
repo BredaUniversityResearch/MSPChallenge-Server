@@ -22,10 +22,11 @@ class VersionsProvider implements ProviderInterface
         // all components must have the same sub-array structure
         // and must have a version.txt file with a SemVer 2.0.0 compliant version in it
         $this->components = [
-            'MSW' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'],
-            'MEL' => str_replace('MSW', 'MEL/v1', $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH']),
-            'SEL' => str_replace('MSW', 'SEL/v1', $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH']),
-            'CEL' => str_replace('MSW', 'CEL/v1', $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH']),
+            'MSW' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'].'MSWdata/',
+            'MEL' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'].'MELdata/',
+            'SEL' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'].'SELdata/',
+            'CEL' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'].'CELdata/',
+            'REL' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'].'RELdata/',
         ];
         $this->setComponentsVersions();
         $this->configVersion = Version::fromString('1.0.0');

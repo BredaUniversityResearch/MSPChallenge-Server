@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 
 class Simulations extends Base
@@ -9,8 +10,6 @@ class Simulations extends Base
     private const ALLOWED = array(
         "GetConfiguredSimulationTypes",
         ["GetWatchdogTokenForServer", Security::ACCESS_LEVEL_FLAG_NONE]);
-
-    const POSSIBLE_SIMULATIONS = array("MEL", "CEL", "SEL", "REL");
 
     public function __construct(string $method = '')
     {
@@ -31,9 +30,10 @@ class Simulations extends Base
         $game = new Game();
         $this->asyncDataTransferTo($game);
         $config = $game->GetGameConfigValues();
-        foreach (self::POSSIBLE_SIMULATIONS as $possibleSim) {
+        $possibleSims = SymfonyToLegacyHelper::getInstance()->getProvider()->getComponentsVersions();
+        foreach ($possibleSims as $possibleSim => $possibleSimVersion) {
             if (array_key_exists($possibleSim, $config) && is_array($config[$possibleSim])) {
-                $versionString = "Latest";
+                $versionString = $possibleSimVersion;
                 if (array_key_exists("force_version", $config[$possibleSim])) {
                     $versionString = $config[$possibleSim]["force_version"];
                 }
