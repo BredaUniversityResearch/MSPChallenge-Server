@@ -5,11 +5,7 @@ namespace App\Controller\SessionAPI;
 use App\Domain\API\v1\User;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use Lcobucci\Clock\FrozenClock;
-use Lcobucci\JWT\Encoding\JoseEncoder;
-use Lcobucci\JWT\Token\Parser;
-use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
-use Lcobucci\JWT\Validation\Validator;
+use App\Security\BearerTokenValidator;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -110,12 +106,10 @@ class UserController extends AbstractController
                 throw new \Exception('Cannot continue without a refresh token');
             }
             $connection = $connectionManager->getCachedGameSessionDbConnection($sessionId);
-            $parser = new Parser(new JoseEncoder());
-            // this might throw an exception because refresh token is not a valid JWT
-            $unencryptedToken = $parser->parse($currentRefreshToken);
-            $validator = new Validator();
-            // this might throw an exception because refresh token is no longer valid
-            $validator->assert($unencryptedToken, new LooseValidAt(new FrozenClock(new \DateTimeImmutable())));
+            $validator = new BearerTokenValidator($currentRefreshToken);
+            if (!$validator->validate()) {
+                throw new \Exception('Refresh token invalid');
+            }
             $query = $connection->createQueryBuilder();
             $query->select('art.*')
                 ->from('api_refresh_token', 'art')
@@ -125,8 +119,7 @@ class UserController extends AbstractController
             if (empty($result)) {
                 throw new \Exception('Refresh token unknown to us');
             }
-            // @phpstan-ignore-next-line 'Call to an undefined method Lcobucci\JWT\Token::claims()'
-            $decodedJwtToken = $unencryptedToken->claims();
+            $decodedJwtToken = $validator->getClaims();
             if (!$decodedJwtToken->has('uid') || !$decodedJwtToken->has('username')) {
                 throw new \Exception('Refresh token has no or the wrong payload');
             }

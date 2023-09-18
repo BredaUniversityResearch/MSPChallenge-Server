@@ -45,6 +45,10 @@ services:
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created }
 
+    App\EventListener\AccessTokenAuthorizationListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_decoded }
+
     App\Domain\WsServer\Plugins\PluginHelper:
         arguments:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'

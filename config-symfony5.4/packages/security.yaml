@@ -11,14 +11,14 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        #none:
-        #    pattern: ^/\d+/api/(User/RequestToken|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config)
-        #    security: false
-        #login:
-        #    pattern: ^/\d+/api/User/RequestSession$
-        #    stateless: true
-        #    json_login:
-        #        check_path: session_api_user_controller
+        none:
+            pattern: ^/\d+/api/(User/RequestToken|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName)
+            security: false
+        login:
+            pattern: ^/\d+/api/User/RequestSession$
+            stateless: true
+            json_login:
+                check_path: session_api_user_controller
         main:
             pattern: ^/\d+/api/\w+/\w+
             security: false

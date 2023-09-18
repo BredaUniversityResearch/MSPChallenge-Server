@@ -577,7 +577,7 @@ class Game extends Base
     public function StartWatchdog(): void
     {
         // no need to startup watchdog in docker, handled by supervisor.
-        if (getenv('DOCKER')) {
+        if (getenv('DOCKER') !== false) {
             return;
         }
         // below code is only necessary for Windows
@@ -737,54 +737,42 @@ class Game extends Base
                 $simulationsHelper = new Simulations();
                 $this->asyncDataTransferTo($simulationsHelper);
                 $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
-                $security = new Security();
-                $this->asyncDataTransferTo($security);
-                $security->setAsync(true); // force async
-                return $security->generateToken()
-                    ->then(function (array $result) use (
-                        $security,
+                $tokens = $simulationsHelper->GetTokensForWatchdog();
+                $newAccessToken = json_encode([
+                    'token' => $tokens['token'],
+                    'valid_until' => (new \DateTime('+1 hour'))->format('Y-m-d H:i:s')
+                ]);
+                $recoveryToken = json_encode([
+                    'token' => $tokens['api_refresh_token'],
+                    'valid_until' => \DateTime::createFromFormat('U', $tokens['exp'])->format('Y-m-d H:i:s')
+                ]);
+                return $this->getWatchdogSessionUniqueToken()
+                    ->then(function (string $watchdogSessionUniqueToken) use (
                         $simulations,
                         $apiRoot,
-                        $newWatchdogGameState
+                        $newWatchdogGameState,
+                        $newAccessToken,
+                        $recoveryToken
                     ) {
-                        $newAccessToken = json_encode($result);
-                        return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
-                            ->then(function (string $token) use (
-                                $simulations,
-                                $apiRoot,
-                                $newWatchdogGameState,
-                                $newAccessToken
-                            ) {
-                                $recoveryToken = json_encode(['token' => $token]);
-                                return $this->getWatchdogSessionUniqueToken()
-                                    ->then(function (string $watchdogSessionUniqueToken) use (
-                                        $simulations,
-                                        $apiRoot,
-                                        $newWatchdogGameState,
-                                        $newAccessToken,
-                                        $recoveryToken
-                                    ) {
-                                        // note(MH): GetWatchdogAddress is not async, but it is cached once it
-                                        //   has been retrieved once, so that's "fine"
-                                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
-                                        $browser = MSPBrowserFactory::create($url);
-                                        $postValues = [
-                                            'game_session_api' => $apiRoot,
-                                            'game_session_token' => $watchdogSessionUniqueToken,
-                                            'game_state' => $newWatchdogGameState,
-                                            'required_simulations' => $simulations,
-                                            'api_access_token' => $newAccessToken,
-                                            'api_access_renew_token' => $recoveryToken
-                                        ];
-                                        return $browser->post(
-                                            $url,
-                                            [
-                                                'Content-Type' => 'application/x-www-form-urlencoded'
-                                            ],
-                                            http_build_query($postValues)
-                                        );
-                                    });
-                            });
+                        // note(MH): GetWatchdogAddress is not async, but it is cached once it
+                        //   has been retrieved once, so that's "fine"
+                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
+                        $browser = MSPBrowserFactory::create($url);
+                        $postValues = [
+                            'game_session_api' => $apiRoot,
+                            'game_session_token' => $watchdogSessionUniqueToken,
+                            'game_state' => $newWatchdogGameState,
+                            'required_simulations' => $simulations,
+                            'api_access_token' => $newAccessToken,
+                            'api_access_renew_token' => $recoveryToken
+                        ];
+                        return $browser->post(
+                            $url,
+                            [
+                                'Content-Type' => 'application/x-www-form-urlencoded'
+                            ],
+                            http_build_query($postValues)
+                        );
                     });
             })
             ->then(function (ResponseInterface $response) {
