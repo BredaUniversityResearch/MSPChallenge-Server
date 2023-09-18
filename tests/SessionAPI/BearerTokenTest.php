@@ -2,6 +2,7 @@
 
 namespace App\Tests\SessionAPI;
 
+use App\Domain\API\v1\Simulations;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -14,6 +15,16 @@ class BearerTokenTest extends WebTestCase
 
     private ?string $refresh_token;
 
+    public function testGameState(): void
+    {
+        $this->client = static::createClient();
+        // @todo: add check that there is a game session with ID 1, and that it's a North Sea edition
+        $this->obtainAPIToken();
+        $this->assertNotNull($this->access_token);
+        $this->assertNotNull($this->refresh_token);
+        $this->requestMSPEndpoint('POST', 'Game/State', ['state' => 'play']);
+        $this->assertMSPServerSuccessResponse();
+    }
     public function testLayerRetrieval(): void
     {
         $this->client = static::createClient();

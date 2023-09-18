@@ -4,19 +4,24 @@ namespace App\EventListener;
 
 use App\Domain\API\v1\User;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Doctrine\DBAL\Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AttachRefreshTokenOnSuccessListener
 {
+
+    private Request $request;
 
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly ConnectionManager $connectionManager,
         private readonly JWTTokenManagerInterface $JWTManager
     ) {
+        $this->request = SymfonyToLegacyHelper::getInstance()->getRequest();
     }
 
     /**
@@ -29,7 +34,12 @@ class AttachRefreshTokenOnSuccessListener
         if (!$user instanceof User) {
             return;
         }
-        $gameSessionId = $this->requestStack->getCurrentRequest()->get('sessionId');
+        $request = $this->requestStack->getCurrentRequest();
+        $gameSessionId = $this->request->get('sessionId');
+        // temporary fallback while we continue migrating legacy code to Symfony...
+        if (is_null($gameSessionId)) {
+            $gameSessionId = explode('/', ltrim($this->request->getPathInfo(), '/'))[0];
+        }
         $connection = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId);
         $query = $connection->createQueryBuilder();
         // delete user's refresh token from the db table (won't exist upon first login using RequestSession)
