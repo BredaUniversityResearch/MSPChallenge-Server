@@ -20,11 +20,7 @@
     <div>
         Server Address:
         <?php
-        $address = ServerManager::getInstance()->getTranslatedServerURL();
-        if ($address == "localhost") {
-            $address .= "<br/>Translated automatically to ".gethostbyname(gethostname());
-        }
-        echo $address;
+        echo ServerManager::getInstance()->getTranslatedServerURL();
         ?>
     </div>
 </footer>
