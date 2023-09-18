@@ -280,15 +280,17 @@ class ServerManager extends Base
         return $this->serverDescription;
     }
 
-    public function getServerURLBySessionId($sessionId = ''): string
+    public function getServerURLBySessionId($sessionId = '', bool $forDocker = false): string
     {
         // e.g. http://localhost/1
         // use this one if you just want the full URL of a Server's session
-        $url = Config::get('msp_server_protocol').$this->getTranslatedServerURL().Config::get('code_branch');
+        $url = $forDocker ?
+            // this is always called from inside the docker environment,so just use http://caddy:80/...
+            'http://caddy:80'.Config::get('code_branch') :
+            Config::get('msp_server_protocol').$this->getTranslatedServerURL().Config::get('code_branch');
         if (!empty($sessionId)) {
             $url = rtrim($url, '/').'/'.$sessionId;
         }
-
         return $url;
     }
 
@@ -315,7 +317,7 @@ class ServerManager extends Base
     public function getTranslatedServerURL(): string
     {
         $port = $_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80;
-        if (($_ENV['URL_WEB_SERVER_HOST'] ?? null) !== null) {
+        if (($_ENV['URL_WEB_SERVER_HOST'] ?? '') !== '') {
             return $_ENV['URL_WEB_SERVER_HOST'].':'.$port;
         }
 
