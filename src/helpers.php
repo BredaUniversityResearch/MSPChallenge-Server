@@ -31,7 +31,9 @@ function isJsonObject($string): bool
 
 function rrmdir($src): void
 {
-    $dir = opendir($src);
+    if (false === $dir = opendir($src)) {
+        return;
+    }
     while (false !== ( $file = readdir($dir))) {
         if (( $file != '.' ) && ( $file != '..' )) {
             $full = $src . '/' . $file;

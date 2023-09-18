@@ -12162,11 +12162,11 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="M:EwECore.Database.cEwEAccessDatabase.GetAdapter(System.String)">
  -------------------------------------------------------------------
  <summary>
- Obtains and configures a <see cref="T:System.Data.OleDb.OleDbDataAdapter">OleDbDataAdapter</see>
+ Obtains and configures a <see cref="!:OleDbDataAdapter">OleDbDataAdapter</see>
  for the current M$ Access database.
  </summary>
  <param name="strSQL">The SQL query to obtain the adapter for.</param>
- <returns>A <see cref="T:System.Data.OleDb.OleDbDataAdapter">OleDbDataAdapter</see> if
+ <returns>A <see cref="!:OleDbDataAdapter">OleDbDataAdapter</see> if
  successful, or Nothing when an error occurred.</returns>
  <remarks>
  <para>The returned adapter is initialized with default insert, update 
@@ -26420,7 +26420,7 @@ min_B_QB: minimum B*QB.
  <summary>
  Converts an iGroup into a cumulative stanza index Nvarsplit
  </summary>
- <remarks>Populated in initSpatialEqulibrium().  
+ <remarks>Populated in initSpatialEqulibrium().
  Use to access stanza varaibles that are stored after the groups in biologial indexes of spatial matrixes.
  </remarks>
 </member>
@@ -26443,16 +26443,16 @@ min_B_QB: minimum B*QB.
  </summary>
 </member>
 <member name="F:EwECore.cEcoSpace.nSpinUp">
- <summary>Number of timesteps in the total Spin-Up period</summary>   
+ <summary>Number of timesteps in the total Spin-Up period</summary>
 </member>
 <member name="F:EwECore.cEcoSpace.nSpinUpYear">
- <summary>Number of timesteps in one year used by Spin-Up.</summary>   
+ <summary>Number of timesteps in one year used by Spin-Up.</summary>
 </member>
 <member name="F:EwECore.cEcoSpace.iSpinUp">
- <summary>Cumulative Spin-Up counter</summary>   
+ <summary>Cumulative Spin-Up counter</summary>
 </member>
 <member name="F:EwECore.cEcoSpace.iSpinUpYear">
- <summary>Yearly Spin-Up counter</summary>   
+ <summary>Yearly Spin-Up counter</summary>
 </member>
 <member name="F:EwECore.cEcoSpace.bInitSpinUpBase">
  <summary>Does the Spin-Up base biomass need initialization</summary>
@@ -26461,7 +26461,7 @@ min_B_QB: minimum B*QB.
  <summary>
  Converts a cumulative stanza index(Nvarsplit) into an iGroup index
  </summary>
- <remarks>Computed in initSpatialEquilibrium(). 
+ <remarks>Computed in initSpatialEquilibrium().
  This is the opposite of IecoCode().
  </remarks>
 </member>
@@ -26483,10 +26483,10 @@ min_B_QB: minimum B*QB.
  Exposes the MessagePublisher instance so that the core can add message handlers
  </summary>
  <remarks>
-  All messages from EcoSpace to the core are passed via this MessagePublisher. 
-  The core adds a message handler during Ecospace initialization <see cref="M:EwECore.cCore.InitEcospace"> InitEcospace()</see> 
+  All messages from EcoSpace to the core are passed via this MessagePublisher.
+  The core adds a message handler during Ecospace initialization <see cref="M:EwECore.cCore.InitEcospace"> InitEcospace()</see>
  </remarks>
- ----------------------------------------------------------------------- 
+ -----------------------------------------------------------------------
 </member>
 <member name="P:EwECore.cEcoSpace.EcoPathData">
  <summary>
@@ -26511,10 +26511,10 @@ min_B_QB: minimum B*QB.
  </summary>
  <returns>True if Ecospace ran successfully. False otherwise.</returns>
  <remarks>
- cEcoSpace.Run() runs Ecospace on the same thread as the calling routine. 
- It is used when you need run Ecospace in some kind of a looping structure 
- and gather the results at the end of each run. 
- <see cref="M:EwECore.cMPARandomSearch.runSearch">MPA Optimization </see> 
+ cEcoSpace.Run() runs Ecospace on the same thread as the calling routine.
+ It is used when you need run Ecospace in some kind of a looping structure
+ and gather the results at the end of each run.
+ <see cref="M:EwECore.cMPARandomSearch.runSearch">MPA Optimization </see>
  </remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.RunThreaded">
@@ -26523,9 +26523,9 @@ min_B_QB: minimum B*QB.
  </summary>
  <returns>True if the EcoSpace run was successfully started, this does not mean the run has successfully completed. False otherwise.</returns>
  <remarks>
- Starts EcoSpace running on a seperate thread and returns immediately. 
- Once the EcoSpace run has completed the <see cref="P:EwECore.cEcoSpace.RunCompletedDelegate">RunCompletedDelegate</see> 
- will be called with the success or failure of the run.   
+ Starts EcoSpace running on a seperate thread and returns immediately.
+ Once the EcoSpace run has completed the <see cref="P:EwECore.cEcoSpace.RunCompletedDelegate">RunCompletedDelegate</see>
+ will be called with the success or failure of the run.
  Used by the interface so running EcoSpace does not block the interface.
 </remarks>
 </member>
@@ -26537,7 +26537,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.FindSpatialEquilibrium">
  <summary>
- 
+
  </summary>
  <remarks>
  This routine attempts to seek spatial equilibrium in ecosim biomasses, given mpa pattern
@@ -26567,8 +26567,8 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.ForceBiomassWithEcosimTimeSeries(System.Int32)">
  <summary>
- VC stole this from Ecosim 
- Force Ecospace Biomass with Ecosim time series forced biomass 
+ VC stole this from Ecosim
+ Force Ecospace Biomass with Ecosim time series forced biomass
  </summary>
 </member>
 <member name="M:EwECore.cEcoSpace.UpdateDepthMap">
@@ -26602,14 +26602,14 @@ min_B_QB: minimum B*QB.
  <summary>
  Redim or Clear all variables that are needed for an Ecospace run
  </summary>
- <remarks>In EwE5 this was handled inside FindSpatialEquilibrium. 
+ <remarks>In EwE5 this was handled inside FindSpatialEquilibrium.
  These are variables that will be populated by the Ecospace initialization initSpatialEquilibrium().
  This should not contain any data that was populated by the database.
  </remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.derivtRed(System.Single[],System.Single[]@,System.Single[]@,System.Single[],System.Single[]@,System.Single)">
  <summary>
- Local version of derivtRed() used by Ecospace during initialization ONLY 
+ Local version of derivtRed() used by Ecospace during initialization ONLY
  </summary>
  <param name="Biomass">Input Biomass of all the groups</param>
  <param name="Flowin">Ouput Flow of biomass into a cell  </param>
@@ -26624,7 +26624,7 @@ min_B_QB: minimum B*QB.
 <member name="M:EwECore.cEcoSpace.ScaleRelativePrimaryProductivityToEcopathLevel">
  -----------------------------------------------------------------------
  <summary>
- Returns a scaling factor to ensure that the total primary productivity 
+ Returns a scaling factor to ensure that the total primary productivity
  is the same in Ecospace and Ecopath.
  </summary>
  <returns>
@@ -26635,7 +26635,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.ScaleSailingCost">
  <summary>
- Scaling Sailing cost 
+ Scaling Sailing cost
  </summary>
  <remarks></remarks>
 </member>
@@ -26649,7 +26649,7 @@ min_B_QB: minimum B*QB.
 <member name="M:EwECore.cEcoSpace.RelMove(System.Int32,System.Int32,System.Int32)">
  <summary>
  Returns the relative movement from bad habitat multiplier based on preferred habitat and percentage of habitat type in the cell.
- <see cref="F:EwECore.cEcospaceDataStructures.PrefHab">Preferred habitat</see> 
+ <see cref="F:EwECore.cEcospaceDataStructures.PrefHab">Preferred habitat</see>
  <see cref="F:EwECore.cEcospaceDataStructures.PHabType">Percentage of habitat type in a cell</see>
  </summary>
  <param name="ip">Group index</param>
@@ -26660,8 +26660,8 @@ min_B_QB: minimum B*QB.
  Otherwise returns Relative movement from bad habitat from the interface.
  </returns>
  <remarks>
- This is only used for the migration movement <see cref="M:EwECore.cEcoSpace.VaryMigMovementParameters(System.Int32)"> Migration movement</see>. 
- Movement/difussion rates across cells are set in <see cref="M:EwECore.cEcoSpace.SetMovementParameters">SetMovementParameters</see> 
+ This is only used for the migration movement <see cref="M:EwECore.cEcoSpace.VaryMigMovementParameters(System.Int32)"> Migration movement</see>.
+ Movement/difussion rates across cells are set in <see cref="M:EwECore.cEcoSpace.SetMovementParameters">SetMovementParameters</see>
  based on habitat capacity <see cref="F:EwECore.cEcospaceDataStructures.HabCap">HabCap</see>.
  </remarks>
 </member>
@@ -26681,7 +26681,7 @@ min_B_QB: minimum B*QB.
  in proportion to relative profitability (catch rate x price sum) for that cell for the gear
  </summary>
  <remarks>
- The load sharing works by spinning in a loop requesting the next available fleet to process. 
+ The load sharing works by spinning in a loop requesting the next available fleet to process.
  Once all the fleets have been processed the thread will exit.
  </remarks>
 </member>
@@ -26700,8 +26700,8 @@ min_B_QB: minimum B*QB.
  <param name="iMonth"></param>
  <param name="iCumMonth"></param>
  <remarks>
- In this version the effort distribution threads will request the next available fleet for effort distribution. 
- Once all the fleets have been completed all the threads will exit.  
+ In this version the effort distribution threads will request the next available fleet for effort distribution.
+ Once all the fleets have been completed all the threads will exit.
  </remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.AdjustTotalEffort">
@@ -26729,7 +26729,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.getMigMoveRate(System.Single[0:,0:,0:],System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
  <summary>
- Calculate the directional flow rate (Bcw,c,d,e) dependant on migratory movement. 
+ Calculate the directional flow rate (Bcw,c,d,e) dependant on migratory movement.
  Base dispersal if inside a migratory area, rapid dispersal if outside migratory area.
  </summary>
  <param name="BaseFlow">Directional flow rate for a cell. Bcw, c, d or e arrays</param>
@@ -26767,14 +26767,14 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.SpaceSplitUpdate">
  <summary>
-  updates numbers, weight, and biomass for multiple stanza species using information 
+  updates numbers, weight, and biomass for multiple stanza species using information
   on average performance (eatenby, loss) over ecospace grid cells used by the species
  </summary>
  <remarks></remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.InitIBM">
  <summary>
- Wraps the initialization of Ecospace IBM 
+ Wraps the initialization of Ecospace IBM
  </summary>
  <remarks>Initialize IMB packet numbers, weights, and positions</remarks>
 </member>
@@ -26791,7 +26791,7 @@ min_B_QB: minimum B*QB.
  Finds nearest suitable cell for IBM packets entering a stanza in a cell not suitable for that stanza
  </summary>
  <remarks>
- 
+
  </remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.setHabCapFromHabitat">
@@ -26802,7 +26802,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.SetHabCap">
  <summary>
- Set capacity maps from all input sources 
+ Set capacity maps from all input sources
  Habitats, habitat preference, habitat proportion in cell, Input Capacity Maps and enviromental response functions.
  </summary>
  <remarks>
@@ -26821,9 +26821,9 @@ min_B_QB: minimum B*QB.
 <member name="M:EwECore.cEcoSpace.AdjustLowHabCapsThreaded(System.Object)">
  <summary>
  Multithreaded version
- Adjust habcap’s so as to cause oriented movement toward nearest good cells. It should be much, much faster than 
- old habgrad, uses dynamic programming to find minimum distances from bad cells to good ones and then exponential 
- decrease in habcap with those distances; I have used the same algorithm to find things like minimum distances to 
+ Adjust habcap’s so as to cause oriented movement toward nearest good cells. It should be much, much faster than
+ old habgrad, uses dynamic programming to find minimum distances from bad cells to good ones and then exponential
+ decrease in habcap with those distances; I have used the same algorithm to find things like minimum distances to
  fishing ports, nice because it even works for moving creatures around island barriers and such.
  </summary>
 </member>
@@ -26859,7 +26859,7 @@ min_B_QB: minimum B*QB.
  </summary>
  <returns>True if enviromental response functions were used to set habitat capacity. False otherwise.</returns>
  <remarks>
- Enviromental response functions are multiplied onto the existing capacity. 
+ Enviromental response functions are multiplied onto the existing capacity.
  This allows the response function to reduce the capacity.
  </remarks>
 </member>
@@ -27888,10 +27888,10 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="F:EwECore.cSpaceSolver.WaitHandle">
  <summary>
- Wait handle 
+ Wait handle
  </summary>
  <remarks>
- When the Solve() thread is running (SignalState in a non-signaled state SignalState.Reset()) 
+ When the Solve() thread is running (SignalState in a non-signaled state SignalState.Reset())
  calls to SignalState.WaitOne() will block until Solve() has completed (SignalState in a signaled state SignalState.Set())
  </remarks>
 </member>
@@ -27959,14 +27959,14 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cSpaceSolver.Solve(System.Object)">
  <summary>
- This is the method that the ThreadPool calls. 
+ This is the method that the ThreadPool calls.
  It must have the object argument to match the Delegate signature required by ThreadPool.QueueUserWorkItem()
  </summary>
  <remarks></remarks>
 </member>
 <member name="M:EwECore.cSpaceSolver.SetRelaSwitch(System.Single[])">
  <summary>
- Sets RelaSwitch() 
+ Sets RelaSwitch()
  </summary>
  <param name="B">Biomass at this time step for this spatial cell</param>
  <remarks>Sets RelaSwitch() using local B() and  Ecosim.A(), Ecosim.SwitchPower(), Ecosim.BaseTimeSwitch()  </remarks>
@@ -27995,7 +27995,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cSpaceSolver.accumCatchData(System.Int32,System.Int32,System.Single[],System.Single[],System.Int32,System.Int32)">
  <summary>
- Accumulate the fisheries data (catch) for a single group for this map cell. 
+ Accumulate the fisheries data (catch) for a single group for this map cell.
  This is called before DerivtRed(), in the time step, so it is the condition at the start of the time step.
  </summary>
  <param name="Biomass">Biomass for all the groups at this time step</param>

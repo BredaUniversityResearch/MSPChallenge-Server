@@ -177,6 +177,9 @@ class GameSave extends Base
     public function createZip(GameSession $gameSession): bool
     {
         $urlBase = ServerManager::getInstance()->getAbsoluteUrlBase();
+        if (getenv('DOCKER') !== false) {
+            $urlBase = 'http://caddy:80'.ServerManager::getInstance()->getAbsolutePathBase();
+        }
         $server_call = self::callServer(
             'GameSession/SaveSession',
             [
