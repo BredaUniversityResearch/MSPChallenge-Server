@@ -16,10 +16,7 @@ class AddUserIdToTokens
     public function __invoke(JWTCreatedEvent $event): void
     {
         $payload = $event->getData();
-        $user = $event->getUser();
-        if ($user instanceof User) {
-            $payload['uid'] = $event->getUser()->getUserIdentifier();
-        }
+        $payload['uid'] = $event->getUser()->getUserIdentifier();
         $event->setData($payload);
     }
 }

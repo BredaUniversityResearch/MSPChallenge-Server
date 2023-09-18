@@ -11,7 +11,7 @@ class Simulations extends Base implements JWTUserInterface
 {
     private const ALLOWED = array(
         "GetConfiguredSimulationTypes",
-    );
+        ["GetWatchdogTokenForServer", Security::ACCESS_LEVEL_FLAG_NONE]);
 
     public function __construct(string $method = '')
     {
@@ -54,14 +54,19 @@ class Simulations extends Base implements JWTUserInterface
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetTokensForWatchdog(): array
+    public function GetWatchdogTokenForServer(): array
     {
-        /*$token = null;
+        $token = null;
         $data = $this->getDatabase()->query("SELECT game_session_watchdog_token FROM game_session LIMIT 0,1");
         if (count($data) > 0) {
             $token = $data[0]["game_session_watchdog_token"];
         }
-        return array("watchdog_token" => $token);*/
+        return array("watchdog_token" => $token);
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetTokensForWatchdog(): array
+    {
         $user = new User();
         $user->setUserId(999999);
         $user->setUsername('Watchdog_'.uniqid());

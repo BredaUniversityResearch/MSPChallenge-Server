@@ -21,7 +21,9 @@ security:
                 check_path: session_api_user_controller
         main:
             pattern: ^/\d+/api/\w+/\w+
-            security: false
+            stateless: true
+            jwt: ~
+            provider: jwt
 
     access_control:
         - { path: ^/\d+/api/(User/RequestSession|GameSession/CreateGameSession|GameSession/CreateGameSessionAndSignal)$, roles: PUBLIC_ACCESS }

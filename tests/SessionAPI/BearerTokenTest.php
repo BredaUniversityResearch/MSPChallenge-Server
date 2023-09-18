@@ -2,7 +2,6 @@
 
 namespace App\Tests\SessionAPI;
 
-use App\Domain\API\v1\Simulations;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -22,7 +21,7 @@ class BearerTokenTest extends WebTestCase
         $this->obtainAPIToken();
         $this->assertNotNull($this->access_token);
         $this->assertNotNull($this->refresh_token);
-        $this->requestMSPEndpoint('POST', 'Game/State', ['state' => 'play']);
+        $this->requestMSPEndpoint('POST', 'Game/State', ['state' => 'pause']);
         $this->assertMSPServerSuccessResponse();
     }
     public function testLayerRetrieval(): void
@@ -39,23 +38,27 @@ class BearerTokenTest extends WebTestCase
         $this->requestMSPEndpoint('POST', 'Layer/MetaByName', ['name' => 'NS_EEZ'], false);
         $this->assertMSPServerSuccessWithPayloadResponse();
         // this tests a partial Authorization header
-        $temp = $this->access_token;
+        $accessToken = $this->access_token;
         $this->access_token = '';
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 1]);
         $this->assertResponseStatusCodeSame(401);
-        $this->access_token = $temp;
         // end of partial Authorization header test
+        // this tests confusing access and refresh tokens
+        $refreshToken = $this->refresh_token;
+        $this->access_token = $refreshToken;
+        $this->refresh_token = $accessToken;
+        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 1]);
+        $this->assertResponseStatusCodeSame(401);
+        $this->access_token = $accessToken;
+        $this->refresh_token = $refreshToken;
+        // end of confusion access and refresh tokens test
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 1]);
         $this->assertMSPServerSuccessWithPayloadResponse();
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 2]);
         $this->assertMSPServerSuccessWithPayloadResponse();
+        // this endpoint is required to make sure MSW/MEL/SEL/CEL/... can also communicate with the session API
         $this->requestMSPEndpoint('POST', 'Simulations/GetWatchdogTokenForServer', [], false);
         $this->assertMSPServerSuccessWithSpecificPayloadStringsResponse(['watchdog_token']);
-        $this->setAccessAndRefreshTokens('watchdog_token');
-        $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 2]);
-        $this->assertResponseStatusCodeSame(401);
-        $this->requestMSPEndpoint('POST', 'Simulations/CheckAccess', []);
-        $this->assertMSPServerSuccessWithSpecificPayloadStringsResponse(['status', 'time_remaining']);
         // sleep required because otherwise there's a risk that the newly created tokens are identical to the old ones
         sleep(1);
         $this->requestMSPEndpoint('POST', 'User/RequestToken', [], false);

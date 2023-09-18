@@ -13,15 +13,17 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class AttachRefreshTokenOnSuccessListener
 {
-
-    private Request $request;
+    private ?Request $request;
 
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly ConnectionManager $connectionManager,
         private readonly JWTTokenManagerInterface $JWTManager
     ) {
-        $this->request = SymfonyToLegacyHelper::getInstance()->getRequest();
+        $this->request = $this->requestStack->getCurrentRequest();
+        if (is_null($this->request)) {
+            $this->request = SymfonyToLegacyHelper::getInstance()->getRequest();
+        }
     }
 
     /**
@@ -31,10 +33,6 @@ class AttachRefreshTokenOnSuccessListener
     {
         $data = $event->getData();
         $user = $event->getUser();
-        if (!$user instanceof User) {
-            return;
-        }
-        $request = $this->requestStack->getCurrentRequest();
         $gameSessionId = $this->request->get('sessionId');
         // temporary fallback while we continue migrating legacy code to Symfony...
         if (is_null($gameSessionId)) {

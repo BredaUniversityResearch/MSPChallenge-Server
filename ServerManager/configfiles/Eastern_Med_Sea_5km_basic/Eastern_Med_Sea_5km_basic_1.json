@@ -3155,7 +3155,7 @@
     },
     "SEL": null,
     "MEL": {
-      "modelfile": "EMS_MG_test_new_maps_5km.eiixml",
+      "modelfile": "MELdata/EMS_MG_test_new_maps_5km.eiixml",
       "mode": null,
       "rows": 225,
       "columns": 260,

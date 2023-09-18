@@ -105,11 +105,11 @@ class UserController extends AbstractController
             if (is_null($currentRefreshToken)) {
                 throw new \Exception('Cannot continue without a refresh token');
             }
-            $connection = $connectionManager->getCachedGameSessionDbConnection($sessionId);
             $validator = new BearerTokenValidator($currentRefreshToken);
             if (!$validator->validate()) {
                 throw new \Exception('Refresh token invalid');
             }
+            $connection = $connectionManager->getCachedGameSessionDbConnection($sessionId);
             $query = $connection->createQueryBuilder();
             $query->select('art.*')
                 ->from('api_refresh_token', 'art')
