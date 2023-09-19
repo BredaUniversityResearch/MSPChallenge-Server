@@ -75,7 +75,7 @@ class VersionsProvider implements ProviderInterface
     public function checkCompatibleClient(?string $clientVersion): bool
     {
         if (is_null($clientVersion)) {
-            throw new InvalidVersionString('Client must send MSP-Client-Version');
+            throw new InvalidVersionString('Client must send Msp-Client-Version');
         }
         $clientVersion = Version::fromString($clientVersion);
         $serverVersion = Version::fromString($this->getVersion());
