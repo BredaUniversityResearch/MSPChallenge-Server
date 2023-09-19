@@ -53,11 +53,11 @@ class GameListRepository extends EntityRepository
                 'g.gameRunningTilTime as game_running_til_time', 'g.sessionState as session_state',
                 'g.gameState as game_state', 'g.playersActive', 'g.playersPastHour', 'g.demoSession'
             ])
+            ->innerJoin('g.gameServer', 'gse')
+            ->innerJoin('g.gameWatchdogServer', 'gws')
             ->leftJoin('g.gameConfigVersion', 'gcv')
             ->leftJoin('gcv.gameConfigFile', 'gcf')
-            ->leftJoin('g.gameServer', 'gse')
             ->leftJoin('g.gameGeoServer', 'ggs')
-            ->leftJoin('g.gameWatchdogServer', 'gws')
             ->leftJoin('g.gameSave', 'gsa');
 
         if ($value == 'archived') {

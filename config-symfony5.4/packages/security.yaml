@@ -11,9 +11,6 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        none:
-            pattern: ^/\d+/api/(User/RequestToken|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName)
-            security: false
         login:
             pattern: ^/\d+/api/User/RequestSession$
             stateless: true
@@ -26,5 +23,5 @@ security:
             provider: jwt
 
     access_control:
-        - { path: ^/\d+/api/(User/RequestSession|GameSession/CreateGameSession|GameSession/CreateGameSessionAndSignal)$, roles: PUBLIC_ACCESS }
+        - { path: ^/\d+/api/(User/RequestToken|User/RequestSession|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
         - { path: ^/\d+/api/\w+/\w+$, roles: IS_AUTHENTICATED_FULLY }
