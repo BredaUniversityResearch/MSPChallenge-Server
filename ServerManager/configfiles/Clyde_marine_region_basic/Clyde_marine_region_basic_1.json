@@ -5416,7 +5416,7 @@
       ]
     },
     "MEL": {
-      "modelfile": "Clyde model for MSP.eiixml",
+      "modelfile": "MELdata/Clyde model for MSP.eiixml",
       "mode": null,
       "rows": 93,
       "columns": 67,

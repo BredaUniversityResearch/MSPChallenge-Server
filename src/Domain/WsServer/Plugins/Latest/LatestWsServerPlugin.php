@@ -2,7 +2,6 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\Security;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientDisconnectedException;
@@ -11,6 +10,7 @@ use App\Domain\WsServer\EPayloadDifferenceType;
 use App\Domain\WsServer\Plugins\Plugin;
 use App\Domain\WsServer\Plugins\PluginHelper;
 use App\Domain\WsServer\WsServerEventDispatcherInterface;
+use App\Security\BearerTokenValidator;
 use Exception;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
@@ -167,17 +167,14 @@ class LatestWsServerPlugin extends Plugin
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
-                $accessTimeRemaining = 0; // not used
-                if (false === $this->getClientConnectionResourceManager()->getSecurity($connResourceId)->validateAccess(
-                    Security::ACCESS_LEVEL_FLAG_FULL,
-                    $accessTimeRemaining,
+                if (!(new BearerTokenValidator())->setTokenFromHeader(
                     $this->getClientConnectionResourceManager()->getClientHeaders($connResourceId)[
-                    ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
+                        ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN
                     ]
-                )) {
-                    // Client's token has been expired, let the client re-connected with a new token
+                )->validate()
+                ) {
                     $this->addOutput(
-                        'Client\'s token has been expired, let the client re-connected with a new token'
+                        'Client\'s token has  expired, let the client re-connect with a new token'
                     );
                     $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)->close();
                     continue;

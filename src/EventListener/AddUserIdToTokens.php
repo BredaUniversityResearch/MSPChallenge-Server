@@ -16,7 +16,6 @@ class AddUserIdToTokens
     {
         $payload = $event->getData();
         $payload['uid'] = $event->getUser()->getUserIdentifier();
-
         $event->setData($payload);
     }
 }

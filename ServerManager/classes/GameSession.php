@@ -235,6 +235,10 @@ class GameSession extends Base
 
     public function recreate(): bool
     {
+        if ($this->game_state != 'end') {
+            $this->game_state = 'end';
+            $this->changeGameState();
+        }
         if ($this->save_id > 0) {
             return $this->reload();
         }
@@ -686,7 +690,7 @@ class GameSession extends Base
                 );
         }
         $server_call = self::callServer(
-            'game/State',
+            'Game/State',
             ['state' => $this->game_state],
             $this->id,
             $this->api_access_token

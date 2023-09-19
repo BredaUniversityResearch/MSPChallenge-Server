@@ -4,9 +4,11 @@ namespace App\Domain\Services;
 
 use App\Domain\API\APIHelper;
 use App\Kernel;
+use App\VersionsProvider;
 use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -27,6 +29,10 @@ class SymfonyToLegacyHelper
     private ?Closure $fnControllerForwarder = null;
     private EntityManagerInterface $em;
 
+    private VersionsProvider $provider;
+
+    private AuthenticationSuccessHandler $authenticationSuccessHandler;
+
     public function __construct(
         string $projectDir,
         UrlGeneratorInterface $urlGenerator,
@@ -35,9 +41,11 @@ class SymfonyToLegacyHelper
         Kernel $kernel,
         TranslatorInterface $translator,
         EntityManagerInterface $em,
+        VersionsProvider $provider,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
-        ConnectionManager $connectionManager
+        ConnectionManager $connectionManager,
+        AuthenticationSuccessHandler $authenticationSuccessHandler
     ) {
         $this->projectDir = $projectDir;
         $this->urlGenerator = $urlGenerator;
@@ -46,7 +54,17 @@ class SymfonyToLegacyHelper
         $this->kernel = $kernel;
         $this->translator = $translator;
         $this->em = $em;
+        $this->provider = $provider;
+        $this->authenticationSuccessHandler = $authenticationSuccessHandler;
         self::$instance = $this;
+    }
+
+    /**
+     * @return AuthenticationSuccessHandler
+     */
+    public function getAuthenticationSuccessHandler(): AuthenticationSuccessHandler
+    {
+        return $this->authenticationSuccessHandler;
     }
 
     public function getProjectDir(): string
@@ -67,6 +85,11 @@ class SymfonyToLegacyHelper
     public function getEntityManager(): EntityManagerInterface
     {
         return $this->em;
+    }
+
+    public function getProvider(): VersionsProvider
+    {
+        return $this->provider;
     }
 
     /**
