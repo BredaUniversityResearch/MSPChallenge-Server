@@ -2,7 +2,6 @@
 
 namespace App\EventListener;
 
-use App\Domain\API\v1\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 
 class AddUserIdToTokens
