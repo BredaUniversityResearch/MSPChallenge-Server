@@ -32,7 +32,7 @@ class GameListController extends AbstractController
         string $sessionState = 'public'
     ): Response {
         try {
-            $provider->checkCompatibleClient($request->headers->get('MSP-Client-Version'));
+            $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
         } catch (IncompatibleClientException $e) {
             return new JsonResponse(
                 BaseController::wrapPayloadForResponse(
