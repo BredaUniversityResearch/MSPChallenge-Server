@@ -4,11 +4,11 @@ namespace App\Domain\WsServer;
 use App\Domain\API\v1\Security;
 use App\Domain\Common\GetConstantsTrait;
 use App\Domain\Event\NameAwareEvent;
-use App\Domain\Helper\Config;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\DoctrineMigrationsDependencyFactoryHelper;
 use App\Domain\WsServer\Plugins\PluginInterface;
+use App\Security\BearerTokenValidator;
 use Drift\DBAL\Connection;
 use Exception;
 use GuzzleHttp\Psr7\Request;
@@ -154,19 +154,9 @@ class WsServer extends EventDispatcher implements
             $conn->close();
             return;
         }
-
         $headers[self::HEADER_KEY_GAME_SESSION_ID] = (int)$headers[self::HEADER_KEY_GAME_SESSION_ID];
-
-        // since we need client headers to create a Base instances, set it before calling getSecurity(...)
         $this->clientHeaders[$conn->resourceId] = $headers;
-
-        $accessTimeRemaining = 0;
-        if (false === $this->getSecurity($conn->resourceId)->validateAccess(
-            Security::ACCESS_LEVEL_FLAG_FULL,
-            $accessTimeRemaining,
-            $headers[self::HEADER_KEY_MSP_API_TOKEN]
-        )) {
-            // not a valid token, connection not allowed
+        if (!(new BearerTokenValidator())->setTokenFromHeader($headers[self::HEADER_KEY_MSP_API_TOKEN])->validate()) {
             wdo('not a valid token, connection not allowed');
             $conn->close();
             return;
@@ -348,20 +338,6 @@ class WsServer extends EventDispatcher implements
     public function getServerManagerDbConnection(): Connection
     {
         return ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection($this->loop);
-    }
-
-    public function getSecurity(int $connResourceId): Security
-    {
-        $gameSessionId = $this->clientHeaders[$connResourceId][self::HEADER_KEY_GAME_SESSION_ID];
-        if (!array_key_exists($connResourceId, $this->securityInstances)) {
-            $security = new Security();
-            $security->setAsync(true);
-            $security->setGameSessionId($gameSessionId);
-            $security->setAsyncDatabase($this->getGameSessionDbConnection($gameSessionId));
-            $security->setToken($this->clientHeaders[$connResourceId][self::HEADER_KEY_MSP_API_TOKEN]);
-            $this->securityInstances[$connResourceId] = $security;
-        }
-        return $this->securityInstances[$connResourceId];
     }
 
     public function dispatch(object $event, ?string $eventName = null): object

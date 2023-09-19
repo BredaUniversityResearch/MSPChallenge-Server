@@ -294,13 +294,12 @@ class Security extends Base
         if (function_exists('apache_request_headers')) {
             $requestHeaders = apache_request_headers();
         }
-        $token = SymfonyToLegacyHelper::getInstance()
-            ->getRequest()
-            ->headers->get(ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN);
         if (isset($requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
             return $requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN];
-        } elseif (!is_null($token)) {
-            return $token;
+        }
+        $request = SymfonyToLegacyHelper::getInstance()->getRequest();
+        if (!is_null($request)) {
+            return $request->headers->get(ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN);
         }
         return null;
     }

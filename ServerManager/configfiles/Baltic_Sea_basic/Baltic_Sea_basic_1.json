@@ -19771,7 +19771,7 @@
       ]
     },
     "MEL": {
-      "modelfile": "Baltic sea model for MSP.eiixml",
+      "modelfile": "MELdata/Baltic sea model for MSP.eiixml",
       "mode": null,
       "rows": 91,
       "columns": 75,

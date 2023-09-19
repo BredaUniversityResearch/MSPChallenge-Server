@@ -45,9 +45,18 @@ services:
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created }
 
+    App\EventListener\AccessTokenAuthenticatedListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_authenticated }
+
     App\Domain\WsServer\Plugins\PluginHelper:
         arguments:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
+
+    App\VersionsProvider:
+        public: true
+        tags:
+            - { name: shivas_versioning.provider, alias: versions_provider, priority: 200 }
 
     ServerManager\ServerManager:
 

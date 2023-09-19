@@ -3155,7 +3155,7 @@
     },
     "SEL": null,
     "MEL": {
-      "modelfile": "EasternMed Sea model 10km.eiixml",
+      "modelfile": "MELdata/EasternMed Sea model 10km.eiixml",
       "mode": null,
       "rows": 113,
       "columns": 131,

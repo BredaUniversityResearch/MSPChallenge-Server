@@ -21800,7 +21800,7 @@
       ]
     },
     "MEL": {
-      "modelfile": "North Sea model for MSP.eiixml",
+      "modelfile": "MELdata/North Sea model for MSP.eiixml",
       "mode": null,
       "rows": 114,
       "columns": 85,

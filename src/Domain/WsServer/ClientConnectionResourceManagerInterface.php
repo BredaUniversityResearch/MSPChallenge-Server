@@ -17,5 +17,4 @@ interface ClientConnectionResourceManagerInterface
     public function getClientHeaders(int $connResourceId): ?array;
     public function getClientInfo(int $connResourceId): ?array;
     public function setClientInfo(int $connResourceId, string $clientInfoKey, $clientInfoValue): void;
-    public function getSecurity(int $connResourceId): Security;
 }
