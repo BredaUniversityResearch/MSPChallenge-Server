@@ -571,8 +571,8 @@ class Store extends Base
             return (int)$this->getDatabase()->query(
                 "
                 INSERT INTO geometry (
-                    geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_mspid,
-                    geometry_subtractive
+                    geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type,
+                     geometry_mspid, geometry_subtractive
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 array($layerId, $geometry, $data, $countryId, $type, $mspId, $subtractive),
                 true
