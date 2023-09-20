@@ -51,7 +51,8 @@ class GameListRepository extends EntityRepository
                 'ggs.address as geoserver_address', 'g.gameStartYear as game_start_year',
                 'g.gameEndMonth as game_end_month', 'g.gameCurrentMonth as game_current_month',
                 'g.gameRunningTilTime as game_running_til_time', 'g.sessionState as session_state',
-                'g.gameState as game_state', 'g.playersActive', 'g.playersPastHour', 'g.demoSession'
+                'g.gameState as game_state', 'g.playersActive as players_active',
+                'g.playersPastHour as players_past_hour'
             ])
             ->innerJoin('g.gameServer', 'gse')
             ->innerJoin('g.gameWatchdogServer', 'gws')
