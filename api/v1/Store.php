@@ -561,7 +561,7 @@ class Store extends Base
             //   to indicate two different names given to that area... very annoying
             $dataToHash = $layerName.$geometry;
             $dataArray = json_decode($data, true);
-            $dataToHash .= $dataArray['name'] ?? '';
+            $dataToHash .= $dataArray['name'] ?? $dataArray['sitename'] ?? $dataArray['fid'] ?? '';
             $mspId = hash($algo, $dataToHash);
         }
 
