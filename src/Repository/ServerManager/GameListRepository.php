@@ -99,7 +99,7 @@ class GameListRepository extends EntityRepository
             $session['edition_colour'] = $configContents['edition_colour'];
             $session['edition_letter'] = $configContents['edition_letter'];
             // complete the server and websocket server addresses
-            $session['game_server_address'] = $scheme.$host.':'.$port;
+            $session['game_server_address'] = $scheme.$host.':'.$port.'/';
             $session['game_ws_server_address'] = WsServer::getWsServerURLBySessionId($session['id'], $host);
             $gameList = new GameList();
             $session['current_month_formatted'] = $gameList
