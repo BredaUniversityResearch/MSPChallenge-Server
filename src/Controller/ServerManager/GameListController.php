@@ -37,7 +37,7 @@ class GameListController extends AbstractController
             return new JsonResponse(
                 BaseController::wrapPayloadForResponse(
                     [
-                        'clients_url' => 'https://community.mspchallenge.info/wiki/Download',
+                        'clients_url' => $this->getParameter('app.clients_url'),
                         'server_version' => $provider->getVersion()
                     ],
                     $e->getMessage()
@@ -53,6 +53,7 @@ class GameListController extends AbstractController
             $this->json(BaseController::wrapPayloadForResponse([
                 'sessionslist' => $gameList,
                 'server_description' => $serverDesc->getValue(),
+                'clients_url' => $this->getParameter('app.clients_url'),
                 'server_version' => $provider->getVersion(),
                 'server_components_versions' => $provider->getComponentsVersions()
             ])) :
