@@ -19,37 +19,6 @@ class UserController extends AbstractController
 {
 
     #[Route(
-        '/{sessionId}/api/User/{method}',
-        name: 'session_api_user_controller',
-        requirements: ['sessionId' => '\d+', 'method' => '\w+']
-    )]
-    public function __invoke(
-        int $sessionId,
-        string $method,
-        Request $request,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper,
-        ConnectionManager $connectionManager,
-        TokenStorageInterface $tokenStorageInterface,
-        JWTTokenManagerInterface $jwtManager,
-        AuthenticationSuccessHandler $authenticationSuccessHandler
-    ): Response {
-        if (strtolower($method) == 'requestsession') {
-            return $this->requestSession($sessionId, $request, $symfonyToLegacyHelper, $authenticationSuccessHandler);
-        }
-        if (strtolower($method) == 'requesttoken') {
-            return $this->requestToken(
-                $sessionId,
-                $request,
-                $connectionManager,
-                $tokenStorageInterface,
-                $jwtManager,
-                $authenticationSuccessHandler
-            );
-        }
-        return new Response();
-    }
-
-    #[Route(
         '/{sessionId}/api/User/RequestSession/',
         name: 'session_api_user_request_session',
         requirements: ['sessionId' => '\d+'],
