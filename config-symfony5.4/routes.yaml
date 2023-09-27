@@ -14,9 +14,13 @@ apidoc:
   requirements:
     anything: '.*'
 
-session_api_user_controller:
-  path: '/{sessionId}/api/User/{method}'
-  controller: App\Controller\SessionAPI\UserController
+session_api_user_controller_requestsession:
+  path: '/{sessionId}/api/User/RequestSession'
+  controller: App\Controller\SessionAPI\UserController::requestSession
+
+session_api_user_controller_requesttoken:
+  path: '/{sessionId}/api/User/RequestToken'
+  controller: App\Controller\SessionAPI\UserController::requestToken
 
 # per session support
 # RewriteRule ^([0-9]+)/api/(.*)$	index.php?session=$1&query=$2 [NC,L]

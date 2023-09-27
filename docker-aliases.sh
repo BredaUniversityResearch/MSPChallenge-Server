@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# generates a random 32 char long string
+CADDY_MERCURE_JWT_SECRET=$(echo $RANDOM | md5sum | head -c 32)
+
 if [[ "${DOCKER}" == "1" ]]; then
   echo "Docker detected, skipping aliases"
   exit 0

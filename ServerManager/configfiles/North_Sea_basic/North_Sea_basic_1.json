@@ -22649,7 +22649,7 @@
           "unit": "km2",
           "valueDefinitions": [
             {
-              "valueName": "No Protection",
+              "valueName": "Unspecified Directive",
               "valueColor": "#FF7272FF",
               "unit": "km2",
               "valueDependentCountry": -1
@@ -36097,7 +36097,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No Protection",
+            "displayName": "Unspecified Directive",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -36425,7 +36425,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No protection",
+            "displayName": "No Protection",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -36453,7 +36453,7 @@
             "media": "wiki://Marine_Protected_Areas"
           },
           "1": {
-            "displayName": "No bottom trawl fleets",
+            "displayName": "No Bottom Trawl Fleets",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -36481,7 +36481,7 @@
             "media": "wiki://Marine_Protected_Areas"
           },
           "2": {
-            "displayName": "No industrial and pelagic trawl fleets",
+            "displayName": "No Industrial and Pelagic Trawl Fleets",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -36509,7 +36509,7 @@
             "media": "wiki://Marine_Protected_Areas"
           },
           "3": {
-            "displayName": "No drift and fixed nets fleets",
+            "displayName": "No Drift and Fixed Nets Fleets",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
