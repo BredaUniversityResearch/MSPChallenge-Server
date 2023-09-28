@@ -395,16 +395,18 @@ class Store extends Base
         for ($j = 0; $j < sizeof($multi); $j++) {
             if (sizeof($multi) > 1 && $j != 0) {
                 //this is a subtractive polygon
-                $this->InsertGeometry(
-                    $layerId,
-                    json_encode($multi[$j]),
-                    $jsonData,
-                    $countryId,
-                    $type,
-                    null,
-                    $lastId,
-                    $filename
-                );
+                if ($lastId > 0) {
+                    $this->InsertGeometry(
+                        $layerId,
+                        json_encode($multi[$j]),
+                        $jsonData,
+                        $countryId,
+                        $type,
+                        null,
+                        $lastId,
+                        $filename
+                    );
+                }
             } else {
                 $lastId = $this->InsertGeometry(
                     $layerId,
@@ -561,19 +563,31 @@ class Store extends Base
             //   to indicate two different names given to that area... very annoying
             $dataToHash = $layerName.$geometry;
             $dataArray = json_decode($data, true);
-            $dataToHash .= $dataArray['name'] ?? '';
+            $dataToHash .= $dataArray['name'] ?? $dataArray['sitename'] ?? '';
             $mspId = hash($algo, $dataToHash);
         }
 
-        return (int)$this->getDatabase()->query(
-            "
-            INSERT INTO geometry (
-                geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type, geometry_mspid,
-                geometry_subtractive
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            array($layerId, $geometry, $data, $countryId, $type, $mspId, $subtractive),
-            true
-        );
+        try {
+            return (int)$this->getDatabase()->query(
+                "INSERT INTO geometry (
+                    geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type,
+                     geometry_mspid, geometry_subtractive
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                array($layerId, $geometry, $data, $countryId, $type, $mspId, $subtractive),
+                true
+            );
+        } catch (Exception $e) {
+            if ($e->getCode() == 23000) {
+                // geometry table's constraint on unique combination of coordinates and feature data was violated
+                Log::LogDebug(
+                    ' -> Note: geometry not added, as its coordinates and feature dataset were already in the database.'
+                    ." The geometry concerned was in layer {$layerName} and the feature dataset starts with "
+                    .substr($data, 0, 30)
+                );
+                return 0;
+            }
+            throw $e;
+        }
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
