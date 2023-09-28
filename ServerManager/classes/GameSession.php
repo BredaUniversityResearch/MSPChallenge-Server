@@ -460,7 +460,7 @@ class GameSession extends Base
     public function setUserAccess(): bool
     {
         $server_call = self::callServer(
-            'gamesession/SetUserAccess',
+            'GameSession/SetUserAccess',
             [
                 'password_admin' => base64_encode($this->password_admin),
                 'password_player' => base64_encode($this->password_player),
@@ -619,7 +619,7 @@ class GameSession extends Base
             throw new ServerManagerAPIException('The session is simulating, so cannot archive it at this time.');
         }
         $server_call = self::callServer(
-            'gamesession/ArchiveGameSession',
+            'GameSession/ArchiveGameSession',
             ['response_url' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php'],
             $this->id,
             $this->api_access_token

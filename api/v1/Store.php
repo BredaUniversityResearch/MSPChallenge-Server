@@ -569,8 +569,7 @@ class Store extends Base
 
         try {
             return (int)$this->getDatabase()->query(
-                "
-                INSERT INTO geometry (
+                "INSERT INTO geometry (
                     geometry_layer_id, geometry_geometry, geometry_data, geometry_country_id, geometry_type,
                      geometry_mspid, geometry_subtractive
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -580,7 +579,11 @@ class Store extends Base
         } catch (Exception $e) {
             if ($e->getCode() == 23000) {
                 // geometry table's constraint on unique combination of coordinates and feature data was violated
-                // silently continue...
+                Log::LogDebug(
+                    ' -> Note: geometry not added, as its coordinates and feature dataset were already in the database.'
+                    ." The geometry concerned was in layer {$layerName} and the feature dataset starts with "
+                    .substr($data, 0, 30)
+                );
                 return 0;
             }
             throw $e;

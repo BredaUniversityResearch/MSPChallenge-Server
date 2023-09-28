@@ -689,7 +689,7 @@ function unWrapWords(str, tmpl1, tmpl2)
 
 function setServerAuthProviders(sessionId)
 {
-    const url = 'api/user/getProviders';
+    const url = 'api/User/getProviders';
     $.when(CallServerAPI(url, {}, sessionId, '0')).done(function (results) {
         if (results.success && results.payload) {
             $.each(results.payload, function (count, provider) {
@@ -714,7 +714,7 @@ function findUsersAtProvider(div, provider)
     };
     $.when(CallAPI(url, data)).done(function (results) {
         if (results.success) {
-            const url2 = "api/user/checkExists";
+            const url2 = "api/User/checkExists";
             const data2 = {
                 provider: provider,
                 users: userTextInput

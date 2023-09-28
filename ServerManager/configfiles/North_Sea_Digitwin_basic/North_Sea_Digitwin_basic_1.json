@@ -15243,7 +15243,7 @@
             "fishing_id": 17,
             "fishing_country_id": 3,
             "fishing_plan_id": 3,
-            "fishing_type": "Drift and fixed Nets",
+            "fishing_type": "Drift and Fixed Nets",
             "fishing_amount": 0.00149412,
             "fishing_active": 1
           },
@@ -15251,7 +15251,7 @@
             "fishing_id": 18,
             "fishing_country_id": 4,
             "fishing_plan_id": 3,
-            "fishing_type": "Drift and fixed Nets",
+            "fishing_type": "Drift and Fixed Nets",
             "fishing_amount": 0.00149412,
             "fishing_active": 1
           },
@@ -15259,7 +15259,7 @@
             "fishing_id": 19,
             "fishing_country_id": 5,
             "fishing_plan_id": 3,
-            "fishing_type": "Drift and fixed Nets",
+            "fishing_type": "Drift and Fixed Nets",
             "fishing_amount": 7.05882E-05,
             "fishing_active": 1
           },
@@ -15267,7 +15267,7 @@
             "fishing_id": 20,
             "fishing_country_id": 6,
             "fishing_plan_id": 3,
-            "fishing_type": "Drift and fixed Nets",
+            "fishing_type": "Drift and Fixed Nets",
             "fishing_amount": 0.000670588,
             "fishing_active": 1
           },
@@ -15275,7 +15275,7 @@
             "fishing_id": 21,
             "fishing_country_id": 7,
             "fishing_plan_id": 3,
-            "fishing_type": "Drift and fixed Nets",
+            "fishing_type": "Drift and Fixed Nets",
             "fishing_amount": 0.000341176,
             "fishing_active": 1
           },
@@ -15283,7 +15283,7 @@
             "fishing_id": 22,
             "fishing_country_id": 8,
             "fishing_plan_id": 3,
-            "fishing_type": "Drift and fixed Nets",
+            "fishing_type": "Drift and Fixed Nets",
             "fishing_amount": 2.35294E-05,
             "fishing_active": 1
           },
@@ -15291,7 +15291,7 @@
             "fishing_id": 23,
             "fishing_country_id": 9,
             "fishing_plan_id": 3,
-            "fishing_type": "Drift and fixed Nets",
+            "fishing_type": "Drift and Fixed Nets",
             "fishing_amount": 0.00114118,
             "fishing_active": 1
           },
@@ -15299,7 +15299,7 @@
             "fishing_id": 24,
             "fishing_country_id": 10,
             "fishing_plan_id": 3,
-            "fishing_type": "Drift and fixed Nets",
+            "fishing_type": "Drift and Fixed Nets",
             "fishing_amount": 0.0147647,
             "fishing_active": 1
           }
@@ -22653,7 +22653,7 @@
           ]
         },
         {
-          "name": "Protection bottom trawl",
+          "name": "Protection Bottom Trawl",
           "layers": [
             {
               "name": "NS_Oil_Gas_Platforms_DT",
@@ -22718,7 +22718,7 @@
           ]
         },
         {
-          "name": "Protection industrial trawl",
+          "name": "Protection Industrial Trawl",
           "layers": [
             {
               "name": "NS_Oil_Gas_Platforms_DT",
@@ -22768,7 +22768,7 @@
           ]
         },
         {
-          "name": "Protection nets",
+          "name": "Protection Nets",
           "layers": [
             {
               "name": "NS_Pipelines_DT",
@@ -22892,7 +22892,7 @@
           ]
         },
         {
-          "name": "Drift and fixed Nets",
+          "name": "Drift and Fixed Nets",
           "initialFishingDistribution": [
             {
               "country_id": 3,
@@ -22939,7 +22939,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Demersal fish",
+          "name": "Demersal Fish",
           "subcategory": "Biomass"
         },
         {
@@ -22955,7 +22955,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Benthic invertebrates",
+          "name": "Benthic Invertebrates",
           "subcategory": "Biomass"
         },
         {
@@ -22967,15 +22967,15 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Windfarm avoiding seabird",
+          "name": "Windfarm Avoiding Seabird",
           "subcategory": "Biomass"
         },
         {
-          "name": "Windfarm indifferent seabird",
+          "name": "Windfarm Indifferent Seabird",
           "subcategory": "Biomass"
         },
         {
-          "name": "Drift and fixed Nets Catch",
+          "name": "Drift and Fixed Nets Catch",
           "subcategory": "Fishery"
         },
         {
@@ -22983,7 +22983,7 @@
           "subcategory": "Fishery"
         },
         {
-          "name": "Bottom trawl Catch",
+          "name": "Bottom Trawl Catch",
           "subcategory": "Fishery"
         },
         {
@@ -23014,7 +23014,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Demersal fish",
+              "valueName": "Demersal Fish",
               "valueColor": "#CEFF73FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -23038,7 +23038,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Benthic invertebrates",
+              "valueName": "Benthic Invertebrates",
               "valueColor": "#737DFFFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -23056,13 +23056,13 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Windfarm avoiding seabird",
+              "valueName": "Windfarm Avoiding Seabird",
               "valueColor": "#FFC773FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Windfarm indifferent seabird",
+              "valueName": "Windfarm Indifferent Seabird",
               "valueColor": "#CEFF73FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -23094,7 +23094,7 @@
           "unit": "t/km2",
           "valueDefinitions": [
             {
-              "valueName": "Drift and fixed Nets Catch",
+              "valueName": "Drift and Fixed Nets Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -23106,7 +23106,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Bottom trawl Catch",
+              "valueName": "Bottom Trawl Catch",
               "valueColor": "#FF0079FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -23119,7 +23119,7 @@
           "unit": "km2",
           "valueDefinitions": [
             {
-              "valueName": "No Protection",
+              "valueName": "Unspecified Directive",
               "valueColor": "#FF7272FF",
               "unit": "km2",
               "valueDependentCountry": -1
@@ -23137,25 +23137,31 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "No protection against fishing",
+              "valueName": "Birds & Habitats Directive",
+              "valueColor": "#CEFF73FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "No Protection",
               "valueColor": "#73FFBCFF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "No bottom trawl fishing",
+              "valueName": "No Bottom Trawl Fleets",
               "valueColor": "#73D9FFFF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "No industrial and pelagic trawl fishing",
+              "valueName": "No Industrial and Pelagic Trawl Fleets",
               "valueColor": "#FF0079FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "No drift and fixed nets fishing",
+              "valueName": "No Drift and Fixed Nets Fleets",
               "valueColor": "#737DFFFF",
               "unit": "km2",
               "valueDependentCountry": -1
@@ -31810,7 +31816,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No Protection",
+            "displayName": "Unspecified Directive",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -32125,7 +32131,7 @@
         "layer_name": "mel_Noise",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Noise",
+        "layer_short": "Noise (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "pressure",
         "layer_download_from_geoserver": 0,
@@ -32312,7 +32318,7 @@
         "layer_name": "mel_Artificial_Substrate",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Artificial Substrate",
+        "layer_short": "Artificial Substrate (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "pressure",
         "layer_download_from_geoserver": 0,
@@ -32499,7 +32505,7 @@
         "layer_name": "mel_Bottom_Disturbance",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Bottom Disturbance",
+        "layer_short": "Bottom Disturbance (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "pressure",
         "layer_download_from_geoserver": 0,
@@ -32686,7 +32692,7 @@
         "layer_name": "mel_Surface_Disturbance",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Surface Disturbance",
+        "layer_short": "Surface Disturbance (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "pressure",
         "layer_download_from_geoserver": 0,
@@ -32873,7 +32879,7 @@
         "layer_name": "mel_Protection_industrial_trawl",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "No Industrial Trawl Fishing",
+        "layer_short": "Protection Industrial Trawl Fleet (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -33060,7 +33066,7 @@
         "layer_name": "mel_Protection_bottom_trawl",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "No Bottom Trawl Fishing",
+        "layer_short": "Protection Bottom Trawl Fleet (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -33247,7 +33253,7 @@
         "layer_name": "mel_Protection_nets",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "No Nets Fishing",
+        "layer_short": "Protection Nets Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -33434,7 +33440,7 @@
         "layer_name": "mel_Benthic_invertebrates",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Benthic invertebrates",
+        "layer_short": "Benthic Invertebrates (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "macrobenthos",
         "layer_download_from_geoserver": 0,
@@ -33621,7 +33627,7 @@
         "layer_name": "mel_Cod",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cod",
+        "layer_short": "Cod (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -33808,7 +33814,7 @@
         "layer_name": "mel_Demersal_fish",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Demersal fish",
+        "layer_short": "Demersal Fish (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -33995,7 +34001,7 @@
         "layer_name": "mel_Flatfish",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Flatfish",
+        "layer_short": "Flatfish (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -34182,7 +34188,7 @@
         "layer_name": "mel_Mackerel",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Mackerel",
+        "layer_short": "Mackerel (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -34369,7 +34375,7 @@
         "layer_name": "mel_Herring",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Herring",
+        "layer_short": "Herring (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -34556,7 +34562,7 @@
         "layer_name": "mel_Sandeel",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Sandeel",
+        "layer_short": "Sandeel (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -34743,7 +34749,7 @@
         "layer_name": "mel_Windfarm_indifferent_seabird",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Windfarm indifferent seabird",
+        "layer_short": "Windfarm Indifferent Seabirds (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
@@ -34930,7 +34936,7 @@
         "layer_name": "mel_Windfarm_avoiding_seabird",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Windfarm avoiding seabird",
+        "layer_short": "Windfarm Avoiding Seabirds (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
@@ -35117,7 +35123,7 @@
         "layer_name": "mel_Cetacean",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cetacean",
+        "layer_short": "Cetaceans (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
@@ -35304,7 +35310,7 @@
         "layer_name": "mel_Seal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Seal",
+        "layer_short": "Seals (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
@@ -35491,7 +35497,7 @@
         "layer_name": "mel_Bottom_trawl_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Bottom Trawl Catch",
+        "layer_short": "Bottom Trawl Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -35678,7 +35684,7 @@
         "layer_name": "mel_Drift_and_fixed_Nets_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Drift and Fixed Nets Catch",
+        "layer_short": "Drift and Fixed Nets Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -35865,7 +35871,7 @@
         "layer_name": "mel_Industrial_and_Pelagic_Trawl_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Industrial and Pelagic Trawl Catch",
+        "layer_short": "Industrial and Pelagic Trawl Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -36052,7 +36058,7 @@
         "layer_name": "mel_Shannon_Diversity_Indicator",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Shannon Diversity Indicator",
+        "layer_short": "Shannon Diversity Indicator (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "biodiversity_indicator",
         "layer_download_from_geoserver": 0,
@@ -36239,7 +36245,7 @@
         "layer_name": "mel_Large_Fish_Indicator",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Large Fish Indicator",
+        "layer_short": "Large Fish Indicator (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "biodiversity_indicator",
         "layer_download_from_geoserver": 0,
@@ -38858,7 +38864,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No protection against fishing",
+            "displayName": "No Protection",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -38886,7 +38892,7 @@
             "media": "wiki://Fisheries_closure"
           },
           "1": {
-            "displayName": "No bottom trawl fishing",
+            "displayName": "No Bottom Trawl Fleets",
             "approval": "EEZ",
             "value": 1,
             "map_type": null,
@@ -38914,7 +38920,7 @@
             "media": "wiki://Fisheries_closure"
           },
           "2": {
-            "displayName": "No industrial and pelagic trawl fishing",
+            "displayName": "No Industrial and Pelagic Trawl Fleets",
             "approval": "EEZ",
             "value": 2,
             "map_type": null,
@@ -38942,7 +38948,7 @@
             "media": "wiki://Fisheries_closure"
           },
           "3": {
-            "displayName": "No drift and fixed nets fishing",
+            "displayName": "No Drift and Fixed Nets Fleets",
             "approval": "EEZ",
             "value": 3,
             "map_type": null,
