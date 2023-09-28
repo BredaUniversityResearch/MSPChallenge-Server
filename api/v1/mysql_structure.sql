@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS `msp`.`geometry` (
   INDEX `fk_gis_layer1_idx` (`geometry_layer_id` ASC),
   INDEX `geometry_persistent` (`geometry_persistent` ASC),
   INDEX `fk_geometry_country1_idx` (`geometry_country_id` ASC),
+  UNIQUE `unique_index`(`geometry_geometry`, `geometry_data`),
   CONSTRAINT `fk_gis_layer1`
     FOREIGN KEY (`geometry_layer_id`)
     REFERENCES `msp`.`layer` (`layer_id`)
