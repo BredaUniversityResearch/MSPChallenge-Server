@@ -57,6 +57,10 @@ class ServerManager extends Base
         ];
         $versionProvider = SymfonyToLegacyHelper::getInstance()->getProvider();
         $this->serverVersions[] = $versionProvider->getVersion();
+        $this->serverAcceptedClients[$versionProvider->getVersion()] = date(
+            "Y-m-d H:i:s",
+            filemtime(SymfonyToLegacyHelper::getInstance()->getProjectDir().DIRECTORY_SEPARATOR.'version.txt')
+        );
         $this->serverCurrentVersion = end($this->serverVersions);
         $this->serverUpgrades = [ // make sure these functions exist in server API update class and is actually
             // callable - just letters and numbers of course
