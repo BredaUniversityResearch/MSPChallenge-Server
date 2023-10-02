@@ -1,11 +1,10 @@
 {
   "metadata": {
-    "date_modified": "7/6/2023",
-    "data_model_hash": "DBD3C65C3FB0EF29DFFF4D03EADE0B03290C922C5E9A16C3E16047297BEEEE17",
+    "date_modified": "02/10/2023",
+    "data_model_hash": "3033DABBDE188C6398B0BD0A6692939E6D7B891AD42A962B847E5BA6A94230CF",
     "errors": 0,
-    "editor_version": 0.0,
-    "min_supported_client": "",
-    "max_supported_client": ""
+    "editor_version": "1.0.0",
+    "config_version": "1.0.0"
   },
   "datamodel": {
     "restrictions": {

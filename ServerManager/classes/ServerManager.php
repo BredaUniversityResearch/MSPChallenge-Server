@@ -3,6 +3,7 @@
 namespace ServerManager;
 
 use App\Domain\Helper\Config;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\WsServer;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\Setting;
@@ -54,6 +55,8 @@ class ServerManager extends Base
           '4.0-rc2' => '2023-02-02 00:00:00Z',
           '4.0-rc3' => '2023-07-10 00:00:00Z'
         ];
+        $versionProvider = SymfonyToLegacyHelper::getInstance()->getProvider();
+        $this->serverVersions[] = $versionProvider->getVersion();
         $this->serverCurrentVersion = end($this->serverVersions);
         $this->serverUpgrades = [ // make sure these functions exist in server API update class and is actually
             // callable - just letters and numbers of course
