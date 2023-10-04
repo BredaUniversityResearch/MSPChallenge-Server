@@ -54,6 +54,8 @@ if [ "$1" = 'php-fpm' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX raster
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX running_session_config
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX running_session_config
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/configfiles
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/configfiles
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/log
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/log
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/saves
