@@ -40259,7 +40259,7 @@
         "layer_type": {
           "0": {
             "displayName": "Fishing Priority Areas",
-            "approval": "NotDependent",
+            "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
