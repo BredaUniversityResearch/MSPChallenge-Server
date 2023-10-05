@@ -27,7 +27,7 @@ if [ $? -ne 0 ]; then
 fi
 
 OPENSSL_CONF_DEFAULT="${EXEPATH}\..\mingw64\ssl\openssl.cnf"
-if [ -n "${EXEPATH}" ] && [ -z "${OPENSSL_CONF}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
+if [ -z "${OPENSSL_CONF}" ] && [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
     OPENSSL_CONF="${OPENSSL_CONF_DEFAULT}"
 fi
 
