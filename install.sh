@@ -25,7 +25,13 @@ if [ $? -ne 0 ]; then
   echo "Could not install tools."
   exit 1
 fi
-eval "php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+
+OPENSSL_CONF_DEFAULT="${EXEPATH}\..\mingw64\ssl\openssl.cnf"
+if [ -z "${OPENSSL_CONF}" ] && [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
+    OPENSSL_CONF="${OPENSSL_CONF_DEFAULT}"
+fi
+
+eval "OPENSSL_CONF=\"${OPENSSL_CONF}\" php bin/console lexik:jwt:generate-keypair --skip-if-exists"
 if [ $? -ne 0 ]; then
   echo "Could not install JWT encoding key pair."
   exit 1
