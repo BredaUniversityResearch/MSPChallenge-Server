@@ -26,15 +26,21 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-OPENSSL_CONF_DEFAULT="${EXEPATH}\..\mingw64\ssl\openssl.cnf"
-if [ -z "${OPENSSL_CONF}" ] && [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
-    OPENSSL_CONF="${OPENSSL_CONF_DEFAULT}"
+if [[ "${DOCKER}" == "1" ]]; then
+  echo "Docker detected, so JWT keypair generation will run normally."
+  eval "php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+else
+  echo "Not in Docker, so assuming Windows, altering JWT keypair generation command."
+  OPENSSL_CONF_DEFAULT="${EXEPATH}\..\mingw64\ssl\openssl.cnf"
+  if [ -z "${OPENSSL_CONF}" ] && [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
+      OPENSSL_CONF="${OPENSSL_CONF_DEFAULT}"
+  fi
+  eval "OPENSSL_CONF=\"${OPENSSL_CONF}\" php bin/console lexik:jwt:generate-keypair --skip-if-exists"
 fi
-
-eval "OPENSSL_CONF=\"${OPENSSL_CONF}\" php bin/console lexik:jwt:generate-keypair --skip-if-exists"
 if [ $? -ne 0 ]; then
   echo "Could not install JWT encoding key pair."
   exit 1
 fi
+
 source docker-aliases.sh
 exit 0
