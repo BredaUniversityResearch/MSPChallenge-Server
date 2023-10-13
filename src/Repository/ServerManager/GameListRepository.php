@@ -89,6 +89,9 @@ class GameListRepository extends EntityRepository
             if (!is_null($server)) {
                 $host = $server->getAddress();
             }
+            if (!empty($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] != $host) {
+                $host = $_SERVER['SERVER_NAME'];
+            }
         }
         foreach ($sessionList as $key => $session) {
             // get session's config file contents and decode the json

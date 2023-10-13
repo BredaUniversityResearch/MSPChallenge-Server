@@ -25,10 +25,20 @@ if [ $? -ne 0 ]; then
   echo "Could not install tools."
   exit 1
 fi
-eval "php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+
+OPENSSL_CONF_DEFAULT="${EXEPATH}\..\mingw64\ssl\openssl.cnf"
+if [ -z "${OPENSSL_CONF}" ] && [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
+    OPENSSL_CONF="${OPENSSL_CONF_DEFAULT}"
+fi
+if [ -n "${OPENSSL_CONF}" ]; then
+    ENV_VARS="OPENSSL_CONF=\"${OPENSSL_CONF}\""
+fi
+eval "${ENV_VARS} php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+
 if [ $? -ne 0 ]; then
   echo "Could not install JWT encoding key pair."
   exit 1
 fi
+
 source docker-aliases.sh
 exit 0
