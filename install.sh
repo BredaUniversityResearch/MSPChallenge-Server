@@ -34,6 +34,7 @@ if [ -n "${OPENSSL_CONF}" ]; then
     ENV_VARS="OPENSSL_CONF=\"${OPENSSL_CONF}\""
 fi
 eval "${ENV_VARS} php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+
 if [ $? -ne 0 ]; then
   echo "Could not install JWT encoding key pair."
   exit 1
