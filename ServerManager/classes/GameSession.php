@@ -636,7 +636,7 @@ class GameSession extends Base
     public function getConfigWithPlans(): array
     {
         $server_call = self::callServer(
-            'plan/ExportPlansToJson',
+            'Plan/ExportPlansToJson',
             [],
             $this->id,
             $this->api_access_token
