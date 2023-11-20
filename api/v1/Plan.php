@@ -1009,10 +1009,6 @@ class Plan extends Base
             $fishing = $result->fetchAllRows();
             $toPromiseFunctions = [];
             foreach ($fishing as $fish) {
-                // skip setting the fish record to inactive for this plan
-                if ($fish['fishing_plan_id'] == $planId) {
-                    continue;
-                }
                 $toPromiseFunctions[] = tpf(function () use ($fish) {
                     return $this->getAsyncDatabase()->update(
                         'fishing',
