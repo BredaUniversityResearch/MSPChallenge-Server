@@ -13,12 +13,6 @@
 
 {$CADDY_EXTRA_CONFIG}
 
-# see https://caddyserver.com/docs/v2-upgrade
-#   "Websocket proxying "just works" in v2; there is no need to "enable" websockets (upgrade connection) like in v1."
-route /ws/* {
-    reverse_proxy http://php:{$WS_SERVER_PORT}
-}
-
 {$SERVER_NAME:localhost} {
 	log {
 		# Redact the authorization query parameter that can be set by Mercure
@@ -56,4 +50,12 @@ route /ws/* {
 	header ?Permissions-Policy "browsing-topics=()"
 
 	php_server
+
+    @websocket {
+        path /ws/*
+    }
+
+    reverse_proxy @websocket http://php:45001 {
+        # Additional reverse proxy options if needed
+    }
 }
