@@ -292,8 +292,8 @@ class ServerManager extends Base
         // e.g. http://localhost/1
         // use this one if you just want the full URL of a Server's session
         $url = $forDocker ?
-            // this is always called from inside the docker environment,so just use http://caddy:80/...
-            'http://caddy:80'.Config::get('code_branch') :
+            // this is always called from inside the docker environment,so just use http://php:80/...
+            'http://php:80'.Config::get('code_branch') :
             Config::get('msp_server_protocol').$this->getTranslatedServerURL().Config::get('code_branch');
         if (!empty($sessionId)) {
             $url = rtrim($url, '/').'/'.$sessionId;

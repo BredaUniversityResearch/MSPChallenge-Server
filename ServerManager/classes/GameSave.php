@@ -178,7 +178,7 @@ class GameSave extends Base
     {
         $urlBase = ServerManager::getInstance()->getAbsoluteUrlBase();
         if (getenv('DOCKER') !== false) {
-            $urlBase = 'http://caddy:80'.ServerManager::getInstance()->getAbsolutePathBase();
+            $urlBase = 'http://php:80'.ServerManager::getInstance()->getAbsolutePathBase();
         }
         $server_call = self::callServer(
             'GameSession/SaveSession',

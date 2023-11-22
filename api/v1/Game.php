@@ -731,7 +731,7 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
-                // $apiRoot is passed to watchdog, so if DOCKER env.var is defined we should use http://caddy:80
+                // $apiRoot is passed to watchdog, so if DOCKER env.var is defined we should use http://localhost:80
                 return GameSession::getRequestApiRootAsync(getenv('DOCKER') !== false);
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
