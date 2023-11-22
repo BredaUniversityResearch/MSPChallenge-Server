@@ -2,29 +2,30 @@
 set -e
 
 if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
-	# Install the project the first time PHP is started
-	# After the installation, the following block can be deleted
-	if [ ! -f composer.json ]; then
-		rm -Rf tmp/
-		composer create-project "symfony/skeleton $SYMFONY_VERSION" tmp --stability="$STABILITY" --prefer-dist --no-progress --no-interaction --no-install
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX config
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX config
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
 
-		cd tmp
-		cp -Rp . ..
-		cd -
-		rm -Rf tmp/
+	#if [ -z "$(ls -A 'vendor/' 2>/dev/null)" ]; then
+	#	composer install --prefer-dist --no-progress --no-interaction
+	#fi
+	bash install.sh
 
-		composer require "php:>=$PHP_VERSION" runtime/frankenphp-symfony
-		composer config --json extra.symfony.docker 'true'
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX config
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX config
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
 
-		if grep -q ^DATABASE_URL= .env; then
-			echo "To finish the installation please press Ctrl+C to stop Docker Compose and run: docker compose up --build -d --wait"
-			sleep infinity
-		fi
-	fi
-
-	if [ -z "$(ls -A 'vendor/' 2>/dev/null)" ]; then
-		composer install --prefer-dist --no-progress --no-interaction
-	fi
+	bash install.sh
 
 	if grep -q ^DATABASE_URL= .env; then
 		echo "Waiting for database to be ready..."
@@ -53,8 +54,31 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		fi
 	fi
 
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX export
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX export
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX raster
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX raster
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX running_session_config
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX running_session_config
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/configfiles
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/configfiles
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/log
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/log
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/saves
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/saves
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/session_archive
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX ServerManager/session_archive
+	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX session_archive
+	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX session_archive
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
+	chmod 777 simulations/alpine.3.17-x64/MSW
+	chmod 777 simulations/alpine.3.17-x64/MEL
+	chmod 777 simulations/alpine.3.17-x64/SEL
+	chmod 777 simulations/alpine.3.17-x64/CEL
+
+	echo "Starting supervisor..."
+	rm -f /run/supervisord.sock ; /usr/bin/supervisord -c /etc/supervisord.conf
 fi
 
 exec docker-php-entrypoint "$@"
