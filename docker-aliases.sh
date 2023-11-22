@@ -57,7 +57,7 @@ alias decpf='de pkill -SIGUSR1 -f "php bin/console app:ws-server"'
 # de + choose profile (rpf) to "Run Blackfire profile on running websocket server process"
 alias derpf='de pkill -SIGUSR2 -f "php bin/console app:ws-server"'
 # de + Run websocket server manually (wss)
-ALIAS_WSS='php /srv/app/bin/console app:ws-server'
+ALIAS_WSS='php /app/bin/console app:ws-server'
 alias dewss="de ${ALIAS_WSS}"
 # dewss + xdebug (x)
 alias dewssx="${ALIAS_DE_BASE} -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" ${PHP_CONTAINER} ${ALIAS_WSS}"
