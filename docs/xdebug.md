@@ -26,7 +26,7 @@ First, [create a PHP debug remote server configuration](https://www.jetbrains.co
 2. Create a new server:
    * Name: `symfony` (or whatever you want to use for the variable `PHP_IDE_CONFIG`)
    * Host: `localhost` (or the one defined using the `SERVER_NAME` environment variable)
-   * Port: `443`
+   * Port: `80`
    * Debugger: `Xdebug`
    * Check `Use path mappings`
    * Absolute path on the server: `/srv/app`
