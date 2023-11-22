@@ -748,7 +748,7 @@ class GameSession extends Base
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $requestHeader = apache_request_headers();
+        $requestHeader = \getallheaders();
         $headers = array();
         if (isset($requestHeader[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
             $headers[] = ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.
