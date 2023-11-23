@@ -175,7 +175,8 @@ class Store extends Base
                     Log::LogError($layerDescriptionRequest["error"]);
                 }
                 foreach ($layerDescriptionRequest["layerDescriptions"] as $individualLayer) {
-                    $json = $layer->GetExport($region, $individualLayer["layerName"], "JSON", [], null);
+                    $json = $layer->GetExport($region, $individualLayer["layerName"], "JSON");
+                    $layerMetaData['original_layer_name'] = $individualLayer["layerName"];
                     $this->LoadJSON($json, $filename, $region, $layerMetaData);
                 }
             } else {
@@ -333,6 +334,9 @@ class Store extends Base
         ?int &$mspId,
         ?int &$countryId
     ): void {
+        if (!empty($layerMetaData['original_layer_name'])) {
+            $featureProperties['original_layer_name'] = $layerMetaData['original_layer_name'];
+        }
 
         if (!empty($layerMetaData["layer_property_as_type"])) {
             // check if the layer_property_as_type value exists in $featureProperties
