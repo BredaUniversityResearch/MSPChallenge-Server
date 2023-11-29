@@ -22,6 +22,14 @@ session_api_user_controller_requesttoken:
   path: '/{sessionId}/api/User/RequestToken'
   controller: App\Controller\SessionAPI\UserController::requestToken
 
+session_api_game_controller_addevent:
+  path: '/{sessionId}/api/Game/AddEvent'
+  controller: App\Controller\SessionAPI\GameController::addEvent
+
+session_api_game_controller_deleteevent:
+  path: '/{sessionId}/api/Game/DeleteEvent'
+  controller: App\Controller\SessionAPI\GameController::deleteEvent
+
 # per session support
 # RewriteRule ^([0-9]+)/api/(.*)$	index.php?session=$1&query=$2 [NC,L]
 legacy_api_session:

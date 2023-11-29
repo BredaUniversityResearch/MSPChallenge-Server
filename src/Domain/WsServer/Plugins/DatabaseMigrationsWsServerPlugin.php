@@ -62,6 +62,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
                 // nothing to migrate
                 continue;
             }
+            $this->addOutput('Started migrations for ' . $dbName);
             $application = new Application(SymfonyToLegacyHelper::getInstance()->getKernel());
             $application->setAutoExit(false);
             $output = new BufferedOutput();

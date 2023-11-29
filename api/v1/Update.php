@@ -416,6 +416,9 @@ class Update extends Base
         $objective = new Objective();
         $objective->Import();
 
+        $game = new Game();
+        $game->ImportEvents();
+
         Log::LogInfo("ImportScenario -> Imported Scenario.");
     }
 

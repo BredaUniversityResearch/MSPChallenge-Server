@@ -2,9 +2,20 @@
 
 namespace App\Controller\SessionAPI;
 
-class BaseController
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+class BaseController extends AbstractController
 {
 
+    public static function success(array $payload = []): JsonResponse
+    {
+        return new JsonResponse(self::wrapPayloadForResponse($payload));
+    }
+    public static function error(string $message, $code = 500): JsonResponse
+    {
+        return new JsonResponse(self::wrapPayloadForResponse([], $message), $code);
+    }
     public static function wrapPayloadForResponse(array $payload, ?string $message = null): array
     {
         return [

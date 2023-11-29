@@ -41359,6 +41359,13 @@
         "deadline": 192
       }
     ],
+    "events": [
+      {
+        "title": "test",
+        "body": "test",
+        "country_id": -1
+      }
+    ],
     "edition_name": "North Sea edition",
     "edition_colour": "#7ECEFDFF",
     "edition_letter": "N",

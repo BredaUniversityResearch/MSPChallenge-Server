@@ -150,15 +150,28 @@ class GameLatest extends CommonBase
                                             $newTime,
                                             $data
                                         )
-                                        ->then(function (Result $result) use (
+                                        ->then(function (Result $queryResult) use (
+                                            $lastUpdateTime,
                                             $user,
                                             $newTime,
                                             &$data
                                         ) {
-                                            return $this->latestLevel10($result, $user, $newTime, $data)
-                                                ->then(function (/*?Result $result */) use ($data) {
-                                                    return $data;
-                                                });
+                                            return $this->latestLevel10(
+                                                $queryResult,
+                                                $lastUpdateTime,
+                                                $newTime,
+                                                $data
+                                            )
+                                            ->then(function (Result $result) use (
+                                                $user,
+                                                $newTime,
+                                                $data
+                                            ) {
+                                                return $this->latestLevel11($result, $user, $newTime, $data)
+                                                    ->then(function (/*?Result $result */) use ($data) {
+                                                        return $data;
+                                                    });
+                                            });
                                         });
                                     });
                                 });
@@ -504,15 +517,37 @@ class GameLatest extends CommonBase
      * @throws Exception
      */
     private function latestLevel10(
+        Result $queryResult,
+        float $lastUpdateTime,
+        float $newTime,
+        array &$data
+    ): PromiseInterface {
+        $data['objectives'] = $queryResult->fetchAllRows();
+
+        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
+            wdo((microtime(true) - $newTime) . ' elapsed after objective<br />');
+        }
+
+        $events = new EventsLatest();
+        $this->asyncDataTransferTo($events);
+        return $events->latest(
+            $lastUpdateTime
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function latestLevel11(
         Result $result,
         int $user,
         float $newTime,
         array &$data
     ): PromiseInterface {
-        $data['objectives'] = $result->fetchAllRows();
+        $data['events'] = $result->fetchAllRows();
 
         if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after objective<br />');
+            wdo((microtime(true) - $newTime) . ' elapsed after events<br />');
         }
 
         //Add a slight fudge of 1ms to the update times to avoid rounding issues.
@@ -528,7 +563,8 @@ class GameLatest extends CommonBase
             empty($data['kpi']) &&
             empty($data['warning']) &&
             empty($data['raster']) &&
-            empty($data['objectives'])) {
+            empty($data['objectives']) &&
+            empty($data['events'])) {
             return resolveOnFutureTick(new Deferred(), '')->promise();
         }
 
