@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `game_event` (
   `event_id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `event_title` varchar(150) NOT NULL,
   `event_body` longtext NOT NULL,
-  `event_country_id` int(11) NULL,
+  `event_country_id` int(11) NOT NULL DEFAULT '-1',
   `event_game_month` int(11) NOT NULL DEFAULT '-1',
   `event_datetime` datetime NULL DEFAULT current_timestamp(),
   `event_lastupdate` double NOT NULL DEFAULT '0'
