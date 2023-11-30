@@ -2,9 +2,8 @@
 
 namespace App\Domain\Helper;
 
-use FilesystemIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+use Exception;
+use ZipArchive;
 
 class Util
 {
@@ -116,5 +115,46 @@ class Util
 
         // Remove the directory itself
         rmdir($dir);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function createZipFromFolder(string $zipFilepath, string $folderPath): void
+    {
+        if (!is_dir($folderPath)) {
+            throw new Exception('The folder "' . $folderPath . '" does not exist.');
+        }
+        $zip = new ZipArchive();
+        if ($zip->open($zipFilepath, ZipArchive::CREATE) !== true) {
+            throw new Exception('Failed to open ZipArchive for writing:' . $zipFilepath);
+        }
+        self::addFolderToOpenedZipArchive($zip, $folderPath);
+        // Close the zip file
+        $zip->close();
+    }
+
+    /**
+     * @throws Exception
+     */
+    private static function addFolderToOpenedZipArchive(
+        ZipArchive $zip,
+        string $folderPath,
+        string $relativePath = DIRECTORY_SEPARATOR
+    ): void {
+        $files = array_diff(scandir($folderPath . $relativePath), ['.', '..']);
+        foreach ($files as $file) {
+            // Calculate the relative path with the basename of the top-level folder
+            if (is_dir($folderPath . $relativePath . $file)) {
+                // Recursively add subdirectories
+                self::addFolderToOpenedZipArchive($zip, $folderPath, $relativePath . $file . DIRECTORY_SEPARATOR);
+            } else {
+                // Add current file to archive
+                $zip->addFile(
+                    $folderPath . $relativePath . $file,
+                    basename($folderPath) . $relativePath . $file
+                );
+            }
+        }
     }
 }

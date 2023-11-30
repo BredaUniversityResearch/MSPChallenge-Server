@@ -49,8 +49,7 @@ class CreatePOVConfigCommand extends Command
                 self::OPT_OUTPUT_DIR,
                 'd',
                 InputOption::VALUE_REQUIRED,
-                'The path to a non-existing or empty output directory. ' .
-                    'Default will be a temporary folder like: ' . ConfigCreator::getDefaultOutputDir($exampleRegion)
+                'The path to output directory. Default is: ' . ConfigCreator::getDefaultOutputBaseDir()
             );
         $this
             ->addOption(
@@ -66,8 +65,8 @@ class CreatePOVConfigCommand extends Command
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'The filename of compressed package file if compression is enabled. ' .
-                    'Default is: ' . ConfigCreator::DEFAULT_COMPRESSED_FILENAME,
-                ConfigCreator::DEFAULT_COMPRESSED_FILENAME
+                    'Default is based on the region coordinates like: ' .
+                        ConfigCreator::getDefaultCompressedFilename($exampleRegion)
             );
         $this->addOption(
             self::OPT_ZIP,

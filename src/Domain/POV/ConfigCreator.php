@@ -10,7 +10,6 @@ use Exception;
 class ConfigCreator
 {
     const DEFAULT_CONFIG_FILENAME = 'pov-config.json';
-    const DEFAULT_COMPRESSED_FILENAME = 'pov-config.zip';
 
     const SUBDIR = 'POV';
 
@@ -41,18 +40,41 @@ class ConfigCreator
         return $databaseName;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
     public function createAndZip(
         Region $region,
         ?string $dir = null,
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
-        return '';
+        $outputDir = $this->create($region, $dir, $configFilename);
+        $zipFilename = self::getDefaultOutputBaseDir() . DIRECTORY_SEPARATOR .
+            self::getDefaultCompressedFilename($region);
+        Util::createZipFromFolder($zipFilename, $outputDir);
+        Util::removeDirectory($outputDir); // clean-up
+        return $zipFilename;
+    }
+
+    public static function getDefaultOutputBaseDir(): string
+    {
+        return getcwd() . DIRECTORY_SEPARATOR . self::SUBDIR;
     }
 
     public static function getDefaultOutputDir(Region $region): string
     {
-        return getcwd() . DIRECTORY_SEPARATOR . self::SUBDIR . DIRECTORY_SEPARATOR .
-            implode('-', $region->toArray());
+        return self::getDefaultOutputBaseDir() . DIRECTORY_SEPARATOR . self::getFoldernameFromRegion($region);
+    }
+
+    public static function getFoldernameFromRegion(Region $region): string
+    {
+        return implode('-', $region->toArray());
+    }
+
+    public static function getDefaultCompressedFilename(Region $region): string
+    {
+        return self::getFoldernameFromRegion($region) . '.zip';
     }
 
     /**
