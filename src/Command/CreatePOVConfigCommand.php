@@ -318,10 +318,7 @@ FROM (
           ),
           'types', l.layer_type_types,     
           'data', JSON_OBJECT(
-             'points', (
-               SELECT JSON_ARRAYAGG(JSON_EXTRACT(geometry_geometry, '$'))
-               FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
-             ),
+             'points', JSON_EXTRACT(geometry_geometry, '$'),
              'types', JSON_ARRAY(JSON_EXTRACT(g.geometry_type, '$')),
              'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
              # just add some aliases to the metadata
@@ -376,8 +373,6 @@ SQL
             $io->error('Could not decode the json string. Error: ' . $e->getMessage());
             return Command::FAILURE;
         }
-
-        // todo: cut geometry according to coordinates
 
         try {
             $this->processRasterLayers($json['datamodel']['raster_layers'], $sessionId, $coordinates);
