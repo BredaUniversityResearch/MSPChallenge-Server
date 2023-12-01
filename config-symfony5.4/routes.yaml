@@ -14,6 +14,13 @@ apidoc:
   requirements:
     anything: '.*'
 
+session_api_game_create_pov_config:
+  path: '/{sessionId}/api/Game/CreatePOVConfig'
+  controller: App\Controller\SessionAPI\GameController::createPOVConfig
+  #methods: ['POST']
+  requirements:
+    sessionId: '\d+'
+
 session_api_user_controller_requestsession:
   path: '/{sessionId}/api/User/RequestSession'
   controller: App\Controller\SessionAPI\UserController::requestSession
