@@ -5,6 +5,7 @@ namespace App\Controller\SessionAPI;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\Region;
 use PHPUnit\Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +24,8 @@ class GameController extends AbstractController
 
     public function createPOVConfig(
         int $sessionId,
-        Request $request
+        Request $request,
+        LoggerInterface $logger
     ): StreamedResponse {
         $regionTopLeftX = $request->request->get('region_top_left_x');
         $regionTopLeftY = $request->request->get('region_top_left_y');
@@ -37,7 +39,7 @@ class GameController extends AbstractController
         }
 
         $region = new Region($regionTopLeftX, $regionTopLeftY, $regionBottomRightX, $regionBottomRightY);
-        $configCreator = new ConfigCreator($this->projectDir, $sessionId);
+        $configCreator = new ConfigCreator($this->projectDir, $sessionId, $logger);
         try {
             $zipFilepath = $configCreator->createAndZip($region);
         } catch (Exception $e) {
@@ -49,6 +51,9 @@ class GameController extends AbstractController
             $fileStream = fopen($zipFilepath, 'rb');
             fpassthru($fileStream);
             fclose($fileStream);
+
+            $filesystem = new Filesystem();
+            $filesystem->remove($zipFilepath);
         });
 
         // Set response headers
@@ -58,9 +63,6 @@ class GameController extends AbstractController
             basename($zipFilepath)
         ));
 
-        // Optionally, remove the file after it has been streamed
-        $filesystem = new Filesystem();
-        $filesystem->remove($zipFilepath);
         return $response;
     }
 }

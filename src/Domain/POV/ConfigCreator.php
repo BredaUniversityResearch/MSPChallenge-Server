@@ -6,6 +6,7 @@ use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use Doctrine\DBAL\Connection;
 use Exception;
+use Psr\Log\LoggerInterface;
 
 class ConfigCreator
 {
@@ -15,7 +16,8 @@ class ConfigCreator
 
     public function __construct(
         private readonly string $projectDir,
-        private readonly int $sessionId
+        private readonly int $sessionId,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -50,31 +52,39 @@ class ConfigCreator
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
         $outputDir = $this->create($region, $dir, $configFilename);
-        $zipFilename = self::getDefaultOutputBaseDir() . DIRECTORY_SEPARATOR .
+        $zipFilename = self::getDefaultOutputBaseDir($this->projectDir) . DIRECTORY_SEPARATOR .
             self::getDefaultCompressedFilename($region);
+        $this->log('Creating zip file: ' . $zipFilename);
         Util::createZipFromFolder($zipFilename, $outputDir);
         Util::removeDirectory($outputDir); // clean-up
+        $this->log('Zip file created: ' . $zipFilename);
         return $zipFilename;
     }
 
-    public static function getDefaultOutputBaseDir(): string
+    private function log(string $message): void
     {
-        return getcwd() . DIRECTORY_SEPARATOR . self::SUBDIR;
+        $this->logger->notice($message);
     }
 
-    public static function getDefaultOutputDir(Region $region): string
+    public static function getDefaultOutputBaseDir(string $projectDir): string
     {
-        return self::getDefaultOutputBaseDir() . DIRECTORY_SEPARATOR . self::getFoldernameFromRegion($region);
+        return (php_sapi_name() == 'cli' ? getcwd() : $projectDir) . DIRECTORY_SEPARATOR . self::SUBDIR;
     }
 
-    public static function getFoldernameFromRegion(Region $region): string
+    public static function getDefaultOutputDir(string $projectDir, Region $region): string
+    {
+        return self::getDefaultOutputBaseDir($projectDir) . DIRECTORY_SEPARATOR .
+            self::getFolderNameFromRegion($region);
+    }
+
+    public static function getFolderNameFromRegion(Region $region): string
     {
         return implode('-', $region->toArray());
     }
 
     public static function getDefaultCompressedFilename(Region $region): string
     {
-        return self::getFoldernameFromRegion($region) . '.zip';
+        return self::getFolderNameFromRegion($region) . '.zip';
     }
 
     /**
@@ -86,19 +96,24 @@ class ConfigCreator
         ?string $dir = null,
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
-        $dir ??= self::getDefaultOutputDir($region);
+        $dir ??= self::getDefaultOutputDir($this->projectDir, $region);
         if (!extension_loaded('imagick')) {
             throw new Exception('The required imagick extension is not loaded.');
         }
+        $this->log('query json from ' . $this->getDatabaseName() . ' for region: ' . $region);
         $jsonString = $this->queryJson($region);
+        $this->log('json retrieved, decoding json');
         try {
             $json = json_decode($jsonString, true, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             throw new Exception('Could not decode the json string retrieved from ' . $this->getDatabaseName() .
                 '. Error: ' . $e->getMessage());
         }
+        $this->log('json decoded, extracting region from raster layers');
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
+        $this->log('region extracted, creating json config file');
         $this->createJsonConfigFile($json, $dir, $configFilename);
+        $this->log('json config file created: ' . $dir . DIRECTORY_SEPARATOR . $configFilename);
         return $dir;
     }
 
