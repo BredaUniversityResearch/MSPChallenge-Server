@@ -1,7 +1,7 @@
 #syntax=docker/dockerfile:1.4
 
 # Versions
-FROM dunglas/frankenphp:latest-alpine AS frankenphp_upstream
+FROM dunglas/frankenphp:latest-php8.2-alpine AS frankenphp_upstream
 FROM composer/composer:2-bin AS composer_upstream
 
 
@@ -36,6 +36,7 @@ RUN set -eux; \
 		opcache \
 		zip \
         pcntl \
+        imagick \
 	;
 
 # if you want to debug on prod, enable below lines:
@@ -135,7 +136,7 @@ RUN set -eux; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
 
-FROM mariadb:10.5 AS mariadb_base
+FROM mariadb:10.6.16 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
 FROM adminer AS adminer_base
 FROM mitmproxy/mitmproxy:9.0.1 as mitmproxy_base
