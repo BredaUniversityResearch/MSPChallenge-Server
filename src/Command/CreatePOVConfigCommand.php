@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\Region;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,7 +33,8 @@ class CreatePOVConfigCommand extends Command
         'Eg: ' . self::ARG_REGION_COORDINATES_EXAMPLE;
 
     public function __construct(
-        private readonly string $projectDir
+        private readonly string $projectDir,
+        private LoggerInterface $logger
     ) {
         parent::__construct();
     }
@@ -49,7 +51,8 @@ class CreatePOVConfigCommand extends Command
                 self::OPT_OUTPUT_DIR,
                 'd',
                 InputOption::VALUE_REQUIRED,
-                'The path to output directory. Default is: ' . ConfigCreator::getDefaultOutputBaseDir()
+                'The path to output directory. Default is: ' .
+                    ConfigCreator::getDefaultOutputBaseDir($this->projectDir)
             );
         $this
             ->addOption(
@@ -104,7 +107,7 @@ class CreatePOVConfigCommand extends Command
         }
         $outputDir = $input->getOption(self::OPT_OUTPUT_DIR);
         $outputJsonFilename = $input->getOption(self::OPT_OUTPUT_JSON_FILENAME);
-        $configCreator = new ConfigCreator($this->projectDir, $sessionId);
+        $configCreator = new ConfigCreator($this->projectDir, $sessionId, $this->logger);
         $region = new Region(...$coordinates);
         try {
             if ($input->getOption('compress')) {

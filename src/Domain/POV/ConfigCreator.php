@@ -6,6 +6,7 @@ use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use Doctrine\DBAL\Connection;
 use Exception;
+use Psr\Log\LoggerInterface;
 
 class ConfigCreator
 {
@@ -15,7 +16,8 @@ class ConfigCreator
 
     public function __construct(
         private readonly string $projectDir,
-        private readonly int $sessionId
+        private readonly int $sessionId,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -50,31 +52,39 @@ class ConfigCreator
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
         $outputDir = $this->create($region, $dir, $configFilename);
-        $zipFilename = self::getDefaultOutputBaseDir() . DIRECTORY_SEPARATOR .
+        $zipFilename = self::getDefaultOutputBaseDir($this->projectDir) . DIRECTORY_SEPARATOR .
             self::getDefaultCompressedFilename($region);
+        $this->log('Creating zip file: ' . $zipFilename);
         Util::createZipFromFolder($zipFilename, $outputDir);
         Util::removeDirectory($outputDir); // clean-up
+        $this->log('Zip file created: ' . $zipFilename);
         return $zipFilename;
     }
 
-    public static function getDefaultOutputBaseDir(): string
+    private function log(string $message): void
     {
-        return getcwd() . DIRECTORY_SEPARATOR . self::SUBDIR;
+        $this->logger->notice($message);
     }
 
-    public static function getDefaultOutputDir(Region $region): string
+    public static function getDefaultOutputBaseDir(string $projectDir): string
     {
-        return self::getDefaultOutputBaseDir() . DIRECTORY_SEPARATOR . self::getFoldernameFromRegion($region);
+        return (php_sapi_name() == 'cli' ? getcwd() : $projectDir) . DIRECTORY_SEPARATOR . self::SUBDIR;
     }
 
-    public static function getFoldernameFromRegion(Region $region): string
+    public static function getDefaultOutputDir(string $projectDir, Region $region): string
+    {
+        return self::getDefaultOutputBaseDir($projectDir) . DIRECTORY_SEPARATOR .
+            self::getFolderNameFromRegion($region);
+    }
+
+    public static function getFolderNameFromRegion(Region $region): string
     {
         return implode('-', $region->toArray());
     }
 
     public static function getDefaultCompressedFilename(Region $region): string
     {
-        return self::getFoldernameFromRegion($region) . '.zip';
+        return self::getFolderNameFromRegion($region) . '.zip';
     }
 
     /**
@@ -86,19 +96,24 @@ class ConfigCreator
         ?string $dir = null,
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
-        $dir ??= self::getDefaultOutputDir($region);
+        $dir ??= self::getDefaultOutputDir($this->projectDir, $region);
         if (!extension_loaded('imagick')) {
             throw new Exception('The required imagick extension is not loaded.');
         }
+        $this->log('query json from ' . $this->getDatabaseName() . ' for region: ' . $region);
         $jsonString = $this->queryJson($region);
+        $this->log('json retrieved, decoding json');
         try {
             $json = json_decode($jsonString, true, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             throw new Exception('Could not decode the json string retrieved from ' . $this->getDatabaseName() .
                 '. Error: ' . $e->getMessage());
         }
+        $this->log('json decoded, extracting region from raster layers');
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
+        $this->log('region extracted, creating json config file');
         $this->createJsonConfigFile($json, $dir, $configFilename);
+        $this->log('json config file created: ' . $dir . DIRECTORY_SEPARATOR . $configFilename);
         return $dir;
     }
 
@@ -181,6 +196,14 @@ WITH
     WHERE pd.plan_delete_geometry_persistent IS NULL
     GROUP BY g.geometry_persistent
   ),
+  LatestGeometryInRegion AS (
+    SELECT *
+    FROM LatestGeometryFinal
+    # if geometry, return only the ones inside the region based on its geometry point data
+    WHERE
+      JSON_EXTRACT(geometry_geometry, '$[0][0]') BETWEEN :topLeftX AND :bottomRightX
+      AND JSON_EXTRACT(geometry_geometry, '$[0][1]') BETWEEN :topLeftY AND :bottomRightY
+  ),  
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
       SELECT l.*
@@ -202,14 +225,14 @@ WITH
   ),
   # include kpi value if layer is an ecology layer and
   #   extract new data columns from layer_type json data
-  LayerFinal AS (
+  LayerStep2 AS (
       SELECT
         l.*,
         k.kpi_value,
         JSON_ARRAYAGG(JSON_OBJECT(
           'channel', 'r',
           'max', t.value,
-          'type', t.id
+          'type', t.id-1
         )) AS layer_type_mapping,
         JSON_ARRAYAGG(JSON_OBJECT(
           'name', t.display_name,
@@ -233,13 +256,32 @@ WITH
       )
       GROUP BY l.layer_id
   ),
-  LatestGeometryInRegion AS (
-    SELECT *
-    FROM LatestGeometryFinal
-    # if geometry, return only the ones inside the region based on its geometry point data
-    WHERE
-      JSON_EXTRACT(geometry_geometry, '$[0][0]') BETWEEN :topLeftX AND :bottomRightX
-      AND JSON_EXTRACT(geometry_geometry, '$[0][1]') BETWEEN :topLeftY AND :bottomRightY
+  LayerFinal AS (
+      SELECT
+        l.*,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'points', JSON_EXTRACT(g.geometry_geometry, '$'),
+            'types', JSON_ARRAY(JSON_EXTRACT(g.geometry_type, '$')),
+            'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
+            # just add some aliases to the metadata
+            'metadata', JSON_MERGE_PATCH(
+              g.geometry_data,
+              JSON_OBJECT(
+                'name', JSON_EXTRACT(g.geometry_data, '$.Name'),
+                'turbines', JSON_EXTRACT(g.geometry_data, '$.N_TURBINES'),   
+                '//width', 'todo, eg: 1',
+                '//direction', 'todo, eg: true',
+                '//number_cables', 'todo, eg: 1'
+              )
+            )
+          )        
+        ) AS layer_data
+      FROM LayerStep2 l
+      # left join since raster layers do not ever have geometry data
+      LEFT JOIN LatestGeometryInRegion as g ON g.geometry_layer_id=l.layer_id
+      WHERE l.layer_geotype IN ('raster') OR g.geometry_layer_id IS NOT NULL
+      GROUP BY l.layer_id
   )
 SELECT
   JSON_OBJECT(
@@ -352,30 +394,12 @@ FROM (
               )
           ),
           'types', l.layer_type_types,     
-          'data', JSON_OBJECT(
-             'points', JSON_EXTRACT(geometry_geometry, '$'),
-             'types', JSON_ARRAY(JSON_EXTRACT(g.geometry_type, '$')),
-             'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
-             # just add some aliases to the metadata
-             'metadata', JSON_MERGE_PATCH(
-               g.geometry_data,
-               JSON_OBJECT(
-                 'name', JSON_EXTRACT(g.geometry_data, '$.Name'),
-                 'turbines', JSON_EXTRACT(g.geometry_data, '$.N_TURBINES'),   
-                 '//width', 'todo, eg: 1',
-                 '//direction', 'todo, eg: true',
-                 '//number_cables', 'todo, eg: 1'
-               )
-             )
-          )
+          'data', l.layer_data
         )
       )
     ), '$') as value
   # start from layer since it holds both raster and vector layers.
   FROM LayerFinal l
-  # left join since raster layers do not ever have geometry data
-  LEFT JOIN LatestGeometryInRegion as g ON g.geometry_layer_id=l.layer_id
-  WHERE l.layer_geotype IN ('raster') OR g.geometry_layer_id IS NOT NULL
   GROUP BY IF(l.layer_geotype = 'raster', 'raster_layers', 'vector_layers')
   ORDER BY FIELD(l.layer_geotype, 'raster', 'polygon', 'point', 'line')
 ) as subquery
