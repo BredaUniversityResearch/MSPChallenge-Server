@@ -15,7 +15,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Request;
 
-class GameController extends AbstractController
+class
+GameController extends AbstractController
 {
     public function __construct(
         private readonly string $projectDir

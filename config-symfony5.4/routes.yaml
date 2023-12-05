@@ -17,17 +17,23 @@ apidoc:
 session_api_game_create_pov_config:
   path: '/{sessionId}/api/Game/CreatePOVConfig'
   controller: App\Controller\SessionAPI\GameController::createPOVConfig
-  #methods: ['POST']
+  methods: ['POST']
   requirements:
     sessionId: '\d+'
 
 session_api_user_controller_requestsession:
   path: '/{sessionId}/api/User/RequestSession'
   controller: App\Controller\SessionAPI\UserController::requestSession
+  methods: ['POST']
+  requirements:
+    sessionId: '\d+'
 
 session_api_user_controller_requesttoken:
   path: '/{sessionId}/api/User/RequestToken'
   controller: App\Controller\SessionAPI\UserController::requestToken
+  methods: ['POST']
+  requirements:
+    sessionId: '\d+'
 
 # per session support
 # RewriteRule ^([0-9]+)/api/(.*)$	index.php?session=$1&query=$2 [NC,L]

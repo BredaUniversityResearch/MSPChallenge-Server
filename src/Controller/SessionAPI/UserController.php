@@ -12,18 +12,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class UserController extends AbstractController
 {
-
-    #[Route(
-        '/{sessionId}/api/User/RequestSession/',
-        name: 'session_api_user_request_session',
-        requirements: ['sessionId' => '\d+'],
-        methods: ['POST']
-    )]
     public function requestSession(
         int $sessionId,
         Request $request,
@@ -54,12 +46,6 @@ class UserController extends AbstractController
         }
     }
 
-    #[Route(
-        '/{sessionId}/api/User/RequestToken/',
-        name: 'session_api_user_request_token',
-        requirements: ['sessionId' => '\d+'],
-        methods: ['POST']
-    )]
     public function requestToken(
         int $sessionId,
         Request $request,
