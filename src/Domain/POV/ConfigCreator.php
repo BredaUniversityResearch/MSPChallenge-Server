@@ -196,6 +196,14 @@ WITH
     WHERE pd.plan_delete_geometry_persistent IS NULL
     GROUP BY g.geometry_persistent
   ),
+  LatestGeometryInRegion AS (
+    SELECT *
+    FROM LatestGeometryFinal
+    # if geometry, return only the ones inside the region based on its geometry point data
+    WHERE
+      JSON_EXTRACT(geometry_geometry, '$[0][0]') BETWEEN :topLeftX AND :bottomRightX
+      AND JSON_EXTRACT(geometry_geometry, '$[0][1]') BETWEEN :topLeftY AND :bottomRightY
+  ),  
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
       SELECT l.*
@@ -217,7 +225,7 @@ WITH
   ),
   # include kpi value if layer is an ecology layer and
   #   extract new data columns from layer_type json data
-  LayerFinal AS (
+  LayerStep2 AS (
       SELECT
         l.*,
         k.kpi_value,
@@ -248,13 +256,32 @@ WITH
       )
       GROUP BY l.layer_id
   ),
-  LatestGeometryInRegion AS (
-    SELECT *
-    FROM LatestGeometryFinal
-    # if geometry, return only the ones inside the region based on its geometry point data
-    WHERE
-      JSON_EXTRACT(geometry_geometry, '$[0][0]') BETWEEN :topLeftX AND :bottomRightX
-      AND JSON_EXTRACT(geometry_geometry, '$[0][1]') BETWEEN :topLeftY AND :bottomRightY
+  LayerFinal AS (
+      SELECT
+        l.*,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'points', JSON_EXTRACT(g.geometry_geometry, '$'),
+            'types', JSON_ARRAY(JSON_EXTRACT(g.geometry_type, '$')),
+            'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
+            # just add some aliases to the metadata
+            'metadata', JSON_MERGE_PATCH(
+              g.geometry_data,
+              JSON_OBJECT(
+                'name', JSON_EXTRACT(g.geometry_data, '$.Name'),
+                'turbines', JSON_EXTRACT(g.geometry_data, '$.N_TURBINES'),   
+                '//width', 'todo, eg: 1',
+                '//direction', 'todo, eg: true',
+                '//number_cables', 'todo, eg: 1'
+              )
+            )
+          )        
+        ) AS layer_data
+      FROM LayerStep2 l
+      # left join since raster layers do not ever have geometry data
+      LEFT JOIN LatestGeometryInRegion as g ON g.geometry_layer_id=l.layer_id
+      WHERE l.layer_geotype IN ('raster') OR g.geometry_layer_id IS NOT NULL
+      GROUP BY l.layer_id
   )
 SELECT
   JSON_OBJECT(
@@ -367,30 +394,12 @@ FROM (
               )
           ),
           'types', l.layer_type_types,     
-          'data', JSON_OBJECT(
-             'points', JSON_EXTRACT(geometry_geometry, '$'),
-             'types', JSON_ARRAY(JSON_EXTRACT(g.geometry_type, '$')),
-             'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
-             # just add some aliases to the metadata
-             'metadata', JSON_MERGE_PATCH(
-               g.geometry_data,
-               JSON_OBJECT(
-                 'name', JSON_EXTRACT(g.geometry_data, '$.Name'),
-                 'turbines', JSON_EXTRACT(g.geometry_data, '$.N_TURBINES'),   
-                 '//width', 'todo, eg: 1',
-                 '//direction', 'todo, eg: true',
-                 '//number_cables', 'todo, eg: 1'
-               )
-             )
-          )
+          'data', l.layer_data
         )
       )
     ), '$') as value
   # start from layer since it holds both raster and vector layers.
   FROM LayerFinal l
-  # left join since raster layers do not ever have geometry data
-  LEFT JOIN LatestGeometryInRegion as g ON g.geometry_layer_id=l.layer_id
-  WHERE l.layer_geotype IN ('raster') OR g.geometry_layer_id IS NOT NULL
   GROUP BY IF(l.layer_geotype = 'raster', 'raster_layers', 'vector_layers')
   ORDER BY FIELD(l.layer_geotype, 'raster', 'polygon', 'point', 'line')
 ) as subquery
