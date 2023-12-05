@@ -302,10 +302,19 @@ FROM (
         l.layer_geotype = 'raster',
         JSON_OBJECT(
           #'db-layer-id', l.layer_id,
-          'name', REPLACE(l.layer_short,'mel_',''),
+          'name', REPLACE(l.layer_short,'mel_',''),          
           'coordinate0', JSON_EXTRACT(l.layer_raster, '$.boundingbox[0]'),
           'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
-          'display_methods', JSON_MERGE_PRESERVE(
+          'scale', JSON_OBJECT(
+            'min_value', 0,
+            # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
+            'max_value', l.kpi_value * 1000 * 2,
+            'interpolation', 'lin'
+          ),
+          'mapping', l.layer_type_mapping,
+          'types', l.layer_type_types,
+          'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url'))),          
+          '//display_methods', JSON_MERGE_PRESERVE(
             IF(
               # detecting a kpi layer
               l.kpi_value IS NOT NULL,
@@ -337,9 +346,7 @@ FROM (
               ),
               JSON_ARRAY()
             )
-          ),
-          'types', l.layer_type_types,
-          'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url')))
+          )
         ),
         JSON_OBJECT(
           #'db-layer-id', l.layer_id,
@@ -348,7 +355,8 @@ FROM (
           #   FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
           # ),
           'name', l.layer_name,
-          'display_methods', JSON_MERGE_PRESERVE(
+          'type', l.layer_geotype,
+          '//display_methods', JSON_MERGE_PRESERVE(
               IF(
                 l.layer_geotype = 'polygon',
                 JSON_ARRAY(
@@ -393,7 +401,7 @@ FROM (
                 JSON_ARRAY()
               )
           ),
-          'types', l.layer_type_types,     
+          'types', l.layer_type_types,
           'data', l.layer_data
         )
       )
@@ -453,6 +461,9 @@ SQL,
             // now set the region coordinates, clamped by input coordinates (see extractPartFromImageByRegion)
             $layer['coordinate0'] = $region->getTopLeft();
             $layer['coordinate1'] = $region->getBottomRight();
+            $this->handleRasterMapping($layer['mapping']);
+
+            // todo : remove display methods once POV/Unity supports it
             $this->handleRasterDisplayMethods($layer);
         }
         unset($layer);
@@ -460,29 +471,33 @@ SQL,
 
     private function handleRasterDisplayMethods(array &$rasterLayer): void
     {
-        if (count($rasterLayer['display_methods']) == 0) {
+        if (count($rasterLayer['//display_methods']) == 0) {
             return;
         }
-
-        foreach ($rasterLayer['display_methods'] as &$displayMethod) {
+        foreach ($rasterLayer['//display_methods'] as &$displayMethod) {
             if ($displayMethod['method'] !== 'TypeMap') {
                 continue;
             }
-            $m = &$displayMethod['mapping'];
-            if (count($m) == 0) {
-                continue;
-            }
-            $maxValue = $m[count($m)-1]['max'];
-            // normalise the max values , up to 255 max. And:
-            //   set the "min" value based on the previous mapping entry's max
-            $m[0]['min'] = 0;
-            $m[0]['max'] = (int)ceil(($m[0]['max'] / $maxValue) * 255);
-            for ($n = 1; $n < count($m); ++$n) {
-                $prevMappingEntry = &$m[$n - 1];
-                $mappingEntry = &$m[$n];
-                $mappingEntry['min'] = $prevMappingEntry['max']+1;
-                $m[$n]['max'] = (int)ceil(($m[$n]['max'] / $maxValue) * 255);
-            }
+            $this->handleRasterMapping($displayMethod['mapping']);
+        }
+    }
+
+    private function handleRasterMapping(array &$mapping): void
+    {
+        $m = &$mapping;
+        if (count($m) == 0) {
+            return;
+        }
+        $maxValue = $m[count($m)-1]['max'];
+        // normalise the max values , up to 255 max. And:
+        //   set the "min" value based on the previous mapping entry's max
+        $m[0]['min'] = 0;
+        $m[0]['max'] = (int)ceil(($m[0]['max'] / $maxValue) * 255);
+        for ($n = 1; $n < count($m); ++$n) {
+            $prevMappingEntry = &$m[$n - 1];
+            $mappingEntry = &$m[$n];
+            $mappingEntry['min'] = $prevMappingEntry['max']+1;
+            $m[$n]['max'] = (int)ceil(($m[$n]['max'] / $maxValue) * 255);
         }
     }
 
