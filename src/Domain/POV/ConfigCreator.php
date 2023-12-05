@@ -224,7 +224,7 @@ WITH
         JSON_ARRAYAGG(JSON_OBJECT(
           'channel', 'r',
           'max', t.value,
-          'type', t.id
+          'type', t.id-1
         )) AS layer_type_mapping,
         JSON_ARRAYAGG(JSON_OBJECT(
           'name', t.display_name,
