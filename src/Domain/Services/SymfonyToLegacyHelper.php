@@ -12,6 +12,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\Authentica
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -30,6 +31,7 @@ class SymfonyToLegacyHelper
     private EntityManagerInterface $em;
 
     private VersionsProvider $provider;
+    private MessageBusInterface $analyticsMessageBus;
 
     private AuthenticationSuccessHandler $authenticationSuccessHandler;
 
@@ -42,6 +44,7 @@ class SymfonyToLegacyHelper
         TranslatorInterface $translator,
         EntityManagerInterface $em,
         VersionsProvider $provider,
+        MessageBusInterface $analyticsMessageBus,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
         ConnectionManager $connectionManager,
@@ -55,6 +58,7 @@ class SymfonyToLegacyHelper
         $this->translator = $translator;
         $this->em = $em;
         $this->provider = $provider;
+        $this->analyticsMessageBus = $analyticsMessageBus;
         $this->authenticationSuccessHandler = $authenticationSuccessHandler;
         self::$instance = $this;
     }
@@ -90,6 +94,11 @@ class SymfonyToLegacyHelper
     public function getProvider(): VersionsProvider
     {
         return $this->provider;
+    }
+
+    public function getAnalyticsMessageBus(): MessageBusInterface
+    {
+        return $this->analyticsMessageBus;
     }
 
     /**
