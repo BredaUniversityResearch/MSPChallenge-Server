@@ -24,6 +24,11 @@ services:
     App\Domain\:
         resource: '../src/Domain/{Services}'
 
+    App\MessageHandler\Analytics\AnalyticsMessageHandler:
+        tags:
+            - { name: messenger.message_handler, handles: App\Message\Analytics\SessionCreated }
+            - { name: messenger.message_handler, handles: App\Message\Analytics\ClientJoinedSession }
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     App\Domain\WsServer\WsServer:
