@@ -62,8 +62,11 @@ class SessionCreated extends AnalyticsMessageBase implements JsonSerializable
         $this->game_end_month = $game_endMonth;
         $this->game_current_month = $game_currentMonth;
         $this->game_visibility = $game_visibility;
+
+        $this->game_config_upload_user = 'to be determined'; //TODO
     }
 
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function JsonSerialize() : array
     {
         return [
@@ -85,5 +88,4 @@ class SessionCreated extends AnalyticsMessageBase implements JsonSerializable
             'game_visibility' => $this->game_visibility
         ];
     }
-
 }
