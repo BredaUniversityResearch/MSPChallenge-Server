@@ -343,15 +343,22 @@ class Store extends Base
             $type = '-1';
             if (!empty($featureProperties[$layerMetaData["layer_property_as_type"]])) {
                 $featureTypeProperty = $featureProperties[$layerMetaData["layer_property_as_type"]];
-                foreach ($layerMetaData["layer_type"] as $layerTypeMetaData) {
+                foreach ($layerMetaData["layer_type"] as $typeValue => $layerTypeMetaData) {
                     if (!empty($layerTypeMetaData["map_type"])) {
                         // identify the 'other' category
                         if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                            $typeOther = $layerTypeMetaData["value"];
+                            $typeOther = $typeValue;
                         }
-                        // translate the found $featureProperties value to the type value
-                        if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
-                            $type = $layerTypeMetaData["value"];
+                        if (str_contains($layerTypeMetaData["map_type"], '-')) {
+                            // assumes an integer range of min-max integer or float values
+                            $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
+                            if ((float) $featureTypeProperty >= (float) $typeValues[0]
+                                && (float) $featureTypeProperty <= (float) $typeValues[1]) {
+                                $type = $typeValue;
+                            }
+                        } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+                            // translate the found $featureProperties value to the type value
+                            $type = $typeValue;
                             break;
                         }
                     }
