@@ -8,6 +8,7 @@ use App\Message\Analytics\SessionCreated;
 use DateInterval;
 use DateTime;
 use DateTimeImmutable;
+use Exception;
 
 class GameSession extends Base
 {
@@ -161,48 +162,7 @@ class GameSession extends Base
         }
         $this->id = $this->db->lastId();
 
-        $legacyHelper = SymfonyToLegacyHelper::getInstance();
-
-        $configRepo = $legacyHelper->getEntityManager()->getRepository(GameConfigVersion::class);
-        $config = $configRepo->find($this->game_config_version_id);
-        $configFile = $config->getGameConfigFile();
-
-        $tempImmutableDateTime = new DateTimeImmutable();
-
-        $configUploadTimeStamp = $config->getUploadTime() ? intval($config->getUploadTime()) : 0;
-        $configUploadTime = $tempImmutableDateTime->setTimestamp($configUploadTimeStamp);
-
-        $gameCreationTimeStamp = $this->game_creation_time ? intval($this->game_creation_time) : 0;
-        $gameCreationTime = $tempImmutableDateTime->setTimestamp($gameCreationTimeStamp);
-
-        $gameRunningTillTimeStamp = $this->game_running_til_time ? intval($this->game_running_til_time) : 0;
-        $gameRunningTillTime = $tempImmutableDateTime->setTimestamp($gameRunningTillTimeStamp);
-
-        $analyticsMessage = new SessionCreated(
-            new DateTimeImmutable(),
-            $this->id,
-            $this->name,
-            $configFile->getFilename(),
-            $config->getFilePath(),
-            $config->getVersion(),
-            $config->getVersionMessage(),
-            $config->getVisibility(),
-            $configUploadTime,
-            $config->getRegion(),
-            $configFile->getDescription(),
-            $gameCreationTime,
-            $gameRunningTillTime,
-            $this->game_start_year,
-            $this->game_end_month,
-            $this->game_current_month,
-            $this->game_visibility
-        );
-        try {
-            $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
-        } catch( Exception $e)
-        {
-            //TODO: figure out how to handle error/exception logging.
-        }
+        $this->logAnalytics();
     }
 
     public function sendLoadRequest($allow_recreate = 0)
@@ -747,5 +707,50 @@ class GameSession extends Base
         }
 
         return true;
+    }
+
+    private function logAnalytics(): void
+    {
+        $legacyHelper = SymfonyToLegacyHelper::getInstance();
+
+        $configRepo = $legacyHelper->getEntityManager()->getRepository(GameConfigVersion::class);
+        $config = $configRepo->find($this->game_config_version_id);
+        $configFile = $config->getGameConfigFile();
+
+        $tempImmutableDateTime = new DateTimeImmutable();
+
+        $configUploadTimeStamp = $config->getUploadTime() ? intval($config->getUploadTime()) : 0;
+        $configUploadTime = $tempImmutableDateTime->setTimestamp($configUploadTimeStamp);
+
+        $gameCreationTimeStamp = $this->game_creation_time ? intval($this->game_creation_time) : 0;
+        $gameCreationTime = $tempImmutableDateTime->setTimestamp($gameCreationTimeStamp);
+
+        $gameRunningTillTimeStamp = $this->game_running_til_time ? intval($this->game_running_til_time) : 0;
+        $gameRunningTillTime = $tempImmutableDateTime->setTimestamp($gameRunningTillTimeStamp);
+
+        $analyticsMessage = new SessionCreated(
+            new DateTimeImmutable(),
+            $this->id,
+            $this->name,
+            $configFile->getFilename(),
+            $config->getFilePath(),
+            $config->getVersion(),
+            $config->getVersionMessage(),
+            $config->getVisibility(),
+            $configUploadTime,
+            $config->getRegion(),
+            $configFile->getDescription(),
+            $gameCreationTime,
+            $gameRunningTillTime,
+            $this->game_start_year,
+            $this->game_end_month,
+            $this->game_current_month,
+            $this->game_visibility
+        );
+        try {
+            $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
+        } catch (Exception $e) {
+            //TODO: figure out how to handle error/exception logging.
+        }
     }
 }

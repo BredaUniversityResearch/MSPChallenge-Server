@@ -26,15 +26,15 @@ class AnalyticsMessageHandler
 
     public function __invoke(AnalyticsMessageBase $message)
     {
-        $requestBody = $this->guraasRequestTransformer->TransformMessageToRequestBody($message);
+        $requestBody = $this->guraasRequestTransformer->transformMessageToRequestBody($message);
         if (!$requestBody) {
             return;
         }
 
-        $result = $this->PostRequestToGURaaS($requestBody);
+        $result = $this->postRequestToGURaaS($requestBody);
     }
 
-    private function PostRequestToGURaaS($requestBody) : bool
+    private function postRequestToGURaaS($requestBody) : bool
     {
         if (!$requestBody) {
             return false;
@@ -50,5 +50,4 @@ class AnalyticsMessageHandler
         }
         return false;
     }
-
 }

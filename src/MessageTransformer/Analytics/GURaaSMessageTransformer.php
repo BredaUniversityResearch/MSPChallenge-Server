@@ -52,7 +52,7 @@ class GURaaSMessageTransformer
 {
     const GURAAS_DATETIME_FORMAT = "Y-m-d H:i:s";
     const GURAAS_MAX_TAG_SIZE = 32;
-    CONST GURAAS_MAX_DATA_SIZE = 4096;
+    const GURAAS_MAX_DATA_SIZE = 4096;
 
     private Uuid $guraasSessionId;
     private DateTimeImmutable $guraasSessionStart;
@@ -65,27 +65,26 @@ class GURaaSMessageTransformer
         $this->guraasSessionStart = $guraasSessionStart ?? new DateTimeImmutable();
     }
 
-    public function TransformMessageToRequestBody(AnalyticsMessageBase $message) : array | null
+    public function transformMessageToRequestBody(AnalyticsMessageBase $message) : array | null
     {
-        if($message instanceof SessionCreated)
-        {
-            return $this->TransformSessionCreated($message);
+        if ($message instanceof SessionCreated) {
+            return $this->transformSessionCreated($message);
         }
-        if($message instanceof ClientJoinedSession){
-            return $this->TransformClientJoinedSession($message);
+        if ($message instanceof ClientJoinedSession) {
+            return $this->transformClientJoinedSession($message);
         }
         //TODO: log unsupported message type transformation.
         return null;
     }
 
-    private function TransformSessionCreated(SessionCreated $message) : array | null
+    private function transformSessionCreated(SessionCreated $message) : array | null
     {
         $tag1 = "GameSessionCreated";
         //TODO: tag2 needs to be a ServerManager uuid (serialized, only 31 chars)
         // so different messages can be associated with each other
         $tag3 = strval($message->id);
         $data = json_encode($message);
-        return $this->CreatePostRequestBody(
+        return $this->createPostRequestBody(
             $message->timeStamp,
             $tag1,
             null,
@@ -94,14 +93,14 @@ class GURaaSMessageTransformer
             $data
         );
     }
-    public function TransformClientJoinedSession(ClientJoinedSession $message) : array | null
+    public function transformClientJoinedSession(ClientJoinedSession $message) : array | null
     {
         $tag1 = "ClientJoinedSession";
         //TODO: tag2 needs to be a ServerManager uuid (serialized, only 31 chars)
         // so different messages can be associated with each other
         $tag3 = strval($message->id);
         $data = json_encode($message);
-        return $this->CreatePostRequestBody(
+        return $this->createPostRequestBody(
             $message->timeStamp,
             $tag1,
             null,
@@ -110,7 +109,7 @@ class GURaaSMessageTransformer
             $data
         );
     }
-    private function CreatePostRequestBody(
+    private function createPostRequestBody(
         DateTimeImmutable $timeStamp,
         ?string $tag1,
         ?string $tag2,
@@ -119,11 +118,11 @@ class GURaaSMessageTransformer
         ?string $data
     ) : array | null {
         if (!(
-            self::CheckValidStringLength($tag1, self::GURAAS_MAX_TAG_SIZE) &&
-            self::CheckValidStringLength($tag2, self::GURAAS_MAX_TAG_SIZE) &&
-            self::CheckValidStringLength($tag3, self::GURAAS_MAX_TAG_SIZE) &&
-            self::CheckValidStringLength($tag4, self::GURAAS_MAX_TAG_SIZE) &&
-            self::CheckValidStringLength($data, self::GURAAS_MAX_DATA_SIZE)
+            self::checkValidStringLength($tag1, self::GURAAS_MAX_TAG_SIZE) &&
+            self::checkValidStringLength($tag2, self::GURAAS_MAX_TAG_SIZE) &&
+            self::checkValidStringLength($tag3, self::GURAAS_MAX_TAG_SIZE) &&
+            self::checkValidStringLength($tag4, self::GURAAS_MAX_TAG_SIZE) &&
+            self::checkValidStringLength($data, self::GURAAS_MAX_DATA_SIZE)
         )) {
             //TODO: throw exception or log error somehow.
             return null;
@@ -148,7 +147,7 @@ class GURaaSMessageTransformer
         ];
     }
 
-    private static function CheckValidStringLength(?string $string, int $maxSize): bool
+    private static function checkValidStringLength(?string $string, int $maxSize): bool
     {
         return !($string && iconv_strlen($string)> $maxSize);
     }

@@ -27,6 +27,7 @@ class ClientJoinedSession extends AnalyticsMessageBase implements JsonSerializab
         $this->session_id = $session_id;
     }
 
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function JsonSerialize() : array
     {
         return [
@@ -36,5 +37,4 @@ class ClientJoinedSession extends AnalyticsMessageBase implements JsonSerializab
             'session_id' => $this->session_id
         ];
     }
-
 }
