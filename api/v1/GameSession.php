@@ -16,6 +16,7 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 use ZipArchive;
@@ -573,16 +574,18 @@ class GameSession extends Base
                 $zip->addFile($file, pathinfo($file, PATHINFO_BASENAME));
             }
         }
-        foreach (Store::GetRasterStoreFolderContents($this->getGameSessionId()) as $rasterfile) {
-            if (is_readable($rasterfile)) {
-                $pathName = pathinfo($rasterfile, PATHINFO_DIRNAME);
-                if (stripos($pathName, "archive") !== false) {
-                    $zipFolder = "raster/archive/";
-                } else {
-                    $zipFolder = "raster/";
-                }
-                $zip->addFile($rasterfile, $zipFolder.pathinfo($rasterfile, PATHINFO_BASENAME));
+        $finder = new Finder();
+        $finder->files()->in(Store::GetRasterStoreFolder($this->getGameSessionId()));
+        foreach ($finder as $rasterfile) {
+            if (stripos($rasterfile->getPathname(), "archive") !== false) {
+                $zipFolder = "raster/archive/";
+            } else {
+                $zipFolder = "raster/";
             }
+            $zip->addFile(
+                $rasterfile->getRealPath(),
+                $zipFolder.$rasterfile->getFilename()
+            );
         }
         $zip->close();
         unlink($sqlDumpPath);
