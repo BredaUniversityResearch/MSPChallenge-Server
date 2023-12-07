@@ -72,6 +72,7 @@ COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor.d/
 COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
 COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
+COPY --link docker/supervisor/supervisor.d/messenger-worker.ini /etc/supervisor.d/messenger-worker.ini
 
 COPY --link docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
