@@ -714,6 +714,7 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function RemoveDirectory(string $dir): void
     {
+        // todo: use Util::removeDirectory() instead ??
         try {
             $it = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
             $files = new RecursiveIteratorIterator(

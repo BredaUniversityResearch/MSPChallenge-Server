@@ -34,9 +34,6 @@ class ConnectionManager extends DatabaseDefaults
         self::$instance = $this;
     }
 
-    /**
-     * @throws Exception
-     */
     public static function getInstance(): self
     {
         if (null === self::$instance) {

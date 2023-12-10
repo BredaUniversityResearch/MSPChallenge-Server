@@ -9,11 +9,11 @@ use Doctrine\DBAL\Schema\Schema;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230202120117 extends MSPMigration
+final class Version20231204154654 extends MSPMigration
 {
     public function getDescription(): string
     {
-        return 'Add unique key to plan_layers\' plan_layer_plan_id, plan_layer_layer_id column pair';
+        return 'Add index to geometry_subtractive column in geometry table';
     }
 
     protected function getDatabaseType(): ?MSPDatabaseType
@@ -23,14 +23,11 @@ final class Version20230202120117 extends MSPMigration
 
     protected function onUp(Schema $schema): void
     {
-        $this->addSql(
-            'ALTER TABLE `plan_layer` ADD UNIQUE `plan_layer_plan_id_plan_layer_layer_id` '.
-            '(`plan_layer_plan_id`, `plan_layer_layer_id`)'
-        );
+        $schema->getTable('geometry')->addIndex(['geometry_subtractive'], 'geometry_subtractive');
     }
 
     protected function onDown(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE `plan_layer` DROP INDEX `plan_layer_plan_id_plan_layer_layer_id`');
+        $schema->getTable('geometry')->dropIndex('geometry_subtractive');
     }
 }
