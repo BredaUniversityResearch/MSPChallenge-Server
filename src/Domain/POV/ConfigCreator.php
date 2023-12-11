@@ -71,12 +71,6 @@ class ConfigCreator
         return (php_sapi_name() == 'cli' ? getcwd() : $projectDir) . DIRECTORY_SEPARATOR . self::SUBDIR;
     }
 
-    public static function getDefaultOutputDir(string $projectDir, Region $region): string
-    {
-        return self::getDefaultOutputBaseDir($projectDir) . DIRECTORY_SEPARATOR .
-            self::getFolderNameFromRegion($region);
-    }
-
     public static function getFolderNameFromRegion(Region $region): string
     {
         return implode('-', $region->toArray());
@@ -96,7 +90,8 @@ class ConfigCreator
         ?string $dir = null,
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
-        $dir ??= self::getDefaultOutputDir($this->projectDir, $region);
+        $dir ??= self::getDefaultOutputBaseDir($this->projectDir);
+        $dir .= DIRECTORY_SEPARATOR . self::getFolderNameFromRegion($region);
         if (!extension_loaded('imagick')) {
             throw new Exception('The required imagick extension is not loaded.');
         }
@@ -113,7 +108,7 @@ class ConfigCreator
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
         $this->log('region extracted, creating json config file');
         $this->createJsonConfigFile($json, $dir, $configFilename);
-        $this->log('json config file created: ' . $dir . DIRECTORY_SEPARATOR . $configFilename);
+        $this->log('json config file created: ' . realpath($dir . DIRECTORY_SEPARATOR . $configFilename));
         return $dir;
     }
 
@@ -290,7 +285,14 @@ SELECT
       'data_modified', CONCAT(UTC_DATE(), ' ', UTC_TIME())
     ),
     'datamodel',
-    JSON_OBJECTAGG(subquery.prop, JSON_EXTRACT(subquery.value, '$.*'))
+      JSON_MERGE_PRESERVE(
+        JSON_OBJECT(
+          'coordinate0', JSON_ARRAY(:topLeftX, :topLeftY),
+          'coordinate1', JSON_ARRAY(:bottomRightX, :bottomRightY),
+          'projection', '//todo'
+        ),
+        JSON_OBJECTAGG(subquery.prop, JSON_EXTRACT(subquery.value, '$.*'))
+      )      
   ) as json
 FROM (
   SELECT

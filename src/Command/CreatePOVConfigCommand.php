@@ -115,7 +115,7 @@ class CreatePOVConfigCommand extends Command
                 $io->success('Created config package: ' . $zipPath);
             } else {
                 $outputDir = $configCreator->create($region, $outputDir, $outputJsonFilename);
-                $io->success('Created config in directory: ' . $outputDir);
+                $io->success('Created config in directory: ' . realpath($outputDir));
             }
         } catch (\Exception $e) {
             $io->error($e->getMessage());
