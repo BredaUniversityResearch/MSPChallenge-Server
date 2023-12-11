@@ -32,6 +32,8 @@ class AnalyticsMessageHandler
         }
 
         $result = $this->postRequestToGURaaS($requestBody);
+        //TODO: properly handle result, retry certain amount of times when failing to post.
+        // maybe supported by the message handler system already?
     }
 
     private function postRequestToGURaaS($requestBody) : bool

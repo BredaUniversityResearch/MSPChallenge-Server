@@ -9,6 +9,7 @@ use DateInterval;
 use DateTime;
 use DateTimeImmutable;
 use Exception;
+use Symfony\Component\Uid\Uuid;
 
 class GameSession extends Base
 {
@@ -711,46 +712,63 @@ class GameSession extends Base
 
     private function logAnalytics(): void
     {
-        $legacyHelper = SymfonyToLegacyHelper::getInstance();
 
-        $configRepo = $legacyHelper->getEntityManager()->getRepository(GameConfigVersion::class);
-        $config = $configRepo->find($this->game_config_version_id);
-        $configFile = $config->getGameConfigFile();
-
-        $tempImmutableDateTime = new DateTimeImmutable();
-
-        $configUploadTimeStamp = $config->getUploadTime() ? intval($config->getUploadTime()) : 0;
-        $configUploadTime = $tempImmutableDateTime->setTimestamp($configUploadTimeStamp);
-
-        $gameCreationTimeStamp = $this->game_creation_time ? intval($this->game_creation_time) : 0;
-        $gameCreationTime = $tempImmutableDateTime->setTimestamp($gameCreationTimeStamp);
-
-        $gameRunningTillTimeStamp = $this->game_running_til_time ? intval($this->game_running_til_time) : 0;
-        $gameRunningTillTime = $tempImmutableDateTime->setTimestamp($gameRunningTillTimeStamp);
-
-        $analyticsMessage = new SessionCreated(
-            new DateTimeImmutable(),
-            $this->id,
-            $this->name,
-            $configFile->getFilename(),
-            $config->getFilePath(),
-            $config->getVersion(),
-            $config->getVersionMessage(),
-            $config->getVisibility(),
-            $configUploadTime,
-            $config->getRegion(),
-            $configFile->getDescription(),
-            $gameCreationTime,
-            $gameRunningTillTime,
-            $this->game_start_year,
-            $this->game_end_month,
-            $this->game_current_month,
-            $this->game_visibility
-        );
         try {
+            $legacyHelper = SymfonyToLegacyHelper::getInstance();
+
+            $configRepo = $legacyHelper->getEntityManager()->getRepository(GameConfigVersion::class);
+            $config = $configRepo->find($this->game_config_version_id);
+            $configFile = $config->getGameConfigFile();
+
+            $tempImmutableDateTime = new DateTimeImmutable();
+
+            $configUploadTimeStamp = $config->getUploadTime() ? intval($config->getUploadTime()) : 0;
+            $configUploadTime = $tempImmutableDateTime->setTimestamp($configUploadTimeStamp);
+
+            $gameCreationTimeStamp = $this->game_creation_time ? intval($this->game_creation_time) : 0;
+            $gameCreationTime = $tempImmutableDateTime->setTimestamp($gameCreationTimeStamp);
+
+            $gameRunningTillTimeStamp = $this->game_running_til_time ? intval($this->game_running_til_time) : 0;
+            $gameRunningTillTime = $tempImmutableDateTime->setTimestamp($gameRunningTillTimeStamp);
+
+            $serverManager = ServerManager::getInstance();
+            $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
+
+            $configUploadUserId = $config->getUploadUser();
+            $configUploadUser = $configUploadUserId ? new User($configUploadUserId) : null;
+            $configUploadUserData = $configUploadUser?->data();
+
+            $userId = $_SESSION['user'];
+            $user = is_null($userId) ? null : new User($userId);
+            $userData = $user?->data();
+
+            $analyticsMessage = new SessionCreated(
+                new DateTimeImmutable(),
+                $serverManagerId,
+                $userData?->username ?? '',
+                $userData?->account_id ?? -1,
+                $this->id,
+                $this->name,
+                $gameCreationTime,
+                $gameRunningTillTime,
+                $this->game_start_year,
+                $this->game_end_month,
+                $this->game_current_month,
+                $this->game_visibility,
+                $configFile->getFilename() ?? '',
+                $config->getFilePath() ?? '',
+                $config->getVersion() ?? '',
+                $config->getVersionMessage() ?? '',
+                $config->getVisibility() ?? '',
+                $config->getRegion() ?? '',
+                $configFile->getDescription() ?? '',
+                $configUploadUserData?->username ?? '',
+                $configUploadUserData?->account_id ?? -1,
+                $configUploadTime,
+            );
             $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
         } catch (Exception $e) {
-            //TODO: figure out how to handle error/exception logging.
+            //TODO: figure out how to handle error/exception logging.d
         }
     }
 }
