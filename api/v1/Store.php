@@ -8,6 +8,7 @@ use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use stdClass;
+use Symfony\Component\Filesystem\Filesystem;
 use ZipArchive;
 use function App\rcopy;
 use function App\rrmdir;
@@ -310,20 +311,26 @@ class Store extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function ExtractRasterFilesFromZIP(string $raster_zip, int $gameSessionId): void
     {
+        $tempStore = self::GetRasterStoreFolder(-1);
         $folder = self::GetRasterStoreFolder($gameSessionId);
         self::EnsureFolderExists($folder);
-        self::EnsureFolderExists("temp");
-
-        $zip = new ZipArchive;
-        $res = $zip->open($raster_zip);
-        if ($res === true) {
-            $total = $zip->numFiles - 3;
-            Log::LogDebug("There are ".$total." raster files in this save, unpacking... This could take a bit longer.");
-            $zip->extractTo("temp/");
-            $zip->close();
-            Log::LogDebug("Now moving all ".$total." raster files to their proper place...");
-            rcopy("temp/raster", $folder);
-            rrmdir("temp/");
+        try {
+            $zip = new ZipArchive;
+            $res = $zip->open($raster_zip);
+            if ($res === true) {
+                Log::LogDebug("There are raster files in this save, unpacking... This could take a bit longer.");
+                if (!$zip->extractTo($tempStore)) {
+                    throw new \Exception('ExtractTo failed.');
+                } else {
+                    Log::LogDebug('ExtractTo succeeded.');
+                }
+                $zip->close();
+                Log::LogDebug("Now moving all raster files to their proper place...");
+                rcopy($tempStore."raster", $folder);
+                rrmdir($tempStore);
+            }
+        } catch (\Exception $e) {
+            Log::LogError($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
     }
 
