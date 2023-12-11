@@ -175,7 +175,8 @@ class Store extends Base
                     Log::LogError($layerDescriptionRequest["error"]);
                 }
                 foreach ($layerDescriptionRequest["layerDescriptions"] as $individualLayer) {
-                    $json = $layer->GetExport($region, $individualLayer["layerName"], "JSON", [], null);
+                    $json = $layer->GetExport($region, $individualLayer["layerName"], "JSON");
+                    $layerMetaData['original_layer_name'] = $individualLayer["layerName"];
                     $this->LoadJSON($json, $filename, $region, $layerMetaData);
                 }
             } else {
@@ -333,21 +334,32 @@ class Store extends Base
         ?int &$mspId,
         ?int &$countryId
     ): void {
+        if (!empty($layerMetaData['original_layer_name'])) {
+            $featureProperties['original_layer_name'] = $layerMetaData['original_layer_name'];
+        }
 
         if (!empty($layerMetaData["layer_property_as_type"])) {
             // check if the layer_property_as_type value exists in $featureProperties
             $type = '-1';
             if (!empty($featureProperties[$layerMetaData["layer_property_as_type"]])) {
                 $featureTypeProperty = $featureProperties[$layerMetaData["layer_property_as_type"]];
-                foreach ($layerMetaData["layer_type"] as $layerTypeMetaData) {
+                foreach ($layerMetaData["layer_type"] as $typeValue => $layerTypeMetaData) {
                     if (!empty($layerTypeMetaData["map_type"])) {
                         // identify the 'other' category
                         if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                            $typeOther = $layerTypeMetaData["value"];
+                            $typeOther = $typeValue;
                         }
-                        // translate the found $featureProperties value to the type value
-                        if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
-                            $type = $layerTypeMetaData["value"];
+                        if (str_contains($layerTypeMetaData["map_type"], '-')) {
+                            // assumes a range of minimum to maximum (but not including) integer or float values
+                            $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
+                            if ((float) $featureTypeProperty >= (float) $typeValues[0]
+                                && (float) $featureTypeProperty < (float) $typeValues[1]) {
+                                $type = $typeValue;
+                            }
+                        } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+                            // translate the found $featureProperties value to the type value
+                            // can be integer, float, string
+                            $type = $typeValue;
                             break;
                         }
                     }
