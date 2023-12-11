@@ -350,14 +350,15 @@ class Store extends Base
                             $typeOther = $typeValue;
                         }
                         if (str_contains($layerTypeMetaData["map_type"], '-')) {
-                            // assumes an integer range of min-max integer or float values
+                            // assumes a range of minimum to maximum (but not including) integer or float values
                             $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
                             if ((float) $featureTypeProperty >= (float) $typeValues[0]
-                                && (float) $featureTypeProperty <= (float) $typeValues[1]) {
+                                && (float) $featureTypeProperty < (float) $typeValues[1]) {
                                 $type = $typeValue;
                             }
                         } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
                             // translate the found $featureProperties value to the type value
+                            // can be integer, float, string
                             $type = $typeValue;
                             break;
                         }
