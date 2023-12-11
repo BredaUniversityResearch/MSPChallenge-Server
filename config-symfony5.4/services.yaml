@@ -27,7 +27,7 @@ services:
     App\MessageHandler\Analytics\AnalyticsMessageHandler:
         tags:
             - { name: messenger.message_handler, handles: App\Message\Analytics\SessionCreated }
-            - { name: messenger.message_handler, handles: App\Message\Analytics\ClientJoinedSession }
+            - { name: messenger.message_handler, handles: App\Message\Analytics\UserJoinedSession }
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

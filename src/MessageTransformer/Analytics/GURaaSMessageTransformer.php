@@ -43,7 +43,7 @@
 namespace App\MessageTransformer\Analytics;
 
 use App\Message\Analytics\AnalyticsMessageBase;
-use App\Message\Analytics\ClientJoinedSession;
+use App\Message\Analytics\UserJoinedSession;
 use App\Message\Analytics\SessionCreated;
 use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
@@ -70,7 +70,7 @@ class GURaaSMessageTransformer
         if ($message instanceof SessionCreated) {
             return $this->transformSessionCreated($message);
         }
-        if ($message instanceof ClientJoinedSession) {
+        if ($message instanceof UserJoinedSession) {
             return $this->transformClientJoinedSession($message);
         }
         //TODO: log unsupported message type transformation.
@@ -79,31 +79,25 @@ class GURaaSMessageTransformer
 
     private function transformSessionCreated(SessionCreated $message) : array | null
     {
-        $tag1 = "GameSessionCreated";
-        //TODO: tag2 needs to be a ServerManager uuid (serialized, only 31 chars)
-        // so different messages can be associated with each other
-        $tag3 = strval($message->id);
+        $tag3 = strval($message->session->id);
         $data = json_encode($message);
         return $this->createPostRequestBody(
             $message->timeStamp,
-            $tag1,
-            null,
+            strval($message->type),
+            self::tagFromUuid($message->serverManagerId),
             $tag3,
             null,
             $data
         );
     }
-    public function transformClientJoinedSession(ClientJoinedSession $message) : array | null
+    public function transformClientJoinedSession(UserJoinedSession $message) : array | null
     {
-        $tag1 = "ClientJoinedSession";
-        //TODO: tag2 needs to be a ServerManager uuid (serialized, only 31 chars)
-        // so different messages can be associated with each other
-        $tag3 = strval($message->id);
+        $tag3 = strval($message->countryId);
         $data = json_encode($message);
         return $this->createPostRequestBody(
             $message->timeStamp,
-            $tag1,
-            null,
+            strval($message->type),
+            self::tagFromUuid($message->serverManagerId),
             $tag3,
             null,
             $data
@@ -150,5 +144,10 @@ class GURaaSMessageTransformer
     private static function checkValidStringLength(?string $string, int $maxSize): bool
     {
         return !($string && iconv_strlen($string)> $maxSize);
+    }
+
+    private static function tagFromUuid(Uuid $id) : string
+    {
+        return $id->toBase32();
     }
 }
