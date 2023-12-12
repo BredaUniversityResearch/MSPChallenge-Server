@@ -7,45 +7,54 @@ use DateTimeImmutable;
 use JsonSerializable;
 use Symfony\Component\Uid\Uuid;
 
-class UserJoinedSession extends AnalyticsMessageBase implements JsonSerializable
+class UserLogOnOffSession extends AnalyticsMessageBase implements JsonSerializable
 {
 
     public readonly int $userId;
     public readonly string $userName;
-    public readonly int $sessionId;
+    public readonly int $gameSessionId;
     public readonly int $countryId;
 
     public function __construct(
+        bool              $logOn,
         DateTimeImmutable $timeStamp,
         Uuid              $serverManagerId,
         int               $userId,
         string            $userName,
-        int               $sessionId,
+        int               $gameSessionId,
         int               $countryId,
     ) {
         parent::__construct(
-            new AnalyticsDataType(AnalyticsDataType::USER_JOINED_SESSION),
+            new AnalyticsDataType(
+                $logOn ?
+                    AnalyticsDataType::USER_LOGON_SESSION :
+                    AnalyticsDataType::USER_LOGOFF_SESSION
+            ),
             $timeStamp,
             $serverManagerId
         );
         $this->userId = $userId;
         $this->userName = $userName;
-        $this->sessionId = $sessionId;
+        $this->gameSessionId = $gameSessionId;
         $this->countryId = $countryId;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function JsonSerialize() : array
     {
-        return [
+        $result = [
             'serverManagerId' => $this->serverManagerId,
             'user' =>
             [
                 'id' => $this->userId,
                 'name' => $this->userName
             ],
-            'sessionId' => $this->sessionId,
-            'countryId' => $this->countryId
+            'gameSessionId' => $this->gameSessionId
         ];
+
+        if ($this->type == AnalyticsDataType::USER_LOGON_SESSION) {
+            $result['countryId'] = $this->countryId;
+        }
+        return $result;
     }
 }

@@ -3,8 +3,9 @@
 namespace App\Message\Analytics\Helper;
 
 use DateTimeImmutable;
+use JsonSerializable;
 
-readonly class GameConfig
+readonly class GameConfig implements JsonSerializable
 {
 
     public string $fileName;
@@ -40,5 +41,22 @@ readonly class GameConfig
         $this->uploadUserName = $uploadUserName;
         $this->uploadUserAccountId = $uploadUserAccountId;
         $this->uploadTime = $uploadTime;
+    }
+
+    //phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function JsonSerialize() : array
+    {
+        return[
+          'fileName' => $this->fileName,
+          'filePath' => $this->filePath,
+          'version' => $this->version,
+          'versionMessage' => $this->versionMessage,
+          'visibility' => $this->visibility,
+          'region' => $this->region,
+          'description' => $this->description,
+          'uploadUserName' => $this->uploadUserName,
+          'uploadUserAccountId' => $this->uploadUserAccountId,
+          'uploadTime' => $this->uploadTime->format('c')
+        ];
     }
 }

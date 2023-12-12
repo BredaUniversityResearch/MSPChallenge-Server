@@ -43,7 +43,7 @@
 namespace App\MessageTransformer\Analytics;
 
 use App\Message\Analytics\AnalyticsMessageBase;
-use App\Message\Analytics\UserJoinedSession;
+use App\Message\Analytics\UserLogOnOffSession;
 use App\Message\Analytics\SessionCreated;
 use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
@@ -70,7 +70,7 @@ class GURaaSMessageTransformer
         if ($message instanceof SessionCreated) {
             return $this->transformSessionCreated($message);
         }
-        if ($message instanceof UserJoinedSession) {
+        if ($message instanceof UserLogOnOffSession) {
             return $this->transformClientJoinedSession($message);
         }
         //TODO: log unsupported message type transformation.
@@ -90,7 +90,7 @@ class GURaaSMessageTransformer
             $data
         );
     }
-    public function transformClientJoinedSession(UserJoinedSession $message) : array | null
+    public function transformClientJoinedSession(UserLogOnOffSession $message) : array | null
     {
         $tag3 = strval($message->countryId);
         $data = json_encode($message);
