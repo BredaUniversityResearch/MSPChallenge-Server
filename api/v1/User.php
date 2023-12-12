@@ -3,11 +3,16 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Message\Analytics\UserLogOnOffSession;
 use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
 use Drift\DBAL\Result;
 use Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
+use ServerManager\ServerManager;
+use Symfony\Component\Uid\Uuid;
 use function App\await;
 
 class User extends Base implements JWTUserInterface
@@ -40,10 +45,11 @@ class User extends Base implements JWTUserInterface
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function RequestSession(
         string $build_timestamp,
-        int $country_id,
+        int    $country_id,
         string $user_name,
         string $country_password = ""
-    ): array {
+    ): array
+    {
         $response = array();
         $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $this->CheckVersion($build_timestamp);
@@ -58,7 +64,7 @@ class User extends Base implements JWTUserInterface
         } else {
             $password_admin = json_decode(base64_decode($password_admin), true);
             $password_player = json_decode(base64_decode($password_player), true);
-                
+
             // check whether this is an admin, region manager, or player requesting entrance and get the authentication
             //   provider accordingly
             if ($country_id == 1) {
@@ -121,6 +127,14 @@ class User extends Base implements JWTUserInterface
             //$response["api_access_token"] = $security->generateToken()["token"];
             //$response["api_access_recovery_token"] = $security->getRecoveryToken();
         }
+        $userId = $response['session_id'];
+        $this->logAnalytics(
+            true,
+            $userId,
+            $user_name,
+            $this->getGameSessionId(),
+            $country_id
+        );
         return $response;
     }
 
@@ -129,10 +143,11 @@ class User extends Base implements JWTUserInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function RequestSessionLegacy(
-        int $countryId,
+        int    $countryId,
         string $countryPassword = "",
         string $userName = ""
-    ): array {
+    ): array
+    {
         $response = array();
         $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $qb = $connection->createQueryBuilder()
@@ -141,7 +156,7 @@ class User extends Base implements JWTUserInterface
         $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
         $hasCorrectPassword = true;
         if (count($passwords) > 0) {
-            $password =  ($countryId < 3) ?
+            $password = ($countryId < 3) ?
                 $passwords[0]["game_session_password_admin"] : $passwords[0]["game_session_password_player"];
             $hasCorrectPassword = $password == $countryPassword;
         }
@@ -165,13 +180,20 @@ class User extends Base implements JWTUserInterface
             } catch (Exception $e) {
                 throw new Exception(
                     "Could not log you in. Please check with your session administrator." .
-                    " This session might need upgrading.".$e->getMessage()
+                    " This session might need upgrading." . $e->getMessage()
                 );
             }
         } else {
             throw new Exception("Incorrect password.");
         }
-
+        $userId = $response['session_id'];
+        $this->logAnalytics(
+            true,
+            $userId,
+            $userName,
+            $this->getGameSessionId(),
+            $countryId
+        );
         return $response;
     }
 
@@ -205,17 +227,17 @@ class User extends Base implements JWTUserInterface
             }
             if ($minBuildDate > $clientBuildDate || ($maxBuildDate > $minDate && $maxBuildDate < $clientBuildDate)) {
                 if ($maxBuildDate > $minDate) {
-                    $clientVersionsMessage = "Accepted client versions are between ".
-                        $minBuildDate->format(DateTimeInterface::ATOM)." and ".
-                        $maxBuildDate->format(DateTimeInterface::ATOM).".";
+                    $clientVersionsMessage = "Accepted client versions are between " .
+                        $minBuildDate->format(DateTimeInterface::ATOM) . " and " .
+                        $maxBuildDate->format(DateTimeInterface::ATOM) . ".";
                 } else {
-                    $clientVersionsMessage = "Accepted client versions are from ".
-                        $minBuildDate->format(DateTimeInterface::ATOM)." onwards.";
+                    $clientVersionsMessage = "Accepted client versions are from " .
+                        $minBuildDate->format(DateTimeInterface::ATOM) . " onwards.";
                 }
 
-                throw new Exception("Incompatible client version.\n".$clientVersionsMessage.
-                    "\nYour client version is ".
-                    $clientBuildDate->format(DateTimeInterface::ATOM).".");
+                throw new Exception("Incompatible client version.\n" . $clientVersionsMessage .
+                    "\nYour client version is " .
+                    $clientBuildDate->format(DateTimeInterface::ATOM) . ".");
             }
         }
     }
@@ -233,13 +255,23 @@ class User extends Base implements JWTUserInterface
             array($session_id)
         );
         $this->getDatabase()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
+
+        $gameSessionId = $this->getGameSessionId();
+
+        $this->logAnalytics(
+            false,
+            $session_id,
+            $this->user_name,
+            $this->getGameSessionId(),
+            -1
+        );
     }
 
     private function checkProviderExists($provider): bool
     {
         return is_subclass_of($provider, Auths::class);
     }
-    
+
     public function getProviders(): array
     {
         $return = array();
@@ -264,7 +296,7 @@ class User extends Base implements JWTUserInterface
             $call_provider = new $provider;
             return $call_provider->checkUser($users);
         }
-        throw new Exception("Could not work with authentication provider '".$provider."'.");
+        throw new Exception("Could not work with authentication provider '" . $provider . "'.");
     }
 
     /**
@@ -284,9 +316,9 @@ class User extends Base implements JWTUserInterface
         }
         return await(
             $this->getAsyncDatabase()->query($qb)
-            ->then(function (Result $result) {
-                return $result->fetchAllRows();
-            })
+                ->then(function (Result $result) {
+                    return $result->fetchAllRows();
+                })
         );
     }
 
@@ -299,7 +331,7 @@ class User extends Base implements JWTUserInterface
             $call_provider = new $provider;
             return $call_provider->authenticate($username, $password);
         }
-        throw new Exception("Could not work with authentication provider '".$provider."'.");
+        throw new Exception("Could not work with authentication provider '" . $provider . "'.");
     }
 
     // all of the below is boilerplate to work with Symfony Security through LexikJWTAuthenticationBundle
@@ -366,5 +398,33 @@ class User extends Base implements JWTUserInterface
     public function eraseCredentials(): void
     {
         // irrelevant, but required function
+    }
+
+    private function logAnalytics(
+        bool $logOn,
+        int $userId,
+        string $userName,
+        int $sessionId,
+        int $countryId
+    ) : void {
+        try {
+            $serverManager = ServerManager::getInstance();
+            $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
+
+            $analyticsMessage = new UserLogOnOffSession(
+                $logOn,
+                new DateTimeImmutable(),
+                $serverManagerId,
+                $userId,
+                $userName,
+                $sessionId,
+                $countryId
+            );
+            $legacyHelper = SymfonyToLegacyHelper::getInstance();
+            $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
+        } catch (Exception $e) {
+            //TODO: figure out how to log errors.
+            printf($e);
+        }
     }
 }

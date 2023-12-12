@@ -8,6 +8,7 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Security\BearerTokenValidator;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use ServerManager\ServerManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,7 @@ class UserController extends AbstractController
         int $sessionId,
         Request $request,
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
+        ServerManager $serverManager,
         AuthenticationSuccessHandler $authenticationSuccessHandler
     ): Response {
         try {

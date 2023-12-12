@@ -9,6 +9,6 @@ class AnalyticsDataType extends Enum
 
     public const GAME_SESSION_CREATED = "GameSessionCreated";
     public const GAME_SESSION_ARCHIVED = "GameSessionArchived";
-    public const USER_JOINED_SESSION = "UserJoinedSession";
-    public const USER_LEFT_SESSION = "UserLeftSession";
+    public const USER_LOGON_SESSION = "UserLoggedOnSession";
+    public const USER_LOGOFF_SESSION = "UserLoggedOffSession";
 }
