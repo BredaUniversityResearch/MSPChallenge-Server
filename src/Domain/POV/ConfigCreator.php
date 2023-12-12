@@ -232,7 +232,8 @@ WITH
         JSON_ARRAYAGG(JSON_OBJECT(
           'name', t.display_name,
           'approval', t.approval,            
-          'value', t.map_type,
+          'value', t.value,
+          'map_type', t.map_type,
           'displayPolygon', t.displayPolygon,
           'polygonColor', t.polygonColor,
           'polygonPatternName', t.polygonPatternName, 
