@@ -503,10 +503,18 @@ SQL,
         // set the actual outputted region coordinates
         $pixelToCoordinateWidthFactor = abs($inputTopRightX - $inputBottomLeftX) / $inputWidth;
         $pixelToCoordinateHeightFactor = abs($inputTopRightY - $inputBottomLeftY) / $inputHeight;
-        $outputRegion->setBottomLeftX($outputBottomLeftX - abs($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor);
-        $outputRegion->setBottomLeftY($outputBottomLeftY - abs($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor);
-        $outputRegion->setTopRightX($outputTopRightX + abs($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor);
-        $outputRegion->setTopRightY($outputTopRightY + abs($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor);
+        $outputRegion->setBottomLeftX(
+            $outputBottomLeftX - abs($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor
+        );
+        $outputRegion->setBottomLeftY(
+            $outputBottomLeftY - abs($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor
+        );
+        $outputRegion->setTopRightX(
+            $outputTopRightX + abs($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor
+        );
+        $outputRegion->setTopRightY(
+            $outputTopRightY + abs($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor
+        );
 
         $image->cropImage($regionWidth, $regionHeight, $outputPixel0X, $outputPixel0Y);
         $image->setImageFormat('PNG');
