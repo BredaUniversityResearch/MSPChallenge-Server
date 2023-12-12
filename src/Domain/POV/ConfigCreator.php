@@ -231,19 +231,68 @@ WITH
         )) AS layer_type_mapping,
         JSON_ARRAYAGG(JSON_OBJECT(
           'name', t.display_name,
-          '//material', 'todo'
+          'approval', t.approval,            
+          'value', t.map_type,
+          'displayPolygon', t.displayPolygon,
+          'polygonColor', t.polygonColor,
+          'polygonPatternName', t.polygonPatternName, 
+          'innerGlowEnabled', t.innerGlowEnabled,
+          'innerGlowRadius', t.innerGlowRadius,
+          'innerGlowIterations', t.innerGlowIterations,
+          'innerGlowMultiplier', t.innerGlowMultiplier,
+          'innerGlowPixelSize', t.innerGlowPixelSize,
+          'displayLines', t.displayLines,
+          'lineColor', t.lineColor,
+          'lineWidth', t.lineWidth,
+          'lineIcon', t.lineIcon,
+          'linePatternType', t.linePatternType,
+          'displayPoints', t.displayPoints,
+          'pointColor', t.pointColor,
+          'pointSize', t.pointSize,
+          'pointSpriteName', t.pointSpriteName,
+          'description', t.description,
+          'capacity', t.capacity, 
+          'investmentCost', t.investmentCost,
+          'availability', t.availability,
+          'media', t.media 
         )) AS layer_type_types,
         MIN(t.value) AS layer_type_value_min,
         MAX(t.value) AS layer_type_value_max,
         COUNT(t.id) as layer_type_value_count,
         CAST((MAX(t.value) / (COUNT(t.id)-1)) as INT) as layer_type_value_step
       FROM LayerStep1 l
+      # join as json table to control which fields we want to extract and alias afterwards
+      #   see https://community.mspchallenge.info/wiki/Configuration_data_schema_documentation
       INNER JOIN JSON_TABLE(
         JSON_EXTRACT(l.layer_type, '$.*'),
           '$[*]' COLUMNS (
             id for ordinality,
             display_name VARCHAR(255) PATH '$.displayName',
-            value int PATH '$.value'
+            approval VARCHAR(255) PATH '$.approval',            
+            value int PATH '$.value',
+            map_type VARCHAR(255) PATH '$.map_type',
+            displayPolygon bool PATH '$.displayPolygon',
+            polygonColor VARCHAR(255) PATH '$.polygonColor',
+            polygonPatternName VARCHAR(255) PATH '$.polygonPatternName', 
+            innerGlowEnabled bool PATH '$.innerGlowEnabled',
+            innerGlowRadius int PATH '$.innerGlowRadius',
+            innerGlowIterations int PATH '$.innerGlowIterations',
+            innerGlowMultiplier float PATH '$.innerGlowMultiplier',
+            innerGlowPixelSize float PATH '$.innerGlowPixelSize',
+            displayLines bool PATH '$.displayLines',
+            lineColor VARCHAR(255) PATH '$.lineColor',
+            lineWidth float PATH '$.lineWidth',
+            lineIcon VARCHAR(255) PATH '$.lineIcon',
+            linePatternType VARCHAR(255) PATH '$.linePatternType',
+            displayPoints bool PATH '$.displayPoints',
+            pointColor VARCHAR(255) PATH '$.pointColor',
+            pointSize float PATH '$.pointSize',
+            pointSpriteName VARCHAR(255) PATH '$.pointSpriteName',
+            description TEXT PATH '$.description',
+            capacity long PATH '$.capacity', 
+            investmentCost float PATH '$.investmentCost',
+            availability int PATH '$.availability',
+            media VARCHAR(255) PATH '$.media'     
         )
       ) AS t
       LEFT JOIN LatestEcologyKpiFinal k ON (
