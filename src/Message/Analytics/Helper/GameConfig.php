@@ -5,7 +5,7 @@ namespace App\Message\Analytics\Helper;
 use DateTimeImmutable;
 use JsonSerializable;
 
-readonly class GameConfig implements JsonSerializable
+class GameConfig implements JsonSerializable
 {
 
     public string $fileName;
