@@ -343,20 +343,28 @@ FROM (
       l.layer_id,
       IF(
         l.layer_geotype = 'raster',
-        JSON_OBJECT(
-          #'db-layer-id', l.layer_id,
-          'name', REPLACE(l.layer_short,'mel_',''),          
-          'coordinate0', JSON_EXTRACT(l.layer_raster, '$.boundingbox[0]'),
-          'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
-          'scale', JSON_OBJECT(
-            'min_value', 0,
-            # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
-            'max_value', l.kpi_value * 1000 * 2,
-            'interpolation', 'lin'
+        JSON_MERGE_PRESERVE(
+          JSON_OBJECT(
+            #'db-layer-id', l.layer_id,
+            'name', REPLACE(l.layer_short,'mel_',''),          
+            'coordinate0', JSON_EXTRACT(l.layer_raster, '$.boundingbox[0]'),
+            'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
+            'mapping', l.layer_type_mapping,
+            'types', l.layer_type_types,
+            'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url')))
           ),
-          'mapping', l.layer_type_mapping,
-          'types', l.layer_type_types,
-          'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url')))
+          IF(
+            l.kpi_value IS NOT NULL,
+            JSON_OBJECT(
+              'scale', JSON_OBJECT(
+                'min_value', 0,
+                # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
+                'max_value', l.kpi_value * 1000 * 2,
+                'interpolation', 'lin'
+              )
+            ),
+            JSON_OBJECT()
+          )
         ),
         JSON_OBJECT(
           #'db-layer-id', l.layer_id,
