@@ -4,76 +4,76 @@ namespace App\Domain\POV;
 
 class Region
 {
-    private float $topLeftX;
-    private float $topLeftY;
-    private float $bottomRightX;
-    private float $bottomRightY;
+    private float $bottomLeftX;
+    private float $bottomLeftY;
+    private float $topRightX;
+    private float $topRightY;
 
-    public function __construct(float $topLeftX, float $topLeftY, float $bottomRightX, float $bottomRightY)
+    public function __construct(float $bottomLeftX, float $bottomLeftY, float $topRightX, float $topRightY)
     {
-        $this->topLeftX = $topLeftX;
-        $this->topLeftY = $topLeftY;
-        $this->bottomRightX = $bottomRightX;
-        $this->bottomRightY = $bottomRightY;
+        $this->bottomLeftX = $bottomLeftX;
+        $this->bottomLeftY = $bottomLeftY;
+        $this->topRightX = $topRightX;
+        $this->topRightY = $topRightY;
     }
 
-    public function getTopLeftX(): float
+    public function getBottomLeftX(): float
     {
-        return $this->topLeftX;
+        return $this->bottomLeftX;
     }
 
-    public function getTopLeftY(): float
+    public function getBottomLeftY(): float
     {
-        return $this->topLeftY;
+        return $this->bottomLeftY;
     }
 
-    public function getBottomRightX(): float
+    public function getTopRightX(): float
     {
-        return $this->bottomRightX;
+        return $this->topRightX;
     }
 
-    public function getBottomRightY(): float
+    public function getTopRightY(): float
     {
-        return $this->bottomRightY;
+        return $this->topRightY;
     }
 
-    public function setTopLeftX(float $topLeftX): void
+    public function setBottomLeftX(float $bottomLeftX): void
     {
-        $this->topLeftX = $topLeftX;
+        $this->bottomLeftX = $bottomLeftX;
     }
 
-    public function setTopLeftY(float $topLeftY): void
+    public function setBottomLeftY(float $bottomLeftY): void
     {
-        $this->topLeftY = $topLeftY;
+        $this->bottomLeftY = $bottomLeftY;
     }
 
-    public function setBottomRightX(float $bottomRightX): void
+    public function setTopRightX(float $topRightX): void
     {
-        $this->bottomRightX = $bottomRightX;
+        $this->topRightX = $topRightX;
     }
 
-    public function setBottomRightY(float $bottomRightY): void
+    public function setTopRightY(float $topRightY): void
     {
-        $this->bottomRightY = $bottomRightY;
+        $this->topRightY = $topRightY;
     }
 
-    public function getTopLeft(): array
+    public function getBottomLeft(): array
     {
-        return [$this->topLeftX, $this->topLeftY];
+        return [$this->bottomLeftX, $this->bottomLeftY];
     }
 
-    public function getBottomRight(): array
+    public function getTopRight(): array
     {
-        return [$this->bottomRightX, $this->bottomRightY];
+        return [$this->topRightX, $this->topRightY];
     }
 
     public function toArray(): array
     {
         return [
-            'topLeftX' => $this->topLeftX,
-            'topLeftY' => $this->topLeftY,
-            'bottomRightX' => $this->bottomRightX,
-            'bottomRightY' => $this->bottomRightY,
+            'bottomLeftX' => $this->bottomLeftX,
+            'bottomLeftY' => $this->bottomLeftY,
+            'topRightX' => $this->topRightX,
+            'topRightY' => $this->topRightY,
         ];
     }
 

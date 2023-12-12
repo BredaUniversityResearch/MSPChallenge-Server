@@ -29,7 +29,7 @@ class CreatePOVConfigCommand extends Command
 
     const ARG_REGION_COORDINATES_EXAMPLE = '4048536 3470232 4063746 3488599';
     const REGION_COORDINATES_DESCRIPTION = '4 floats representing the coordinates of the region. In order:' .
-        ' region top left coordinates x, -y, region bottom right coordinates x, -y. ' .
+        ' region bottom left coordinates x, -y, region top right coordinates x, -y. ' .
         'Eg: ' . self::ARG_REGION_COORDINATES_EXAMPLE;
 
     public function __construct(
