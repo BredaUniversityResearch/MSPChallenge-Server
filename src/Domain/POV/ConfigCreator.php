@@ -411,7 +411,7 @@ SQL,
                 $this->extractPartFromImageByRegion(
                     $this->projectDir . DIRECTORY_SEPARATOR . 'raster' . DIRECTORY_SEPARATOR .
                         $this->sessionId . DIRECTORY_SEPARATOR . $layer['data'],
-                   new Region(
+                    new Region(
                         $layer['coordinate0'][0],
                         $layer['coordinate0'][1],
                         $layer['coordinate1'][0],
