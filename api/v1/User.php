@@ -48,8 +48,7 @@ class User extends Base implements JWTUserInterface
         int    $country_id,
         string $user_name,
         string $country_password = ""
-    ): array
-    {
+    ): array {
         $response = array();
         $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $this->CheckVersion($build_timestamp);
@@ -146,8 +145,7 @@ class User extends Base implements JWTUserInterface
         int    $countryId,
         string $countryPassword = "",
         string $userName = ""
-    ): array
-    {
+    ): array {
         $response = array();
         $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $qb = $connection->createQueryBuilder()
