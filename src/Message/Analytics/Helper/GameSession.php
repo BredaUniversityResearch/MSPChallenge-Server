@@ -5,7 +5,7 @@ namespace App\Message\Analytics\Helper;
 use DateTimeImmutable;
 use JsonSerializable;
 
-readonly class GameSession implements JsonSerializable
+class GameSession implements JsonSerializable
 {
 
     public int $id;
