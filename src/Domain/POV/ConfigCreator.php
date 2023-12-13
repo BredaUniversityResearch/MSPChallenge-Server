@@ -106,6 +106,12 @@ class ConfigCreator
         }
         $this->log('json decoded, extracting region from raster layers');
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
+        if (false !== $bathymetryLayer = current(array_filter(
+            $json['datamodel']['raster_layers'],
+            fn($x) => $x['name'] === 'Bathymetry'
+        ))) {
+            $json['datamodel']['bathymetry'] = $bathymetryLayer;
+        }
         $this->log('region extracted, creating json config file');
         $this->createJsonConfigFile($json, $dir, $configFilename);
         $this->log('json config file created: ' . realpath($dir . DIRECTORY_SEPARATOR . $configFilename));
