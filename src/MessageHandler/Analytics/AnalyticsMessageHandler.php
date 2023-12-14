@@ -17,10 +17,11 @@ class AnalyticsMessageHandler
     private HttpClientInterface $httpClient;
 
     public function __construct(
-        HttpClientInterface $httpClient
+        HttpClientInterface $httpClient,
+        string $guraasGameId,
     ) {
-        $this->guraasGameId = Uuid::fromString('3318cf30-f78d-4284-b530-a329005c248a');
-        $this->guraasRequestTransformer = new GURaaSMessageTransformer(null, null);
+        $this->guraasGameId = Uuid::fromString($guraasGameId);
+        $this->guraasRequestTransformer = new GURaaSMessageTransformer();
         $this->httpClient = $httpClient;
     }
 
@@ -38,7 +39,13 @@ class AnalyticsMessageHandler
 
     private function postRequestToGURaaS($requestBody) : bool
     {
+        if (!Uuid::isValid($this->guraasGameId)) {
+            //TODO: log error
+            return false;
+        }
+
         if (!$requestBody) {
+            //TODO: log error
             return false;
         }
 

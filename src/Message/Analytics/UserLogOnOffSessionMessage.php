@@ -7,7 +7,7 @@ use DateTimeImmutable;
 use JsonSerializable;
 use Symfony\Component\Uid\Uuid;
 
-class UserLogOnOffSession extends AnalyticsMessageBase implements JsonSerializable
+class UserLogOnOffSessionMessage extends AnalyticsMessageBase implements JsonSerializable
 {
 
     public readonly int $userId;
@@ -16,11 +16,11 @@ class UserLogOnOffSession extends AnalyticsMessageBase implements JsonSerializab
     public readonly int $countryId;
 
     public function __construct(
-        bool              $logOn,
+        bool $logOn,
         DateTimeImmutable $timeStamp,
-        Uuid              $serverManagerId,
-        int               $userId,
-        string            $userName,
+        Uuid $serverManagerId,
+        int $userId,
+        string $userName,
         int               $gameSessionId,
         int               $countryId,
     ) {
@@ -42,19 +42,15 @@ class UserLogOnOffSession extends AnalyticsMessageBase implements JsonSerializab
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function JsonSerialize() : array
     {
-        $result = [
+        return [
             'serverManagerId' => $this->serverManagerId,
             'user' =>
             [
                 'id' => $this->userId,
                 'name' => $this->userName
             ],
-            'gameSessionId' => $this->gameSessionId
+            'gameSessionId' => $this->gameSessionId,
+            'countryId' => $this->countryId
         ];
-
-        if ($this->type == AnalyticsDataType::USER_LOGON_SESSION) {
-            $result['countryId'] = $this->countryId;
-        }
-        return $result;
     }
 }

@@ -4,7 +4,7 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Message\Analytics\UserLogOnOffSession;
+use App\Message\Analytics\UserLogOnOffSessionMessage;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -45,7 +45,7 @@ class User extends Base implements JWTUserInterface
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function RequestSession(
         string $build_timestamp,
-        int    $country_id,
+        int $country_id,
         string $user_name,
         string $country_password = ""
     ): array {
@@ -127,7 +127,7 @@ class User extends Base implements JWTUserInterface
             //$response["api_access_recovery_token"] = $security->getRecoveryToken();
         }
         $userId = $response['session_id'];
-        $this->logAnalytics(
+        $this->logUserLogOnOrOff(
             true,
             $userId,
             $user_name,
@@ -142,7 +142,7 @@ class User extends Base implements JWTUserInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function RequestSessionLegacy(
-        int    $countryId,
+        int $countryId,
         string $countryPassword = "",
         string $userName = ""
     ): array {
@@ -185,7 +185,7 @@ class User extends Base implements JWTUserInterface
             throw new Exception("Incorrect password.");
         }
         $userId = $response['session_id'];
-        $this->logAnalytics(
+        $this->logUserLogOnOrOff(
             true,
             $userId,
             $userName,
@@ -252,16 +252,23 @@ class User extends Base implements JWTUserInterface
             "UPDATE plan SET plan_lock_user_id=NULL WHERE plan_lock_user_id=?",
             array($session_id)
         );
+
+        $sessionQueryResult = $this->getDatabase()->query(
+            "SELECT user_name, user_country_id FROM user WHERE user_id = ?",
+            array($session_id)
+        );
         $this->getDatabase()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
 
-        $gameSessionId = $this->getGameSessionId();
+        $userSession = empty($sessionQueryResult) ? null : $sessionQueryResult[0];
+        $userName = empty($userSession) ? '' : $userSession['user_name'];
+        $countryId = empty($userSession) ? -1 : $userSession['user_country_id'];
 
-        $this->logAnalytics(
+        $this->logUserLogOnOrOff(
             false,
             $session_id,
-            $this->user_name,
+            $userName,
             $this->getGameSessionId(),
-            -1
+            $countryId
         );
     }
 
@@ -398,7 +405,7 @@ class User extends Base implements JWTUserInterface
         // irrelevant, but required function
     }
 
-    private function logAnalytics(
+    private function logUserLogOnOrOff(
         bool $logOn,
         int $userId,
         string $userName,
@@ -409,7 +416,7 @@ class User extends Base implements JWTUserInterface
             $serverManager = ServerManager::getInstance();
             $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
 
-            $analyticsMessage = new UserLogOnOffSession(
+            $analyticsMessage = new UserLogOnOffSessionMessage(
                 $logOn,
                 new DateTimeImmutable(),
                 $serverManagerId,

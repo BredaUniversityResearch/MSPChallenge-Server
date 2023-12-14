@@ -4,7 +4,7 @@
  * Request structure for GURaaS messages:
  *
  * POST Request URL: /games/{id_game: UUID}/data/
- *
+ * POST Request Body:
  *  {
  *      id_session: UUID
  *      id_player: (optional?) string (max 63/64 chars inc null terminator)
@@ -27,24 +27,11 @@
  *
  */
 
-//1. Event happens
-// Event's message is only concerned with the data about the event.
-//2. This class gets notified of event through a message
-//3. message's data should be used to construct a GURaaS POST Request.
-//problem: different type of messages need different construction methods.
-//differences: member variables in messages
-//common: structure that the resulting POST Request should have
-//solution: select different construction method based on type.
-//how? A GURaaSPostRequest factory
-//TODO:
-//1. Transform message to GURaaS message
-//2. Send message to GURaaS via HTTP POST request
-
 namespace App\MessageTransformer\Analytics;
 
 use App\Message\Analytics\AnalyticsMessageBase;
-use App\Message\Analytics\UserLogOnOffSession;
-use App\Message\Analytics\SessionCreated;
+use App\Message\Analytics\UserLogOnOffSessionMessage;
+use App\Message\Analytics\SessionCreatedMessage;
 use DateTimeImmutable;
 use Symfony\Component\Uid\Uuid;
 
@@ -65,19 +52,19 @@ class GURaaSMessageTransformer
         $this->guraasSessionStart = $guraasSessionStart ?? new DateTimeImmutable();
     }
 
-    public function transformMessageToRequestBody(AnalyticsMessageBase $message) : array | null
+    public function transformMessageToRequestBody(AnalyticsMessageBase $message) : ?array
     {
-        if ($message instanceof SessionCreated) {
+        if ($message instanceof SessionCreatedMessage) {
             return $this->transformSessionCreated($message);
         }
-        if ($message instanceof UserLogOnOffSession) {
+        if ($message instanceof UserLogOnOffSessionMessage) {
             return $this->transformClientJoinedSession($message);
         }
         //TODO: log unsupported message type transformation.
         return null;
     }
 
-    private function transformSessionCreated(SessionCreated $message) : array | null
+    private function transformSessionCreated(SessionCreatedMessage $message) : ?array
     {
         $tag3 = strval($message->session->id);
         $data = json_encode($message);
@@ -90,7 +77,8 @@ class GURaaSMessageTransformer
             $data
         );
     }
-    public function transformClientJoinedSession(UserLogOnOffSession $message) : array | null
+
+    private function transformClientJoinedSession(UserLogOnOffSessionMessage $message) : ?array
     {
         $tag3 = strval($message->countryId);
         $data = json_encode($message);
@@ -103,6 +91,7 @@ class GURaaSMessageTransformer
             $data
         );
     }
+
     private function createPostRequestBody(
         DateTimeImmutable $timeStamp,
         ?string $tag1,
@@ -110,7 +99,7 @@ class GURaaSMessageTransformer
         ?string $tag3,
         ?string $tag4,
         ?string $data
-    ) : array | null {
+    ) : ?array {
         if (!(
             self::checkValidStringLength($tag1, self::GURAAS_MAX_TAG_SIZE) &&
             self::checkValidStringLength($tag2, self::GURAAS_MAX_TAG_SIZE) &&
