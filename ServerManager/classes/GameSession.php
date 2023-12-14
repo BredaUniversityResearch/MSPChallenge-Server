@@ -4,7 +4,7 @@ namespace ServerManager;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameConfigVersion;
-use App\Message\Analytics\SessionCreated;
+use App\Message\Analytics\SessionCreatedMessage;
 use DateInterval;
 use DateTime;
 use DateTimeImmutable;
@@ -163,7 +163,7 @@ class GameSession extends Base
         }
         $this->id = $this->db->lastId();
 
-        $this->logAnalytics();
+        $this->logSessionCreation();
     }
 
     public function sendLoadRequest($allow_recreate = 0)
@@ -710,7 +710,7 @@ class GameSession extends Base
         return true;
     }
 
-    private function logAnalytics(): void
+    private function logSessionCreation(): void
     {
 
         try {
@@ -722,27 +722,17 @@ class GameSession extends Base
 
             $tempImmutableDateTime = new DateTimeImmutable();
 
-            $configUploadTimeStamp = $config->getUploadTime() ? intval($config->getUploadTime()) : 0;
-            $configUploadTime = $tempImmutableDateTime->setTimestamp($configUploadTimeStamp);
-
             $gameCreationTimeStamp = $this->game_creation_time ? intval($this->game_creation_time) : 0;
             $gameCreationTime = $tempImmutableDateTime->setTimestamp($gameCreationTimeStamp);
 
-            $gameRunningTillTimeStamp = $this->game_running_til_time ? intval($this->game_running_til_time) : 0;
-            $gameRunningTillTime = $tempImmutableDateTime->setTimestamp($gameRunningTillTimeStamp);
-
             $serverManager = ServerManager::getInstance();
             $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
-
-            $configUploadUserId = $config->getUploadUser();
-            $configUploadUser = $configUploadUserId ? new User($configUploadUserId) : null;
-            $configUploadUserData = $configUploadUser?->data();
 
             $userId = $_SESSION['user'];
             $user = is_null($userId) ? null : new User($userId);
             $userData = $user?->data();
 
-            $analyticsMessage = new SessionCreated(
+            $analyticsMessage = new SessionCreatedMessage(
                 new DateTimeImmutable(),
                 $serverManagerId,
                 $userData?->username ?? '',
@@ -750,21 +740,13 @@ class GameSession extends Base
                 $this->id,
                 $this->name,
                 $gameCreationTime,
-                $gameRunningTillTime,
                 $this->game_start_year,
                 $this->game_end_month,
-                $this->game_current_month,
-                $this->game_visibility,
                 $configFile->getFilename() ?? '',
-                $config->getFilePath() ?? '',
                 $config->getVersion() ?? '',
                 $config->getVersionMessage() ?? '',
-                $config->getVisibility() ?? '',
                 $config->getRegion() ?? '',
-                $configFile->getDescription() ?? '',
-                $configUploadUserData?->username ?? '',
-                $configUploadUserData?->account_id ?? -1,
-                $configUploadTime,
+                $configFile->getDescription() ?? ''
             );
             $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
         } catch (Exception $e) {
