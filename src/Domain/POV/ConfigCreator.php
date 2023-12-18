@@ -71,12 +71,6 @@ class ConfigCreator
         return (php_sapi_name() == 'cli' ? getcwd() : $projectDir) . DIRECTORY_SEPARATOR . self::SUBDIR;
     }
 
-    public static function getDefaultOutputDir(string $projectDir, Region $region): string
-    {
-        return self::getDefaultOutputBaseDir($projectDir) . DIRECTORY_SEPARATOR .
-            self::getFolderNameFromRegion($region);
-    }
-
     public static function getFolderNameFromRegion(Region $region): string
     {
         return implode('-', $region->toArray());
@@ -96,7 +90,8 @@ class ConfigCreator
         ?string $dir = null,
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
-        $dir ??= self::getDefaultOutputDir($this->projectDir, $region);
+        $dir ??= self::getDefaultOutputBaseDir($this->projectDir);
+        $dir .= DIRECTORY_SEPARATOR . self::getFolderNameFromRegion($region);
         if (!extension_loaded('imagick')) {
             throw new Exception('The required imagick extension is not loaded.');
         }
@@ -111,9 +106,15 @@ class ConfigCreator
         }
         $this->log('json decoded, extracting region from raster layers');
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
+        if (false !== $bathymetryLayer = current(array_filter(
+            $json['datamodel']['raster_layers'],
+            fn($x) => $x['name'] === 'Bathymetry'
+        ))) {
+            $json['datamodel']['bathymetry'] = $bathymetryLayer;
+        }
         $this->log('region extracted, creating json config file');
         $this->createJsonConfigFile($json, $dir, $configFilename);
-        $this->log('json config file created: ' . $dir . DIRECTORY_SEPARATOR . $configFilename);
+        $this->log('json config file created: ' . realpath($dir . DIRECTORY_SEPARATOR . $configFilename));
         return $dir;
     }
 
@@ -201,8 +202,8 @@ WITH
     FROM LatestGeometryFinal
     # if geometry, return only the ones inside the region based on its geometry point data
     WHERE
-      JSON_EXTRACT(geometry_geometry, '$[0][0]') BETWEEN :topLeftX AND :bottomRightX
-      AND JSON_EXTRACT(geometry_geometry, '$[0][1]') BETWEEN :topLeftY AND :bottomRightY
+      JSON_EXTRACT(geometry_geometry, '$[0][0]') BETWEEN :bottomLeftX AND :topRightX
+      AND JSON_EXTRACT(geometry_geometry, '$[0][1]') BETWEEN :bottomLeftY AND :topRightY
   ),  
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
@@ -215,10 +216,10 @@ WITH
         l.layer_geotype IN ('line','point','polygon') OR (
           # if raster, return only if the region overlaps with its bounding box data
           -- l.layer_geotype IN ('raster')
-          JSON_EXTRACT(l.layer_raster, '$.boundingbox[0][0]') < :bottomRightX
-          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[0][1]') < :bottomRightY
-          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[1][0]') > :topLeftX
-          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[1][1]') > :topLeftY
+          JSON_EXTRACT(l.layer_raster, '$.boundingbox[0][0]') < :topRightX
+          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[0][1]') < :topRightY
+          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[1][0]') > :bottomLeftX
+          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[1][1]') > :bottomLeftY
         )
       )
       GROUP BY l.layer_id
@@ -236,19 +237,69 @@ WITH
         )) AS layer_type_mapping,
         JSON_ARRAYAGG(JSON_OBJECT(
           'name', t.display_name,
-          '//material', 'todo'
+          'approval', t.approval,            
+          'value', t.value,
+          'map_type', t.map_type,
+          'displayPolygon', t.displayPolygon,
+          'polygonColor', t.polygonColor,
+          'polygonPatternName', t.polygonPatternName, 
+          'innerGlowEnabled', t.innerGlowEnabled,
+          'innerGlowRadius', t.innerGlowRadius,
+          'innerGlowIterations', t.innerGlowIterations,
+          'innerGlowMultiplier', t.innerGlowMultiplier,
+          'innerGlowPixelSize', t.innerGlowPixelSize,
+          'displayLines', t.displayLines,
+          'lineColor', t.lineColor,
+          'lineWidth', t.lineWidth,
+          'lineIcon', t.lineIcon,
+          'linePatternType', t.linePatternType,
+          'displayPoints', t.displayPoints,
+          'pointColor', t.pointColor,
+          'pointSize', t.pointSize,
+          'pointSpriteName', t.pointSpriteName,
+          'description', t.description,
+          'capacity', t.capacity, 
+          'investmentCost', t.investmentCost,
+          'availability', t.availability,
+          'media', t.media 
         )) AS layer_type_types,
         MIN(t.value) AS layer_type_value_min,
         MAX(t.value) AS layer_type_value_max,
         COUNT(t.id) as layer_type_value_count,
         CAST((MAX(t.value) / (COUNT(t.id)-1)) as INT) as layer_type_value_step
       FROM LayerStep1 l
+      # join as json table to control which fields we want to extract and alias afterwards
+      #   see https://community.mspchallenge.info/wiki/Configuration_data_schema_documentation
       INNER JOIN JSON_TABLE(
         JSON_EXTRACT(l.layer_type, '$.*'),
           '$[*]' COLUMNS (
             id for ordinality,
             display_name VARCHAR(255) PATH '$.displayName',
-            value int PATH '$.value'
+            approval VARCHAR(255) PATH '$.approval',            
+            value int PATH '$.value',
+            map_type VARCHAR(255) PATH '$.map_type',
+            displayPolygon bool PATH '$.displayPolygon',
+            polygonColor VARCHAR(255) PATH '$.polygonColor',
+            polygonPatternName VARCHAR(255) PATH '$.polygonPatternName', 
+            innerGlowEnabled bool PATH '$.innerGlowEnabled',
+            innerGlowRadius int PATH '$.innerGlowRadius',
+            innerGlowIterations int PATH '$.innerGlowIterations',
+            innerGlowMultiplier double PATH '$.innerGlowMultiplier',
+            innerGlowPixelSize double PATH '$.innerGlowPixelSize',
+            displayLines bool PATH '$.displayLines',
+            lineColor VARCHAR(255) PATH '$.lineColor',
+            lineWidth double PATH '$.lineWidth',
+            lineIcon VARCHAR(255) PATH '$.lineIcon',
+            linePatternType VARCHAR(255) PATH '$.linePatternType',
+            displayPoints bool PATH '$.displayPoints',
+            pointColor VARCHAR(255) PATH '$.pointColor',
+            pointSize double PATH '$.pointSize',
+            pointSpriteName VARCHAR(255) PATH '$.pointSpriteName',
+            description TEXT PATH '$.description',
+            capacity long PATH '$.capacity', 
+            investmentCost float PATH '$.investmentCost',
+            availability int PATH '$.availability',
+            media VARCHAR(255) PATH '$.media'     
         )
       ) AS t
       LEFT JOIN LatestEcologyKpiFinal k ON (
@@ -265,16 +316,7 @@ WITH
             'types', JSON_ARRAY(JSON_EXTRACT(g.geometry_type, '$')),
             'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
             # just add some aliases to the metadata
-            'metadata', JSON_MERGE_PATCH(
-              g.geometry_data,
-              JSON_OBJECT(
-                'name', JSON_EXTRACT(g.geometry_data, '$.Name'),
-                'turbines', JSON_EXTRACT(g.geometry_data, '$.N_TURBINES'),   
-                '//width', 'todo, eg: 1',
-                '//direction', 'todo, eg: true',
-                '//number_cables', 'todo, eg: 1'
-              )
-            )
+            'metadata', JSON_EXTRACT(g.geometry_data, '$')
           )        
         ) AS layer_data
       FROM LayerStep2 l
@@ -290,7 +332,14 @@ SELECT
       'data_modified', CONCAT(UTC_DATE(), ' ', UTC_TIME())
     ),
     'datamodel',
-    JSON_OBJECTAGG(subquery.prop, JSON_EXTRACT(subquery.value, '$.*'))
+      JSON_MERGE_PRESERVE(
+        JSON_OBJECT(
+          'coordinate0', JSON_ARRAY(CAST(:bottomLeftX AS DOUBLE), CAST(:bottomLeftY AS DOUBLE)),
+          'coordinate1', JSON_ARRAY(CAST(:topRightX AS DOUBLE), CAST(:topRightY AS DOUBLE)),
+          'projection', '//todo'
+        ),
+        JSON_OBJECTAGG(subquery.prop, JSON_EXTRACT(subquery.value, '$.*'))
+      )      
   ) as json
 FROM (
   SELECT
@@ -300,52 +349,27 @@ FROM (
       l.layer_id,
       IF(
         l.layer_geotype = 'raster',
-        JSON_OBJECT(
-          #'db-layer-id', l.layer_id,
-          'name', REPLACE(l.layer_short,'mel_',''),          
-          'coordinate0', JSON_EXTRACT(l.layer_raster, '$.boundingbox[0]'),
-          'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
-          'scale', JSON_OBJECT(
-            'min_value', 0,
-            # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
-            'max_value', l.kpi_value * 1000 * 2,
-            'interpolation', 'lin'
+        JSON_MERGE_PRESERVE(
+          JSON_OBJECT(
+            #'db-layer-id', l.layer_id,
+            'name', REPLACE(l.layer_short,'mel_',''),          
+            'coordinate0', JSON_EXTRACT(l.layer_raster, '$.boundingbox[0]'),
+            'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
+            'mapping', l.layer_type_mapping,
+            'types', l.layer_type_types,
+            'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url')))
           ),
-          'mapping', l.layer_type_mapping,
-          'types', l.layer_type_types,
-          'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url'))),          
-          '//display_methods', JSON_MERGE_PRESERVE(
-            IF(
-              # detecting a kpi layer
-              l.kpi_value IS NOT NULL,
-              JSON_ARRAY(
-                JSON_OBJECT(
-                  'method', 'DensityFish',
-                  'scale', JSON_OBJECT(
-                    'min_value', 0,
-                    # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
-                    'max_value', l.kpi_value * 1000 * 2,
-                    'interpolation', 'lin',
-                    '//model', 'todo, eg: \'Cod\'',
-                    '//unit_mass', 'todo, eg: 10'
-                  )
-                )
-              ),
-              JSON_ARRAY()
+          IF(
+            l.kpi_value IS NOT NULL,
+            JSON_OBJECT(
+              'scale', JSON_OBJECT(
+                'min_value', 0,
+                # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
+                'max_value', l.kpi_value * 1000 * 2,
+                'interpolation', 'lin'
+              )
             ),
-            IF (
-              # detecting a non-kpi layer
-              l.kpi_value IS NULL,
-              JSON_ARRAY(
-                  JSON_OBJECT(
-                    'method', 'TypeMap',
-                    'mapping', l.layer_type_mapping,
-                    '//type_material', 'todo, eg: \'material\'',
-                    '//seabottom', 'todo, eg: true'
-                  )
-              ),
-              JSON_ARRAY()
-            )
+            JSON_OBJECT()
           )
         ),
         JSON_OBJECT(
@@ -356,51 +380,6 @@ FROM (
           # ),
           'name', l.layer_name,
           'type', l.layer_geotype,
-          '//display_methods', JSON_MERGE_PRESERVE(
-              IF(
-                l.layer_geotype = 'polygon',
-                JSON_ARRAY(
-                  JSON_OBJECT(
-                    'method', 'AreaModelScatter',
-                    '//type_model', 'todo, eg: \'default_model\'',
-                    '//meta_amount', 'todo, eg: \'turbines\'',
-                    '//stages', 'todo',
-                    '//stage_distribution', 'todo'
-                  ),
-                  JSON_OBJECT(
-                    'method', 'AreaColour',
-                    '//colour', 'todo, eg: \'#ffb30f\''
-                  )
-                ),
-                JSON_ARRAY()
-              ),
-              IF(
-                l.layer_geotype = 'point',
-                JSON_ARRAY(
-                  JSON_OBJECT(
-                    'method', 'PointModel',
-                    '//model', 'todo, eg: ConverterStationModel'
-                  )
-                ),
-                JSON_ARRAY()
-              ),
-              IF(
-                l.layer_geotype = 'line',
-                JSON_ARRAY(
-                  JSON_OBJECT(
-                    'method', 'LineModel',
-                    '//model', 'todo, eg: EnergyCableModel',
-                    '//meta_amount', 'todo, eg: \'number_cables\''
-                  ),
-                  JSON_OBJECT(
-                    'method', 'LineColour',
-                    '//colour', 'todo, eg: #ebff0f',
-                    '//meta_width', 'todo, eg: \'width\''
-                  )
-                ),
-                JSON_ARRAY()
-              )
-          ),
           'types', l.layer_type_types,
           'data', l.layer_data
         )
@@ -441,6 +420,7 @@ SQL,
             $pathInfo = pathinfo($layer['data']);
             // add _Cut in the filename before the extension
             $targetFile = $pathInfo['filename'] . '_Cut.png';
+            $outputRegion = clone $region;
             try {
                 $this->extractPartFromImageByRegion(
                     $this->projectDir . DIRECTORY_SEPARATOR . 'raster' . DIRECTORY_SEPARATOR .
@@ -452,34 +432,18 @@ SQL,
                         $layer['coordinate1'][1]
                     ),
                     $targetDir . DIRECTORY_SEPARATOR . $targetFile,
-                    $region
+                    $outputRegion
                 );
             } catch (Exception $e) {
                 throw new Exception('Could not extract region from image: ' . $e->getMessage(), 0, $e);
             }
             $layer['data'] = $targetFile;
             // now set the region coordinates, clamped by input coordinates (see extractPartFromImageByRegion)
-            $layer['coordinate0'] = $region->getTopLeft();
-            $layer['coordinate1'] = $region->getBottomRight();
+            $layer['coordinate0'] = $outputRegion->getBottomLeft();
+            $layer['coordinate1'] = $outputRegion->getTopRight();
             $this->handleRasterMapping($layer['mapping']);
-
-            // todo : remove display methods once POV/Unity supports it
-            $this->handleRasterDisplayMethods($layer);
         }
         unset($layer);
-    }
-
-    private function handleRasterDisplayMethods(array &$rasterLayer): void
-    {
-        if (count($rasterLayer['//display_methods']) == 0) {
-            return;
-        }
-        foreach ($rasterLayer['//display_methods'] as &$displayMethod) {
-            if ($displayMethod['method'] !== 'TypeMap') {
-                continue;
-            }
-            $this->handleRasterMapping($displayMethod['mapping']);
-        }
     }
 
     private function handleRasterMapping(array &$mapping): void
@@ -511,48 +475,36 @@ SQL,
         string $outputImageFilePath,
         Region $outputRegion
     ): void {
-        list($inputTopLeftX, $inputTopLeftY, $inputBottomRightX, $inputBottomRightY) =
+        list($inputBottomLeftX, $inputBottomLeftY, $inputTopRightX, $inputTopRightY) =
             array_values($inputRegion->toArray());
-        // clamp by input coordinates. The output region should be fully covered by the input region
-        $outputRegion->setTopLeftX(min($outputRegion->getTopLeftX(), $inputRegion->getBottomRightX()));
-        $outputRegion->setTopLeftY(min($outputRegion->getTopLeftY(), $inputRegion->getBottomRightY()));
-        $outputRegion->setBottomRightX(max($outputRegion->getBottomRightX(), $inputRegion->getTopLeftX()));
-        $outputRegion->setBottomRightY(max($outputRegion->getBottomRightY(), $inputRegion->getTopLeftY()));
-        list($outputTopLeftX, $outputTopLeftY, $outputBottomRightX, $outputBottomRightY) =
+        list($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY) =
             array_values($outputRegion->toArray());
 
-        //correct y of input coordinate, the y of input coordinate 0 should be greater than input coordinate 1
-        if ($inputTopLeftY < $inputBottomRightY) {
-            $tmp = $inputTopLeftY;
-            $inputTopLeftY = $inputBottomRightY;
-            $inputBottomRightY = $tmp;
-        }
-        //correct y of output coordinate, the y of output coordinate 0 should be greater than output coordinate 1
-        if ($outputTopLeftY < $outputBottomRightY) {
-            $tmp = $outputTopLeftY;
-            $outputTopLeftY = $outputBottomRightY;
-            $outputBottomRightY = $tmp;
-        }
+        // clamp by input coordinates.
+        $outputBottomLeftX = max($outputRegion->getBottomLeftX(), $inputRegion->getBottomLeftX());
+        $outputBottomLeftY = max($outputBottomLeftY, $inputBottomLeftY);
+        $outputTopRightX = min($outputRegion->getTopRightX(), $inputRegion->getTopRightX());
+        $outputTopRightY = min($outputTopRightY, $inputTopRightY);
 
         $image = new \Imagick();
         $image->readImage($inputImageFilePath);
         $inputWidth = $image->getImageWidth();
         $inputHeight = $image->getImageHeight();
 
-        $coordinateToPixelWidthFactor = $inputWidth / ($inputBottomRightX - $inputTopLeftX);
-        $coordinateToPixelHeightFactor = $inputHeight / ($inputBottomRightY - $inputTopLeftY);
+        $coordinateToPixelWidthFactor = $inputWidth / abs($inputTopRightX - $inputBottomLeftX);
+        $coordinateToPixelHeightFactor = $inputHeight / abs($inputTopRightY - $inputBottomLeftY);
 
-        // map coordinate to the pixel coordinate of the image
-        $outputPixel0X = (int)round(($outputTopLeftX - $inputTopLeftX) * $coordinateToPixelWidthFactor);
-        $outputPixel0Y = (int)round(($outputTopLeftY -  $inputTopLeftY) * $coordinateToPixelHeightFactor);
-        $outputPixel1X = (int)round(($outputBottomRightX - $inputTopLeftX) * $coordinateToPixelWidthFactor);
-        $outputPixel1Y = (int)round(($outputBottomRightY -  $inputTopLeftY) * $coordinateToPixelHeightFactor);
+        // map coordinate to the pixel coordinate of the image, still as real number
+        $outputPixel0XRealNumber = abs($outputBottomLeftX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
+        $outputPixel0YRealNumber = abs($outputBottomLeftY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
+        $outputPixel1XRealNumber = abs($outputTopRightX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
+        $outputPixel1YRealNumber = abs($outputTopRightY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
 
-        // Check if output coordinates are within input range
-        $outputPixel0X = max(0, min($inputWidth - 1, $outputPixel0X));
-        $outputPixel0Y = max(0, min($inputHeight - 1, $outputPixel0Y));
-        $outputPixel1X = max(0, min($inputWidth - 1, $outputPixel1X));
-        $outputPixel1Y = max(0, min($inputHeight - 1, $outputPixel1Y));
+        // now convert to actual pixel, clamp by image input size
+        $outputPixel0X = max(0, min($inputWidth - 1, (int)($outputPixel0XRealNumber)));
+        $outputPixel0Y = max(0, min($inputHeight - 1, (int)($outputPixel0YRealNumber)));
+        $outputPixel1X = max(0, min($inputWidth - 1, (int)ceil($outputPixel1XRealNumber)));
+        $outputPixel1Y = max(0, min($inputHeight - 1, (int)ceil($outputPixel1YRealNumber)));
 
         // Calculate the size of the extracted region
         $regionWidth = $outputPixel1X - $outputPixel0X + 1;
@@ -561,6 +513,22 @@ SQL,
         if ($regionWidth <= 0 || $regionHeight <= 0) {
             throw new Exception('Invalid region size: ' . $regionWidth . 'x' . $regionHeight);
         }
+
+        // set the actual outputted region coordinates
+        $pixelToCoordinateWidthFactor = abs($inputTopRightX - $inputBottomLeftX) / $inputWidth;
+        $pixelToCoordinateHeightFactor = abs($inputTopRightY - $inputBottomLeftY) / $inputHeight;
+        $outputRegion->setBottomLeftX(
+            $outputBottomLeftX - abs($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor
+        );
+        $outputRegion->setBottomLeftY(
+            $outputBottomLeftY - abs($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor
+        );
+        $outputRegion->setTopRightX(
+            $outputTopRightX + abs($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor
+        );
+        $outputRegion->setTopRightY(
+            $outputTopRightY + abs($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor
+        );
 
         $image->cropImage($regionWidth, $regionHeight, $outputPixel0X, $outputPixel0Y);
         $image->setImageFormat('PNG');
