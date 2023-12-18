@@ -27,18 +27,18 @@ class GameController extends AbstractController
         Request $request,
         LoggerInterface $logger
     ): StreamedResponse {
-        $regionTopLeftX = $request->request->get('region_top_left_x');
-        $regionTopLeftY = $request->request->get('region_top_left_y');
-        $regionBottomRightX = $request->request->get('region_bottom_right_x');
-        $regionBottomRightY = $request->request->get('region_bottom_right_y');
-        if (!is_numeric($regionTopLeftX) ||
-            !is_numeric($regionTopLeftY) ||
-            !is_numeric($regionBottomRightX) ||
-            !is_numeric($regionBottomRightY)) {
+        $regionBottomLeftX = $request->request->get('region_bottom_left_x');
+        $regionBottomLeftY = $request->request->get('region_bottom_left_y');
+        $regionTopRightX = $request->request->get('region_top_right_x');
+        $regionTopRightY = $request->request->get('region_top_right_y');
+        if (!is_numeric($regionBottomLeftX) ||
+            !is_numeric($regionBottomLeftY) ||
+            !is_numeric($regionTopRightX) ||
+            !is_numeric($regionTopRightY)) {
             throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid region coordinates');
         }
 
-        $region = new Region($regionTopLeftX, $regionTopLeftY, $regionBottomRightX, $regionBottomRightY);
+        $region = new Region($regionBottomLeftX, $regionBottomLeftY, $regionTopRightX, $regionTopRightY);
         $configCreator = new ConfigCreator($this->projectDir, $sessionId, $logger);
         try {
             $zipFilepath = $configCreator->createAndZip($region);
