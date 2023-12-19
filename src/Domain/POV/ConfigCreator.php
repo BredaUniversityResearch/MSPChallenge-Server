@@ -7,6 +7,7 @@ use App\Domain\Services\ConnectionManager;
 use Doctrine\DBAL\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
+use ServerManager\ServerManager;
 
 class ConfigCreator
 {
@@ -142,6 +143,17 @@ class ConfigCreator
      */
     private function queryJson(Region $region): string
     {
+        try {
+            $gameConfigRegion = ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->executeQuery(
+                'select c.region from game_list l inner join game_config_version c ' .
+                'on l.game_config_version_id=c.id and l.id=:game_session_id',
+                ['game_session_id' => $this->sessionId]
+            )->fetch(\PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            throw new Exception('Could not retrieve the game config region for the given session id: ' .
+                $this->sessionId);
+        }
+
         try {
             $result = $this->getConnection()->executeQuery(
                 <<<'SQL'
@@ -329,7 +341,8 @@ SELECT
   JSON_OBJECT(
     'metadata',
     JSON_OBJECT(
-      'data_modified', CONCAT(UTC_DATE(), ' ', UTC_TIME())
+      'data_modified', CONCAT(UTC_DATE(), ' ', UTC_TIME()),
+      'region', :region
     ),
     'datamodel',
       JSON_MERGE_PRESERVE(
@@ -352,7 +365,7 @@ FROM (
         JSON_MERGE_PRESERVE(
           JSON_OBJECT(
             #'db-layer-id', l.layer_id,
-            'name', REPLACE(l.layer_short,'mel_',''),          
+            'name', REPLACE(l.layer_short,'mel_',''),
             'coordinate0', JSON_EXTRACT(l.layer_raster, '$.boundingbox[0]'),
             'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
             'mapping', l.layer_type_mapping,
@@ -379,7 +392,7 @@ FROM (
           #   FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
           # ),
           'name', l.layer_name,
-          'type', l.layer_geotype,
+          'tags', JSON_ARRAY(l.layer_geotype),
           'types', l.layer_type_types,
           'data', l.layer_data
         )
@@ -391,7 +404,10 @@ FROM (
   ORDER BY FIELD(l.layer_geotype, 'raster', 'polygon', 'point', 'line')
 ) as subquery
 SQL,
-                $region->toArray()
+                array_merge(
+                    $region->toArray(),
+                    $gameConfigRegion
+                )
             );
             $jsonString = $result->fetchOne();
         } catch (Exception $e) {
@@ -437,7 +453,7 @@ SQL,
             } catch (Exception $e) {
                 throw new Exception('Could not extract region from image: ' . $e->getMessage(), 0, $e);
             }
-            $layer['data'] = $targetFile;
+            $layer['data'] = 'Rastermaps/' . $targetFile;
             // now set the region coordinates, clamped by input coordinates (see extractPartFromImageByRegion)
             $layer['coordinate0'] = $outputRegion->getBottomLeft();
             $layer['coordinate1'] = $outputRegion->getTopRight();

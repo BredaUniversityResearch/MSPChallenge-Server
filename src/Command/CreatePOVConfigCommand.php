@@ -15,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:create-pov-config',
-    description: 'Create a POV config json file for a session by region.',
+    description: 'Create a POV config json file for a session by region. Coordinate system: https://epsg.io/3035.',
 )]
 class CreatePOVConfigCommand extends Command
 {
