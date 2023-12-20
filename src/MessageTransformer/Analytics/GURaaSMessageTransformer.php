@@ -87,14 +87,15 @@ class GURaaSMessageTransformer
 
     private function transformClientJoinedSession(UserLogOnOffSessionMessage $message) : ?array
     {
-        $tag3 = strval($message->countryId);
+        $tag3 = strval($message->gameSessionId);
+        $tag4 = strval($message->countryId);
         $data = json_encode($message);
         return $this->createPostRequestBody(
             $message->timeStamp,
             strval($message->type),
             self::tagFromUuid($message->serverManagerId),
             $tag3,
-            null,
+            $tag4,
             $data
         );
     }
