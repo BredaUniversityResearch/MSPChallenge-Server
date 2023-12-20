@@ -412,7 +412,11 @@ class User extends Base implements JWTUserInterface
         int $sessionId,
         int $countryId
     ) : void {
+        $analyticsLogger = null;
         try {
+            $legacyHelper = SymfonyToLegacyHelper::getInstance();
+            $analyticsLogger = $legacyHelper->getAnalyticsLogger();
+
             $serverManager = ServerManager::getInstance();
             $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
 
@@ -425,11 +429,13 @@ class User extends Base implements JWTUserInterface
                 $sessionId,
                 $countryId
             );
-            $legacyHelper = SymfonyToLegacyHelper::getInstance();
             $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
         } catch (Exception $e) {
-            //TODO: figure out how to log errors.
-            printf($e);
+            $analyticsLogger?->error(
+                "Exception occurred while dispatching user log ".
+                ($logOn ? "on" : "off").
+                " message : ". $e->getMessage()
+            );
         }
     }
 }

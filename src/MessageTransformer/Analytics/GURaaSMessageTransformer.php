@@ -33,6 +33,7 @@ use App\Message\Analytics\AnalyticsMessageBase;
 use App\Message\Analytics\UserLogOnOffSessionMessage;
 use App\Message\Analytics\SessionCreatedMessage;
 use DateTimeImmutable;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
 class GURaaSMessageTransformer
@@ -43,13 +44,16 @@ class GURaaSMessageTransformer
 
     private Uuid $guraasSessionId;
     private DateTimeImmutable $guraasSessionStart;
+    private LoggerInterface $logger;
 
     public function __construct(
+        LoggerInterface $logger,
         ?Uuid $guraasSessionId = null,
         ?DateTimeImmutable $guraasSessionStart = null
     ) {
         $this->guraasSessionId = $guraasSessionId ?? Uuid::v1();
         $this->guraasSessionStart = $guraasSessionStart ?? new DateTimeImmutable();
+        $this->logger = $logger;
     }
 
     public function transformMessageToRequestBody(AnalyticsMessageBase $message) : ?array
@@ -60,7 +64,10 @@ class GURaaSMessageTransformer
         if ($message instanceof UserLogOnOffSessionMessage) {
             return $this->transformClientJoinedSession($message);
         }
-        //TODO: log unsupported message type transformation.
+        $this->logger->error(
+            "Can not transform analytics message of class: ". get_class($message).
+            " to a GURaaS POST request body"
+        );
         return null;
     }
 
@@ -107,7 +114,21 @@ class GURaaSMessageTransformer
             self::checkValidStringLength($tag4, self::GURAAS_MAX_TAG_SIZE) &&
             self::checkValidStringLength($data, self::GURAAS_MAX_DATA_SIZE)
         )) {
-            //TODO: throw exception or log error somehow.
+            $tagLengths =
+                [
+                    (is_null($tag1) ? 0 : iconv_strlen($tag1)),
+                    (is_null($tag2) ? 0 : iconv_strlen($tag2)),
+                    (is_null($tag3) ? 0 : iconv_strlen($tag3)),
+                    (is_null($tag4) ? 0 : iconv_strlen($tag4)),
+                ];
+
+            $this->logger->error(
+                "Can not create GURaaS POST request body with provided arguments due to invalid argument length.".
+                " \nMax tag length: ".strval(self::GURAAS_MAX_TAG_SIZE).
+                ", Max data length: ".strval(self::GURAAS_MAX_DATA_SIZE).
+                "\n Tag lengths: ". implode(',', $tagLengths).
+                "\n Data length: ". (is_null($data) ? 0 : iconv_strlen($data))
+            );
             return null;
         }
 
