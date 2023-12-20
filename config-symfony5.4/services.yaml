@@ -28,9 +28,14 @@ services:
     App\MessageHandler\Analytics\AnalyticsMessageHandler:
         arguments:
             $guraasGameId: '%app.guraas_game_id%'
+            $logger: '@monolog.logger.analytics'
         tags:
             - { name: messenger.message_handler, handles: App\Message\Analytics\SessionCreatedMessage }
             - { name: messenger.message_handler, handles: App\Message\Analytics\UserLogOnOffSessionMessage }
+
+    App\Domain\Services\SymfonyToLegacyHelper:
+        arguments:
+            $analyticsLogger: '@monolog.logger.analytics'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

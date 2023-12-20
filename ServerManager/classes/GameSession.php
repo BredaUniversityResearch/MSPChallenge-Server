@@ -2,6 +2,7 @@
 
 namespace ServerManager;
 
+use App\Domain\API\v1\Game;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Message\Analytics\SessionCreatedMessage;
@@ -712,13 +713,24 @@ class GameSession extends Base
 
     private function logSessionCreation(): void
     {
-
+        $analyticsLogger = null;
         try {
             $legacyHelper = SymfonyToLegacyHelper::getInstance();
+            $analyticsLogger = $legacyHelper->getAnalyticsLogger();
 
-            $configRepo = $legacyHelper->getEntityManager()->getRepository(GameConfigVersion::class);
-            $config = $configRepo->find($this->game_config_version_id);
-            $configFile = $config->getGameConfigFile();
+            $gameConfig = new GameConfig();
+            $gameConfig->id = $this->game_config_version_id;
+            $gameConfig->get();
+
+            $gameConfigContents = $gameConfig->getContents();
+            $gameStartYear = -1;
+            $gameEndMonth = -1;
+            if (isset($gameConfigContents["datamodel"])) {
+                $gameStartYear = $gameConfigContents["datamodel"]["start"] ?? -1;
+                $endYear = $gameConfigContents["datamodel"]["end"] ?? -1;
+                $validStartAndEnd = $gameStartYear > 0 && $endYear > 0 && $endYear > $gameStartYear;
+                $gameEndMonth =  $validStartAndEnd ? ($endYear - $gameStartYear) * 12 : -1;
+            }
 
             $tempImmutableDateTime = new DateTimeImmutable();
 
@@ -729,8 +741,7 @@ class GameSession extends Base
             $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
 
             $userId = $_SESSION['user'];
-            $user = is_null($userId) ? null : new User($userId);
-            $userData = $user?->data();
+            $userData = is_null($userId) ? null : (new User($userId))->data();
 
             $analyticsMessage = new SessionCreatedMessage(
                 new DateTimeImmutable(),
@@ -740,17 +751,20 @@ class GameSession extends Base
                 $this->id,
                 $this->name,
                 $gameCreationTime,
-                $this->game_start_year,
-                $this->game_end_month,
-                $configFile->getFilename() ?? '',
-                $config->getVersion() ?? '',
-                $config->getVersionMessage() ?? '',
-                $config->getRegion() ?? '',
-                $configFile->getDescription() ?? ''
+                $gameStartYear,
+                $gameEndMonth,
+                $gameConfig->filename,
+                $gameConfig->version,
+                $gameConfig->version_message,
+                $gameConfig->region,
+                $gameConfig->description
             );
             $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
         } catch (Exception $e) {
-            //TODO: figure out how to handle error/exception logging.d
+            $analyticsLogger?->error(
+                "Exception occurred while dispatching game session creation message: ".
+                $e->getMessage()
+            );
         }
     }
 }
