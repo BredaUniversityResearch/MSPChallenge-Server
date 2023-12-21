@@ -6,6 +6,7 @@
 parameters:
     app.clients_url: 'https://community.mspchallenge.info/wiki/Download'
     app.guraas_game_id: '00000000-0000-0000-0000-000000000000'
+    app.guraas_analytics_version: '0.1'
 
 services:
     # default configuration for services in *this* file
@@ -28,6 +29,7 @@ services:
     App\MessageHandler\Analytics\AnalyticsMessageHandler:
         arguments:
             $guraasGameId: '%app.guraas_game_id%'
+            $guraasAnalyticsVersion: '%app.guraas_analytics_version%'
             $logger: '@monolog.logger.analytics'
         tags:
             - { name: messenger.message_handler, handles: App\Message\Analytics\SessionCreatedMessage }

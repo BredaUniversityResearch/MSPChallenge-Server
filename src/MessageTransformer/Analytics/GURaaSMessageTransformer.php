@@ -30,6 +30,7 @@
 namespace App\MessageTransformer\Analytics;
 
 use App\Message\Analytics\AnalyticsMessageBase;
+use App\Message\Analytics\Helper\AnalyticsDataType;
 use App\Message\Analytics\UserLogOnOffSessionMessage;
 use App\Message\Analytics\SessionCreatedMessage;
 use DateTimeImmutable;
@@ -43,15 +44,18 @@ class GURaaSMessageTransformer
     const GURAAS_MAX_DATA_SIZE = 4096;
 
     private Uuid $guraasSessionId;
+    private string $guraasAnalyticsVersion;
     private DateTimeImmutable $guraasSessionStart;
     private LoggerInterface $logger;
 
     public function __construct(
         LoggerInterface $logger,
+        string $guraasAnalyticsVersion,
         ?Uuid $guraasSessionId = null,
         ?DateTimeImmutable $guraasSessionStart = null
     ) {
         $this->guraasSessionId = $guraasSessionId ?? Uuid::v1();
+        $this->guraasAnalyticsVersion = $guraasAnalyticsVersion;
         $this->guraasSessionStart = $guraasSessionStart ?? new DateTimeImmutable();
         $this->logger = $logger;
     }
@@ -73,13 +77,13 @@ class GURaaSMessageTransformer
 
     private function transformSessionCreated(SessionCreatedMessage $message) : ?array
     {
-        $tag3 = strval($message->session->id);
+        $tag1 = strval($message->session->id);
         $data = json_encode($message);
         return $this->createPostRequestBody(
             $message->timeStamp,
-            strval($message->type),
-            self::tagFromUuid($message->serverManagerId),
-            $tag3,
+            $message->serverManagerId,
+            $message->type,
+            $tag1,
             null,
             $data
         );
@@ -87,40 +91,40 @@ class GURaaSMessageTransformer
 
     private function transformClientJoinedSession(UserLogOnOffSessionMessage $message) : ?array
     {
-        $tag3 = strval($message->gameSessionId);
-        $tag4 = strval($message->countryId);
+        $tag1 = strval($message->gameSessionId);
+        $tag2 = strval($message->countryId);
         $data = json_encode($message);
         return $this->createPostRequestBody(
             $message->timeStamp,
-            strval($message->type),
-            self::tagFromUuid($message->serverManagerId),
-            $tag3,
-            $tag4,
+            $message->serverManagerId,
+            $message->type,
+            $tag1,
+            $tag2,
             $data
         );
     }
 
     private function createPostRequestBody(
         DateTimeImmutable $timeStamp,
+        Uuid $serverManagerId,
+        AnalyticsDataType $dataType,
         ?string $tag1,
         ?string $tag2,
-        ?string $tag3,
-        ?string $tag4,
         ?string $data
     ) : ?array {
+
+        $dataVersionTag = strval($dataType)."-".$this->guraasAnalyticsVersion;
+
         if (!(
             self::checkValidStringLength($tag1, self::GURAAS_MAX_TAG_SIZE) &&
             self::checkValidStringLength($tag2, self::GURAAS_MAX_TAG_SIZE) &&
-            self::checkValidStringLength($tag3, self::GURAAS_MAX_TAG_SIZE) &&
-            self::checkValidStringLength($tag4, self::GURAAS_MAX_TAG_SIZE) &&
-            self::checkValidStringLength($data, self::GURAAS_MAX_DATA_SIZE)
+            self::checkValidStringLength($data, self::GURAAS_MAX_DATA_SIZE) &&
+            self::checkValidStringLength($dataVersionTag, self::GURAAS_MAX_TAG_SIZE)
         )) {
             $tagLengths =
                 [
                     (is_null($tag1) ? 0 : iconv_strlen($tag1)),
                     (is_null($tag2) ? 0 : iconv_strlen($tag2)),
-                    (is_null($tag3) ? 0 : iconv_strlen($tag3)),
-                    (is_null($tag4) ? 0 : iconv_strlen($tag4)),
                 ];
 
             $this->logger->error(
@@ -128,6 +132,7 @@ class GURaaSMessageTransformer
                 " \nMax tag length: ".strval(self::GURAAS_MAX_TAG_SIZE).
                 ", Max data length: ".strval(self::GURAAS_MAX_DATA_SIZE).
                 "\n Tag lengths: ". implode(',', $tagLengths).
+                "\n Data-Version length: ". iconv_strlen($dataVersionTag).
                 "\n Data length: ". (is_null($data) ? 0 : iconv_strlen($data))
             );
             return null;
@@ -144,8 +149,8 @@ class GURaaSMessageTransformer
                     'time' => $timeStamp->format(self::GURAAS_DATETIME_FORMAT),
                     'tag1' => $tag1 ?? "",
                     'tag2' => $tag2 ?? "",
-                    'tag3' => $tag3 ?? "",
-                    'tag4' => $tag4 ?? "",
+                    'tag3' => self::tagFromUuid($serverManagerId),
+                    'tag4' => $dataVersionTag,
                     'data' => $data ?? ""
                 ]
             ]

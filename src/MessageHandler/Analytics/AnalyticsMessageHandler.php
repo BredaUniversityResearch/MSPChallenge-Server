@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\RecoverableMessageHandlingException;
 use Symfony\Component\Uid\Uuid;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsMessageHandler]
@@ -24,9 +23,10 @@ class AnalyticsMessageHandler
         HttpClientInterface $httpClient,
         LoggerInterface $logger,
         string $guraasGameId,
+        string $guraasAnalyticsVersion,
     ) {
         $this->guraasGameId = Uuid::fromString($guraasGameId);
-        $this->guraasRequestTransformer = new GURaaSMessageTransformer($logger);
+        $this->guraasRequestTransformer = new GURaaSMessageTransformer($logger, $guraasAnalyticsVersion);
         $this->httpClient = $httpClient;
         $this->logger = $logger;
 
