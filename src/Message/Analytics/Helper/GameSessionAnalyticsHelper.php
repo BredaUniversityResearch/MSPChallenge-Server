@@ -7,7 +7,6 @@ use JsonSerializable;
 
 class GameSessionAnalyticsHelper implements JsonSerializable
 {
-
     public int $id;
     public string $name;
     public DateTimeImmutable $creationTime;
