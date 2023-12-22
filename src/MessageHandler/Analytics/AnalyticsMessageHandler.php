@@ -63,7 +63,7 @@ class AnalyticsMessageHandler
             return false;
         }
 
-        $url = "https://grg.service.guraas.com/v1/games/$this->guraasGameId/data";
+        $url = "https://grg.service.guraas.com/v1/games/{$this->guraasGameId}/data";
 
         try {
             $response = $this->httpClient->request('POST', $url, ['json' => $requestBody]);
