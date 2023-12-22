@@ -21,8 +21,8 @@ class UserLogOnOffSessionMessage extends AnalyticsMessageBase implements JsonSer
         Uuid $serverManagerId,
         int $userId,
         string $userName,
-        int               $gameSessionId,
-        int               $countryId,
+        int $gameSessionId,
+        int $countryId,
     ) {
         parent::__construct(
             new AnalyticsDataType(
