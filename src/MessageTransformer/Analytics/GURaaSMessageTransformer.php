@@ -34,6 +34,7 @@ use App\Message\Analytics\Helper\AnalyticsDataType;
 use App\Message\Analytics\UserLogOnOffSessionMessage;
 use App\Message\Analytics\SessionCreatedMessage;
 use DateTimeImmutable;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -75,10 +76,12 @@ class GURaaSMessageTransformer
         return null;
     }
 
-    private function transformSessionCreated(SessionCreatedMessage $message) : ?array
+    private function transformSessionCreated(SessionCreatedMessage $message) : array
     {
         $tag1 = strval($message->session->id);
         $data = json_encode($message);
+        assert($data, new Exception("Failed to encode SessionCreatedMessage as json data"));
+
         return $this->createPostRequestBody(
             $message->timeStamp,
             $message->serverManagerId,
@@ -89,11 +92,13 @@ class GURaaSMessageTransformer
         );
     }
 
-    private function transformClientJoinedSession(UserLogOnOffSessionMessage $message) : ?array
+    private function transformClientJoinedSession(UserLogOnOffSessionMessage $message) : array
     {
         $tag1 = strval($message->gameSessionId);
         $tag2 = strval($message->countryId);
         $data = json_encode($message);
+        assert($data, new Exception("Failed to encode UserLogOnOffSessionMessage as json data"));
+
         return $this->createPostRequestBody(
             $message->timeStamp,
             $message->serverManagerId,
@@ -111,32 +116,9 @@ class GURaaSMessageTransformer
         ?string $tag1,
         ?string $tag2,
         ?string $data
-    ) : ?array {
-
+    ) : array {
         $dataVersionTag = strval($dataType)."-".$this->guraasAnalyticsVersion;
-
-        if (!(
-            self::checkValidStringLength($tag1, self::GURAAS_MAX_TAG_SIZE) &&
-            self::checkValidStringLength($tag2, self::GURAAS_MAX_TAG_SIZE) &&
-            self::checkValidStringLength($data, self::GURAAS_MAX_DATA_SIZE) &&
-            self::checkValidStringLength($dataVersionTag, self::GURAAS_MAX_TAG_SIZE)
-        )) {
-            $tagLengths =
-                [
-                    (is_null($tag1) ? 0 : iconv_strlen($tag1)),
-                    (is_null($tag2) ? 0 : iconv_strlen($tag2)),
-                ];
-
-            $this->logger->error(
-                "Can not create GURaaS POST request body with provided arguments due to invalid argument length.".
-                " \nMax tag length: ".strval(self::GURAAS_MAX_TAG_SIZE).
-                ", Max data length: ".strval(self::GURAAS_MAX_DATA_SIZE).
-                "\n Tag lengths: ". implode(',', $tagLengths).
-                "\n Data-Version length: ". iconv_strlen($dataVersionTag).
-                "\n Data length: ". (is_null($data) ? 0 : iconv_strlen($data))
-            );
-            return null;
-        }
+        self::assertValidTagsAndData($tag1, $tag2, $dataVersionTag, $data);
 
         return
         [
@@ -157,9 +139,41 @@ class GURaaSMessageTransformer
         ];
     }
 
-    private static function checkValidStringLength(?string $string, int $maxSize): bool
-    {
-        return !($string && iconv_strlen($string)> $maxSize);
+    private static function assertValidTagsAndData(
+        ?string $tag1,
+        ?string $tag2,
+        string $dataVersionTag,
+        ?string $data
+    ) {
+        assert(
+            !($tag1 && iconv_strlen($tag1) > self::GURAAS_MAX_TAG_SIZE),
+            new Exception(
+                "Tag 1 for GURaaS POST request body is not a valid length: ".
+                (is_null($tag1) ? 0 : iconv_strlen($tag1))
+            )
+        );
+        assert(
+            !($tag2 && iconv_strlen($tag2) > self::GURAAS_MAX_TAG_SIZE),
+            new Exception(
+                "Tag 2 for GURaaS POST request body is not a valid length: ".
+                (is_null($tag2) ? 0 : iconv_strlen($tag2))
+            )
+        );
+        assert(
+            iconv_strlen($dataVersionTag) <= self::GURAAS_MAX_TAG_SIZE,
+            new Exception(
+                "Data version tag for GURaaS POST request body is not a valid length: ".
+                (iconv_strlen($dataVersionTag))
+            )
+        );
+
+        assert(
+            !($data && iconv_strlen($data) > self::GURAAS_MAX_DATA_SIZE),
+            new Exception(
+                "Data for GURaaS POST request body is not a valid length: ".
+                (is_null($data) ? 0 : iconv_strlen($data))
+            )
+        );
     }
 
     private static function tagFromUuid(Uuid $id) : string

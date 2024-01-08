@@ -7,11 +7,10 @@ use DateTimeImmutable;
 use JsonSerializable;
 use Symfony\Component\Uid\Uuid;
 
-class UserLogOnOffSessionMessage extends AnalyticsMessageBase implements JsonSerializable
+class UserLogOnOffSessionMessage extends AnalyticsMessageBase
 {
 
-    public readonly int $userId;
-    public readonly string $userName;
+    public readonly int $sessionId;
     public readonly int $gameSessionId;
     public readonly int $countryId;
 
@@ -19,8 +18,7 @@ class UserLogOnOffSessionMessage extends AnalyticsMessageBase implements JsonSer
         bool $logOn,
         DateTimeImmutable $timeStamp,
         Uuid $serverManagerId,
-        int $userId,
-        string $userName,
+        int $sessionId,
         int $gameSessionId,
         int $countryId,
     ) {
@@ -33,24 +31,8 @@ class UserLogOnOffSessionMessage extends AnalyticsMessageBase implements JsonSer
             $timeStamp,
             $serverManagerId
         );
-        $this->userId = $userId;
-        $this->userName = $userName;
+        $this->sessionId = $sessionId;
         $this->gameSessionId = $gameSessionId;
         $this->countryId = $countryId;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function JsonSerialize() : array
-    {
-        return [
-            'serverManagerId' => $this->serverManagerId,
-            'user' =>
-            [
-                'id' => $this->userId,
-                'name' => $this->userName
-            ],
-            'gameSessionId' => $this->gameSessionId,
-            'countryId' => $this->countryId
-        ];
     }
 }

@@ -126,11 +126,11 @@ class User extends Base implements JWTUserInterface
             //$response["api_access_token"] = $security->generateToken()["token"];
             //$response["api_access_recovery_token"] = $security->getRecoveryToken();
         }
-        $userId = $response['session_id'];
+
+        $sessionId = $response['session_id'];
         $this->logUserLogOnOrOff(
             true,
-            $userId,
-            $user_name,
+            $sessionId,
             $this->getGameSessionId(),
             $country_id
         );
@@ -184,11 +184,11 @@ class User extends Base implements JWTUserInterface
         } else {
             throw new Exception("Incorrect password.");
         }
-        $userId = $response['session_id'];
+
+        $sessionId = $response['session_id'];
         $this->logUserLogOnOrOff(
             true,
-            $userId,
-            $userName,
+            $sessionId,
             $this->getGameSessionId(),
             $countryId
         );
@@ -259,14 +259,11 @@ class User extends Base implements JWTUserInterface
         );
         $this->getDatabase()->query("UPDATE user SET user_loggedoff = 1 WHERE user_id = ?", array($session_id));
 
-        $userSession = empty($sessionQueryResult) ? null : $sessionQueryResult[0];
-        $userName = empty($userSession) ? '' : $userSession['user_name'];
-        $countryId = empty($userSession) ? -1 : $userSession['user_country_id'];
-
+        $userSession = empty($sessionQueryResult) ? [] : $sessionQueryResult[0];
+        $countryId =  $userSession['user_country_id'] ?? -1;
         $this->logUserLogOnOrOff(
             false,
             $session_id,
-            $userName,
             $this->getGameSessionId(),
             $countryId
         );
@@ -407,31 +404,29 @@ class User extends Base implements JWTUserInterface
 
     private function logUserLogOnOrOff(
         bool $logOn,
-        int $userId,
-        string $userName,
         int $sessionId,
+        int $gameSessionId,
         int $countryId
     ) : void {
-        $analyticsLogger = null;
+        $legacyHelper = SymfonyToLegacyHelper::getInstance();
+        $analyticsLogger = $legacyHelper->getAnalyticsLogger();
+
+        $serverManager = ServerManager::getInstance();
+        $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
+
+        $analyticsMessage = new UserLogOnOffSessionMessage(
+            $logOn,
+            new DateTimeImmutable(),
+            $serverManagerId,
+            $sessionId,
+            $gameSessionId,
+            $countryId
+        );
+
         try {
-            $legacyHelper = SymfonyToLegacyHelper::getInstance();
-            $analyticsLogger = $legacyHelper->getAnalyticsLogger();
-
-            $serverManager = ServerManager::getInstance();
-            $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
-
-            $analyticsMessage = new UserLogOnOffSessionMessage(
-                $logOn,
-                new DateTimeImmutable(),
-                $serverManagerId,
-                $userId,
-                $userName,
-                $sessionId,
-                $countryId
-            );
             $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
         } catch (Exception $e) {
-            $analyticsLogger?->error(
+            $analyticsLogger->error(
                 "Exception occurred while dispatching user log ".
                 ($logOn ? "on" : "off").
                 " message : ". $e->getMessage()
