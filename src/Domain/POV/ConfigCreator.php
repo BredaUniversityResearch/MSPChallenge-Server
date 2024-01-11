@@ -7,18 +7,17 @@ use App\Domain\Services\ConnectionManager;
 use Doctrine\DBAL\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
-use ServerManager\ServerManager;
 
 class ConfigCreator
 {
     const DEFAULT_CONFIG_FILENAME = 'pov-config.json';
 
-    const SUBDIR = 'POV';
+    const SUB_DIR = 'POV';
 
     public function __construct(
         private readonly string $projectDir,
         private readonly int $sessionId,
-        private LoggerInterface $logger
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -69,7 +68,7 @@ class ConfigCreator
 
     public static function getDefaultOutputBaseDir(string $projectDir): string
     {
-        return (php_sapi_name() == 'cli' ? getcwd() : $projectDir) . DIRECTORY_SEPARATOR . self::SUBDIR;
+        return (php_sapi_name() == 'cli' ? getcwd() : $projectDir) . DIRECTORY_SEPARATOR . self::SUB_DIR;
     }
 
     public static function getFolderNameFromRegion(Region $region): string
@@ -148,7 +147,7 @@ class ConfigCreator
                 'select c.region from game_list l inner join game_config_version c ' .
                 'on l.game_config_version_id=c.id and l.id=:game_session_id',
                 ['game_session_id' => $this->sessionId]
-            )->fetch(\PDO::FETCH_ASSOC);
+            )->fetchAssociative();
         } catch (Exception $e) {
             throw new Exception('Could not retrieve the game config region for the given session id: ' .
                 $this->sessionId);
@@ -219,19 +218,21 @@ WITH
   ),  
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
-      SELECT l.*
+      SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype
       FROM layer l
       LEFT JOIN plan_layer pl ON l.layer_id=pl.plan_layer_layer_id
       LEFT JOIN plan p ON p.plan_id=pl.plan_layer_plan_id
-      WHERE l.layer_active = 1 AND p.plan_id IS NULL OR (p.plan_state IN ('IMPLEMENTED') AND p.plan_active = 1) AND
+      LEFT JOIN layer lorg ON IFNULL(l.layer_original_id,l.layer_id)=lorg.layer_id
+      WHERE l.layer_active = 1 AND lorg.layer_active = 1 AND
+        p.plan_id IS NULL OR (p.plan_state IN ('IMPLEMENTED') AND p.plan_active = 1) AND
       (
-        l.layer_geotype IN ('line','point','polygon') OR (
+        lorg.layer_geotype IN ('line','point','polygon') OR (
           # if raster, return only if the region overlaps with its bounding box data
           -- l.layer_geotype IN ('raster')
-          JSON_EXTRACT(l.layer_raster, '$.boundingbox[0][0]') < :topRightX
-          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[0][1]') < :topRightY
-          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[1][0]') > :bottomLeftX
-          AND JSON_EXTRACT(l.layer_raster, '$.boundingbox[1][1]') > :bottomLeftY
+          JSON_EXTRACT(lorg.layer_raster, '$.boundingbox[0][0]') < :topRightX
+          AND JSON_EXTRACT(lorg.layer_raster, '$.boundingbox[0][1]') < :topRightY
+          AND JSON_EXTRACT(lorg.layer_raster, '$.boundingbox[1][0]') > :bottomLeftX
+          AND JSON_EXTRACT(lorg.layer_raster, '$.boundingbox[1][1]') > :bottomLeftY
         )
       )
       GROUP BY l.layer_id
