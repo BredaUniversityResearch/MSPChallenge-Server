@@ -4,14 +4,12 @@ namespace App\Controller\SessionAPI;
 
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\Region;
-use PHPUnit\Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -42,7 +40,7 @@ class GameController extends AbstractController
         $configCreator = new ConfigCreator($this->projectDir, $sessionId, $logger);
         try {
             $zipFilepath = $configCreator->createAndZip($region);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
         }
 
@@ -62,6 +60,7 @@ class GameController extends AbstractController
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             basename($zipFilepath)
         ));
+        $response->headers->set('Content-Length', (string)filesize($zipFilepath));
 
         return $response;
     }
