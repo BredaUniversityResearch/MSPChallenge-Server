@@ -122,7 +122,6 @@ class MEL extends Base
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name=?",
             array($layerName)
         );
-                
         $rasterProperties = array(
             "url" => "$layerName.tif",
             "boundingbox" => array(
@@ -132,6 +131,9 @@ class MEL extends Base
 
         if (empty($data)) {
             //create new layer
+            Log::LogDebug("Note: found reference to MEL layer {$layerName}. Please check its existence under 'meta'.");
+            $game = new Game();
+            $globalConfig = $game->GetGameConfigValues();
             $rasterFormat = json_encode($rasterProperties);
             $layerId = $this->getDatabase()->query(
                 "
@@ -139,7 +141,7 @@ class MEL extends Base
                     layer_name, layer_short, layer_geotype, layer_group, layer_category, layer_subcategory, layer_raster
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
                 ",
-                array($layerName, $melLayerName, "raster", $config['region'], "Ecology", "pressure", $rasterFormat),
+                array($layerName, $melLayerName, "raster", $globalConfig['region'], "Ecology", "pressure", $rasterFormat),
                 true
             );
         } else {
