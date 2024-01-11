@@ -1,0 +1,10 @@
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+  app.clients_url: 'https://community.mspchallenge.info/wiki/Download'
+  app.session_raster_dir: '%kernel.project_dir%/raster/'
+  app.session_config_dir: '%kernel.project_dir%/running_session_config/'
+  app.server_manager_config_dir: '%kernel.project_dir%/ServerManager/configfiles/'
+  # test environment specific directories, when relevant
+  app.session_raster_dir_test: '%kernel.logs_dir%/raster/'
+  app.session_config_dir_test: '%kernel.logs_dir%/running_session_config/'

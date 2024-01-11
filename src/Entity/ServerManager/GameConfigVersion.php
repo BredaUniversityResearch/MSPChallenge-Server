@@ -62,6 +62,11 @@ class GameConfigVersion
     #[ORM\Column(length: 45)]
     private ?string $clientVersions = null;
 
+    /**
+     * @param array $gameConfigComplete
+     */
+    private ?array $gameConfigComplete = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -186,6 +191,25 @@ class GameConfigVersion
     public function setClientVersions(string $clientVersions): self
     {
         $this->clientVersions = $clientVersions;
+
+        return $this;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getGameConfigComplete(): ?array
+    {
+        return $this->gameConfigComplete;
+    }
+
+    /**
+     * @param array|null $gameConfigComplete
+     * @return GameConfigVersion
+     */
+    public function setGameConfigComplete(?array $gameConfigComplete): self
+    {
+        $this->gameConfigComplete = $gameConfigComplete;
 
         return $this;
     }

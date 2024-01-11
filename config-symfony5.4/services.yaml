@@ -1,11 +1,6 @@
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
 
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
-parameters:
-    app.clients_url: 'https://community.mspchallenge.info/wiki/Download'
-
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -60,6 +55,24 @@ services:
             - { name: shivas_versioning.provider, alias: versions_provider, priority: 200 }
 
     ServerManager\ServerManager:
+
+    App\Logger\GameSessionLogger:
+        arguments:
+            $kernelLogsDir: '%kernel.logs_dir%'
+            $kernelProjectDir: '%kernel.project_dir%'
+
+    App\Entity\ServerManager\Listener\GameConfigVersionListener:
+        arguments:
+            $kernel: '@Symfony\Component\HttpKernel\KernelInterface'
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion' }
+
+    App\Entity\ServerManager\Listener\GameGeoServerListener:
+        arguments:
+            $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameGeoServer' }
 
 when@dev:
     services:
