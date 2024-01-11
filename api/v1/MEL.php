@@ -141,7 +141,7 @@ class MEL extends Base
                     layer_name, layer_short, layer_geotype, layer_group, layer_category, layer_subcategory, layer_raster
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
                 ",
-                array($layerName, $melLayerName, "raster", $globalConfig['region'], "Ecology", "pressure", $rasterFormat),
+                [$layerName, $melLayerName, "raster", $globalConfig['region'], "Ecology", "pressure", $rasterFormat],
                 true
             );
         } else {
