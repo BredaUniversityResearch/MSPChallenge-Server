@@ -209,13 +209,30 @@ WITH
     GROUP BY g.geometry_persistent
   ),
   LatestGeometryInRegion AS (
-    SELECT *
-    FROM LatestGeometryFinal
-    # if geometry, return only the ones inside the region based on its geometry point data
-    WHERE
-      JSON_EXTRACT(geometry_geometry, '$[0][0]') BETWEEN :bottomLeftX AND :topRightX
-      AND JSON_EXTRACT(geometry_geometry, '$[0][1]') BETWEEN :bottomLeftY AND :topRightY
-  ),  
+    SELECT gf.*
+    FROM LatestGeometryFinal gf
+    # create and join dynamic table that holds all the geometry points as records for each geometry id
+    INNER JOIN (
+      SELECT
+          g.geometry_id,
+          jt.x,
+          jt.y
+      FROM
+          geometry g
+      CROSS JOIN
+          JSON_TABLE(
+              g.geometry_geometry,
+              '$[*]' COLUMNS (
+                  x double PATH '$[0]',
+                  y double PATH '$[1]'
+              )
+          ) AS jt
+    # only geometry with points inside the region
+    ) AS p ON p.geometry_id=gf.geometry_id AND
+      p.x BETWEEN :bottomLeftX AND :topRightX AND p.y BETWEEN :bottomLeftY AND :topRightY
+    # since get records per point, group by geometry id
+    GROUP BY gf.geometry_id
+  ),
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
       SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype
@@ -350,7 +367,8 @@ SELECT
         JSON_OBJECT(
           'coordinate0', JSON_ARRAY(CAST(:bottomLeftX AS DOUBLE), CAST(:bottomLeftY AS DOUBLE)),
           'coordinate1', JSON_ARRAY(CAST(:topRightX AS DOUBLE), CAST(:topRightY AS DOUBLE)),
-          'projection', '//todo'
+          # @todo (MH): add projection
+          'projection', '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs'
         ),
         JSON_OBJECTAGG(subquery.prop, JSON_EXTRACT(subquery.value, '$.*'))
       )      
