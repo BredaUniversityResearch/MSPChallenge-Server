@@ -660,13 +660,13 @@ class SEL extends Base
                 );
                 if (count($layerData) > 0) {
                     $restrictionLayerExceptions[] = $layerData[0]["layer_id"];
-                } else {
-                    $this->getLogger()->serverEvent(
-                        "SEL_API",
-                        Log::WARNING,
-                        "Unknown layer with name ".$data." found in SEL Configuration file"
-                    );
+                    continue;
                 }
+                $this->getLogger()->serverEvent(
+                    "SEL_API",
+                    Log::WARNING,
+                    "Unknown layer with name ".$data." found in SEL Configuration file"
+                );
             }
         }
         $riskMapSettings["restriction_layer_exceptions"] = $restrictionLayerExceptions;
