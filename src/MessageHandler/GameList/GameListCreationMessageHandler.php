@@ -441,7 +441,7 @@ class GameListCreationMessageHandler
                         );
                         continue;
                     }
-                    if (!$this->geometry->processAndAdd($feature, $layerId, $layerMetaData)) {
+                    if (!$this->processAndAdd($feature, $layerId, $layerMetaData)) {
                         $this->gameSessionLogger->error(
                             'Could not import geometry with id {featureId} of layer {layerName} into database.'.
                             ' Some property information to help you find the feature: ',
@@ -475,6 +475,267 @@ class GameListCreationMessageHandler
             'Successfully retrieved {layerName} without storing geometry in the database, as requested.',
             ['gameSession' => $this->gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
         );
+    }
+
+    public function processAndAdd($feature, $layerId, $layerMetaData): bool
+    {
+        $feature = $this->moveDataFromArray($layerMetaData, $feature);
+        if ($this->featureHasUnknownType($layerMetaData, $feature)) {
+            throw new \Exception(
+                'Importing geometry '.$feature['id'].' for layer '.$layerMetaData['layer_name'].
+                ' with type '.$feature['properties_msp']['type'].', but this type has not been defined in the 
+                session config file, so not continuing.'
+            );
+        }
+
+        $geometryData = $feature["geometry"];
+        // let's make sure we are always working with multidata: multipolygon, multilinestring, multipoint
+        if ($geometryData["type"] == "Polygon"
+            || $geometryData["type"] == "LineString"
+            ||  $geometryData["type"] == "Point"
+        ) {
+            $geometryData["coordinates"] = [$geometryData["coordinates"]];
+            $geometryData["type"] = "Multi".$geometryData["type"];
+        }
+
+        $encodedFeatureProperties = json_encode($feature["properties"]);
+        if (strcasecmp($geometryData["type"], "MultiPolygon") == 0) {
+            foreach ($geometryData["coordinates"] as $multi) {
+                if (!is_array($multi)) {
+                    continue;
+                }
+                $returnChecks[] = $this->addMultiPolygon(
+                    $multi,
+                    $layerId,
+                    $encodedFeatureProperties,
+                    $feature['properties_msp']['countryId'],
+                    $feature['properties_msp']['type'],
+                    $feature['properties_msp']['mspId'],
+                    $layerMetaData['layer_name']
+                );
+            }
+            return (!array_search(false, $returnChecks ?? [], true));
+        }
+        if (strcasecmp($geometryData["type"], "MultiPoint") == 0) {
+            return (!is_null($this->addGeometry(
+                [
+                    'geometry_layer_id' => $layerId,
+                    'geometry_geometry' => json_encode($geometryData["coordinates"]),
+                    'geometry_data' => $encodedFeatureProperties,
+                    'geometry_country_id' => $feature['properties_msp']['countryId'],
+                    'geometry_type' => $feature['properties_msp']['type'],
+                    'geometry_mspid' => $feature['properties_msp']['mspId'],
+                    'geometry_subtractive' => 0
+                ],
+                $layerMetaData['layer_name']
+            )));
+        }
+        if (strcasecmp($geometryData["type"], "MultiLineString") == 0) {
+            foreach ($geometryData["coordinates"] as $line) {
+                $returnChecks2[] = $this->addGeometry(
+                    [
+                        'geometry_layer_id' => $layerId,
+                        'geometry_geometry' => json_encode($line),
+                        'geometry_data' => $encodedFeatureProperties,
+                        'geometry_country_id' => $feature['properties_msp']['countryId'],
+                        'geometry_type' => $feature['properties_msp']['type'],
+                        'geometry_mspid' => $feature['properties_msp']['mspId'],
+                        'geometry_subtractive' => 0
+                    ],
+                    $layerMetaData['layer_name']
+                );
+            }
+            return (!array_search(null, $returnChecks2 ?? [], true));
+        }
+        return false;
+    }
+
+    public function moveDataFromArray(
+        array $layerMetaData,
+        array $feature
+    ): array {
+        $featureProperties = $feature['properties'];
+        if (!empty($layerMetaData["layer_property_as_type"])) {
+            // check if the layer_property_as_type value exists in $featureProperties
+            $type = '-1';
+            if (!empty($featureProperties[$layerMetaData["layer_property_as_type"]])) {
+                $featureTypeProperty = $featureProperties[$layerMetaData["layer_property_as_type"]];
+                foreach ($layerMetaData["layer_type"] as $layerTypeMetaData) {
+                    if (!empty($layerTypeMetaData["map_type"])) {
+                        // identify the 'other' category
+                        if (strtolower($layerTypeMetaData["map_type"]) == "other") {
+                            $typeOther = $layerTypeMetaData["value"];
+                        }
+                        // translate the found $featureProperties value to the type value
+                        if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+                            $type = $layerTypeMetaData["value"];
+                            break;
+                        }
+                    }
+                }
+            }
+            if ($type == -1) {
+                $type = $typeOther ?? 0;
+            }
+        } else {
+            $type = (int)($featureProperties['type'] ?? 0);
+            unset($featureProperties['type']);
+        }
+
+        if (isset($featureProperties['mspid'])
+            && is_numeric($featureProperties['mspid'])
+            && intval($featureProperties['mspid']) !== 0
+        ) {
+            $mspId = intval($featureProperties['mspid']);
+            unset($featureProperties['mspid']);
+        }
+
+        if (isset($featureProperties['country_id'])
+            && is_numeric($featureProperties['country_id'])
+            && intval($featureProperties['country_id']) !== 0
+        ) {
+            $countryId = intval($featureProperties['country_id']);
+            unset($featureProperties['country_id']);
+        }
+
+        $feature['properties'] = $featureProperties;
+        $feature['properties_msp']['type'] = $type;
+        $feature['properties_msp']['mspId'] = $mspId ?? null;
+        $feature['properties_msp']['countryId'] = $countryId ?? null;
+        return $feature;
+    }
+
+    public function featureHasUnknownType(array $layerMetaData, array $feature): bool
+    {
+        return (!isset($layerMetaData['layer_type'][$feature['properties_msp']['type']]));
+    }
+
+    private function addMultiPolygon(
+        array $multi,
+        int $layerId,
+        string $jsonData,
+        ?int $countryId,
+        string $type,
+        ?int $mspId,
+        string $layerName
+    ): bool {
+        $lastId = 0;
+        for ($j = 0; $j < sizeof($multi); $j++) {
+            if (sizeof($multi) > 1 && $j != 0) {
+                //this is a subtractive polygon
+                $this->addGeometry(
+                    [
+                        'geometry_layer_id' => $layerId,
+                        'geometry_geometry' => json_encode($multi[$j]),
+                        'geometry_data' => $jsonData,
+                        'geometry_country_id' => $countryId,
+                        'geometry_type' => $type,
+                        'geometry_mspid' => null,
+                        'geometry_subtractive' => $lastId
+                    ],
+                    $layerName
+                );
+            } else {
+                $lastId = $this->addGeometry(
+                    [
+                        'geometry_layer_id' => $layerId,
+                        'geometry_geometry' => json_encode($multi[$j]),
+                        'geometry_data' => $jsonData,
+                        'geometry_country_id' => $countryId,
+                        'geometry_type' => $type,
+                        'geometry_mspid' => $mspId,
+                        'geometry_subtractive' => 0
+                    ],
+                    $layerName
+                );
+            }
+        }
+        return false;
+    }
+
+    private function addGeometry(array $geometryColumns, $layerName = ''): int|null
+    {
+        if (empty($geometryColumns['geometry_geometry'])
+            || empty($geometryColumns['geometry_layer_id'])
+        ) {
+            throw new \Exception('Need at least some geometry and a layer ID to continue.');
+        }
+        $subtractive = $geometryColumns['geometry_subtractive'] ?? 0;
+        if ($subtractive === 0 && empty($geometryColumns['geometry_mspid'])) {
+            // so many algorithms to choose from, but this one seemed to have low collision, reasonable speed,
+            //   and simply availability to PHP in default installation
+            $algo = 'fnv1a64';
+            // to avoid duplicate MSP IDs, we need the string to include the layer name, the geometry, and if available
+            //   the geometry's name ... there have been cases in which one layer had exactly the same geometry twice
+            //   to indicate two different names given to that area... very annoying
+            $dataToHash = $layerName.$geometryColumns['geometry_geometry'];
+            $dataArray = json_decode($geometryColumns['geometry_data'], true);
+            $dataToHash .= $dataArray['name'] ?? '';
+            $geometryColumns['geometry_mspid'] = hash($algo, $dataToHash);
+        }
+        return $this->insert('geometry', $geometryColumns);
+    }
+
+    /**
+     * Returns the database id of the persistent geometry id described by the base_geometry_info
+     *
+     */
+    public function fixupPersistentGeometryID(array $baseGeometryInfo, array $mappedGeometryIds): int|string
+    {
+        $fixedGeometryId = -1;
+        if (!empty($baseGeometryInfo["geometry_mspid"])) {
+            $fixedGeometryId = $this->getGeometryIdByMspId($baseGeometryInfo["geometry_mspid"]);
+        } else {
+            if (array_key_exists($baseGeometryInfo["geometry_persistent"], $mappedGeometryIds)) {
+                $fixedGeometryId = $mappedGeometryIds[$baseGeometryInfo["geometry_persistent"]];
+            } else {
+                $return = "Found geometry ID (Fallback field \"geometry_persistent\": ".
+                    $baseGeometryInfo["geometry_persistent"].
+                    ") which is not referenced by msp id and hasn't been imported by the plans importer yet. ".
+                    var_export($baseGeometryInfo, true);
+            }
+        }
+        return $return ?? $fixedGeometryId;
+    }
+
+    /**
+     * Returns the database id of the geometry id described by the base_geometry_info
+     *
+     */
+    public function fixupGeometryID(array $baseGeometryInfo, array $mappedGeometryIds): int|string
+    {
+        $fixedGeometryId = -1;
+        if (array_key_exists($baseGeometryInfo["geometry_id"], $mappedGeometryIds)) {
+            $fixedGeometryId = $mappedGeometryIds[$baseGeometryInfo["geometry_id"]];
+        } else {
+            // If we can't find the geometry id in the ones that we already have imported, check if the geometry id
+            //   matches the persistent id, and if so select it by the mspid since this should all be present then.
+            if ($baseGeometryInfo["geometry_id"] == $baseGeometryInfo["geometry_persistent"]) {
+                if (isset($baseGeometryInfo["geometry_mspid"])) {
+                    $fixedGeometryId = $this->getGeometryIdByMspId($baseGeometryInfo["geometry_mspid"]);
+                } else {
+                    $return = "Found geometry (".implode(", ", $baseGeometryInfo).
+                        " which has not been imported by the plans importer. The persistent id matches but mspid is".
+                        "not set.";
+                }
+            } else {
+                $return = "Found geometry ID (Fallback field \"geometry_id\": ". $baseGeometryInfo["geometry_id"].
+                    ") which hasn't been imported by the plans importer yet.";
+            }
+        }
+        return $return ?? $fixedGeometryId;
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function getGeometryIdByMspId(int|string $mspId): int|string
+    {
+        $return = $this->selectRowsFromTable('geometry', ['geometry_mspid' => $mspId])['geometry_id'];
+        if (is_null($return)) {
+            return 'Could not find MSP ID ' . $mspId . ' in the current database';
+        }
+        return (int) $return;
     }
 
     /**
