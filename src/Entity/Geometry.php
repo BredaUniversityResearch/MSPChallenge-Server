@@ -179,6 +179,4 @@ class Geometry
         $this->geometryMspid = $geometryMspid;
         return $this;
     }
-
-
 }
