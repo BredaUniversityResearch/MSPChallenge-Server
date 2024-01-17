@@ -20,7 +20,7 @@ class GeoServerCommunicator extends AbstractCommunicator
      */
     public function getResource(string $endPoint, bool $asArray = true): string|array
     {
-        if (is_null($this->getUsername()) || is_null($this->getPassword()) || is_null($this->getBasePath())) {
+        if (is_null($this->getUsername()) || is_null($this->getPassword()) || is_null($this->getBaseURL())) {
             return [];
         }
 

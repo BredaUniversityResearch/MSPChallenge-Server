@@ -2,8 +2,11 @@
 
 namespace App\Entity\ServerManager\Listener;
 
+use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
 use App\Entity\ServerManager\GameConfigVersion;
 use Doctrine\ORM\Event\PostLoadEventArgs;
+use Doctrine\ORM\Event\PrePersistEventArgs;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class GameConfigVersionListener

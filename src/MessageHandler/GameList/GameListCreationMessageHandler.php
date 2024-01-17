@@ -2,20 +2,17 @@
 
 namespace App\MessageHandler\GameList;
 
-use App\Domain\API\v1\Game;
-use App\Domain\API\v1\Geometry;
-use App\Domain\API\v1\Layer;
-use App\Domain\API\v1\Objective;
-use App\Domain\API\v1\Plan;
+use App\Entity\Country;
+use App\Entity\Game;
 use App\Domain\API\v1\Simulations;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Communicator\GeoServerCommunicator;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\Layer;
 use App\Entity\ServerManager\GameList;
 use App\Message\GameList\GameListCreationMessage;
 use App\Repository\ServerManager\GameListRepository;
 use App\VersionsProvider;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -36,17 +33,11 @@ use function App\await;
 class GameListCreationMessageHandler
 {
     private string $database;
-    private Connection $connection;
+    private EntityManagerInterface $entityManager;
 
     private GameList $gameSession;
 
     private array $dataModel;
-
-    /*private Game $game;
-    private Layer $layer;
-    private Geometry $geometry;
-    private Objective $objective;
-    private Plan $plan;*/
 
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager,
@@ -69,7 +60,8 @@ class GameListCreationMessageHandler
             ?? throw new \Exception('Game session not found, so cannot continue.');
         $connectionManager = ConnectionManager::getInstance();
         $this->database = $connectionManager->getGameSessionDbName($this->gameSession->getId());
-        $this->connection = $connectionManager->getCachedGameSessionDbConnection($this->gameSession->getId());
+        $this->entityManager = $this->kernel->getContainer("doctrine.orm.{$this->database}_entity_manager");
+
         try {
             $this->validateGameConfigComplete();
             $this->gameSessionLogger->notice(
@@ -224,19 +216,15 @@ class GameListCreationMessageHandler
      */
     private function setupGame(): void
     {
-        $eraRealtimeString = str_repeat(($this->dataModel['era_planning_realtime'] ?? 300). ",", 4);
-        $eraRealtimeString = substr($eraRealtimeString, 0, -1);
-        $this->insert('game', [
-                'game_start' => $this->dataModel['start'] ?? date('Y'),
-                'game_planning_gametime' => $this->dataModel['era_planning_months'] ?? 1,
-                'game_planning_realtime' => $this->dataModel['era_planning_realtime'] ?? 300,
-                'game_planning_era_realtime' => $eraRealtimeString,
-                'game_eratime' =>
-                    max($this->dataModel['era_total_months'], $this->params->get('app.min_game_era_time')),
-                'game_configfile' =>
-                    sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()),
-                'game_autosave_month_interval' => $this->params->get('app.game_auto_save_interval')
-        ]);
+        $game = new Game();
+        $game->setGameId(1);
+        $game->setGameStart($this->dataModel['start']);
+        $game->setGamePlanningGametime($this->dataModel['era_planning_months']);
+        $game->setGamePlanningRealtime($this->dataModel['era_planning_realtime']);
+        $game->setGamePlanningEraRealtimeComplete();
+        $game->setGameEratime($this->dataModel['era_total_months']);
+        $this->entityManager->persist($game);
+        $this->entityManager->flush();
         $this->gameSessionLogger->info(
             'Basic game parameters set up.',
             ['gameSession' => $this->gameSession->getId()]
@@ -248,34 +236,30 @@ class GameListCreationMessageHandler
      */
     private function setupGameCountries(): void
     {
-        $countries = [
-            [
-                'country_id' => 1,
-                'country_colour' => $this->dataModel['user_admin_color'] ?? '#FF00FFFF',
-                'country_is_manager' => 1
-            ],
-            [
-                'country_id' => 2,
-                'country_colour' => $this->dataModel['user_region_manager_color'] ?? '#00FFFFFF',
-                'country_is_manager' => 1
-            ]
-        ];
+        $countries[] = (new Country())
+            ->setCountryId(1)
+            ->setCountryColour($this->dataModel['user_admin_color'])
+            ->setCountryIsManager(1);
+        $countries[] = (new Country())
+            ->setCountryId(1)
+            ->setCountryColour($this->dataModel['user_region_manager_color'])
+            ->setCountryIsManager(1);
         foreach ($this->dataModel['meta'] as $layerMeta) {
             if ($layerMeta['layer_name'] == $this->dataModel['countries']) {
                 foreach ($layerMeta['layer_type'] as $country) {
-                    $countries[] = [
-                        'country_id' => $country['value'],
-                        'country_name' => $country['displayName'],
-                        'country_colour' => $country['polygonColor'],
-                        'country_is_manager' => 0
-                    ];
+                    $countries[] = (new Country())
+                        ->setCountryId($country['value'])
+                        ->setCountryName($country['displayName'])
+                        ->setCountryColour($country['polygonColor'])
+                        ->setCountryIsManager(0);
                 }
                 break;
             }
         }
         foreach ($countries as $country) {
-            $this->insert('game', $country);
+            $this->entityManager->persist($country);
         }
+        $this->entityManager->flush();
         $this->gameSessionLogger->info(
             'All countries set up.',
             ['gameSession' => $this->gameSession->getId()]
@@ -331,6 +315,12 @@ class GameListCreationMessageHandler
         array $layerMetaData,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
+        $layer = new Layer();
+        $layer->setLayerName($layerMetaData['layer_name']);
+        $layer->setLayerGeotype($layerMetaData['layer_geotype']);
+        $layer->setLayerGroup($this->dataModel['region']);
+        $layer->setLayerEditable(0);
+        $message = 'Successfully retrieved {layerName} without storing a raster file, as requested.';
         $rasterFileName = $_ENV['APP_ENV'] == 'test' ?
             $this->params->get('app.session_raster_dir_test') :
             $this->params->get('app.session_raster_dir');
@@ -342,13 +332,7 @@ class GameListCreationMessageHandler
                 $this->dataModel['region'],
                 $layerMetaData['layer_name']
             );
-            $this->insert('layer', [
-                'layer_name' => $layerMetaData['layer_name'],
-                'layer_geotype' => $layerMetaData['layer_geotype'],
-                'layer_group' => $this->dataModel['region'],
-                'layer_editable' => 0,
-                'layer_raster' => $rasterMetaData
-            ]);
+            $layer->setLayerRaster($rasterMetaData);
             $rasterData = $geoServerCommunicator->getRasterDataThroughMetaData(
                 $this->dataModel['region'],
                 $layerMetaData,
@@ -359,25 +343,13 @@ class GameListCreationMessageHandler
                 $rasterFileName,
                 $rasterData
             );
-            $this->gameSessionLogger->info(
-                'Successfully retrieved {layerName} and stored the raster file at {rasterFileName}.',
-                [
-                    'gameSession' => $this->gameSession->getId(),
-                    'layerName' => $layerMetaData['layer_name'],
-                    'rasterFileName' => $rasterFileName
-                ]
-            );
-            return;
+            $message = 'Successfully retrieved {layerName} and stored the raster file at {rasterFileName}.';
         }
         // Create the metadata for the raster layer, but don't fill in the layer_raster field.
-        $this->insert('layer', [
-            'layer_name' => $layerMetaData['layer_name'],
-            'layer_geotype' => $layerMetaData['layer_geotype'],
-            'layer_group' => $this->dataModel['region'],
-            'layer_editable' => 0
-        ]);
+        $this->entityManager->persist($layer);
+        $this->entityManager->flush();
         $this->gameSessionLogger->info(
-            'Successfully retrieved {layerName} without storing a raster file, as requested.',
+            $message,
             [
                 'gameSession' => $this->gameSession->getId(),
                 'layerName' => $layerMetaData['layer_name'],
@@ -394,24 +366,16 @@ class GameListCreationMessageHandler
         array $layerMetaData,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
+        $layer = new Layer();
+        $layer->setLayerName($layerMetaData['layer_name']);
+        $layer->setLayerGeotype($layerMetaData['layer_geotype']);
+        $layer->setLayerGroup($this->dataModel['region']);
+        $this->entityManager->persist($layer);
+        $this->entityManager->flush();
+        $message = 'Successfully retrieved {layerName} without storing geometry in the database, as requested.';
         if (!array_key_exists('layer_download_from_geoserver', $layerMetaData) ||
             $layerMetaData['layer_download_from_geoserver']
         ) {
-            $qb = $this->connection->createQueryBuilder();
-            $result = $qb->select('l.layer_id')
-                ->from('layer', 'l')
-                ->where($qb->expr()->eq('l.layer_name', $layerMetaData['layer_name']))
-                ->executeQuery()
-                ->fetchOne();
-            if ($result === false) {
-                $layerId = $this->insert('layer', [
-                    'layer_name' => $layerMetaData['layer_name'],
-                    'layer_geotype' => $layerMetaData['layer_geotype'],
-                    'layer_group' => $this->dataModel['region']
-                ]);
-            } else {
-                $layerId = $result['layer_id'];
-            }
             $layersContainer = $geoServerCommunicator->getLayerDescription(
                 $this->dataModel['region'],
                 $layerMetaData['layer_name']
@@ -441,7 +405,7 @@ class GameListCreationMessageHandler
                         );
                         continue;
                     }
-                    if (!$this->processAndAdd($feature, $layerId, $layerMetaData)) {
+                    if (!$this->processAndAdd($feature, $layer->getLayerId(), $layerMetaData)) {
                         $this->gameSessionLogger->error(
                             'Could not import geometry with id {featureId} of layer {layerName} into database.'.
                             ' Some property information to help you find the feature: ',
@@ -459,20 +423,11 @@ class GameListCreationMessageHandler
                     }
                 }
             }
-            $this->gameSessionLogger->info(
-                'Successfully retrieved {layerName} and stored the geometry in the database.',
-                ['gameSession' => $this->gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
-            );
-            return;
+            $message = 'Successfully retrieved {layerName} and stored the geometry in the database.';
         }
         // Create the metadata for the vector layer, but don't fill the geometry table.
-        $this->insert('layer', [
-            'layer_name' => $layerMetaData['layer_name'],
-            'layer_geotype' => $layerMetaData['layer_geotype'],
-            'layer_group' => $this->dataModel['region']
-        ]);
         $this->gameSessionLogger->info(
-            'Successfully retrieved {layerName} without storing geometry in the database, as requested.',
+            $message,
             ['gameSession' => $this->gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
         );
     }
@@ -860,6 +815,8 @@ class GameListCreationMessageHandler
     {
         // get the watchdog and end-user log-on in order
         $qb = $this->connection->createQueryBuilder();
+        // not turning game_session into a Doctrine Entity as the whole table will be deprecated
+        // as soon as the session API has been ported to Symfony
         $qb->insert('game_session')
             ->values(
                 [

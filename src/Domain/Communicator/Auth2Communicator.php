@@ -11,7 +11,7 @@ class Auth2Communicator extends AbstractCommunicator
         HttpClientInterface $client
     ) {
         $this->client = $client;
-        $this->setBasePath(
+        $this->setBaseURL(
             ($_ENV['AUTH_SERVER_SCHEME'] ?? 'https') . '://' .
             ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info') . ':' .
             ($_ENV['AUTH_SERVER_PORT'] ?? 443).

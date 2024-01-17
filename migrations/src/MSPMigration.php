@@ -36,7 +36,7 @@ abstract class MSPMigration extends AbstractMigration
                 break;
             case MSPDatabaseType::DATABASE_TYPE_SERVER_MANAGER:
                 $this->skipIf(
-                    $schema->getName() != ($_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager'),
+                    !Util::hasPrefix($schema->getName(), $_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager'),
                     'This migrations requires a server manager database. Please use --em=' . $schema->getName()
                 );
                 break;
