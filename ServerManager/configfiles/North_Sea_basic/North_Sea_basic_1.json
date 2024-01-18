@@ -25358,7 +25358,7 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-          "current_speed"
+          "currents_speed"
         ]
       },
       {
@@ -26418,7 +26418,7 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-          "sediment_type"
+          "sediments"
         ]
       },
       {
@@ -29036,7 +29036,7 @@
         "layer_tags": [
           "wind_park",
           "wind_farms",
-          "consented"
+          "potential"
         ]
       },
       {
@@ -29257,7 +29257,7 @@
         "layer_tags": [
           "wind_park",
           "wave_farms",
-          "consented"
+          "potential"
         ]
       },
       {
@@ -29478,7 +29478,7 @@
         "layer_tags": [
           "wind_park",
           "tidal_farms",
-          "consented"
+          "potential"
         ]
       },
       {
@@ -32392,7 +32392,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "total_intensity",
+          "simulated"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_ferry",
@@ -32580,7 +32584,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "ferry_intensity",
+          "simulated"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_passenger",
@@ -32768,7 +32776,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "passenger_intensity",
+          "simulated"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_tanker",
@@ -32956,7 +32968,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "tanker_intensity",
+          "simulated"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_maintenance",
@@ -33144,7 +33160,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "maintenance_intensity",
+          "simulated"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_cargo",
@@ -33332,7 +33352,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "cargo_intensity",
+          "simulated"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_raster",
@@ -33548,7 +33572,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "total_intensity"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Risk",
@@ -34770,7 +34797,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "passenger_intensity",
+          "static"
+        ]
       },
       {
         "layer_name": "NS_shipping_intensity_tanker_raster_EM",
@@ -35014,7 +35045,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "tanker_intensity",
+          "static"
+        ]
       },
       {
         "layer_name": "NS_shipping_intensity_cargo_raster_EM",
@@ -35258,7 +35293,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "shipping_intensity",
+          "cargo_intensity",
+          "static"
+        ]
       },
       {
         "layer_name": "NS_Aquaculture_Freshwater",
@@ -36483,7 +36522,10 @@
             "default_value": null
           }
         ],
-        "layer_tags": []
+        "layer_tags": [
+          "protection_areas",
+          "natura_2000"
+        ]
       },
       {
         "layer_name": "NS_Marine_Protected_Areas",
@@ -36952,7 +36994,10 @@
             "default_value": null
           }
         ],
-        "layer_tags": []
+        "layer_tags": [
+          "protection_areas",
+          "marine_protected_areas"
+        ]
       },
       {
         "layer_name": "mel_Noise",
@@ -37140,7 +37185,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "noise",
+          "simulated"
+        ]
       },
       {
         "layer_name": "mel_Artificial_Substrate",
@@ -37892,7 +37940,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "protected_areas",
+          "industrial_trawl",
+          "simulated"
+        ]
       },
       {
         "layer_name": "mel_Protection_bottom_trawl",
@@ -38080,7 +38132,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "protected_areas",
+          "bottom_trawl",
+          "simulated"
+        ]
       },
       {
         "layer_name": "mel_Protection_nets",
@@ -38268,7 +38324,11 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "protected_areas",
+          "nets",
+          "simulated"
+        ]
       },
       {
         "layer_name": "mel_Benthic_invertebrates",
@@ -38644,9 +38704,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": [
+        "layer_tags": [        
           "fish",
-          "cod"
+          "cod",
+          "simulated"
         ]
       },
       {
@@ -38835,9 +38896,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": [
+        "layer_tags": [        
           "fish",
-          "demersal_fish"
+          "demersal_fish",
+          "simulated"
         ]
       },
       {
@@ -39026,9 +39088,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": [
+        "layer_tags": [        
           "fish",
-          "flatfish"
+          "flatfish",
+          "simulated"
         ]
       },
       {
@@ -39217,9 +39280,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": [
+        "layer_tags": [        
           "fish",
-          "mackerel"
+          "mackerel",
+          "simulated"
         ]
       },
       {
@@ -39408,9 +39472,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": [
+        "layer_tags": [        
           "fish",
-          "herring"
+          "herring",
+          "simulated"
         ]
       },
       {
@@ -39599,9 +39664,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": [
+        "layer_tags": [mamm
           "fish",
-          "sandeel"
+          "sandeel",
+          "simulated"
         ]
       },
       {
@@ -40167,8 +40233,9 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-          "fish",
-          "cetacean"
+          "mammals",
+          "cetacean",
+          "simulated"
         ]
       },
       {
@@ -40358,8 +40425,9 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-          "fish",
-          "seal"
+          "mammals",
+          "seal",
+          "simulated"
         ]
       },
       {
