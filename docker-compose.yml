@@ -60,6 +60,7 @@ services:
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       # Exposes BLACKFIRE_CLIENT_* environment variables allowing the client to communicate with Blackfire's API:
+      BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED:-0}
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
       APP_ENV: ${APP_ENV:-dev}
