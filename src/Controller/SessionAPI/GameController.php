@@ -4,6 +4,7 @@ namespace App\Controller\SessionAPI;
 
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\Region;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
@@ -23,7 +24,9 @@ class GameController extends AbstractController
     public function createPOVConfig(
         int $sessionId,
         Request $request,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ): StreamedResponse {
         $regionBottomLeftX = $request->request->get('region_bottom_left_x');
         $regionBottomLeftY = $request->request->get('region_bottom_left_y');
