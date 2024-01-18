@@ -2,6 +2,7 @@
 
 namespace App\Domain\POV;
 
+use App\Domain\API\v1\Game;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use Doctrine\DBAL\Connection;
@@ -142,16 +143,9 @@ class ConfigCreator
      */
     private function queryJson(Region $region): string
     {
-        try {
-            $gameConfigRegion = ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->executeQuery(
-                'select c.region from game_list l inner join game_config_version c ' .
-                'on l.game_config_version_id=c.id and l.id=:game_session_id',
-                ['game_session_id' => $this->sessionId]
-            )->fetchAssociative();
-        } catch (Exception $e) {
-            throw new Exception('Could not retrieve the game config region for the given session id: ' .
-                $this->sessionId);
-        }
+        $game = new Game();
+        $game->setGameSessionId($this->sessionId);
+        $dataModel = $game->GetGameConfigValues();
 
         try {
             $result = $this->getConnection()->executeQuery(
@@ -235,7 +229,8 @@ WITH
   ),
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
-      SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype
+      SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype,
+             lorg.layer_tags
       FROM layer l
       LEFT JOIN plan_layer pl ON l.layer_id=pl.plan_layer_layer_id
       LEFT JOIN plan p ON p.plan_id=pl.plan_layer_plan_id
@@ -367,8 +362,7 @@ SELECT
         JSON_OBJECT(
           'coordinate0', JSON_ARRAY(CAST(:bottomLeftX AS DOUBLE), CAST(:bottomLeftY AS DOUBLE)),
           'coordinate1', JSON_ARRAY(CAST(:topRightX AS DOUBLE), CAST(:topRightY AS DOUBLE)),
-          # @todo (MH): add projection
-          'projection', '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs'
+          'projection', :projection
         ),
         JSON_OBJECTAGG(subquery.prop, JSON_EXTRACT(subquery.value, '$.*'))
       )      
@@ -411,7 +405,8 @@ FROM (
           #   FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
           # ),
           'name', l.layer_name,
-          'tags', JSON_ARRAY(l.layer_geotype),
+          # for POV, adding the geo type as a layer tag as well
+          'tags', JSON_MERGE(l.layer_tags,JSON_ARRAY(l.layer_geotype)),
           'types', l.layer_type_types,
           'data', l.layer_data
         )
@@ -425,7 +420,10 @@ FROM (
 SQL,
                 array_merge(
                     $region->toArray(),
-                    $gameConfigRegion
+                    [
+                        'region' => $dataModel['region'],
+                        'projection' => $dataModel['projection']
+                    ]
                 )
             );
             $jsonString = $result->fetchOne();
