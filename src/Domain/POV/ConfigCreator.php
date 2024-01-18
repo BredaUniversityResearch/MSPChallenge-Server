@@ -230,7 +230,7 @@ WITH
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
       SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype,
-             lorg.layer_tags
+             lorg.layer_tags, lorg.layer_category, lorg.layer_subcategory
       FROM layer l
       LEFT JOIN plan_layer pl ON l.layer_id=pl.plan_layer_layer_id
       LEFT JOIN plan p ON p.plan_id=pl.plan_layer_plan_id
@@ -383,7 +383,9 @@ FROM (
             'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
             'mapping', l.layer_type_mapping,
             'types', l.layer_type_types,
-            'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url')))
+            'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url'))),
+            # for POV, add layer "geo type", category and subcategory as tags
+            'tags', JSON_MERGE_PRESERVE(l.layer_tags,JSON_ARRAY(l.layer_geotype, l.layer_category, l.layer_subcategory))
           ),
           IF(
             l.kpi_value IS NOT NULL,
@@ -405,8 +407,8 @@ FROM (
           #   FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
           # ),
           'name', l.layer_name,
-          # for POV, adding the geo type as a layer tag as well
-          'tags', JSON_MERGE(l.layer_tags,JSON_ARRAY(l.layer_geotype)),
+          # for POV, add layer "geo type", category and subcategory as tags
+          'tags', JSON_MERGE_PRESERVE(l.layer_tags,JSON_ARRAY(l.layer_geotype, l.layer_category, l.layer_subcategory)),
           'types', l.layer_type_types,
           'data', l.layer_data
         )
