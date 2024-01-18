@@ -128,7 +128,7 @@ class MEL extends Base
         $layerMeta = current(array_filter($globalConfig['meta'], function ($meta) use ($layerName) {
             return strcasecmp($meta['layer_name'], $layerName) === 0;
         }));
-        // take the config's layer name since the case of the characters can be different from MEL's layer name. 
+        // take the config's layer name since the case of the characters can be different from MEL's layer name.
         $layerName = $layerMeta['layer_name'] ?? $layerName;
         $rasterProperties = array(
             "url" => "$layerName.tif",
