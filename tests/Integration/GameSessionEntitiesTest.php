@@ -4,6 +4,7 @@ namespace App\Tests\Integration;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Country;
 use App\Entity\Game;
+use App\Entity\Geometry;
 use App\Entity\Layer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -67,6 +68,28 @@ class GameSessionEntitiesTest extends KernelTestCase
 
         $layer2 = $this->em->getRepository(Layer::class)->findAll()[0];
         self::assertSame($layer, $layer2);
+    }
+
+    public function testGeometryEntity(): void
+    {
+        $this->start();
+        $geometry = new Geometry();
+        $geometry->setGeometryLayerId(1);
+        $geometry->setGeometryGeometry(
+            '[[4800176.69845479,748903.878],[4800176.69845479,2483199.127],[7398173.756,2483199.127]]'
+        ); // coordinates following a certain projection mode
+        $geometry->setGeometryData(
+            '{"minx":4800176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.127}'
+        ); // json representation of feature properties
+        $geometry->setGeometryCountryId(1);
+        $geometry->setGeometryType('0');
+        $geometry->setGeometryMspid('4fba98446ce9d9ff');
+
+        $this->em->persist($geometry);
+        $this->em->flush();
+
+        $geometry2 = $this->em->getRepository(Geometry::class)->findAll()[0];
+        self::assertSame($geometry, $geometry2);
     }
 
 

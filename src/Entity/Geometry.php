@@ -46,7 +46,7 @@ class Geometry
     private ?int $geometryDeleted = 0;
 
     #[ORM\Column(type: Types::STRING, length: 16, nullable: true)]
-    private ?int $geometryMspid;
+    private ?string $geometryMspid;
 
     public function getGeometryId(): ?int
     {
@@ -169,12 +169,12 @@ class Geometry
         return $this;
     }
 
-    public function getGeometryMspid(): ?int
+    public function getGeometryMspid(): ?string
     {
         return $this->geometryMspid;
     }
 
-    public function setGeometryMspid(?int $geometryMspid): Geometry
+    public function setGeometryMspid(?string $geometryMspid): Geometry
     {
         $this->geometryMspid = $geometryMspid;
         return $this;
