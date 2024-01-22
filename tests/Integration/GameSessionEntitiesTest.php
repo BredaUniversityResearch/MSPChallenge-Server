@@ -6,16 +6,22 @@ use App\Entity\Country;
 use App\Entity\Game;
 use App\Entity\Geometry;
 use App\Entity\Layer;
+use App\Entity\ServerManager\GameConfigVersion;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class GameSessionEntitiesTest extends KernelTestCase
 {
     private const DBNAME = 'msp_session_1';
     private EntityManagerInterface $em;
+
+    private EntityManagerInterface $emServerManager;
 
     public function testGameSessionEntityManager(): void
     {
@@ -68,13 +74,20 @@ class GameSessionEntitiesTest extends KernelTestCase
 
         $layer2 = $this->em->getRepository(Layer::class)->findAll()[0];
         self::assertSame($layer, $layer2);
+
+        $gameConfig = $this->emServerManager->getRepository(GameConfigVersion::class)->find(1);
+
+        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        $allLayers = $gameConfig->getGameConfigComplete()['datamodel']['meta'];
+        $layer3 = $normalizer->denormalize($allLayers[0], Layer::class);
+        //dump($layer3);
+        self::assertInstanceOf(Layer::class, $layer3); //good enough, normalizer throws exceptions anyway
     }
 
     public function testGeometryEntity(): void
     {
         $this->start();
         $geometry = new Geometry();
-        $geometry->setGeometryLayerId(1);
         $geometry->setGeometryGeometry(
             '[[4800176.69845479,748903.878],[4800176.69845479,2483199.127],[7398173.756,2483199.127]]'
         ); // coordinates following a certain projection mode
@@ -84,20 +97,22 @@ class GameSessionEntitiesTest extends KernelTestCase
         $geometry->setGeometryCountryId(1);
         $geometry->setGeometryType('0');
         $geometry->setGeometryMspid('4fba98446ce9d9ff');
-
-        $this->em->persist($geometry);
+        $layer = $this->em->getRepository(Layer::class)->find(1);
+        $layer->addGeometry($geometry);
+        $this->em->persist($layer);
         $this->em->flush();
 
         $geometry2 = $this->em->getRepository(Geometry::class)->findAll()[0];
+        //dump($layer);
         self::assertSame($geometry, $geometry2);
     }
-
 
     private function start(): void
     {
         $container = static::getContainer();
         $test = self::DBNAME;
         $this->em = $container->get("doctrine.orm.{$test}_entity_manager");
+        $this->emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
     }
 
     public static function setUpBeforeClass(): void

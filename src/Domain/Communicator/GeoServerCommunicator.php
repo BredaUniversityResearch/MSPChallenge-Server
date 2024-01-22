@@ -2,6 +2,7 @@
 
 namespace App\Domain\Communicator;
 
+use App\Entity\Layer;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GeoServerCommunicator extends AbstractCommunicator
@@ -36,10 +37,10 @@ class GeoServerCommunicator extends AbstractCommunicator
     /**
      * @param string $workspace
      * @param string $layerName
-     * @return string
+     * @return array
      * @throws \Exception
      */
-    public function getRasterMetaData(string $workspace, string $layerName): string
+    public function getRasterMetaData(string $workspace, string $layerName): array
     {
         $metaCheckType = $this->getResource("rest/workspaces/" . $workspace . "/layers/" . $layerName);
         $layerType = $metaCheckType['layer']['type'] ?? throw new \Exception(
@@ -76,50 +77,47 @@ class GeoServerCommunicator extends AbstractCommunicator
                     "Layer ".$layerName." returned an unsupported type ".$metaCheckType['layer']['type']
                 );
         }
-        $rasterMeta = [
+        return [
             "url" => $layerName.".png",
             "boundingbox" => [
                 [$bb['minx'], $bb['miny']],
                 [$bb['maxx'], $bb['maxy']]
             ]
         ];
-        return json_encode($rasterMeta);
     }
 
     /**
      * @param string $workspace
      * @param array $layerMetaData
-     * @param string $rasterMetaData
+     * @param array $rasterMetaData
      * @return string
      * @throws \Exception
      */
     public function getRasterDataThroughMetaData(
         string $workspace,
-        array $layerMetaData,
-        string $rasterMetaData
+        Layer $layer,
+        array $rasterMetaData
     ): string {
-        $rasterMeta = json_decode($rasterMetaData, true);
-        $deltaSizeX = $rasterMeta["boundingbox"][1][0] - $rasterMeta["boundingbox"][0][0];
-        $deltaSizeY = $rasterMeta["boundingbox"][1][1] - $rasterMeta["boundingbox"][0][1];
+        $deltaSizeX = $rasterMetaData["boundingbox"][1][0] - $rasterMetaData["boundingbox"][0][0];
+        $deltaSizeY = $rasterMetaData["boundingbox"][1][1] - $rasterMetaData["boundingbox"][0][1];
         $widthRatioMultiplier = $deltaSizeX / $deltaSizeY;
 
-        if (empty($layerMetaData['layer_height'])) {
+        if (empty($layer->getLayerHeight())) {
             throw new \Exception('Missing required "layer_height" in layer data');
         }
 
-        $height = $layerMetaData['layer_height'];
-        $width = $height * $widthRatioMultiplier;
-        $bounds = $rasterMeta["boundingbox"][0][0].",".$rasterMeta["boundingbox"][0][1].",".
-            $rasterMeta["boundingbox"][1][0].",".$rasterMeta["boundingbox"][1][1];
+        $width = $layer->getLayerHeight() * $widthRatioMultiplier;
+        $bounds = $rasterMetaData["boundingbox"][0][0].",".$rasterMetaData["boundingbox"][0][1].",".
+            $rasterMetaData["boundingbox"][1][0].",".$rasterMetaData["boundingbox"][1][1];
         return $this->getResource(
             $workspace.
             "/wms/reflect?layers=".
             $workspace.
             ":".
-            $layerMetaData['layer_name'].
+            $layer->getLayerName().
             "&format=image/png&transparent=FALSE".
             "&width=".round($width).
-            "&height=".$height.
+            "&height=".$layer->getLayerHeight().
             "&bbox=".$bounds,
             false
         );

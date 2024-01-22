@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\LayerRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use function App\await;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
 
@@ -112,6 +115,126 @@ class Layer
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $layerEntityValueMax;
+
+    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'])]
+    private Collection $geometry;
+
+    private ?bool $layerDownloadFromGeoserver;
+
+    private ?string $layerPropertyAsType;
+
+    private ?int $layerWidth;
+
+    private ?int $layerHeight;
+
+    public function getLayerWidth(): ?int
+    {
+        return $this->layerWidth;
+    }
+
+    public function setLayerWidth(?int $layerWidth): Layer
+    {
+        $this->layerWidth = $layerWidth;
+        return $this;
+    }
+
+    public function getLayerHeight(): ?int
+    {
+        return $this->layerHeight;
+    }
+
+    public function setLayerHeight(?int $layerHeight): Layer
+    {
+        $this->layerHeight = $layerHeight;
+        return $this;
+    }
+
+    private ?string $layerRasterMaterial;
+
+    private ?bool $layerRasterFilterMode;
+
+    private ?bool $layerRasterColorInterpolation;
+
+    private ?string $layerRasterPattern;
+
+    private ?float $layerRasterMinimumValueCutoff;
+
+    public function getLayerRasterMaterial(): ?string
+    {
+        return $this->layerRasterMaterial;
+    }
+
+    public function setLayerRasterMaterial(?string $layerRasterMaterial): Layer
+    {
+        $this->layerRasterMaterial = $layerRasterMaterial;
+        return $this;
+    }
+
+    public function getLayerRasterFilterMode(): ?bool
+    {
+        return $this->layerRasterFilterMode;
+    }
+
+    public function setLayerRasterFilterMode(?bool $layerRasterFilterMode): Layer
+    {
+        $this->layerRasterFilterMode = $layerRasterFilterMode;
+        return $this;
+    }
+
+    public function getLayerRasterColorInterpolation(): ?bool
+    {
+        return $this->layerRasterColorInterpolation;
+    }
+
+    public function setLayerRasterColorInterpolation(?bool $layerRasterColorInterpolation): Layer
+    {
+        $this->layerRasterColorInterpolation = $layerRasterColorInterpolation;
+        return $this;
+    }
+
+    public function getLayerRasterPattern(): ?string
+    {
+        return $this->layerRasterPattern;
+    }
+
+    public function setLayerRasterPattern(?string $layerRasterPattern): Layer
+    {
+        $this->layerRasterPattern = $layerRasterPattern;
+        return $this;
+    }
+
+    public function getLayerRasterMinimumValueCutoff(): ?float
+    {
+        return $this->layerRasterMinimumValueCutoff;
+    }
+
+    public function setLayerRasterMinimumValueCutoff(?float $layerRasterMinimumValueCutoff): Layer
+    {
+        $this->layerRasterMinimumValueCutoff = $layerRasterMinimumValueCutoff;
+        return $this;
+    }
+
+    public function getLayerDownloadFromGeoserver(): ?bool
+    {
+        return $this->layerDownloadFromGeoserver;
+    }
+
+    public function setLayerDownloadFromGeoserver(?bool $layerDownloadFromGeoserver): Layer
+    {
+        $this->layerDownloadFromGeoserver = $layerDownloadFromGeoserver;
+        return $this;
+    }
+
+    public function getLayerPropertyAsType(): ?string
+    {
+        return $this->layerPropertyAsType;
+    }
+
+    public function setLayerPropertyAsType(?string $layerPropertyAsType): Layer
+    {
+        $this->layerPropertyAsType = $layerPropertyAsType;
+        return $this;
+    }
 
     public function getLayerId(): ?int
     {
@@ -283,8 +406,11 @@ class Layer
         return $this->layerType;
     }
 
-    public function setLayerType(?string $layerType): Layer
+    public function setLayerType(string|array|null $layerType): Layer
     {
+        if (is_array($layerType)) {
+            $layerType = json_encode($layerType);
+        }
         $this->layerType = $layerType;
         return $this;
     }
@@ -305,8 +431,11 @@ class Layer
         return $this->layerInfoProperties;
     }
 
-    public function setLayerInfoProperties(?string $layerInfoProperties): Layer
+    public function setLayerInfoProperties(string|array|null $layerInfoProperties): Layer
     {
+        if (is_array($layerInfoProperties)) {
+            $layerInfoProperties = json_encode($layerInfoProperties);
+        }
         $this->layerInfoProperties = $layerInfoProperties;
         return $this;
     }
@@ -338,8 +467,11 @@ class Layer
         return $this->layerStates;
     }
 
-    public function setLayerStates(?string $layerStates): Layer
+    public function setLayerStates(string|array|null $layerStates): Layer
     {
+        if (is_array($layerStates)) {
+            $layerStates = json_encode($layerStates);
+        }
         $this->layerStates = $layerStates;
         return $this;
     }
@@ -349,9 +481,21 @@ class Layer
         return $this->layerRaster;
     }
 
-    public function setLayerRaster(?string $layerRaster): Layer
+    public function setLayerRaster(string|array|null $layerRaster): Layer
     {
-        $this->layerRaster = $layerRaster;
+        if (is_string($layerRaster)) {
+            $layerRaster = json_decode($layerRaster, true);
+            if (!$layerRaster) {
+                throw new \Exception('Could not decode $layerRaster. Are you sure it is json?');
+            }
+        }
+        $layerRaster["layer_raster_material"] = $this->getLayerRasterMaterial();
+        $layerRaster["layer_raster_pattern"] = $this->getLayerRasterPattern();
+        $layerRaster["layer_raster_minimum_value_cutoff"] = $this->getLayerRasterMinimumValueCutoff();
+        $layerRaster["layer_raster_color_interpolation"] = $this->getLayerRasterColorInterpolation();
+        $layerRaster["layer_raster_filter_mode"] = $this->getLayerRasterFilterMode();
+
+        $this->layerRaster = json_encode($layerRaster);
         return $this;
     }
 
@@ -451,6 +595,60 @@ class Layer
     public function setLayerEntityValueMax(?float $layerEntityValueMax): Layer
     {
         $this->layerEntityValueMax = $layerEntityValueMax;
+        return $this;
+    }
+
+    public function processLayerMetaData(array $layerMetaData): void
+    {
+        //these meta vars are to be ignored in the importer (in addition to those that don't exist in the db anyway)
+        $ignoreList = [
+            "layer_id",
+            "layer_name",
+            "layer_original_id",
+            "layer_raster"
+        ];
+        $layerColumns = [];
+        foreach (await($this->getAsyncDatabase()->queryBySQL("DESCRIBE layer")->then(function (Result $qResult) {
+            return $qResult->fetchAllRows();
+        })) as $returnedRow) {
+            $layerColumns[] = $returnedRow['Field'];
+        }
+        $layerUpdateArray = [];
+        foreach ($layerMetaData as $key => $val) {
+            if (!in_array($key, $ignoreList) && in_array($key, $layerColumns)) {
+                $layerUpdateArray[$key] = $this->metaValueValidation($key, $val);
+            }
+        }
+        $this->updateRowInTable('layer', $layerUpdateArray, ['layer_id' => $dbLayerId]);
+    }
+
+    /**
+     * @return Collection<int, Geometry>
+     */
+    public function getGeometry(): Collection
+    {
+        return $this->geometry;
+    }
+
+    public function addGeometry(Geometry $geometry): self
+    {
+        if (!$this->geometry->contains($geometry)) {
+            $this->geometry->add($geometry);
+            $geometry->setLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGeometry(Geometry $geometry): self
+    {
+        if ($this->geometry->removeElement($geometry)) {
+            // set the owning side to null (unless already changed)
+            if ($geometry->getLayer() === $this) {
+                $geometry->setLayer(null);
+            }
+        }
+
         return $this;
     }
 }

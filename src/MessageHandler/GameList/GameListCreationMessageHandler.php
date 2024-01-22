@@ -25,8 +25,13 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 use function App\await;
 
@@ -47,7 +52,8 @@ class GameListCreationMessageHandler
         private readonly HttpClientInterface $client,
         private readonly KernelInterface $kernel,
         private readonly ContainerBagInterface $params,
-        private readonly VersionsProvider $provider
+        private readonly VersionsProvider $provider,
+        private readonly SerializerInterface $serializer
     ) {
     }
 
@@ -270,6 +276,7 @@ class GameListCreationMessageHandler
     /**
      * @throws Exception
      * @throws \Exception
+     * @throws ExceptionInterface
      */
     private function importLayerData(): void
     {
@@ -284,18 +291,21 @@ class GameListCreationMessageHandler
                 ['gameSession' => $this->gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
             );
             $startTime = microtime(true);
-
-            if ($layerMetaData['layer_geotype'] == "raster") {
+            $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+            $layer = $normalizer->denormalize($layerMetaData, Layer::class);
+            if ($layer->getLayerGeotype() == "raster") {
                 $this->importLayerRasterData(
-                    $layerMetaData,
+                    $layer,
                     $geoServerCommunicator
                 );
             } else {
                 $this->importLayerGeometryData(
-                    $layerMetaData,
+                    $layer,
                     $geoServerCommunicator
                 );
             }
+            $this->entityManager->persist($layer);
+            $this->entityManager->flush();
             $this->gameSessionLogger->info(
                 'Imported layer {layerName} in {seconds} seconds.',
                 [
@@ -310,33 +320,23 @@ class GameListCreationMessageHandler
     /**
      * @throws Exception
      * @throws \Exception
-     * @param array<string, string> $layerMetaData
      */
     private function importLayerRasterData(
-        array $layerMetaData,
+        Layer &$layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
-        $layer = new Layer();
-        $layer->setLayerName($layerMetaData['layer_name']);
-        $layer->setLayerGeotype($layerMetaData['layer_geotype']);
-        $layer->setLayerGroup($this->dataModel['region']);
-        $layer->setLayerEditable(0);
-        $message = 'Successfully retrieved {layerName} without storing a raster file, as requested.';
         $rasterFileName = $_ENV['APP_ENV'] == 'test' ?
             $this->params->get('app.session_raster_dir_test') :
             $this->params->get('app.session_raster_dir');
-        $rasterFileName .= "{$this->gameSession->getId()}/{$layerMetaData['layer_name']}.png";
-        if (!array_key_exists('layer_download_from_geoserver', $layerMetaData) ||
-            $layerMetaData['layer_download_from_geoserver']
-        ) {
+        $rasterFileName .= "{$this->gameSession->getId()}/{$layer->getLayerName()}.png";
+        if ($layer->getLayerDownloadFromGeoserver()) {
             $rasterMetaData = $geoServerCommunicator->getRasterMetaData(
                 $this->dataModel['region'],
-                $layerMetaData['layer_name']
+                $layer->getLayerName()
             );
-            $layer->setLayerRaster($rasterMetaData);
             $rasterData = $geoServerCommunicator->getRasterDataThroughMetaData(
                 $this->dataModel['region'],
-                $layerMetaData,
+                $layer,
                 $rasterMetaData
             );
             $fileSystem = new Filesystem();
@@ -346,15 +346,12 @@ class GameListCreationMessageHandler
             );
             $message = 'Successfully retrieved {layerName} and stored the raster file at {rasterFileName}.';
         }
-        // todo: some version of $this->setupMetaForLayer($layerMetaData);
-        // Create the metadata for the raster layer, but don't fill in the layer_raster field.
-        $this->entityManager->persist($layer);
-        $this->entityManager->flush();
+        $layer->setLayerRaster($rasterMetaData ?? null);
         $this->gameSessionLogger->info(
-            $message,
+            $message ?? 'Successfully retrieved {layerName} without storing a raster file, as requested.',
             [
                 'gameSession' => $this->gameSession->getId(),
-                'layerName' => $layerMetaData['layer_name'],
+                'layerName' => $layer->getLayerName(),
                 'rasterFileName' => $rasterFileName
             ]
         );
@@ -362,26 +359,15 @@ class GameListCreationMessageHandler
 
     /**
      * @throws \Exception
-     * @param array<string, string> $layerMetaData
      */
     private function importLayerGeometryData(
-        array $layerMetaData,
+        Layer &$layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
-        $layer = new Layer();
-        $layer->setLayerName($layerMetaData['layer_name']);
-        $layer->setLayerGeotype($layerMetaData['layer_geotype']);
-        $layer->setLayerGroup($this->dataModel['region']);
-        // todo: some version of $this->setupMetaForLayer($layerMetaData);
-        $this->entityManager->persist($layer);
-        $this->entityManager->flush();
-        $message = 'Successfully retrieved {layerName} without storing geometry in the database, as requested.';
-        if (!array_key_exists('layer_download_from_geoserver', $layerMetaData) ||
-            $layerMetaData['layer_download_from_geoserver']
-        ) {
+        if ($layer->getLayerDownloadFromGeoserver()) {
             $layersContainer = $geoServerCommunicator->getLayerDescription(
                 $this->dataModel['region'],
-                $layerMetaData['layer_name']
+                $layer->getLayerName()
             );
             foreach ($layersContainer as $layerWithin) {
                 $geometryData = $geoServerCommunicator->getLayerGeometry($layerWithin['layerName']);
@@ -390,48 +376,17 @@ class GameListCreationMessageHandler
                         'Geometry data call did not return a features variable, so something must be wrong.'
                     );
                 foreach ($features as $feature) {
-                    if (empty($feature["geometry"])) {
-                        $this->gameSessionLogger->error(
-                            'Could not import geometry with id {featureId} of layer '.
-                            ' {layerName}. The feature in question has NULL geometry.'.
-                            ' Some property information to help you find the feature: ',
-                            [
-                                'featureId' => $feature["id"],
-                                'layerName' => $layerWithin['layerName'],
-                                'propertyInfo' => substr(
-                                    var_export($feature["properties"], true),
-                                    0,
-                                    80
-                                ),
-                                'gameSession' => $this->gameSession->getId()
-                            ]
-                        );
-                        continue;
-                    }
-                    if (!$this->processAndAddGeometry($feature, $layer->getLayerId(), $layerMetaData)) {
-                        $this->gameSessionLogger->error(
-                            'Could not import geometry with id {featureId} of layer {layerName} into database.'.
-                            ' Some property information to help you find the feature: ',
-                            [
-                                'featureId' => $feature['id'],
-                                'layerName' => $layerWithin['layerName'],
-                                'propertyInfo' => substr(
-                                    var_export($feature['properties'], true),
-                                    0,
-                                    80
-                                ),
-                                'gameSession' => $this->gameSession->getId()
-                            ]
-                        );
-                    }
+                    $geometry = new Geometry();
+                    //
+                    $geometry->processLayerGeometry($feature);
+                    $layer->addGeometry($geometry);
                 }
             }
             $message = 'Successfully retrieved {layerName} and stored the geometry in the database.';
         }
-        // Create the metadata for the vector layer, but don't fill the geometry table.
         $this->gameSessionLogger->info(
-            $message,
-            ['gameSession' => $this->gameSession->getId(), 'layerName' => $layerMetaData['layer_name']]
+            $message ?? 'Successfully retrieved {layerName} without storing geometry in the database, as requested.',
+            ['gameSession' => $this->gameSession->getId(), 'layerName' => $layer->getLayerName()]
         );
     }
 
@@ -509,61 +464,6 @@ class GameListCreationMessageHandler
             return (!array_search(null, $returnChecks2 ?? [], true));
         }
         return false;
-    }
-
-    public function moveDataFromArray(
-        array $layerMetaData,
-        array $feature
-    ): array {
-        $featureProperties = $feature['properties'];
-        if (!empty($layerMetaData["layer_property_as_type"])) {
-            // check if the layer_property_as_type value exists in $featureProperties
-            $type = '-1';
-            if (!empty($featureProperties[$layerMetaData["layer_property_as_type"]])) {
-                $featureTypeProperty = $featureProperties[$layerMetaData["layer_property_as_type"]];
-                foreach ($layerMetaData["layer_type"] as $layerTypeMetaData) {
-                    if (!empty($layerTypeMetaData["map_type"])) {
-                        // identify the 'other' category
-                        if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                            $typeOther = $layerTypeMetaData["value"];
-                        }
-                        // translate the found $featureProperties value to the type value
-                        if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
-                            $type = $layerTypeMetaData["value"];
-                            break;
-                        }
-                    }
-                }
-            }
-            if ($type == -1) {
-                $type = $typeOther ?? 0;
-            }
-        } else {
-            $type = (int)($featureProperties['type'] ?? 0);
-            unset($featureProperties['type']);
-        }
-
-        if (isset($featureProperties['mspid'])
-            && is_numeric($featureProperties['mspid'])
-            && intval($featureProperties['mspid']) !== 0
-        ) {
-            $mspId = intval($featureProperties['mspid']);
-            unset($featureProperties['mspid']);
-        }
-
-        if (isset($featureProperties['country_id'])
-            && is_numeric($featureProperties['country_id'])
-            && intval($featureProperties['country_id']) !== 0
-        ) {
-            $countryId = intval($featureProperties['country_id']);
-            unset($featureProperties['country_id']);
-        }
-
-        $feature['properties'] = $featureProperties;
-        $feature['properties_msp']['type'] = $type;
-        $feature['properties_msp']['mspId'] = $mspId ?? null;
-        $feature['properties_msp']['countryId'] = $countryId ?? null;
-        return $feature;
     }
 
     public function featureHasUnknownType(array $layerMetaData, array $feature): bool
@@ -725,56 +625,7 @@ class GameListCreationMessageHandler
 
     public function setupMetaForLayer(array $layerData): void
     {
-        $dbLayerId = $this->selectRowsFromTable('layer', ['layer_name' => $layerData['layer_name'] ?? ''])['layer_id']
-            ?? throw new Exception('Could not find layer in the database, so cannot continue.');
-        //these meta vars are to be ignored in the importer (in addition to those that don't exist in the db anyway)
-        $ignoreList = [
-            "layer_id",
-            "layer_name",
-            "layer_original_id",
-            "layer_raster"
-        ];
-        $layerColumns = [];
-        foreach (await($this->getAsyncDatabase()->queryBySQL("DESCRIBE layer")->then(function (Result $qResult) {
-            return $qResult->fetchAllRows();
-        })) as $returnedRow) {
-            $layerColumns[] = $returnedRow['Field'];
-        }
-        $layerUpdateArray = [];
-        foreach ($layerData as $key => $val) {
-            if (!in_array($key, $ignoreList) && in_array($key, $layerColumns)) {
-                $layerUpdateArray[$key] = $this->metaValueValidation($key, $val);
-            }
-        }
-        $this->updateRowInTable('layer', $layerUpdateArray, ['layer_id' => $dbLayerId]);
-        //Import raster specific information.
-        if ($layerData["layer_geotype"] == "raster") {
-            $layerRaster = $this->selectRowsFromTable('layer', ['layer_id' => $dbLayerId])['layer_raster'] ?? null;
-            $existingRasterInfo = json_decode($layerRaster, true);
 
-            if (isset($layerData["layer_raster_material"])) {
-                $existingRasterInfo["layer_raster_material"] = $layerData["layer_raster_material"];
-            }
-            if (isset($layerData["layer_raster_pattern"])) {
-                $existingRasterInfo["layer_raster_pattern"] = $layerData["layer_raster_pattern"];
-            }
-            if (isset($layerData["layer_raster_minimum_value_cutoff"])) {
-                $existingRasterInfo["layer_raster_minimum_value_cutoff"] =
-                    $layerData["layer_raster_minimum_value_cutoff"];
-            }
-            if (isset($layerData["layer_raster_color_interpolation"])) {
-                $existingRasterInfo["layer_raster_color_interpolation"] =
-                    $layerData["layer_raster_color_interpolation"];
-            }
-            if (isset($layerData["layer_raster_filter_mode"])) {
-                $existingRasterInfo["layer_raster_filter_mode"] = $layerData["layer_raster_filter_mode"];
-            }
-            $this->updateRowInTable(
-                'layer',
-                ['layer_raster' => json_encode($existingRasterInfo)],
-                ['layer_id' => $dbLayerId]
-            );
-        }
     }
 
     /**
