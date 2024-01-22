@@ -146,7 +146,7 @@ class GeoServerCommunicator extends AbstractCommunicator
      * @param string $layerName
      * @return array
      */
-    public function getLayerGeometry(string $layerName): array
+    public function getLayerGeometryFeatures(string $layerName): array
     {
         return $this->getResource(
             "/ows?service=WFS&version=1.0.0&outputFormat=json&request=GetFeature&typeName=".

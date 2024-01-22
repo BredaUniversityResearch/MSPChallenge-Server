@@ -210,7 +210,6 @@ class GameListCreationMessageHandler
         $this->setupGame();
         $this->setupGameCountries();
         $this->importLayerData();
-        //$this->setupLayerMeta(); refactored into importLayerData()
         $this->setupRestrictions();
         $this->setupSimulations();
         $this->setupObjectives();
@@ -304,13 +303,11 @@ class GameListCreationMessageHandler
                     $geoServerCommunicator
                 );
             }
-            $this->entityManager->persist($layer);
-            $this->entityManager->flush();
             $this->gameSessionLogger->info(
                 'Imported layer {layerName} in {seconds} seconds.',
                 [
                     'gameSession' => $this->gameSession->getId(),
-                    'layerName' => $layerMetaData['layer_name'],
+                    'layerName' => $layer->getLayerName(),
                     'seconds' => (microtime(true) - $startTime)
                 ]
             );
@@ -322,7 +319,7 @@ class GameListCreationMessageHandler
      * @throws \Exception
      */
     private function importLayerRasterData(
-        Layer &$layer,
+        Layer $layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
         $rasterFileName = $_ENV['APP_ENV'] == 'test' ?
@@ -347,6 +344,8 @@ class GameListCreationMessageHandler
             $message = 'Successfully retrieved {layerName} and stored the raster file at {rasterFileName}.';
         }
         $layer->setLayerRaster($rasterMetaData ?? null);
+        $this->entityManager->persist($layer);
+        $this->entityManager->flush();
         $this->gameSessionLogger->info(
             $message ?? 'Successfully retrieved {layerName} without storing a raster file, as requested.',
             [
@@ -361,25 +360,67 @@ class GameListCreationMessageHandler
      * @throws \Exception
      */
     private function importLayerGeometryData(
-        Layer &$layer,
+        Layer $layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
+        $this->entityManager->persist($layer);
+        $this->entityManager->flush();
         if ($layer->getLayerDownloadFromGeoserver()) {
             $layersContainer = $geoServerCommunicator->getLayerDescription(
                 $this->dataModel['region'],
                 $layer->getLayerName()
             );
             foreach ($layersContainer as $layerWithin) {
-                $geometryData = $geoServerCommunicator->getLayerGeometry($layerWithin['layerName']);
-                $features = $geometryData['features']
+                $geoserverReturn = $geoServerCommunicator->getLayerGeometryFeatures($layerWithin['layerName']);
+                $features = $geoserverReturn['features']
                     ?? throw new \Exception(
                         'Geometry data call did not return a features variable, so something must be wrong.'
                     );
                 foreach ($features as $feature) {
-                    $geometry = new Geometry();
-                    //
-                    $geometry->processLayerGeometry($feature);
-                    $layer->addGeometry($geometry);
+                    $geometryData = $feature['geometry'] ?? throw new \Exception(
+                        'No geometry within returned features variable, so something must be wrong.'
+                    );
+                    self::ensureMultiData($geometryData);
+                    if (strcasecmp($geometryData['type'], 'MultiPolygon') == 0) {
+                        foreach ($geometryData['coordinates'] as $multi) {
+                            if (!is_array($multi)) {
+                                continue;
+                            }
+                            $lastId = 0;
+                            for ($j = 0; $j < sizeof($multi); $j++) {
+                                $geometry = new Geometry($layer);
+                                $geometry->setGeometryGeometry($multi[$j]);
+                                if (sizeof($multi) > 1 && $j != 0) {
+                                    //anything but the first element in the array is a subtractive polygon
+                                    $geometry->setGeometrySubtractive($lastId);
+                                    // unfortunate, but this function depends on subtractive being set
+                                    $geometry->setGeometryPropertiesThroughFeature($feature);
+                                    $this->entityManager->persist($geometry);
+                                    $this->entityManager->flush();
+                                } else {
+                                    $geometry->setGeometryPropertiesThroughFeature($feature);
+                                    $this->entityManager->persist($geometry);
+                                    $this->entityManager->flush();
+                                    //the first element in the array becomes the polygon from which to subtract
+                                    $lastId = $geometry->getGeometryId();
+                                }
+                            }
+                        }
+                    } elseif (strcasecmp($geometryData['type'], 'MultiLineString') == 0) {
+                        foreach ($geometryData['coordinates'] as $line) {
+                            $geometry = new Geometry($layer);
+                            $geometry->setGeometryGeometry($line);
+                            $geometry->setGeometryPropertiesThroughFeature($feature);
+                            $this->entityManager->persist($geometry);
+                            $this->entityManager->flush();
+                        }
+                    } elseif (strcasecmp($geometryData['type'], 'MultiPoint') == 0) {
+                        $geometry = new Geometry($layer);
+                        $geometry->setGeometryGeometry($geometryData["coordinates"]);
+                        $geometry->setGeometryPropertiesThroughFeature($feature);
+                        $this->entityManager->persist($geometry);
+                        $this->entityManager->flush();
+                    }
                 }
             }
             $message = 'Successfully retrieved {layerName} and stored the geometry in the database.';
@@ -390,161 +431,12 @@ class GameListCreationMessageHandler
         );
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function processAndAddGeometry($feature, $layerId, $layerMetaData): bool
+    public static function ensureMultiData(&$geometry): void
     {
-        $feature = $this->moveDataFromArray($layerMetaData, $feature);
-        if ($this->featureHasUnknownType($layerMetaData, $feature)) {
-            throw new \Exception(
-                'Importing geometry '.$feature['id'].' for layer '.$layerMetaData['layer_name'].
-                ' with type '.$feature['properties_msp']['type'].', but this type has not been defined in the 
-                session config file, so not continuing.'
-            );
+        if ($geometry['type'] == 'Polygon' || $geometry['type'] == 'LineString' ||  $geometry['type'] == 'Point') {
+            $geometry['coordinates'] = [$geometry['coordinates']];
+            $geometry['type'] = 'Multi'.$geometry['type'];
         }
-
-        $geometryData = $feature["geometry"];
-        // let's make sure we are always working with multidata: multipolygon, multilinestring, multipoint
-        if ($geometryData["type"] == "Polygon"
-            || $geometryData["type"] == "LineString"
-            ||  $geometryData["type"] == "Point"
-        ) {
-            $geometryData["coordinates"] = [$geometryData["coordinates"]];
-            $geometryData["type"] = "Multi".$geometryData["type"];
-        }
-
-        $encodedFeatureProperties = json_encode($feature["properties"]);
-        if (strcasecmp($geometryData["type"], "MultiPolygon") == 0) {
-            foreach ($geometryData["coordinates"] as $multi) {
-                if (!is_array($multi)) {
-                    continue;
-                }
-                $returnChecks[] = $this->addGeometryMultiPolygon(
-                    $multi,
-                    $layerId,
-                    $encodedFeatureProperties,
-                    $feature['properties_msp']['countryId'],
-                    $feature['properties_msp']['type'],
-                    $feature['properties_msp']['mspId'],
-                    $layerMetaData['layer_name']
-                );
-            }
-            return (!array_search(false, $returnChecks ?? [], true));
-        }
-        if (strcasecmp($geometryData["type"], "MultiPoint") == 0) {
-            return (!is_null($this->addGeometry(
-                [
-                    'geometry_layer_id' => $layerId,
-                    'geometry_geometry' => json_encode($geometryData["coordinates"]),
-                    'geometry_data' => $encodedFeatureProperties,
-                    'geometry_country_id' => $feature['properties_msp']['countryId'],
-                    'geometry_type' => $feature['properties_msp']['type'],
-                    'geometry_mspid' => $feature['properties_msp']['mspId'],
-                    'geometry_subtractive' => 0
-                ],
-                $layerMetaData['layer_name']
-            )));
-        }
-        if (strcasecmp($geometryData["type"], "MultiLineString") == 0) {
-            foreach ($geometryData["coordinates"] as $line) {
-                $returnChecks2[] = $this->addGeometry(
-                    [
-                        'geometry_layer_id' => $layerId,
-                        'geometry_geometry' => json_encode($line),
-                        'geometry_data' => $encodedFeatureProperties,
-                        'geometry_country_id' => $feature['properties_msp']['countryId'],
-                        'geometry_type' => $feature['properties_msp']['type'],
-                        'geometry_mspid' => $feature['properties_msp']['mspId'],
-                        'geometry_subtractive' => 0
-                    ],
-                    $layerMetaData['layer_name']
-                );
-            }
-            return (!array_search(null, $returnChecks2 ?? [], true));
-        }
-        return false;
-    }
-
-    public function featureHasUnknownType(array $layerMetaData, array $feature): bool
-    {
-        return (!isset($layerMetaData['layer_type'][$feature['properties_msp']['type']]));
-    }
-
-    private function addGeometryMultiPolygon(
-        array $multi,
-        int $layerId,
-        string $jsonData,
-        ?int $countryId,
-        string $type,
-        ?int $mspId,
-        string $layerName
-    ): bool {
-        $lastId = 0;
-        for ($j = 0; $j < sizeof($multi); $j++) {
-            if (sizeof($multi) > 1 && $j != 0) {
-                //this is a subtractive polygon
-                $this->addGeometry(
-                    [
-                        'geometry_layer_id' => $layerId,
-                        'geometry_geometry' => json_encode($multi[$j]),
-                        'geometry_data' => $jsonData,
-                        'geometry_country_id' => $countryId,
-                        'geometry_type' => $type,
-                        'geometry_mspid' => null,
-                        'geometry_subtractive' => $lastId
-                    ],
-                    $layerName
-                );
-            } else {
-                $lastId = $this->addGeometry(
-                    [
-                        'geometry_layer_id' => $layerId,
-                        'geometry_geometry' => json_encode($multi[$j]),
-                        'geometry_data' => $jsonData,
-                        'geometry_country_id' => $countryId,
-                        'geometry_type' => $type,
-                        'geometry_mspid' => $mspId,
-                        'geometry_subtractive' => 0
-                    ],
-                    $layerName
-                );
-            }
-        }
-        return false;
-    }
-
-    private function addGeometry(array $geometryColumns, $layerName = ''): int|null
-    {
-        if (empty($geometryColumns['geometry_geometry'])
-            || empty($geometryColumns['geometry_layer_id'])
-        ) {
-            throw new \Exception('Need at least some geometry and a layer ID to continue.');
-        }
-        $subtractive = $geometryColumns['geometry_subtractive'] ?? 0;
-        if ($subtractive === 0 && empty($geometryColumns['geometry_mspid'])) {
-            // so many algorithms to choose from, but this one seemed to have low collision, reasonable speed,
-            //   and simply availability to PHP in default installation
-            $algo = 'fnv1a64';
-            // to avoid duplicate MSP IDs, we need the string to include the layer name, the geometry, and if available
-            //   the geometry's name ... there have been cases in which one layer had exactly the same geometry twice
-            //   to indicate two different names given to that area... very annoying
-            $dataToHash = $layerName.$geometryColumns['geometry_geometry'];
-            $dataArray = json_decode($geometryColumns['geometry_data'], true);
-            $dataToHash .= $dataArray['name'] ?? '';
-            $geometryColumns['geometry_mspid'] = hash($algo, $dataToHash);
-        }
-        $geometry = new Geometry();
-        $geometry->setGeometryLayerId($geometryColumns['geometry_layer_id']);
-        $geometry->setGeometryGeometry($geometryColumns['geometry_geometry']);
-        $geometry->setGeometryData($geometryColumns['geometry_data']);
-        $geometry->setGeometryCountryId($geometryColumns['geometry_country_id']);
-        $geometry->setGeometryType($geometryColumns['geometry_type']);
-        $geometry->setGeometryMspid($geometryColumns['geometry_mspid']);
-        $geometry->setGeometrySubtractive($geometryColumns['geometry_subtractive']);
-        $this->entityManager->persist($geometry);
-        $this->entityManager->flush();
-        return $geometry->getGeometryId();
     }
 
     /**
@@ -607,25 +499,6 @@ class GameListCreationMessageHandler
             return 'Could not find MSP ID ' . $mspId . ' in the current database';
         }
         return (int) $return;
-    }
-
-    /**
-     * @throws \Exception
-     */
-    private function setupLayerMeta(): void
-    {
-        foreach ($this->dataModel['meta'] as $layerMetaData) {
-            $this->setupMetaForLayer($layerMetaData);
-        }
-        $this->gameSessionLogger->info(
-            'Layer metadata set up.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
-    }
-
-    public function setupMetaForLayer(array $layerData): void
-    {
-
     }
 
     /**

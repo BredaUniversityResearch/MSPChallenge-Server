@@ -50,6 +50,15 @@ class Geometry
     #[JoinColumn(name: 'geometry_layer_id', referencedColumnName: 'layer_id')]
     private ?Layer $layer;
 
+    /**
+     * @param Layer|null $layer
+     */
+    public function __construct(?Layer $layer)
+    {
+        $this->layer = $layer;
+    }
+
+
     public function getGeometryId(): ?int
     {
         return $this->geometryId;
@@ -99,8 +108,11 @@ class Geometry
         return $this->geometryGeometry;
     }
 
-    public function setGeometryGeometry(?string $geometryGeometry): Geometry
+    public function setGeometryGeometry(array|string|null $geometryGeometry): Geometry
     {
+        if (is_array($geometryGeometry)) {
+            $geometryGeometry = json_encode($geometryGeometry);
+        }
         $this->geometryGeometry = $geometryGeometry;
         return $this;
     }
@@ -110,8 +122,15 @@ class Geometry
         return $this->geometryData;
     }
 
-    public function setGeometryData(?string $geometryData): Geometry
+    public function setGeometryData(array|string|null $geometryData): Geometry
     {
+        if (is_array($geometryData)) {
+            // assume $geometryData is actually a downloaded feature properties array
+            unset($geometryData['type']);
+            unset($geometryData['mspid']);
+            unset($geometryData['country_id']);
+            $geometryData = json_encode($geometryData);
+        }
         $this->geometryData = $geometryData;
         return $this;
     }
@@ -121,8 +140,11 @@ class Geometry
         return $this->geometryCountryId;
     }
 
-    public function setGeometryCountryId(?int $geometryCountryId): Geometry
+    public function setGeometryCountryId(string|int|null $geometryCountryId): Geometry
     {
+        if (is_string($geometryCountryId)) {
+            $geometryCountryId = intval($geometryCountryId);
+        }
         $this->geometryCountryId = $geometryCountryId;
         return $this;
     }
@@ -154,33 +176,44 @@ class Geometry
         return $this->geometryType;
     }
 
-    public function setGeometryType(?string $geometryType): Geometry
+    public function setGeometryType(string|array|null $geometryType): Geometry
     {
-        if (!empty($layerMetaData["layer_property_as_type"])) {
-            // check if the layer_property_as_type value exists in $featureProperties
-            $type = '-1';
-            if (!empty($featureProperties[$layerMetaData["layer_property_as_type"]])) {
-                $featureTypeProperty = $featureProperties[$layerMetaData["layer_property_as_type"]];
-                foreach ($layerMetaData["layer_type"] as $layerTypeMetaData) {
-                    if (!empty($layerTypeMetaData["map_type"])) {
-                        // identify the 'other' category
-                        if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                            $typeOther = $layerTypeMetaData["value"];
-                        }
-                        // translate the found $featureProperties value to the type value
-                        if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
-                            $type = $layerTypeMetaData["value"];
-                            break;
+        if (is_array($geometryType)) {
+            // assume $geometryType is actually a downloaded feature properties array
+            $featureProperties = $geometryType;
+            if (!empty($this->getLayer()->getLayerPropertyAsType())) {
+                $type = '-1';
+                if (!empty($featureProperties[$this->getLayer()->getLayerPropertyAsType()])) {
+                    $featureTypeProperty = $featureProperties[$this->getLayer()->getLayerPropertyAsType()];
+                    foreach ($this->getLayer()->getLayerType() as $typeValue => $layerTypeMetaData) {
+                        if (!empty($layerTypeMetaData["map_type"])) {
+                            // identify the 'other' category
+                            if (strtolower($layerTypeMetaData["map_type"]) == "other") {
+                                $typeOther = $typeValue;
+                            }
+                            if (str_contains($layerTypeMetaData["map_type"], '-')) {
+                                // assumes a range of minimum to maximum (but not including) integer or float values
+                                $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
+                                if ((float) $featureTypeProperty >= (float) $typeValues[0]
+                                    && (float) $featureTypeProperty < (float) $typeValues[1]) {
+                                    $type = $typeValue;
+                                }
+                            } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+                                // translate the found $featureProperties value to the type value (int, float, string)
+                                $type = $typeValue;
+                                break;
+                            }
                         }
                     }
                 }
+                if ($type == '-1') {
+                    $type = $typeOther ?? 0;
+                }
+                $this->geometryType = $type;
+                return $this;
             }
-            if ($type == -1) {
-                $type = $typeOther ?? 0;
-            }
-        } else {
-            $type = (int)($featureProperties['type'] ?? 0);
-            unset($featureProperties['type']);
+            $this->geometryType = $featureProperties['type'] ?? '0';
+            return $this;
         }
         $this->geometryType = $geometryType;
         return $this;
@@ -219,11 +252,18 @@ class Geometry
      */
     public function processLayerGeometry(array $feature): bool
     {
-        // getting geometryType, geometryMspId, geometryCountryId in order, and cleaning up $feature["properties"]
-        // setting geometryData through $feature["properties"]
-        // setting geometryGeometry through $feature["geometry"]
         // ensuring Multidata (Multipoint, -linestring, -polygon), making sure we handle subtractive polygons ('holes')
-        $this->setGeometryType($feature['properties']);
+        // setting geometryGeometry through $feature["geometry"]
+        $this->setGeometryGeometry($feature['geometry']);
+        // getting geometryType, geometryMspId, geometryCountryId in order
+        $this->setGeometryType($feature); //needs whole $feature properties in case type is defined through a property
+        $this->setGeometryMspid($feature['mspid'] ?? null);
+        $this->setGeometryCountryId($feature['country_id'] ?? null);
+        $this->setGeometryData($feature);
+        // setting geometryData through $feature["properties"], cleaning it first e.g. unset($featureProperties['type']);
+
+
+
 
         if (empty($feature["geometry"])) {
             throw new \Exception("Could not import geometry with id {$feature['id']} of layer
@@ -308,5 +348,14 @@ class Geometry
         $feature['properties_msp']['mspId'] = $mspId ?? null;
         $feature['properties_msp']['countryId'] = $countryId ?? null;
         return $feature;
+    }
+
+    public function setGeometryPropertiesThroughFeature(array $feature): self
+    {
+        $this->setGeometryData($feature);
+        $this->setGeometryType($feature);
+        $this->setGeometryCountryId($feature['country_id'] ?? null);
+        $this->setGeometryMspid($feature['mspid'] ?? null);
+        return $this;
     }
 }

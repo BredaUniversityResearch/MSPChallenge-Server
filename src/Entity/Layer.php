@@ -401,9 +401,9 @@ class Layer
         return $this;
     }
 
-    public function getLayerType(): ?string
+    public function getLayerType(): ?array
     {
-        return $this->layerType;
+        return json_decode($this->layerType, true);
     }
 
     public function setLayerType(string|array|null $layerType): Layer

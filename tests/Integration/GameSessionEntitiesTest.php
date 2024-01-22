@@ -80,7 +80,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
         $allLayers = $gameConfig->getGameConfigComplete()['datamodel']['meta'];
         $layer3 = $normalizer->denormalize($allLayers[0], Layer::class);
-        //dump($layer3);
+        dump($layer3);
         self::assertInstanceOf(Layer::class, $layer3); //good enough, normalizer throws exceptions anyway
     }
 
