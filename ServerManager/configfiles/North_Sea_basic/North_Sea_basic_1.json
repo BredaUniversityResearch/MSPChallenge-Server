@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "1/22/2024",
-    "data_model_hash": "9BF05AF001ECFE67E3E68ACAAEFB68FE12B4949A7DE258DDBC3E31EE8F990B45",
+    "date_modified": "1/23/2024",
+    "data_model_hash": "7F7AAF6DF7A03AA00533B0CDDAFAD4A3ED3AB6FAF8B0D12DF67F2FD709EBB132",
     "errors": 0,
     "editor_version": "1.0.0",
     "config_version": "1.0.0"
@@ -41743,7 +41743,7 @@
     "edition_colour": "#7ECEFDFF",
     "edition_letter": "N",
     "region": "northsee",
-    "projection": "",
+    "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2018,
     "end": 2050,
     "era_total_months": 96,
