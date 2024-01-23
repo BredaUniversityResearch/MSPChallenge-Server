@@ -611,30 +611,6 @@ class Layer
         return $this;
     }
 
-    public function processLayerMetaData(array $layerMetaData): void
-    {
-        //these meta vars are to be ignored in the importer (in addition to those that don't exist in the db anyway)
-        $ignoreList = [
-            "layer_id",
-            "layer_name",
-            "layer_original_id",
-            "layer_raster"
-        ];
-        $layerColumns = [];
-        foreach (await($this->getAsyncDatabase()->queryBySQL("DESCRIBE layer")->then(function (Result $qResult) {
-            return $qResult->fetchAllRows();
-        })) as $returnedRow) {
-            $layerColumns[] = $returnedRow['Field'];
-        }
-        $layerUpdateArray = [];
-        foreach ($layerMetaData as $key => $val) {
-            if (!in_array($key, $ignoreList) && in_array($key, $layerColumns)) {
-                $layerUpdateArray[$key] = $this->metaValueValidation($key, $val);
-            }
-        }
-        $this->updateRowInTable('layer', $layerUpdateArray, ['layer_id' => $dbLayerId]);
-    }
-
     /**
      * @return Collection<int, Geometry>
      */

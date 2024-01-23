@@ -88,7 +88,7 @@ class GeoServerCommunicator extends AbstractCommunicator
 
     /**
      * @param string $workspace
-     * @param array $layerMetaData
+     * @param Layer $layer
      * @param array $rasterMetaData
      * @return string
      * @throws \Exception
