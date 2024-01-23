@@ -384,7 +384,7 @@ FROM (
             'mapping', l.layer_type_mapping,
             'types', l.layer_type_types,
             'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url'))),
-            'tags', l.layer_tags
+            'tags', JSON_EXTRACT(l.layer_tags, '$')
           ),
           IF(
             l.kpi_value IS NOT NULL,
