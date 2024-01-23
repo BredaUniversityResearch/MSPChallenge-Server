@@ -406,8 +406,7 @@ FROM (
           #   FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
           # ),
           'name', l.layer_name,
-          # for POV, add layer "geo type", category and subcategory as tags
-          'tags', JSON_MERGE_PRESERVE(l.layer_tags,JSON_ARRAY(l.layer_geotype, l.layer_category, l.layer_subcategory)),
+          'tags', JSON_EXTRACT(l.layer_tags, '$'),
           'types', l.layer_type_types,
           'data', l.layer_data
         )
