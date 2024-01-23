@@ -384,8 +384,7 @@ FROM (
             'mapping', l.layer_type_mapping,
             'types', l.layer_type_types,
             'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url'))),
-            # for POV, add layer "geo type", category and subcategory as tags
-            'tags', JSON_MERGE_PRESERVE(l.layer_tags,JSON_ARRAY(l.layer_geotype, l.layer_category, l.layer_subcategory))
+            'tags', l.layer_tags
           ),
           IF(
             l.kpi_value IS NOT NULL,
