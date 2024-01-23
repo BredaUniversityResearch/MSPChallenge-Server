@@ -1,12 +1,7 @@
 {
   "metadata": {
-<<<<<<< Updated upstream
-    "date_modified": "1/17/2024",
-    "data_model_hash": "72989F7C4CE57C6FAF45C8F0167CD9446ECE70B1FA586DCC036F0CD29AFEBB67",
-=======
     "date_modified": "1/22/2024",
     "data_model_hash": "9BF05AF001ECFE67E3E68ACAAEFB68FE12B4949A7DE258DDBC3E31EE8F990B45",
->>>>>>> Stashed changes
     "errors": 0,
     "editor_version": "1.0.0",
     "config_version": "1.0.0"
@@ -22788,13 +22783,9 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Countries",
@@ -22955,14 +22946,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Country"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_North_Sea",
@@ -23053,13 +23040,9 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Cities",
@@ -23400,14 +23383,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "City"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Info",
@@ -23596,13 +23575,9 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Topography_raster",
@@ -23818,14 +23793,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Topography"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Combined_rivers_europe_NE",
@@ -23972,14 +23943,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Line",
           "River"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Territorial_Waters_Lines",
@@ -24266,14 +24233,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Line",
           "TerritorialWater"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_EEZ",
@@ -24574,14 +24537,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "EEZ"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_ICES_grid",
@@ -24770,13 +24729,9 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Wind_Speed_Raster",
@@ -24993,12 +24948,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "wind_speed"
-=======
           "ValueMap",
           "WindSpeed"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -25216,12 +25167,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "wave_height"
-=======
           "ValueMap",
           "WaveHeight"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -25439,12 +25386,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "currents_speed"
-=======
           "ValueMap",
           "Currents"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -25718,12 +25661,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "bathymetry"
-=======
           "ValueMap",
           "Bathymetry"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -25969,14 +25908,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Eutrophication"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Sediments_Habitats_Raster",
@@ -26516,12 +26451,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "sediments"
-=======
           "TypeMap",
           "Sediment"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -26669,15 +26600,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "FossilFuel",
           "Availability"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Sand_and_Gravel_Availability",
@@ -26824,15 +26751,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "SandAndGravel",
           "Availability"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Military_Areas",
@@ -27091,14 +27014,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Military"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Telecom_Cables",
@@ -27371,15 +27290,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Line",
           "CableAndPipe",
           "Telecom"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Unused_Cables",
@@ -27904,14 +27819,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Line",
           "CableAndPipe"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Dredging_Deposit_Areas",
@@ -28114,15 +28025,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Deposit",
           "Dredging"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Recreational_Areas_fixed",
@@ -28339,14 +28246,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Recreation"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Wind_Farms_Implemented",
@@ -28632,14 +28535,9 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "wind_park",
-          "wind_farms"
-=======
           "Polygon",
           "Electricity",
           "Production"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -28800,14 +28698,9 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "wind_park",
-          "wave_farms"
-=======
           "Polygon",
           "Electricity",
           "Production"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -28954,14 +28847,9 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "wind_park",
-          "tidal_farms"
-=======
           "Polygon",
           "Electricity",
           "Production"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -29208,16 +29096,10 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "wind_park",
-          "wind_farms",
-          "potential"
-=======
           "Polygon",
           "Electricity",
           "Production",
           "Planned"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -29436,16 +29318,10 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "wind_park",
-          "wave_farms",
-          "potential"
-=======
           "Polygon",
           "Electricity",
           "Production",
           "Planned"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -29664,16 +29540,10 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "wind_park",
-          "tidal_farms",
-          "potential"
-=======
           "Polygon",
           "Electricity",
           "Production",
           "Planned"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -29918,13 +29788,9 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "energy_cables"
-=======
           "Line",
           "Electricity",
           "CableAndPipe"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -30016,15 +29882,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Corridor",
           "CableAndPipe"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Electicity_Sockets",
@@ -30183,15 +30045,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "Electricity",
           "Socket"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Electricity_Transformers",
@@ -30351,13 +30209,9 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "converter_stations"
-=======
           "Point",
           "Electricity",
           "Converter"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -30771,15 +30625,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "FossilFuel",
           "Production"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Pipelines_Edit",
@@ -30870,15 +30720,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Line",
           "CableAndPipe",
           "FossilFuel"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Pipelines",
@@ -31179,15 +31025,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Line",
           "CableAndPipe",
           "FossilFuel"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Oil_Gas_Licensed_Areas",
@@ -31418,15 +31260,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "FossilFuel",
           "Planned"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Sand_Gravel_Extraction",
@@ -31601,15 +31439,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "SandAndGravel",
           "Extraction"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_IMO_Routes",
@@ -31855,14 +31689,9 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_lanes",
-          "imo_routes"
-=======
           "Line",
           "Shipping",
           "Lane"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -32137,14 +31966,9 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_lanes",
-          "national_shipping_lanes"
-=======
           "Line",
           "Shipping",
           "Lane"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -32262,14 +32086,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "Port"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_No_shipping_zones",
@@ -32486,15 +32306,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Exclusion",
           "Shipping"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Shipping_Intensity",
@@ -32683,14 +32499,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "total_intensity",
-          "simulated"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -32880,14 +32690,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "ferry_intensity",
-          "simulated"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -33077,14 +32881,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "passenger_intensity",
-          "simulated"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -33274,14 +33072,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "tanker_intensity",
-          "simulated"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -33471,14 +33263,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "maintenance_intensity",
-          "simulated"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -33668,14 +33454,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "cargo_intensity",
-          "simulated"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -33893,13 +33673,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "total_intensity"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -34088,15 +33863,11 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Shipping",
           "Risk"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Bat_20_shipping",
@@ -34201,15 +33972,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Shipping",
           "Bathymetry"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Shipping_Gates",
@@ -34699,14 +34466,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "Lighthouse"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Anchorages",
@@ -34825,14 +34588,10 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Anchorage"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Precautionary_Areas",
@@ -34908,15 +34667,11 @@
           }
         },
         "layer_info_properties": [],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "Shipping",
           "Risk"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_shipping_intensity_passengers_raster_EM",
@@ -35161,14 +34916,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "passenger_intensity",
-          "static"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -35414,14 +35163,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "tanker_intensity",
-          "static"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -35667,14 +35410,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "shipping_intensity",
-          "cargo_intensity",
-          "static"
-=======
           "ValueMap",
           "Shipping"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -35934,15 +35671,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "Production",
           "FishCatch"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Aquaculture_Shellfish",
@@ -36173,15 +35906,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "Production",
           "FishCatch"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Aquaculture_Finfish",
@@ -36440,15 +36169,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "Production",
           "FishCatch"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Aquaculture_Algae",
@@ -36595,15 +36320,11 @@
             "default_value": null
           }
         ],
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Point",
           "Production",
           "FishCatch"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "NS_Natura_2000",
@@ -36933,13 +36654,8 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "protected_areas",
-          "natura_2000"
-=======
           "Polygon",
           "Protection"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -37410,13 +37126,8 @@
           }
         ],
         "layer_tags": [
-<<<<<<< Updated upstream
-          "protected_areas",
-          "marine_protected_areas"
-=======
           "Polygon",
           "Protection"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -37606,13 +37317,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "noise",
-          "simulated"
-=======
           "ValueMap",
           "Pressure"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -37801,14 +37507,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Pressure"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Bottom_Disturbance",
@@ -37996,14 +37698,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Pressure"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Surface_Disturbance",
@@ -38191,14 +37889,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Pressure"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Protection_industrial_trawl",
@@ -38387,14 +38081,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "protected_areas",
-          "industrial_trawl",
-          "simulated"
-=======
           "ValueMap",
           "FishCatch"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -38584,14 +38272,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "protected_areas",
-          "bottom_trawl",
-          "simulated"
-=======
           "ValueMap",
           "FishCatch"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -38781,15 +38463,9 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "protected_areas",
-          "nets",
-          "simulated"
-=======
           "ValueMap",
           "Exclusion",
           "FishCatch"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -38978,14 +38654,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Biomass"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Cod",
@@ -39173,16 +38845,9 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": [        
-          "fish",
-          "cod",
-          "simulated"
-=======
         "layer_tags": [
           "ValueMap",
           "Biomass"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -39371,16 +39036,9 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": [        
-          "fish",
-          "demersal_fish",
-          "simulated"
-=======
         "layer_tags": [
           "ValueMap",
           "Biomass"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -39569,16 +39227,9 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": [        
-          "fish",
-          "flatfish",
-          "simulated"
-=======
         "layer_tags": [
           "ValueMap",
           "Biomass"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -39767,16 +39418,9 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": [        
-          "fish",
-          "mackerel",
-          "simulated"
-=======
         "layer_tags": [
           "ValueMap",
           "Biomass"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -39965,16 +39609,9 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": [        
-          "fish",
-          "herring",
-          "simulated"
-=======
         "layer_tags": [
           "ValueMap",
           "Biomass"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -40164,14 +39801,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "fish",
-          "sandeel",
-          "simulated"
-=======
           "ValueMap",
           "Biomass"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -40360,14 +39991,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Biomass"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Windfarm_avoiding_seabird",
@@ -40555,14 +40182,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Biomass"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Cetacean",
@@ -40751,14 +40374,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "mammals",
-          "cetacean",
-          "simulated"
-=======
           "ValueMap",
           "Biomass"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -40948,14 +40565,8 @@
         },
         "layer_info_properties": null,
         "layer_tags": [
-<<<<<<< Updated upstream
-          "mammals",
-          "seal",
-          "simulated"
-=======
           "ValueMap",
           "Biomass"
->>>>>>> Stashed changes
         ]
       },
       {
@@ -41032,14 +40643,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "Polygon",
           "FishCatch"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Bottom_trawl_Catch",
@@ -41227,14 +40834,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "FishCatch"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Drift_and_fixed_Nets_Catch",
@@ -41422,14 +41025,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "FishCatch"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Industrial_and_Pelagic_Trawl_Catch",
@@ -41617,14 +41216,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "FishCatch"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Shannon_Diversity_Indicator",
@@ -41812,14 +41407,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Diversity"
         ]
->>>>>>> Stashed changes
       },
       {
         "layer_name": "mel_Large_Fish_Indicator",
@@ -42007,14 +41598,10 @@
           }
         },
         "layer_info_properties": null,
-<<<<<<< Updated upstream
-        "layer_tags": []
-=======
         "layer_tags": [
           "ValueMap",
           "Diversity"
         ]
->>>>>>> Stashed changes
       }
     ],
     "expertise_definitions": [],
@@ -42156,11 +41743,7 @@
     "edition_colour": "#7ECEFDFF",
     "edition_letter": "N",
     "region": "northsee",
-<<<<<<< Updated upstream
-    "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs",
-=======
     "projection": "",
->>>>>>> Stashed changes
     "start": 2018,
     "end": 2050,
     "era_total_months": 96,
