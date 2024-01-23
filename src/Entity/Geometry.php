@@ -243,6 +243,7 @@ class Geometry
             $dataArray = json_decode($this->getGeometryData(), true);
             $dataToHash .= $dataArray['name'] ?? '';
             $this->geometryMspid = hash($algo, $dataToHash);
+            $this->getLayer()->setGeometryWithGeneratedMspids(true);
         }
         return $this;
     }

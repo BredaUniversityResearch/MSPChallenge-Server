@@ -382,27 +382,20 @@ class GameListCreationMessageHandler
                     );
                     self::ensureMultiData($geometryData);
                     if (strcasecmp($geometryData['type'], 'MultiPolygon') == 0) {
-                        foreach ($geometryData['coordinates'] as $multi) {
-                            if (!is_array($multi)) {
+                        foreach ($geometryData['coordinates'] as $multiPolygon) {
+                            if (!is_array($multiPolygon)) {
                                 continue;
                             }
-                            $lastId = 0;
-                            for ($j = 0; $j < sizeof($multi); $j++) {
+                            $idToSubtractFrom = 0;
+                            foreach ($multiPolygon as $key => $polygon) {
                                 $geometry = new Geometry($layer);
-                                $geometry->setGeometryGeometry($multi[$j]);
-                                if (sizeof($multi) > 1 && $j != 0) {
-                                    //anything but the first element in the array is a subtractive polygon
-                                    $geometry->setGeometrySubtractive($lastId);
-                                    // unfortunate, but this function depends on subtractive being set
-                                    $geometry->setGeometryPropertiesThroughFeature($feature);
-                                    $this->entityManager->persist($geometry);
-                                    $this->entityManager->flush();
-                                } else {
-                                    $geometry->setGeometryPropertiesThroughFeature($feature);
-                                    $this->entityManager->persist($geometry);
-                                    $this->entityManager->flush();
-                                    //the first element in the array becomes the polygon from which to subtract
-                                    $lastId = $geometry->getGeometryId();
+                                $geometry->setGeometryGeometry($polygon);
+                                $geometry->setGeometrySubtractive($idToSubtractFrom);
+                                $geometry->setGeometryPropertiesThroughFeature($feature);
+                                $this->entityManager->persist($geometry);
+                                $this->entityManager->flush(); //have to flush already
+                                if (sizeof($multiPolygon) > 1 && $key == 0) {
+                                    $idToSubtractFrom = $geometry->getGeometryId();
                                 }
                             }
                         }
@@ -412,18 +405,21 @@ class GameListCreationMessageHandler
                             $geometry->setGeometryGeometry($line);
                             $geometry->setGeometryPropertiesThroughFeature($feature);
                             $this->entityManager->persist($geometry);
-                            $this->entityManager->flush();
+                            $this->entityManager->flush(); //since I had to flush already before
                         }
                     } elseif (strcasecmp($geometryData['type'], 'MultiPoint') == 0) {
                         $geometry = new Geometry($layer);
                         $geometry->setGeometryGeometry($geometryData["coordinates"]);
                         $geometry->setGeometryPropertiesThroughFeature($feature);
                         $this->entityManager->persist($geometry);
-                        $this->entityManager->flush();
+                        $this->entityManager->flush(); //since I had to flush already before
                     }
                 }
             }
             $message = 'Successfully retrieved {layerName} and stored the geometry in the database.';
+            if ($layer->hasGeometryWithGeneratedMspids()) {
+                $message .= ' Note that at least some of the geometry has auto-generated MSP IDs.';
+            }
         }
         $this->gameSessionLogger->info(
             $message ?? 'Successfully retrieved {layerName} without storing geometry in the database, as requested.',

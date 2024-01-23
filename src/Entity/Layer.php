@@ -119,6 +119,19 @@ class Layer
     #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'])]
     private Collection $geometry;
 
+    private bool $layerGeometryWithGeneratedMspids = false;
+
+    public function hasGeometryWithGeneratedMspids(): bool
+    {
+        return $this->layerGeometryWithGeneratedMspids;
+    }
+
+    public function setGeometryWithGeneratedMspids(bool $layerGeometryWithGeneratedMspids): Layer
+    {
+        $this->layerGeometryWithGeneratedMspids = $layerGeometryWithGeneratedMspids;
+        return $this;
+    }
+
     private ?bool $layerDownloadFromGeoserver;
 
     private ?string $layerPropertyAsType;
