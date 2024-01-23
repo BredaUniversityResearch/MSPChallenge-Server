@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\LayerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Types;
@@ -120,6 +121,11 @@ class Layer
     private Collection $geometry;
 
     private bool $layerGeometryWithGeneratedMspids = false;
+
+    public function __construct()
+    {
+        $this->geometry = new ArrayCollection();
+    }
 
     public function hasGeometryWithGeneratedMspids(): bool
     {
