@@ -80,7 +80,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
         $allLayers = $gameConfig->getGameConfigComplete()['datamodel']['meta'];
         $layer3 = $normalizer->denormalize($allLayers[0], Layer::class);
-        dump($layer3);
+        //dump($layer3);
         self::assertInstanceOf(Layer::class, $layer3); //good enough, normalizer throws exceptions anyway
     }
 
@@ -105,6 +105,8 @@ class GameSessionEntitiesTest extends KernelTestCase
         $geometry2 = $this->em->getRepository(Geometry::class)->findAll()[0];
         //dump($layer);
         self::assertSame($geometry, $geometry2);
+        $geometry3 = $layer->getGeometry()[0];
+        self::assertSame($geometry, $geometry3);
     }
 
     private function start(): void

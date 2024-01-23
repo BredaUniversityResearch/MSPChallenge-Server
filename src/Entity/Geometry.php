@@ -53,7 +53,7 @@ class Geometry
     /**
      * @param Layer|null $layer
      */
-    public function __construct(?Layer $layer)
+    public function __construct(?Layer $layer = null)
     {
         $this->layer = $layer;
     }
