@@ -510,36 +510,37 @@ SQL,
     ): void {
         list($inputBottomLeftX, $inputBottomLeftY, $inputTopRightX, $inputTopRightY) =
             array_values($inputRegion->toArray());
-        list($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY) =
-            array_values($outputRegion->toArray());
 
         // clamp by input coordinates.
-        $outputBottomLeftX = max($outputRegion->getBottomLeftX(), $inputRegion->getBottomLeftX());
-        $outputBottomLeftY = max($outputBottomLeftY, $inputBottomLeftY);
-        $outputTopRightX = min($outputRegion->getTopRightX(), $inputRegion->getTopRightX());
-        $outputTopRightY = min($outputTopRightY, $inputTopRightY);
+        if (null === $clampedOutputRegion = $outputRegion->createClampedBy($inputRegion)) {
+            // this should be impossible, since the region coordinates were used for a query input resulting into this
+            //  layer
+            throw new Exception("Specified region does not overlap with the input image: $inputImageFilePath");
+        }
+        list($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY) =
+            array_values($clampedOutputRegion->toArray());
 
         $image = new \Imagick();
         $image->readImage($inputImageFilePath);
         $inputWidth = $image->getImageWidth();
         $inputHeight = $image->getImageHeight();
 
-        $coordinateToPixelWidthFactor = $inputWidth / abs($inputTopRightX - $inputBottomLeftX);
-        $coordinateToPixelHeightFactor = $inputHeight / abs($inputTopRightY - $inputBottomLeftY);
+        $coordinateToPixelWidthFactor = $inputWidth / ($inputTopRightX - $inputBottomLeftX);
+        $coordinateToPixelHeightFactor = $inputHeight / ($inputTopRightY - $inputBottomLeftY);
 
-        // map coordinate to the pixel coordinate of the image, still as real number
-        $outputPixel0XRealNumber = abs($outputBottomLeftX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
-        $outputPixel0YRealNumber = abs($outputBottomLeftY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
-        $outputPixel1XRealNumber = abs($outputTopRightX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
-        $outputPixel1YRealNumber = abs($outputTopRightY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
+        // map coordinate to the pixel "size", still as real number
+        $outputPixel0XRealNumber = ($outputBottomLeftX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
+        $outputPixel0YRealNumber = ($outputBottomLeftY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
+        $outputPixel1XRealNumber = ($outputTopRightX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
+        $outputPixel1YRealNumber = ($outputTopRightY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
 
-        // now convert to actual pixel, clamp by image input size
-        $outputPixel0X = max(0, min($inputWidth - 1, (int)($outputPixel0XRealNumber)));
-        $outputPixel0Y = max(0, min($inputHeight - 1, (int)($outputPixel0YRealNumber)));
-        $outputPixel1X = max(0, min($inputWidth - 1, (int)ceil($outputPixel1XRealNumber)));
-        $outputPixel1Y = max(0, min($inputHeight - 1, (int)ceil($outputPixel1YRealNumber)));
+        // now convert to actual pixel "size", so int
+        $outputPixel0X = (int)($outputPixel0XRealNumber);
+        $outputPixel0Y = (int)($outputPixel0YRealNumber);
+        $outputPixel1X = (int)ceil($outputPixel1XRealNumber);
+        $outputPixel1Y = (int)ceil($outputPixel1YRealNumber);
 
-        // Calculate the size of the extracted region
+        // Calculate the size of the extracted region in pixel "size"
         $regionWidth = $outputPixel1X - $outputPixel0X + 1;
         $regionHeight = $outputPixel1Y - $outputPixel0Y + 1;
 
@@ -548,20 +549,27 @@ SQL,
         }
 
         // set the actual outputted region coordinates
-        $pixelToCoordinateWidthFactor = abs($inputTopRightX - $inputBottomLeftX) / $inputWidth;
-        $pixelToCoordinateHeightFactor = abs($inputTopRightY - $inputBottomLeftY) / $inputHeight;
+        $pixelToCoordinateWidthFactor = ($inputTopRightX - $inputBottomLeftX) / $inputWidth;
+        $pixelToCoordinateHeightFactor = ($inputTopRightY - $inputBottomLeftY) / $inputHeight;
         $outputRegion->setBottomLeftX(
-            $outputBottomLeftX - abs($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor
+            $outputBottomLeftX - ($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor
         );
         $outputRegion->setBottomLeftY(
-            $outputBottomLeftY - abs($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor
+            $outputBottomLeftY - ($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor
         );
         $outputRegion->setTopRightX(
-            $outputTopRightX + abs($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor
+            $outputTopRightX + ($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor
         );
         $outputRegion->setTopRightY(
-            $outputTopRightY + abs($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor
+            $outputTopRightY + ($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor
         );
+
+        // finally convert to pixel coordinates.
+        $outputPixel0Y = $inputHeight - $regionHeight - $outputPixel0Y;
+
+        // clamp by image input size
+        $outputPixel0X = max(0, min($inputWidth - 1, $outputPixel0X));
+        $outputPixel0Y = max(0, min($inputHeight - 1, $outputPixel0Y));
 
         $image->cropImage($regionWidth, $regionHeight, $outputPixel0X, $outputPixel0Y);
         $image->setImageFormat('PNG');
