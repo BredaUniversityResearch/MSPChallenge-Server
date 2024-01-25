@@ -338,7 +338,7 @@ WITH
         JSON_ARRAYAGG(
           JSON_OBJECT(
             'points', JSON_EXTRACT(g.geometry_geometry, '$'),
-            'types', JSON_ARRAY(JSON_EXTRACT(CONCAT('[',g.geometry_type,']'), '$')),
+            'types', JSON_EXTRACT(CONCAT('[',g.geometry_type,']'), '$'),
             'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
             # just add some aliases to the metadata
             'metadata', JSON_EXTRACT(g.geometry_data, '$')
