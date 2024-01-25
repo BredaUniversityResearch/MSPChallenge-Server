@@ -574,7 +574,7 @@ class GameListCreationMessageHandler
      * Returns the database id of the persistent geometry id described by the base_geometry_info
      *
      */
-    public function fixupPersistentGeometryID(array $baseGeometryInfo, array $mappedGeometryIds): int|string
+    /*public function fixupPersistentGeometryID(array $baseGeometryInfo, array $mappedGeometryIds): int|string
     {
         $fixedGeometryId = -1;
         if (!empty($baseGeometryInfo["geometry_mspid"])) {
@@ -590,13 +590,13 @@ class GameListCreationMessageHandler
             }
         }
         return $return ?? $fixedGeometryId;
-    }
+    }*/
 
     /**
      * Returns the database id of the geometry id described by the base_geometry_info
      *
      */
-    public function fixupGeometryID(array $baseGeometryInfo, array $mappedGeometryIds): int|string
+    /*public function fixupGeometryID(array $baseGeometryInfo, array $mappedGeometryIds): int|string
     {
         $fixedGeometryId = -1;
         if (array_key_exists($baseGeometryInfo["geometry_id"], $mappedGeometryIds)) {
@@ -618,19 +618,19 @@ class GameListCreationMessageHandler
             }
         }
         return $return ?? $fixedGeometryId;
-    }
+    }*/
 
     /**
      * @throws \Doctrine\DBAL\Exception
      */
-    private function getGeometryIdByMspId(int|string $mspId): int|string
+    /*private function getGeometryIdByMspId(int|string $mspId): int|string
     {
         $return = $this->selectRowsFromTable('geometry', ['geometry_mspid' => $mspId])['geometry_id'];
         if (is_null($return)) {
             return 'Could not find MSP ID ' . $mspId . ' in the current database';
         }
         return (int) $return;
-    }
+    }*/
 
     /**
      * @throws \Exception
@@ -746,7 +746,7 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      */
-    private function setupPlans(): void
+    /*private function setupPlans(): void
     {
         $return = $this->plan->setupPlans($this->dataModel);
         if (is_array($return)) {
@@ -762,7 +762,7 @@ class GameListCreationMessageHandler
                 ['gameSession' => $this->gameSession->getId()]
             );
         }
-    }
+    }*/
 
     private function setupObjectives(): void
     {
@@ -804,7 +804,7 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      */
-    private function setupGameWatchdogAndAccess(): void
+    /*private function setupGameWatchdogAndAccess(): void
     {
         // get the watchdog and end-user log-on in order
         $qb = $this->connection->createQueryBuilder();
@@ -843,7 +843,7 @@ class GameListCreationMessageHandler
                 ['gameSession' => $this->gameSession->getId()]
             );
         }
-    }
+    }*/
 
     /**
      * @throws \Exception
@@ -858,7 +858,7 @@ class GameListCreationMessageHandler
     /**
      * @throws Exception
      */
-    private function insert(string $table, array $values): int
+    /*private function insert(string $table, array $values): int
     {
         $qb = $this->connection->createQueryBuilder();
         foreach ($values as $key => $value) {
@@ -868,5 +868,5 @@ class GameListCreationMessageHandler
             ->values($values)
             ->executeStatement();
         return $this->connection->lastInsertId('auto_increment');
-    }
+    }*/
 }
