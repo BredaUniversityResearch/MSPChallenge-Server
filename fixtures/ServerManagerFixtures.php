@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\ServerManager\Setting;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use JetBrains\PhpStorm\ArrayShape;
@@ -16,15 +17,29 @@ class ServerManagerFixtures extends Fixture implements EventSubscriberInterface
 
     public function load(ObjectManager $manager): void
     {
-        $dbName = $_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager';
+        $databaseName = ($_ENV['APP_ENV'] != 'test') ?
+            $_ENV['DBNAME_SERVER_MANAGER'] :
+            $_ENV['DBNAME_SERVER_MANAGER'].'_test';
+        $defaultDatabaseName = ($_ENV['APP_ENV'] != 'test') ? 'msp_server_manager' : 'msp_server_manager_test';
+        $dbName = $databaseName ?? $defaultDatabaseName;
         if ($manager->getConnection()->getParams()['dbname'] !== $dbName) {
             $this->output->writeln(
-                'Skipping '.__CLASS__ .'. It requires a game session database. '.
-                'Please use "--em" to set the game session entity manager. '.
+                'Skipping '.__CLASS__ .' for connection '.$manager->getConnection()->getParams()['dbname'].
+                '. Please use "--em" to set the game session entity manager. '.
                 'This migrations requires a server manager database. Please use --em='.$dbName
             );
             return;
         }
+        $setting = new Setting();
+        $setting->setName('server_id');
+        $setting->setValue('643fb212a63121.89114231');
+        $manager->persist($setting);
+
+        $setting2 = new Setting();
+        $setting2->setName('server_password');
+        $setting2->setValue('1681895954');
+        $manager->persist($setting2);
+
         $manager->flush();
     }
 

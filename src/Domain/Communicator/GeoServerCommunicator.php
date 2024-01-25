@@ -3,6 +3,11 @@
 namespace App\Domain\Communicator;
 
 use App\Entity\Layer;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GeoServerCommunicator extends AbstractCommunicator
@@ -18,13 +23,17 @@ class GeoServerCommunicator extends AbstractCommunicator
      * @param string $endPoint
      * @param bool $asArray
      * @return string|array
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getResource(string $endPoint, bool $asArray = true): string|array
     {
         if (is_null($this->getUsername()) || is_null($this->getPassword()) || is_null($this->getBaseURL())) {
             return [];
         }
-
         return $this->call(
             'GET',
             $endPoint,
@@ -39,46 +48,40 @@ class GeoServerCommunicator extends AbstractCommunicator
      * @param string $layerName
      * @return array
      * @throws \Exception
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getRasterMetaData(string $workspace, string $layerName): array
     {
-        $metaCheckType = $this->getResource("rest/workspaces/" . $workspace . "/layers/" . $layerName);
+        $metaCheckType = $this->getResource("rest/workspaces/{$workspace}/layers/{$layerName}");
         $layerType = $metaCheckType['layer']['type'] ?? throw new \Exception(
-            "Layer type (raster or WMS store) could not be ascertained, so cannot continue with ".$layerName
+            "Layer type (raster or WMS store) could not be ascertained, so cannot continue with {$layerName}"
         );
         switch ($layerType) {
             case "RASTER":
-                $meta = $this->getResource(
-                    'rest/workspaces/'.
-                    $workspace.
-                    '/coverages/'.
-                    $layerName.
-                    '.json'
-                );
+                $meta = $this->getResource("rest/workspaces/{$workspace}/coverages/{$layerName}.json");
                 $bb = $meta['coverage']['nativeBoundingBox'] ??
                 throw new \Exception(
-                    "Native bounding box could not be ascertained for local raster layer " . $layerName
+                    "Native bounding box could not be ascertained for local raster layer {$layerName}"
                 );
             break;
             case "WMS":
-                $meta = $this->getResource(
-                    'rest/workspaces/'.
-                    $workspace.
-                    '/wmslayers/'.
-                    $layerName
-                );
+                $meta = $this->getResource("rest/workspaces/{$workspace}/wmslayers/{$layerName}");
                 $bb = $meta['wmsLayer']['nativeBoundingBox'] ??
                 throw new \Exception(
-                    "Native bounding box could not be ascertained for WMS raster layer " . $layerName
+                    "Native bounding box could not be ascertained for WMS raster layer {$layerName}"
                 );
                 break;
             default:
                 throw new \Exception(
-                    "Layer ".$layerName." returned an unsupported type ".$metaCheckType['layer']['type']
+                    "Layer {$layerName} returned an unsupported type {$metaCheckType['layer']['type']}"
                 );
         }
         return [
-            "url" => $layerName.".png",
+            "url" => "{$layerName}.png",
             "boundingbox" => [
                 [$bb['minx'], $bb['miny']],
                 [$bb['maxx'], $bb['maxy']]
@@ -92,6 +95,11 @@ class GeoServerCommunicator extends AbstractCommunicator
      * @param array $rasterMetaData
      * @return string
      * @throws \Exception
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getRasterDataThroughMetaData(
         string $workspace,
@@ -106,19 +114,12 @@ class GeoServerCommunicator extends AbstractCommunicator
             throw new \Exception('Missing required "layer_height" in layer data');
         }
 
-        $width = $layer->getLayerHeight() * $widthRatioMultiplier;
+        $width = round($layer->getLayerHeight() * $widthRatioMultiplier);
         $bounds = $rasterMetaData["boundingbox"][0][0].",".$rasterMetaData["boundingbox"][0][1].",".
             $rasterMetaData["boundingbox"][1][0].",".$rasterMetaData["boundingbox"][1][1];
         return $this->getResource(
-            $workspace.
-            "/wms/reflect?layers=".
-            $workspace.
-            ":".
-            $layer->getLayerName().
-            "&format=image/png&transparent=FALSE".
-            "&width=".round($width).
-            "&height=".$layer->getLayerHeight().
-            "&bbox=".$bounds,
+            "{$workspace}/wms/reflect?layers={$workspace}:{$layer->getLayerName()}&format=image/png".
+            "&transparent=FALSE&width={$width}&height={$layer->getLayerHeight()}&bbox={$bounds}",
             false
         );
     }
@@ -128,14 +129,16 @@ class GeoServerCommunicator extends AbstractCommunicator
      * @param string $layerName
      * @return array
      * @throws \Exception
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getLayerDescription(string $workspace, string $layerName): array
     {
         $response = $this->getResource(
-            "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers=".
-            $workspace.
-            ":".
-            $layerName.
+            "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers={$workspace}:{$layerName}".
             "&outputFormat=application/json"
         );
         return $response["layerDescriptions"]
@@ -145,12 +148,16 @@ class GeoServerCommunicator extends AbstractCommunicator
     /**
      * @param string $layerName
      * @return array
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     public function getLayerGeometryFeatures(string $layerName): array
     {
         return $this->getResource(
-            "/ows?service=WFS&version=1.0.0&outputFormat=json&request=GetFeature&typeName=".
-            $layerName.
+            "/ows?service=WFS&version=1.0.0&outputFormat=json&request=GetFeature&typeName={$layerName}".
             "&maxFeatures=1000000"
         );
     }

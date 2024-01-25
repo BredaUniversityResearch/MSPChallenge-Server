@@ -5,13 +5,10 @@ namespace App\Entity;
 use App\Repository\LayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use function App\await;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
-
 class Layer
 {
     #[ORM\Id]
@@ -120,11 +117,37 @@ class Layer
     #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'])]
     private Collection $geometry;
 
+    #[ORM\OneToMany(mappedBy: 'restrictionStartLayer', targetEntity: Restriction::class, cascade: ['persist'])]
+    private Collection $restrictionStart;
+
+    #[ORM\OneToMany(mappedBy: 'restrictionEndLayer', targetEntity: Restriction::class, cascade: ['persist'])]
+    private Collection $restrictionEnd;
+
     private bool $layerGeometryWithGeneratedMspids = false;
+
+    private ?bool $layerDownloadFromGeoserver;
+
+    private ?string $layerPropertyAsType;
+
+    private ?int $layerWidth;
+
+    private ?int $layerHeight;
+
+    private ?string $layerRasterMaterial;
+
+    private ?bool $layerRasterFilterMode;
+
+    private ?bool $layerRasterColorInterpolation;
+
+    private ?string $layerRasterPattern;
+
+    private ?float $layerRasterMinimumValueCutoff;
 
     public function __construct()
     {
         $this->geometry = new ArrayCollection();
+        $this->restrictionStart = new ArrayCollection();
+        $this->restrictionEnd = new ArrayCollection();
     }
 
     public function hasGeometryWithGeneratedMspids(): bool
@@ -137,14 +160,6 @@ class Layer
         $this->layerGeometryWithGeneratedMspids = $layerGeometryWithGeneratedMspids;
         return $this;
     }
-
-    private ?bool $layerDownloadFromGeoserver;
-
-    private ?string $layerPropertyAsType;
-
-    private ?int $layerWidth;
-
-    private ?int $layerHeight;
 
     public function getLayerWidth(): ?int
     {
@@ -167,16 +182,6 @@ class Layer
         $this->layerHeight = $layerHeight;
         return $this;
     }
-
-    private ?string $layerRasterMaterial;
-
-    private ?bool $layerRasterFilterMode;
-
-    private ?bool $layerRasterColorInterpolation;
-
-    private ?string $layerRasterPattern;
-
-    private ?float $layerRasterMinimumValueCutoff;
 
     public function getLayerRasterMaterial(): ?string
     {
@@ -383,6 +388,9 @@ class Layer
 
     public function setLayerTooltip(?string $layerTooltip): Layer
     {
+        if (is_null($layerTooltip)) {
+            $layerTooltip = "";
+        }
         $this->layerTooltip = $layerTooltip;
         return $this;
     }
@@ -475,8 +483,14 @@ class Layer
         return $this->layerTextInfo;
     }
 
-    public function setLayerTextInfo(?string $layerTextInfo): Layer
+    public function setLayerTextInfo(string|array|null $layerTextInfo): Layer
     {
+        if (is_null($layerTextInfo)) {
+            $layerTextInfo = "";
+        }
+        if (is_array($layerTextInfo)) {
+            $layerTextInfo = json_encode($layerTextInfo);
+        }
         $this->layerTextInfo = $layerTextInfo;
         return $this;
     }
@@ -641,6 +655,60 @@ class Layer
             // set the owning side to null (unless already changed)
             if ($geometry->getLayer() === $this) {
                 $geometry->setLayer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getRestrictionStart(): Collection
+    {
+        return $this->restrictionStart;
+    }
+
+    public function addRestrictionStart(Restriction $restriction): self
+    {
+        if (!$this->restrictionStart->contains($restriction)) {
+            $this->restrictionStart->add($restriction);
+            $restriction->setRestrictionStartLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRestrictionStart(Restriction $restriction): self
+    {
+        if ($this->restrictionStart->removeElement($restriction)) {
+            // set the owning side to null (unless already changed)
+            if ($restriction->getRestrictionStartLayer() === $this) {
+                $restriction->setRestrictionStartLayer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getRestrictionEnd(): Collection
+    {
+        return $this->restrictionEnd;
+    }
+
+    public function addRestrictionEnd(Restriction $restriction): self
+    {
+        if (!$this->restrictionEnd->contains($restriction)) {
+            $this->restrictionEnd->add($restriction);
+            $restriction->setRestrictionEndLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRestrictionEnd(Restriction $restriction): self
+    {
+        if ($this->restrictionEnd->removeElement($restriction)) {
+            // set the owning side to null (unless already changed)
+            if ($restriction->getRestrictionEndLayer() === $this) {
+                $restriction->setRestrictionEndLayer(null);
             }
         }
 

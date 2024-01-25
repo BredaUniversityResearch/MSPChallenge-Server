@@ -38,6 +38,7 @@ class GameListRepository extends EntityRepository
 
     /**
      * @return GameList[] Returns an array of GameList objects by session state, archived or not archived (active)
+     * @throws \Exception
      */
     public function findBySessionState(string $value): array
     {

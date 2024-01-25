@@ -82,6 +82,10 @@ services:
             $kernelLogsDir: '%kernel.logs_dir%'
             $kernelProjectDir: '%kernel.project_dir%'
 
+    App\Entity\ServerManager\Listener\GameListListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList' }
+
     App\Entity\ServerManager\Listener\GameConfigVersionListener:
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion' }
@@ -96,6 +100,22 @@ services:
     App\EventListener\SessionEntityListener:
         tags:
             - { name: 'doctrine.event_listener', event: 'prePersist' }
+
+    App\Repository\ServerManager\GameListRepository:
+        factory: [ '@doctrine.orm.msp_server_manager_entity_manager', getRepository ]
+        arguments:
+            - App\Entity\ServerManager\GameList
+
+    App\MessageHandler\GameList\GameListCreationMessageHandler:
+        public: true
+        arguments:
+            $mspServerManagerEntityManager: '@Doctrine\ORM\EntityManagerInterface'
+            $gameListRepository: '@App\Repository\ServerManager\GameListRepository'
+            $gameSessionLogger: '@monolog.logger.game_session'
+            $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+            $kernel: '@Symfony\Component\HttpKernel\KernelInterface'
+            $params: '@Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface'
+            $provider: '@App\VersionsProvider'
 
 when@dev:
     services:
@@ -114,3 +134,13 @@ when@dev:
                     id: 'App\DataCollector\MSPDataCollector'
                     template: 'data_collector/msp.html.twig'
                 - 'controller.service_arguments'
+
+when@test:
+    services:
+        # make classes in src/DataFixtures available to be used as services
+        # and have a tag that allows actions to type-hint services
+        App\DataFixtures\:
+            resource: '../fixtures/'
+            tags:
+                - 'doctrine.fixture.orm'
+                - 'kernel.event_subscriber'

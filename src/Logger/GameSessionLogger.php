@@ -2,6 +2,7 @@
 namespace App\Logger;
 
 use Monolog\Handler\AbstractProcessingHandler;
+use Symfony\Component\Filesystem\Filesystem;
 
 class GameSessionLogger extends AbstractProcessingHandler
 {
@@ -26,7 +27,17 @@ class GameSessionLogger extends AbstractProcessingHandler
         error_log(
             $record['formatted'],
             3,
-            $path.'log_session_'.$record['context']['gameSession'].'.log'
+            "{$path}log_session_{$record['context']['gameSession']}.log"
         );
+    }
+
+    public function empty($gameSessionId): void
+    {
+        $path = ($_ENV['APP_ENV'] !== 'test') ?
+            $this->kernelProjectDir.'/ServerManager/log/' :
+            $this->kernelLogsDir.'/';
+        $path .= "log_session_{$gameSessionId}.log";
+        $fileSystem = new Filesystem();
+        $fileSystem->remove($path);
     }
 }

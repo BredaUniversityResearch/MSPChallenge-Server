@@ -3,9 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\GeometryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
+use Doctrine\ORM\Mapping\OneToMany;
 
 #[ORM\Entity(repositoryClass: GeometryRepository::class)]
 
@@ -34,8 +38,13 @@ class Geometry
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $geometryActive = 1;
 
-    #[ORM\Column(type: Types::INTEGER, length: 11, options: ['default' => 0])]
-    private ?int $geometrySubtractive = 0;
+    #[OneToMany(mappedBy: 'geometryToSubtractFrom', targetEntity: Geometry::class, cascade: ['persist'])]
+    private Collection $geometrySubtractives;
+
+    /** Many Categories have One Category. */
+    #[ManyToOne(targetEntity: Geometry::class, cascade: ['persist'], inversedBy: 'geometrySubtractive')]
+    #[JoinColumn(name: 'geometry_subtractive', referencedColumnName: 'geometry_id')]
+    private Geometry|null $geometryToSubtractFrom = null;
 
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => '0'])]
     private ?string $geometryType = '0';
@@ -56,6 +65,7 @@ class Geometry
     public function __construct(?Layer $layer = null)
     {
         $this->layer = $layer;
+        $this->geometrySubtractives = new ArrayCollection();
     }
 
 
@@ -78,6 +88,46 @@ class Geometry
     public function setLayer(?Layer $layer): Geometry
     {
         $this->layer = $layer;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Geometry>
+     */
+    public function getGeometrySubtractives(): Collection
+    {
+        return $this->geometrySubtractives;
+    }
+
+    public function addGeometrySubtractive(Geometry $geometry): self
+    {
+        if (!$this->geometrySubtractives->contains($geometry)) {
+            $this->geometrySubtractives->add($geometry);
+            $geometry->setGeometryToSubtractFrom($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGeometrySubtractive(Geometry $geometry): self
+    {
+        $this->geometrySubtractives->removeElement($geometry);
+        $geometry->setGeometryToSubtractFrom(null);
+        return $this;
+    }
+
+    public function getGeometryToSubtractFrom(): ?Geometry
+    {
+        return $this->geometryToSubtractFrom;
+    }
+
+    public function setGeometryToSubtractFrom(?Geometry $geometryToSubtractFrom): Geometry
+    {
+        $this->geometryToSubtractFrom = $geometryToSubtractFrom;
+        if (!is_null($geometryToSubtractFrom)) {
+            $geometryToSubtractFrom->addGeometrySubtractive($this);
+            $this->setGeometryMspid(null);
+        }
         return $this;
     }
 
@@ -160,17 +210,6 @@ class Geometry
         return $this;
     }
 
-    public function getGeometrySubtractive(): ?int
-    {
-        return $this->geometrySubtractive;
-    }
-
-    public function setGeometrySubtractive(?int $geometrySubtractive): Geometry
-    {
-        $this->geometrySubtractive = $geometrySubtractive;
-        return $this;
-    }
-
     public function getGeometryType(): ?string
     {
         return $this->geometryType;
@@ -237,23 +276,29 @@ class Geometry
 
     public function setGeometryMspid(?string $geometryMspid): Geometry
     {
-        if ($this->getGeometrySubtractive() === 0 && empty($geometryMspid)) {
+        if (!empty($this->getGeometryToSubtractFrom())) {
+            $this->geometryMspid = null;
+            return $this;
+        }
+        if (empty($geometryMspid)) {
             $algo = 'fnv1a64';
             $dataToHash = $this->getLayer()->getLayerName() . $this->getGeometryGeometry();
             $dataArray = json_decode($this->getGeometryData(), true);
             $dataToHash .= $dataArray['name'] ?? '';
             $this->geometryMspid = hash($algo, $dataToHash);
             $this->getLayer()->setGeometryWithGeneratedMspids(true);
+            return $this;
         }
+        $this->geometryMspid = $geometryMspid;
         return $this;
     }
 
-    public function setGeometryPropertiesThroughFeature(array $feature): self
+    public function setGeometryPropertiesThroughFeature(array $featureProperties): self
     {
-        $this->setGeometryData($feature);
-        $this->setGeometryType($feature);
-        $this->setGeometryCountryId($feature['country_id'] ?? null);
-        $this->setGeometryMspid($feature['mspid'] ?? null);
+        $this->setGeometryData($featureProperties);
+        $this->setGeometryType($featureProperties);
+        $this->setGeometryCountryId($featureProperties['country_id'] ?? null);
+        $this->setGeometryMspid($featureProperties['mspid'] ?? null);
         return $this;
     }
 }

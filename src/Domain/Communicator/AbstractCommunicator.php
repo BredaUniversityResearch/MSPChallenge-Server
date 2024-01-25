@@ -17,6 +17,7 @@ abstract class AbstractCommunicator
     protected ?string $username = null;
     protected ?string $password = null;
     protected ?string $token = null;
+    protected ?string $lastCompleteURLCalled = null;
 
     /**
      * @throws RedirectionExceptionInterface
@@ -35,9 +36,11 @@ abstract class AbstractCommunicator
         $options['json'] = $data;
         $options['headers'] = $headers;
 
+        $this->lastCompleteURLCalled = $this->getBaseURL().$endPoint;
+
         $response = $this->client->request(
             $method,
-            $this->getBaseURL().$endPoint,
+            $this->lastCompleteURLCalled,
             $options
         );
         if ($asArray) {
@@ -110,5 +113,10 @@ abstract class AbstractCommunicator
         $this->token = $token;
 
         return $this;
+    }
+
+    public function getLastCompleteURLCalled(): ?string
+    {
+        return $this->lastCompleteURLCalled;
     }
 }

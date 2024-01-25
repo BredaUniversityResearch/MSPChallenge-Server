@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `geometry` (
   `geometry_data` TEXT CHARACTER SET 'latin1' NULL COMMENT 'is this format long enough?',
   `geometry_country_id` INT NULL,
   `geometry_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Is this geometry active or still valid to become active. This is set to 0 when it is replaced by a new geometry with the same persistent ID when plans are implemented.',
-  `geometry_subtractive` INT(11) NOT NULL DEFAULT 0,
+  `geometry_subtractive` INT(11) NULL,
   `geometry_type` VARCHAR(75) NOT NULL DEFAULT 0,
   `geometry_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Has this geometry been deleted by a user? This only applies to geometry inside a plan that hasn\'t become active. E.g. geometry is created in plan, plan is submitted to server, user deletes geometry from said plan, geometry_deleted = 1.',
   `geometry_mspid` VARCHAR(16) NULL,

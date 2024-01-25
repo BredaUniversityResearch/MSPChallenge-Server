@@ -6,8 +6,11 @@ use App\Entity\Country;
 use App\Entity\Game;
 use App\Entity\Geometry;
 use App\Entity\Layer;
+use App\Entity\Objective;
+use App\Entity\Restriction;
 use App\Entity\ServerManager\GameConfigVersion;
 use Doctrine\ORM\EntityManagerInterface;
+use Jfcherng\Diff\DiffHelper;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -107,6 +110,55 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertSame($geometry, $geometry2);
         $geometry3 = $layer->getGeometry()[0];
         self::assertSame($geometry, $geometry3);
+        $geometry2 = clone $geometry;
+        $geometry2->setGeometryMspid('1');
+        $geometry2->setGeometryData(
+            '{"minx":4800176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.121}'
+        );
+        $geometry2->setGeometryToSubtractFrom($geometry);
+        $geometry3 = clone $geometry;
+        $geometry3->setGeometryData(
+            '{"minx":4800176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.120}'
+        );
+        $this->em->persist($geometry2);
+        $this->em->persist($geometry3);
+        $this->em->flush();
+        self::assertSame($geometry->getGeometrySubtractives()[0], $geometry2);
+    }
+
+    public function testRestrictionEntity(): void
+    {
+        $this->start();
+        $restriction = new Restriction();
+        $restriction->setRestrictionSort("INCLUSION");
+        $restriction->setRestrictionType('WARNING');
+        $restriction->setRestrictionMessage('Precautionary areas are reserved for shipping.');
+        $restriction2 = clone $restriction;
+        $layer = $this->em->getRepository(Layer::class)->find(1);
+        $layer->addRestrictionStart($restriction);
+        $layer->addRestrictionEnd($restriction);
+        $layer->addRestrictionStart($restriction2);
+        $this->em->persist($layer);
+        $this->em->flush();
+        self::assertSame($this->em->getRepository(Restriction::class)->find(1), $restriction);
+        self::assertSame($this->em->getRepository(Restriction::class)->find(2), $restriction2);
+    }
+
+    public function testObjectiveEntity(): void
+    {
+        $this->start();
+        $objective = new Objective();
+        $objective->setObjectiveTitle('Renewable Energy Production - 2030');
+        $objective->setObjectiveDescription(
+            'Increase the current renewable energy production to 12.0 GW by 2030.'
+        );
+        $objective->setObjectiveDeadline(192);
+        $objective->setObjectiveLastupdate(100);
+        $country = $this->em->getRepository(Country::class)->find(1);
+        $country->addObjective($objective);
+        $this->em->persist($country);
+        $this->em->flush();
+        self::assertSame($this->em->getRepository(Objective::class)->find(1), $objective);
     }
 
     private function start(): void
@@ -124,7 +176,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $app = new Application(static::bootKernel());
         $input = new ArrayInput([
             'command' => 'doctrine:database:drop',
-            '--connection' => 'msp_session_1',
+            '--connection' => self::DBNAME,
             '--force' => true,
             '--no-interaction' => true,
         ]);
@@ -133,14 +185,14 @@ class GameSessionEntitiesTest extends KernelTestCase
 
         $input2 = new ArrayInput([
             'command' => 'doctrine:database:create',
-            '--connection' => 'msp_session_1'
+            '--connection' => self::DBNAME
         ]);
         $input2->setInteractive(false);
         $app->doRun($input2, new NullOutput());
 
         $input3 = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
-            '--em' => 'msp_session_1',
+            '--em' => self::DBNAME,
         ]);
         $input3->setInteractive(false);
         $app->doRun($input3, new NullOutput());

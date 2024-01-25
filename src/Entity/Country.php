@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CountryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -22,6 +24,14 @@ class Country
 
     #[ORM\Column(type: Types::INTEGER, length: 1, nullable: true, options: ['default' => 0])]
     private ?int $countryIsManager;
+
+    #[ORM\OneToMany(mappedBy: 'country', targetEntity: Objective::class, cascade: ['persist'])]
+    private Collection $objective;
+
+    public function __construct()
+    {
+        $this->objective = new ArrayCollection();
+    }
 
     public function getCountryId(): ?int
     {
@@ -64,6 +74,36 @@ class Country
     public function setCountryIsManager(?int $countryIsManager): Country
     {
         $this->countryIsManager = $countryIsManager;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Geometry>
+     */
+    public function getObjective(): Collection
+    {
+        return $this->objective;
+    }
+
+    public function addObjective(Objective $objective): self
+    {
+        if (!$this->objective->contains($objective)) {
+            $this->objective->add($objective);
+            $objective->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeObjective(Objective $objective): self
+    {
+        if ($this->objective->removeElement($objective)) {
+            // set the owning side to null (unless already changed)
+            if ($objective->getCountry() === $this) {
+                $objective->setCountry(null);
+            }
+        }
+
         return $this;
     }
 }
