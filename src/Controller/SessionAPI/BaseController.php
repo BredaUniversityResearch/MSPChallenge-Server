@@ -12,7 +12,7 @@ class BaseController extends AbstractController
     public function getSessionEntityManager($sessionId): EntityManagerInterface
     {
         $database = ConnectionManager::getInstance()->getGameSessionDbName($sessionId);
-        return $this->container->get("doctrine.orm.{$this->database}_entity_manager");
+        return $this->container->get("doctrine.orm.{$database}_entity_manager");
     }
     public static function wrapPayloadForResponse(array $payload, ?string $message = null): array
     {
