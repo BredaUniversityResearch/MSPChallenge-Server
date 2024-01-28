@@ -2,9 +2,9 @@
 
 namespace App\MessageHandler\GameList;
 
+use App\Controller\SessionAPI\SELController;
 use App\Entity\Country;
 use App\Entity\Game;
-use App\Domain\API\v1\Simulations;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Communicator\GeoServerCommunicator;
 use App\Domain\Services\ConnectionManager;
@@ -19,6 +19,8 @@ use App\Repository\ServerManager\GameListRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Jfcherng\Diff\DiffHelper;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -32,20 +34,21 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
-use function App\await;
 
 //#[AsMessageHandler]
 class GameListCreationMessageHandler
 {
     private string $database;
     private EntityManagerInterface $entityManager;
-
     private GameList $gameSession;
-
     private array $dataModel;
-
     private ObjectNormalizer $normalizer;
 
     public function __construct(
@@ -62,7 +65,6 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws Exception
      * @throws \Exception
      */
     public function __invoke(GameListCreationMessage $gameList): void
@@ -351,17 +353,21 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws Exception
      * @throws \Exception
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     private function importLayerRasterData(
         Layer $layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
-        $rasterFileName = $_ENV['APP_ENV'] == 'test' ?
+        $rasterPath = ($_ENV['APP_ENV'] == 'test' ?
             $this->params->get('app.session_raster_dir_test') :
-            $this->params->get('app.session_raster_dir');
-        $rasterFileName .= "{$this->gameSession->getId()}/{$layer->getLayerName()}.png";
+            $this->params->get('app.session_raster_dir'))
+            . "{$this->gameSession->getId()}/{$layer->getLayerName()}.png";
         if ($layer->getLayerDownloadFromGeoserver()) {
             $this->gameSessionLogger->debug(
                 'Calling GeoServer to obtain raster metadata.',
@@ -396,10 +402,10 @@ class GameListCreationMessageHandler
             );
             $fileSystem = new Filesystem();
             $fileSystem->dumpFile(
-                $rasterFileName,
+                $rasterPath,
                 $rasterData
             );
-            $message = 'Successfully retrieved {layerName} and stored the raster file at {rasterFileName}.';
+            $message = 'Successfully retrieved {layerName} and stored the raster file at {rasterPath}.';
         }
         $layer->setLayerRaster($rasterMetaData ?? null);
         $this->gameSessionLogger->info(
@@ -407,7 +413,7 @@ class GameListCreationMessageHandler
             [
                 'gameSession' => $this->gameSession->getId(),
                 'layerName' => $layer->getLayerName(),
-                'rasterFileName' => $rasterFileName
+                'rasterPath' => $rasterPath
             ]
         );
     }
@@ -644,7 +650,10 @@ class GameListCreationMessageHandler
             );
             return;
         }
-
+        $this->gameSessionLogger->info(
+            'Found {count} restriction definitions, commencing setup.',
+            ['gameSession' => $this->gameSession->getId(), 'count' => count($this->dataModel['restrictions'])]
+        );
         foreach ($this->dataModel['restrictions'] as $restrictionKey => $restrictionConfig) {
             foreach ($restrictionConfig as $restrictionItem) {
                 $restriction = new Restriction();
@@ -653,10 +662,10 @@ class GameListCreationMessageHandler
                 if (empty($startLayer)) {
                     $this->gameSessionLogger->warning(
                         "Start layer {startLayer} used in restriction {restrictionKey} does not seem to exist.".
-                        "Are you sure this layer has been added under the 'meta' object?",
+                        "Are you sure this layer has been added under the 'meta' object? Restriction skipped.",
                         [
                             'gameSession' => $this->gameSession->getId(),
-                            'restrictionKey' => $restrictionKey,
+                            'restrictionKey' => $restrictionKey + 1,
                             'startLayer' => $restrictionItem['startlayer']
                         ]
                     );
@@ -667,10 +676,10 @@ class GameListCreationMessageHandler
                 if (empty($endLayer)) {
                     $this->gameSessionLogger->warning(
                         "End layer {endLayer} used in restriction {restrictionKey} does not seem to exist. ".
-                        "Are you sure this layer has been added under the 'meta' object?",
+                        "Are you sure this layer has been added under the 'meta' object? Restriction skipped.",
                         [
                             'gameSession' => $this->gameSession->getId(),
-                            'restrictionKey' => $restrictionKey,
+                            'restrictionKey' => $restrictionKey + 1,
                             'endLayer' => $restrictionItem['endlayer']
                         ]
                     );
@@ -689,42 +698,26 @@ class GameListCreationMessageHandler
         }
         $this->entityManager->flush();
         $this->gameSessionLogger->info(
-            'A total of {count} restrictions were set up.',
-            ['gameSession' => $this->gameSession->getId(), 'count' => count($this->dataModel['restrictions'])]
+            'Restrictions setup complete.',
+            ['gameSession' => $this->gameSession->getId()]
         );
     }
 
     private function setupSimulations(): void
     {
-        $nameSpaceName = (new \ReflectionClass(Simulations::class))->getNamespaceName();
         $simulationsDone = [];
         $possibleSims = array_keys($this->provider->getComponentsVersions());
         foreach ($possibleSims as $possibleSim) {
+            $simSessionCreationMethod = "{$possibleSim}SessionCreation";
             if (array_key_exists($possibleSim, $this->dataModel)
                 && is_array($this->dataModel[$possibleSim])
-                && class_exists("{$nameSpaceName}\\{$possibleSim}")
-                && method_exists("{$nameSpaceName}\\{$possibleSim}", 'onSessionSetup')
-                && method_exists("{$nameSpaceName}\\{$possibleSim}", 'setGameSessionId')
+                && method_exists($this, $simSessionCreationMethod)
             ) {
                 $this->gameSessionLogger->info(
                     'Setting up simulation {simulation}...',
                     ['simulation' => $possibleSim, 'gameSession' => $this->gameSession->getId()]
                 );
-                $simulation = new ("{$nameSpaceName}\\{$possibleSim}")();
-                $simulation->setGameSessionId($this->gameSession->getId());
-                $return = $simulation->onSessionSetup($this->dataModel);
-                if (is_array($return)) {
-                    foreach ($return as $message) {
-                        $this->gameSessionLogger->warning(
-                            '{simulation} returned the message: {message}',
-                            [
-                                'simulation' => $possibleSim,
-                                'message' => $message,
-                                'gameSession' => $this->gameSession->getId()
-                            ]
-                        );
-                    }
-                }
+                $this->$simSessionCreationMethod();
                 $this->gameSessionLogger->info(
                     'Finished setting up simulation {simulation}.',
                     ['simulation' => $possibleSim, 'gameSession' => $this->gameSession->getId()]
@@ -741,6 +734,152 @@ class GameListCreationMessageHandler
                 );
             }
         }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function MELSessionCreation(): void
+    {
+        $config = $this->dataModel['MEL'];
+        if (isset($config["fishing"])) {
+            $countries = $this->entityManager->getRepository(Country::class)->findAll();
+            foreach ($config["fishing"] as $fleet) {
+                if (isset($fleet["initialFishingDistribution"])) {
+                    foreach ($countries as $country) {
+                        $foundCountry = false;
+                        foreach ($fleet["initialFishingDistribution"] as $distribution) {
+                            if ($distribution["country_id"] == $country->getCountryId()) {
+                                $foundCountry = true;
+                                break;
+                            }
+                        }
+                        if (!$foundCountry) {
+                            $this->gameSessionLogger->error(
+                                "Country with ID {country} is missing a distribution entry in the ".
+                                " initialFishingDistribution table for fleet {fleet} for MEL.",
+                                [
+                                    'country' => $country->getCountryId(),
+                                    'fleet' => $fleet["name"],
+                                    'gameSession' => $this->gameSession->getId()
+                                ]
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach ($config['pressures'] as $pressure) {
+            $pressureLayer = $this->setupMELLayer($pressure['name']);
+            foreach ($pressure['layers'] as $layerGeneratingPressures) {
+                $layer = $this->entityManager->getRepository(Layer::class)
+                    ->findOneBy(['layerName' => $layerGeneratingPressures['name']]);
+                if (empty($layer)) {
+                    $this->gameSessionLogger->error(
+                        "Layer {layerGeneratingPressure} supposed to generate pressure {pressure} not found.",
+                        [
+                            'layerGeneratingPressure' => $layerGeneratingPressures['name'],
+                            'pressure' => $pressure['name'],
+                            'gameSession' => $this->gameSession->getId()
+                        ]
+                    );
+                    continue;
+                }
+                //add a layer to the mel_layer table for faster accessing
+                $pressureLayer->addPressureGeneratingLayer($layer);
+                $this->entityManager->persist($pressureLayer);
+            }
+        }
+        foreach ($config['outcomes'] as $outcome) {
+            $this->setupMELLayer($outcome['name']);
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function setupMELLayer(string $melLayerName): Layer
+    {
+        $layerName = "mel_" . str_replace(" ", "_", $melLayerName);
+        $layer = $this->entityManager->getRepository(Layer::class)->findOneBy(['layerName' => $layerName]);
+        if (empty($layer)) {
+            throw new \Exception(
+                "Pressure layer {$layerName} not found. Make sure it has been defined under 'meta'."
+            );
+        }
+        $layerRaster = $layer->getLayerRaster(); //also sets all other raster metadata properties
+        $layer->setLayerRasterURL("{$layerName}.tif");
+        $layer->setLayerRasterBoundingbox([
+            [
+                $this->dataModel['MEl']['x_min'],
+                $this->dataModel['MEl']["y_min"]
+            ],
+            [
+                $this->dataModel['MEl']["x_max"],
+                $this->dataModel['MEl']["y_max"]
+            ]
+        ]);
+        $layer->setLayerRaster($layerRaster); //also sets by getting other raster metadata properties
+        $this->entityManager->persist($layer);
+        return $layer;
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     * @throws \Exception
+     */
+    private function SELSessionCreation(): void
+    {
+        $boundsConfig = SELController::calculateAlignedSimulationBounds(
+            $this->dataModel,
+            $this->entityManager
+        );
+        foreach ($this->dataModel["SEL"]["heatmap_settings"] as $heatmap) {
+            $selOutputLayer = $this->entityManager->getRepository(Layer::class)->findOneBy(
+                ['layerName' => $heatmap['layer_name']]
+            );
+            if (is_null($selOutputLayer)) {
+                throw new \Exception(
+                    'The layer '.$heatmap['layer_name'].' referenced in the heatmap settings has not been 
+                    found in the database, so cannot continue. Are you sure it has been defined separately as an 
+                    actual layer in the configuration file?'
+                );
+            }
+            $layerRaster = $selOutputLayer->getLayerRaster(); //also sets all other raster metadata properties
+            $selOutputLayer->setLayerRasterURL("{$selOutputLayer->getLayerName()}.png");
+            if (isset($heatmap["output_for_mel"]) && $heatmap["output_for_mel"] === true) {
+                if (empty($this->dataModel["MEL"])) {
+                    throw new \Exception("SEL has a layer {$heatmap["layer_name"]} that is marked ".
+                        "for use by MEL. However the MEL configuration is not found in the current config file.");
+                }
+                if (!array_key_exists("x_min", $this->dataModel["MEL"])
+                    || !array_key_exists("y_min", $this->dataModel["MEL"])
+                    || !array_key_exists("x_max", $this->dataModel["MEL"])
+                    || !array_key_exists("y_max", $this->dataModel["MEL"])
+                ) {
+                    throw new \Exception("SEL has layer {$heatmap["layer_name"]} that is marked ".
+                        "for use by MEL. However the bounding box configuration in the MEL section is incomplete.");
+                }
+                $selOutputLayer->setLayerRasterBoundingbox([
+                    [$this->dataModel["MEL"]['x_min'], $this->dataModel["MEL"]['y_min']],
+                    [$this->dataModel["MEL"]['x_max'], $this->dataModel["MEL"]['y_max']]
+                ]);
+            } else {
+                $selOutputLayer->setLayerRasterBoundingbox([
+                    [$boundsConfig['x_min'], $boundsConfig['y_min']],
+                    [$boundsConfig['x_max'], $boundsConfig['y_max']]
+                ]);
+            }
+            $selOutputLayer->setLayerRaster($layerRaster); //also sets by getting other raster metadata properties
+            $this->entityManager->persist($selOutputLayer);
+        }
+    }
+
+    private function CELSessionCreation(): void
+    {
+        //CEL does not need anything here to make it work
     }
 
     /**

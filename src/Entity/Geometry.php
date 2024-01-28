@@ -301,4 +301,27 @@ class Geometry
         $this->setGeometryMspid($featureProperties['mspid'] ?? null);
         return $this;
     }
+
+    public function calculateBounds(): array
+    {
+        if (empty($this->geometryGeometry)) {
+            throw new \Exception('No geometry coordinates retrieved, cannot calculate bounds.');
+        }
+        $result = ["x_min" => 1e25, "y_min" => 1e25, "x_max" => -1e25, "y_max" => -1e25];
+        foreach (json_decode($this->geometryGeometry, true) as $g) {
+            if ($g[0] < $result["x_min"]) {
+                $result["x_min"] = $g[0];
+            }
+            if ($g[1] < $result["y_min"]) {
+                $result["y_min"] = $g[1];
+            }
+            if ($g[0] > $result["x_max"]) {
+                $result["x_max"] = $g[0];
+            }
+            if ($g[1] > $result["y_max"]) {
+                $result["y_max"] = $g[1];
+            }
+        }
+        return $result;
+    }
 }

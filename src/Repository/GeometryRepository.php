@@ -6,6 +6,8 @@ use App\Entity\Geometry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 
 class GeometryRepository extends EntityRepository
 {
@@ -15,7 +17,24 @@ class GeometryRepository extends EntityRepository
     }
 
     /**
-     * @return Geometry[] Returns an array of GameList objects by session state, archived or not archived (active)
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function getPlayArea(): Geometry
+    {
+        $expr = $this->getEntityManager()->getExpressionBuilder();
+        return $this->createQueryBuilder('g')
+            ->innerJoin('g.layer', 'l')
+            ->where(
+                $expr->like('l.layerName', ':playarea')
+            )
+            ->setParameter('playarea', '_PLAYAREA%')
+            ->getQuery()
+            ->getSingleResult();
+    }
+
+    /**
+     * @return array of geometry with duplicate MSP IDs
      */
     public function findDuplicateMspids(int $layerId): array
     {
@@ -43,15 +62,6 @@ class GeometryRepository extends EntityRepository
             ->getQuery()
             ->getArrayResult()
             ;
-            /*SELECT layer_id, geometry_mspid, geometry_geometry, geometry_data, layer_name
-            FROM `geometry`
-            INNER JOIN layer ON layer.layer_id = geometry.geometry_layer_id
-            WHERE geometry_mspid IN (SELECT geometry_mspid
-                                  FROM geometry
-                                  GROUP BY geometry_mspid
-                                  HAVING COUNT(geometry_mspid) > 1)
-            AND layer_id = 93
-            ORDER BY geometry_mspid*/
     }
 
     public function save(Geometry $entity, bool $flush = false): void

@@ -7,6 +7,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\InverseJoinColumn;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\JoinTable;
+use Doctrine\ORM\Mapping\ManyToMany;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
 class Layer
@@ -123,6 +130,15 @@ class Layer
     #[ORM\OneToMany(mappedBy: 'restrictionEndLayer', targetEntity: Restriction::class, cascade: ['persist'])]
     private Collection $restrictionEnd;
 
+    #[ManyToMany(targetEntity: Layer::class, mappedBy: 'pressureGeneratingLayer', cascade: ['persist'])]
+    private Collection $pressure;
+
+    #[JoinTable(name: 'mel_layer')]
+    #[JoinColumn(name: 'mel_layer_pressurelayer', referencedColumnName: 'layer_id')]
+    #[InverseJoinColumn(name: 'mel_layer_layer_id', referencedColumnName: 'layer_id')]
+    #[ManyToMany(targetEntity: Layer::class, inversedBy: 'pressure', cascade: ['persist'])]
+    private Collection $pressureGeneratingLayer;
+
     private bool $layerGeometryWithGeneratedMspids = false;
 
     private ?bool $layerDownloadFromGeoserver;
@@ -143,11 +159,17 @@ class Layer
 
     private ?float $layerRasterMinimumValueCutoff;
 
+    private ?string $layerRasterURL = null;
+
+    private ?array $layerRasterBoundingbox = null;
+
     public function __construct()
     {
         $this->geometry = new ArrayCollection();
         $this->restrictionStart = new ArrayCollection();
         $this->restrictionEnd = new ArrayCollection();
+        $this->pressure = new ArrayCollection();
+        $this->pressureGeneratingLayer = new ArrayCollection();
     }
 
     public function hasGeometryWithGeneratedMspids(): bool
@@ -235,6 +257,28 @@ class Layer
     public function setLayerRasterMinimumValueCutoff(?float $layerRasterMinimumValueCutoff): Layer
     {
         $this->layerRasterMinimumValueCutoff = $layerRasterMinimumValueCutoff;
+        return $this;
+    }
+
+    public function getLayerRasterURL(): ?string
+    {
+        return $this->layerRasterURL;
+    }
+
+    public function setLayerRasterURL(?string $layerRasterURL): Layer
+    {
+        $this->layerRasterURL = $layerRasterURL;
+        return $this;
+    }
+
+    public function getLayerRasterBoundingbox(): ?array
+    {
+        return $this->layerRasterBoundingbox;
+    }
+
+    public function setLayerRasterBoundingbox(?array $layerRasterBoundingbox): Layer
+    {
+        $this->layerRasterBoundingbox = $layerRasterBoundingbox;
         return $this;
     }
 
@@ -509,26 +553,42 @@ class Layer
         return $this;
     }
 
-    public function getLayerRaster(): ?string
+    public function getLayerRaster(): ?array
+    {
+        $layerRaster = json_decode($this->layerRaster, true);
+        $this->setLayerRasterMaterial($layerRaster["layer_raster_material"] ?? null);
+        $this->setLayerRasterPattern($layerRaster["layer_raster_pattern"] ?? null);
+        $this->setLayerRasterMinimumValueCutoff($layerRaster["layer_raster_minimum_value_cutoff"] ?? null);
+        $this->setLayerRasterColorInterpolation($layerRaster["layer_raster_color_interpolation"] ?? null);
+        $this->setLayerRasterFilterMode($layerRaster["layer_raster_filter_mode"] ?? null);
+        $this->setLayerRasterURL($layerRaster["url"] ?? null);
+        $this->setLayerRasterBoundingbox($layerRaster["boundingbox"] ?? null);
+        return $layerRaster;
+    }
+
+    public function getLayerRasterAsJson(): ?string
     {
         return $this->layerRaster;
     }
 
+    /*
+     * $layerRaster array should only contain additional raster metadata retrieved from GeoServer
+     * all other elements are this layer class' properties, so should only be set/get through appropriate methods
+     */
     public function setLayerRaster(string|array|null $layerRaster): Layer
     {
-        if (is_string($layerRaster)) {
-            $layerRaster = json_decode($layerRaster, true);
-            if (!$layerRaster) {
-                throw new \Exception('Could not decode $layerRaster. Are you sure it is json?');
-            }
+        if (is_array($layerRaster)) {
+            $layerRaster["layer_raster_material"] = $this->getLayerRasterMaterial();
+            $layerRaster["layer_raster_pattern"] = $this->getLayerRasterPattern();
+            $layerRaster["layer_raster_minimum_value_cutoff"] = $this->getLayerRasterMinimumValueCutoff();
+            $layerRaster["layer_raster_color_interpolation"] = $this->getLayerRasterColorInterpolation();
+            $layerRaster["layer_raster_filter_mode"] = $this->getLayerRasterFilterMode();
+            $layerRaster["url"] = $this->getLayerRasterURL();
+            $layerRaster["boundingbox"] = $this->getLayerRasterBoundingbox();
+            $this->layerRaster = json_encode($layerRaster);
+            return $this;
         }
-        $layerRaster["layer_raster_material"] = $this->getLayerRasterMaterial();
-        $layerRaster["layer_raster_pattern"] = $this->getLayerRasterPattern();
-        $layerRaster["layer_raster_minimum_value_cutoff"] = $this->getLayerRasterMinimumValueCutoff();
-        $layerRaster["layer_raster_color_interpolation"] = $this->getLayerRasterColorInterpolation();
-        $layerRaster["layer_raster_filter_mode"] = $this->getLayerRasterFilterMode();
-
-        $this->layerRaster = json_encode($layerRaster);
+        $this->layerRaster = $layerRaster;
         return $this;
     }
 
@@ -712,6 +772,53 @@ class Layer
             }
         }
 
+        return $this;
+    }
+
+    public function getPressure(): Collection
+    {
+        return $this->pressure;
+    }
+
+    public function addPressure(Layer $layer): self
+    {
+        if (!$this->pressure->contains($layer)) {
+            $this->pressure->add($layer);
+            $layer->addPressureGeneratingLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removePressure(Layer $layer): self
+    {
+        if ($this->pressure->removeElement($layer)) {
+            $layer->removePressureGeneratingLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function getPressureGeneratingLayer(): Collection
+    {
+        return $this->pressureGeneratingLayer;
+    }
+
+    public function addPressureGeneratingLayer(Layer $layer): self
+    {
+        if (!$this->pressureGeneratingLayer->contains($layer)) {
+            $this->pressureGeneratingLayer->add($layer);
+            $layer->addPressure($this);
+        }
+
+        return $this;
+    }
+
+    public function removePressureGeneratingLayer(Layer $layer): self
+    {
+        if ($this->pressureGeneratingLayer->removeElement($layer)) {
+            $layer->removePressure($this);
+        }
         return $this;
     }
 }

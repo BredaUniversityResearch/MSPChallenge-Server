@@ -161,6 +161,33 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertSame($this->em->getRepository(Objective::class)->find(1), $objective);
     }
 
+    public function testMelLayerRelationship(): void
+    {
+        $this->start();
+        $layer = $this->em->getRepository(Layer::class)->find(1);
+        $layer->setLayerName('Pressure layer');
+
+        $layer2 = new Layer();
+        $layer2->setLayerName('First layer generating pressure');
+        $layer2->setLayerGeotype('raster');
+        $layer2->setLayerGroup('northsee');
+        $layer2->setLayerEditable(0);
+
+        $layer3 = new Layer();
+        $layer3->setLayerName('Second layer generating pressure');
+        $layer3->setLayerGeotype('raster');
+        $layer3->setLayerGroup('northsee');
+        $layer3->setLayerEditable(0);
+
+        $layer->addPressureGeneratingLayer($layer2);
+        $layer->addPressureGeneratingLayer($layer3);
+
+        $this->em->persist($layer);
+        $this->em->flush();
+
+        self::assertSame($layer->getPressureGeneratingLayer()[0], $layer2);
+    }
+
     private function start(): void
     {
         $container = static::getContainer();
