@@ -103,6 +103,7 @@ class EwEPerformanceCommand extends Command
                 $total[$splitted] = 0;
             }
         }
+        $returnList = [];
         foreach ($average as $key => $splitAdded) {
             if (!isset($split[$key])) {
                 $split[$key] = 'last';
