@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\Region;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -34,7 +35,9 @@ class CreatePOVConfigCommand extends Command
 
     public function __construct(
         private readonly string $projectDir,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
         parent::__construct();
     }
