@@ -220,8 +220,8 @@ class GameListCreationMessageHandler
         $this->setupRestrictions();
         $this->setupSimulations();
         $this->setupObjectives();
-        /*$this->setupPlans();
-        $this->setupGameWatchdogAndAccess();*/
+        $this->setupPlans();
+        /*$this->setupGameWatchdogAndAccess();*/
         $this->entityManager->flush();
     }
 
@@ -743,7 +743,7 @@ class GameListCreationMessageHandler
     {
         $config = $this->dataModel['MEL'];
         if (isset($config["fishing"])) {
-            $countries = $this->entityManager->getRepository(Country::class)->findAll();
+            $countries = $this->entityManager->getRepository(Country::class)->findBy(['countryIsManager' => 0]);
             foreach ($config["fishing"] as $fleet) {
                 if (isset($fleet["initialFishingDistribution"])) {
                     foreach ($countries as $country) {
@@ -757,7 +757,7 @@ class GameListCreationMessageHandler
                         if (!$foundCountry) {
                             $this->gameSessionLogger->error(
                                 "Country with ID {country} is missing a distribution entry in the ".
-                                " initialFishingDistribution table for fleet {fleet} for MEL.",
+                                "initialFishingDistribution table for fleet {fleet} for MEL.",
                                 [
                                     'country' => $country->getCountryId(),
                                     'fleet' => $fleet["name"],
@@ -775,20 +775,11 @@ class GameListCreationMessageHandler
             foreach ($pressure['layers'] as $layerGeneratingPressures) {
                 $layer = $this->entityManager->getRepository(Layer::class)
                     ->findOneBy(['layerName' => $layerGeneratingPressures['name']]);
-                if (empty($layer)) {
-                    $this->gameSessionLogger->error(
-                        "Layer {layerGeneratingPressure} supposed to generate pressure {pressure} not found.",
-                        [
-                            'layerGeneratingPressure' => $layerGeneratingPressures['name'],
-                            'pressure' => $pressure['name'],
-                            'gameSession' => $this->gameSession->getId()
-                        ]
-                    );
-                    continue;
+                if (!empty($layer)) {
+                    //add a layer to the mel_layer table for faster accessing
+                    $pressureLayer->addPressureGeneratingLayer($layer);
+                    $this->entityManager->persist($pressureLayer);
                 }
-                //add a layer to the mel_layer table for faster accessing
-                $pressureLayer->addPressureGeneratingLayer($layer);
-                $this->entityManager->persist($pressureLayer);
             }
         }
         foreach ($config['outcomes'] as $outcome) {
@@ -885,9 +876,181 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      */
-    /*private function setupPlans(): void
+    private function setupPlans(): void
     {
-        $return = $this->plan->setupPlans($this->dataModel);
+       //Maps from old persistent ID to new persistent id. $array[$oldId] = newId;
+        //$importedPlanId = []; //see bottom of function
+        //$importedLayerId = []; //see bottom of function
+        $importedGeometryId = [];
+
+        foreach ($this->dataModel['plans'] as $plan) {
+            //create a new plan and get the new ID
+            if (!isset($plan['plan_alters_energy_distribution'])) {
+                $plan['plan_alters_energy_distribution'] = 0;
+            }
+            $planId = $this->insertRowIntoTable(
+                'plan',
+                [
+                    'plan_country_id' => $plan['plan_country_id'],
+                    'plan_name' => $plan['plan_name'],
+                    'plan_gametime' => $plan['plan_gametime'],
+                    'plan_lastupdate' => 0,
+                    'plan_type' => self::convertToNewPlanType($plan['plan_type']),
+                    'plan_alters_energy_distribution' => $plan['plan_alters_energy_distribution'],
+                    'plan_state' => 'APPROVED'
+                ]
+            ) ?? throw new \Exception('Could not add plan from configuration file.');
+
+            $importedPlanId[$plan['plan_id']] = $planId;
+
+            if (isset($plan['fishing'])) {
+                foreach ($plan['fishing'] as $fish) {
+                    $this->insertRowIntoTable(
+                        'fishing',
+                        [
+                            'fishing_country_id' => $fish['fishing_country_id'],
+                            'fishing_plan_id' => $planId,
+                            'fishing_type' => $fish['fishing_type'],
+                            'fishing_amount' => $fish['fishing_amount']
+                        ]
+                    );
+                }
+            }
+            if (isset($plan['messages'])) {
+                foreach ($plan['messages'] as $message) {
+                    $this->insertRowIntoTable(
+                        'plan_message',
+                        [
+                            'plan_message_plan_id' => $planId,
+                            'plan_message_country_id' => $message['country_id'],
+                            'plan_message_user_name' => $message['user_name'],
+                            'plan_message_text' => $message['text'],
+                            'plan_message_time' => $message['time']
+                        ]
+                    );
+                }
+            }
+            if (isset($plan['restriction_settings'])) {
+                foreach ($plan['restriction_settings'] as $setting) {
+                    $layerId = $this->selectRowsFromTable(
+                        'layer',
+                        ['layer_name' => $setting['layer_name']]
+                    )['layer_id'] ?? throw new \Exception(
+                        'Could not find layer with name '.$setting['layer_name'].' as referenced in plan "'.
+                        $plan['plan_name'].'" restriction_settings, so cannot continue.'
+                    );
+                    $this->insertRowIntoTable(
+                        'plan_restriction_area',
+                        [
+                            'plan_restriction_area_plan_id' => $planId,
+                            'plan_restriction_area_layer_id' => $layerId['layer_id'],
+                            'plan_restriction_area_country_id' => $setting['country_id'],
+                            'plan_restriction_area_entity_type' => $setting['entity_type_id'],
+                            'plan_restriction_area_size' => $setting['size']
+                        ]
+                    );
+                }
+            }
+            //Mapping of the latest id of a geometry. This maps from base geometry id to latest id inserted by the plan.
+            foreach ($plan['layers'] as $layer) {
+                //find the original layer ID from the current local database
+                $layerId = $this->selectRowsFromTable('layer', ['layer_name' => $layer['name']])['layer_id']
+                    ?? throw new \Exception(
+                        'Could not find layer with name '.$layer['name'].' as referenced in plan "'.
+                        $plan['plan_name'].'" layers, so cannot continue.'
+                    );
+                //create a new layer for the new geometry
+                $lid = $this->insertRowIntoTable('layer', ['layer_original_id' => $layerId])
+                    ?? throw new \Exception(
+                        'Could not create new plan layer on top of '.$layer['name'].' as referenced in plan "'.
+                        $plan['plan_name'].'" layers, so cannot continue.'
+                    );
+                $importedLayerId[$layer['layer_id']] = $lid;
+                $this->insertRowIntoTable(
+                    'plan_layer',
+                    [
+                        'plan_layer_plan_id' => $planId,
+                        'plan_layer_layer_id' => $lid
+                    ]
+                );
+                foreach ($layer['geometry'] as $layerGeometry) {
+                    //add the geometry to the database
+                    $geometryData = null;
+                    if (isset($layerGeometry['data'])) {
+                        $geometryData = json_encode($layerGeometry['data']);
+                    }
+                    $newGeometryId = $this->insertRowIntoTable(
+                        'geometry',
+                        [
+                            'geometry_layer_id' => $lid,
+                            'geometry_FID' => $layerGeometry['FID'],
+                            'geometry_geometry' => $layerGeometry['geometry'],
+                            'geometry_data' => $geometryData,
+                            'geometry_country_id' => $layerGeometry['country'],
+                            'geometry_type' => $layerGeometry['type']
+                        ]
+                    );
+                    $importedGeometryId[$layerGeometry['geometry_id']] = $newGeometryId;
+                    $baseGeometryId = $geometry->fixupPersistentGeometryID(
+                        $layerGeometry['base_geometry_info'],
+                        $importedGeometryId
+                    );
+                    if (is_string($baseGeometryId)) {
+                        $return[] = $baseGeometryId;
+                    } else {
+                        $this->updateRowInTable(
+                            'geometry',
+                            ['geometry_persistent' => $baseGeometryId],
+                            ['geometry_id' => $newGeometryId]
+                        );
+                    }
+                }
+                //Import deleted geometry
+                foreach ($layer['deleted'] as $deletedGeometry) {
+                    $deletedGeometryId = $geometry->fixupPersistentGeometryID(
+                        $deletedGeometry['base_geometry_info'],
+                        $importedGeometryId
+                    );
+                    if (is_string($deletedGeometryId)) {
+                        $return[] = $deletedGeometryId;
+                    } else {
+                        $this->insertRowIntoTable(
+                            'plan_delete',
+                            [
+                                'plan_delete_plan_id' => $planId,
+                                'plan_delete_geometry_persistent' => $deletedGeometryId,
+                                'plan_delete_layer_id' => $lid
+                            ]
+                        );
+                    }
+                }
+            }
+            //update the persistent IDs or the client starts complaining
+            $this->updateRowInTable(
+                ['geometry', 'g'],
+                ['g.geometry_persistent' => 'g.geometry_id'],
+                ['geometry_persistent' => null]
+            );
+
+            $energyConnectionsReturn = $energy->setupPlannedConnections($plan, $importedGeometryId);
+            if (is_array($energyConnectionsReturn)) {
+                $return = $energyConnectionsReturn + ($return ?? []);
+            }
+            $energyGridsReturn = $energy->setupPlannedGrids($plan['grids'], $planId, $importedGeometryId);
+            if (is_array($energyGridsReturn)) {
+                $return = $energyGridsReturn + ($return ?? []);
+            }
+            $this->UpdatePlanConstructionTime($planId);
+        }
+
+        //the comments at the top of the next function suggest that this should not be done at all
+        //besides, by the look of it, the config files don't have warnings with their plans
+        //moreover, warnings are handled by the client when needed, so adding them here does not make sense
+        //the question remains though whether the plan export function even adds them
+        //if not, then this can 100% be removed
+        //$this->ImportAllWarningsFromExportedPlans($plans, $importedPlanId, $importedLayerId);
+        //return $return ?? true;
+
         if (is_array($return)) {
             foreach ($return as $message) {
                 $this->gameSessionLogger->warning(
@@ -901,7 +1064,7 @@ class GameListCreationMessageHandler
                 ['gameSession' => $this->gameSession->getId()]
             );
         }
-    }*/
+    }
 
     private function setupObjectives(): void
     {
