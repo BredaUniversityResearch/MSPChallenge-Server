@@ -28,6 +28,9 @@ class Country
     #[ORM\OneToMany(mappedBy: 'country', targetEntity: Objective::class, cascade: ['persist'])]
     private Collection $objective;
 
+    #[ORM\OneToMany(mappedBy: 'country', targetEntity: Plan::class, cascade: ['persist'])]
+    private Collection $plan;
+
     public function __construct()
     {
         $this->objective = new ArrayCollection();
@@ -78,7 +81,7 @@ class Country
     }
 
     /**
-     * @return Collection<int, Geometry>
+     * @return Collection<int, Objective>
      */
     public function getObjective(): Collection
     {
@@ -106,4 +109,35 @@ class Country
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Plan>
+     */
+    public function getPlan(): Collection
+    {
+        return $this->plan;
+    }
+
+    public function addPlan(Plan $plan): self
+    {
+        if (!$this->plan->contains($plan)) {
+            $this->plan->add($plan);
+            $plan->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlan(Plan $plan): self
+    {
+        if ($this->plan->removeElement($plan)) {
+            // set the owning side to null (unless already changed)
+            if ($plan->getCountry() === $this) {
+                $plan->setCountry(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

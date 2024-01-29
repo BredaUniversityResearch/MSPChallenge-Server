@@ -7,6 +7,7 @@ use App\Entity\Game;
 use App\Entity\Geometry;
 use App\Entity\Layer;
 use App\Entity\Objective;
+use App\Entity\Plan;
 use App\Entity\Restriction;
 use App\Entity\ServerManager\GameConfigVersion;
 use Doctrine\ORM\EntityManagerInterface;
@@ -186,6 +187,21 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->em->flush();
 
         self::assertSame($layer->getPressureGeneratingLayer()[0], $layer2);
+    }
+
+    public function testPlan(): void
+    {
+        $this->start();
+        $plan = new Plan();
+        $plan->setPlanName('test plan');
+        $plan->setPlanDescription('this is a test plan');
+        $plan->setCountry($this->em->getRepository(Country::class)->find(1));
+        $plan->setPlanGametime(5);
+        $plan->setPlanState('APPROVED');
+        $this->em->persist($plan);
+        $this->em->flush();
+
+        self::assertSame($this->em->getRepository(Plan::class)->find(1), $plan);
     }
 
     private function start(): void
