@@ -41,6 +41,15 @@ class GameController extends AbstractController
 
         $region = new Region($regionBottomLeftX, $regionBottomLeftY, $regionTopRightX, $regionTopRightY);
         $configCreator = new ConfigCreator($this->projectDir, $sessionId, $logger);
+
+        if ($request->request->has('output_image_format')) {
+            try {
+                $configCreator->setOutputImageFormat($request->request->get('output_image_format'));
+            } catch (\Exception $e) {
+                throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+            }
+        }
+
         try {
             $zipFilepath = $configCreator->createAndZip($region);
         } catch (\Exception $e) {

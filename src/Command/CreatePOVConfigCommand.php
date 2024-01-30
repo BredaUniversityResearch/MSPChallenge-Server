@@ -24,13 +24,14 @@ class CreatePOVConfigCommand extends Command
     const OPT_OUTPUT_JSON_FILENAME = 'output-json-filename';
     const OPT_OUTPUT_PACKAGE_FILENAME = 'output-package-filename';
     const OPT_ZIP = 'compress';
+    const OPT_OUTPUT_IMAGE_FORMAT = 'output-image-format';
 
     const ARG_SESSION_ID = 'session-id';
     const ARG_REGION_COORDINATES = 'region-coordinates';
 
     const ARG_REGION_COORDINATES_EXAMPLE = '4048536 3470232 4063746 3488599';
     const REGION_COORDINATES_DESCRIPTION = '4 floats representing the coordinates of the region. In order:' .
-        ' region bottom left coordinates x, -y, region top right coordinates x, -y. ' .
+        ' region bottom left coordinates x, -y, region top right coordinates x, -y. ' . PHP_EOL .
         'Eg: ' . self::ARG_REGION_COORDINATES_EXAMPLE;
 
     public function __construct(
@@ -70,9 +71,19 @@ class CreatePOVConfigCommand extends Command
                 self::OPT_OUTPUT_PACKAGE_FILENAME,
                 'p',
                 InputOption::VALUE_REQUIRED,
-                'The filename of compressed package file if compression is enabled. ' .
+                'The filename of compressed package file if compression is enabled. ' . PHP_EOL .
                     'Default is based on the region coordinates like: ' .
-                        ConfigCreator::getDefaultCompressedFilename($exampleRegion)
+                    ConfigCreator::getDefaultCompressedFilename($exampleRegion)
+            );
+        $this
+            ->addOption(
+                self::OPT_OUTPUT_IMAGE_FORMAT,
+                'i',
+                InputOption::VALUE_REQUIRED,
+                'The output image format to use for all extracted images. Default is: ' .
+                    ConfigCreator::DEFAULT_IMAGE_FORMAT .
+                    '. Current supported formats: ' . implode(', ', \Imagick::queryformats('PNG*')) . PHP_EOL .
+                    'For more info, go to https://imagemagick.org/script/formats.php#supported',
             );
         $this->addOption(
             self::OPT_ZIP,
@@ -113,6 +124,10 @@ class CreatePOVConfigCommand extends Command
         $configCreator = new ConfigCreator($this->projectDir, $sessionId, $this->logger);
         $region = new Region(...$coordinates);
         try {
+            if ($input->getOption(self::OPT_OUTPUT_IMAGE_FORMAT)) {
+                $configCreator->setOutputImageFormat($input->getOption(self::OPT_OUTPUT_IMAGE_FORMAT));
+                $io->success('Using output image format: ' . $input->getOption(self::OPT_OUTPUT_IMAGE_FORMAT));
+            }
             if ($input->getOption('compress')) {
                 $zipPath = $configCreator->createAndZip($region, $outputDir, $outputJsonFilename);
                 $io->success('Created config package: ' . $zipPath);
