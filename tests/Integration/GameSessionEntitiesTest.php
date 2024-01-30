@@ -8,6 +8,8 @@ use App\Entity\Geometry;
 use App\Entity\Layer;
 use App\Entity\Objective;
 use App\Entity\Plan;
+use App\Entity\PlanDelete;
+use App\Entity\PlanLayer;
 use App\Entity\Restriction;
 use App\Entity\ServerManager\GameConfigVersion;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,6 +28,8 @@ class GameSessionEntitiesTest extends KernelTestCase
     private EntityManagerInterface $em;
 
     private EntityManagerInterface $emServerManager;
+
+    private ObjectNormalizer $normalizer;
 
     public function testGameSessionEntityManager(): void
     {
@@ -76,7 +80,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->em->persist($layer);
         $this->em->flush();
 
-        $layer2 = $this->em->getRepository(Layer::class)->findAll()[0];
+        $layer2 = $this->em->getRepository(Layer::class)->find(1);
         self::assertSame($layer, $layer2);
 
         $gameConfig = $this->emServerManager->getRepository(GameConfigVersion::class)->find(1);
@@ -84,8 +88,14 @@ class GameSessionEntitiesTest extends KernelTestCase
         $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
         $allLayers = $gameConfig->getGameConfigComplete()['datamodel']['meta'];
         $layer3 = $normalizer->denormalize($allLayers[0], Layer::class);
-        //dump($layer3);
         self::assertInstanceOf(Layer::class, $layer3); //good enough, normalizer throws exceptions anyway
+
+        $planLayer = new Layer();
+        $planLayer->setLayerOriginalId($layer->getLayerId());
+        $this->em->persist($planLayer);
+        $this->em->flush();
+        $planLayer2 = $this->em->getRepository(Layer::class)->find(2);
+        self::assertSame($planLayer2, $planLayer);
     }
 
     public function testGeometryEntity(): void
@@ -202,6 +212,28 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->em->flush();
 
         self::assertSame($this->em->getRepository(Plan::class)->find(1), $plan);
+
+        $layerMetaData = $this->emServerManager->getRepository(GameConfigVersion::class)->find(1);
+        $planFromConfig = $layerMetaData->getGameConfigComplete()['datamodel']['plans'][0];
+        $plan2 = $this->normalizer->denormalize($planFromConfig, Plan::class);
+        $plan2->setPlanDescription('test description');
+        $plan2->setCountry($this->em->getRepository(Country::class)->find($planFromConfig['plan_country_id']));
+        $planLayer = new PlanLayer();
+        $planLayer->setPlan($plan2);
+        $planLayer->setLayer(
+            (new Layer())->setOriginalLayer($this->em->getRepository(Layer::class)->find(1))
+        );
+        $this->em->persist($planLayer);
+
+        $planDelete = new PlanDelete();
+        $planDelete->setPlan($plan2);
+        $planDelete->setGeometry($this->em->getRepository(Geometry::class)->find(1));
+        $planDelete->setLayer($this->em->getRepository(Layer::class)->find(1));
+        $this->em->persist($planDelete);
+        $this->em->flush();
+
+        self::assertSame($plan2, $planLayer->getPlan());
+        self::assertSame($plan2, $planDelete->getPlan());
     }
 
     private function start(): void
@@ -210,6 +242,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $test = self::DBNAME;
         $this->em = $container->get("doctrine.orm.{$test}_entity_manager");
         $this->emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
+        $this->normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
     }
 
     public static function setUpBeforeClass(): void

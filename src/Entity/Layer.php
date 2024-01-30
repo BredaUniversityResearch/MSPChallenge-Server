@@ -7,13 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\InverseJoinColumn;
-use Doctrine\ORM\Mapping\JoinColumn;
-use Doctrine\ORM\Mapping\JoinTable;
-use Doctrine\ORM\Mapping\ManyToMany;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
-use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
 class Layer
@@ -23,8 +16,12 @@ class Layer
     #[ORM\Column(type: Types::INTEGER, length: 11)]
     private ?int $layerId;
 
-    #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
-    private ?int $layerOriginalId;
+    #[ORM\OneToMany(mappedBy: 'originalLayer', targetEntity: Layer::class, cascade: ['persist'])]
+    private Collection $derivedLayer;
+
+    #[ORM\ManyToOne(targetEntity: Layer::class, cascade: ['persist'], inversedBy: 'derivedLayer')]
+    #[ORM\JoinColumn(name: 'layer_original_id', referencedColumnName: 'layer_id')]
+    private ?Layer $originalLayer;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $layerActive = 1;
@@ -130,14 +127,20 @@ class Layer
     #[ORM\OneToMany(mappedBy: 'restrictionEndLayer', targetEntity: Restriction::class, cascade: ['persist'])]
     private Collection $restrictionEnd;
 
-    #[ManyToMany(targetEntity: Layer::class, mappedBy: 'pressureGeneratingLayer', cascade: ['persist'])]
+    #[ORM\ManyToMany(targetEntity: Layer::class, mappedBy: 'pressureGeneratingLayer', cascade: ['persist'])]
     private Collection $pressure;
 
-    #[JoinTable(name: 'mel_layer')]
-    #[JoinColumn(name: 'mel_layer_pressurelayer', referencedColumnName: 'layer_id')]
-    #[InverseJoinColumn(name: 'mel_layer_layer_id', referencedColumnName: 'layer_id')]
-    #[ManyToMany(targetEntity: Layer::class, inversedBy: 'pressure', cascade: ['persist'])]
+    #[ORM\JoinTable(name: 'mel_layer')]
+    #[ORM\JoinColumn(name: 'mel_layer_pressurelayer', referencedColumnName: 'layer_id')]
+    #[ORM\InverseJoinColumn(name: 'mel_layer_layer_id', referencedColumnName: 'layer_id')]
+    #[ORM\ManyToMany(targetEntity: Layer::class, inversedBy: 'pressure', cascade: ['persist'])]
     private Collection $pressureGeneratingLayer;
+
+    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanLayer::class, cascade: ['persist'])]
+    private Collection $planLayer;
+
+    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanDelete::class, cascade: ['persist'])]
+    private Collection $planDelete;
 
     private bool $layerGeometryWithGeneratedMspids = false;
 
@@ -165,11 +168,52 @@ class Layer
 
     public function __construct()
     {
+        $this->derivedLayer = new ArrayCollection();
         $this->geometry = new ArrayCollection();
         $this->restrictionStart = new ArrayCollection();
         $this->restrictionEnd = new ArrayCollection();
         $this->pressure = new ArrayCollection();
         $this->pressureGeneratingLayer = new ArrayCollection();
+        $this->planLayer = new ArrayCollection();
+        $this->planDelete = new ArrayCollection();
+    }
+
+    public function getDerivedLayer(): Collection
+    {
+        return $this->derivedLayer;
+    }
+
+    public function addDerivedLayer(Layer $derivedLayer): Layer
+    {
+        if (!$this->derivedLayer->contains($derivedLayer)) {
+            $this->derivedLayer->add($derivedLayer);
+            $derivedLayer->setOriginalLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDerivedLayer(Layer $derivedLayer): Layer
+    {
+        if ($this->derivedLayer->removeElement($derivedLayer)) {
+            // set the owning side to null (unless already changed)
+            if ($derivedLayer->getOriginalLayer() === $this) {
+                $derivedLayer->setOriginalLayer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getOriginalLayer(): ?Layer
+    {
+        return $this->originalLayer;
+    }
+
+    public function setOriginalLayer(?Layer $originalLayer): Layer
+    {
+        $this->originalLayer = $originalLayer;
+        return $this;
     }
 
     public function hasGeometryWithGeneratedMspids(): bool
@@ -819,6 +863,66 @@ class Layer
         if ($this->pressureGeneratingLayer->removeElement($layer)) {
             $layer->removePressure($this);
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanLayer>
+     */
+    public function getPlanLayer(): Collection
+    {
+        return $this->planLayer;
+    }
+
+    public function addPlanLayer(PlanLayer $planLayer): self
+    {
+        if (!$this->planLayer->contains($planLayer)) {
+            $this->planLayer->add($planLayer);
+            $planLayer->setLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanLayer(PlanLayer $planLayer): self
+    {
+        if ($this->planLayer->removeElement($planLayer)) {
+            // set the owning side to null (unless already changed)
+            if ($planLayer->getLayer() === $this) {
+                $planLayer->setLayer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanDelete>
+     */
+    public function getPlanDelete(): Collection
+    {
+        return $this->planDelete;
+    }
+
+    public function addPlanDelete(PlanDelete $planDelete): self
+    {
+        if (!$this->planDelete->contains($planDelete)) {
+            $this->planDelete->add($planDelete);
+            $planDelete->setLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanDelete(PlanDelete $planDelete): self
+    {
+        if ($this->planDelete->removeElement($planDelete)) {
+            // set the owning side to null (unless already changed)
+            if ($planDelete->getLayer() === $this) {
+                $planDelete->setLayer(null);
+            }
+        }
+
         return $this;
     }
 }

@@ -7,9 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\JoinColumn;
-use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToMany;
 
 #[ORM\Entity(repositoryClass: GeometryRepository::class)]
 
@@ -38,13 +35,13 @@ class Geometry
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $geometryActive = 1;
 
-    #[OneToMany(mappedBy: 'geometryToSubtractFrom', targetEntity: Geometry::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'geometryToSubtractFrom', targetEntity: Geometry::class, cascade: ['persist'])]
     private Collection $geometrySubtractives;
 
     /** Many Categories have One Category. */
-    #[ManyToOne(targetEntity: Geometry::class, cascade: ['persist'], inversedBy: 'geometrySubtractive')]
-    #[JoinColumn(name: 'geometry_subtractive', referencedColumnName: 'geometry_id')]
-    private Geometry|null $geometryToSubtractFrom = null;
+    #[ORM\ManyToOne(targetEntity: Geometry::class, cascade: ['persist'], inversedBy: 'geometrySubtractive')]
+    #[ORM\JoinColumn(name: 'geometry_subtractive', referencedColumnName: 'geometry_id')]
+    private ?Geometry $geometryToSubtractFrom = null;
 
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => '0'])]
     private ?string $geometryType = '0';
@@ -56,8 +53,11 @@ class Geometry
     private ?string $geometryMspid;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'geometry')]
-    #[JoinColumn(name: 'geometry_layer_id', referencedColumnName: 'layer_id')]
+    #[ORM\JoinColumn(name: 'geometry_layer_id', referencedColumnName: 'layer_id')]
     private ?Layer $layer;
+
+    #[ORM\OneToMany(mappedBy: 'geometry', targetEntity: PlanDelete::class, cascade: ['persist'])]
+    private Collection $planDelete;
 
     /**
      * @param Layer|null $layer
@@ -66,6 +66,7 @@ class Geometry
     {
         $this->layer = $layer;
         $this->geometrySubtractives = new ArrayCollection();
+        $this->planDelete = new ArrayCollection();
     }
 
 
@@ -323,5 +324,35 @@ class Geometry
             }
         }
         return $result;
+    }
+
+    /**
+     * @return Collection<int, PlanDelete>
+     */
+    public function getPlanDelete(): Collection
+    {
+        return $this->planDelete;
+    }
+
+    public function addPlanDelete(PlanDelete $planDelete): self
+    {
+        if (!$this->planDelete->contains($planDelete)) {
+            $this->planDelete->add($planDelete);
+            $planDelete->setGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanDelete(PlanDelete $planDelete): self
+    {
+        if ($this->planDelete->removeElement($planDelete)) {
+            // set the owning side to null (unless already changed)
+            if ($planDelete->getGeometry() === $this) {
+                $planDelete->setGeometry(null);
+            }
+        }
+
+        return $this;
     }
 }

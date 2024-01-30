@@ -2,14 +2,12 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\PolicyTypeValue;
 use App\Repository\PlanRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\JoinColumn;
-use Doctrine\ORM\Mapping\ManyToOne;
-use Doctrine\ORM\Mapping\OneToMany;
 
 #[ORM\Entity(repositoryClass: PlanRepository::class)]
 class Plan
@@ -20,7 +18,7 @@ class Plan
     private ?int $planId;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'plan')]
-    #[JoinColumn(name: 'plan_country_id', referencedColumnName: 'country_id')]
+    #[ORM\JoinColumn(name: 'plan_country_id', referencedColumnName: 'country_id')]
     private Country $country;
 
     #[ORM\Column(type: Types::STRING, length: 75)]
@@ -61,6 +59,24 @@ class Plan
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
     private ?int $planAltersEnergyDistribution = 0;
+
+    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanLayer::class, cascade: ['persist'])]
+    private Collection $planLayer;
+
+    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanDelete::class, cascade: ['persist'])]
+    private Collection $planDelete;
+
+    // onetomany on fishing
+
+    // onetomany on planmessage
+
+    // onetomany on planrestrictionarea
+
+    public function __construct()
+    {
+        $this->planLayer = new ArrayCollection();
+        $this->planDelete = new ArrayCollection();
+    }
 
     public function getPlanId(): ?int
     {
@@ -199,10 +215,50 @@ class Plan
         return $this->planType;
     }
 
-    public function setPlanType(?int $planType): Plan
+    public function setPlanType(int|string|null $planType): Plan
     {
+        if (is_string($planType)) {
+            $planType = self::convertToNewPlanType($planType);
+        }
         $this->planType = $planType;
         return $this;
+    }
+
+    private static function convertToNewPlanType(string $planType): int
+    {
+        $newPlanType = (int)$planType; // assuming a correct db value, which is int of bit flags.
+
+        // detect old way of comma separated of 3 bits, order has meaning
+        if (1 === preg_match('/(\d),(\d),(\d)/', $planType, $matches)) { // e.g. 0,1,0
+            array_shift($matches);
+            array_walk($matches, function (string $item, int $key) use (&$newPlanType) {
+                if ($item === '0') {
+                    return;
+                }
+                $newPlanType |= array_values(PolicyTypeValue::getConstants())[$key];
+            });
+            return $newPlanType;
+        }
+
+        // detect old way of up to 3 comma separated strings energy/ecology/shipping
+        //   but also accept the new "fishing" for ecology, and random order
+        if (1 === preg_match(
+            '/(energy|ecology|fishing|shipping)'.
+                '(?:,(energy|ecology|fishing|shipping)(?:,(energy|ecology|fishing|shipping))?)?/',
+            $planType,
+            $matches
+        )) {
+            array_shift($matches);
+            array_walk($matches, function (string $item) use (&$newPlanType) {
+                if ($item == 'ecology') {
+                    $item = 'fishing';
+                }
+                $newPlanType |= PolicyTypeValue::getConstants()[strtoupper($item)];
+            });
+            return $newPlanType;
+        }
+
+        return $newPlanType;
     }
 
     public function getPlanEnergyError(): ?int
@@ -224,6 +280,66 @@ class Plan
     public function setPlanAltersEnergyDistribution(?int $planAltersEnergyDistribution): Plan
     {
         $this->planAltersEnergyDistribution = $planAltersEnergyDistribution;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanLayer>
+     */
+    public function getPlanLayer(): Collection
+    {
+        return $this->planLayer;
+    }
+
+    public function addPlanLayer(PlanLayer $planLayer): self
+    {
+        if (!$this->planLayer->contains($planLayer)) {
+            $this->planLayer->add($planLayer);
+            $planLayer->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanLayer(PlanLayer $planLayer): self
+    {
+        if ($this->planLayer->removeElement($planLayer)) {
+            // set the owning side to null (unless already changed)
+            if ($planLayer->getPlan() === $this) {
+                $planLayer->setPlan(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanDelete>
+     */
+    public function getPlanDelete(): Collection
+    {
+        return $this->planDelete;
+    }
+
+    public function addPlanDelete(PlanDelete $planDelete): self
+    {
+        if (!$this->planDelete->contains($planDelete)) {
+            $this->planDelete->add($planDelete);
+            $planDelete->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanDelete(PlanDelete $planDelete): self
+    {
+        if ($this->planDelete->removeElement($planDelete)) {
+            // set the owning side to null (unless already changed)
+            if ($planDelete->getPlan() === $this) {
+                $planDelete->setPlan(null);
+            }
+        }
+
         return $this;
     }
 
