@@ -18,6 +18,9 @@ class ConfigCreator
 
     private string $outputImageFormat = self::DEFAULT_IMAGE_FORMAT;
 
+    /** @var LayerTags[] $excludedLayersByTags */
+    private array $excludedLayersByTags = [];
+
     public function __construct(
         private readonly string $projectDir,
         private readonly int $sessionId,
@@ -30,13 +33,31 @@ class ConfigCreator
         return $this->outputImageFormat;
     }
 
-    public function setOutputImageFormat(string $outputImageFormat): void
+    public function setOutputImageFormat(string $outputImageFormat): self
     {
         $formats = \Imagick::queryFormats('PNG*'); // png formats supported
         if (!in_array(strtoupper($outputImageFormat), $formats)) {
             throw new Exception('Invalid image format: ' . $outputImageFormat);
         }
         $this->outputImageFormat = $outputImageFormat;
+        return $this;
+    }
+
+    /**
+     * @return LayerTags[]
+     */
+    public function getExcludedLayersByTags(): array
+    {
+        return $this->excludedLayersByTags;
+    }
+
+    /**
+     * @param LayerTags[] $excludedLayersByTags
+     */
+    public function setExcludedLayersByTags(array $excludedLayersByTags): self
+    {
+        $this->excludedLayersByTags = $excludedLayersByTags;
+        return $this;
     }
 
     /**
@@ -123,6 +144,7 @@ class ConfigCreator
                 '. Error: ' . $e->getMessage());
         }
         $this->log('json decoded, extracting region from raster layers');
+        $this->excludeLayersByTags($json['datamodel']['raster_layers'], $json['datamodel']['vector_layers']);
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
         if (false !== $bathymetryLayer = current(array_filter(
             $json['datamodel']['raster_layers'],
@@ -453,6 +475,29 @@ SQL,
             throw new Exception('No data found from ' . $this->getDatabaseName() . ' for the given region: ' . $region);
         }
         return $jsonString;
+    }
+
+    private function excludeLayersByTags(array &$rasterLayers, array &$vectorLayers): void
+    {
+        $excludedLayersByTags = $this->getExcludedLayersByTags();
+        if (count($excludedLayersByTags) == 0) {
+            return;
+        }
+
+        foreach ($this->excludedLayersByTags as $exclTags) {
+            foreach ($rasterLayers as $key => $layer) {
+                if ($exclTags->matches(new LayerTags($layer['tags']))) {
+                    $this->log('Excluding raster layer: ' . $layer['name']);
+                    unset($rasterLayers[$key]);
+                }
+            }
+            foreach ($vectorLayers as $key => $layer) {
+                if ($exclTags->matches(new LayerTags($layer['tags']))) {
+                    $this->log('Excluding raster layer: ' . $layer['name']);
+                    unset($vectorLayers[$key]);
+                }
+            }
+        }
     }
 
     /**

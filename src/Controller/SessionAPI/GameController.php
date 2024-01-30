@@ -3,6 +3,7 @@
 namespace App\Controller\SessionAPI;
 
 use App\Domain\POV\ConfigCreator;
+use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Psr\Log\LoggerInterface;
@@ -41,16 +42,22 @@ class GameController extends AbstractController
 
         $region = new Region($regionBottomLeftX, $regionBottomLeftY, $regionTopRightX, $regionTopRightY);
         $configCreator = new ConfigCreator($this->projectDir, $sessionId, $logger);
-
-        if ($request->request->has('output_image_format')) {
-            try {
-                $configCreator->setOutputImageFormat($request->request->get('output_image_format'));
-            } catch (\Exception $e) {
-                throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
-            }
-        }
-
         try {
+            if ($request->request->has('output_image_format')) {
+                $configCreator->setOutputImageFormat($request->request->get('output_image_format'));
+            }
+            if ($request->request->has('excl_layers_by_tags')) {
+                $exclLayerByTags = json_decode(
+                    $request->request->get('excl_layers_by_tags'),
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                );
+                $configCreator->setExcludedLayersByTags(array_map(
+                    fn($s) => new LayerTags($s),
+                    $exclLayerByTags
+                ));
+            }
             $zipFilepath = $configCreator->createAndZip($region);
         } catch (\Exception $e) {
             throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
