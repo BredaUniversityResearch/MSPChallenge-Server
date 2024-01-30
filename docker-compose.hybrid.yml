@@ -1,0 +1,25 @@
+version: "3.7"
+
+# Production environment override
+services:
+  php:
+    build:
+      context: .
+      target: php_prod
+    volumes:
+      - ./:/srv/app
+      - ./docker/php/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
+      # If you develop on Mac or Windows you can remove the vendor/ directory
+      #  from the bind-mount for better performance by enabling the next line:
+      - /srv/app/vendor
+    environment:
+      APP_SECRET: ${APP_SECRET}
+      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
+
+  caddy:
+    build:
+      context: .
+      target: caddy_prod
+    environment:
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
