@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "1/23/2024",
-    "data_model_hash": "7F7AAF6DF7A03AA00533B0CDDAFAD4A3ED3AB6FAF8B0D12DF67F2FD709EBB132",
+    "date_modified": "1/31/2024",
+    "data_model_hash": "E41E2B792C7A3323F66EE7DA7FEA706ECDD047982E1A98324ADBFDE38DEB58FF",
     "errors": 0,
-    "editor_version": "1.0.0",
-    "config_version": "1.0.0"
+    "editor_version": "1.1.0",
+    "config_version": "1.1.0"
   },
   "datamodel": {
     "restrictions": {
@@ -28537,7 +28537,8 @@
         "layer_tags": [
           "Polygon",
           "Electricity",
-          "Production"
+          "Production",
+          "Wind"
         ]
       },
       {
@@ -28700,7 +28701,8 @@
         "layer_tags": [
           "Polygon",
           "Electricity",
-          "Production"
+          "Production",
+          "Wave"
         ]
       },
       {
@@ -28849,7 +28851,8 @@
         "layer_tags": [
           "Polygon",
           "Electricity",
-          "Production"
+          "Production",
+          "Tidal"
         ]
       },
       {
@@ -29099,7 +29102,8 @@
           "Polygon",
           "Electricity",
           "Production",
-          "Planned"
+          "Planned",
+          "Wind"
         ]
       },
       {
@@ -29321,7 +29325,8 @@
           "Polygon",
           "Electricity",
           "Production",
-          "Planned"
+          "Planned",
+          "Wave"
         ]
       },
       {
@@ -29543,7 +29548,8 @@
           "Polygon",
           "Electricity",
           "Production",
-          "Planned"
+          "Planned",
+          "Tidal"
         ]
       },
       {
@@ -31691,7 +31697,8 @@
         "layer_tags": [
           "Line",
           "Shipping",
-          "Lane"
+          "Lane",
+          "IMO"
         ]
       },
       {
@@ -31968,7 +31975,8 @@
         "layer_tags": [
           "Line",
           "Shipping",
-          "Lane"
+          "Lane",
+          "National"
         ]
       },
       {
@@ -32500,7 +32508,8 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Shipping"
+          "Shipping",
+          "Total"
         ]
       },
       {
@@ -32691,7 +32700,8 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Shipping"
+          "Shipping",
+          "Ferry"
         ]
       },
       {
@@ -32882,7 +32892,8 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Shipping"
+          "Shipping",
+          "Passenger"
         ]
       },
       {
@@ -33073,7 +33084,8 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Shipping"
+          "Shipping",
+          "Tanker"
         ]
       },
       {
@@ -33264,7 +33276,8 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Shipping"
+          "Shipping",
+          "Maintenance"
         ]
       },
       {
@@ -33455,7 +33468,8 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Shipping"
+          "Shipping",
+          "Cargo"
         ]
       },
       {
@@ -36655,7 +36669,8 @@
         ],
         "layer_tags": [
           "Polygon",
-          "Protection"
+          "Protection",
+          "Natura2000"
         ]
       },
       {
@@ -37127,7 +37142,8 @@
         ],
         "layer_tags": [
           "Polygon",
-          "Protection"
+          "Protection",
+          "Marine"
         ]
       },
       {
@@ -37318,7 +37334,8 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Pressure"
+          "Pressure",
+          "Noise"
         ]
       },
       {
@@ -38847,7 +38864,9 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+          "Cod",
+          "Fish"
         ]
       },
       {
@@ -39038,7 +39057,9 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+          "Demersal",
+          "Fish"
         ]
       },
       {
@@ -39229,7 +39250,9 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+          "Flatfish",
+          "Fish"
         ]
       },
       {
@@ -39420,7 +39443,9 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+          "Mackerel",
+          "Fish"
         ]
       },
       {
@@ -39611,7 +39636,9 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+          "Herring",
+          "Fish"
         ]
       },
       {
@@ -39802,7 +39829,9 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+          "Sandeel",
+          "Fish"
         ]
       },
       {
@@ -40375,7 +40404,9 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+          "Cetacean",
+          "Mammals"
         ]
       },
       {
@@ -40566,7 +40597,9 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+          "Seal",
+          "Mammals"
         ]
       },
       {
