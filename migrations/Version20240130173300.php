@@ -23,12 +23,18 @@ final class Version20240130173300 extends MSPMigration
      */
     protected function onUp(Schema $schema): void
     {
-        $sql = 'ALTER TABLE IF EXISTS `plan_delete` ADD `plan_delete_id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST;';
-        $this->addSql($sql);
+        $this->addSql(
+            'ALTER TABLE IF EXISTS `plan_delete` ADD `plan_delete_id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST'
+        );
+        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
+        $this->addSql(
+            'ALTER TABLE IF EXISTS `plan_restriction_area` ADD `plan_restriction_area_id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST'
+        );
     }
 
     protected function onDown(Schema $schema): void
     {
         $this->addSql('ALTER TABLE IF EXISTS `plan_delete` DROP `plan_delete_id`;');
+        $this->addSql('ALTER TABLE IF EXISTS `plan_restriction_area` DROP `plan_restriction_area_id`;');
     }
 }

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Illuminate\Support\Arr;
 
 #[ORM\Entity(repositoryClass: CountryRepository::class)]
 class Country
@@ -31,9 +32,26 @@ class Country
     #[ORM\OneToMany(mappedBy: 'country', targetEntity: Plan::class, cascade: ['persist'])]
     private Collection $plan;
 
+    #[ORM\OneToMany(mappedBy: 'country', targetEntity: Fishing::class, cascade: ['persist'])]
+    private Collection $fishing;
+
+    #[ORM\OneToMany(mappedBy: 'country', targetEntity: PlanMessage::class, cascade: ['persist'])]
+    private Collection $planMessage;
+
+    #[ORM\OneToMany(mappedBy: 'country', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
+    private Collection $planRestrictionArea;
+
+    #[ORM\OneToMany(mappedBy: 'country', targetEntity: Geometry::class, cascade: ['persist'])]
+    private Collection $geometry;
+
     public function __construct()
     {
         $this->objective = new ArrayCollection();
+        $this->plan = new ArrayCollection();
+        $this->fishing = new ArrayCollection();
+        $this->planMessage = new ArrayCollection();
+        $this->planRestrictionArea = new ArrayCollection();
+        $this->geometry = new ArrayCollection();
     }
 
     public function getCountryId(): ?int
@@ -134,6 +152,126 @@ class Country
             // set the owning side to null (unless already changed)
             if ($plan->getCountry() === $this) {
                 $plan->setCountry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Fishing>
+     */
+    public function getFishing(): Collection
+    {
+        return $this->fishing;
+    }
+
+    public function addFishing(Fishing $fishing): self
+    {
+        if (!$this->fishing->contains($fishing)) {
+            $this->fishing->add($fishing);
+            $fishing->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFishing(Fishing $fishing): self
+    {
+        if ($this->fishing->removeElement($fishing)) {
+            // set the owning side to null (unless already changed)
+            if ($fishing->getCountry() === $this) {
+                $fishing->setCountry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanMessage>
+     */
+    public function getPlanMessage(): Collection
+    {
+        return $this->planMessage;
+    }
+
+    public function addPlanMessage(PlanMessage $planMessage): self
+    {
+        if (!$this->planMessage->contains($planMessage)) {
+            $this->planMessage->add($planMessage);
+            $planMessage->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanMessage(PlanMessage $planMessage): self
+    {
+        if ($this->planMessage->removeElement($planMessage)) {
+            // set the owning side to null (unless already changed)
+            if ($planMessage->getCountry() === $this) {
+                $planMessage->setCountry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanRestrictionArea>
+     */
+    public function getPlanRestrictionArea(): Collection
+    {
+        return $this->planRestrictionArea;
+    }
+
+    public function addPlanRestrictionArea(PlanRestrictionArea $planRestrictionArea): self
+    {
+        if (!$this->planRestrictionArea->contains($planRestrictionArea)) {
+            $this->planRestrictionArea->add($planRestrictionArea);
+            $planRestrictionArea->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanRestrictionArea(PlanRestrictionArea $planRestrictionArea): self
+    {
+        if ($this->planRestrictionArea->removeElement($planRestrictionArea)) {
+            // set the owning side to null (unless already changed)
+            if ($planRestrictionArea->getCountry() === $this) {
+                $planRestrictionArea->setCountry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Geometry>
+     */
+    public function getGeometry(): Collection
+    {
+        return $this->geometry;
+    }
+
+    public function addGeometry(Geometry $geometry): self
+    {
+        if (!$this->geometry->contains($geometry)) {
+            $this->geometry->add($geometry);
+            $geometry->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGeometry(Geometry $geometry): self
+    {
+        if ($this->geometry->removeElement($geometry)) {
+            // set the owning side to null (unless already changed)
+            if ($geometry->getCountry() === $this) {
+                $geometry->setCountry(null);
             }
         }
 

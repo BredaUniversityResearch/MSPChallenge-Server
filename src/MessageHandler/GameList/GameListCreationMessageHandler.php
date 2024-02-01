@@ -4,6 +4,7 @@ namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
 use App\Entity\Country;
+use App\Entity\Fishing;
 use App\Entity\Game;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Communicator\GeoServerCommunicator;
@@ -11,6 +12,11 @@ use App\Domain\Services\ConnectionManager;
 use App\Entity\Geometry;
 use App\Entity\Layer;
 use App\Entity\Objective;
+use App\Entity\Plan;
+use App\Entity\PlanDelete;
+use App\Entity\PlanLayer;
+use App\Entity\PlanMessage;
+use App\Entity\PlanRestrictionArea;
 use App\Entity\Restriction;
 use App\Entity\ServerManager\GameList;
 use App\Logger\GameSessionLogger;
@@ -468,6 +474,8 @@ class GameListCreationMessageHandler
                         'No geometry within returned features variable, so something must be wrong.'
                     );
                     self::ensureMultiData($geometryData);
+                    $feature['properties']['country_object'] = $this->entityManager->getRepository(Country::class)
+                        ->find($feature['properties']['country_id'] ?? null);
                     (isset($counter[$geometryData['type']])) ?
                         $counter[$geometryData['type']]++ : $counter[$geometryData['type']] = 1;
                     if (strcasecmp($geometryData['type'], 'MultiPolygon') == 0) {
@@ -878,14 +886,94 @@ class GameListCreationMessageHandler
      */
     private function setupPlans(): void
     {
-       //Maps from old persistent ID to new persistent id. $array[$oldId] = newId;
-        //$importedPlanId = []; //see bottom of function
-        //$importedLayerId = []; //see bottom of function
-        $importedGeometryId = [];
+        foreach ($this->dataModel['plans'] as $planConfig) {
+            $plan = $this->normalizer->denormalize($planConfig, Plan::class);
+            $plan->setCountry(
+                $this->entityManager->getRepository(Country::class)->find($planConfig['plan_country_id'])
+            );
+            $plan->setPlanState('APPROVED');
 
-        foreach ($this->dataModel['plans'] as $plan) {
+            foreach ($plan['fishing'] as $fishingConfig) {
+                $fishing = $this->normalizer->denormalize($fishingConfig, Fishing::class);
+                $fishing->setCountry(
+                    $this->entityManager->getRepository(Country::class)->find($fishingConfig['fishing_country_id'])
+                );
+                $plan->addFishing($fishing);
+            }
+
+            foreach ($plan['messages'] as $planMessageConfig) {
+                $planMessage = new PlanMessage();
+                $planMessage->setCountry(
+                    $this->entityManager->getRepository(Country::class)->find($planMessageConfig['country_id'])
+                );
+                $planMessage->setPlanMessageUserName($planMessageConfig['user_name']);
+                $planMessage->setPlanMessageText($planMessageConfig['text']);
+                $planMessage->setPlanMessageTime($planMessageConfig['time']);
+                $plan->addPlanMessage($planMessage);
+            }
+
+            foreach ($plan['restriction_settings'] as $restrictionAreaConfig) {
+                $planRestrictionArea = new PlanRestrictionArea();
+                $planRestrictionArea->setLayer(
+                    $this->entityManager->getRepository(Layer::class)->findOneBy(
+                        ['layerName' => $restrictionAreaConfig['layer_name']]
+                    )
+                );
+                $planRestrictionArea->setCountry(
+                    $this->entityManager->getRepository(Country::class)->find($restrictionAreaConfig['country_id'])
+                );
+                $planRestrictionArea->setPlanRestrictionAreaEntityType($restrictionAreaConfig['entity_type_id']);
+                $planRestrictionArea->setPlanRestrictionAreaSize($restrictionAreaConfig['size']);
+                $plan->addPlanRestrictionArea($planRestrictionArea);
+            }
+
+            foreach ($plan['layers'] as $layerConfig) {
+                $derivedLayer = new Layer();
+                $derivedLayer->setOriginalLayer(
+                    $this->entityManager->getRepository(Layer::class)->findOneBy(
+                        ['layerName' => $layerConfig['name']]
+                    )
+                );
+                foreach ($layerConfig['geometry'] as $layerGeometryConfig) {
+                    $geometry = new Geometry();
+                    $geometry->setGeometryData($layerGeometryConfig['data'] ?? null);
+                    $geometry->setGeometryFID($layerGeometryConfig['FID']);
+                    $geometry->setGeometryGeometry($layerGeometryConfig['geometry']);
+                    $geometry->setCountry(
+                        $this->entityManager->getRepository(Country::class)->find(
+                            $layerGeometryConfig['country']
+                        )
+                    );
+                    $geometry->setGeometryType($layerGeometryConfig['type']);
+                    $geometry->setOriginalGeometry(
+                        $this->entityManager->getRepository(Geometry::class)->findOneBy(
+                            ['geometryMspid' => $layerGeometryConfig['base_geometry_info']['geometry_mspid']]
+                        )
+                    );
+                    $derivedLayer->addGeometry($geometry);
+                }
+                $planLayer = new PlanLayer();
+                $planLayer->setLayer($derivedLayer);
+                $plan->addPlanLayer($planLayer);
+                foreach ($layerConfig['deleted'] as $layerGeometryDeletedConfig) {
+                    $planDelete = new PlanDelete();
+                    $planDelete->setLayer($derivedLayer);
+                    $planDelete->setGeometry(
+                        $this->entityManager->getRepository(Geometry::class)->findOneBy(
+                            ['geometryMspid' => $layerGeometryDeletedConfig['base_geometry_info']['geometry_mspid']]
+                        )
+                    );
+                    $plan->addPlanDelete($planDelete);
+                }
+            }
+            // all the energy stuff here
+
+            $this->entityManager->persist($plan);
+
+
+
             //create a new plan and get the new ID
-            if (!isset($plan['plan_alters_energy_distribution'])) {
+            /*if (!isset($plan['plan_alters_energy_distribution'])) {
                 $plan['plan_alters_energy_distribution'] = 0;
             }
             $planId = $this->insertRowIntoTable(
@@ -1041,7 +1129,13 @@ class GameListCreationMessageHandler
                 $return = $energyGridsReturn + ($return ?? []);
             }
             $this->UpdatePlanConstructionTime($planId);
+            */
         }
+
+        //Maps from old persistent ID to new persistent id. $array[$oldId] = newId;
+        //$importedPlanId = []; //see bottom of function
+        //$importedLayerId = []; //see bottom of function
+        //$importedGeometryId = [];
 
         //the comments at the top of the next function suggest that this should not be done at all
         //besides, by the look of it, the config files don't have warnings with their plans
@@ -1051,7 +1145,7 @@ class GameListCreationMessageHandler
         //$this->ImportAllWarningsFromExportedPlans($plans, $importedPlanId, $importedLayerId);
         //return $return ?? true;
 
-        if (is_array($return)) {
+        /*if (is_array($return)) {
             foreach ($return as $message) {
                 $this->gameSessionLogger->warning(
                     'Plan setup returned the message: {message}',
@@ -1063,7 +1157,7 @@ class GameListCreationMessageHandler
                 'Plan setup was successful',
                 ['gameSession' => $this->gameSession->getId()]
             );
-        }
+        }*/
     }
 
     private function setupObjectives(): void

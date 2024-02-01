@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Illuminate\Support\Arr;
 
 #[ORM\Entity(repositoryClass: PlanRepository::class)]
 class Plan
@@ -28,7 +29,7 @@ class Plan
     private ?string $planDescription;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?string $planTime;
+    private \DateTime $planTime;
 
     #[ORM\Column(type: Types::INTEGER, length: 5)]
     private ?int $planGametime;
@@ -66,16 +67,22 @@ class Plan
     #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanDelete::class, cascade: ['persist'])]
     private Collection $planDelete;
 
-    // onetomany on fishing
+    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: Fishing::class, cascade: ['persist'])]
+    private Collection $fishing;
 
-    // onetomany on planmessage
+    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanMessage::class, cascade: ['persist'])]
+    private Collection $planMessage;
 
-    // onetomany on planrestrictionarea
+    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
+    private Collection $planRestrictionArea;
 
     public function __construct()
     {
         $this->planLayer = new ArrayCollection();
         $this->planDelete = new ArrayCollection();
+        $this->fishing = new ArrayCollection();
+        $this->planMessage = new ArrayCollection();
+        $this->planRestrictionArea = new ArrayCollection();
     }
 
     public function getPlanId(): ?int
@@ -122,12 +129,12 @@ class Plan
         return $this;
     }
 
-    public function getPlanTime(): ?string
+    public function getPlanTime(): \DateTime
     {
         return $this->planTime;
     }
 
-    public function setPlanTime(?string $planTime): Plan
+    public function setPlanTime(\DateTime $planTime): Plan
     {
         $this->planTime = $planTime;
         return $this;
@@ -343,4 +350,93 @@ class Plan
         return $this;
     }
 
+    /**
+     * @return Collection<int, Fishing>
+     */
+    public function getFishing(): Collection
+    {
+        return $this->fishing;
+    }
+
+    public function addFishing(Fishing $fishing): self
+    {
+        if (!$this->fishing->contains($fishing)) {
+            $this->fishing->add($fishing);
+            $fishing->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFishing(Fishing $fishing): self
+    {
+        if ($this->fishing->removeElement($fishing)) {
+            // set the owning side to null (unless already changed)
+            if ($fishing->getPlan() === $this) {
+                $fishing->setPlan(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanMessage>
+     */
+    public function getPlanMessage(): Collection
+    {
+        return $this->planMessage;
+    }
+
+    public function addPlanMessage(PlanMessage $planMessage): self
+    {
+        if (!$this->planMessage->contains($planMessage)) {
+            $this->planMessage->add($planMessage);
+            $planMessage->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanMessage(PlanMessage $planMessage): self
+    {
+        if ($this->planMessage->removeElement($planMessage)) {
+            // set the owning side to null (unless already changed)
+            if ($planMessage->getPlan() === $this) {
+                $planMessage->setPlan(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanRestrictionArea>
+     */
+    public function getPlanRestrictionArea(): Collection
+    {
+        return $this->planRestrictionArea;
+    }
+
+    public function addPlanRestrictionArea(PlanRestrictionArea $planRestrictionArea): self
+    {
+        if (!$this->planRestrictionArea->contains($planRestrictionArea)) {
+            $this->planRestrictionArea->add($planRestrictionArea);
+            $planRestrictionArea->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanRestrictionArea(PlanRestrictionArea $planRestrictionArea): self
+    {
+        if ($this->planRestrictionArea->removeElement($planRestrictionArea)) {
+            // set the owning side to null (unless already changed)
+            if ($planRestrictionArea->getPlan() === $this) {
+                $planRestrictionArea->setPlan(null);
+            }
+        }
+
+        return $this;
+    }
 }

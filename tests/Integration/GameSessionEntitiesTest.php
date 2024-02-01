@@ -3,6 +3,7 @@ namespace App\Tests\Integration;
 
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Country;
+use App\Entity\Fishing;
 use App\Entity\Game;
 use App\Entity\Geometry;
 use App\Entity\Layer;
@@ -10,6 +11,8 @@ use App\Entity\Objective;
 use App\Entity\Plan;
 use App\Entity\PlanDelete;
 use App\Entity\PlanLayer;
+use App\Entity\PlanMessage;
+use App\Entity\PlanRestrictionArea;
 use App\Entity\Restriction;
 use App\Entity\ServerManager\GameConfigVersion;
 use Doctrine\ORM\EntityManagerInterface;
@@ -108,7 +111,9 @@ class GameSessionEntitiesTest extends KernelTestCase
         $geometry->setGeometryData(
             '{"minx":4800176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.127}'
         ); // json representation of feature properties
-        $geometry->setGeometryCountryId(1);
+        $geometry->setCountry(
+            $this->em->getRepository(Country::class)->find(1)
+        );
         $geometry->setGeometryType('0');
         $geometry->setGeometryMspid('4fba98446ce9d9ff');
         $layer = $this->em->getRepository(Layer::class)->find(1);
@@ -209,9 +214,6 @@ class GameSessionEntitiesTest extends KernelTestCase
         $plan->setPlanGametime(5);
         $plan->setPlanState('APPROVED');
         $this->em->persist($plan);
-        $this->em->flush();
-
-        self::assertSame($this->em->getRepository(Plan::class)->find(1), $plan);
 
         $layerMetaData = $this->emServerManager->getRepository(GameConfigVersion::class)->find(1);
         $planFromConfig = $layerMetaData->getGameConfigComplete()['datamodel']['plans'][0];
@@ -219,21 +221,53 @@ class GameSessionEntitiesTest extends KernelTestCase
         $plan2->setPlanDescription('test description');
         $plan2->setCountry($this->em->getRepository(Country::class)->find($planFromConfig['plan_country_id']));
         $planLayer = new PlanLayer();
-        $planLayer->setPlan($plan2);
         $planLayer->setLayer(
             (new Layer())->setOriginalLayer($this->em->getRepository(Layer::class)->find(1))
         );
-        $this->em->persist($planLayer);
+        $plan2->addPlanLayer($planLayer);
 
         $planDelete = new PlanDelete();
-        $planDelete->setPlan($plan2);
         $planDelete->setGeometry($this->em->getRepository(Geometry::class)->find(1));
         $planDelete->setLayer($this->em->getRepository(Layer::class)->find(1));
-        $this->em->persist($planDelete);
+        $plan2->addPlanDelete($planDelete);
+
+        $planMessage = new PlanMessage();
+        $planMessage->setCountry($plan2->getCountry());
+        $planMessage->setPlanMessageUserName('test user');
+        $planMessage->setPlanMessageText('test text hello hello');
+        $plan2->addPlanMessage($planMessage);
+
+        $planRestrictionArea = new PlanRestrictionArea();
+        $planRestrictionArea->setLayer($this->em->getRepository(Layer::class)->find(1));
+        $planRestrictionArea->setCountry($this->em->getRepository(Country::class)->find(1));
+        $planRestrictionArea->setPlanRestrictionAreaEntityType(10);
+        $planRestrictionArea->setPlanRestrictionAreaSize(0);
+        $plan2->addPlanRestrictionArea($planRestrictionArea);
+
+        $this->em->persist($plan2);
         $this->em->flush();
 
+        self::assertSame($this->em->getRepository(Plan::class)->find(1), $plan);
         self::assertSame($plan2, $planLayer->getPlan());
         self::assertSame($plan2, $planDelete->getPlan());
+        self::assertSame($plan2->getPlanMessage()[0], $planMessage);
+        self::assertSame($plan2->getPlanRestrictionArea()[0], $planRestrictionArea);
+    }
+
+    public function testFishing(): void
+    {
+        $this->start();
+        $fishing = new Fishing();
+        $country = $this->em->getRepository(Country::class)->find(1);
+        $fishing->setCountry($country);
+        $fishing->setFishingType('testing');
+        $plan = $this->em->getRepository(Plan::class)->find(1);
+        $plan->addFishing($fishing);
+        $this->em->persist($plan);
+        $this->em->flush();
+
+        self::assertSame($fishing->getPlan(), $plan);
+        self::assertSame($fishing->getCountry(), $country);
     }
 
     private function start(): void

@@ -142,6 +142,9 @@ class Layer
     #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanDelete::class, cascade: ['persist'])]
     private Collection $planDelete;
 
+    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
+    private Collection $planRestrictionArea;
+
     private bool $layerGeometryWithGeneratedMspids = false;
 
     private ?bool $layerDownloadFromGeoserver;
@@ -176,6 +179,7 @@ class Layer
         $this->pressureGeneratingLayer = new ArrayCollection();
         $this->planLayer = new ArrayCollection();
         $this->planDelete = new ArrayCollection();
+        $this->planRestrictionArea = new ArrayCollection();
     }
 
     public function getDerivedLayer(): Collection
@@ -920,6 +924,36 @@ class Layer
             // set the owning side to null (unless already changed)
             if ($planDelete->getLayer() === $this) {
                 $planDelete->setLayer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanRestrictionArea>
+     */
+    public function getPlanRestrictionArea(): Collection
+    {
+        return $this->planRestrictionArea;
+    }
+
+    public function addPlanRestrictionArea(PlanRestrictionArea $planRestrictionArea): self
+    {
+        if (!$this->planRestrictionArea->contains($planRestrictionArea)) {
+            $this->planRestrictionArea->add($planRestrictionArea);
+            $planRestrictionArea->setLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanRestrictionArea(PlanRestrictionArea $planRestrictionArea): self
+    {
+        if ($this->planRestrictionArea->removeElement($planRestrictionArea)) {
+            // set the owning side to null (unless already changed)
+            if ($planRestrictionArea->getLayer() === $this) {
+                $planRestrictionArea->setLayer(null);
             }
         }
 

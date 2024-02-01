@@ -17,8 +17,12 @@ class Geometry
     #[ORM\Column(type: Types::INTEGER, length: 11)]
     private ?int $geometryId;
 
-    #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
-    private ?int $geometryPersistent;
+    #[ORM\ManyToOne(targetEntity: Geometry::class, cascade: ['persist'], inversedBy: 'derivedGeometry')]
+    #[ORM\JoinColumn(name: 'geometry_persistent', referencedColumnName: 'geometry_id')]
+    private ?Geometry $originalGeometry;
+
+    #[ORM\OneToMany(mappedBy: 'originalGeometry', targetEntity: Geometry::class, cascade: ['persist'])]
+    private Collection $derivedGeometry;
 
     #[ORM\Column(type: Types::STRING, length: 75, nullable: true)]
     private ?string $geometryFID;
@@ -29,8 +33,9 @@ class Geometry
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $geometryData;
 
-    #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
-    private ?int $geometryCountryId;
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'geometry')]
+    #[ORM\JoinColumn(name: 'geometry_country_id', referencedColumnName: 'country_id')]
+    private ?Country $country;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $geometryActive = 1;
@@ -65,6 +70,7 @@ class Geometry
     public function __construct(?Layer $layer = null)
     {
         $this->layer = $layer;
+        $this->derivedGeometry = new ArrayCollection();
         $this->geometrySubtractives = new ArrayCollection();
         $this->planDelete = new ArrayCollection();
     }
@@ -132,14 +138,41 @@ class Geometry
         return $this;
     }
 
-    public function getGeometryPersistent(): ?int
+    public function getOriginalGeometry(): ?Geometry
     {
-        return $this->geometryPersistent;
+        return $this->originalGeometry;
     }
 
-    public function setGeometryPersistent(?int $geometryPersistent): Geometry
+    public function setOriginalGeometry(?Geometry $originalGeometry): Geometry
     {
-        $this->geometryPersistent = $geometryPersistent;
+        $this->originalGeometry = $originalGeometry;
+        return $this;
+    }
+
+    public function getDerivedGeometry(): Collection
+    {
+        return $this->derivedGeometry;
+    }
+
+    public function addDerivedGeometry(Geometry $derivedGeometry): Geometry
+    {
+        if (!$this->derivedGeometry->contains($derivedGeometry)) {
+            $this->derivedGeometry->add($derivedGeometry);
+            $derivedGeometry->setOriginalGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDerivedLayer(Geometry $derivedGeometry): Geometry
+    {
+        if ($this->derivedGeometry->removeElement($derivedGeometry)) {
+            // set the owning side to null (unless already changed)
+            if ($derivedGeometry->getOriginalGeometry() === $this) {
+                $derivedGeometry->setOriginalGeometry(null);
+            }
+        }
+
         return $this;
     }
 
@@ -186,17 +219,14 @@ class Geometry
         return $this;
     }
 
-    public function getGeometryCountryId(): ?int
+    public function getCountry(): ?Country
     {
-        return $this->geometryCountryId;
+        return $this->country;
     }
 
-    public function setGeometryCountryId(string|int|null $geometryCountryId): Geometry
+    public function setCountry(?Country $country): Geometry
     {
-        if (is_string($geometryCountryId)) {
-            $geometryCountryId = intval($geometryCountryId);
-        }
-        $this->geometryCountryId = $geometryCountryId;
+        $this->country = $country;
         return $this;
     }
 
@@ -298,11 +328,14 @@ class Geometry
     {
         $this->setGeometryData($featureProperties);
         $this->setGeometryType($featureProperties);
-        $this->setGeometryCountryId($featureProperties['country_id'] ?? null);
+        $this->setCountry($featureProperties['country_object'] ?? null);
         $this->setGeometryMspid($featureProperties['mspid'] ?? null);
         return $this;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function calculateBounds(): array
     {
         if (empty($this->geometryGeometry)) {
