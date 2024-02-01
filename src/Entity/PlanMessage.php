@@ -96,5 +96,4 @@ class PlanMessage
         $this->planMessageTime = $planMessageTime;
         return $this;
     }
-
 }

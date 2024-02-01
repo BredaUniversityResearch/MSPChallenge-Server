@@ -67,7 +67,4 @@ class PlanLayer
         $this->planLayerState = $planLayerState;
         return $this;
     }
-
-
-
 }

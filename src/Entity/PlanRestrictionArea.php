@@ -96,5 +96,4 @@ class PlanRestrictionArea
         $this->planRestrictionAreaSize = $planRestrictionAreaSize;
         return $this;
     }
-
 }

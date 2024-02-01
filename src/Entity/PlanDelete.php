@@ -57,5 +57,4 @@ class PlanDelete
         $this->layer = $layer;
         return $this;
     }
-
 }

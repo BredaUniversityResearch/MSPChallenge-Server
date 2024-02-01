@@ -95,6 +95,4 @@ class Fishing
         $this->fishingActive = $fishingActive;
         return $this;
     }
-
-
 }
