@@ -20,7 +20,7 @@ class Plan
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'plan')]
     #[ORM\JoinColumn(name: 'plan_country_id', referencedColumnName: 'country_id')]
-    private Country $country;
+    private ?Country $country;
 
     #[ORM\Column(type: Types::STRING, length: 75)]
     private ?string $planName;
@@ -96,12 +96,12 @@ class Plan
         return $this;
     }
 
-    public function getCountry(): Country
+    public function getCountry(): ?Country
     {
         return $this->country;
     }
 
-    public function setCountry(Country $country): Plan
+    public function setCountry(?Country $country): Plan
     {
         $this->country = $country;
         return $this;

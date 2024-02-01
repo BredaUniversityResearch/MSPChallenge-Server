@@ -363,17 +363,6 @@ class Layer
         return $this;
     }
 
-    public function getLayerOriginalId(): ?int
-    {
-        return $this->layerOriginalId;
-    }
-
-    public function setLayerOriginalId(?int $layerOriginalId): Layer
-    {
-        $this->layerOriginalId = $layerOriginalId;
-        return $this;
-    }
-
     public function getLayerActive(): ?int
     {
         return $this->layerActive;
