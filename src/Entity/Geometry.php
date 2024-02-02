@@ -64,6 +64,24 @@ class Geometry
     #[ORM\OneToMany(mappedBy: 'geometry', targetEntity: PlanDelete::class, cascade: ['persist'])]
     private Collection $planDelete;
 
+    #[ORM\OneToMany(mappedBy: 'startGeometry', targetEntity: EnergyConnection::class, cascade: ['persist'])]
+    private Collection $energyConnectionStart;
+
+    #[ORM\OneToMany(mappedBy: 'endGeometry', targetEntity: EnergyConnection::class, cascade: ['persist'])]
+    private Collection $energyConnectionEnd;
+
+    #[ORM\OneToMany(mappedBy: 'cableGeometry', targetEntity: EnergyConnection::class, cascade: ['persist'])]
+    private Collection $energyConnectionCable;
+
+    #[ORM\OneToMany(mappedBy: 'geometry', targetEntity: EnergyOutput::class, cascade: ['persist'])]
+    private Collection $energyOutput;
+
+    #[ORM\ManyToMany(targetEntity: Grid::class, mappedBy: 'sourceGeometry', cascade: ['persist'])]
+    private Collection $sourceForGrid;
+
+    #[ORM\ManyToMany(targetEntity: Grid::class, mappedBy: 'socketGeometry', cascade: ['persist'])]
+    private Collection $socketForGrid;
+
     /**
      * @param Layer|null $layer
      */
@@ -73,6 +91,12 @@ class Geometry
         $this->derivedGeometry = new ArrayCollection();
         $this->geometrySubtractives = new ArrayCollection();
         $this->planDelete = new ArrayCollection();
+        $this->energyConnectionStart = new ArrayCollection();
+        $this->energyConnectionEnd = new ArrayCollection();
+        $this->energyConnectionCable = new ArrayCollection();
+        $this->energyOutput = new ArrayCollection();
+        $this->sourceForGrid = new ArrayCollection();
+        $this->socketForGrid = new ArrayCollection();
     }
 
 
@@ -384,6 +408,174 @@ class Geometry
             if ($planDelete->getGeometry() === $this) {
                 $planDelete->setGeometry(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EnergyConnection>
+     */
+    public function getEnergyConnectionStart(): Collection
+    {
+        return $this->energyConnectionStart;
+    }
+
+    public function addEnergyConnectionStart(EnergyConnection $energyConnectionStart): self
+    {
+        if (!$this->energyConnectionStart->contains($energyConnectionStart)) {
+            $this->energyConnectionStart->add($energyConnectionStart);
+            $energyConnectionStart->setStartGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnergyConnectionStart(EnergyConnection $energyConnectionStart): self
+    {
+        if ($this->energyConnectionStart->removeElement($energyConnectionStart)) {
+            // set the owning side to null (unless already changed)
+            if ($energyConnectionStart->getStartGeometry() === $this) {
+                $energyConnectionStart->setStartGeometry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EnergyConnection>
+     */
+    public function getEnergyConnectionEnd(): Collection
+    {
+        return $this->energyConnectionEnd;
+    }
+
+    public function addEnergyConnectionEnd(EnergyConnection $energyConnectionEnd): self
+    {
+        if (!$this->energyConnectionEnd->contains($energyConnectionEnd)) {
+            $this->energyConnectionEnd->add($energyConnectionEnd);
+            $energyConnectionEnd->setEndGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnergyConnectionEnd(EnergyConnection $energyConnectionEnd): self
+    {
+        if ($this->energyConnectionEnd->removeElement($energyConnectionEnd)) {
+            // set the owning side to null (unless already changed)
+            if ($energyConnectionEnd->getEndGeometry() === $this) {
+                $energyConnectionEnd->setEndGeometry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EnergyConnection>
+     */
+    public function getEnergyConnectionCable(): Collection
+    {
+        return $this->energyConnectionCable;
+    }
+
+    public function addEnergyConnectionCable(EnergyConnection $energyConnectionCable): self
+    {
+        if (!$this->energyConnectionCable->contains($energyConnectionCable)) {
+            $this->energyConnectionCable->add($energyConnectionCable);
+            $energyConnectionCable->setCableGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnergyConnectionCable(EnergyConnection $energyConnectionCable): self
+    {
+        if ($this->energyConnectionCable->removeElement($energyConnectionCable)) {
+            // set the owning side to null (unless already changed)
+            if ($energyConnectionCable->getCableGeometry() === $this) {
+                $energyConnectionCable->setCableGeometry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EnergyOutput>
+     */
+    public function getEnergyOutput(): Collection
+    {
+        return $this->energyOutput;
+    }
+
+    public function addEnergyOutput(EnergyOutput $energyOutput): self
+    {
+        if (!$this->energyOutput->contains($energyOutput)) {
+            $this->energyOutput->add($energyOutput);
+            $energyOutput->setGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnergyOutput(EnergyOutput $energyOutput): self
+    {
+        if ($this->energyOutput->removeElement($energyOutput)) {
+            // set the owning side to null (unless already changed)
+            if ($energyOutput->getGeometry() === $this) {
+                $energyOutput->setGeometry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getSourceForGrid(): Collection
+    {
+        return $this->sourceForGrid;
+    }
+
+    public function addSourceForGrid(Grid $sourceForGrid): self
+    {
+        if (!$this->sourceForGrid->contains($sourceForGrid)) {
+            $this->sourceForGrid->add($sourceForGrid);
+            $sourceForGrid->addSourceGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSourceForGrid(Grid $sourceGeometry): self
+    {
+        if ($this->sourceForGrid->removeElement($sourceGeometry)) {
+            $sourceGeometry->removeSourceGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function getSocketForGrid(): Collection
+    {
+        return $this->socketForGrid;
+    }
+
+    public function addSocketForGrid(Grid $socketForGrid): self
+    {
+        if (!$this->socketForGrid->contains($socketForGrid)) {
+            $this->socketForGrid->add($socketForGrid);
+            $socketForGrid->addSocketGeometry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSocketForGrid(Grid $socketForGrid): self
+    {
+        if ($this->socketForGrid->removeElement($socketForGrid)) {
+            $socketForGrid->removeSocketGeometry($this);
         }
 
         return $this;

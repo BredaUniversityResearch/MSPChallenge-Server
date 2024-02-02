@@ -7,7 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Illuminate\Support\Arr;
 
 #[ORM\Entity(repositoryClass: CountryRepository::class)]
 class Country
@@ -44,6 +43,9 @@ class Country
     #[ORM\OneToMany(mappedBy: 'country', targetEntity: Geometry::class, cascade: ['persist'])]
     private Collection $geometry;
 
+    #[ORM\OneToMany(mappedBy: 'country', targetEntity: GridEnergy::class, cascade: ['persist'])]
+    private Collection $gridEnergy;
+
     public function __construct()
     {
         $this->objective = new ArrayCollection();
@@ -52,6 +54,7 @@ class Country
         $this->planMessage = new ArrayCollection();
         $this->planRestrictionArea = new ArrayCollection();
         $this->geometry = new ArrayCollection();
+        $this->gridEnergy = new ArrayCollection();
     }
 
     public function getCountryId(): ?int
@@ -272,6 +275,33 @@ class Country
             // set the owning side to null (unless already changed)
             if ($geometry->getCountry() === $this) {
                 $geometry->setCountry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getGridEnergy(): Collection
+    {
+        return $this->gridEnergy;
+    }
+
+    public function addGridEnergy(GridEnergy $gridEnergy): self
+    {
+        if (!$this->gridEnergy->contains($gridEnergy)) {
+            $this->gridEnergy->add($gridEnergy);
+            $gridEnergy->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGridEnergy(GridEnergy $gridEnergy): self
+    {
+        if ($this->gridEnergy->removeElement($gridEnergy)) {
+            // set the owning side to null (unless already changed)
+            if ($gridEnergy->getCountry() === $this) {
+                $gridEnergy->setCountry(null);
             }
         }
 

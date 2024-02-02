@@ -76,6 +76,12 @@ class Plan
     #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
     private Collection $planRestrictionArea;
 
+    #[ORM\JoinTable(name: 'grid_removed')]
+    #[ORM\JoinColumn(name: 'grid_removed_plan_id', referencedColumnName: 'plan_id')]
+    #[ORM\InverseJoinColumn(name: 'grid_removed_grid_persistent', referencedColumnName: 'grid_id')]
+    #[ORM\ManyToMany(targetEntity: Grid::class, inversedBy: 'planToRemove', cascade: ['persist'])]
+    private Collection $gridToRemove;
+
     public function __construct()
     {
         $this->planLayer = new ArrayCollection();
@@ -83,6 +89,7 @@ class Plan
         $this->fishing = new ArrayCollection();
         $this->planMessage = new ArrayCollection();
         $this->planRestrictionArea = new ArrayCollection();
+        $this->gridToRemove = new ArrayCollection();
     }
 
     public function getPlanId(): ?int
@@ -437,6 +444,46 @@ class Plan
             }
         }
 
+        return $this;
+    }
+
+    public function getGridToRemove(): Collection
+    {
+        return $this->gridToRemove;
+    }
+
+    public function addGridToRemove(Grid $gridToRemove): self
+    {
+        if (!$this->gridToRemove->contains($gridToRemove)) {
+            $this->gridToRemove->add($gridToRemove);
+            $gridToRemove->addPlanToRemove($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGridToRemove(Grid $planToRemove): self
+    {
+        if ($this->gridToRemove->removeElement($planToRemove)) {
+            $planToRemove->removePlanToRemove($this);
+        }
+
+        return $this;
+    }
+
+    public function updatePlanConstructionTime(): self
+    {
+        $highest = 0;
+        foreach ($this->getPlanLayer() as $planLayer) {
+            foreach ($planLayer->getLayer()->getLayerStates() as $stateByTime) {
+                if ($stateByTime["state"] == "ASSEMBLY" && $stateByTime['time'] > $highest) {
+                    $highest = $stateByTime['time'];
+                    break;
+                }
+            }
+        }
+        $this->setPlanLastupdate(microtime(true));
+        $this->setPlanConstructionstart($this->getPlanGametime() - $highest);
         return $this;
     }
 }

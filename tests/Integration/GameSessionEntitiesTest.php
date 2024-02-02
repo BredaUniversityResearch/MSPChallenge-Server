@@ -3,9 +3,13 @@ namespace App\Tests\Integration;
 
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Country;
+use App\Entity\EnergyConnection;
+use App\Entity\EnergyOutput;
 use App\Entity\Fishing;
 use App\Entity\Game;
 use App\Entity\Geometry;
+use App\Entity\Grid;
+use App\Entity\GridEnergy;
 use App\Entity\Layer;
 use App\Entity\Objective;
 use App\Entity\Plan;
@@ -82,7 +86,6 @@ class GameSessionEntitiesTest extends KernelTestCase
 
         $this->em->persist($layer);
         $this->em->flush();
-
         $layer2 = $this->em->getRepository(Layer::class)->find(1);
         self::assertSame($layer, $layer2);
 
@@ -94,7 +97,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertInstanceOf(Layer::class, $layer3); //good enough, normalizer throws exceptions anyway
 
         $planLayer = new Layer();
-        $planLayer->setLayerOriginalId($layer->getLayerId());
+        $planLayer->setOriginalLayer($layer);
         $this->em->persist($planLayer);
         $this->em->flush();
         $planLayer2 = $this->em->getRepository(Layer::class)->find(2);
@@ -140,6 +143,42 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->em->persist($geometry3);
         $this->em->flush();
         self::assertSame($geometry->getGeometrySubtractives()[0], $geometry2);
+    }
+
+    public function testEnergyConnection(): void
+    {
+        $this->start();
+        $energyConnection = new EnergyConnection();
+        $energyConnection->setStartGeometry(
+            $this->em->getRepository(Geometry::class)->find(1)
+        );
+        $energyConnection->setEndGeometry(
+            $this->em->getRepository(Geometry::class)->find(2)
+        );
+        $energyConnection->setCableGeometry(
+            $this->em->getRepository(Geometry::class)->find(3)
+        );
+        $energyConnection->setEnergyConnectionStartCoordinates('test coordinates');
+        $energyConnection->setEnergyConnectionLastupdate(100);
+        $this->em->persist($energyConnection);
+        $this->em->flush();
+        self::assertSame(
+            $this->em->getRepository(Geometry::class)->find(3)->getEnergyConnectionCable()[0],
+            $energyConnection
+        );
+    }
+
+    public function testEnergyOutput(): void
+    {
+        $this->start();
+        $energyOutput = new EnergyOutput();
+        $energyOutput->setGeometry($this->em->getRepository(Geometry::class)->find(3));
+        $this->em->persist($energyOutput);
+        $this->em->flush();
+        self::assertSame(
+            $this->em->getRepository(Geometry::class)->find(3)->getEnergyOutput()[0],
+            $energyOutput
+        );
     }
 
     public function testRestrictionEntity(): void
@@ -268,6 +307,53 @@ class GameSessionEntitiesTest extends KernelTestCase
 
         self::assertSame($fishing->getPlan(), $plan);
         self::assertSame($fishing->getCountry(), $country);
+    }
+
+    public function testGrid(): void
+    {
+        $this->start();
+        $geometry = $this->em->getRepository(Geometry::class)->find(1);
+        $geometry2 = $this->em->getRepository(Geometry::class)->find(2);
+        $grid = new Grid();
+        $grid->setGridName('test grid');
+        $grid->setPlan($this->em->getRepository(Plan::class)->find(1));
+        $grid->addSourceGeometry($geometry);
+        $grid->addSocketGeometry($geometry2);
+
+        $grid2 = new Grid();
+        $grid2->setGridName('grid derived from test grid');
+        $grid2->setPlan($this->em->getRepository(Plan::class)->find(1));
+
+        $grid->addDerivedGrid($grid2);
+        $this->em->persist($grid);
+        $this->em->flush();
+
+        self::assertSame(
+            $this->em->getRepository(Grid::class)->find(1)->getDerivedGrid()[0],
+            $grid2
+        );
+        self::assertSame($geometry->getSourceForGrid()[0], $grid);
+        self::assertSame($geometry2->getSocketForGrid()[0], $grid);
+
+        $gridEnergy = new GridEnergy();
+        $gridEnergy->setGrid($grid);
+
+        $country = $this->em->getRepository(Country::class)->find(1);
+        $country->addGridEnergy($gridEnergy);
+        $this->em->persist($country);
+        $this->em->flush();
+
+        self::assertSame(
+            $this->em->getRepository(Country::class)->find(1)->getGridEnergy()[0],
+            $gridEnergy
+        );
+
+        $plan2 = $this->em->getRepository(Plan::class)->find(2);
+        $plan2->addGridToRemove($grid2);
+        $this->em->persist($plan2);
+        $this->em->flush();
+
+        self::assertSame($grid2->getPlanToRemove()[0], $plan2);
     }
 
     private function start(): void

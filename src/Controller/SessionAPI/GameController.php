@@ -5,7 +5,6 @@ namespace App\Controller\SessionAPI;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\Region;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -13,7 +12,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Request;
 
-class GameController extends AbstractController
+class GameController extends BaseController
 {
     public function __construct(
         private readonly string $projectDir

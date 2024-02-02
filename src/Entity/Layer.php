@@ -576,9 +576,9 @@ class Layer
         return $this;
     }
 
-    public function getLayerStates(): ?string
+    public function getLayerStates(): ?array
     {
-        return $this->layerStates;
+        return json_decode($this->layerStates, true);
     }
 
     public function setLayerStates(string|array|null $layerStates): Layer

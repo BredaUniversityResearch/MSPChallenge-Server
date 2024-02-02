@@ -3,7 +3,6 @@
 namespace App\Controller\SessionAPI;
 
 use App\Entity\Geometry;
-use App\Entity\ServerManager\GameList;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

@@ -2,14 +2,19 @@
 
 namespace App\MessageHandler\GameList;
 
+use App\Controller\SessionAPI\PlanController;
 use App\Controller\SessionAPI\SELController;
 use App\Entity\Country;
+use App\Entity\EnergyConnection;
+use App\Entity\EnergyOutput;
 use App\Entity\Fishing;
 use App\Entity\Game;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Communicator\GeoServerCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Geometry;
+use App\Entity\Grid;
+use App\Entity\GridEnergy;
 use App\Entity\Layer;
 use App\Entity\Objective;
 use App\Entity\Plan;
@@ -47,6 +52,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use function App\await;
 
 //#[AsMessageHandler]
 class GameListCreationMessageHandler
@@ -56,6 +62,8 @@ class GameListCreationMessageHandler
     private GameList $gameSession;
     private array $dataModel;
     private ObjectNormalizer $normalizer;
+
+    private array $oldToNewGeometryIDs;
 
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager,
@@ -585,68 +593,6 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * Returns the database id of the persistent geometry id described by the base_geometry_info
-     *
-     */
-    /*public function fixupPersistentGeometryID(array $baseGeometryInfo, array $mappedGeometryIds): int|string
-    {
-        $fixedGeometryId = -1;
-        if (!empty($baseGeometryInfo["geometry_mspid"])) {
-            $fixedGeometryId = $this->getGeometryIdByMspId($baseGeometryInfo["geometry_mspid"]);
-        } else {
-            if (array_key_exists($baseGeometryInfo["geometry_persistent"], $mappedGeometryIds)) {
-                $fixedGeometryId = $mappedGeometryIds[$baseGeometryInfo["geometry_persistent"]];
-            } else {
-                $return = "Found geometry ID (Fallback field \"geometry_persistent\": ".
-                    $baseGeometryInfo["geometry_persistent"].
-                    ") which is not referenced by msp id and hasn't been imported by the plans importer yet. ".
-                    var_export($baseGeometryInfo, true);
-            }
-        }
-        return $return ?? $fixedGeometryId;
-    }*/
-
-    /**
-     * Returns the database id of the geometry id described by the base_geometry_info
-     *
-     */
-    /*public function fixupGeometryID(array $baseGeometryInfo, array $mappedGeometryIds): int|string
-    {
-        $fixedGeometryId = -1;
-        if (array_key_exists($baseGeometryInfo["geometry_id"], $mappedGeometryIds)) {
-            $fixedGeometryId = $mappedGeometryIds[$baseGeometryInfo["geometry_id"]];
-        } else {
-            // If we can't find the geometry id in the ones that we already have imported, check if the geometry id
-            //   matches the persistent id, and if so select it by the mspid since this should all be present then.
-            if ($baseGeometryInfo["geometry_id"] == $baseGeometryInfo["geometry_persistent"]) {
-                if (isset($baseGeometryInfo["geometry_mspid"])) {
-                    $fixedGeometryId = $this->getGeometryIdByMspId($baseGeometryInfo["geometry_mspid"]);
-                } else {
-                    $return = "Found geometry (".implode(", ", $baseGeometryInfo).
-                        " which has not been imported by the plans importer. The persistent id matches but mspid is".
-                        "not set.";
-                }
-            } else {
-                $return = "Found geometry ID (Fallback field \"geometry_id\": ". $baseGeometryInfo["geometry_id"].
-                    ") which hasn't been imported by the plans importer yet.";
-            }
-        }
-        return $return ?? $fixedGeometryId;
-    }*/
-
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     */
-    /*private function getGeometryIdByMspId(int|string $mspId): int|string
-    {
-        $return = $this->selectRowsFromTable('geometry', ['geometry_mspid' => $mspId])['geometry_id'];
-        if (is_null($return)) {
-            return 'Could not find MSP ID ' . $mspId . ' in the current database';
-        }
-        return (int) $return;
-    }*/
-
-    /**
      * @throws \Exception
      */
     private function setupRestrictions(): void
@@ -883,16 +829,23 @@ class GameListCreationMessageHandler
 
     /**
      * @throws \Exception
+     * @throws ExceptionInterface
      */
     private function setupPlans(): void
     {
+        if (empty($this->dataModel['plans'])) {
+            $this->gameSessionLogger->info(
+                'No plans defined, so nothing to import there.',
+                ['gameSession' => $this->gameSession->getId()]
+            );
+        }
         foreach ($this->dataModel['plans'] as $planConfig) {
             $plan = $this->normalizer->denormalize($planConfig, Plan::class);
             $plan->setCountry(
                 $this->entityManager->getRepository(Country::class)->find($planConfig['plan_country_id'])
             );
             $plan->setPlanState('APPROVED');
-
+            $planCableConnections = [];
             foreach ($plan['fishing'] as $fishingConfig) {
                 $fishing = $this->normalizer->denormalize($fishingConfig, Fishing::class);
                 $fishing->setCountry(
@@ -946,11 +899,18 @@ class GameListCreationMessageHandler
                     );
                     $geometry->setGeometryType($layerGeometryConfig['type']);
                     $geometry->setOriginalGeometry(
-                        $this->entityManager->getRepository(Geometry::class)->findOneBy(
-                            ['geometryMspid' => $layerGeometryConfig['base_geometry_info']['geometry_mspid']]
-                        )
+                        $this->findNewPersistentGeometry($layerGeometryConfig['base_geometry_info'])
                     );
                     $derivedLayer->addGeometry($geometry);
+                    $this->entityManager->persist($derivedLayer);
+                    $this->entityManager->flush(); // have to be able to map old > new geometry IDs
+                    if (!empty($layerGeometryConfig['cable'])) {
+                        $layerGeometryConfig['cable']['geometry_id'] = $geometry->getGeometryId();
+                        $combinedCableArray['cable'] = $layerGeometryConfig['cable'];
+                        $combinedCableArray['energy_output'] = $layerGeometryConfig['energy_output'];
+                        $planCableConnections[] = $combinedCableArray;
+                    }
+                    $this->oldToNewGeometryIDs[$layerGeometryConfig['geometry_id']] = $geometry->getGeometryId();
                 }
                 $planLayer = new PlanLayer();
                 $planLayer->setLayer($derivedLayer);
@@ -959,205 +919,165 @@ class GameListCreationMessageHandler
                     $planDelete = new PlanDelete();
                     $planDelete->setLayer($derivedLayer);
                     $planDelete->setGeometry(
-                        $this->entityManager->getRepository(Geometry::class)->findOneBy(
-                            ['geometryMspid' => $layerGeometryDeletedConfig['base_geometry_info']['geometry_mspid']]
-                        )
+                        $this->findNewPersistentGeometry($layerGeometryDeletedConfig['base_geometry_info'])
                     );
                     $plan->addPlanDelete($planDelete);
                 }
             }
-            // all the energy stuff here
-
             $this->entityManager->persist($plan);
+            $this->entityManager->flush(); // need to have a plan ID for next steps
 
+            $this->setupPlannedCableConnections($planCableConnections);
+            $this->setupPlannedGrids($planConfig['grids'], $plan);
 
-
-            //create a new plan and get the new ID
-            /*if (!isset($plan['plan_alters_energy_distribution'])) {
-                $plan['plan_alters_energy_distribution'] = 0;
-            }
-            $planId = $this->insertRowIntoTable(
-                'plan',
-                [
-                    'plan_country_id' => $plan['plan_country_id'],
-                    'plan_name' => $plan['plan_name'],
-                    'plan_gametime' => $plan['plan_gametime'],
-                    'plan_lastupdate' => 0,
-                    'plan_type' => self::convertToNewPlanType($plan['plan_type']),
-                    'plan_alters_energy_distribution' => $plan['plan_alters_energy_distribution'],
-                    'plan_state' => 'APPROVED'
-                ]
-            ) ?? throw new \Exception('Could not add plan from configuration file.');
-
-            $importedPlanId[$plan['plan_id']] = $planId;
-
-            if (isset($plan['fishing'])) {
-                foreach ($plan['fishing'] as $fish) {
-                    $this->insertRowIntoTable(
-                        'fishing',
-                        [
-                            'fishing_country_id' => $fish['fishing_country_id'],
-                            'fishing_plan_id' => $planId,
-                            'fishing_type' => $fish['fishing_type'],
-                            'fishing_amount' => $fish['fishing_amount']
-                        ]
-                    );
-                }
-            }
-            if (isset($plan['messages'])) {
-                foreach ($plan['messages'] as $message) {
-                    $this->insertRowIntoTable(
-                        'plan_message',
-                        [
-                            'plan_message_plan_id' => $planId,
-                            'plan_message_country_id' => $message['country_id'],
-                            'plan_message_user_name' => $message['user_name'],
-                            'plan_message_text' => $message['text'],
-                            'plan_message_time' => $message['time']
-                        ]
-                    );
-                }
-            }
-            if (isset($plan['restriction_settings'])) {
-                foreach ($plan['restriction_settings'] as $setting) {
-                    $layerId = $this->selectRowsFromTable(
-                        'layer',
-                        ['layer_name' => $setting['layer_name']]
-                    )['layer_id'] ?? throw new \Exception(
-                        'Could not find layer with name '.$setting['layer_name'].' as referenced in plan "'.
-                        $plan['plan_name'].'" restriction_settings, so cannot continue.'
-                    );
-                    $this->insertRowIntoTable(
-                        'plan_restriction_area',
-                        [
-                            'plan_restriction_area_plan_id' => $planId,
-                            'plan_restriction_area_layer_id' => $layerId['layer_id'],
-                            'plan_restriction_area_country_id' => $setting['country_id'],
-                            'plan_restriction_area_entity_type' => $setting['entity_type_id'],
-                            'plan_restriction_area_size' => $setting['size']
-                        ]
-                    );
-                }
-            }
-            //Mapping of the latest id of a geometry. This maps from base geometry id to latest id inserted by the plan.
-            foreach ($plan['layers'] as $layer) {
-                //find the original layer ID from the current local database
-                $layerId = $this->selectRowsFromTable('layer', ['layer_name' => $layer['name']])['layer_id']
-                    ?? throw new \Exception(
-                        'Could not find layer with name '.$layer['name'].' as referenced in plan "'.
-                        $plan['plan_name'].'" layers, so cannot continue.'
-                    );
-                //create a new layer for the new geometry
-                $lid = $this->insertRowIntoTable('layer', ['layer_original_id' => $layerId])
-                    ?? throw new \Exception(
-                        'Could not create new plan layer on top of '.$layer['name'].' as referenced in plan "'.
-                        $plan['plan_name'].'" layers, so cannot continue.'
-                    );
-                $importedLayerId[$layer['layer_id']] = $lid;
-                $this->insertRowIntoTable(
-                    'plan_layer',
-                    [
-                        'plan_layer_plan_id' => $planId,
-                        'plan_layer_layer_id' => $lid
-                    ]
-                );
-                foreach ($layer['geometry'] as $layerGeometry) {
-                    //add the geometry to the database
-                    $geometryData = null;
-                    if (isset($layerGeometry['data'])) {
-                        $geometryData = json_encode($layerGeometry['data']);
-                    }
-                    $newGeometryId = $this->insertRowIntoTable(
-                        'geometry',
-                        [
-                            'geometry_layer_id' => $lid,
-                            'geometry_FID' => $layerGeometry['FID'],
-                            'geometry_geometry' => $layerGeometry['geometry'],
-                            'geometry_data' => $geometryData,
-                            'geometry_country_id' => $layerGeometry['country'],
-                            'geometry_type' => $layerGeometry['type']
-                        ]
-                    );
-                    $importedGeometryId[$layerGeometry['geometry_id']] = $newGeometryId;
-                    $baseGeometryId = $geometry->fixupPersistentGeometryID(
-                        $layerGeometry['base_geometry_info'],
-                        $importedGeometryId
-                    );
-                    if (is_string($baseGeometryId)) {
-                        $return[] = $baseGeometryId;
-                    } else {
-                        $this->updateRowInTable(
-                            'geometry',
-                            ['geometry_persistent' => $baseGeometryId],
-                            ['geometry_id' => $newGeometryId]
-                        );
-                    }
-                }
-                //Import deleted geometry
-                foreach ($layer['deleted'] as $deletedGeometry) {
-                    $deletedGeometryId = $geometry->fixupPersistentGeometryID(
-                        $deletedGeometry['base_geometry_info'],
-                        $importedGeometryId
-                    );
-                    if (is_string($deletedGeometryId)) {
-                        $return[] = $deletedGeometryId;
-                    } else {
-                        $this->insertRowIntoTable(
-                            'plan_delete',
-                            [
-                                'plan_delete_plan_id' => $planId,
-                                'plan_delete_geometry_persistent' => $deletedGeometryId,
-                                'plan_delete_layer_id' => $lid
-                            ]
-                        );
-                    }
-                }
-            }
-            //update the persistent IDs or the client starts complaining
-            $this->updateRowInTable(
-                ['geometry', 'g'],
-                ['g.geometry_persistent' => 'g.geometry_id'],
-                ['geometry_persistent' => null]
-            );
-
-            $energyConnectionsReturn = $energy->setupPlannedConnections($plan, $importedGeometryId);
-            if (is_array($energyConnectionsReturn)) {
-                $return = $energyConnectionsReturn + ($return ?? []);
-            }
-            $energyGridsReturn = $energy->setupPlannedGrids($plan['grids'], $planId, $importedGeometryId);
-            if (is_array($energyGridsReturn)) {
-                $return = $energyGridsReturn + ($return ?? []);
-            }
-            $this->UpdatePlanConstructionTime($planId);
-            */
-        }
-
-        //Maps from old persistent ID to new persistent id. $array[$oldId] = newId;
-        //$importedPlanId = []; //see bottom of function
-        //$importedLayerId = []; //see bottom of function
-        //$importedGeometryId = [];
-
-        //the comments at the top of the next function suggest that this should not be done at all
-        //besides, by the look of it, the config files don't have warnings with their plans
-        //moreover, warnings are handled by the client when needed, so adding them here does not make sense
-        //the question remains though whether the plan export function even adds them
-        //if not, then this can 100% be removed
-        //$this->ImportAllWarningsFromExportedPlans($plans, $importedPlanId, $importedLayerId);
-        //return $return ?? true;
-
-        /*if (is_array($return)) {
-            foreach ($return as $message) {
-                $this->gameSessionLogger->warning(
-                    'Plan setup returned the message: {message}',
-                    ['message' => $message, 'gameSession' => $this->gameSession->getId()]
-                );
-            }
-        } else {
+            $plan->updatePlanConstructionTime();
+            $this->entityManager->persist($plan);
             $this->gameSessionLogger->info(
-                'Plan setup was successful',
-                ['gameSession' => $this->gameSession->getId()]
+                'Finished importing plan {planName}.',
+                ['planName' => $plan->getPlanName(), 'gameSession' => $this->gameSession->getId()]
             );
-        }*/
+        }
+        $this->entityManager->flush();
+
+        // final step to avoid client complaints
+        $qb = $this->entityManager->createQueryBuilder();
+        $qb->update('geometry', 'g')
+            ->set('g.originalGeometry', 'g.geometryId')
+            ->where($qb->expr()->isNull('g.originalGeometry'))
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function setupPlannedCableConnections(array $cablesConfig): void
+    {
+        //Import energy connections and output now we now all geometry is known by the importer.
+        foreach ($cablesConfig as $cableConfig) {
+            //Import energy connections
+            $cable = $this->entityManager->getRepository(Geometry::class)->find($cableConfig['cable']['geometry_id']);
+            $energyConnection = new EnergyConnection();
+            $energyConnection->setCableGeometry($cable);
+            $energyConnection->setStartGeometry($this->findNewGeometry($cableConfig['cable']['start']));
+            $energyConnection->setEndGeometry($this->findNewGeometry($cableConfig['cable']['end']));
+            $energyConnection->setEnergyConnectionStartCoordinates($cableConfig['cable']['coordinates']);
+            $energyConnection->setEnergyConnectionLastupdate(100);
+            $this->entityManager->persist($energyConnection);
+            //Import energy output
+            if (!empty($cableConfig['energy_output'])) {
+                foreach ($cableConfig['energy_output'] as $output) {
+                    $energyOutput = new EnergyOutput();
+                    $energyOutput->setGeometry($cable);
+                    $energyOutput->setEnergyOutputMaxcapacity($output['maxcapacity']);
+                    $energyOutput->setEnergyOutputActive($output['active']);
+                    $this->entityManager->persist($energyOutput);
+                }
+            }
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function setupPlannedGrids(array $planGridsConfig, Plan $plan): void
+    {
+        $importedGridIds = [];
+        foreach ($planGridsConfig as $gridConfig) {
+            $grid = new Grid();
+            $grid->setGridName($gridConfig['name']);
+            $grid->setGridActive($gridConfig['active']);
+            $grid->setGridLastupdate(100);
+            $grid->setPlan($plan);
+            $this->entityManager->persist($grid);
+            $this->entityManager->flush();
+            $gridPersistent = $grid->getGridId();
+            if ($gridConfig['grid_persistent'] == $gridConfig['grid_id']) {
+                $importedGridIds[$gridConfig['grid_persistent']] = $grid->getGridId();
+            } else {
+                if (isset($importedGridIds[$gridConfig['grid_persistent']])) {
+                    $gridPersistent = $importedGridIds[$gridConfig['grid_persistent']];
+                } else {
+                    throw new \Exception("Found reference persistent Grid ID (". $grid['grid_persistent'].
+                        ") which has not been imported by the plans importer (yet).");
+                }
+            }
+            $grid->setOriginalGrid(
+                $this->entityManager->getRepository(Grid::class)->find($gridPersistent)
+            );
+            foreach ($gridConfig['energy'] as $gridEnergyConfig) {
+                $gridEnergy = new GridEnergy();
+                $gridEnergy->setCountry(
+                    $this->entityManager->getRepository(Country::class)->find($gridEnergyConfig['country'])
+                );
+                $gridEnergy->setGridEnergyExpected($gridEnergyConfig['expected']);
+                $grid->addGridEnergy($gridEnergy);
+            }
+            foreach ($gridConfig['removed'] as $gridRemovedConfig) {
+                if (empty($importedGridIds[$gridRemovedConfig['grid_persistent']])) {
+                    throw new \Exception("Found plan to remove grid ({$gridRemovedConfig['grid_persistent']}".
+                        ") but this has not been imported by the plans importer (yet).");
+                }
+                $plan->addGridToRemove($this->entityManager->getRepository(Grid::class)->find(
+                    $importedGridIds[$gridRemovedConfig['grid_persistent']]
+                ));
+                $this->entityManager->persist($plan);
+            }
+            foreach ($gridConfig['sockets'] as $gridSocketConfig) {
+                $grid->addSocketGeometry($this->findNewGeometry($gridSocketConfig['geometry']));
+            }
+            foreach ($gridConfig['sources'] as $gridSourceConfig) {
+                $grid->addSourceGeometry($this->findNewGeometry($gridSourceConfig['geometry']));
+            }
+            $this->entityManager->persist($grid);
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function findNewPersistentGeometry(array $baseGeometryInfo): ?Geometry
+    {
+        if (!empty($baseGeometryInfo['geometry_mspid'])) {
+            return $this->entityManager->getRepository(Geometry::class)->findOneBy(
+                ['geometryMspid' => $baseGeometryInfo['geometry_mspid']]
+            );
+        }
+        if (array_key_exists($baseGeometryInfo["geometry_persistent"], $this->oldToNewGeometryIDs)) {
+            return $this->entityManager->getRepository(Geometry::class)->find(
+                $this->oldToNewGeometryIDs[$baseGeometryInfo["geometry_persistent"]]
+            );
+        }
+        throw new \Exception(
+            "Failed to find newly imported persistent geometry. No MSP ID was available and geometry_persistent ".
+            "{$baseGeometryInfo["geometry_persistent"]} wasn't imported earlier by the plans importer.".
+            var_export($baseGeometryInfo, true)
+        );
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function findNewGeometry(array $baseGeometryInfo): ?Geometry
+    {
+        if (array_key_exists($baseGeometryInfo["geometry_id"], $this->oldToNewGeometryIDs)) {
+            return $this->entityManager->getRepository(Geometry::class)->find(
+                $this->oldToNewGeometryIDs[$baseGeometryInfo["geometry_id"]]
+            );
+        }
+        // If we can't find the geometry id in the ones that we already have imported, check if the geometry id
+        //   matches the persistent id, and if so select it by the mspid since this should all be present then.
+        if ($baseGeometryInfo["geometry_id"] == $baseGeometryInfo["geometry_persistent"]) {
+            if (isset($baseGeometryInfo["geometry_mspid"])) {
+                return $this->entityManager->getRepository(Geometry::class)->findOneBy(
+                    ['geometryMspid' => $baseGeometryInfo['geometry_mspid']]
+                );
+            }
+            throw new \Exception("Found geometry (".implode(", ", $baseGeometryInfo).
+                " which has not been imported by the plans importer. The persistent id matches but MSP ID is not set.");
+        }
+        throw new \Exception("Found geometry ID (Fallback field \"geometry_id\": ". $baseGeometryInfo["geometry_id"].
+            ") which hasn't been imported by the plans importer yet.");
     }
 
     private function setupObjectives(): void
@@ -1200,10 +1120,10 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      */
-    /*private function setupGameWatchdogAndAccess(): void
+    private function setupGameWatchdogAndAccess(): void
     {
         // get the watchdog and end-user log-on in order
-        $qb = $this->connection->createQueryBuilder();
+        $qb = $this->entityManager->getConnection()->createQueryBuilder();
         // not turning game_session into a Doctrine Entity as the whole table will be deprecated
         // as soon as the session API has been ported to Symfony
         $qb->insert('game_session')
@@ -1224,7 +1144,10 @@ class GameListCreationMessageHandler
             //This is needed because MEL needs to be run before the game to setup the initial fishing values.
             //$this->asyncDataTransferTo($game);
             //$game->setProjectDir($this->kernel->getProjectDir());
-            if (null !== $promise = $this->game->changeWatchdogState("SETUP")) {
+            $game = new \App\Domain\API\v1\Game();
+            $game->setGameSessionId($this->gameSession->getId());
+            $game->setAsync(true);
+            if (null !== $promise = $game->changeWatchdogState("SETUP")) {
                 await($promise);
                 $this->gameSessionLogger->info(
                     'Watchdog and user access set up successfully.',
@@ -1239,7 +1162,7 @@ class GameListCreationMessageHandler
                 ['gameSession' => $this->gameSession->getId()]
             );
         }
-    }*/
+    }
 
     /**
      * @throws \Exception
@@ -1250,19 +1173,4 @@ class GameListCreationMessageHandler
         // https://github.com/justinrainbow/json-schema !!
         $this->dataModel = $completeConfig['datamodel'] ?? throw new \Exception('nope.');
     }
-
-    /**
-     * @throws Exception
-     */
-    /*private function insert(string $table, array $values): int
-    {
-        $qb = $this->connection->createQueryBuilder();
-        foreach ($values as $key => $value) {
-            $values[$key] = $qb->createPositionalParameter($value);
-        }
-        $qb->insert($table)
-            ->values($values)
-            ->executeStatement();
-        return $this->connection->lastInsertId('auto_increment');
-    }*/
 }
