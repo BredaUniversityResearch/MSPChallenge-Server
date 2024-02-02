@@ -67,5 +67,4 @@ class GridEnergy
         $this->gridEnergyExpected = $gridEnergyExpected;
         return $this;
     }
-
 }
