@@ -485,7 +485,7 @@ class GameListCreationMessageHandler
             );
             return;
         }
-        $message = "Duplicate MSP ID check in {$layer->getLayerName()} returned {counted} geometry records with duplicates."
+        $message = "Duplicate MSP ID check in {$layer->getLayerName()} returned {counted} duplicates."
             .PHP_EOL;
         $previousMspId = null;
         $previousGeometryData = null;
