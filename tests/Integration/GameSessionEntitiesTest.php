@@ -406,38 +406,6 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertSame($grid2->getPlanToRemove()[0], $plan2);
     }
 
-
-
-    public function testSessionJsonValidator(): void
-    {
-        $this->start();
-        $newGameSession = new GameList();
-        $newGameSession->setName('testSession');
-        $newGameSession->setGameConfigVersion(
-            $this->emServerManager->getRepository(GameConfigVersion::class)->findOneBy(['id' => 1]) // North Sea config
-        );
-        $newGameSession->setPasswordAdmin('test');
-        $this->emServerManager->persist($newGameSession);
-        $this->emServerManager->flush();
-
-        $data = json_decode($newGameSession->getGameConfigVersion()->getGameConfigCompleteRaw());
-
-        // Validate
-        $path = static::getContainer()->get('kernel')->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json';
-
-        $validator = new Validator();
-        $validator->validate($data, (object)['$ref' => 'file://' . realpath($path)]);
-
-        if ($validator->isValid()) {
-            echo "The supplied JSON validates against the schema.\n";
-        } else {
-            echo "JSON does not validate. Violations:\n";
-            foreach ($validator->getErrors() as $error) {
-                printf("[%s] %s\n", $error['property'], $error['message']);
-            }
-        }
-    }
-
     private function start(): void
     {
         $container = static::getContainer();

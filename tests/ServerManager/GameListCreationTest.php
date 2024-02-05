@@ -27,6 +27,7 @@ class GameListCreationTest extends KernelTestCase
         $newGameSession->setPasswordAdmin('test');
         $this->emServerManager->persist($newGameSession);
         $this->emServerManager->flush();
+        self::assertSame($newGameSession, $this->emServerManager->getRepository(GameList::class)->find(1));
     }
 
     public function testGameListCreationMessageHandler(): void
@@ -34,6 +35,9 @@ class GameListCreationTest extends KernelTestCase
         $container = static::getContainer();
         $handler = $container->get(GameListCreationMessageHandler::class);
         $handler->__invoke(new GameListCreationMessage(1));
+        $logFile = static::getContainer()->get('kernel')->getLogDir()."/log_session_1.log";
+        self::assertFileExists($logFile);
+        self::assertNotNull(file_get_contents($logFile));
     }
 
     private function start(): void

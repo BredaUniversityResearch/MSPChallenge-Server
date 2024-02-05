@@ -64,8 +64,8 @@ class SessionEntityListener
                     [
                         'gameSession' => $layer->getContextCreatingGameSession(),
                         'layer' => "{$layer->getLayerName()}",
-                        'geometry' => substr($geometry->getGeometryGeometry(), 0, 40).'... - '.
-                            substr($geometry->getGeometryData(), 0, 40).'...'
+                        'geometry' => substr($geometry->getGeometryGeometry(), 0, 50).'... - '.
+                            substr($geometry->getGeometryData(), 0, 50).'...'
                     ]
                 );
                 $layer->removeGeometry($geometry);

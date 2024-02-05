@@ -31,6 +31,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Jfcherng\Diff\DiffHelper;
+use JsonSchema\Validator;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
@@ -87,8 +88,8 @@ class GameListCreationMessageHandler
         $this->database = $connectionManager->getGameSessionDbName($this->gameSession->getId());
         $this->entityManager = $this->kernel->getContainer()->get("doctrine.orm.{$this->database}_entity_manager");
         try {
-            $this->validateGameConfigComplete();
             $this->gameSessionLogFileHandling->empty($this->gameSession->getId());
+            $this->validateGameConfigComplete();
             $this->gameSessionLogger->notice(
                 'Session {name} creation initiated. This might take a while.',
                 ['name' => $this->gameSession->getName(), 'gameSession' => $this->gameSession->getId()]
@@ -504,10 +505,10 @@ class GameListCreationMessageHandler
                         $counter[$geometryTypeAdded] = 1;
                 }
                 $this->gameSessionLogger->debug(
-                    "Import of  layer geometry features completed: {geometryTypeDetails}.",
+                    "Import of layer geometry features completed: {geometryTypeDetails}.",
                     [
                         'gameSession' => $this->gameSession->getId(),
-                        'geometryTypeDetails' => trim(var_export($counter ?? '', true))
+                        'geometryTypeDetails' => http_build_query($counter ?? '', '', ' ')
                     ]
                 );
             }
@@ -1240,8 +1241,25 @@ class GameListCreationMessageHandler
      */
     private function validateGameConfigComplete(): void
     {
-        $completeConfig = $this->gameSession->getGameConfigVersion()->getGameConfigComplete();
-        // https://github.com/justinrainbow/json-schema !!
-        $this->dataModel = $completeConfig['datamodel'] ?? throw new \Exception('nope.');
+        $gameConfigContents = json_decode($this->gameSession->getGameConfigVersion()->getGameConfigCompleteRaw());
+        $validator = new Validator();
+        $validator->validate(
+            $gameConfigContents,
+            json_decode(
+                file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
+            )
+        );
+        if (!$validator->isValid()) {
+            $message = '';
+            foreach ($validator->getErrors() as $error) {
+                $message .= sprintf("[%s] %s".PHP_EOL, $error['property'], $error['message']);
+            }
+            throw new \Exception($message);
+        }
+        $this->gameSessionLogger->info(
+            'Session config file contents were successfully validated.',
+            ['gameSession' => $this->gameSession->getId()]
+        );
+        $this->dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'];
     }
 }
