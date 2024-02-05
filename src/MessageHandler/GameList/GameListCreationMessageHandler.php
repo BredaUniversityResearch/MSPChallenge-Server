@@ -90,29 +90,19 @@ class GameListCreationMessageHandler
         try {
             $this->gameSessionLogFileHandling->empty($this->gameSession->getId());
             $this->validateGameConfigComplete();
-            $this->gameSessionLogger->notice(
-                'Session {name} creation initiated. This might take a while.',
-                ['name' => $this->gameSession->getName(), 'gameSession' => $this->gameSession->getId()]
-            );
+            $this->notice("Session {$this->gameSession->getName()} creation initiated. Please wait.");
             $this->dropSessionDatabase();
             $this->createSessionDatabase();
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
             $this->createSessionRunningConfig();
             $this->finaliseSession();
-            $this->gameSessionLogger->notice(
-                'Session {name} created and ready for use.',
-                ['name' => $this->gameSession->getName(), 'gameSession' => $this->gameSession->getId()]
-            );
+            $this->notice("Session {$this->gameSession->getName()} created and ready for use.");
             $state = 'healthy';
         } catch (\Throwable $e) {
-            $this->gameSessionLogger->error(
-                'Session {name} failed to create. Try to resolve the problem and retry. Problem: {problem}',
-                [
-                   'name' => $this->gameSession->getName(),
-                   'problem' => $e->getMessage().' '.$e->getTraceAsString(),
-                   'gameSession' => $this->gameSession->getId()
-                ]
+            $this->error(
+                "Session {$this->gameSession->getName()} failed to create. {problem}",
+                ['problem' => $e->getMessage().' '.$e->getTraceAsString()]
             );
             $state = 'failed';
         }
@@ -133,11 +123,8 @@ class GameListCreationMessageHandler
         $input->setInteractive(false);
         $output = new BufferedOutput();
         $app->doRun($input, $output);
-        $this->gameSessionLogger->info(
-            (string) $input.' resulted in: '.$output->fetch(),
-            ['gameSession' => $this->gameSession->getId()]
-        );
-        sleep(1); // todo: to confirm this is necessary
+        $this->info("{$input} resulted in: {$output->fetch()}");
+        sleep(1);
     }
 
     private function createSessionDatabase(): void
@@ -151,11 +138,8 @@ class GameListCreationMessageHandler
         $input->setInteractive(false);
         $output = new BufferedOutput();
         $app->doRun($input, $output);
-        $this->gameSessionLogger->info(
-            (string) $input.' resulted in: '.$output->fetch(),
-            ['gameSession' => $this->gameSession->getId()]
-        );
-        sleep(1); // todo: to confirm this is necessary
+        $this->info("{$input} resulted in: {$output->fetch()}");
+        sleep(1);
     }
 
     private function migrateSessionDatabase(): void
@@ -169,11 +153,8 @@ class GameListCreationMessageHandler
         $input->setInteractive(false);
         $output = new BufferedOutput();
         $app->doRun($input, $output);
-        $this->gameSessionLogger->info(
-            (string) $input.' resulted in: '.$output->fetch(),
-            ['gameSession' => $this->gameSession->getId()]
-        );
-        sleep(1); // todo: to confirm this is necessary
+        $this->info("{$input} resulted in: {$output->fetch()}");
+        sleep(1);
     }
 
     /**
@@ -192,10 +173,7 @@ class GameListCreationMessageHandler
         }
         $fileSystem->mkdir($sessionRasterStore);
         $fileSystem->mkdir($sessionRasterStore . '/archive');
-        $this->gameSessionLogger->info(
-            'Reset the session raster store at {sessionRasterStore}',
-            ['gameSession' => $this->gameSession->getId(), 'sessionRasterStore' => $sessionRasterStore]
-        );
+        $this->info("Reset the session raster store at {$sessionRasterStore}");
     }
 
     /**
@@ -215,10 +193,7 @@ class GameListCreationMessageHandler
             $sessionConfigStore,
             true
         );
-        $this->gameSessionLogger->info(
-            'Created the running session config file at {sessionConfigStore}',
-            ['gameSession' => $this->gameSession->getId(), 'sessionConfigStore' => $sessionConfigStore]
-        );
+        $this->info("Created the running session config file at {$sessionConfigStore}");
     }
 
     /**
@@ -259,10 +234,7 @@ class GameListCreationMessageHandler
         $game->setGamePlanningEraRealtimeComplete();
         $game->setGameEratime($this->dataModel['era_total_months']);
         $this->entityManager->persist($game);
-        $this->gameSessionLogger->info(
-            'Basic game parameters set up.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('Basic game parameters set up.');
     }
 
     /**
@@ -293,10 +265,7 @@ class GameListCreationMessageHandler
         foreach ($countries as $country) {
             $this->entityManager->persist($country);
         }
-        $this->gameSessionLogger->info(
-            'All countries set up.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('All countries set up.');
         $this->entityManager->flush(); //because we will look up countries later on
     }
 
@@ -321,10 +290,7 @@ class GameListCreationMessageHandler
         foreach ($this->dataModel['meta'] as $layerMetaData) {
             $layer = $this->normalizer->denormalize($layerMetaData, Layer::class);
             $layer->setContextCreatingGameSession($this->gameSession->getId()); // indicator for SessionEntityListener
-            $this->gameSessionLogger->info(
-                'Starting import of layer {layerName}...',
-                ['gameSession' => $this->gameSession->getId(), 'layerName' => $layer->getLayerName()]
-            );
+            $this->info("Starting import of layer {$layer->getLayerName()}...");
             if ($layer->getLayerGeotype() == "raster") {
                 $this->importLayerRasterData(
                     $layer,
@@ -336,13 +302,7 @@ class GameListCreationMessageHandler
                     $geoServerCommunicator
                 );
             }
-            $this->gameSessionLogger->info(
-                'Finished importing layer {layerName}.',
-                [
-                    'gameSession' => $this->gameSession->getId(),
-                    'layerName' => $layer->getLayerName()
-                ]
-            );
+            $this->info("Finished importing layer {$layer->getLayerName()}.");
             $this->importLayerTypeAvailabilityRestrictions($layer);
             $this->entityManager->persist($layer);
             $this->entityManager->flush();
@@ -361,22 +321,13 @@ class GameListCreationMessageHandler
                 $restriction->setRestrictionEndLayerType($typeId);
                 $restriction->setRestrictionSort('TYPE_UNAVAILABLE');
                 $restriction->setRestrictionType('ERROR');
-                $restriction->setRestrictionMessage(
-                    'Type not yet available at the plan implementation time.'
-                );
+                $restriction->setRestrictionMessage('Type not yet available at the plan implementation time.');
                 $layer->addRestrictionStart($restriction);
                 $layer->addRestrictionEnd($restriction);
             }
         }
         if ($counter > 0) {
-            $this->gameSessionLogger->info(
-                'Added {counter} availability restrictions for layer {layerName}.',
-                [
-                    'gameSession' => $this->gameSession->getId(),
-                    'layerName' => $layer->getLayerName(),
-                    'counter' => $counter
-                ]
-            );
+            $this->info("Added {$counter} availability restrictions for layer {$layer->getLayerName()}.");
         }
     }
 
@@ -399,37 +350,19 @@ class GameListCreationMessageHandler
             $this->params->get('app.session_raster_dir'))
             . "{$this->gameSession->getId()}/{$layer->getLayerName()}.png";
         if ($layer->getLayerDownloadFromGeoserver()) {
-            $this->gameSessionLogger->debug(
-                'Calling GeoServer to obtain raster metadata.',
-                ['gameSession' => $this->gameSession->getId()]
-            );
+            $this->debug('Calling GeoServer to obtain raster metadata.');
             $rasterMetaData = $geoServerCommunicator->getRasterMetaData(
                 $this->dataModel['region'],
                 $layer->getLayerName()
             );
-            $this->gameSessionLogger->debug(
-                "Call to GeoServer completed: {geoserverURL}",
-                [
-                    'gameSession' => $this->gameSession->getId(),
-                    'geoserverURL' => $geoServerCommunicator->getLastCompleteURLCalled()
-                ]
-            );
-            $this->gameSessionLogger->debug(
-                'Calling GeoServer to obtain actual raster data.',
-                ['gameSession' => $this->gameSession->getId()]
-            );
+            $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
+            $this->debug('Calling GeoServer to obtain actual raster data.');
             $rasterData = $geoServerCommunicator->getRasterDataThroughMetaData(
                 $this->dataModel['region'],
                 $layer,
                 $rasterMetaData
             );
-            $this->gameSessionLogger->debug(
-                "Call to GeoServer completed: {geoserverURL}",
-                [
-                    'gameSession' => $this->gameSession->getId(),
-                    'geoserverURL' => $geoServerCommunicator->getLastCompleteURLCalled()
-                ]
-            );
+            $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
             $fileSystem = new Filesystem();
             $fileSystem->dumpFile(
                 $rasterPath,
@@ -438,13 +371,8 @@ class GameListCreationMessageHandler
             $message = 'Successfully retrieved {layerName} and stored the raster file at {rasterPath}.';
         }
         $layer->setLayerRaster($rasterMetaData ?? null);
-        $this->gameSessionLogger->info(
-            $message ?? 'Successfully retrieved {layerName} without storing a raster file, as requested.',
-            [
-                'gameSession' => $this->gameSession->getId(),
-                'layerName' => $layer->getLayerName(),
-                'rasterPath' => $rasterPath
-            ]
+        $this->info(
+            $message ?? "Successfully retrieved {$layer->getLayerName()} without storing a raster file, as requested."
         );
     }
 
@@ -461,42 +389,23 @@ class GameListCreationMessageHandler
         GeoServerCommunicator $geoServerCommunicator
     ): void {
         if ($layer->getLayerDownloadFromGeoserver()) {
-            $this->gameSessionLogger->debug(
-                'Calling GeoServer to obtain layer description.',
-                ['gameSession' => $this->gameSession->getId()]
-            );
+            $this->debug('Calling GeoServer to obtain layer description.');
             $layersContainer = $geoServerCommunicator->getLayerDescription(
                 $this->dataModel['region'],
                 $layer->getLayerName()
             );
-            $this->gameSessionLogger->debug(
-                "Call to GeoServer completed: {geoserverURL}",
-                [
-                    'gameSession' => $this->gameSession->getId(),
-                    'geoserverURL' => $geoServerCommunicator->getLastCompleteURLCalled()
-                ]
-            );
+            $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
             foreach ($layersContainer as $layerWithin) {
-                $this->gameSessionLogger->debug(
-                    'Calling GeoServer to obtain layer geometry features.',
-                    ['gameSession' => $this->gameSession->getId()]
-                );
+                $this->debug('Calling GeoServer to obtain layer geometry features.');
                 $geoserverReturn = $geoServerCommunicator->getLayerGeometryFeatures($layerWithin['layerName']);
-                $this->gameSessionLogger->debug(
-                    "Call to GeoServer completed: {geoserverURL}",
-                    [
-                        'gameSession' => $this->gameSession->getId(),
-                        'geoserverURL' => $geoServerCommunicator->getLastCompleteURLCalled()
-                    ]
-                );
+                $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
                 $features = $geoserverReturn['features']
                     ?? throw new \Exception(
                         'Geometry data call did not return a features variable, so something must be wrong.'
                     );
-                $numFeatures = count($features);
-                $this->gameSessionLogger->debug(
-                    "Starting import of all {$numFeatures} layer geometry features.",
-                    ['gameSession' => $this->gameSession->getId()]
+                $this->debug(
+                    "Starting import of all {numFeatures} layer geometry features.",
+                    ['numFeatures' => count($features)]
                 );
                 foreach ($features as $feature) {
                     $geometryTypeAdded = $this->addLayerGeometryFromFeatureDataSet($layer, $feature);
@@ -504,12 +413,9 @@ class GameListCreationMessageHandler
                         $counter[$geometryTypeAdded]++ :
                         $counter[$geometryTypeAdded] = 1;
                 }
-                $this->gameSessionLogger->debug(
+                $this->debug(
                     "Import of layer geometry features completed: {geometryTypeDetails}.",
-                    [
-                        'gameSession' => $this->gameSession->getId(),
-                        'geometryTypeDetails' => http_build_query($counter ?? '', '', ' ')
-                    ]
+                    ['geometryTypeDetails' => http_build_query($counter ?? '', '', ' ')]
                 );
             }
             $message = 'Successfully retrieved {layerName} and stored the geometry in the database.';
@@ -517,9 +423,8 @@ class GameListCreationMessageHandler
                 $message .= ' Note that at least some of the geometry has auto-generated MSP IDs.';
             }
         }
-        $this->gameSessionLogger->info(
-            $message ?? 'Successfully retrieved {layerName} without storing geometry in the database, as requested.',
-            ['gameSession' => $this->gameSession->getId(), 'layerName' => $layer->getLayerName()]
+        $this->info(
+            $message ?? "Successfully set up {$layer->getLayerName()} without obtaining geometry, as requested."
         );
     }
 
@@ -575,13 +480,12 @@ class GameListCreationMessageHandler
         }
         $list = $this->entityManager->getRepository(Geometry::class)->findDuplicateMspids($layer->getLayerId());
         if (empty($list)) {
-            $this->gameSessionLogger->info(
-                'Check for duplicate MSP IDs among {layerName}\'s geometry complete. None found, yay!',
-                ['gameSession' => $this->gameSession->getId(), 'layerName' => $layer->getLayerName()]
+            $this->info(
+                "Check for duplicate MSP IDs among {$layer->getLayerName()}'s geometry complete. None found, yay!"
             );
             return;
         }
-        $message = 'Check for duplicate MSP IDs in {layerName] returned {counted} geometry records with duplicates.'
+        $message = "Duplicate MSP ID check in {$layer->getLayerName()} returned {counted} geometry records with duplicates."
             .PHP_EOL;
         $previousMspId = null;
         $previousGeometryData = null;
@@ -606,14 +510,7 @@ class GameListCreationMessageHandler
             }
             $previousMspId = $item['geometryMspid'];
         }
-        $this->gameSessionLogger->error(
-            $message,
-            [
-                'gameSession' => $this->gameSession->getId(),
-                'layerName' => $layer->getLayerName(),
-                'counted' => count($list)
-            ]
-        );
+        $this->error($message, ['counted' => count($list)]);
     }
 
     public static function ensureMultiData(&$geometry): void
@@ -630,15 +527,12 @@ class GameListCreationMessageHandler
     private function setupRestrictions(): void
     {
         if (empty($this->dataModel['restrictions'])) {
-            $this->gameSessionLogger->info(
-                'No layer restrictions to set up.',
-                ['gameSession' => $this->gameSession->getId()]
-            );
+            $this->info('No layer restrictions to set up.');
             return;
         }
-        $this->gameSessionLogger->info(
+        $this->info(
             'Found {count} restriction definitions, commencing setup.',
-            ['gameSession' => $this->gameSession->getId(), 'count' => count($this->dataModel['restrictions'])]
+            ['count' => count($this->dataModel['restrictions'])]
         );
         foreach ($this->dataModel['restrictions'] as $restrictionKey => $restrictionConfig) {
             foreach ($restrictionConfig as $restrictionItem) {
@@ -646,28 +540,22 @@ class GameListCreationMessageHandler
                 $startLayer = $this->entityManager
                     ->getRepository(Layer::class)->findOneBy(['layerName' => $restrictionItem['startlayer']]);
                 if (empty($startLayer)) {
-                    $this->gameSessionLogger->warning(
-                        "Start layer {startLayer} used in restriction {restrictionKey} does not seem to exist.".
-                        "Are you sure this layer has been added under the 'meta' object? Restriction skipped.",
-                        [
-                            'gameSession' => $this->gameSession->getId(),
-                            'restrictionKey' => $restrictionKey + 1,
-                            'startLayer' => $restrictionItem['startlayer']
-                        ]
+                    $this->warning(
+                        "Start layer {$restrictionItem['startlayer']} used in restriction {restrictionKey} ".
+                        "does not seem to exist. Are you sure this layer has been added under the 'meta' object? ".
+                        "Restriction skipped.",
+                        ['restrictionKey' => $restrictionKey + 1]
                     );
                     continue;
                 }
                 $endLayer = $this->entityManager
                     ->getRepository(Layer::class)->findOneBy(['layerName' => $restrictionItem['endlayer']]);
                 if (empty($endLayer)) {
-                    $this->gameSessionLogger->warning(
-                        "End layer {endLayer} used in restriction {restrictionKey} does not seem to exist. ".
-                        "Are you sure this layer has been added under the 'meta' object? Restriction skipped.",
-                        [
-                            'gameSession' => $this->gameSession->getId(),
-                            'restrictionKey' => $restrictionKey + 1,
-                            'endLayer' => $restrictionItem['endlayer']
-                        ]
+                    $this->warning(
+                        "End layer {$restrictionItem['endlayer']} used in restriction {restrictionKey} does ".
+                        "not seem to exist. Are you sure this layer has been added under the 'meta' object? ".
+                        "Restriction skipped.",
+                        ['restrictionKey' => $restrictionKey + 1]
                     );
                     continue;
                 }
@@ -683,10 +571,7 @@ class GameListCreationMessageHandler
             }
         }
         $this->entityManager->flush();
-        $this->gameSessionLogger->info(
-            'Restrictions setup complete.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('Restrictions setup complete.');
     }
 
     private function setupSimulations(): void
@@ -706,10 +591,7 @@ class GameListCreationMessageHandler
         $remainingSims = array_diff($possibleSims, $simulationsDone);
         foreach ($remainingSims as $remainingSim) {
             if (key_exists($remainingSim, $this->dataModel)) {
-                $this->gameSessionLogger->error(
-                    'Unable to set up {simulation}, as its SessionCreation function does not exist.',
-                    ['simulation' => $remainingSim, 'gameSession' => $this->gameSession->getId()]
-                );
+                $this->error("Unable to set up {$remainingSim}, as its SessionCreation function does not exist.");
             }
         }
     }
@@ -719,10 +601,7 @@ class GameListCreationMessageHandler
      */
     private function MELSessionCreation(): void
     {
-        $this->gameSessionLogger->info(
-            'Setting up simulation MEL...',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('Setting up simulation MEL...');
         $config = $this->dataModel['MEL'];
         if (isset($config["fishing"])) {
             $countries = $this->entityManager->getRepository(Country::class)->findBy(['countryIsManager' => 0]);
@@ -737,14 +616,9 @@ class GameListCreationMessageHandler
                             }
                         }
                         if (!$foundCountry) {
-                            $this->gameSessionLogger->error(
-                                "Country with ID {country} is missing a distribution entry in the ".
-                                "initialFishingDistribution table for fleet {fleet} for MEL.",
-                                [
-                                    'country' => $country->getCountryId(),
-                                    'fleet' => $fleet["name"],
-                                    'gameSession' => $this->gameSession->getId()
-                                ]
+                            $this->error(
+                                "Country with ID {$country->getCountryId()} is missing a distribution entry ".
+                                "in the initialFishingDistribution table for fleet {$fleet["name"]} for MEL."
                             );
                         }
                     }
@@ -767,10 +641,7 @@ class GameListCreationMessageHandler
         foreach ($config['outcomes'] as $outcome) {
             $this->setupMELLayer($outcome['name']);
         }
-        $this->gameSessionLogger->info(
-            'Finished setting up simulation MEL.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('Finished setting up simulation MEL.');
     }
 
     /**
@@ -809,10 +680,7 @@ class GameListCreationMessageHandler
      */
     private function SELSessionCreation(): void
     {
-        $this->gameSessionLogger->info(
-            'Setting up simulation SEL...',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('Setting up simulation SEL...');
         $boundsConfig = SELController::calculateAlignedSimulationBounds(
             $this->dataModel,
             $this->entityManager
@@ -856,18 +724,12 @@ class GameListCreationMessageHandler
             $selOutputLayer->setLayerRaster($layerRaster); //also sets by getting other raster metadata properties
             $this->entityManager->persist($selOutputLayer);
         }
-        $this->gameSessionLogger->info(
-            'Finished setting up simulation SEL.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('Finished setting up simulation SEL.');
     }
 
     private function CELSessionCreation(): void
     {
-        $this->gameSessionLogger->info(
-            'For CEL no setup is required at all. Ready to go.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('For CEL no setup is required at all. Ready to go.');
     }
 
     /**
@@ -877,15 +739,9 @@ class GameListCreationMessageHandler
     private function setupPlans(): void
     {
         if (empty($this->dataModel['plans'])) {
-            $this->gameSessionLogger->info(
-                'No plans defined, so nothing to import there.',
-                ['gameSession' => $this->gameSession->getId()]
-            );
+            $this->info('No plans defined, so nothing to import there.');
         }
-        $this->gameSessionLogger->info(
-            'Starting to import all plans.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('Starting to import all plans.');
         foreach ($this->dataModel['plans'] as $planConfig) {
             $plan = $this->normalizer->denormalize($planConfig, Plan::class);
             $plan->setCountry(
@@ -951,7 +807,6 @@ class GameListCreationMessageHandler
                         $this->findNewPersistentGeometry($layerGeometryConfig['base_geometry_info'], $geometry)
                     );
                     $derivedLayer->addGeometry($geometry);
-                    $this->entityManager->persist($derivedLayer);
                     if (!empty($layerGeometryConfig['cable'])) {
                         $planCableConnections[] = array_merge(
                             $layerGeometryConfig['cable'],
@@ -965,10 +820,6 @@ class GameListCreationMessageHandler
                         );
                     }
                 }
-                $this->entityManager->flush(); // have to be able to map old > new geometry IDs
-                foreach ($derivedLayer->getGeometry() as $geometry) {
-                    $this->oldToNewGeometryIDs[$geometry->getOldGeometryId()] = $geometry->getGeometryId();
-                }
                 $planLayer = new PlanLayer();
                 $planLayer->setLayer($derivedLayer);
                 $plan->addPlanLayer($planLayer);
@@ -980,19 +831,18 @@ class GameListCreationMessageHandler
                     );
                     $plan->addPlanDelete($planDelete);
                 }
+                $this->entityManager->persist($plan);
+                $this->entityManager->flush(); // have to be able to map old > new geometry IDs
+                foreach ($derivedLayer->getGeometry() as $geometry) {
+                    $this->oldToNewGeometryIDs[$geometry->getOldGeometryId()] = $geometry->getGeometryId();
+                }
             }
-            $this->entityManager->persist($plan);
-            $this->entityManager->flush(); // need to have a plan ID for next steps
             $this->setupPlannedCableConnections($planCableConnections);
             $this->setupPlannedEnergyOutput($planEnergyOutput);
             $this->setupPlannedGrids($planConfig['grids'], $plan);
-
             $plan->updatePlanConstructionTime();
             $this->entityManager->persist($plan);
-            $this->gameSessionLogger->info(
-                'Finished importing plan {planName}.',
-                ['planName' => $plan->getPlanName(), 'gameSession' => $this->gameSession->getId()]
-            );
+            $this->info("Finished importing plan {$plan->getPlanName()}.");
         }
         $this->entityManager->flush();
 
@@ -1155,23 +1005,16 @@ class GameListCreationMessageHandler
     private function setupObjectives(): void
     {
         if (empty($this->dataModel['objectives'])) {
-            $this->gameSessionLogger->info(
-                'No objectives to set up.',
-                ['gameSession' => $this->gameSession->getId()]
-            );
+            $this->info('No objectives to set up.');
             return;
         }
         foreach ($this->dataModel['objectives'] as $key => $objectiveConfig) {
             $country = $this->entityManager->getRepository(Country::class)
                 ->findOneBy(['countryId' => $objectiveConfig['country_id']]);
             if (empty($country)) {
-                $this->gameSessionLogger->warning(
+                $this->warning(
                     'Country {countryId} set in objective {key} does not seem to exist.',
-                    [
-                        'gameSession' => $this->gameSession->getId(),
-                        'key' => $key,
-                        'countryId' => $objectiveConfig['country_id']
-                    ]
+                    ['key' => $key, 'countryId' => $objectiveConfig['country_id']]
                 );
                 continue;
             }
@@ -1183,9 +1026,9 @@ class GameListCreationMessageHandler
             $objective->setObjectiveLastupdate(100);
             $this->entityManager->persist($objective);
         }
-        $this->gameSessionLogger->info(
+        $this->info(
             'A total of {count} objectives were set up successfully.',
-            ['gameSession' => $this->gameSession->getId(), 'count' => count($this->dataModel['objectives'])]
+            ['count' => count($this->dataModel['objectives'])]
         );
     }
 
@@ -1221,18 +1064,12 @@ class GameListCreationMessageHandler
             $game->setAsync(true);
             if (null !== $promise = $game->changeWatchdogState("SETUP")) {
                 await($promise);
-                $this->gameSessionLogger->info(
-                    'Watchdog and user access set up successfully.',
-                    ['gameSession' => $this->gameSession->getId()]
-                );
+                $this->info('Watchdog and user access set up successfully.');
                 return;
             };
             throw new \Exception('Watchdog failed to start up.');
         } else {
-            $this->gameSessionLogger->info(
-                'User access set up successfully, but Watchdog was not started as you are in test mode.',
-                ['gameSession' => $this->gameSession->getId()]
-            );
+            $this->info('User access set up successfully, but Watchdog was not started as you are in test mode.');
         }
     }
 
@@ -1256,10 +1093,38 @@ class GameListCreationMessageHandler
             }
             throw new \Exception($message);
         }
-        $this->gameSessionLogger->info(
-            'Session config file contents were successfully validated.',
-            ['gameSession' => $this->gameSession->getId()]
-        );
+        $this->info('Session config file contents were successfully validated.');
         $this->dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'];
+    }
+
+    private function log(string $level, string $message, array $contextVars = []): void
+    {
+        $contextVars['gameSession'] = $this->gameSession->getId();
+        $this->gameSessionLogger->$level($message, $contextVars);
+    }
+
+    private function info(string $message, array $contextVars = []): void
+    {
+        $this->log('info', $message, $contextVars);
+    }
+
+    private function debug(string $message, array $contextVars = []): void
+    {
+        $this->log('debug', $message, $contextVars);
+    }
+
+    private function notice(string $message, array $contextVars = []): void
+    {
+        $this->log('notice', $message, $contextVars);
+    }
+
+    private function warning(string $message, array $contextVars = []): void
+    {
+        $this->log('warning', $message, $contextVars);
+    }
+
+    private function error(string $message, array $contextVars = []): void
+    {
+        $this->log('error', $message, $contextVars);
     }
 }
