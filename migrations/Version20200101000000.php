@@ -26,7 +26,7 @@ final class Version20200101000000 extends MSPMigration
         // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $sql = <<< 'SQL'
 CREATE TABLE IF NOT EXISTS `country` (
-  `country_id` INT NOT NULL AUTO_INCREMENT,
+    `country_id` INT NOT NULL AUTO_INCREMENT,
   `country_name` VARCHAR(45) NULL,
   `country_colour` VARCHAR(45) NULL,
   `country_is_manager` TINYINT(1) NULL DEFAULT 0,
@@ -36,9 +36,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `user`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `user` (
-  `user_id` INT NOT NULL AUTO_INCREMENT,
+    `user_id` INT NOT NULL AUTO_INCREMENT,
   `user_name` VARCHAR(45) NULL,
   `user_lastupdate` DOUBLE NOT NULL,
   `user_country_id` INT NOT NULL,
@@ -55,9 +55,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `plan`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `plan` (
-  `plan_id` INT NOT NULL AUTO_INCREMENT,
+    `plan_id` INT NOT NULL AUTO_INCREMENT,
   `plan_country_id` INT NOT NULL,
   `plan_name` VARCHAR(75) NOT NULL,
   `plan_description` TEXT NOT NULL DEFAULT '',
@@ -90,9 +90,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `layer`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `layer` (
-  `layer_id` INT NOT NULL AUTO_INCREMENT,
+    `layer_id` INT NOT NULL AUTO_INCREMENT,
   `layer_original_id` INT NULL,
   `layer_active` TINYINT(1) NOT NULL DEFAULT 1,
   `layer_selectable` TINYINT(1) NOT NULL DEFAULT 1,
@@ -135,9 +135,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `geometry`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `geometry` (
-  `geometry_id` INT NOT NULL AUTO_INCREMENT,
+    `geometry_id` INT NOT NULL AUTO_INCREMENT,
   `geometry_layer_id` INT NOT NULL,
   `geometry_persistent` INT NULL,
   `geometry_FID` VARCHAR(75) NULL,
@@ -153,6 +153,7 @@ CREATE TABLE IF NOT EXISTS `geometry` (
   INDEX `fk_gis_layer1_idx` (`geometry_layer_id` ASC),
   INDEX `geometry_persistent` (`geometry_persistent` ASC),
   INDEX `fk_geometry_country1_idx` (`geometry_country_id` ASC),
+  UNIQUE `uq_geometry_data`(`geometry_geometry`, `geometry_data`),
   CONSTRAINT `fk_gis_layer1`
     FOREIGN KEY (`geometry_layer_id`)
     REFERENCES `layer` (`layer_id`)
@@ -168,9 +169,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `game`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `game` (
-  `game_id` INT NOT NULL AUTO_INCREMENT,
+    `game_id` INT NOT NULL AUTO_INCREMENT,
   `game_start` INT(5) NULL DEFAULT 2010 COMMENT 'starting year',
   `game_state` ENUM('SETUP', 'PLAY', 'SIMULATION', 'FASTFORWARD', 'PAUSE', 'END') NULL DEFAULT 'SETUP',
   `game_lastupdate` DOUBLE NULL DEFAULT 0,
@@ -193,9 +194,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `plan_layer`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `plan_layer` (
-  `plan_layer_id` INT NOT NULL AUTO_INCREMENT,
+    `plan_layer_id` INT NOT NULL AUTO_INCREMENT,
   `plan_layer_plan_id` INT NOT NULL,
   `plan_layer_layer_id` INT NOT NULL,
   `plan_layer_state` VARCHAR(50) NULL DEFAULT 'WAIT',
@@ -217,9 +218,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `plan_message`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `plan_message` (
-  `plan_message_id` INT NOT NULL AUTO_INCREMENT,
+    `plan_message_id` INT NOT NULL AUTO_INCREMENT,
   `plan_message_plan_id` INT NOT NULL,
   `plan_message_country_id` INT NOT NULL,
   `plan_message_user_name` VARCHAR(128) NULL,
@@ -243,9 +244,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `event_log`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `event_log` (
-  `event_log_id` INT NOT NULL AUTO_INCREMENT,
+    `event_log_id` INT NOT NULL AUTO_INCREMENT,
   `event_log_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `event_log_source` VARCHAR(75) NOT NULL COMMENT 'What triggered this (Server, MEL, SEL, CEL, Game)?',
   `event_log_severity` ENUM('Warning', 'Error', 'Fatal') NOT NULL DEFAULT 'Warning',
@@ -257,9 +258,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `mel_layer`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mel_layer` (
-  `mel_layer_id` INT NOT NULL AUTO_INCREMENT,
+    `mel_layer_id` INT NOT NULL AUTO_INCREMENT,
   `mel_layer_pressurelayer` INT NOT NULL,
   `mel_layer_layer_id` INT NOT NULL,
   PRIMARY KEY (`mel_layer_id`),
@@ -280,9 +281,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `energy_connection`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `energy_connection` (
-  `energy_connection_start_id` INT NOT NULL COMMENT 'Database ID of the start geometry\n',
+    `energy_connection_start_id` INT NOT NULL COMMENT 'Database ID of the start geometry\n',
   `energy_connection_end_id` INT NOT NULL COMMENT 'Database ID of the end geometry\n',
   `energy_connection_cable_id` INT NOT NULL COMMENT 'Database ID of the cable geometry\n',
   `energy_connection_start_coordinates` VARCHAR(255) NULL,
@@ -311,9 +312,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `grid`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `grid` (
-  `grid_id` INT NOT NULL AUTO_INCREMENT,
+    `grid_id` INT NOT NULL AUTO_INCREMENT,
   `grid_name` VARCHAR(75) NULL,
   `grid_lastupdate` DOUBLE NULL,
   `grid_active` TINYINT NULL DEFAULT 1,
@@ -333,9 +334,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `energy_output`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `energy_output` (
-  `energy_output_id` INT NOT NULL AUTO_INCREMENT,
+    `energy_output_id` INT NOT NULL AUTO_INCREMENT,
   `energy_output_geometry_id` INT NOT NULL,
   `energy_output_capacity` VARCHAR(20) NOT NULL DEFAULT 0 COMMENT 'Actually 64bit integer field. ',
   `energy_output_maxcapacity` VARCHAR(20) NOT NULL DEFAULT 0 COMMENT 'Actually 64bit integer field. ',
@@ -353,9 +354,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `grid_energy`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `grid_energy` (
-  `grid_energy_id` INT NOT NULL AUTO_INCREMENT,
+    `grid_energy_id` INT NOT NULL AUTO_INCREMENT,
   `grid_energy_grid_id` INT NOT NULL,
   `grid_energy_country_id` INT NOT NULL,
   `grid_energy_expected` VARCHAR(20) NULL DEFAULT 0 COMMENT 'Actually 64bit integer field. ',
@@ -377,9 +378,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `grid_socket`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `grid_socket` (
-  `grid_socket_grid_id` INT NOT NULL,
+    `grid_socket_grid_id` INT NOT NULL,
   `grid_socket_geometry_id` INT NOT NULL,
   PRIMARY KEY (`grid_socket_grid_id`, `grid_socket_geometry_id`),
   INDEX `fk_grid_socket_geometry1_idx` (`grid_socket_geometry_id` ASC),
@@ -398,9 +399,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `fishing`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `fishing` (
-  `fishing_id` INT NOT NULL AUTO_INCREMENT,
+    `fishing_id` INT NOT NULL AUTO_INCREMENT,
   `fishing_country_id` INT NOT NULL,
   `fishing_plan_id` INT NOT NULL,
   `fishing_type` VARCHAR(75) NULL,
@@ -423,9 +424,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `restriction`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `restriction` (
-  `restriction_id` INT NOT NULL AUTO_INCREMENT,
+    `restriction_id` INT NOT NULL AUTO_INCREMENT,
   `restriction_start_layer_id` INT NOT NULL,
   `restriction_start_layer_type` VARCHAR(45) NULL,
   `restriction_sort` ENUM('INCLUSION', 'EXCLUSION', 'TYPE_UNAVAILABLE') NOT NULL DEFAULT 'INCLUSION',
@@ -452,9 +453,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `kpi`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `kpi` (
-  `kpi_id` INT NOT NULL AUTO_INCREMENT,
+    `kpi_id` INT NOT NULL AUTO_INCREMENT,
   `kpi_name` VARCHAR(127) NULL,
   `kpi_value` FLOAT NULL,
   `kpi_month` INT NULL,
@@ -471,9 +472,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `warning`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `warning` (
-  `warning_id` INT NOT NULL AUTO_INCREMENT,
+    `warning_id` INT NOT NULL AUTO_INCREMENT,
   `warning_last_update` DOUBLE NULL,
   `warning_active` TINYINT(1) NULL DEFAULT 1,
   `warning_layer_id` INT NOT NULL,
@@ -506,9 +507,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `plan_delete`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `plan_delete` (
-  `plan_delete_plan_id` INT NOT NULL,
+    `plan_delete_plan_id` INT NOT NULL,
   `plan_delete_geometry_persistent` INT NULL,
   `plan_delete_layer_id` INT NOT NULL,
   INDEX `fk_plan_delete_layer1_idx` (`plan_delete_layer_id` ASC),
@@ -527,9 +528,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `grid_source`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `grid_source` (
-  `grid_source_grid_id` INT NOT NULL,
+    `grid_source_grid_id` INT NOT NULL,
   `grid_source_geometry_id` INT NOT NULL,
   PRIMARY KEY (`grid_source_grid_id`, `grid_source_geometry_id`),
   INDEX `fk_grid_source_grid1_idx` (`grid_source_grid_id` ASC),
@@ -548,9 +549,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `grid_removed`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `grid_removed` (
-  `grid_removed_plan_id` INT NOT NULL,
+    `grid_removed_plan_id` INT NOT NULL,
   `grid_removed_grid_persistent` INT NOT NULL,
   INDEX `fk_table1_plan1_idx` (`grid_removed_plan_id` ASC),
   CONSTRAINT `fk_table1_plan1`
@@ -563,9 +564,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `objective`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `objective` (
-  `objective_id` INT NOT NULL AUTO_INCREMENT,
+    `objective_id` INT NOT NULL AUTO_INCREMENT,
   `objective_country_id` INT NOT NULL,
   `objective_title` VARCHAR(128) NOT NULL,
   `objective_description` VARCHAR(1024) NOT NULL,
@@ -585,9 +586,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `task`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `task` (
-  `task_id` INT NOT NULL AUTO_INCREMENT,
+    `task_id` INT NOT NULL AUTO_INCREMENT,
   `task_objective_id` INT NOT NULL,
   `task_sectorname` VARCHAR(45) NULL,
   `task_category` VARCHAR(75) NULL,
@@ -607,9 +608,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `approval`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `approval` (
-  `approval_plan_id` INT NOT NULL,
+    `approval_plan_id` INT NOT NULL,
   `approval_country_id` INT NOT NULL,
   `approval_vote` INT NULL DEFAULT -1,
   INDEX `fk_table1_plan2_idx` (`approval_plan_id` ASC),
@@ -629,9 +630,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `energy_kpi`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `energy_kpi` (
-  `energy_kpi_id` INT NOT NULL AUTO_INCREMENT,
+    `energy_kpi_id` INT NOT NULL AUTO_INCREMENT,
   `energy_kpi_grid_id` INT NOT NULL,
   `energy_kpi_month` INT NULL,
   `energy_kpi_country_id` INT NOT NULL,
@@ -656,9 +657,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `plan_restriction_area`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `plan_restriction_area` (
-  `plan_restriction_area_plan_id` INT NOT NULL,
+    `plan_restriction_area_plan_id` INT NOT NULL,
   `plan_restriction_area_layer_id` INT NOT NULL,
   `plan_restriction_area_country_id` INT NOT NULL,
   `plan_restriction_area_entity_type` INT NOT NULL,
@@ -687,9 +688,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `shipping_warning`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `shipping_warning` (
-  `shipping_warning_id` INT NOT NULL AUTO_INCREMENT,
+    `shipping_warning_id` INT NOT NULL AUTO_INCREMENT,
   `shipping_warning_lastupdate` DOUBLE NOT NULL,
   `shipping_warning_source_geometry_persistent_id` INT NOT NULL,
   `shipping_warning_destination_geometry_persistent_id` INT NOT NULL,
@@ -714,9 +715,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `game_session`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `game_session` (
-  `game_session_watchdog_address` VARCHAR(255) NOT NULL DEFAULT '',
+    `game_session_watchdog_address` VARCHAR(255) NOT NULL DEFAULT '',
   `game_session_watchdog_token` BIGINT UNSIGNED NOT NULL,
   `game_session_password_admin` TEXT NOT NULL,
   `game_session_password_player` TEXT NOT NULL)
@@ -725,18 +726,18 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `game_session_api_version`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `game_session_api_version` (
-  `game_session_api_version_server` VARCHAR(16) NOT NULL,
+    `game_session_api_version_server` VARCHAR(16) NOT NULL,
   PRIMARY KEY (`game_session_api_version_server`))
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
 -- Table `api_token`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `api_token` (
-  `api_token_id` INT NOT NULL AUTO_INCREMENT,
+    `api_token_id` INT NOT NULL AUTO_INCREMENT,
   `api_token_token` BIGINT UNSIGNED NOT NULL COMMENT 'UUID_SHORT()',
   `api_token_valid_until` TIMESTAMP NOT NULL,
   `api_token_scope` INT NOT NULL DEFAULT 1,
@@ -747,9 +748,9 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `api_batch`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `api_batch` (
-  `api_batch_id` int NOT NULL AUTO_INCREMENT,
+    `api_batch_id` int NOT NULL AUTO_INCREMENT,
   `api_batch_state` enum('Setup','Queued','Executing','Success','Failed') NOT NULL DEFAULT 'Setup',
   `api_batch_country_id` int NOT NULL,
   `api_batch_user_id` int NOT NULL,
@@ -764,9 +765,9 @@ CREATE TABLE IF NOT EXISTS `api_batch` (
 
 -- -----------------------------------------------------
 -- Table `api_batch_task`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `api_batch_task` (
-  `api_batch_task_id` INT NOT NULL AUTO_INCREMENT,
+    `api_batch_task_id` INT NOT NULL AUTO_INCREMENT,
   `api_batch_task_batch_id` INT NOT NULL,
   `api_batch_task_group` INT NOT NULL,
   `api_batch_task_reference_identifier` VARCHAR(32) NOT NULL COMMENT 'Client defined identifier that can be used to reference the results of this call by later calls.',

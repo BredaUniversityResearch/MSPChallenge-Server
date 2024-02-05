@@ -1,6 +1,7 @@
 <?php
-// the reason this isn't split over multiple Doctrine Entity listeners, is because then the services.yaml config
-// would have needed a specification of the entity manager is use for said listener:
+// Important!
+// The reason this isn't split over multiple Doctrine Entity listeners, is because then the services.yaml config
+// would have needed a specification of the entity manager in use for said listener (which is impossible):
 // App\Entity\Listener\GameListener:
 //  tags:
 //   - { name: 'doctrine.orm.entity_listener',
@@ -12,13 +13,16 @@
 namespace App\EventListener;
 
 use App\Entity\Game;
+use App\Entity\Layer;
 use Doctrine\ORM\Event\PrePersistEventArgs;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class SessionEntityListener
 {
     public function __construct(
-        private readonly ParameterBagInterface $params
+        private readonly ParameterBagInterface $params,
+        private readonly LoggerInterface $gameSessionLogger
     ) {
     }
 
@@ -26,6 +30,8 @@ class SessionEntityListener
     {
         if ($event->getObject() instanceof Game) {
             $this->prePersistGame($event);
+        } elseif ($event->getObject() instanceof Layer) {
+            $this->prePersistLayer($event);
         }
     }
 
@@ -37,5 +43,35 @@ class SessionEntityListener
         $game->setGameConfigfile(sprintf($this->params->get('app.session_config_name'), $game->getGameId()));
         $game->setGameAutosaveMonthInterval($this->params->get('app.game_auto_save_interval'));
         $game->setGameIsRunningUpdate(0);
+    }
+
+    private function prePersistLayer(PrePersistEventArgs $event): void
+    {
+        $layer = $event->getObject();
+        if (is_null($layer->getContextCreatingGameSession())) {
+            return;
+        }
+        $geometryCoordsDataSets = [];
+        foreach ($layer->getGeometry() as $geometry) {
+            $array = [
+                'coords' => $geometry->getGeometryGeometry(),
+                'data' => $geometry->getGeometryData()
+            ];
+            if (in_array($array, $geometryCoordsDataSets)) {
+                $this->gameSessionLogger->warning(
+                    'Avoided adding duplicate geometry (based on the combination of coordinates and complete '.
+                    'properties set) to layer {layer}. Some information about the geometry: {geometry}',
+                    [
+                        'gameSession' => $layer->getContextCreatingGameSession(),
+                        'layer' => "{$layer->getLayerName()}",
+                        'geometry' => substr($geometry->getGeometryGeometry(), 0, 40).'... - '.
+                            substr($geometry->getGeometryData(), 0, 40).'...'
+                    ]
+                );
+                $layer->removeGeometry($geometry);
+            } else {
+                $geometryCoordsDataSets[] = $array;
+            }
+        }
     }
 }

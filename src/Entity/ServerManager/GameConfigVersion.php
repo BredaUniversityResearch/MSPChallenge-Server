@@ -63,6 +63,11 @@ class GameConfigVersion
     private ?string $clientVersions = null;
 
     /**
+     * @param array $gameConfigCompleteRaw
+     */
+    private ?string $gameConfigCompleteRaw = null;
+
+    /**
      * @param array $gameConfigComplete
      */
     private ?array $gameConfigComplete = null;
@@ -211,6 +216,17 @@ class GameConfigVersion
     {
         $this->gameConfigComplete = $gameConfigComplete;
 
+        return $this;
+    }
+
+    public function getGameConfigCompleteRaw(): ?string
+    {
+        return $this->gameConfigCompleteRaw;
+    }
+
+    public function setGameConfigCompleteRaw(?string $gameConfigCompleteRaw): GameConfigVersion
+    {
+        $this->gameConfigCompleteRaw = $gameConfigCompleteRaw;
         return $this;
     }
 }

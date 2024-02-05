@@ -19,8 +19,9 @@ class GameConfigVersionListener
     public function postLoad(GameConfigVersion $gameConfigVersion, PostLoadEventArgs $event): void
     {
         $path = $this->kernel->getProjectDir().'/ServerManager/configfiles/'.$gameConfigVersion->getFilePath();
+        $gameConfigContentCompleteRaw = file_get_contents($path);
         $gameConfigContentComplete = json_decode(
-            file_get_contents($path),
+            $gameConfigContentCompleteRaw,
             true
         );
         if ($gameConfigContentComplete === false) {
@@ -28,6 +29,7 @@ class GameConfigVersionListener
                 'Cannot read contents of the session\'s chosen configuration file: '.$path
             );
         }
+        $gameConfigVersion->setGameConfigCompleteRaw($gameConfigContentCompleteRaw);
         $gameConfigVersion->setGameConfigComplete($gameConfigContentComplete);
     }
 }

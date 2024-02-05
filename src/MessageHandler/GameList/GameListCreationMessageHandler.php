@@ -2,7 +2,6 @@
 
 namespace App\MessageHandler\GameList;
 
-use App\Controller\SessionAPI\PlanController;
 use App\Controller\SessionAPI\SELController;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
@@ -28,7 +27,6 @@ use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
 use App\Repository\ServerManager\GameListRepository;
 use App\VersionsProvider;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -225,6 +223,14 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      * @throws ExceptionInterface
+     * @throws ExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
      */
     private function finaliseSession(): void
     {
@@ -235,7 +241,7 @@ class GameListCreationMessageHandler
         $this->setupSimulations();
         $this->setupObjectives();
         $this->setupPlans();
-        /*$this->setupGameWatchdogAndAccess();*/
+        $this->setupGameWatchdogAndAccess();
         $this->entityManager->flush();
     }
 
@@ -294,9 +300,15 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws Exception
      * @throws \Exception
      * @throws ExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
      */
     private function importLayerData(): void
     {
@@ -307,6 +319,7 @@ class GameListCreationMessageHandler
 
         foreach ($this->dataModel['meta'] as $layerMetaData) {
             $layer = $this->normalizer->denormalize($layerMetaData, Layer::class);
+            $layer->setContextCreatingGameSession($this->gameSession->getId()); // indicator for SessionEntityListener
             $this->gameSessionLogger->info(
                 'Starting import of layer {layerName}...',
                 ['gameSession' => $this->gameSession->getId(), 'layerName' => $layer->getLayerName()]
@@ -373,6 +386,8 @@ class GameListCreationMessageHandler
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
      */
     private function importLayerRasterData(
         Layer $layer,
@@ -434,6 +449,11 @@ class GameListCreationMessageHandler
 
     /**
      * @throws \Exception
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
     private function importLayerGeometryData(
         Layer $layer,
@@ -478,50 +498,16 @@ class GameListCreationMessageHandler
                     ['gameSession' => $this->gameSession->getId()]
                 );
                 foreach ($features as $feature) {
-                    $geometryData = $feature['geometry'] ?? throw new \Exception(
-                        'No geometry within returned features variable, so something must be wrong.'
-                    );
-                    self::ensureMultiData($geometryData);
-                    $feature['properties']['country_object'] = $this->entityManager->getRepository(Country::class)
-                        ->find($feature['properties']['country_id'] ?? null);
-                    (isset($counter[$geometryData['type']])) ?
-                        $counter[$geometryData['type']]++ : $counter[$geometryData['type']] = 1;
-                    if (strcasecmp($geometryData['type'], 'MultiPolygon') == 0) {
-                        foreach ($geometryData['coordinates'] as $multiPolygon) {
-                            if (!is_array($multiPolygon)) {
-                                continue;
-                            }
-                            $geometryToSubtractFrom = null;
-                            foreach ($multiPolygon as $key => $polygon) {
-                                $geometry = new Geometry($layer);
-                                $geometry->setGeometryGeometry($polygon);
-                                $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
-                                $geometry->setGeometryToSubtractFrom($geometryToSubtractFrom);
-                                $layer->addGeometry($geometry);
-                                if (sizeof($multiPolygon) > 1 && $key == 0) {
-                                    $geometryToSubtractFrom = $geometry;
-                                }
-                            }
-                        }
-                    } elseif (strcasecmp($geometryData['type'], 'MultiLineString') == 0) {
-                        foreach ($geometryData['coordinates'] as $line) {
-                            $geometry = new Geometry($layer);
-                            $geometry->setGeometryGeometry($line);
-                            $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
-                            $layer->addGeometry($geometry);
-                        }
-                    } elseif (strcasecmp($geometryData['type'], 'MultiPoint') == 0) {
-                        $geometry = new Geometry($layer);
-                        $geometry->setGeometryGeometry($geometryData["coordinates"]);
-                        $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
-                        $layer->addGeometry($geometry);
-                    }
+                    $geometryTypeAdded = $this->addLayerGeometryFromFeatureDataSet($layer, $feature);
+                    isset($counter[$geometryTypeAdded]) ?
+                        $counter[$geometryTypeAdded]++ :
+                        $counter[$geometryTypeAdded] = 1;
                 }
                 $this->gameSessionLogger->debug(
                     "Import of  layer geometry features completed: {geometryTypeDetails}.",
                     [
                         'gameSession' => $this->gameSession->getId(),
-                        'geometryTypeDetails' => var_export($counter ?? '', true)
+                        'geometryTypeDetails' => trim(var_export($counter ?? '', true))
                     ]
                 );
             }
@@ -534,6 +520,51 @@ class GameListCreationMessageHandler
             $message ?? 'Successfully retrieved {layerName} without storing geometry in the database, as requested.',
             ['gameSession' => $this->gameSession->getId(), 'layerName' => $layer->getLayerName()]
         );
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function addLayerGeometryFromFeatureDataSet(Layer $layer, array $feature): string
+    {
+        $geometryData = $feature['geometry'] ?? throw new \Exception(
+            'No geometry within returned features variable, so something must be wrong.'
+        );
+        self::ensureMultiData($geometryData);
+        $feature['properties']['country_object'] = (!empty($feature['properties']['country_id'])) ?
+            $this->entityManager->getRepository(Country::class)->find($feature['properties']['country_id']) :
+            null;
+        if (strcasecmp($geometryData['type'], 'MultiPolygon') == 0) {
+            foreach ($geometryData['coordinates'] as $multiPolygon) {
+                if (!is_array($multiPolygon)) {
+                    continue;
+                }
+                $geometryToSubtractFrom = null;
+                foreach ($multiPolygon as $key => $polygon) {
+                    $geometry = new Geometry($layer);
+                    $geometry->setGeometryGeometry($polygon);
+                    $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
+                    $geometry->setGeometryToSubtractFrom($geometryToSubtractFrom);
+                    $layer->addGeometry($geometry);
+                    if (sizeof($multiPolygon) > 1 && $key == 0) {
+                        $geometryToSubtractFrom = $geometry;
+                    }
+                }
+            }
+        } elseif (strcasecmp($geometryData['type'], 'MultiLineString') == 0) {
+            foreach ($geometryData['coordinates'] as $line) {
+                $geometry = new Geometry($layer);
+                $geometry->setGeometryGeometry($line);
+                $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
+                $layer->addGeometry($geometry);
+            }
+        } elseif (strcasecmp($geometryData['type'], 'MultiPoint') == 0) {
+            $geometry = new Geometry($layer);
+            $geometry->setGeometryGeometry($geometryData["coordinates"]);
+            $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
+            $layer->addGeometry($geometry);
+        }
+        return $geometryData['type'];
     }
 
     public function checkForDuplicateMspids(Layer $layer): void
@@ -667,15 +698,7 @@ class GameListCreationMessageHandler
                 && is_array($this->dataModel[$possibleSim])
                 && method_exists($this, $simSessionCreationMethod)
             ) {
-                $this->gameSessionLogger->info(
-                    'Setting up simulation {simulation}...',
-                    ['simulation' => $possibleSim, 'gameSession' => $this->gameSession->getId()]
-                );
                 $this->$simSessionCreationMethod();
-                $this->gameSessionLogger->info(
-                    'Finished setting up simulation {simulation}.',
-                    ['simulation' => $possibleSim, 'gameSession' => $this->gameSession->getId()]
-                );
                 $simulationsDone[] = $possibleSim;
             }
         }
@@ -683,7 +706,7 @@ class GameListCreationMessageHandler
         foreach ($remainingSims as $remainingSim) {
             if (key_exists($remainingSim, $this->dataModel)) {
                 $this->gameSessionLogger->error(
-                    'Unable to set up {simulation}.',
+                    'Unable to set up {simulation}, as its SessionCreation function does not exist.',
                     ['simulation' => $remainingSim, 'gameSession' => $this->gameSession->getId()]
                 );
             }
@@ -695,6 +718,10 @@ class GameListCreationMessageHandler
      */
     private function MELSessionCreation(): void
     {
+        $this->gameSessionLogger->info(
+            'Setting up simulation MEL...',
+            ['gameSession' => $this->gameSession->getId()]
+        );
         $config = $this->dataModel['MEL'];
         if (isset($config["fishing"])) {
             $countries = $this->entityManager->getRepository(Country::class)->findBy(['countryIsManager' => 0]);
@@ -739,6 +766,10 @@ class GameListCreationMessageHandler
         foreach ($config['outcomes'] as $outcome) {
             $this->setupMELLayer($outcome['name']);
         }
+        $this->gameSessionLogger->info(
+            'Finished setting up simulation MEL.',
+            ['gameSession' => $this->gameSession->getId()]
+        );
     }
 
     /**
@@ -777,6 +808,10 @@ class GameListCreationMessageHandler
      */
     private function SELSessionCreation(): void
     {
+        $this->gameSessionLogger->info(
+            'Setting up simulation SEL...',
+            ['gameSession' => $this->gameSession->getId()]
+        );
         $boundsConfig = SELController::calculateAlignedSimulationBounds(
             $this->dataModel,
             $this->entityManager
@@ -820,11 +855,18 @@ class GameListCreationMessageHandler
             $selOutputLayer->setLayerRaster($layerRaster); //also sets by getting other raster metadata properties
             $this->entityManager->persist($selOutputLayer);
         }
+        $this->gameSessionLogger->info(
+            'Finished setting up simulation SEL.',
+            ['gameSession' => $this->gameSession->getId()]
+        );
     }
 
     private function CELSessionCreation(): void
     {
-        //CEL does not need anything here to make it work
+        $this->gameSessionLogger->info(
+            'For CEL no setup is required at all. Ready to go.',
+            ['gameSession' => $this->gameSession->getId()]
+        );
     }
 
     /**
@@ -839,6 +881,10 @@ class GameListCreationMessageHandler
                 ['gameSession' => $this->gameSession->getId()]
             );
         }
+        $this->gameSessionLogger->info(
+            'Starting to import all plans.',
+            ['gameSession' => $this->gameSession->getId()]
+        );
         foreach ($this->dataModel['plans'] as $planConfig) {
             $plan = $this->normalizer->denormalize($planConfig, Plan::class);
             $plan->setCountry(
@@ -846,7 +892,8 @@ class GameListCreationMessageHandler
             );
             $plan->setPlanState('APPROVED');
             $planCableConnections = [];
-            foreach ($plan['fishing'] as $fishingConfig) {
+            $planEnergyOutput = [];
+            foreach ($planConfig['fishing'] as $fishingConfig) {
                 $fishing = $this->normalizer->denormalize($fishingConfig, Fishing::class);
                 $fishing->setCountry(
                     $this->entityManager->getRepository(Country::class)->find($fishingConfig['fishing_country_id'])
@@ -854,7 +901,7 @@ class GameListCreationMessageHandler
                 $plan->addFishing($fishing);
             }
 
-            foreach ($plan['messages'] as $planMessageConfig) {
+            foreach ($planConfig['messages'] as $planMessageConfig) {
                 $planMessage = new PlanMessage();
                 $planMessage->setCountry(
                     $this->entityManager->getRepository(Country::class)->find($planMessageConfig['country_id'])
@@ -865,7 +912,7 @@ class GameListCreationMessageHandler
                 $plan->addPlanMessage($planMessage);
             }
 
-            foreach ($plan['restriction_settings'] as $restrictionAreaConfig) {
+            foreach ($planConfig['restriction_settings'] as $restrictionAreaConfig) {
                 $planRestrictionArea = new PlanRestrictionArea();
                 $planRestrictionArea->setLayer(
                     $this->entityManager->getRepository(Layer::class)->findOneBy(
@@ -880,7 +927,7 @@ class GameListCreationMessageHandler
                 $plan->addPlanRestrictionArea($planRestrictionArea);
             }
 
-            foreach ($plan['layers'] as $layerConfig) {
+            foreach ($planConfig['layers'] as $layerConfig) {
                 $derivedLayer = new Layer();
                 $derivedLayer->setOriginalLayer(
                     $this->entityManager->getRepository(Layer::class)->findOneBy(
@@ -889,28 +936,37 @@ class GameListCreationMessageHandler
                 );
                 foreach ($layerConfig['geometry'] as $layerGeometryConfig) {
                     $geometry = new Geometry();
+                    $geometry->setOldGeometryId($layerGeometryConfig['geometry_id']);
                     $geometry->setGeometryData($layerGeometryConfig['data'] ?? null);
                     $geometry->setGeometryFID($layerGeometryConfig['FID']);
                     $geometry->setGeometryGeometry($layerGeometryConfig['geometry']);
-                    $geometry->setCountry(
-                        $this->entityManager->getRepository(Country::class)->find(
+                    if (!is_null($layerGeometryConfig['country'])) {
+                        $geometry->setCountry($this->entityManager->getRepository(Country::class)->find(
                             $layerGeometryConfig['country']
-                        )
-                    );
+                        ));
+                    }
                     $geometry->setGeometryType($layerGeometryConfig['type']);
                     $geometry->setOriginalGeometry(
-                        $this->findNewPersistentGeometry($layerGeometryConfig['base_geometry_info'])
+                        $this->findNewPersistentGeometry($layerGeometryConfig['base_geometry_info'], $geometry)
                     );
                     $derivedLayer->addGeometry($geometry);
                     $this->entityManager->persist($derivedLayer);
-                    $this->entityManager->flush(); // have to be able to map old > new geometry IDs
                     if (!empty($layerGeometryConfig['cable'])) {
-                        $layerGeometryConfig['cable']['geometry_id'] = $geometry->getGeometryId();
-                        $combinedCableArray['cable'] = $layerGeometryConfig['cable'];
-                        $combinedCableArray['energy_output'] = $layerGeometryConfig['energy_output'];
-                        $planCableConnections[] = $combinedCableArray;
+                        $planCableConnections[] = array_merge(
+                            $layerGeometryConfig['cable'],
+                            $layerGeometryConfig['base_geometry_info']
+                        );
                     }
-                    $this->oldToNewGeometryIDs[$layerGeometryConfig['geometry_id']] = $geometry->getGeometryId();
+                    if (!empty($layerGeometryConfig['energy_output'])) {
+                        $planEnergyOutput[] = array_merge(
+                            $layerGeometryConfig['energy_output'],
+                            $layerGeometryConfig['base_geometry_info']
+                        );
+                    }
+                }
+                $this->entityManager->flush(); // have to be able to map old > new geometry IDs
+                foreach ($derivedLayer->getGeometry() as $geometry) {
+                    $this->oldToNewGeometryIDs[$geometry->getOldGeometryId()] = $geometry->getGeometryId();
                 }
                 $planLayer = new PlanLayer();
                 $planLayer->setLayer($derivedLayer);
@@ -926,8 +982,8 @@ class GameListCreationMessageHandler
             }
             $this->entityManager->persist($plan);
             $this->entityManager->flush(); // need to have a plan ID for next steps
-
             $this->setupPlannedCableConnections($planCableConnections);
+            $this->setupPlannedEnergyOutput($planEnergyOutput);
             $this->setupPlannedGrids($planConfig['grids'], $plan);
 
             $plan->updatePlanConstructionTime();
@@ -941,7 +997,7 @@ class GameListCreationMessageHandler
 
         // final step to avoid client complaints
         $qb = $this->entityManager->createQueryBuilder();
-        $qb->update('geometry', 'g')
+        $qb->update('App:Geometry', 'g')
             ->set('g.originalGeometry', 'g.geometryId')
             ->where($qb->expr()->isNull('g.originalGeometry'))
             ->getQuery()
@@ -953,27 +1009,30 @@ class GameListCreationMessageHandler
      */
     private function setupPlannedCableConnections(array $cablesConfig): void
     {
-        //Import energy connections and output now we now all geometry is known by the importer.
+        //Import energy connections now we know all geometry is known by the importer.
         foreach ($cablesConfig as $cableConfig) {
             //Import energy connections
-            $cable = $this->entityManager->getRepository(Geometry::class)->find($cableConfig['cable']['geometry_id']);
             $energyConnection = new EnergyConnection();
-            $energyConnection->setCableGeometry($cable);
-            $energyConnection->setStartGeometry($this->findNewGeometry($cableConfig['cable']['start']));
-            $energyConnection->setEndGeometry($this->findNewGeometry($cableConfig['cable']['end']));
-            $energyConnection->setEnergyConnectionStartCoordinates($cableConfig['cable']['coordinates']);
+            $energyConnection->setCableGeometry($this->findNewGeometry($cableConfig));
+            $energyConnection->setStartGeometry($this->findNewGeometry($cableConfig['start']));
+            $energyConnection->setEndGeometry($this->findNewGeometry($cableConfig['end']));
+            $energyConnection->setEnergyConnectionStartCoordinates($cableConfig['coordinates']);
             $energyConnection->setEnergyConnectionLastupdate(100);
             $this->entityManager->persist($energyConnection);
-            //Import energy output
-            if (!empty($cableConfig['energy_output'])) {
-                foreach ($cableConfig['energy_output'] as $output) {
-                    $energyOutput = new EnergyOutput();
-                    $energyOutput->setGeometry($cable);
-                    $energyOutput->setEnergyOutputMaxcapacity($output['maxcapacity']);
-                    $energyOutput->setEnergyOutputActive($output['active']);
-                    $this->entityManager->persist($energyOutput);
-                }
-            }
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function setupPlannedEnergyOutput(array $energyOutputsConfig): void
+    {
+        foreach ($energyOutputsConfig as $energyOutputConfig) {
+            $energyOutput = new EnergyOutput();
+            $energyOutput->setGeometry($this->findNewGeometry($energyOutputConfig));
+            $energyOutput->setEnergyOutputMaxcapacity($energyOutputConfig[0]['maxcapacity']);
+            $energyOutput->setEnergyOutputActive($energyOutputConfig[0]['active']);
+            $this->entityManager->persist($energyOutput);
         }
     }
 
@@ -1034,28 +1093,40 @@ class GameListCreationMessageHandler
     }
 
     /**
+     * When importing the geometry included in the 'plans' part of the config file, we'll need to map the geometry IDs
+     * in there to the IDs given to that same geometry as it was imported into the database earlier...
+     * ... and we'll need to be able to map *references* to any original geometry in there to the original geometry
+     * as it was imported into the database earlier. For the second purpose we have this function.
      * @throws \Exception
      */
-    private function findNewPersistentGeometry(array $baseGeometryInfo): ?Geometry
+    private function findNewPersistentGeometry(array $baseGeometryInfo, ?Geometry $geometry = null): ?Geometry
     {
         if (!empty($baseGeometryInfo['geometry_mspid'])) {
             return $this->entityManager->getRepository(Geometry::class)->findOneBy(
                 ['geometryMspid' => $baseGeometryInfo['geometry_mspid']]
-            );
+            ); // as MSP IDs are meant to always stay the same across any session and config file
         }
         if (array_key_exists($baseGeometryInfo["geometry_persistent"], $this->oldToNewGeometryIDs)) {
             return $this->entityManager->getRepository(Geometry::class)->find(
                 $this->oldToNewGeometryIDs[$baseGeometryInfo["geometry_persistent"]]
-            );
+            ); // this means that the original (persisten) geometry being refered to was already put in the database
+        }
+        if (!empty($baseGeometryInfo['geometry_id']) && !empty($baseGeometryInfo['geometry_persistent']) &&
+            $baseGeometryInfo['geometry_id'] == $baseGeometryInfo['geometry_persistent']) {
+            return $geometry; // the geometry in this plan is completely new anyway, so it *is* the original
         }
         throw new \Exception(
-            "Failed to find newly imported persistent geometry. No MSP ID was available and geometry_persistent ".
-            "{$baseGeometryInfo["geometry_persistent"]} wasn't imported earlier by the plans importer.".
-            var_export($baseGeometryInfo, true)
+            "Failed to find newly imported persistent geometry. No MSP ID was available, geometry_persistent ".
+            "{$baseGeometryInfo["geometry_persistent"]} wasn't imported earlier, and this isn't new geometry.".
+            var_export($baseGeometryInfo, true).var_export($this->oldToNewGeometryIDs, true)
         );
     }
 
     /**
+     * When importing the geometry included in the 'plans' part of the config file, we'll need to map the geometry IDs
+     * in there to the IDs given to that same geometry as it was imported into the database earlier...
+     * ... and we'll need to be able to map *references* to any original geometry in there to the original geometry
+     * as it was imported into the database earlier. For the first purpose we have this function.
      * @throws \Exception
      */
     private function findNewGeometry(array $baseGeometryInfo): ?Geometry

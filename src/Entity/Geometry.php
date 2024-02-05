@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GeometryRepository::class)]
-
+#[ORM\UniqueConstraint(name: 'uq_geometry_data', columns: ['geometry_geometry', 'geometry_data'])]
 class Geometry
 {
     #[ORM\Id]
@@ -82,6 +82,8 @@ class Geometry
     #[ORM\ManyToMany(targetEntity: Grid::class, mappedBy: 'socketGeometry', cascade: ['persist'])]
     private Collection $socketForGrid;
 
+    private ?int $oldGeometryId;
+
     /**
      * @param Layer|null $layer
      */
@@ -108,6 +110,17 @@ class Geometry
     public function setGeometryId(?int $geometryId): Geometry
     {
         $this->geometryId = $geometryId;
+        return $this;
+    }
+
+    public function getOldGeometryId(): ?int
+    {
+        return $this->oldGeometryId;
+    }
+
+    public function setOldGeometryId(?int $oldGeometryId): Geometry
+    {
+        $this->oldGeometryId = $oldGeometryId;
         return $this;
     }
 
@@ -237,6 +250,7 @@ class Geometry
             unset($geometryData['type']);
             unset($geometryData['mspid']);
             unset($geometryData['country_id']);
+            unset($geometryData['country_object']);
             $geometryData = json_encode($geometryData);
         }
         $this->geometryData = $geometryData;
@@ -341,7 +355,7 @@ class Geometry
             $dataArray = json_decode($this->getGeometryData(), true);
             $dataToHash .= $dataArray['name'] ?? '';
             $this->geometryMspid = hash($algo, $dataToHash);
-            $this->getLayer()->setGeometryWithGeneratedMspids(true);
+            $this->getLayer()->isGeometryWithGeneratedMspids();
             return $this;
         }
         $this->geometryMspid = $geometryMspid;

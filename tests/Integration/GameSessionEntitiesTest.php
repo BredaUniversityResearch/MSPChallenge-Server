@@ -1,7 +1,6 @@
 <?php
 namespace App\Tests\Integration;
 
-use App\Domain\Services\ConnectionManager;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
 use App\Entity\EnergyOutput;
@@ -19,15 +18,18 @@ use App\Entity\PlanMessage;
 use App\Entity\PlanRestrictionArea;
 use App\Entity\Restriction;
 use App\Entity\ServerManager\GameConfigVersion;
+use App\Entity\ServerManager\GameList;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
-use Jfcherng\Diff\DiffHelper;
+use JsonSchema\Validator;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class GameSessionEntitiesTest extends KernelTestCase
 {
@@ -35,6 +37,8 @@ class GameSessionEntitiesTest extends KernelTestCase
     private EntityManagerInterface $em;
 
     private EntityManagerInterface $emServerManager;
+
+    private ValidatorInterface $validator;
 
     private ObjectNormalizer $normalizer;
 
@@ -143,6 +147,52 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->em->persist($geometry3);
         $this->em->flush();
         self::assertSame($geometry->getGeometrySubtractives()[0], $geometry2);
+
+        $geometry4 = clone $geometry;
+        $validation = $this->validator->validate($geometry4, new UniqueEntity(
+            ['geometryGeometry', 'geometryData'],
+            'has to be unique geometry',
+            null,
+            self::DBNAME
+        ));
+        self::assertSame(1, $validation->count());
+        $this->em->persist($geometry4);
+        $this->expectException(UniqueConstraintViolationException::class);
+        $this->em->flush();
+    }
+
+    public function testDuplicateGeometryThroughLayerAdd(): void
+    {
+        $this->start();
+        $layer = new Layer();
+        $layer->setContextCreatingGameSession(1);
+        $layer->setLayerName('test2');
+        $layer->setLayerGeotype('raster2');
+        $layer->setLayerGroup('northsee2');
+        $layer->setLayerEditable(0);
+
+        $geometry5 = new Geometry();
+        $geometry5->setGeometryGeometry(
+            '[[9900176.69845479,748903.878],[4800176.69845479,2483199.127],[7398173.756,2483199.127]]'
+        ); // coordinates following a certain projection mode
+        $geometry5->setGeometryData(
+            '{"minx":9900176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.127}'
+        ); // json representation of feature properties
+        $geometry5->setCountry(
+            $this->em->getRepository(Country::class)->find(1)
+        );
+        $geometry5->setGeometryType('0');
+        $geometry5->setGeometryMspid('abcdefg');
+
+        $layer->addGeometry($geometry5);
+
+        $geometry6 = clone $geometry5;
+        $layer->addGeometry($geometry6);
+        $this->em->persist($layer); // SessionEntityListener should have prevented addition of geometry6
+        $this->em->flush();
+
+        self::assertCount(4, $this->em->getRepository(Geometry::class)->findAll());
+        // namely $geometry, $geometry3, $geometry4, $geometry5 only
     }
 
     public function testEnergyConnection(): void
@@ -356,12 +406,45 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertSame($grid2->getPlanToRemove()[0], $plan2);
     }
 
+
+
+    public function testSessionJsonValidator(): void
+    {
+        $this->start();
+        $newGameSession = new GameList();
+        $newGameSession->setName('testSession');
+        $newGameSession->setGameConfigVersion(
+            $this->emServerManager->getRepository(GameConfigVersion::class)->findOneBy(['id' => 1]) // North Sea config
+        );
+        $newGameSession->setPasswordAdmin('test');
+        $this->emServerManager->persist($newGameSession);
+        $this->emServerManager->flush();
+
+        $data = json_decode($newGameSession->getGameConfigVersion()->getGameConfigCompleteRaw());
+
+        // Validate
+        $path = static::getContainer()->get('kernel')->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json';
+
+        $validator = new Validator();
+        $validator->validate($data, (object)['$ref' => 'file://' . realpath($path)]);
+
+        if ($validator->isValid()) {
+            echo "The supplied JSON validates against the schema.\n";
+        } else {
+            echo "JSON does not validate. Violations:\n";
+            foreach ($validator->getErrors() as $error) {
+                printf("[%s] %s\n", $error['property'], $error['message']);
+            }
+        }
+    }
+
     private function start(): void
     {
         $container = static::getContainer();
         $test = self::DBNAME;
         $this->em = $container->get("doctrine.orm.{$test}_entity_manager");
         $this->emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
+        $this->validator = $container->get("validator");
         $this->normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
     }
 

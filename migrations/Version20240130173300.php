@@ -24,6 +24,9 @@ final class Version20240130173300 extends MSPMigration
     protected function onUp(Schema $schema): void
     {
         $this->addSql(
+            'ALTER TABLE IF EXISTS `geometry` CHANGE geometry_subtractive geometry_subtractive INT(11) NULL'
+        );
+        $this->addSql(
             'ALTER TABLE IF EXISTS `plan_delete` ADD `plan_delete_id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST'
         );
         // phpcs:ignoreFile Generic.Files.LineLength.TooLong
@@ -38,6 +41,9 @@ final class Version20240130173300 extends MSPMigration
 
     protected function onDown(Schema $schema): void
     {
+        $this->addSql(
+            'ALTER TABLE IF EXISTS `geometry` CHANGE geometry_subtractive geometry_subtractive INT(11) NOT NULL DEFAULT 0'
+        );
         $this->addSql('ALTER TABLE IF EXISTS `plan_delete` DROP `plan_delete_id`;');
         $this->addSql('ALTER TABLE IF EXISTS `plan_restriction_area` DROP `plan_restriction_area_id`;');
         $this->addSql('ALTER TABLE IF EXISTS `energy_connection` DROP `energy_connection_id`;');

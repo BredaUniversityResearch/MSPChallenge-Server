@@ -25,6 +25,7 @@
         "gasparesganga/php-shapefile": "3.3.3",
         "illuminate/collections": "^8.73.2",
         "jfcherng/php-diff": "*",
+        "justinrainbow/json-schema": "*",
         "lcobucci/jwt": "^4.0",
         "lexik/jwt-authentication-bundle": "*",
         "phpdocumentor/reflection-docblock": "^5.3",

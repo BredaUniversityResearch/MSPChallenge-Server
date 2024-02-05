@@ -169,6 +169,8 @@ class Layer
 
     private ?array $layerRasterBoundingbox = null;
 
+    private ?int $contextCreatingGameSession = null;
+
     public function __construct()
     {
         $this->derivedLayer = new ArrayCollection();
@@ -180,6 +182,17 @@ class Layer
         $this->planLayer = new ArrayCollection();
         $this->planDelete = new ArrayCollection();
         $this->planRestrictionArea = new ArrayCollection();
+    }
+
+    public function getContextCreatingGameSession(): ?int
+    {
+        return $this->contextCreatingGameSession;
+    }
+
+    public function setContextCreatingGameSession(?int $contextCreatingGameSession): Layer
+    {
+        $this->contextCreatingGameSession = $contextCreatingGameSession;
+        return $this;
     }
 
     public function getDerivedLayer(): Collection
@@ -225,9 +238,9 @@ class Layer
         return $this->layerGeometryWithGeneratedMspids;
     }
 
-    public function setGeometryWithGeneratedMspids(bool $layerGeometryWithGeneratedMspids): Layer
+    public function isGeometryWithGeneratedMspids(): Layer
     {
-        $this->layerGeometryWithGeneratedMspids = $layerGeometryWithGeneratedMspids;
+        $this->layerGeometryWithGeneratedMspids = true;
         return $this;
     }
 

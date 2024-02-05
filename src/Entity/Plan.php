@@ -26,7 +26,7 @@ class Plan
     private ?string $planName;
 
     #[ORM\Column(type: Types::TEXT, length: 75)]
-    private ?string $planDescription;
+    private ?string $planDescription = "";
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTime $planTime;

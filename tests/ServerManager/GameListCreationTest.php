@@ -29,17 +29,17 @@ class GameListCreationTest extends KernelTestCase
         $this->emServerManager->flush();
     }
 
-    private function start(): void
-    {
-        $container = static::getContainer();
-        $this->emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
-    }
-
     public function testGameListCreationMessageHandler(): void
     {
         $container = static::getContainer();
         $handler = $container->get(GameListCreationMessageHandler::class);
         $handler->__invoke(new GameListCreationMessage(1));
+    }
+
+    private function start(): void
+    {
+        $container = static::getContainer();
+        $this->emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
     }
 
     public static function setUpBeforeClass(): void
