@@ -9,15 +9,21 @@ monolog:
             channels: ["game_session"]
             process_psr_3_messages:
                 enabled: true
+        analytics: # Log messages for analytics messaging to a dedicated  "analytics" channel
 
 when@dev:
     monolog:
         handlers:
+            analytics:
+                type: stream
+                path: "%kernel.logs_dir%/analytics-%kernel.environment%.log"
+                level: debug
+                channels: [ 'analytics' ]
             main:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
-                channels: ["!event", "!game_session"]
+                channels: ["!event", "!analytics", "!game_session"]
             # uncomment to get logging in your browser
             # you may have to allow bigger header sizes in your Web server configuration
             #firephp:
@@ -49,6 +55,11 @@ when@test:
 when@prod:
     monolog:
         handlers:
+            analytics:
+                type: stream
+                path: "%kernel.logs_dir%/analytics-%kernel.environment%.log"
+                level: error
+                channels: [ 'analytics' ]
             main:
                 type: fingers_crossed
                 action_level: error

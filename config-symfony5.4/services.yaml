@@ -21,6 +21,8 @@ parameters:
     # test environment specific directories, when relevant
     app.session_raster_dir_test: '%kernel.logs_dir%/raster/'
     app.session_config_dir_test: '%kernel.logs_dir%/running_session_config/'
+    app.guraas_game_id: '00000000-0000-0000-0000-000000000000'
+    app.guraas_analytics_version: '0.1'
 
 services:
     # default configuration for services in *this* file
@@ -39,6 +41,19 @@ services:
         resource: '../src/{Command,Controller}'
     App\Domain\:
         resource: '../src/Domain/{Services}'
+
+    App\MessageHandler\Analytics\AnalyticsMessageHandler:
+        arguments:
+            $guraasGameId: '%app.guraas_game_id%'
+            $guraasAnalyticsVersion: '%app.guraas_analytics_version%'
+            $logger: '@monolog.logger.analytics'
+        tags:
+            - { name: messenger.message_handler, handles: App\Message\Analytics\SessionCreatedMessage }
+            - { name: messenger.message_handler, handles: App\Message\Analytics\UserLogOnOffSessionMessage }
+
+    App\Domain\Services\SymfonyToLegacyHelper:
+        arguments:
+            $analyticsLogger: '@monolog.logger.analytics'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
@@ -118,6 +133,9 @@ services:
             $provider: '@App\VersionsProvider'
 
 when@dev:
+    parameters:
+        app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'
+
     services:
         # make classes in src/DataFixtures available to be used as services
         # and have a tag that allows actions to type-hint services

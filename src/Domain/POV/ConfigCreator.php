@@ -2,6 +2,7 @@
 
 namespace App\Domain\POV;
 
+use App\Domain\API\v1\Game;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use Doctrine\DBAL\Connection;
@@ -10,15 +11,53 @@ use Psr\Log\LoggerInterface;
 
 class ConfigCreator
 {
+    const DEFAULT_IMAGE_FORMAT = 'PNG';
     const DEFAULT_CONFIG_FILENAME = 'pov-config.json';
 
     const SUB_DIR = 'POV';
+
+    private string $outputImageFormat = self::DEFAULT_IMAGE_FORMAT;
+
+    /** @var LayerTags[] $excludedLayersByTags */
+    private array $excludedLayersByTags = [];
 
     public function __construct(
         private readonly string $projectDir,
         private readonly int $sessionId,
         private readonly LoggerInterface $logger
     ) {
+    }
+
+    public function getOutputImageFormat(): string
+    {
+        return $this->outputImageFormat;
+    }
+
+    public function setOutputImageFormat(string $outputImageFormat): self
+    {
+        $formats = \Imagick::queryFormats('PNG*'); // png formats supported
+        if (!in_array(strtoupper($outputImageFormat), $formats)) {
+            throw new Exception('Invalid image format: ' . $outputImageFormat);
+        }
+        $this->outputImageFormat = $outputImageFormat;
+        return $this;
+    }
+
+    /**
+     * @return LayerTags[]
+     */
+    public function getExcludedLayersByTags(): array
+    {
+        return $this->excludedLayersByTags;
+    }
+
+    /**
+     * @param LayerTags[] $excludedLayersByTags
+     */
+    public function setExcludedLayersByTags(array $excludedLayersByTags): self
+    {
+        $this->excludedLayersByTags = $excludedLayersByTags;
+        return $this;
     }
 
     /**
@@ -105,6 +144,7 @@ class ConfigCreator
                 '. Error: ' . $e->getMessage());
         }
         $this->log('json decoded, extracting region from raster layers');
+        $this->excludeLayersByTags($json['datamodel']['raster_layers'], $json['datamodel']['vector_layers']);
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
         if (false !== $bathymetryLayer = current(array_filter(
             $json['datamodel']['raster_layers'],
@@ -142,16 +182,9 @@ class ConfigCreator
      */
     private function queryJson(Region $region): string
     {
-        try {
-            $gameConfigRegion = ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->executeQuery(
-                'select c.region from game_list l inner join game_config_version c ' .
-                'on l.game_config_version_id=c.id and l.id=:game_session_id',
-                ['game_session_id' => $this->sessionId]
-            )->fetchAssociative();
-        } catch (Exception $e) {
-            throw new Exception('Could not retrieve the game config region for the given session id: ' .
-                $this->sessionId);
-        }
+        $game = new Game();
+        $game->setGameSessionId($this->sessionId);
+        $dataModel = $game->GetGameConfigValues();
 
         try {
             $result = $this->getConnection()->executeQuery(
@@ -235,7 +268,8 @@ WITH
   ),
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
-      SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype
+      SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype,
+             lorg.layer_tags, lorg.layer_category, lorg.layer_subcategory
       FROM layer l
       LEFT JOIN plan_layer pl ON l.layer_id=pl.plan_layer_layer_id
       LEFT JOIN plan p ON p.plan_id=pl.plan_layer_plan_id
@@ -343,7 +377,7 @@ WITH
         JSON_ARRAYAGG(
           JSON_OBJECT(
             'points', JSON_EXTRACT(g.geometry_geometry, '$'),
-            'types', JSON_ARRAY(JSON_EXTRACT(g.geometry_type, '$')),
+            'types', JSON_EXTRACT(CONCAT('[',g.geometry_type,']'), '$'),
             'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
             # just add some aliases to the metadata
             'metadata', JSON_EXTRACT(g.geometry_data, '$')
@@ -367,8 +401,7 @@ SELECT
         JSON_OBJECT(
           'coordinate0', JSON_ARRAY(CAST(:bottomLeftX AS DOUBLE), CAST(:bottomLeftY AS DOUBLE)),
           'coordinate1', JSON_ARRAY(CAST(:topRightX AS DOUBLE), CAST(:topRightY AS DOUBLE)),
-          # @todo (MH): add projection
-          'projection', '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs'
+          'projection', :projection
         ),
         JSON_OBJECTAGG(subquery.prop, JSON_EXTRACT(subquery.value, '$.*'))
       )      
@@ -389,7 +422,8 @@ FROM (
             'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
             'mapping', l.layer_type_mapping,
             'types', l.layer_type_types,
-            'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url')))
+            'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url'))),
+            'tags', JSON_EXTRACT(l.layer_tags, '$')
           ),
           IF(
             l.kpi_value IS NOT NULL,
@@ -411,7 +445,7 @@ FROM (
           #   FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
           # ),
           'name', l.layer_name,
-          'tags', JSON_ARRAY(l.layer_geotype),
+          'tags', JSON_EXTRACT(l.layer_tags, '$'),
           'types', l.layer_type_types,
           'data', l.layer_data
         )
@@ -425,7 +459,10 @@ FROM (
 SQL,
                 array_merge(
                     $region->toArray(),
-                    $gameConfigRegion
+                    [
+                        'region' => $dataModel['region'],
+                        'projection' => $dataModel['projection']
+                    ]
                 )
             );
             $jsonString = $result->fetchOne();
@@ -438,6 +475,29 @@ SQL,
             throw new Exception('No data found from ' . $this->getDatabaseName() . ' for the given region: ' . $region);
         }
         return $jsonString;
+    }
+
+    private function excludeLayersByTags(array &$rasterLayers, array &$vectorLayers): void
+    {
+        $excludedLayersByTags = $this->getExcludedLayersByTags();
+        if (count($excludedLayersByTags) == 0) {
+            return;
+        }
+
+        foreach ($this->excludedLayersByTags as $exclTags) {
+            foreach ($rasterLayers as $key => $layer) {
+                if ($exclTags->matches(new LayerTags($layer['tags']))) {
+                    $this->log('Excluding raster layer: ' . $layer['name']);
+                    unset($rasterLayers[$key]);
+                }
+            }
+            foreach ($vectorLayers as $key => $layer) {
+                if ($exclTags->matches(new LayerTags($layer['tags']))) {
+                    $this->log('Excluding raster layer: ' . $layer['name']);
+                    unset($vectorLayers[$key]);
+                }
+            }
+        }
     }
 
     /**
@@ -512,36 +572,36 @@ SQL,
     ): void {
         list($inputBottomLeftX, $inputBottomLeftY, $inputTopRightX, $inputTopRightY) =
             array_values($inputRegion->toArray());
-        list($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY) =
-            array_values($outputRegion->toArray());
 
         // clamp by input coordinates.
-        $outputBottomLeftX = max($outputRegion->getBottomLeftX(), $inputRegion->getBottomLeftX());
-        $outputBottomLeftY = max($outputBottomLeftY, $inputBottomLeftY);
-        $outputTopRightX = min($outputRegion->getTopRightX(), $inputRegion->getTopRightX());
-        $outputTopRightY = min($outputTopRightY, $inputTopRightY);
+        if (null === $clampedOutputRegion = $outputRegion->createClampedBy($inputRegion)) {
+            // this should be impossible, since the region coordinates were used for a query input resulting into this
+            //  layer
+            throw new Exception("Specified region does not overlap with the input image: $inputImageFilePath");
+        }
+        list($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY) =
+            array_values($clampedOutputRegion->toArray());
 
-        $image = new \Imagick();
-        $image->readImage($inputImageFilePath);
+        $image = new \Imagick($inputImageFilePath);
         $inputWidth = $image->getImageWidth();
         $inputHeight = $image->getImageHeight();
 
-        $coordinateToPixelWidthFactor = $inputWidth / abs($inputTopRightX - $inputBottomLeftX);
-        $coordinateToPixelHeightFactor = $inputHeight / abs($inputTopRightY - $inputBottomLeftY);
+        $coordinateToPixelWidthFactor = $inputWidth / ($inputTopRightX - $inputBottomLeftX);
+        $coordinateToPixelHeightFactor = $inputHeight / ($inputTopRightY - $inputBottomLeftY);
 
-        // map coordinate to the pixel coordinate of the image, still as real number
-        $outputPixel0XRealNumber = abs($outputBottomLeftX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
-        $outputPixel0YRealNumber = abs($outputBottomLeftY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
-        $outputPixel1XRealNumber = abs($outputTopRightX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
-        $outputPixel1YRealNumber = abs($outputTopRightY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
+        // map coordinate to the pixel "size", still as real number
+        $outputPixel0XRealNumber = ($outputBottomLeftX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
+        $outputPixel0YRealNumber = ($outputBottomLeftY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
+        $outputPixel1XRealNumber = ($outputTopRightX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
+        $outputPixel1YRealNumber = ($outputTopRightY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
 
-        // now convert to actual pixel, clamp by image input size
-        $outputPixel0X = max(0, min($inputWidth - 1, (int)($outputPixel0XRealNumber)));
-        $outputPixel0Y = max(0, min($inputHeight - 1, (int)($outputPixel0YRealNumber)));
-        $outputPixel1X = max(0, min($inputWidth - 1, (int)ceil($outputPixel1XRealNumber)));
-        $outputPixel1Y = max(0, min($inputHeight - 1, (int)ceil($outputPixel1YRealNumber)));
+        // now convert to actual pixel "size", so int
+        $outputPixel0X = (int)($outputPixel0XRealNumber);
+        $outputPixel0Y = (int)($outputPixel0YRealNumber);
+        $outputPixel1X = (int)ceil($outputPixel1XRealNumber);
+        $outputPixel1Y = (int)ceil($outputPixel1YRealNumber);
 
-        // Calculate the size of the extracted region
+        // Calculate the size of the extracted region in pixel "size"
         $regionWidth = $outputPixel1X - $outputPixel0X + 1;
         $regionHeight = $outputPixel1Y - $outputPixel0Y + 1;
 
@@ -550,23 +610,31 @@ SQL,
         }
 
         // set the actual outputted region coordinates
-        $pixelToCoordinateWidthFactor = abs($inputTopRightX - $inputBottomLeftX) / $inputWidth;
-        $pixelToCoordinateHeightFactor = abs($inputTopRightY - $inputBottomLeftY) / $inputHeight;
+        $pixelToCoordinateWidthFactor = ($inputTopRightX - $inputBottomLeftX) / $inputWidth;
+        $pixelToCoordinateHeightFactor = ($inputTopRightY - $inputBottomLeftY) / $inputHeight;
         $outputRegion->setBottomLeftX(
-            $outputBottomLeftX - abs($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor
+            $outputBottomLeftX - ($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor
         );
         $outputRegion->setBottomLeftY(
-            $outputBottomLeftY - abs($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor
+            $outputBottomLeftY - ($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor
         );
         $outputRegion->setTopRightX(
-            $outputTopRightX + abs($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor
+            $outputTopRightX + ($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor
         );
         $outputRegion->setTopRightY(
-            $outputTopRightY + abs($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor
+            $outputTopRightY + ($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor
         );
 
+        // finally convert to pixel coordinates.
+        $outputPixel0Y = $inputHeight - $regionHeight - $outputPixel0Y;
+
+        // clamp by image input size
+        $outputPixel0X = max(0, min($inputWidth - 1, $outputPixel0X));
+        $outputPixel0Y = max(0, min($inputHeight - 1, $outputPixel0Y));
+
+        $image->setImageFormat($this->outputImageFormat);
+        $image->setFormat($this->outputImageFormat);
         $image->cropImage($regionWidth, $regionHeight, $outputPixel0X, $outputPixel0Y);
-        $image->setImageFormat('PNG');
         $image->writeImage($outputImageFilePath);
     }
 }

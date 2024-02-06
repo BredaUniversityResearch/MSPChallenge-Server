@@ -3,7 +3,9 @@
 namespace App\Controller\SessionAPI;
 
 use App\Domain\POV\ConfigCreator;
+use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +24,9 @@ class GameController extends BaseController
     public function createPOVConfig(
         int $sessionId,
         Request $request,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ): StreamedResponse {
         $regionBottomLeftX = $request->request->get('region_bottom_left_x');
         $regionBottomLeftY = $request->request->get('region_bottom_left_y');
@@ -38,6 +42,24 @@ class GameController extends BaseController
         $region = new Region($regionBottomLeftX, $regionBottomLeftY, $regionTopRightX, $regionTopRightY);
         $configCreator = new ConfigCreator($this->projectDir, $sessionId, $logger);
         try {
+            if ($request->request->has('output_image_format')) {
+                $configCreator->setOutputImageFormat(
+                    $request->request->get('output_image_format') ?: ConfigCreator::DEFAULT_IMAGE_FORMAT
+                );
+            }
+            if ($request->request->has('excl_layers_by_tags')) {
+                $exclLayerByTags = json_decode(
+                    $request->request->get('excl_layers_by_tags'),
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                );
+                $exclLayerByTags = is_array($exclLayerByTags) ? $exclLayerByTags : [];
+                $configCreator->setExcludedLayersByTags(array_map(
+                    fn($s) => new LayerTags($s),
+                    $exclLayerByTags
+                ));
+            }
             $zipFilepath = $configCreator->createAndZip($region);
         } catch (\Exception $e) {
             throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
