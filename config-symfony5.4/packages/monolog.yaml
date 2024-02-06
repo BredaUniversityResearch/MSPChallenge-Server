@@ -2,6 +2,8 @@ monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
         - game_session # file-based game session creation and loading log
+        - analytics
+
     handlers:
         session_log_handler:
             type: service
@@ -9,7 +11,6 @@ monolog:
             channels: ["game_session"]
             process_psr_3_messages:
                 enabled: true
-        analytics: # Log messages for analytics messaging to a dedicated  "analytics" channel
 
 when@dev:
     monolog:
