@@ -652,14 +652,16 @@ class SEL extends Base
         $riskMapSettings = $configValues["risk_heatmap_settings"];
 
         $restrictionLayerExceptions = array();
-        foreach ($riskMapSettings["restriction_layer_exceptions"] as $data) {
-            $layerData = $this->getDatabase()->query(
-                "SELECT layer_id FROM layer WHERE layer_name = ?",
-                array($data)
-            );
-            if (count($layerData) > 0) {
-                $restrictionLayerExceptions[] = $layerData[0]["layer_id"];
-            } else {
+        if (!empty($riskMapSettings["restriction_layer_exceptions"])) {
+            foreach ($riskMapSettings["restriction_layer_exceptions"] as $data) {
+                $layerData = $this->getDatabase()->query(
+                    "SELECT layer_id FROM layer WHERE layer_name = ?",
+                    array($data)
+                );
+                if (count($layerData) > 0) {
+                    $restrictionLayerExceptions[] = $layerData[0]["layer_id"];
+                    continue;
+                }
                 $this->getLogger()->serverEvent(
                     "SEL_API",
                     Log::WARNING,
