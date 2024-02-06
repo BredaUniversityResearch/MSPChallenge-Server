@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GeometryRepository::class)]
-#[ORM\UniqueConstraint(name: 'uq_geometry_data', columns: ['geometry_geometry', 'geometry_data'])]
+#[ORM\UniqueConstraint(name: 'uq_geometry_data', columns: ['geometry_geometry', 'geometry_data', 'geometry_layer_id'])]
 class Geometry
 {
     #[ORM\Id]

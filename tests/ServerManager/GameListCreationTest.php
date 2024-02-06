@@ -22,7 +22,7 @@ class GameListCreationTest extends KernelTestCase
         $newGameSession = new GameList();
         $newGameSession->setName('testSession');
         $newGameSession->setGameConfigVersion(
-            $this->emServerManager->getRepository(GameConfigVersion::class)->findOneBy(['id' => 1]) // North Sea config
+            $this->emServerManager->getRepository(GameConfigVersion::class)->findOneBy(['id' => 3])
         );
         $newGameSession->setPasswordAdmin('test');
         $this->emServerManager->persist($newGameSession);

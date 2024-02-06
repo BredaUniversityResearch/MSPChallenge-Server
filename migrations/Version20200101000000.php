@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `geometry` (
   INDEX `fk_gis_layer1_idx` (`geometry_layer_id` ASC),
   INDEX `geometry_persistent` (`geometry_persistent` ASC),
   INDEX `fk_geometry_country1_idx` (`geometry_country_id` ASC),
-  UNIQUE `uq_geometry_data`(`geometry_geometry`, `geometry_data`),
+  UNIQUE `uq_geometry_data`(`geometry_geometry`, `geometry_data`, `geometry_layer_id`),
   CONSTRAINT `fk_gis_layer1`
     FOREIGN KEY (`geometry_layer_id`)
     REFERENCES `layer` (`layer_id`)
