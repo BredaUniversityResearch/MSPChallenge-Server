@@ -43,6 +43,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 //use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -746,7 +747,9 @@ class GameListCreationMessageHandler
         }
         $this->info('Starting to import all plans.');
         foreach ($this->dataModel['plans'] as $planConfig) {
-            $plan = $this->normalizer->denormalize($planConfig, Plan::class);
+            $plan = $this->normalizer->denormalize($planConfig, Plan::class, null, [
+                AbstractNormalizer::IGNORED_ATTRIBUTES => ['fishing']
+            ]);
             $plan->setCountry(
                 $this->entityManager->getRepository(Country::class)->find($planConfig['plan_country_id'])
             );

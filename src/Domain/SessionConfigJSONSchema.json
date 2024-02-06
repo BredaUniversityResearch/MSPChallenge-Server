@@ -612,7 +612,7 @@
           ]
         },
         "SEL": {
-          "type": "object",
+          "type": ["object", "null"],
           "properties": {
             "shipping_lane_layers": {
               "type": "array",
@@ -1015,7 +1015,7 @@
           ]
         },
         "MEL": {
-          "type": "object",
+          "type": ["object", "null"],
           "properties": {
             "modelfile": {
               "type": "string"
@@ -1342,7 +1342,7 @@
                 ]
               },
               "layer_states": {
-                "type": "array",
+                "type": ["array", "null"],
                 "items": {
                   "type": "object",
                   "properties": {
@@ -1492,7 +1492,7 @@
                       "type": "number"
                     },
                     "display_name": {
-                      "type": "string"
+                      "type": ["string", "null"]
                     },
                     "sprite_name": {},
                     "update_visuals": {
