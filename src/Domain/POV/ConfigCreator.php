@@ -16,6 +16,9 @@ class ConfigCreator
 
     const SUB_DIR = 'POV';
 
+    const INTERPOLATION_TYPE_LIN = 'Lin';
+    const INTERPOLATION_TYPE_LIN_GROUPED = 'LinGrouped';
+
     private string $outputImageFormat = self::DEFAULT_IMAGE_FORMAT;
 
     /** @var LayerTags[] $excludedLayersByTags */
@@ -205,14 +208,14 @@ class ConfigCreator
                     $rasterLayers[$key]['scale'] = [
                         'min_value' => current($heatmapRange)['min_output_value'],
                         'max_value' => end($heatmapRange)['min_output_value'],
-                        'interpolation' => 'lin'
+                        'interpolation' => self::INTERPOLATION_TYPE_LIN
                     ];
                     continue;
                 }
                 $rasterLayers[$key]['scale'] = [
                     'min_value' => current($heatmapRange)['min_output_value'],
                     'max_value' => end($heatmapRange)['min_output_value'],
-                    'interpolation' => 'lin-grouped',
+                    'interpolation' => self::INTERPOLATION_TYPE_LIN_GROUPED,
                     'groups' => $heatmapRange
                 ];
                 continue;
@@ -236,7 +239,7 @@ class ConfigCreator
             $rasterLayers[$key]['scale'] = [
                 'min_value' => $minValue,
                 'max_value' => $maxValue,
-                'interpolation' => 'lin'
+                'interpolation' => self::INTERPOLATION_TYPE_LIN
             ];
         }
         unset($layer);
@@ -526,7 +529,7 @@ FROM (
                 'min_value', 0,
                 # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
                 'max_value', l.kpi_value * 1000 * 2,
-                'interpolation', 'lin'
+                'interpolation', :interpolationTypeLin
               )
             ),
             JSON_OBJECT()
@@ -556,7 +559,8 @@ SQL,
                     $region->toArray(),
                     [
                         'region' => $dataModel['region'],
-                        'projection' => $dataModel['projection']
+                        'projection' => $dataModel['projection'],
+                        'interpolationTypeLin' => self::INTERPOLATION_TYPE_LIN
                     ]
                 )
             );
