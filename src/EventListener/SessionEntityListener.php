@@ -40,7 +40,6 @@ class SessionEntityListener
         $game = $event->getObject();
 
         $game->setGameEratime(max($game->getGameEratime(), $this->params->get('app.min_game_era_time')));
-        $game->setGameConfigfile(sprintf($this->params->get('app.session_config_name'), $game->getGameId()));
         $game->setGameAutosaveMonthInterval($this->params->get('app.game_auto_save_interval'));
         $game->setGameIsRunningUpdate(0);
     }

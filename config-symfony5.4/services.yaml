@@ -116,21 +116,17 @@ services:
         tags:
             - { name: 'doctrine.event_listener', event: 'prePersist' }
 
-    App\Repository\ServerManager\GameListRepository:
-        factory: [ '@doctrine.orm.msp_server_manager_entity_manager', getRepository ]
-        arguments:
-            - App\Entity\ServerManager\GameList
-
     App\MessageHandler\GameList\GameListCreationMessageHandler:
         public: true
         arguments:
             $mspServerManagerEntityManager: '@Doctrine\ORM\EntityManagerInterface'
-            $gameListRepository: '@App\Repository\ServerManager\GameListRepository'
             $gameSessionLogger: '@monolog.logger.game_session'
             $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
             $kernel: '@Symfony\Component\HttpKernel\KernelInterface'
             $params: '@Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface'
             $provider: '@App\VersionsProvider'
+
+    App\Domain\Communicator\WatchdogCommunicator:
 
 when@dev:
     parameters:

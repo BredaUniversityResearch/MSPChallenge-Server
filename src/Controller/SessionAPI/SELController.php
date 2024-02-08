@@ -31,8 +31,8 @@ class SELController extends BaseController
         $melCellSize = $config["MEL"]["cellsize"];
         $simulationAreaShift = array(fmod($xOffset, $melCellSize), fmod($yOffset, $melCellSize));
 
-        $xSize = ceil($bounds["x_max"] - $bounds["x_min"] / $melCellSize) * $melCellSize;
-        $ySize = ceil($bounds["y_max"] - $bounds["y_min"] / $melCellSize) * $melCellSize;
+        $xSize = ceil(($bounds["x_max"] - $bounds["x_min"]) / $melCellSize) * $melCellSize;
+        $ySize = ceil(($bounds["y_max"] - $bounds["y_min"]) / $melCellSize) * $melCellSize;
 
         $bounds["x_min"] += $simulationAreaShift[0];
         $bounds["y_min"] += $simulationAreaShift[1];

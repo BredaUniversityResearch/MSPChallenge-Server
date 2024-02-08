@@ -320,7 +320,7 @@ class Geometry
                 $this->geometryType = $type;
                 return $this;
             }
-            $this->geometryType = $featureProperties['type'] ?? '0';
+            $this->geometryType = !empty($featureProperties['type']) ? $featureProperties['type'] : '0';
             return $this;
         }
         $this->geometryType = $geometryType;

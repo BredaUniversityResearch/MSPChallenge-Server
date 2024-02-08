@@ -18,7 +18,7 @@ class PlanDelete
     private ?Plan $plan;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planDelete')]
-    #[ORM\JoinColumn(name: 'plan_delete_geometry_persistent', referencedColumnName: 'geometry_persistent')]
+    #[ORM\JoinColumn(name: 'plan_delete_geometry_persistent', referencedColumnName: 'geometry_id')]
     private ?Geometry $geometry;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planDelete')]

@@ -12,66 +12,65 @@ use Doctrine\ORM\Mapping as ORM;
 class Game
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, length: 11)]
     private ?int $gameId;
 
     #[ORM\Column(type: Types::INTEGER, length: 5, nullable: true, options: ['default' => 2010])]
-    private ?int $gameStart;
+    private ?int $gameStart = 2010;
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['default' => 'SETUP'])]
-    private ?string $gameState;
+    private ?string $gameState = 'SETUP';
 
     #[ORM\Column(type: Types::FLOAT, nullable: true, options: ['default' => 0])]
-    private ?float $gameLastupdate;
+    private ?float $gameLastupdate = 0;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => 1])]
-    private ?int $gameCurrentmonth;
+    private ?int $gameCurrentmonth = 1;
 
     #[ORM\Column(type: Types::SMALLINT, length: 4, nullable: true, options: ['default' => 0])]
-    private ?int $gameEnergyupdate;
+    private ?int $gameEnergyupdate = 0;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => 36])]
-    private ?int $gamePlanningGametime;
+    private ?int $gamePlanningGametime = 36;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => 1])]
-    private ?int $gamePlanningRealtime;
+    private ?int $gamePlanningRealtime = 1;
 
-    #[ORM\Column(type: Types::STRING, length: 256, nullable: true, options: ['default' => 0])]
-    private ?string $gamePlanningEraRealtime;
+    #[ORM\Column(type: Types::STRING, length: 256, nullable: true, options: ['default' => '0'])]
+    private ?string $gamePlanningEraRealtime = '0';
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => 0])]
-    private ?int $gamePlanningMonthsdone;
+    private ?int $gamePlanningMonthsdone = 0;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => 120])]
-    private ?int $gameEratime;
+    private ?int $gameEratime = 120;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => -1])]
-    private ?int $gameMelLastmonth;
+    private ?int $gameMelLastmonth = -1;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => -1])]
-    private ?int $gameCelLastmonth;
+    private ?int $gameCelLastmonth = -1;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => -1])]
-    private ?int $gameSelLastmonth;
+    private ?int $gameSelLastmonth = -1;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true, options: ['default' => 0])]
-    private ?float $gameMelLastupdate;
+    private ?float $gameMelLastupdate = 0;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true, options: ['default' => 0])]
-    private ?float $gameCelLastupdate;
+    private ?float $gameCelLastupdate = 0;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true, options: ['default' => 0])]
-    private ?float $gameSelLastupdate;
+    private ?float $gameSelLastupdate = 0;
 
     #[ORM\Column(type: Types::STRING, length: 128, nullable: true)]
     private ?string $gameConfigfile;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true, options: ['default' => 120])]
-    private ?int $gameAutosaveMonthInterval;
+    private ?int $gameAutosaveMonthInterval = 120;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
-    private ?int $gameIsRunningUpdate;
+    private ?int $gameIsRunningUpdate = 0;
 
     public function getGameId(): ?int
     {

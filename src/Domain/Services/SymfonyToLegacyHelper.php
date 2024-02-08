@@ -29,6 +29,7 @@ class SymfonyToLegacyHelper
     private Kernel $kernel;
     private TranslatorInterface $translator;
     private ?Closure $fnControllerForwarder = null;
+    private MessageBusInterface $messageBus;
     private EntityManagerInterface $em;
 
     private VersionsProvider $provider;
@@ -45,6 +46,7 @@ class SymfonyToLegacyHelper
         Kernel $kernel,
         TranslatorInterface $translator,
         EntityManagerInterface $em,
+        MessageBusInterface $messageBus,
         VersionsProvider $provider,
         MessageBusInterface $analyticsMessageBus,
         LoggerInterface $analyticsLogger,
@@ -60,6 +62,7 @@ class SymfonyToLegacyHelper
         $this->kernel = $kernel;
         $this->translator = $translator;
         $this->em = $em;
+        $this->messageBus = $messageBus;
         $this->provider = $provider;
         $this->analyticsMessageBus = $analyticsMessageBus;
         $this->analyticsLogger = $analyticsLogger;
@@ -88,6 +91,14 @@ class SymfonyToLegacyHelper
     public function getTranslator(): TranslatorInterface
     {
         return $this->translator;
+    }
+
+    /**
+     * @return MessageBusInterface
+     */
+    public function getMessageBus(): MessageBusInterface
+    {
+        return $this->messageBus;
     }
 
     public function getEntityManager(): EntityManagerInterface

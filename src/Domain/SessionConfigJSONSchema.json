@@ -35,44 +35,49 @@
       "properties": {
         "restrictions": {
           "type": "object",
-          "items": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              },
-              "value": {
-                "type": "number"
-              },
-              "type": {
-                "type": "string"
-              },
-              "startlayer": {
-                "type": "string"
-              },
-              "starttype": {
-                "type": "string"
-              },
-              "endlayer": {
-                "type": "string"
-              },
-              "endtype": {
-                "type": "string"
-              },
-              "sort": {
-                "type": "string"
+          "patternProperties": {
+            "[a-zA-Z_|]+" : {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "startlayer": {
+                    "type": "string"
+                  },
+                  "starttype": {
+                    "type": "string"
+                  },
+                  "endlayer": {
+                    "type": "string"
+                  },
+                  "endtype": {
+                    "type": "string"
+                  },
+                  "sort": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "message",
+                  "value",
+                  "type",
+                  "startlayer",
+                  "starttype",
+                  "endlayer",
+                  "endtype",
+                  "sort"
+                ]
               }
-            },
-            "required": [
-              "message",
-              "value",
-              "type",
-              "startlayer",
-              "starttype",
-              "endlayer",
-              "endtype",
-              "sort"
-            ]
+            }
           }
         },
         "plans": {
@@ -1371,110 +1376,115 @@
               "layer_property_as_type": {},
               "layer_type": {
                 "type": "object",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "displayName": {
-                      "type": "string"
+                "patternProperties": {
+                  "[0-9]+": {
+                    "type": "object",
+                    "properties": {
+                      "displayName": {
+                        "type": "string"
+                      },
+                      "approval": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "number"
+                      },
+                      "map_type": {},
+                      "displayPolygon": {
+                        "type": "number"
+                      },
+                      "polygonColor": {
+                        "type": "string"
+                      },
+                      "polygonPatternName": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "innerGlowEnabled": {
+                        "type": "number"
+                      },
+                      "innerGlowRadius": {
+                        "type": "number"
+                      },
+                      "innerGlowIterations": {
+                        "type": "number"
+                      },
+                      "innerGlowMultiplier": {
+                        "type": "number"
+                      },
+                      "innerGlowPixelSize": {
+                        "type": "number"
+                      },
+                      "displayLines": {
+                        "type": "number"
+                      },
+                      "lineColor": {
+                        "type": "string"
+                      },
+                      "lineWidth": {
+                        "type": "number"
+                      },
+                      "lineIcon": {},
+                      "linePatternType": {
+                        "type": "string"
+                      },
+                      "displayPoints": {
+                        "type": "number"
+                      },
+                      "pointColor": {
+                        "type": "string"
+                      },
+                      "pointSize": {
+                        "type": "number"
+                      },
+                      "pointSpriteName": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": ["string", "null"]
+                      },
+                      "capacity": {
+                        "type": "number"
+                      },
+                      "investmentCost": {
+                        "type": "number"
+                      },
+                      "availability": {
+                        "type": "number"
+                      },
+                      "media": {
+                        "type": "string"
+                      }
                     },
-                    "approval": {
-                      "type": "string"
-                    },
-                    "value": {
-                      "type": "number"
-                    },
-                    "map_type": {},
-                    "displayPolygon": {
-                      "type": "number"
-                    },
-                    "polygonColor": {
-                      "type": "string"
-                    },
-                    "polygonPatternName": {
-                      "type": ["string", "null"]
-                    },
-                    "innerGlowEnabled": {
-                      "type": "number"
-                    },
-                    "innerGlowRadius": {
-                      "type": "number"
-                    },
-                    "innerGlowIterations": {
-                      "type": "number"
-                    },
-                    "innerGlowMultiplier": {
-                      "type": "number"
-                    },
-                    "innerGlowPixelSize": {
-                      "type": "number"
-                    },
-                    "displayLines": {
-                      "type": "number"
-                    },
-                    "lineColor": {
-                      "type": "string"
-                    },
-                    "lineWidth": {
-                      "type": "number"
-                    },
-                    "lineIcon": {},
-                    "linePatternType": {
-                      "type": "string"
-                    },
-                    "displayPoints": {
-                      "type": "number"
-                    },
-                    "pointColor": {
-                      "type": "string"
-                    },
-                    "pointSize": {
-                      "type": "number"
-                    },
-                    "pointSpriteName": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    },
-                    "capacity": {
-                      "type": "number"
-                    },
-                    "investmentCost": {
-                      "type": "number"
-                    },
-                    "availability": {
-                      "type": "number"
-                    },
-                    "media": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "displayName",
-                    "approval",
-                    "value",
-                    "map_type",
-                    "displayPolygon",
-                    "polygonColor",
-                    "innerGlowEnabled",
-                    "innerGlowRadius",
-                    "innerGlowIterations",
-                    "innerGlowMultiplier",
-                    "innerGlowPixelSize",
-                    "displayLines",
-                    "lineColor",
-                    "lineWidth",
-                    "lineIcon",
-                    "linePatternType",
-                    "displayPoints",
-                    "pointColor",
-                    "pointSize",
-                    "pointSpriteName",
-                    "capacity",
-                    "investmentCost",
-                    "availability",
-                    "media"
-                  ]
+                    "required": [
+                      "displayName",
+                      "approval",
+                      "value",
+                      "map_type",
+                      "displayPolygon",
+                      "polygonColor",
+                      "innerGlowEnabled",
+                      "innerGlowRadius",
+                      "innerGlowIterations",
+                      "innerGlowMultiplier",
+                      "innerGlowPixelSize",
+                      "displayLines",
+                      "lineColor",
+                      "lineWidth",
+                      "lineIcon",
+                      "linePatternType",
+                      "displayPoints",
+                      "pointColor",
+                      "pointSize",
+                      "pointSpriteName",
+                      "capacity",
+                      "investmentCost",
+                      "availability",
+                      "media"
+                    ]
+                  }
                 }
               },
               "layer_info_properties": {

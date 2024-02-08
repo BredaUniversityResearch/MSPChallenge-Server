@@ -6,6 +6,7 @@ use App\Domain\API\v1\Game;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Message\Analytics\SessionCreatedMessage;
+use App\Message\GameList\GameListCreationMessage;
 use DateInterval;
 use DateTime;
 use DateTimeImmutable;
@@ -254,7 +255,9 @@ class GameSession extends Base
 
         // after a server upgrade the version might have changed since session was first created
         $this->server_version = ServerManager::getInstance()->getCurrentVersion();
-        $this->sendCreateRequest(1);
+        //$this->sendCreateRequest(1);
+        // alternative to the above
+        SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(new GameListCreationMessage($this->id));
         $this->setToLoading();
 
         return true;

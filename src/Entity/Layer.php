@@ -621,24 +621,21 @@ class Layer
         return $this->layerRaster;
     }
 
-    /*
-     * $layerRaster array should only contain additional raster metadata retrieved from GeoServer
-     * all other elements are this layer class' properties, so should only be set/get through appropriate methods
-     */
-    public function setLayerRaster(string|array|null $layerRaster): Layer
+    public function setLayerRaster(?string $layerRaster = null): Layer
     {
-        if (is_array($layerRaster)) {
-            $layerRaster["layer_raster_material"] = $this->getLayerRasterMaterial();
-            $layerRaster["layer_raster_pattern"] = $this->getLayerRasterPattern();
-            $layerRaster["layer_raster_minimum_value_cutoff"] = $this->getLayerRasterMinimumValueCutoff();
-            $layerRaster["layer_raster_color_interpolation"] = $this->getLayerRasterColorInterpolation();
-            $layerRaster["layer_raster_filter_mode"] = $this->getLayerRasterFilterMode();
-            $layerRaster["url"] = $this->getLayerRasterURL();
-            $layerRaster["boundingbox"] = $this->getLayerRasterBoundingbox();
-            $this->layerRaster = json_encode($layerRaster);
+        if (is_string($layerRaster) && !empty($layerRaster)) {
+            $this->layerRaster = $layerRaster;
             return $this;
         }
-        $this->layerRaster = $layerRaster;
+        $layerRaster = [];
+        $layerRaster["layer_raster_material"] = $this->getLayerRasterMaterial();
+        $layerRaster["layer_raster_pattern"] = $this->getLayerRasterPattern();
+        $layerRaster["layer_raster_minimum_value_cutoff"] = $this->getLayerRasterMinimumValueCutoff();
+        $layerRaster["layer_raster_color_interpolation"] = $this->getLayerRasterColorInterpolation();
+        $layerRaster["layer_raster_filter_mode"] = $this->getLayerRasterFilterMode();
+        $layerRaster["url"] = $this->getLayerRasterURL();
+        $layerRaster["boundingbox"] = $this->getLayerRasterBoundingbox();
+        $this->layerRaster = json_encode($layerRaster);
         return $this;
     }
 
