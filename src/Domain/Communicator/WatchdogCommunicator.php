@@ -25,7 +25,6 @@ class WatchdogCommunicator extends AbstractCommunicator
         protected HttpClientInterface $client,
         private readonly VersionsProvider $versionsProvider,
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
-
     ) {
     }
 
@@ -137,5 +136,4 @@ class WatchdogCommunicator extends AbstractCommunicator
         $jsonResponse = $this->authenticationSuccessHandler->handleAuthenticationSuccess($user);
         return json_decode($jsonResponse->getContent(), true);
     }
-
 }
