@@ -2,6 +2,7 @@
 
 namespace App\Controller\SessionAPI;
 
+use App\Domain\API\v1\Router;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
@@ -9,10 +10,10 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Request;
 
 class GameController extends AbstractController
@@ -28,7 +29,7 @@ class GameController extends AbstractController
         LoggerInterface $logger,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         SymfonyToLegacyHelper $symfonyToLegacyHelper
-    ): StreamedResponse {
+    ): StreamedResponse|JsonResponse {
         $regionBottomLeftX = $request->request->get('region_bottom_left_x');
         $regionBottomLeftY = $request->request->get('region_bottom_left_y');
         $regionTopRightX = $request->request->get('region_top_right_x');
@@ -37,7 +38,10 @@ class GameController extends AbstractController
             !is_numeric($regionBottomLeftY) ||
             !is_numeric($regionTopRightX) ||
             !is_numeric($regionTopRightY)) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, 'Invalid region coordinates');
+            return new JsonResponse(
+                Router::formatResponse(false, 'Invalid region coordinates', null, __CLASS__, __FUNCTION__),
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $region = new Region($regionBottomLeftX, $regionBottomLeftY, $regionTopRightX, $regionTopRightY);
@@ -63,7 +67,10 @@ class GameController extends AbstractController
             }
             $zipFilepath = $configCreator->createAndZip($region);
         } catch (\Exception $e) {
-            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
+            return new JsonResponse(
+                Router::formatResponse(false, $e->getMessage(), null, __CLASS__, __FUNCTION__),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
 
         // Create a StreamedResponse
