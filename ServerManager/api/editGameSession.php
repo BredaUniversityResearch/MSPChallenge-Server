@@ -1,5 +1,7 @@
 <?php
 
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Message\GameList\GameListCreationMessage;
 use ServerManager\API;
 use ServerManager\GameSession;
 use ServerManager\User;
@@ -36,6 +38,10 @@ if (method_exists($gamesession, $action) && in_array($action, $allowed_actions))
 
 // ready to do final actual update
 $gamesession->edit();
+// alternative to recreate function in GameSession class
+if ($action == 'recreate') {
+    SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(new GameListCreationMessage($gamesession->id));
+}
 $api->setPayLoad(["gamesession" => get_object_vars($gamesession)]);
 $api->setStatusSuccess();
 $api->Return();

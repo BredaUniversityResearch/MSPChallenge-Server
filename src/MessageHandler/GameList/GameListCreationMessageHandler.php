@@ -3,6 +3,7 @@
 namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
@@ -109,6 +110,7 @@ class GameListCreationMessageHandler
             $state = 'failed';
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
+        $this->gameSession->setGameState(new GameStateValue('setup'));
         $this->mspServerManagerEntityManager->persist($this->gameSession); // don't understand why this is needed though
         $this->mspServerManagerEntityManager->flush();
     }

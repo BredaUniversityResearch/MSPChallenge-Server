@@ -256,8 +256,7 @@ class GameSession extends Base
         // after a server upgrade the version might have changed since session was first created
         $this->server_version = ServerManager::getInstance()->getCurrentVersion();
         //$this->sendCreateRequest(1);
-        // alternative to the above
-        SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(new GameListCreationMessage($this->id));
+        // alternative to the above is in editGameSession.php
         $this->setToLoading();
 
         return true;
