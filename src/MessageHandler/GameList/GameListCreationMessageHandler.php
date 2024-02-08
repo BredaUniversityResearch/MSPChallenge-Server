@@ -122,8 +122,7 @@ class GameListCreationMessageHandler
             'command' => 'doctrine:database:drop',
             '--force' => true,
             '--if-exists' => true,
-            '--connection' => $this->database,
-            '--env' => $_ENV['APP_ENV']
+            '--connection' => $this->database
         ]);
         $input->setInteractive(false);
         $output = new BufferedOutput();
@@ -137,7 +136,6 @@ class GameListCreationMessageHandler
         $input = new ArrayInput([
             'command' => 'doctrine:database:create',
             '--connection' => $this->database,
-            '--env' => $_ENV['APP_ENV'],
             '--no-interaction' => true
         ]);
         $input->setInteractive(false);
@@ -152,7 +150,6 @@ class GameListCreationMessageHandler
         $input = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
             '--em' => $this->database,
-            '--env' => $_ENV['APP_ENV'],
             '--all-or-nothing' => true,
             '--no-interaction' => true
         ]);

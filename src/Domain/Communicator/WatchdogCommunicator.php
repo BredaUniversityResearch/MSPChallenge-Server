@@ -49,7 +49,7 @@ class WatchdogCommunicator extends AbstractCommunicator
             'game_session_token' => ConnectionManager::getInstance()
                 ->getCachedGameSessionDbConnection($this->gameList->getId())->createQueryBuilder()
                 ->select('game_session_watchdog_token')->from('game_session')->fetchOne(), // legacy
-            'game_state' => $newWatchdogState,
+            'game_state' => strtoupper($newWatchdogState),
             'required_simulations' => $this->getRequiredSimulations(),
             'api_access_token' => json_encode([
                 'token' => $tokens['token'],
