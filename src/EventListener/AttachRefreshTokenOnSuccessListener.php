@@ -22,6 +22,7 @@ class AttachRefreshTokenOnSuccessListener
     {
         $data = $event->getData();
         $user = $event->getUser();
+        // @phpstan-ignore-next-line 'Call to an undefined method getGameSessionId()'
         $gameSessionId = $user->getGameSessionId();
         $connection = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId);
         $query = $connection->createQueryBuilder();
