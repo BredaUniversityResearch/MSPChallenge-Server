@@ -168,7 +168,7 @@ class ConfigCreator
      * The game config data model (from the config file) has a ["SEL"]["heatmap_settings"]["heatmap_range"],
      *   that is available for each SEL layer. E.g. for shipping intensity layers.
      * This function will try to retrieve that heatmap_range array for the specified layer
-     *   or null if it is not available, e.g. it is not a SEL layer
+     *   or null if it is not available, e.g. if it is not a SEL layer
      * @throws Exception
      */
     private function getSELHeatmapRange(string $layerName): ?array
@@ -245,6 +245,12 @@ class ConfigCreator
                 continue;
             }
             $maxValue = (float)end($matches[0]);
+            if ($maxValue < $minValue) {
+                throw new Exception(
+                    'Failed attempt to extract min and max scale values from layer: ' . $layer['name'] . '. ' .
+                    'The extracted max value (' . $maxValue . ') is less than min value (' . $minValue . ').'
+                );
+            }
             $rasterLayers[$key]['scale'] = [
                 'min_value' => $minValue,
                 'max_value' => $maxValue,
