@@ -192,6 +192,11 @@ class ConfigCreator
     }
 
     /**
+     * Adds a scale to the raster layers that are missing it.
+     * It can add missing scales to raster layers of type ValueMap only if:
+     * - the layer has a heatmap range data in the game config data model.
+     *   The scale will be of interpolation type LinGrouped
+     * - the layer type names can be parsed to extract min and max values. The scale will be of interpolation type Lin
      * @throws Exception
      */
     private function fixMissingRasterLayerScales(array &$rasterLayers): void
