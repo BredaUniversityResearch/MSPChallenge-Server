@@ -731,8 +731,6 @@ SQL,
             return;
         }
         $maxValue = $m[count($m)-1]['max'];
-        // normalise the max values, up to 255 max. And:
-        //   set the "min" value based on the previous mapping entry's max
         $m[0]['min'] = 0;
         $m[0]['max'] = (int)ceil(($m[0]['max'] / $maxValue) * 255);
         for ($n = 1; $n < count($m); ++$n) {
