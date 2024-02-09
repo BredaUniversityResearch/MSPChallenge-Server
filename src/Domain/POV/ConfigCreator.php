@@ -188,7 +188,7 @@ class ConfigCreator
 
     /**
      * Given a layer's SEL heatmap range from the game config file, it will try to create a scale from it
-     * The scale can either of interpolation type Lin or LinGrouped
+     * The scale can be of interpolation type Lin or LinGrouped
      *
      * @throws Exception
      */
