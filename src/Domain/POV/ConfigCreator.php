@@ -236,7 +236,7 @@ class ConfigCreator
      * and type names:
      *   ["0 - 20 m","20 - 40 m","40 - 60 m","60 -100 m","100 - 200 m","200 - 500 m ","500 - 1000 m ","> 1000 m"]
      *
-     * is also support the special case "<" for the first type name, e.g. for "NO Hywind Metcentre"'s Wind Speed layer
+     * is also supports the special case "<" for the first type name, e.g. for "NO Hywind Metcentre"'s Wind Speed layer:
      *   ["< 5.0 m\\/s","5.0 - 6.0 m\\/s","6.0 - 7.0 m\\/s","7.0 - 8.0 m\\/s","8.0 - 9.0 m\\/s","> 9.0 m\\/s"]
      * @param string[] $layerTypeNames
      * @throws Exception
