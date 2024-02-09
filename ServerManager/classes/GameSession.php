@@ -255,7 +255,7 @@ class GameSession extends Base
 
         // after a server upgrade the version might have changed since session was first created
         $this->server_version = ServerManager::getInstance()->getCurrentVersion();
-        //$this->sendCreateRequest(1);
+        $this->sendCreateRequest(1);
         // alternative to the above is in editGameSession.php
         $this->setToLoading();
 
@@ -296,7 +296,7 @@ class GameSession extends Base
         return true;
     }
 
-    private function setToLoading()
+    public function setToLoading()
     {
         $now = time();
         $this->session_state = 'request';

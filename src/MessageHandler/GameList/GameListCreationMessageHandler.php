@@ -146,6 +146,7 @@ class GameListCreationMessageHandler
 
     private function migrateSessionDatabase(): void
     {
+        $this->kernel->boot(); // required to wake up doctrine, so it actually does *all* migrations
         $app = new Application($this->kernel);
         $input = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',

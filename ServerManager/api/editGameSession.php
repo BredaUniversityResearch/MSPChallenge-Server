@@ -27,7 +27,7 @@ $allowed_actions = array(
     "upgrade", // called in JS function callUpgrade
     "changeGameState", // called in JS functions startSession, pauseSession
     "processZip", // called by server API gamesession/ArchiveGameSessionInternal
-    "recreate", // called by JS function RecreateSession >> simplified
+    //"recreate", // called by JS function RecreateSession
     // called by websocket server GameTick >> UpdateGameDetailsAtServerManager and by JS function toggleDemoSession
     "demoCheck"
 );
@@ -38,10 +38,10 @@ if (method_exists($gamesession, $action) && in_array($action, $allowed_actions))
 
 // alternative to recreate function in GameSession class
 if ($action == 'recreate') {
+    $gamesession->setToLoading();
     $gamesession->edit();
     SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(new GameListCreationMessage($gamesession->id));
 } else {
-    // ready to do final actual update
     $gamesession->edit();
 }
 
