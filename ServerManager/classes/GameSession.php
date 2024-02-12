@@ -296,7 +296,7 @@ class GameSession extends Base
         return true;
     }
 
-    public function setToLoading()
+    private function setToLoading()
     {
         $now = time();
         $this->session_state = 'request';

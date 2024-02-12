@@ -3,6 +3,8 @@
 namespace App\Domain\Communicator;
 
 use App\Domain\API\v1\User;
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
 use App\VersionsProvider;
@@ -38,8 +40,11 @@ class WatchdogCommunicator extends AbstractCommunicator
      */
     public function changeState(
         GameList $gameList,
-        string $newWatchdogState
+        GameStateValue $newWatchdogState
     ): array {
+        if ($_ENV['APP_ENV'] === 'test') {
+            return [];
+        }
         $this->gameList = $gameList;
         $this->ensureWatchDogAlive();
         $tokens = $this->getAPITokens();
@@ -48,7 +53,7 @@ class WatchdogCommunicator extends AbstractCommunicator
             'game_session_api' => $this->getSessionAPIBaseUrl(),
             'game_session_token' => ConnectionManager::getInstance()
                 ->getCachedGameSessionDbConnection($this->gameList->getId())->createQueryBuilder()
-                ->select('game_session_watchdog_token')->from('game_session')->fetchOne(), // legacy
+                ->select('game_session_watchdog_token')->from('game_session')->fetchOne(),
             'game_state' => strtoupper($newWatchdogState),
             'required_simulations' => $this->getRequiredSimulations(),
             'api_access_token' => json_encode([

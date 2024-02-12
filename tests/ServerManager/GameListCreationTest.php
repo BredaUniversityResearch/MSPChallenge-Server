@@ -1,6 +1,7 @@
 <?php
 namespace App\Tests\ServerManager;
 
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Message\GameList\GameListCreationMessage;
@@ -37,7 +38,15 @@ class GameListCreationTest extends KernelTestCase
         $handler->__invoke(new GameListCreationMessage(1));
         $logFile = static::getContainer()->get('kernel')->getLogDir()."/log_session_1.log";
         self::assertFileExists($logFile);
-        self::assertNotNull(file_get_contents($logFile));
+        $log = file_get_contents($logFile);
+        dump($log);
+        self::assertNotNull($log);
+    }
+
+    public function testRecreateGameListCreationMessageHandler(): void
+    {
+        // simply do it again!
+        $this->testGameListCreationMessageHandler();
     }
 
     private function start(): void
@@ -48,12 +57,22 @@ class GameListCreationTest extends KernelTestCase
 
     public static function setUpBeforeClass(): void
     {
-        // completely removes, creates and migrates the test database
+        // completely removes, creates and migrates the test databases
 
         $app = new Application(static::bootKernel());
         $input = new ArrayInput([
             'command' => 'doctrine:database:drop',
             '--connection' => $_ENV['DBNAME_SERVER_MANAGER'],
+            '--force' => true,
+            '--no-interaction' => true,
+        ]);
+        $input->setInteractive(false);
+        $app->doRun($input, new NullOutput());
+
+        $app = new Application(static::bootKernel());
+        $input = new ArrayInput([
+            'command' => 'doctrine:database:drop',
+            '--connection' => 'msp_session_1',
             '--force' => true,
             '--no-interaction' => true,
         ]);

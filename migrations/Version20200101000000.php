@@ -787,6 +787,7 @@ SQL;
 
     protected function onDown(Schema $schema): void
     {
+        $this->addSql('SET FOREIGN_KEY_CHECKS=0');
         $this->addSql('DROP TABLE IF EXISTS `api_batch`');
         $this->addSql('DROP TABLE IF EXISTS `api_batch_task`');
         $this->addSql('DROP TABLE IF EXISTS `api_token`');
@@ -820,5 +821,6 @@ SQL;
         $this->addSql('DROP TABLE IF EXISTS `task`');
         $this->addSql('DROP TABLE IF EXISTS `user`');
         $this->addSql('DROP TABLE IF EXISTS `warning`');
+        $this->addSql('SET FOREIGN_KEY_CHECKS=1');
     }
 }

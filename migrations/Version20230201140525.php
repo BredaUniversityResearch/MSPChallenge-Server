@@ -41,7 +41,7 @@ final class Version20230201140525 extends MSPMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(
-            'ALTER TABLE `game` DROP `game_mel_lastupdate`, DROP `game_cel_lastupdate`, DROP `game_sel_lastupdate`'
+            'ALTER TABLE `game` DROP IF EXISTS `game_mel_lastupdate`, DROP IF EXISTS `game_cel_lastupdate`, DROP IF EXISTS `game_sel_lastupdate`'
         );
         // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $this->addSql(

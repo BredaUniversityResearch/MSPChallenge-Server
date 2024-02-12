@@ -44,8 +44,8 @@ final class Version20240130173300 extends MSPMigration
         $this->addSql(
             'ALTER TABLE IF EXISTS `geometry` CHANGE geometry_subtractive geometry_subtractive INT(11) NOT NULL DEFAULT 0'
         );
-        $this->addSql('ALTER TABLE IF EXISTS `plan_delete` DROP `plan_delete_id`;');
-        $this->addSql('ALTER TABLE IF EXISTS `plan_restriction_area` DROP `plan_restriction_area_id`;');
-        $this->addSql('ALTER TABLE IF EXISTS `energy_connection` DROP `energy_connection_id`;');
+        $this->addSql('ALTER TABLE IF EXISTS `plan_delete` DROP IF EXISTS `plan_delete_id`;');
+        $this->addSql('ALTER TABLE IF EXISTS `plan_restriction_area` DROP IF EXISTS `plan_restriction_area_id`;');
+        $this->addSql('ALTER TABLE IF EXISTS `energy_connection` DROP IF EXISTS `energy_connection_id`;');
     }
 }

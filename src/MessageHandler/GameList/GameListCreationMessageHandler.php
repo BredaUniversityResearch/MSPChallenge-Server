@@ -70,7 +70,7 @@ class GameListCreationMessageHandler
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager,
         private readonly LoggerInterface $gameSessionLogger,
-        private readonly GameSessionLogger $gameSessionLogFileHandling,
+        private readonly GameSessionLogger $gameSessionLogFileHandler,
         private readonly HttpClientInterface $client,
         private readonly KernelInterface $kernel,
         private readonly ContainerBagInterface $params,
@@ -86,16 +86,15 @@ class GameListCreationMessageHandler
     public function __invoke(GameListCreationMessage $gameList): void
     {
         $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
-            ?? throw new \Exception('Game session not found, so cannot continue.');
+                ?? throw new \Exception('Game session not found, so cannot continue.');
         $connectionManager = ConnectionManager::getInstance();
         $this->database = $connectionManager->getGameSessionDbName($this->gameSession->getId());
         $this->entityManager = $this->kernel->getContainer()->get("doctrine.orm.{$this->database}_entity_manager");
         try {
-            $this->gameSessionLogFileHandling->empty($this->gameSession->getId());
+            $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
             $this->validateGameConfigComplete();
             $this->notice("Session {$this->gameSession->getName()} creation initiated. Please wait.");
-            $this->dropSessionDatabase();
-            $this->createSessionDatabase();
+            $this->setupSessionDatabase();
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
             $this->createSessionRunningConfig();
@@ -110,19 +109,35 @@ class GameListCreationMessageHandler
             $state = 'failed';
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
-        $this->gameSession->setGameState(new GameStateValue('setup'));
-        $this->mspServerManagerEntityManager->persist($this->gameSession); // don't understand why this is needed though
+        $this->mspServerManagerEntityManager->persist($this->gameSession); //don't understand why this is needed
         $this->mspServerManagerEntityManager->flush();
     }
 
-    private function dropSessionDatabase(): void
+    private function setupSessionDatabase(): void
+    {
+        if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
+            $this->notice('Resetting the session database, as this is a session recreate.');
+            $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+            $this->gameSession->setSessionState(new GameSessionStateValue('request'));
+            $this->gameSession->setGameState(new GameStateValue('setup'));
+            $this->mspServerManagerEntityManager->persist($this->gameSession); //don't understand why this is needed
+            $this->mspServerManagerEntityManager->flush();
+            $this->resetSessionDatabase();
+            return;
+        }
+        $this->notice('Creating a new session database, as this is a brand new session.');
+        $this->createSessionDatabase();
+    }
+
+    private function resetSessionDatabase(): void
     {
         $app = new Application($this->kernel);
         $input = new ArrayInput([
-            'command' => 'doctrine:database:drop',
-            '--force' => true,
-            '--if-exists' => true,
-            '--connection' => $this->database
+            'command' => 'doctrine:migrations:migrate',
+            'version' => 'first',
+            '--no-interaction' => true,
+            '--em' => $this->database,
+            '--env' => $_ENV['APP_ENV']
         ]);
         $input->setInteractive(false);
         $output = new BufferedOutput();
@@ -136,7 +151,8 @@ class GameListCreationMessageHandler
         $input = new ArrayInput([
             'command' => 'doctrine:database:create',
             '--connection' => $this->database,
-            '--no-interaction' => true
+            '--no-interaction' => true,
+            '--env' => $_ENV['APP_ENV']
         ]);
         $input->setInteractive(false);
         $output = new BufferedOutput();
@@ -146,13 +162,13 @@ class GameListCreationMessageHandler
 
     private function migrateSessionDatabase(): void
     {
-        $this->kernel->boot(); // required to wake up doctrine, so it actually does *all* migrations
+        //$this->kernel->boot();
         $app = new Application($this->kernel);
         $input = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
             '--em' => $this->database,
-            '--all-or-nothing' => true,
-            '--no-interaction' => true
+            '--no-interaction' => true,
+            '--env' => $_ENV['APP_ENV']
         ]);
         $input->setInteractive(false);
         $output = new BufferedOutput();
@@ -1102,8 +1118,8 @@ class GameListCreationMessageHandler
             )
             ->executeStatement();
         // end of backward compatibility code
+        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('setup'));
         if ($_ENV['APP_ENV'] !== 'test') {
-            $this->watchdogCommunicator->changeState($this->gameSession, "SETUP");
             $this->info("Watchdog called successfully at {$this->watchdogCommunicator->getLastCompleteURLCalled()}");
         } else {
             $this->info('User access set up successfully, but Watchdog was not started as you are in test mode.');

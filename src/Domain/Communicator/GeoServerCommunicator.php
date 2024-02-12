@@ -138,7 +138,7 @@ class GeoServerCommunicator extends AbstractCommunicator
     public function getLayerDescription(string $workspace, string $layerName): array
     {
         $response = $this->getResource(
-            "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers={$workspace}:{$layerName}".
+            "ows?service=WMS&version=1.1.1&request=DescribeLayer&layers={$workspace}:{$layerName}".
             "&outputFormat=application/json"
         );
         return $response["layerDescriptions"]
