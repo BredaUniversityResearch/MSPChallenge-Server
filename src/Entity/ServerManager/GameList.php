@@ -11,7 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
-#[ORM\ChangeTrackingPolicy('DEFERRED_EXPLICIT')]
 class GameList
 {
     #[ORM\Id]
@@ -83,7 +82,7 @@ class GameList
     #[ORM\Column(length: 32, nullable: true)]
     private ?string $apiAccessToken = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne]
     #[ORM\JoinColumn(name: 'save_id', nullable: true, options: ['default' => null])]
     private ?GameSave $gameSave = null;
 

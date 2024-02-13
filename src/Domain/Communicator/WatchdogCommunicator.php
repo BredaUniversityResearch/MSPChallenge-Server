@@ -101,7 +101,8 @@ class WatchdogCommunicator extends AbstractCommunicator
         $address = $_ENV['WATCHDOG_ADDRESS'] ?? $this->gameList->getGameWatchdogServer()->getAddress();
         /** @noinspection HttpUrlsUsage */
         $address = 'http://'.preg_replace('~^https?://~', '', $address);
-        return $address.':' . ($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT) . '/Watchdog/UpdateState';
+        $port = $_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT;
+        return "{$address}:{$port}/Watchdog/UpdateState";
     }
 
     private function getSessionAPIBaseUrl(): string

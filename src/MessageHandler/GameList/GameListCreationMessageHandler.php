@@ -85,6 +85,7 @@ class GameListCreationMessageHandler
      */
     public function __invoke(GameListCreationMessage $gameList): void
     {
+        $this->oldToNewGeometryIDs = [];
         $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
                 ?? throw new \Exception('Game session not found, so cannot continue.');
         $connectionManager = ConnectionManager::getInstance();
@@ -109,7 +110,6 @@ class GameListCreationMessageHandler
             $state = 'failed';
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
-        $this->mspServerManagerEntityManager->persist($this->gameSession); //don't understand why this is needed
         $this->mspServerManagerEntityManager->flush();
     }
 
@@ -120,7 +120,6 @@ class GameListCreationMessageHandler
             $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->gameSession->setGameState(new GameStateValue('setup'));
-            $this->mspServerManagerEntityManager->persist($this->gameSession); //don't understand why this is needed
             $this->mspServerManagerEntityManager->flush();
             $this->resetSessionDatabase();
             return;
@@ -129,14 +128,32 @@ class GameListCreationMessageHandler
         $this->createSessionDatabase();
     }
 
+    private function clearCache(): void
+    {
+        $id = $this->gameSession->getId();
+
+        $app = new Application($this->kernel);
+        $input = new ArrayInput([
+            'command' => 'cache:clear',
+            '--env' => $_ENV['APP_ENV']
+        ]);
+        $input->setInteractive(false);
+        $output = new BufferedOutput();
+        $app->doRun($input, $output);
+
+        $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($id);
+        $this->info("{$input} resulted in: {$output->fetch()}");
+    }
+
     private function resetSessionDatabase(): void
     {
+        $this->clearCache(); // << this shouldn't be necessary...
         $app = new Application($this->kernel);
         $input = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
             'version' => 'first',
-            '--no-interaction' => true,
             '--em' => $this->database,
+            '--no-interaction' => true,
             '--env' => $_ENV['APP_ENV']
         ]);
         $input->setInteractive(false);
@@ -162,7 +179,6 @@ class GameListCreationMessageHandler
 
     private function migrateSessionDatabase(): void
     {
-        //$this->kernel->boot();
         $app = new Application($this->kernel);
         $input = new ArrayInput([
             'command' => 'doctrine:migrations:migrate',
@@ -431,17 +447,15 @@ class GameListCreationMessageHandler
             );
             $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
             foreach ($layersContainer as $layerWithin) {
-                $this->debug('Calling GeoServer to obtain layer geometry features.');
+                $this->debug("Calling GeoServer to obtain geometry features for layer {$layerWithin['layerName']}.");
                 $geoserverReturn = $geoServerCommunicator->getLayerGeometryFeatures($layerWithin['layerName']);
                 $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
                 $features = $geoserverReturn['features']
                     ?? throw new \Exception(
                         'Geometry data call did not return a features variable, so something must be wrong.'
                     );
-                $this->debug(
-                    "Starting import of all {numFeatures} layer geometry features.",
-                    ['numFeatures' => count($features)]
-                );
+                $numFeatures = count($features);
+                $this->debug("Starting import of all {$numFeatures} layer geometry features.");
                 foreach ($features as $feature) {
                     $feature['properties']['original_layer_name'] = $layerWithin['layerName'];
                     $geometryTypeAdded = $this->addLayerGeometryFromFeatureDataSet($layer, $feature);
@@ -449,10 +463,11 @@ class GameListCreationMessageHandler
                         $counter[$geometryTypeAdded]++ :
                         $counter[$geometryTypeAdded] = 1;
                 }
-                $this->debug(
-                    "Import of layer geometry features completed: {geometryTypeDetails}.",
-                    ['geometryTypeDetails' => http_build_query($counter ?? '', '', ' ')]
-                );
+                $geometryTypeDetails = http_build_query($counter ?? '', '', ' ');
+                $this->debug("Import of layer geometry features completed: {$geometryTypeDetails}.");
+                if (isset($counter['None'])) {
+                    $this->warning("A total of {$counter['None']} features returned no geometry at all.");
+                }
             }
             $message = "Successfully retrieved {$layer->getLayerName()} and stored the geometry in the database.";
             if ($layer->hasGeometryWithGeneratedMspids()) {
@@ -471,11 +486,7 @@ class GameListCreationMessageHandler
     {
         $geometryData = $feature['geometry'];
         if (empty($geometryData)) {
-            $this->warning(
-                "No geometry within returned features variable, so this must be an empty layer. ".
-                "Note that in such cases it's better to set layer_download_from_geoserver to 0."
-            );
-            return 'none';
+            return 'None';
         }
         self::ensureMultiData($geometryData);
         $feature['properties']['country_object'] = (!empty($feature['properties']['country_id'])) ?
@@ -524,31 +535,32 @@ class GameListCreationMessageHandler
             $this->info("No duplicate MSP IDs among {$layer->getLayerName()}'s geometry. Yay!");
             return;
         }
-        $message = "Duplicate MSP ID check in {$layer->getLayerName()} returned {counted} duplicates.".PHP_EOL;
+        $counted = count($list);
+        $this->error("Duplicate MSP ID check in {$layer->getLayerName()} returned {$counted} duplicates.".PHP_EOL);
         $previousMspId = null;
         $previousGeometryData = null;
         foreach ($list as $key => $item) {
             $item['geometryData'] .= PHP_EOL; //just a little hack to get rid of stupid 'no line ending' notice
             if ($item['geometryMspid'] != $previousMspId) {
-                $geometryDataBit = substr($item['geometryData'], 0, 100).'...';
-                $message .= "MSP ID {$item['geometryMspid']} was used for a feature with properties {$geometryDataBit} "
-                    .PHP_EOL;
+                $this->error(
+                    "MSP ID {$item['geometryMspid']} was used for a feature with properties {$item['geometryData']}"
+                );
                 $previousGeometryData = $item['geometryData'];
             } else {
                 $diff = DiffHelper::calculate($previousGeometryData, $item['geometryData']);
+                // only using $diff to ascertain differences, as the rendered difference has so far been useless...
                 if (!empty($diff)) {
-                    $message .= " and for a feature with differing properties {$diff}".PHP_EOL;
+                    $this->error("...and for a feature with somehow differing properties: ".$item['geometryData']);
                 } else {
-                    $message .= " and for another feature but seemingly with the same properties.".PHP_EOL;
+                    $this->error("...and for another feature but seemingly with the same properties.".PHP_EOL);
                 }
             }
-            if ($key == 50) {
-                $message .= "Now terminating the listing of duplicated geometry to not clog up this log.".PHP_EOL;
+            if ($key == 4) {
+                $this->error("Now terminating the listing of duplicated geometry to not clog up this log.".PHP_EOL);
                 break;
             }
             $previousMspId = $item['geometryMspid'];
         }
-        $this->error($message, ['counted' => count($list)]);
     }
 
     public static function ensureMultiData(&$geometry): void
@@ -568,21 +580,19 @@ class GameListCreationMessageHandler
             $this->info('No layer restrictions to set up.');
             return;
         }
-        $this->info(
-            'Found {count} restriction definitions, commencing setup.',
-            ['count' => count($this->dataModel['restrictions'])]
-        );
+        $count = count($this->dataModel['restrictions']);
+        $this->info("Found {$count} restriction definitions, commencing setup.");
         foreach ($this->dataModel['restrictions'] as $restrictionKey => $restrictionConfig) {
+            $restrictionKeyText = (int) $restrictionKey + 1;
             foreach ($restrictionConfig as $restrictionItem) {
                 $restriction = new Restriction();
                 $startLayer = $this->entityManager
                     ->getRepository(Layer::class)->findOneBy(['layerName' => $restrictionItem['startlayer']]);
                 if (empty($startLayer)) {
                     $this->warning(
-                        "Start layer {$restrictionItem['startlayer']} used in restriction {restrictionKey} ".
+                        "Start layer {$restrictionItem['startlayer']} used in restriction {$restrictionKeyText} ".
                         "does not seem to exist. Are you sure this layer has been added under the 'meta' object? ".
-                        "Restriction skipped.",
-                        ['restrictionKey' => $restrictionKey + 1]
+                        "Restriction skipped."
                     );
                     continue;
                 }
@@ -590,10 +600,9 @@ class GameListCreationMessageHandler
                     ->getRepository(Layer::class)->findOneBy(['layerName' => $restrictionItem['endlayer']]);
                 if (empty($endLayer)) {
                     $this->warning(
-                        "End layer {$restrictionItem['endlayer']} used in restriction {restrictionKey} does ".
+                        "End layer {$restrictionItem['endlayer']} used in restriction {$restrictionKeyText} does ".
                         "not seem to exist. Are you sure this layer has been added under the 'meta' object? ".
-                        "Restriction skipped.",
-                        ['restrictionKey' => $restrictionKey + 1]
+                        "Restriction skipped."
                     );
                     continue;
                 }

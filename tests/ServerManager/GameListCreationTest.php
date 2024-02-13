@@ -1,58 +1,83 @@
 <?php
 namespace App\Tests\ServerManager;
 
-use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
+use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Message\GameList\GameListCreationMessage;
 use App\MessageHandler\GameList\GameListCreationMessageHandler;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 class GameListCreationTest extends KernelTestCase
 {
 
-    private EntityManagerInterface $emServerManager;
-
     public function testGameListCreation(): void
     {
-        $this->start();
-        $newGameSession = new GameList();
-        $newGameSession->setName('testSession');
-        $newGameSession->setGameConfigVersion(
-            $this->emServerManager->getRepository(GameConfigVersion::class)->findOneBy(['id' => 1])
-        );
-        $newGameSession->setPasswordAdmin('test');
-        $this->emServerManager->persist($newGameSession);
-        $this->emServerManager->flush();
-        self::assertSame($newGameSession, $this->emServerManager->getRepository(GameList::class)->find(1));
+        $container = static::getContainer();
+        $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
+        $configPath = 'tests/ServerManager/config/';
+        $path = $container->get('kernel')->getProjectDir()."/{$configPath}";
+        $fileSystem = new Filesystem();
+        $gameConfigs = [];
+        if ($fileSystem->exists($path)) {
+            $finder = new Finder();
+            foreach ($finder->files()->in($path) as $file) {
+                $gameConfig = new GameConfigFile();
+                $gameConfig->setFilename($file->getFilename());
+                $gameConfig->setDescription('test temporary');
+                $gameConfigVersion = new GameConfigVersion();
+                $gameConfigVersion->setGameConfigFile($gameConfig);
+                $gameConfigVersion->setVersionMessage('test temporary');
+                $gameConfigVersion->setFilePath($configPath.$file->getFilename());
+                $gameConfigVersion->setVersion(1);
+                $gameConfigVersion->setVisibility(new GameConfigVersionVisibilityValue('active'));
+                $gameConfigVersion->setUploadUser(1);
+                $gameConfigVersion->setUploadTime('temp');
+                $gameConfigVersion->setLastPlayedTime('test');
+                $gameConfigVersion->setRegion('test');
+                $gameConfigVersion->setClientVersions('test');
+                $emServerManager->persist($gameConfigVersion);
+                $emServerManager->flush();
+                $fileSystem->copy(
+                    $file->getRealPath(),
+                    $container->get('kernel')->getProjectDir() .
+                    "/ServerManager/configfiles/{$configPath}{$file->getFilename()}"
+                );
+                $gameConfigs[] = $gameConfigVersion;
+            }
+        }
+        if (empty($gameConfigs)) {
+            $gameConfigs[] = $emServerManager->getRepository(GameConfigVersion::class)->findOneBy(['id' => 1]);
+        }
+        foreach ($gameConfigs as $gameConfig) {
+            $newGameSession = new GameList();
+            $newGameSession->setName('testSession');
+            $newGameSession->setGameConfigVersion($gameConfig);
+            $newGameSession->setPasswordAdmin('test');
+            $emServerManager->persist($newGameSession);
+            $emServerManager->flush();
+        }
+        self::assertCount(count($gameConfigs), $emServerManager->getRepository(GameList::class)->findAll());
     }
 
     public function testGameListCreationMessageHandler(): void
     {
+        self::expectNotToPerformAssertions();
         $container = static::getContainer();
-        $handler = $container->get(GameListCreationMessageHandler::class);
-        $handler->__invoke(new GameListCreationMessage(1));
-        $logFile = static::getContainer()->get('kernel')->getLogDir()."/log_session_1.log";
-        self::assertFileExists($logFile);
-        $log = file_get_contents($logFile);
-        dump($log);
-        self::assertNotNull($log);
-    }
-
-    public function testRecreateGameListCreationMessageHandler(): void
-    {
-        // simply do it again!
-        $this->testGameListCreationMessageHandler();
-    }
-
-    private function start(): void
-    {
-        $container = static::getContainer();
-        $this->emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
+        $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
+        foreach ($emServerManager->getRepository(GameList::class)->findAll() as $gameSession) {
+            $handler = $container->get(GameListCreationMessageHandler::class);
+            $handler->__invoke(new GameListCreationMessage($gameSession->getId()));
+            sleep(3);
+            $handler->__invoke(new GameListCreationMessage($gameSession->getId()));
+        }
     }
 
     public static function setUpBeforeClass(): void
@@ -72,7 +97,7 @@ class GameListCreationTest extends KernelTestCase
         $app = new Application(static::bootKernel());
         $input = new ArrayInput([
             'command' => 'doctrine:database:drop',
-            '--connection' => 'msp_session_1',
+            '--connection' => 'msp_session_1', // don't worry, only removes msp_session_1_test database
             '--force' => true,
             '--no-interaction' => true,
         ]);

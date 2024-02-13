@@ -57,15 +57,12 @@ class SessionEntityListener
                 'data' => $geometry->getGeometryData()
             ];
             if (in_array($array, $geometryCoordsDataSets)) {
+                $geometryText = substr($geometry->getGeometryGeometry(), 0, 50).'... - '.
+                    substr($geometry->getGeometryData(), 0, 50).'...';
                 $this->gameSessionLogger->warning(
-                    'Avoided adding duplicate geometry (based on the combination of coordinates and complete '.
-                    'properties set) to layer {layer}. Some information about the geometry: {geometry}',
-                    [
-                        'gameSession' => $layer->getContextCreatingGameSession(),
-                        'layer' => "{$layer->getLayerName()}",
-                        'geometry' => substr($geometry->getGeometryGeometry(), 0, 50).'... - '.
-                            substr($geometry->getGeometryData(), 0, 50).'...'
-                    ]
+                    "Avoided adding duplicate geometry (based on the combination of coordinates and complete ".
+                    "properties set) to layer {$layer->getLayerName()}. Some geometry data: {$geometryText}",
+                    ['gameSession' => $layer->getContextCreatingGameSession()]
                 );
                 $layer->removeGeometry($geometry);
             } else {

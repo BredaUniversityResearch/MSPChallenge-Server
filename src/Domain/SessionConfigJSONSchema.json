@@ -805,7 +805,7 @@
               ]
             },
             "risk_heatmap_settings": {
-              "type": "object",
+              "type": ["object", "null"],
               "properties": {
                 "restriction_layer_exceptions": {
                   "type": "array",
@@ -1455,7 +1455,7 @@
                         "type": "number"
                       },
                       "media": {
-                        "type": "string"
+                        "type": ["string", "null"]
                       }
                     },
                     "required": [
