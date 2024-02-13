@@ -35,7 +35,7 @@ class ConnectionManager extends DatabaseDefaults
 
     public function __construct(
         private ?ManagerRegistry $doctrine = null
-    ){
+    ) {
         self::$instance = $this;
     }
 
