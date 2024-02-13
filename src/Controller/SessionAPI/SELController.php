@@ -2,10 +2,12 @@
 
 namespace App\Controller\SessionAPI;
 
+use App\Controller\BaseController;
 use App\Entity\Geometry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Exception;
 
 class SELController extends BaseController
 {
@@ -13,7 +15,7 @@ class SELController extends BaseController
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
-     * @throws \Exception
+     * @throws Exception
      */
     public static function calculateAlignedSimulationBounds(
         array $config,

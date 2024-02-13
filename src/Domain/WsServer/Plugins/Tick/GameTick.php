@@ -3,13 +3,12 @@
 namespace App\Domain\WsServer\Plugins\Tick;
 
 use App\Domain\API\v1\Game;
-use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Plan;
-use App\Domain\API\v1\Security;
-use App\Domain\Common\MSPBrowserFactory;
+use App\Domain\Services\ConnectionManager;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
+use React\EventLoop\Loop;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -35,12 +34,12 @@ class GameTick extends TickBase
                             ->then(function () {
                                 // only activate this after the Tick call has moved out of the client and into the
                                 //   Watchdog
-                                return $this->UpdateGameDetailsAtServerManager();
+                                return $this->updateGameDetailsAtServerManager();
                             });
                     }
                 }
                 // only activate this after the Tick call has moved out of the client and into the Watchdog
-                return $this->UpdateGameDetailsAtServerManager();
+                return $this->updateGameDetailsAtServerManager();
             });
     }
 
@@ -118,31 +117,19 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function UpdateGameDetailsAtServerManager(): PromiseInterface
+    private function updateGameDetailsAtServerManager(): PromiseInterface
     {
         $game = new Game();
         $this->asyncDataTransferTo($game);
         return $game->getGameDetails()
             ->then(function (array $postValues) {
-                $security = new Security();
-                $this->asyncDataTransferTo($security);
-                return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
-                    ->then(function (string $token) use ($postValues) {
-                        $postValues['token'] = $token;
-                        $postValues['session_id'] = $this->getGameSessionId();
-                        $postValues['action'] = 'demoCheck';
-                        $url = GameSession::getServerManagerApiRoot(getenv('DOCKER') !== false).'editGameSession.php';
-                        $browser = MSPBrowserFactory::create($url);
-                        return $browser
-                            ->post(
-                                $url,
-                                [
-                                'Content-Type' => 'application/x-www-form-urlencoded'
-                                ],
-                                http_build_query($postValues)
-                            );
-                    });
+                $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
+                $qb = $connection->createQueryBuilder()
+                    ->update('game_list');
+                foreach ($postValues as $column => $value) {
+                    $qb->set($column, $value);
+                }
+                return $connection->query($qb);
             });
     }
 

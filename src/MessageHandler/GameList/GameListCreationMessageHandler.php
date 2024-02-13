@@ -75,7 +75,8 @@ class GameListCreationMessageHandler
         private readonly KernelInterface $kernel,
         private readonly ContainerBagInterface $params,
         private readonly VersionsProvider $provider,
-        private readonly WatchdogCommunicator $watchdogCommunicator
+        private readonly WatchdogCommunicator $watchdogCommunicator,
+        private readonly ConnectionManager $connectionManager
     ) {
         $this->normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
     }
@@ -88,11 +89,11 @@ class GameListCreationMessageHandler
         $this->oldToNewGeometryIDs = [];
         $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
                 ?? throw new \Exception('Game session not found, so cannot continue.');
-        $connectionManager = ConnectionManager::getInstance();
-        $this->database = $connectionManager->getGameSessionDbName($this->gameSession->getId());
-        $this->entityManager = $this->kernel->getContainer()->get("doctrine.orm.{$this->database}_entity_manager");
+        $sessionId = $this->gameSession->getId();
+        $this->database = $this->connectionManager->getGameSessionDbName($sessionId);
+        $this->entityManager = $this->connectionManager->getGameSessionEntityManager($sessionId);
         try {
-            $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
+            $this->gameSessionLogFileHandler->empty($sessionId);
             $this->validateGameConfigComplete();
             $this->notice("Session {$this->gameSession->getName()} creation initiated. Please wait.");
             $this->setupSessionDatabase();
@@ -113,6 +114,14 @@ class GameListCreationMessageHandler
         $this->mspServerManagerEntityManager->flush();
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     */
     private function setupSessionDatabase(): void
     {
         if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
@@ -269,7 +278,8 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws \Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     private function setupGame(): void
     {

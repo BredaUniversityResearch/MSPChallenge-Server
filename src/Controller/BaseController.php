@@ -1,19 +1,11 @@
 <?php
 
-namespace App\Controller\SessionAPI;
+namespace App\Controller;
 
-use App\Domain\Services\ConnectionManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class BaseController extends AbstractController
 {
-
-    public function getSessionEntityManager($sessionId): EntityManagerInterface
-    {
-        $database = ConnectionManager::getInstance()->getGameSessionDbName($sessionId);
-        return $this->container->get("doctrine.orm.{$database}_entity_manager");
-    }
     public static function wrapPayloadForResponse(array $payload, ?string $message = null): array
     {
         return [

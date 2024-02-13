@@ -2,6 +2,7 @@
 
 namespace App\Controller\SessionAPI;
 
+use App\Controller\BaseController;
 use App\Domain\API\v1\User;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
@@ -38,10 +39,10 @@ class UserController extends BaseController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse(BaseController::wrapPayloadForResponse($payload));
+            return new JsonResponse(self::wrapPayloadForResponse($payload));
         } catch (\Exception $e) {
             return new JsonResponse(
-                BaseController::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                self::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
                 500
             );
         }
@@ -87,10 +88,10 @@ class UserController extends BaseController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse(BaseController::wrapPayloadForResponse($payload));
+            return new JsonResponse(self::wrapPayloadForResponse($payload));
         } catch (\Exception $e) {
             return new JsonResponse(
-                BaseController::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                self::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
                 500
             );
         }
