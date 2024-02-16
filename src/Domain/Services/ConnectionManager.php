@@ -132,6 +132,10 @@ class ConnectionManager extends DatabaseDefaults
         ];
         // @todo change default? In 6.2: doctrine.orm.naming_strategy.underscore_number_aware
         $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore';
+        $config['metadata_cache_driver'] = [
+            'type' => 'pool',
+            'pool' => 'doctrine.meta_cache_pool'
+        ];
         if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
             return $config;
         }

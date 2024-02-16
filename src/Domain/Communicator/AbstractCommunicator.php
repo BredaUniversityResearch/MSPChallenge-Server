@@ -19,6 +19,12 @@ abstract class AbstractCommunicator
     protected ?string $token = null;
     protected ?string $lastCompleteURLCalled = null;
 
+    public function __construct(
+        HttpClientInterface $client
+    ) {
+        $this->client = $client;
+    }
+
     /**
      * @throws RedirectionExceptionInterface
      * @throws DecodingExceptionInterface

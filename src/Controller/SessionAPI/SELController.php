@@ -4,14 +4,12 @@ namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
 use App\Entity\Geometry;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
 
 class SELController extends BaseController
 {
-
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
@@ -19,9 +17,9 @@ class SELController extends BaseController
      */
     public static function calculateAlignedSimulationBounds(
         array $config,
-        EntityManagerInterface $entityManager
+        Geometry $playAreaGeometry
     ): ?array {
-        $bounds = $entityManager->getRepository(Geometry::class)->getPlayArea()->calculateBounds();
+        $bounds = $playAreaGeometry->calculateBounds();
         if (empty($config["MEL"]) || empty($config["MEL"]["x_min"]) || empty($config["MEL"]["y_min"])
             || empty($config["MEL"]["x_max"]) || empty($config["MEL"]["y_max"]) || empty($config["MEL"]['cellsize'])
         ) {

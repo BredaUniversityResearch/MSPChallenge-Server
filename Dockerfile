@@ -34,6 +34,7 @@ RUN apk add --no-cache \
 # php extensions installer: https://github.com/mlocati/docker-php-extension-installer
 COPY --from=php_extension_installer_upstream --link /usr/bin/install-php-extensions /usr/local/bin/
 
+# gd is required by apc.php
 RUN set -eux; \
     install-php-extensions \
 		apcu \
@@ -42,6 +43,7 @@ RUN set -eux; \
     	zip \
         pcntl \
         imagick \
+        gd \
     ;
 
 # if you want to debug on prod, enable below lines:

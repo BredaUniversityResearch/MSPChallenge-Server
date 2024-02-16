@@ -5,6 +5,7 @@ namespace App\MessageHandler\GameList;
 use App\Controller\SessionAPI\SELController;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Communicator\WatchdogCommunicator;
+use App\Domain\Helper\Util;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
 use App\Entity\EnergyOutput;
@@ -34,16 +35,16 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Jfcherng\Diff\DiffHelper;
 use JsonSchema\Validator;
+use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -65,8 +66,6 @@ class GameListCreationMessageHandler
     private array $dataModel;
     private ObjectNormalizer $normalizer;
 
-    private array $oldToNewGeometryIDs;
-
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager,
         private readonly LoggerInterface $gameSessionLogger,
@@ -76,7 +75,10 @@ class GameListCreationMessageHandler
         private readonly ContainerBagInterface $params,
         private readonly VersionsProvider $provider,
         private readonly WatchdogCommunicator $watchdogCommunicator,
-        private readonly ConnectionManager $connectionManager
+        private readonly ConnectionManager $connectionManager,
+        // e.g. used by GeoServerCommunicator
+        private readonly CacheInterface $downloadsCache,
+        private readonly CacheInterface $resultsCache
     ) {
         $this->normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
     }
@@ -86,7 +88,6 @@ class GameListCreationMessageHandler
      */
     public function __invoke(GameListCreationMessage $gameList): void
     {
-        $this->oldToNewGeometryIDs = [];
         $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
                 ?? throw new \Exception('Game session not found, so cannot continue.');
         $sessionId = $this->gameSession->getId();
@@ -100,7 +101,7 @@ class GameListCreationMessageHandler
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
             $this->createSessionRunningConfig();
-            $this->finaliseSession();
+            $this->entityManager->wrapInTransaction(fn() => $this->finaliseSession());
             $this->notice("Session {$this->gameSession->getName()} created and ready for use.");
             $state = 'healthy';
         } catch (\Throwable $e) {
@@ -137,68 +138,44 @@ class GameListCreationMessageHandler
         $this->createSessionDatabase();
     }
 
-    private function clearCache(): void
-    {
-        $id = $this->gameSession->getId();
-
-        $app = new Application($this->kernel);
-        $input = new ArrayInput([
-            'command' => 'cache:clear',
-            '--env' => $_ENV['APP_ENV']
-        ]);
-        $input->setInteractive(false);
-        $output = new BufferedOutput();
-        $app->doRun($input, $output);
-
-        $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($id);
-        $this->info("{$input} resulted in: {$output->fetch()}");
-    }
-
     private function resetSessionDatabase(): void
     {
-        $this->clearCache(); // << this shouldn't be necessary...
-        $app = new Application($this->kernel);
-        $input = new ArrayInput([
-            'command' => 'doctrine:migrations:migrate',
-            'version' => 'first',
-            '--em' => $this->database,
-            '--no-interaction' => true,
-            '--env' => $_ENV['APP_ENV']
-        ]);
-        $input->setInteractive(false);
-        $output = new BufferedOutput();
-        $app->doRun($input, $output);
-        $this->info("{$input} resulted in: {$output->fetch()}");
+        $process = new Process([
+            'php',
+            'bin/console',
+            'doctrine:migrations:migrate',
+            'first',
+            '--em='.$this->database,
+            '--no-interaction',
+            '--env='.$_ENV['APP_ENV']
+        ], $this->kernel->getProjectDir());
+        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
     }
 
     private function createSessionDatabase(): void
     {
-        $app = new Application($this->kernel);
-        $input = new ArrayInput([
-            'command' => 'doctrine:database:create',
-            '--connection' => $this->database,
-            '--no-interaction' => true,
-            '--env' => $_ENV['APP_ENV']
-        ]);
-        $input->setInteractive(false);
-        $output = new BufferedOutput();
-        $app->doRun($input, $output);
-        $this->info("{$input} resulted in: {$output->fetch()}");
+        $process = new Process([
+            'php',
+            'bin/console',
+            'doctrine:database:create',
+            '--connection='.$this->database,
+            '--no-interaction',
+            '--env='.$_ENV['APP_ENV']
+        ], $this->kernel->getProjectDir());
+        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
     }
 
     private function migrateSessionDatabase(): void
     {
-        $app = new Application($this->kernel);
-        $input = new ArrayInput([
-            'command' => 'doctrine:migrations:migrate',
-            '--em' => $this->database,
-            '--no-interaction' => true,
-            '--env' => $_ENV['APP_ENV']
-        ]);
-        $input->setInteractive(false);
-        $output = new BufferedOutput();
-        $app->doRun($input, $output);
-        $this->info("{$input} resulted in: {$output->fetch()}");
+        $process = new Process([
+            'php',
+            'bin/console',
+            'doctrine:migrations:migrate',
+            '--em='.$this->database,
+            '--no-interaction',
+            '--env='.$_ENV['APP_ENV']
+        ], $this->kernel->getProjectDir());
+        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
     }
 
     /**
@@ -253,8 +230,9 @@ class GameListCreationMessageHandler
     }
 
     /**
+     * finalise session will create all the necessary entities for a game session *without intermediate flushes*
+     *
      * @throws \Exception
-     * @throws ExceptionInterface
      * @throws ExceptionInterface
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
@@ -263,18 +241,24 @@ class GameListCreationMessageHandler
      * @throws TransportExceptionInterface
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
      */
     private function finaliseSession(): void
     {
+        $context = new FinaliseSessionContext();
+
+        // entities are created in the order of their dependencies
         $this->setupGame();
-        $this->setupGameCountries();
-        $this->importLayerData();
-        $this->setupRestrictions();
-        $this->setupSimulations();
-        $this->setupObjectives();
-        $this->setupPlans();
+        $this->setupGameCountries($context);
+        $this->importLayerData($context);
+        $this->setupRestrictions($context);
+        $this->setupSimulations($context);
+        $this->setupObjectives($context);
+        $this->setupPlans($context);
+
+        // some final custom queries
+        $this->completeGeometryRecords();
         $this->setupGameWatchdogAndAccess();
-        $this->entityManager->flush();
     }
 
     /**
@@ -299,18 +283,20 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      */
-    private function setupGameCountries(): void
+    private function setupGameCountries(FinaliseSessionContext $context): void
     {
-        $country = (new Country())
+        $country1 = (new Country())
             ->setCountryId(1)
             ->setCountryColour($this->dataModel['user_admin_color'])
             ->setCountryIsManager(1);
-        $this->entityManager->persist($country);
+        $this->entityManager->persist($country1);
+        $context->addCountry($country1);
         $country2 = (new Country())
-            ->setCountryId(1)
+            ->setCountryId(2)
             ->setCountryColour($this->dataModel['user_region_manager_color'])
             ->setCountryIsManager(1);
         $this->entityManager->persist($country2);
+        $context->addCountry($country2);
         foreach ($this->dataModel['meta'] as $layerMeta) {
             if ($layerMeta['layer_name'] == $this->dataModel['countries']) {
                 foreach ($layerMeta['layer_type'] as $country) {
@@ -320,31 +306,34 @@ class GameListCreationMessageHandler
                         ->setCountryColour($country['polygonColor'])
                         ->setCountryIsManager(0);
                     $this->entityManager->persist($nextCountry);
+                    $context->addCountry($nextCountry);
                 }
                 break;
             }
         }
         $this->info('All countries set up.');
-        $this->entityManager->flush(); //because we will look up countries later on
     }
 
     /**
-     * @throws \Exception
-     * @throws ExceptionInterface
+     * @param FinaliseSessionContext $context
+     * @return void
      * @throws ClientExceptionInterface
+     * @throws ContainerExceptionInterface
      * @throws DecodingExceptionInterface
+     * @throws ExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws ContainerExceptionInterface
      */
-    private function importLayerData(): void
+    private function importLayerData(FinaliseSessionContext $context): void
     {
-        $geoServerCommunicator = new GeoServerCommunicator($this->client);
-        $geoServerCommunicator->setBaseURL($this->gameSession->getGameGeoServer()->getAddress());
-        $geoServerCommunicator->setUsername($this->gameSession->getGameGeoServer()->getUsername());
-        $geoServerCommunicator->setPassword($this->gameSession->getGameGeoServer()->getPassword());
+        $geoServerCommunicator = new GeoServerCommunicator($this->client, $this->downloadsCache, $this->resultsCache);
+        $geoServerCommunicator
+            ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress())
+            ->setUsername($this->gameSession->getGameGeoServer()->getUsername())
+            ->setPassword($this->gameSession->getGameGeoServer()->getPassword());
 
         foreach ($this->dataModel['meta'] as $layerMetaData) {
             $layer = $this->normalizer->denormalize($layerMetaData, Layer::class);
@@ -356,17 +345,14 @@ class GameListCreationMessageHandler
                     $geoServerCommunicator
                 );
             } else {
-                $this->importLayerGeometryData(
-                    $layer,
-                    $geoServerCommunicator
-                );
+                $this->importLayerGeometryData($layer, $geoServerCommunicator, $context);
             }
             $this->info("Finished importing layer {$layer->getLayerName()}.");
             $this->importLayerTypeAvailabilityRestrictions($layer);
             $this->entityManager->persist($layer);
-            $this->entityManager->flush();
-            $this->checkForDuplicateMspids($layer); //flush required, hence here
+            $context->addLayer($layer);
         }
+        $this->checkForDuplicateMspIds($context);
     }
 
     private function importLayerTypeAvailabilityRestrictions(Layer $layer): void
@@ -391,14 +377,16 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws \Exception
+     * @param Layer $layer
+     * @param GeoServerCommunicator $geoServerCommunicator
      * @throws ClientExceptionInterface
+     * @throws ContainerExceptionInterface
      * @throws DecodingExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws ContainerExceptionInterface
      */
     private function importLayerRasterData(
         Layer $layer,
@@ -418,7 +406,7 @@ class GameListCreationMessageHandler
             $this->debug('Calling GeoServer to obtain actual raster data.');
             $layer->setLayerRasterURL($rasterMetaData['url']);
             $layer->setLayerRasterBoundingbox($rasterMetaData['boundingbox']);
-            $rasterData = $geoServerCommunicator->getRasterDataThroughMetaData(
+            $rasterData = $geoServerCommunicator->getRasterDataByMetaData(
                 $this->dataModel['region'],
                 $layer,
                 $rasterMetaData
@@ -429,6 +417,7 @@ class GameListCreationMessageHandler
                 $rasterPath,
                 $rasterData
             );
+            $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
             $message = "Successfully retrieved {$layer->getLayerName()} and stored the raster file at {$rasterPath}.";
         }
         $layer->setLayerRaster();
@@ -438,16 +427,20 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws \Exception
+     * @param Layer $layer
+     * @param GeoServerCommunicator $geoServerCommunicator
+     * @param FinaliseSessionContext $context
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
+     * @throws InvalidArgumentException
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
     private function importLayerGeometryData(
         Layer $layer,
-        GeoServerCommunicator $geoServerCommunicator
+        GeoServerCommunicator $geoServerCommunicator,
+        FinaliseSessionContext $context
     ): void {
         if ($layer->getLayerDownloadFromGeoserver()) {
             $this->debug('Calling GeoServer to obtain layer description.');
@@ -468,7 +461,7 @@ class GameListCreationMessageHandler
                 $this->debug("Starting import of all {$numFeatures} layer geometry features.");
                 foreach ($features as $feature) {
                     $feature['properties']['original_layer_name'] = $layerWithin['layerName'];
-                    $geometryTypeAdded = $this->addLayerGeometryFromFeatureDataSet($layer, $feature);
+                    $geometryTypeAdded = $this->addLayerGeometryFromFeatureDataSet($layer, $feature, $context);
                     isset($counter[$geometryTypeAdded]) ?
                         $counter[$geometryTypeAdded]++ :
                         $counter[$geometryTypeAdded] = 1;
@@ -490,18 +483,26 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws \Exception
+     * @param Layer $layer
+     * @param array $feature
+     * @param FinaliseSessionContext $context
+     * @return string
      */
-    private function addLayerGeometryFromFeatureDataSet(Layer $layer, array $feature): string
-    {
+    private function addLayerGeometryFromFeatureDataSet(
+        Layer $layer,
+        array $feature,
+        FinaliseSessionContext $context
+    ): string {
         $geometryData = $feature['geometry'];
         if (empty($geometryData)) {
             return 'None';
         }
         self::ensureMultiData($geometryData);
-        $feature['properties']['country_object'] = (!empty($feature['properties']['country_id'])) ?
-            $this->entityManager->getRepository(Country::class)->find($feature['properties']['country_id']) :
-            null;
+
+        $feature['properties']['country_object'] = null;
+        if ((null !== $country = $context->getCountry($feature['properties']['country_id'] ?? -1))) {
+            $feature['properties']['country_object'] = $country;
+        }
         if (strcasecmp($geometryData['type'], 'MultiPolygon') == 0) {
             foreach ($geometryData['coordinates'] as $multiPolygon) {
                 if (!is_array($multiPolygon)) {
@@ -510,9 +511,11 @@ class GameListCreationMessageHandler
                 $geometryToSubtractFrom = null;
                 foreach ($multiPolygon as $key => $polygon) {
                     $geometry = new Geometry($layer);
-                    $geometry->setGeometryGeometry($polygon);
-                    $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
-                    $geometry->setGeometryToSubtractFrom($geometryToSubtractFrom);
+                    $geometry
+                        ->setGeometryGeometry($polygon)
+                        ->setGeometryPropertiesThroughFeature($feature['properties'])
+                        ->setGeometryToSubtractFrom($geometryToSubtractFrom);
+                    $context->addGeometry($geometry);
                     $layer->addGeometry($geometry);
                     if (sizeof($multiPolygon) > 1 && $key == 0) {
                         $geometryToSubtractFrom = $geometry;
@@ -522,54 +525,59 @@ class GameListCreationMessageHandler
         } elseif (strcasecmp($geometryData['type'], 'MultiLineString') == 0) {
             foreach ($geometryData['coordinates'] as $line) {
                 $geometry = new Geometry($layer);
-                $geometry->setGeometryGeometry($line);
-                $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
+                $geometry
+                    ->setGeometryGeometry($line)
+                    ->setGeometryPropertiesThroughFeature($feature['properties']);
+                $context->addGeometry($geometry);
                 $layer->addGeometry($geometry);
             }
         } elseif (strcasecmp($geometryData['type'], 'MultiPoint') == 0) {
             $geometry = new Geometry($layer);
-            $geometry->setGeometryGeometry($geometryData["coordinates"]);
-            $geometry->setGeometryPropertiesThroughFeature($feature['properties']);
+            $geometry
+                ->setGeometryGeometry($geometryData["coordinates"])
+                ->setGeometryPropertiesThroughFeature($feature['properties']);
+            $context->addGeometry($geometry);
             $layer->addGeometry($geometry);
         }
         return $geometryData['type'];
     }
 
-    public function checkForDuplicateMspids(Layer $layer): void
+    public function checkForDuplicateMspIds(FinaliseSessionContext $context): void
     {
-        if ($layer->getLayerGeotype() == 'raster') {
+        $geometries = $context->getGeometriesWithDuplicateMspId();
+        if (empty($geometries)) {
+            $this->info("No duplicate MSP IDs. Yay!");
             return;
         }
-        $list = $this->entityManager->getRepository(Geometry::class)->findDuplicateMspids($layer->getLayerId());
-        if (empty($list)) {
-            $this->info("No duplicate MSP IDs among {$layer->getLayerName()}'s geometry. Yay!");
-            return;
-        }
-        $counted = count($list);
-        $this->error("Duplicate MSP ID check in {$layer->getLayerName()} returned {$counted} duplicates.".PHP_EOL);
-        $previousMspId = null;
-        $previousGeometryData = null;
-        foreach ($list as $key => $item) {
-            $item['geometryData'] .= PHP_EOL; //just a little hack to get rid of stupid 'no line ending' notice
-            if ($item['geometryMspid'] != $previousMspId) {
-                $this->error(
-                    "MSP ID {$item['geometryMspid']} was used for a feature with properties {$item['geometryData']}"
-                );
-                $previousGeometryData = $item['geometryData'];
-            } else {
-                $diff = DiffHelper::calculate($previousGeometryData, $item['geometryData']);
-                // only using $diff to ascertain differences, as the rendered difference has so far been useless...
-                if (!empty($diff)) {
-                    $this->error("...and for a feature with somehow differing properties: ".$item['geometryData']);
+
+        foreach ($geometries as $mspId => $geometryList) {
+            $counted = count($geometryList);
+            $this->error(
+                "MSP ID {$mspId} has {$counted} duplicates, used by layers: ".PHP_EOL.
+                implode(',', array_map(fn($x) => $x->getLayer()->getLayerName(), $geometryList)).
+                PHP_EOL
+            );
+            $previousGeometryData = null;
+            foreach ($geometryList as $key => $geometry) {
+                $geometryData = $geometry->getGeometryData().
+                    PHP_EOL; //just a little hack to get rid of stupid 'no line ending' notice
+                $this->error("MSP ID {$mspId} was used for a feature with properties ".$geometryData);
+                if ($previousGeometryData === null) {
+                    $previousGeometryData = $geometryData;
                 } else {
-                    $this->error("...and for another feature but seemingly with the same properties.".PHP_EOL);
+                    $diff = DiffHelper::calculate($previousGeometryData, $geometryData);
+                    // only using $diff to ascertain differences, as the rendered difference has so far been useless...
+                    if (!empty($diff)) {
+                        $this->error("...and for a feature with somehow differing properties: ".$geometryData);
+                    } else {
+                        $this->error("...and for another feature but seemingly with the same properties.".PHP_EOL);
+                    }
+                }
+                if ($key == 4) {
+                    $this->error("Now terminating the listing of duplicated geometry to not clog up this log.".PHP_EOL);
+                    break;
                 }
             }
-            if ($key == 4) {
-                $this->error("Now terminating the listing of duplicated geometry to not clog up this log.".PHP_EOL);
-                break;
-            }
-            $previousMspId = $item['geometryMspid'];
         }
     }
 
@@ -582,9 +590,9 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws \Exception
+     * @param FinaliseSessionContext $context
      */
-    private function setupRestrictions(): void
+    private function setupRestrictions(FinaliseSessionContext $context): void
     {
         if (empty($this->dataModel['restrictions'])) {
             $this->info('No layer restrictions to set up.');
@@ -596,9 +604,7 @@ class GameListCreationMessageHandler
             $restrictionKeyText = (int) $restrictionKey + 1;
             foreach ($restrictionConfig as $restrictionItem) {
                 $restriction = new Restriction();
-                $startLayer = $this->entityManager
-                    ->getRepository(Layer::class)->findOneBy(['layerName' => $restrictionItem['startlayer']]);
-                if (empty($startLayer)) {
+                if (null === $startLayer = $context->getLayer($restrictionItem['startlayer'] ?? '')) {
                     $this->warning(
                         "Start layer {$restrictionItem['startlayer']} used in restriction {$restrictionKeyText} ".
                         "does not seem to exist. Are you sure this layer has been added under the 'meta' object? ".
@@ -606,9 +612,7 @@ class GameListCreationMessageHandler
                     );
                     continue;
                 }
-                $endLayer = $this->entityManager
-                    ->getRepository(Layer::class)->findOneBy(['layerName' => $restrictionItem['endlayer']]);
-                if (empty($endLayer)) {
+                if (null === $endLayer = $context->getLayer($restrictionItem['endlayer'] ?? '')) {
                     $this->warning(
                         "End layer {$restrictionItem['endlayer']} used in restriction {$restrictionKeyText} does ".
                         "not seem to exist. Are you sure this layer has been added under the 'meta' object? ".
@@ -616,31 +620,34 @@ class GameListCreationMessageHandler
                     );
                     continue;
                 }
-                $restriction->setRestrictionStartLayer($startLayer);
-                $restriction->setRestrictionEndLayer($endLayer);
-                $restriction->setRestrictionSort($restrictionItem['sort']);
-                $restriction->setRestrictionValue($restrictionItem['value']);
-                $restriction->setRestrictionType($restrictionItem['type']);
-                $restriction->setRestrictionMessage($restrictionItem['message']);
-                $restriction->setRestrictionStartLayerType($restrictionItem['starttype']);
-                $restriction->setRestrictionEndLayerType($restrictionItem['endtype']);
+                $restriction->setRestrictionStartLayer($startLayer)
+                    ->setRestrictionEndLayer($endLayer)
+                    ->setRestrictionSort($restrictionItem['sort'])
+                    ->setRestrictionValue($restrictionItem['value'])
+                    ->setRestrictionType($restrictionItem['type'])
+                    ->setRestrictionMessage($restrictionItem['message'])
+                    ->setRestrictionStartLayerType($restrictionItem['starttype'])
+                    ->setRestrictionEndLayerType($restrictionItem['endtype']);
                 $this->entityManager->persist($restriction);
             }
         }
         $this->info('Restrictions setup complete.');
     }
 
-    private function setupSimulations(): void
+    /**
+     * @param FinaliseSessionContext $context
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    private function setupSimulations(FinaliseSessionContext $context): void
     {
         $simulationsDone = [];
         $possibleSims = array_keys($this->provider->getComponentsVersions());
         foreach ($possibleSims as $possibleSim) {
-            $simSessionCreationMethod = "{$possibleSim}SessionCreation";
             if (array_key_exists($possibleSim, $this->dataModel)
                 && is_array($this->dataModel[$possibleSim])
-                && method_exists($this, $simSessionCreationMethod)
+                && $this->createSessionForSimulation($possibleSim, $context)
             ) {
-                $this->$simSessionCreationMethod();
                 $simulationsDone[] = $possibleSim;
             }
         }
@@ -653,14 +660,44 @@ class GameListCreationMessageHandler
     }
 
     /**
+     * @param string $simulation
+     * @param FinaliseSessionContext $context
+     * @return bool
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
-    private function MELSessionCreation(): void
+    private function createSessionForSimulation(string $simulation, FinaliseSessionContext $context): bool
+    {
+        switch ($simulation) {
+            case 'MEL':
+                $this->MELSessionCreation($context);
+                return true;
+            case 'SEL':
+                $this->SELSessionCreation($context);
+                return true;
+            case 'CEL':
+                $this->CELSessionCreation();
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @param FinaliseSessionContext $context
+     * @throws \Exception
+     */
+    private function MELSessionCreation(FinaliseSessionContext $context): void
     {
         $this->info('Setting up simulation MEL...');
         $config = $this->dataModel['MEL'];
+
+        // todo: this just shows an error message ? no action ?
         if (isset($config["fishing"])) {
-            $countries = $this->entityManager->getRepository(Country::class)->findBy(['countryIsManager' => 0]);
+            $countries = $context->getCountries(
+                fn(Country $country) => $country->getCountryIsManager() == 0
+            );
             foreach ($config["fishing"] as $fleet) {
                 if (isset($fleet["initialFishingDistribution"])) {
                     foreach ($countries as $country) {
@@ -683,30 +720,34 @@ class GameListCreationMessageHandler
         }
 
         foreach ($config['pressures'] as $pressure) {
-            $pressureLayer = $this->setupMELLayer($pressure['name']);
+            $pressureLayer = $this->setupMELLayer($pressure['name'], $context);
             foreach ($pressure['layers'] as $layerGeneratingPressures) {
-                $layer = $this->entityManager->getRepository(Layer::class)
-                    ->findOneBy(['layerName' => $layerGeneratingPressures['name']]);
-                if (!empty($layer)) {
-                    //add a layer to the mel_layer table for faster accessing
-                    $pressureLayer->addPressureGeneratingLayer($layer);
+                if (null === $layer = $context->getLayer($layerGeneratingPressures['name'] ?? '')) {
+                    continue;
                 }
+                //add a layer to the mel_layer table for faster accessing
+                // $layer is cascaded by $pressureLayer, so no need to persist it
+                $pressureLayer->addPressureGeneratingLayer($layer);
             }
+            $this->entityManager->persist($pressureLayer);
         }
         foreach ($config['outcomes'] as $outcome) {
-            $this->setupMELLayer($outcome['name']);
+            $outcomeLayer = $this->setupMELLayer($outcome['name'], $context);
+            $this->entityManager->persist($outcomeLayer);
         }
         $this->info('Finished setting up simulation MEL.');
     }
 
     /**
+     * @param string $melLayerName
+     * @param FinaliseSessionContext $context
+     * @return Layer
      * @throws \Exception
      */
-    private function setupMELLayer(string $melLayerName): Layer
+    private function setupMELLayer(string $melLayerName, FinaliseSessionContext $context): Layer
     {
         $layerName = "mel_" . str_replace(" ", "_", $melLayerName);
-        $layer = $this->entityManager->getRepository(Layer::class)->findOneBy(['layerName' => $layerName]);
-        if (empty($layer)) {
+        if (null === $layer = $context->getLayer($layerName)) {
             throw new \Exception(
                 "Pressure layer {$layerName} not found. Make sure it has been defined under 'meta'."
             );
@@ -727,23 +768,27 @@ class GameListCreationMessageHandler
         return $layer;
     }
 
+    private function getPlayAreaGeometryFromContext(FinaliseSessionContext $context): Geometry
+    {
+        $playAreaLayer = $context->filterOneLayer(fn($v, $k) => Util::hasPrefix($k, '_playarea'));
+        return $playAreaLayer->getGeometry()->first();
+    }
+
     /**
-     * @throws NonUniqueResultException
+     * @param FinaliseSessionContext $context
      * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws \Exception
      */
-    private function SELSessionCreation(): void
+    private function SELSessionCreation(FinaliseSessionContext $context): void
     {
         $this->info('Setting up simulation SEL...');
         $boundsConfig = SELController::calculateAlignedSimulationBounds(
             $this->dataModel,
-            $this->entityManager
+            $this->getPlayAreaGeometryFromContext($context)
         );
         foreach ($this->dataModel["SEL"]["heatmap_settings"] as $heatmap) {
-            $selOutputLayer = $this->entityManager->getRepository(Layer::class)->findOneBy(
-                ['layerName' => $heatmap['layer_name']]
-            );
-            if (is_null($selOutputLayer)) {
+            if (null === $selOutputLayer = $context->getLayer($heatmap['layer_name'] ?? '')) {
                 throw new \Exception(
                     'The layer '.$heatmap['layer_name'].' referenced in the heatmap settings has not been 
                     found in the database, so cannot continue. Are you sure it has been defined separately as an 
@@ -776,6 +821,7 @@ class GameListCreationMessageHandler
                 ]);
             }
             $selOutputLayer->setLayerRaster();
+            $this->entityManager->persist($selOutputLayer);
         }
         $this->info('Finished setting up simulation SEL.');
     }
@@ -786,65 +832,57 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @throws \Exception
+     * @param FinaliseSessionContext $context
      * @throws ExceptionInterface
+     * @throws \Exception
      */
-    private function setupPlans(): void
+    private function setupPlans(FinaliseSessionContext $context): void
     {
         if (empty($this->dataModel['plans'])) {
             $this->info('No plans defined, so nothing to import there.');
         }
         foreach ($this->dataModel['plans'] as $planConfig) {
+            /** @var Plan $plan */
             $plan = $this->normalizer->denormalize($planConfig, Plan::class, null, [
                 AbstractNormalizer::IGNORED_ATTRIBUTES => ['fishing']
             ]);
             $this->info("Starting import of plan {$plan->getPlanName()}.");
-            $plan->setCountry(
-                $this->entityManager->getRepository(Country::class)->find($planConfig['plan_country_id'])
-            );
+            $plan->setCountry($context->getCountry($planConfig['plan_country_id'] ?? -1));
             $plan->setPlanState('APPROVED');
             foreach ($planConfig['fishing'] as $fishingConfig) {
                 $fishing = $this->normalizer->denormalize($fishingConfig, Fishing::class);
-                $fishing->setCountry(
-                    $this->entityManager->getRepository(Country::class)->find($fishingConfig['fishing_country_id'])
-                );
+                $fishing->setCountry($context->getCountry($fishingConfig['fishing_country_id'] ?? -1));
+                // $fishing is cascaded by $plan, so no persist needed
                 $plan->addFishing($fishing);
             }
 
             foreach ($planConfig['messages'] as $planMessageConfig) {
                 $planMessage = new PlanMessage();
-                $planMessage->setCountry(
-                    $this->entityManager->getRepository(Country::class)->find($planMessageConfig['country_id'])
-                );
+                $planMessage->setCountry($context->getCountry($planMessageConfig['country_id'] ?? -1));
                 $planMessage->setPlanMessageUserName($planMessageConfig['user_name']);
                 $planMessage->setPlanMessageText($planMessageConfig['text']);
                 $planMessage->setPlanMessageTime($planMessageConfig['time']);
+                // $planMessage is cascaded by $plan, so no persist needed
                 $plan->addPlanMessage($planMessage);
             }
 
             foreach ($planConfig['restriction_settings'] as $restrictionAreaConfig) {
                 $planRestrictionArea = new PlanRestrictionArea();
-                $planRestrictionArea->setLayer(
-                    $this->entityManager->getRepository(Layer::class)->findOneBy(
-                        ['layerName' => $restrictionAreaConfig['layer_name']]
-                    )
-                );
+                $planRestrictionArea->setLayer($context->getLayer($restrictionAreaConfig['layer_name'] ?? ''));
                 $planRestrictionArea->setCountry(
-                    $this->entityManager->getRepository(Country::class)->find($restrictionAreaConfig['country_id'])
+                    $context->getCountry($restrictionAreaConfig['country_id'] ?? -1)
                 );
                 $planRestrictionArea->setPlanRestrictionAreaEntityType($restrictionAreaConfig['entity_type_id']);
                 $planRestrictionArea->setPlanRestrictionAreaSize($restrictionAreaConfig['size']);
+                // $planRestrictionArea is cascaded by $plan, so no persist needed
                 $plan->addPlanRestrictionArea($planRestrictionArea);
             }
-            $this->entityManager->persist($plan);
-            $this->entityManager->flush();
-            $this->setupPlannedLayerGeometry($planConfig, $plan);
-            $this->setupPlannedGrids($planConfig['grids'], $plan);
+            $this->setupPlannedLayerGeometry($planConfig, $plan, $context);
+            $this->setupPlannedGrids($planConfig['grids'], $plan, $context);
             $plan->updatePlanConstructionTime();
             $this->info("Import of plan {$plan->getPlanName()} finished.");
+            $this->entityManager->persist($plan);
         }
-        $this->entityManager->flush();
-        $this->completeGeometryRecords();
     }
 
     private function completeGeometryRecords(): void
@@ -859,12 +897,15 @@ class GameListCreationMessageHandler
     }
 
     /**
+     * @param array $planConfig
+     * @param Plan $plan
+     * @param FinaliseSessionContext $context
      * @throws \Exception
      */
-    private function setupPlannedLayerGeometry(array $planConfig, Plan $plan): void
+    private function setupPlannedLayerGeometry(array $planConfig, Plan $plan, FinaliseSessionContext $context): void
     {
-        $planCableConnections = [];
-        $planEnergyOutput = [];
+        $planCableConnectionsConfig = [];
+        $planEnergyOutputConfig = [];
         $this->info(
             "Starting import of plan {$plan->getPlanName()}'s {count} layers.",
             ['count' => count($planConfig['layers'])]
@@ -873,72 +914,80 @@ class GameListCreationMessageHandler
             $derivedLayer = new Layer();
             foreach ($layerConfig['geometry'] as $layerGeometryConfig) {
                 $geometry = new Geometry();
-                $geometry->setOldGeometryId($layerGeometryConfig['geometry_id']);
-                $geometry->setGeometryData($layerGeometryConfig['data'] ?? null);
-                $geometry->setGeometryFID($layerGeometryConfig['FID']);
-                $geometry->setGeometryGeometry($layerGeometryConfig['geometry']);
-                $geometry->setGeometryType($layerGeometryConfig['type']);
-                if (!is_null($layerGeometryConfig['country'])) {
-                    $country = $this->entityManager->getRepository(Country::class)->find(
-                        $layerGeometryConfig['country']
-                    );
+                $geometry
+                    ->setOldGeometryId($layerGeometryConfig['geometry_id'])
+                    ->setGeometryData($layerGeometryConfig['data'] ?? null)
+                    ->setGeometryFID($layerGeometryConfig['FID'])
+                    ->setGeometryGeometry($layerGeometryConfig['geometry'])
+                    ->setGeometryType($layerGeometryConfig['type']);
+                $context->addGeometry($geometry);
+                if ((null !== $country = $context->getCountry($layerGeometryConfig['country'] ?? -1))) {
                     $country->addGeometry($geometry);
                 }
-                $originalGeometry = $this->findNewPersistentGeometry(
+                if (null !== $originalGeometry = $this->findNewPersistentGeometry(
                     $layerGeometryConfig['base_geometry_info'],
+                    $context,
                     $geometry
-                );
-                $originalGeometry->addDerivedGeometry($geometry);
+                )) {
+                    // $originalGeometry is cascaded by $geometry, so no persist needed
+                    $originalGeometry->addDerivedGeometry($geometry);
+                }
+                // $geometry is cascaded by $derivedLayer, so no persist needed
                 $derivedLayer->addGeometry($geometry);
                 if (!empty($layerGeometryConfig['cable'])) {
-                    $planCableConnections[] = array_merge(
+                    $planCableConnectionsConfig[] = array_merge(
                         $layerGeometryConfig['cable'],
                         $layerGeometryConfig['base_geometry_info']
                     );
                 }
                 if (!empty($layerGeometryConfig['energy_output'])) {
-                    $planEnergyOutput[] = array_merge(
+                    $planEnergyOutputConfig[] = array_merge(
                         $layerGeometryConfig['energy_output'],
                         $layerGeometryConfig['base_geometry_info']
                     );
                 }
             }
+            // $planLayer is cascaded by $plan, so no persist needed
             $planLayer = new PlanLayer();
+            // $derivedLayer is cascaded by $planLayer (and vice versa), so no persist needed.
+            //  And layers were persisted before in the importLayerData method.
             $derivedLayer->addPlanLayer($planLayer);
-            $layer = $this->entityManager->getRepository(Layer::class)->findOneBy(
-                ['layerName' => $layerConfig['name']]
-            );
-            $layer->addDerivedLayer($derivedLayer);
+            $layer = $context->getLayer($layerConfig['name'] ?? '');
+            // $layer is cascaded by $derivedLayer (and vice versa), so no persist needed
+            //  And layers were persisted before in the importLayerData method.
+            $layer?->addDerivedLayer($derivedLayer);
+            // $plan is already persisted by caller.
             $plan->addPlanLayer($planLayer);
             foreach ($layerConfig['deleted'] as $layerGeometryDeletedConfig) {
                 $planDelete = new PlanDelete();
                 $originalPlannedDeletedGeometry = $this->findNewPersistentGeometry(
-                    $layerGeometryDeletedConfig['base_geometry_info']
+                    $layerGeometryDeletedConfig['base_geometry_info'],
+                    $context
                 );
+                // $planDelete is cascaded by $derivedLayer, so no persist needed
                 $derivedLayer->addPlanDelete($planDelete);
+                // $originalPlannedDeletedGeometry is cascaded by $planDelete (and vice versa), so no persist needed
                 $originalPlannedDeletedGeometry->addPlanDelete($planDelete);
                 $plan->addPlanDelete($planDelete);
             }
-            $this->entityManager->flush(); // have to be able to map old > new geometry IDs
-            foreach ($derivedLayer->getGeometry() as $geometry) {
-                $this->oldToNewGeometryIDs[$geometry->getOldGeometryId()] = $geometry->getGeometryId();
-            }
         }
-        $this->setupPlannedCableConnections($planCableConnections);
-        $this->setupPlannedEnergyOutput($planEnergyOutput);
+        $this->setupPlannedCableConnections($planCableConnectionsConfig, $context);
+        $this->setupPlannedEnergyOutput($planEnergyOutputConfig, $context);
     }
 
     /**
+     * @param array $cablesConfig
+     * @param FinaliseSessionContext $context
      * @throws \Exception
      */
-    private function setupPlannedCableConnections(array $cablesConfig): void
+    private function setupPlannedCableConnections(array $cablesConfig, FinaliseSessionContext $context): void
     {
         //Import energy connections now we know all geometry is known by the importer.
         foreach ($cablesConfig as $cableConfig) {
             $energyConnection = new EnergyConnection();
-            $energyConnection->setCableGeometry($this->findNewGeometry($cableConfig));
-            $energyConnection->setStartGeometry($this->findNewGeometry($cableConfig['start']));
-            $energyConnection->setEndGeometry($this->findNewGeometry($cableConfig['end']));
+            $energyConnection->setCableGeometry($this->findNewGeometry($cableConfig, $context));
+            $energyConnection->setStartGeometry($this->findNewGeometry($cableConfig['start'], $context));
+            $energyConnection->setEndGeometry($this->findNewGeometry($cableConfig['end'], $context));
             $energyConnection->setEnergyConnectionStartCoordinates($cableConfig['coordinates']);
             $energyConnection->setEnergyConnectionLastupdate(100);
             $this->entityManager->persist($energyConnection);
@@ -946,13 +995,15 @@ class GameListCreationMessageHandler
     }
 
     /**
+     * @param array $energyOutputsConfig
+     * @param FinaliseSessionContext $context
      * @throws \Exception
      */
-    private function setupPlannedEnergyOutput(array $energyOutputsConfig): void
+    private function setupPlannedEnergyOutput(array $energyOutputsConfig, FinaliseSessionContext $context): void
     {
         foreach ($energyOutputsConfig as $energyOutputConfig) {
             $energyOutput = new EnergyOutput();
-            $energyOutput->setGeometry($this->findNewGeometry($energyOutputConfig));
+            $energyOutput->setGeometry($this->findNewGeometry($energyOutputConfig, $context));
             $energyOutput->setEnergyOutputMaxcapacity($energyOutputConfig[0]['maxcapacity']);
             $energyOutput->setEnergyOutputActive($energyOutputConfig[0]['active']);
             $this->entityManager->persist($energyOutput);
@@ -962,9 +1013,8 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      */
-    private function setupPlannedGrids(?array $planGridsConfig, Plan $plan): void
+    private function setupPlannedGrids(?array $planGridsConfig, Plan $plan, FinaliseSessionContext $context): void
     {
-        $importedGridIds = [];
         foreach ($planGridsConfig as $gridConfig) {
             $grid = new Grid();
             $grid->setGridName($gridConfig['name']);
@@ -972,51 +1022,41 @@ class GameListCreationMessageHandler
             $grid->setGridLastupdate(100);
             $grid->setPlan($plan);
             $this->entityManager->persist($grid);
-            $this->entityManager->flush(); // required to update out grid references in the config
-            $gridPersistent = $grid->getGridId();
             if ($gridConfig['grid_persistent'] == $gridConfig['grid_id']) {
-                $importedGridIds[$gridConfig['grid_persistent']] = $grid->getGridId();
-            } else {
-                if (isset($importedGridIds[$gridConfig['grid_persistent']])) {
-                    $gridPersistent = $importedGridIds[$gridConfig['grid_persistent']];
-                } else {
-                    throw new \Exception("Found reference persistent Grid ID (". $grid['grid_persistent'].
-                        ") which has not been imported by the plans importer (yet).");
-                }
+                $context->addGrid($gridConfig['grid_id'], $grid);
             }
-            $grid->setOriginalGrid(
-                $this->entityManager->getRepository(Grid::class)->find($gridPersistent)
-            );
+            if (null === $originalGrid = $context->getGrid($gridConfig['grid_persistent'])) {
+                throw new \Exception("Found reference persistent Grid ID (". $gridConfig['grid_persistent'].
+                    ") which has not been imported by the plans importer (yet).");
+            }
+            // $originalGrid is cascaded by $grid, so no persist needed
+            $grid->setOriginalGrid($originalGrid);
             foreach ($gridConfig['energy'] as $gridEnergyConfig) {
                 $gridEnergy = new GridEnergy();
-                $gridEnergy->setCountry(
-                    $this->entityManager->getRepository(Country::class)->find($gridEnergyConfig['country'])
-                );
+                $gridEnergy->setCountry($context->getCountry($gridEnergyConfig['country'] ?? -1));
                 $gridEnergy->setGridEnergyExpected($gridEnergyConfig['expected']);
+                // $gridEnergy is cascaded by $grid, so no persist needed
                 $grid->addGridEnergy($gridEnergy);
             }
             if (is_array($gridConfig['removed'])) {
                 foreach ($gridConfig['removed'] as $gridRemovedConfig) {
-                    if (empty($importedGridIds[$gridRemovedConfig['grid_persistent']])) {
+                    if (null === $gridRemoved = $context->getGrid($gridRemovedConfig['grid_persistent'])) {
                         throw new \Exception("Found plan to remove grid ({$gridRemovedConfig['grid_persistent']}" .
                             ") but this has not been imported by the plans importer (yet).");
                     }
-                    $plan->addGridToRemove($this->entityManager->getRepository(Grid::class)->find(
-                        $importedGridIds[$gridRemovedConfig['grid_persistent']]
-                    ));
+                    $plan->addGridToRemove($gridRemoved);
                 }
             }
             if (is_array($gridConfig['sockets'])) {
                 foreach ($gridConfig['sockets'] as $gridSocketConfig) {
-                    $grid->addSocketGeometry($this->findNewGeometry($gridSocketConfig['geometry']));
+                    $grid->addSocketGeometry($this->findNewGeometry($gridSocketConfig['geometry'], $context));
                 }
             }
             if (is_array($gridConfig['sources'])) {
                 foreach ($gridConfig['sources'] as $gridSourceConfig) {
-                    $grid->addSourceGeometry($this->findNewGeometry($gridSourceConfig['geometry']));
+                    $grid->addSourceGeometry($this->findNewGeometry($gridSourceConfig['geometry'], $context));
                 }
             }
-            $this->entityManager->persist($grid);
         }
     }
 
@@ -1025,19 +1065,29 @@ class GameListCreationMessageHandler
      * in there to the IDs given to that same geometry as it was imported into the database earlier...
      * ... and we'll need to be able to map *references* to any original geometry in there to the original geometry
      * as it was imported into the database earlier. For the second purpose we have this function.
+     * @param array $baseGeometryInfo
+     * @param FinaliseSessionContext $context
+     * @param Geometry|null $geometry
+     * @return Geometry|null
      * @throws \Exception
      */
-    private function findNewPersistentGeometry(array $baseGeometryInfo, ?Geometry $geometry = null): ?Geometry
-    {
+    private function findNewPersistentGeometry(
+        array $baseGeometryInfo,
+        FinaliseSessionContext $context,
+        ?Geometry $geometry = null
+    ): ?Geometry {
         if (!empty($baseGeometryInfo['geometry_mspid'])) {
-            return $this->entityManager->getRepository(Geometry::class)->findOneBy(
-                ['geometryMspid' => $baseGeometryInfo['geometry_mspid']]
+            return $context->findOneGeometryByIdentifier(
+                new GeometryIdentifierType(GeometryIdentifierType::MSP_ID),
+                $baseGeometryInfo['geometry_mspid']
             ); // as MSP IDs are meant to always stay the same across any session and config file
         }
-        if (array_key_exists($baseGeometryInfo["geometry_persistent"], $this->oldToNewGeometryIDs)) {
-            return $this->entityManager->getRepository(Geometry::class)->find(
-                $this->oldToNewGeometryIDs[$baseGeometryInfo["geometry_persistent"]]
-            ); // this means that the original (persistent) geometry being refered to was already put in the database
+        if (null !== $originalGeometry = $context->findOneGeometryByIdentifier(
+            new GeometryIdentifierType(GeometryIdentifierType::OLD_ID),
+            $baseGeometryInfo["geometry_persistent"]
+        )) {
+            // this means that the original (persistent) geometry being referred to was already put in the database
+            return $originalGeometry;
         }
         if (!empty($baseGeometryInfo['geometry_id']) && !empty($baseGeometryInfo['geometry_persistent']) &&
             $baseGeometryInfo['geometry_id'] == $baseGeometryInfo['geometry_persistent']) {
@@ -1046,7 +1096,7 @@ class GameListCreationMessageHandler
         throw new \Exception(
             "Failed to find newly imported persistent geometry. No MSP ID was available, geometry_persistent ".
             "{$baseGeometryInfo["geometry_persistent"]} wasn't imported earlier, and this isn't new geometry.".
-            var_export($baseGeometryInfo, true).var_export($this->oldToNewGeometryIDs, true)
+            var_export($baseGeometryInfo, true)
         );
     }
 
@@ -1055,21 +1105,26 @@ class GameListCreationMessageHandler
      * in there to the IDs given to that same geometry as it was imported into the database earlier...
      * ... and we'll need to be able to map *references* to any original geometry in there to the original geometry
      * as it was imported into the database earlier. For the first purpose we have this function.
+     * @param array $baseGeometryInfo
+     * @param FinaliseSessionContext $context
+     * @return Geometry|null
      * @throws \Exception
      */
-    private function findNewGeometry(array $baseGeometryInfo): ?Geometry
+    private function findNewGeometry(array $baseGeometryInfo, FinaliseSessionContext $context): ?Geometry
     {
-        if (array_key_exists($baseGeometryInfo["geometry_id"], $this->oldToNewGeometryIDs)) {
-            return $this->entityManager->getRepository(Geometry::class)->find(
-                $this->oldToNewGeometryIDs[$baseGeometryInfo["geometry_id"]]
-            );
+        if (null !== $geometry = $context->findOneGeometryByIdentifier(
+            new GeometryIdentifierType(GeometryIdentifierType::OLD_ID),
+            $baseGeometryInfo['geometry_id']
+        )) {
+            return $geometry;
         }
         // If we can't find the geometry id in the ones that we already have imported, check if the geometry id
         //   matches the persistent id, and if so select it by the mspid since this should all be present then.
         if ($baseGeometryInfo["geometry_id"] == $baseGeometryInfo["geometry_persistent"]) {
             if (isset($baseGeometryInfo["geometry_mspid"])) {
-                return $this->entityManager->getRepository(Geometry::class)->findOneBy(
-                    ['geometryMspid' => $baseGeometryInfo['geometry_mspid']]
+                return $context->findOneGeometryByIdentifier(
+                    new GeometryIdentifierType(GeometryIdentifierType::MSP_ID),
+                    $baseGeometryInfo['geometry_mspid']
                 );
             }
             throw new \Exception("Found geometry (".implode(", ", $baseGeometryInfo).
@@ -1079,16 +1134,18 @@ class GameListCreationMessageHandler
             ") which hasn't been imported by the plans importer yet.");
     }
 
-    private function setupObjectives(): void
+    /**
+     * @param FinaliseSessionContext $context
+     * @return void
+     */
+    private function setupObjectives(FinaliseSessionContext $context): void
     {
         if (empty($this->dataModel['objectives'])) {
             $this->info('No objectives to set up.');
             return;
         }
         foreach ($this->dataModel['objectives'] as $key => $objectiveConfig) {
-            $country = $this->entityManager->getRepository(Country::class)
-                ->findOneBy(['countryId' => $objectiveConfig['country_id']]);
-            if (empty($country)) {
+            if (null === $country = $context->getCountry($objectiveConfig['country_id'] ?? -1)) {
                 $this->warning(
                     'Country {countryId} set in objective {key} does not seem to exist.',
                     ['key' => $key, 'countryId' => $objectiveConfig['country_id']]
@@ -1173,7 +1230,10 @@ class GameListCreationMessageHandler
             "{$this->gameSession->getGameConfigVersion()->getGameConfigFile()->getFilename()} ".
             "v{$this->gameSession->getGameConfigVersion()->getVersion()} were successfully validated."
         );
-        $this->dataModel = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()['datamodel'];
+        if (null === $gameConfig = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()) {
+            throw new \Exception('Game config is null, so not continuing.');
+        }
+        $this->dataModel = $gameConfig['datamodel'];
     }
 
     private function log(string $level, string $message, array $contextVars = []): void

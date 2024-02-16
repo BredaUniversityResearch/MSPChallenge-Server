@@ -19,16 +19,16 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class WatchdogCommunicator extends AbstractCommunicator
 {
-
     private const DEFAULT_WATCHDOG_PORT = 45000;
     private GameList $gameList;
 
     public function __construct(
-        protected HttpClientInterface $client,
+        HttpClientInterface $client,
         private readonly VersionsProvider $versionsProvider,
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
         private readonly string $projectDir
     ) {
+        parent::__construct($client);
     }
 
     /**

@@ -6,11 +6,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Auth2Communicator extends AbstractCommunicator
 {
-
     public function __construct(
         HttpClientInterface $client
     ) {
-        $this->client = $client;
+        parent::__construct($client);
         $this->setBaseURL(
             ($_ENV['AUTH_SERVER_SCHEME'] ?? 'https') . '://' .
             ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info') . ':' .

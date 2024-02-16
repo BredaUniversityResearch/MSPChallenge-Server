@@ -15,7 +15,7 @@ class Geometry
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, length: 11)]
-    private ?int $geometryId;
+    private ?int $geometryId = null;
 
     #[ORM\ManyToOne(targetEntity: Geometry::class, cascade: ['persist'], inversedBy: 'derivedGeometry')]
     #[ORM\JoinColumn(name: 'geometry_persistent', referencedColumnName: 'geometry_id')]
@@ -55,7 +55,7 @@ class Geometry
     private ?int $geometryDeleted = 0;
 
     #[ORM\Column(type: Types::STRING, length: 16, nullable: true)]
-    private ?string $geometryMspid;
+    private ?string $geometryMspid = null;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'geometry')]
     #[ORM\JoinColumn(name: 'geometry_layer_id', referencedColumnName: 'layer_id')]
@@ -82,7 +82,7 @@ class Geometry
     #[ORM\ManyToMany(targetEntity: Grid::class, mappedBy: 'socketGeometry', cascade: ['persist'])]
     private Collection $socketForGrid;
 
-    private ?int $oldGeometryId;
+    private ?int $oldGeometryId = null;
 
     /**
      * @param Layer|null $layer
