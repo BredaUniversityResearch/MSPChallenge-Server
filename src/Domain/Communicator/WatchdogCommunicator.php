@@ -74,38 +74,32 @@ class WatchdogCommunicator extends AbstractCommunicator
 
     private function ensureWatchDogAlive(): void
     {
-        // 1. *only* if you're running the server on Windows... (so not docker)
         if (getenv('DOCKER') !== false) {
             return;
         }
-        // below code is only necessary for Windows
         if (!str_starts_with(php_uname(), "Windows")) {
             return;
         }
-
-        // 1. ...and that Watchdog is meant to run locally (so not at some completely different address)
         if ($this->gameList->getGameWatchdogServer()->getId() !== 1) {
             return;
         }
-
-        // 2. ...and the Watchdog is not responding quick enough (meaning it's not alive)...
-        //    A TransportExceptionInterface will be issued if nothing happens for 2.5 seconds
+        // A TransportExceptionInterface will be issued if nothing happens for 2.5 seconds
         try {
             // we do not care about the response, we just want to know if the watchdog is alive
             $this->client->request("GET", $this->getWatchdogUrl(), ['timeout' => 2.5]);
+            $continue = false;
         } catch (TransportExceptionInterface $e) {
-            return;
+            $continue = true;
         }
-
-        // 3. then start up locally the Watchdog through the command, and do that only once.
-        $process = new Process(
-            ['MSW.exe', 'APIEndpoint='.$this->getSessionAPIBaseUrl()],
-            $this->projectDir.'/'.(
-                $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
-            )
-        );
-        $process->start(); // start asynchronously
-        // And add a sleep(2) to it at the end if you want to give it a little time.
+        if ($continue) {
+            $process = new Process(
+                ['MSW.exe', 'APIEndpoint=' . $this->getSessionAPIBaseUrl()],
+                $this->projectDir . '/' . (
+                    $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
+                )
+            );
+            $process->start(); // start asynchronously
+        }
         sleep(2);
     }
 
