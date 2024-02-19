@@ -474,8 +474,8 @@ class Plan
     public function updatePlanConstructionTime(): self
     {
         $highest = 0;
-        foreach ($this->getPlanLayer() as $planLayer) {
-            foreach ($planLayer->getLayer()->getLayerStates() as $stateByTime) {
+        foreach ($this->getPlanLayer() as $key => $planLayer) {
+            foreach ($planLayer->getLayer()->getOriginalLayer()->getLayerStates() as $key2 => $stateByTime) {
                 if ($stateByTime["state"] == "ASSEMBLY" && $stateByTime['time'] > $highest) {
                     $highest = $stateByTime['time'];
                     break;

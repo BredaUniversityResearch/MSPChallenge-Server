@@ -124,10 +124,10 @@ class GameTick extends TickBase
         return $game->getGameDetails()
             ->then(function (array $postValues) {
                 $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
-                $qb = $connection->createQueryBuilder()
-                    ->update('game_list');
+                $qb = $connection->createQueryBuilder();
+                $qb->update('game_list');
                 foreach ($postValues as $column => $value) {
-                    $qb->set($column, $value);
+                    $qb->set($column, $qb->createPositionalParameter($value));
                 }
                 return $connection->query($qb);
             });

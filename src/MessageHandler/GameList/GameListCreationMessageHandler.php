@@ -101,7 +101,8 @@ class GameListCreationMessageHandler
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
             $this->createSessionRunningConfig();
-            $this->entityManager->wrapInTransaction(fn() => $this->finaliseSession());
+            $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
+            $this->finaliseSession();
             $this->notice("Session {$this->gameSession->getName()} created and ready for use.");
             $state = 'healthy';
         } catch (\Throwable $e) {
@@ -143,13 +144,15 @@ class GameListCreationMessageHandler
         $process = new Process([
             'php',
             'bin/console',
-            'doctrine:migrations:migrate',
-            'first',
-            '--em='.$this->database,
+            'doctrine:database:drop',
+            '--connection='.$this->database,
+            '--force',
             '--no-interaction',
             '--env='.$_ENV['APP_ENV']
         ], $this->kernel->getProjectDir());
         $process->mustRun(fn($type, $buffer) => $this->info($buffer));
+
+        $this->createSessionDatabase();
     }
 
     private function createSessionDatabase(): void
@@ -243,10 +246,9 @@ class GameListCreationMessageHandler
      * @throws ContainerExceptionInterface
      * @throws InvalidArgumentException
      */
-    private function finaliseSession(): void
+    private function setupAllEntities(): void
     {
         $context = new FinaliseSessionContext();
-
         // entities are created in the order of their dependencies
         $this->setupGame();
         $this->setupGameCountries($context);
@@ -255,7 +257,18 @@ class GameListCreationMessageHandler
         $this->setupSimulations($context);
         $this->setupObjectives($context);
         $this->setupPlans($context);
+    }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     */
+    private function finaliseSession(): void
+    {
         // some final custom queries
         $this->completeGeometryRecords();
         $this->setupGameWatchdogAndAccess();
@@ -337,13 +350,11 @@ class GameListCreationMessageHandler
 
         foreach ($this->dataModel['meta'] as $layerMetaData) {
             $layer = $this->normalizer->denormalize($layerMetaData, Layer::class);
+            $layer->setLayerGroup($this->dataModel['region']);
             $layer->setContextCreatingGameSession($this->gameSession->getId()); // indicator for SessionEntityListener
             $this->info("Starting import of layer {$layer->getLayerName()}...");
             if ($layer->getLayerGeotype() == "raster") {
-                $this->importLayerRasterData(
-                    $layer,
-                    $geoServerCommunicator
-                );
+                $this->importLayerRasterData($layer, $geoServerCommunicator);
             } else {
                 $this->importLayerGeometryData($layer, $geoServerCommunicator, $context);
             }
@@ -460,7 +471,8 @@ class GameListCreationMessageHandler
                 $numFeatures = count($features);
                 $this->debug("Starting import of all {$numFeatures} layer geometry features.");
                 foreach ($features as $feature) {
-                    $feature['properties']['original_layer_name'] = $layerWithin['layerName'];
+                    $layerWithinParts = explode(':', $layerWithin['layerName']);
+                    $feature['properties']['original_layer_name'] = $layerWithinParts[1] ?? $layerWithinParts[0];
                     $geometryTypeAdded = $this->addLayerGeometryFromFeatureDataSet($layer, $feature, $context);
                     isset($counter[$geometryTypeAdded]) ?
                         $counter[$geometryTypeAdded]++ :
