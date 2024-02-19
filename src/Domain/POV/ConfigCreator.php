@@ -16,10 +16,15 @@ class ConfigCreator
 
     const SUB_DIR = 'POV';
 
+    const INTERPOLATION_TYPE_LIN = 'Lin';
+    const INTERPOLATION_TYPE_LIN_GROUPED = 'LinGrouped';
+
     private string $outputImageFormat = self::DEFAULT_IMAGE_FORMAT;
 
     /** @var LayerTags[] $excludedLayersByTags */
     private array $excludedLayersByTags = [];
+
+    private ?array $gameConfigDataModel = null;
 
     public function __construct(
         private readonly string $projectDir,
@@ -145,17 +150,167 @@ class ConfigCreator
         }
         $this->log('json decoded, extracting region from raster layers');
         $this->excludeLayersByTags($json['datamodel']['raster_layers'], $json['datamodel']['vector_layers']);
+        $this->normaliseAndExtendRasterMappings($json['datamodel']['raster_layers']);
+        $this->fixMissingRasterLayerScales($json['datamodel']['raster_layers']);
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
-        if (false !== $bathymetryLayer = current(array_filter(
-            $json['datamodel']['raster_layers'],
-            fn($x) => $x['name'] === 'Bathymetry'
-        ))) {
-            $json['datamodel']['bathymetry'] = $bathymetryLayer;
-        }
         $this->log('region extracted, creating json config file');
         $this->createJsonConfigFile($json, $dir, $configFilename);
         $this->log('json config file created: ' . realpath($dir . DIRECTORY_SEPARATOR . $configFilename));
         return $dir;
+    }
+
+    /**
+     * The game config data model (from the config file) has a ["SEL"]["heatmap_settings"]["heatmap_range"],
+     *   that is available for each SEL layer. E.g. for shipping intensity layers.
+     * This function will try to retrieve that heatmap_range array for the specified layer
+     *   or null if it is not available, e.g. if it is not a SEL layer
+     * @throws Exception
+     */
+    private function getSELHeatmapRange(string $layerName): ?array
+    {
+        $gameConfigDataModel = $this->getGameConfigDataModel();
+        $heatmapSettings = array_filter(
+            $gameConfigDataModel['SEL']['heatmap_settings'],
+            fn($x) => $x['layer_name'] === $layerName
+        );
+        if (empty($heatmapSettings)) {
+            return null;
+        }
+        $heatMapSetting = current($heatmapSettings);
+        if (!array_key_exists('heatmap_range', $heatMapSetting)) {
+            return null;
+        }
+        if (empty($heatMapSetting['heatmap_range'])) {
+            return null;
+        }
+        return $heatMapSetting['heatmap_range'];
+    }
+
+    /**
+     * Given a layer's SEL heatmap range from the game config file, it will try to create a scale from it
+     * The scale can be of interpolation type Lin or LinGrouped
+     *
+     * @throws Exception
+     */
+    private function getScaleFromSELHeatMapRange(?array $heatmapRange): ?array
+    {
+        if (null === $heatmapRange) {
+            return null;
+        }
+        if (empty($heatmapRange) || count($heatmapRange) < 2) {
+            return null;
+        }
+        $scale = [
+            'min_value' => current($heatmapRange)['input'],
+            'max_value' => end($heatmapRange)['input'],
+            'interpolation' => self::INTERPOLATION_TYPE_LIN
+        ];
+
+        if (count($heatmapRange) < 3) {
+            return $scale;
+        }
+
+        $scale['interpolation'] = self::INTERPOLATION_TYPE_LIN_GROUPED;
+        $scale['groups'] = array_map(fn($x) => [
+            'normalised_input_value' => $x['output'],
+            'min_output_value' => $x['input']
+        ], $heatmapRange);
+
+        return $scale;
+    }
+
+    /**
+     * Given layer mapping and type names data from the game config data model, it will try to create a scale
+     *
+     * e.g. for "NO Hywind Metcentre"'s Bathymetry layer has mapping:
+     *  [
+     *      {"max": 0,"type": 0,"min": 0},
+     *      {"max": 37,"type": 1,"min": 1},
+     *      {"max": 73,"type": 2,"min": 38},
+     *      {"max": 110,"type": 3,"min": 74},
+     *      {"max": 146,"type": 4,"min": 111},
+     *      {"max": 183,"type": 5,"min": 147},
+     *      {"max": 219,"type": 6,"min": 184},
+     *      {"max": 255,"type": 7,"min": 220}
+     *  ]
+     * and type names:
+     *   ["0 - 20 m","20 - 40 m","40 - 60 m","60 -100 m","100 - 200 m","200 - 500 m ","500 - 1000 m ","> 1000 m"]
+     *
+     * it also supports the special case "<" for the first type name, e.g. for "NO Hywind Metcentre"'s Wind Speed layer:
+     *   ["< 5.0 m\\/s","5.0 - 6.0 m\\/s","6.0 - 7.0 m\\/s","7.0 - 8.0 m\\/s","8.0 - 9.0 m\\/s","> 9.0 m\\/s"]
+     * @param string[] $layerTypeNames
+     * @throws Exception
+     */
+    private function getScaleFromTypeMapping(array $layerMapping, array $layerTypeNames): ?array
+    {
+        // using heatmap format as intermediate format
+        $heatmapRange= [];
+        foreach ($layerMapping as $mapping) {
+            $typeIndex = $mapping['type'];
+            if (!array_key_exists($typeIndex, $layerTypeNames)) {
+                return null;
+            }
+            $layerTypeName = $layerTypeNames[$typeIndex];
+            if (false === preg_match_all('/(\d+(?:\.\d+)?)|<\s/', $layerTypeName, $matches)) {
+                return null;
+            }
+            if (!isset($matches[0][0])) {
+                return null;
+            }
+            if ($matches[0][0] === '<') {
+                $matches[0][0] = 0;
+            }
+            $heatmapRangeEl['input'] = (float)$matches[0][0];
+            $heatmapRangeEl['output'] = $mapping['min'] / 255;
+            $heatmapRange[] = $heatmapRangeEl;
+        }
+
+        $num = count($heatmapRange);
+        if ($num < 3) {
+            return $this->getScaleFromSELHeatMapRange($heatmapRange);
+        }
+
+        // add additional element to fill-up to 255, use the same range as the one of the last 2 elements
+        $lastRange = $heatmapRange[$num - 1]['input'] - $heatmapRange[$num - 2]['input'];
+        $heatmapRangeEl['input'] = $heatmapRange[$num - 1]['input'] + $lastRange;
+        $heatmapRangeEl['output'] = 1;
+        $heatmapRange[] = $heatmapRangeEl;
+
+        return $this->getScaleFromSELHeatMapRange($heatmapRange);
+    }
+
+    /**
+     * Adds a scale to the raster layers that are missing it.
+     * It can add missing scales to raster layers of type ValueMap only if:
+     * - the layer has a heatmap range data in the game config data model.
+     *   The scale will be of interpolation type LinGrouped
+     * - the layer type names can be parsed to extract min and max values. The scale will be of interpolation type Lin
+     * @throws Exception
+     */
+    private function fixMissingRasterLayerScales(array &$rasterLayers): void
+    {
+        $targetRasterLayers = array_filter(
+            $rasterLayers,
+            fn($x) => !array_key_exists('scale', $x) && in_array('ValueMap', $x['tags'])
+        );
+        foreach ($targetRasterLayers as $key => &$layer) {
+            // create a scale based on the SELs heatmap range data, if available
+            if (null !== $scale = $this->getScaleFromSELHeatMapRange(
+                $this->getSELHeatmapRange($layer['name'])
+            )) {
+                $rasterLayers[$key]['scale'] = $scale;
+                continue;
+            }
+            // create a scale based on the layer type names, if available
+            if (null === $scale = $this->getScaleFromTypeMapping(
+                $layer['mapping'],
+                array_column($layer['types'], 'name')
+            )) {
+                continue;
+            }
+            $rasterLayers[$key]['scale'] = $scale;
+        }
+        unset($layer);
     }
 
     /**
@@ -178,14 +333,25 @@ class ConfigCreator
 
     /**
      * @throws Exception
+     */
+    private function getGameConfigDataModel(): array
+    {
+        if ($this->gameConfigDataModel !== null) {
+            return $this->gameConfigDataModel;
+        }
+        $game = new Game();
+        $game->setGameSessionId($this->sessionId);
+        $this->gameConfigDataModel = $game->GetGameConfigValues();
+        return $this->gameConfigDataModel;
+    }
+
+    /**
+     * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
     private function queryJson(Region $region): string
     {
-        $game = new Game();
-        $game->setGameSessionId($this->sessionId);
-        $dataModel = $game->GetGameConfigValues();
-
+        $dataModel = $this->getGameConfigDataModel();
         try {
             $result = $this->getConnection()->executeQuery(
                 <<<'SQL'
@@ -295,7 +461,6 @@ WITH
         l.*,
         k.kpi_value,
         JSON_ARRAYAGG(JSON_OBJECT(
-          'channel', 'r',
           'max', t.value,
           'type', t.id-1
         )) AS layer_type_mapping,
@@ -366,9 +531,7 @@ WITH
             media VARCHAR(255) PATH '$.media'     
         )
       ) AS t
-      LEFT JOIN LatestEcologyKpiFinal k ON (
-        l.layer_short != '' AND CONCAT('mel_',LOWER(REPLACE(k.kpi_name,' ','_'))) = l.layer_name
-      )
+      LEFT JOIN LatestEcologyKpiFinal k ON (CONCAT('mel_',LOWER(REPLACE(k.kpi_name,' ','_'))) = l.layer_name)
       GROUP BY l.layer_id
   ),
   LayerFinal AS (
@@ -417,7 +580,8 @@ FROM (
         JSON_MERGE_PRESERVE(
           JSON_OBJECT(
             #'db-layer-id', l.layer_id,
-            'name', REPLACE(l.layer_short,'mel_',''),
+            'name', l.layer_name,
+            'short', l.layer_short,
             'coordinate0', JSON_EXTRACT(l.layer_raster, '$.boundingbox[0]'),
             'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
             'mapping', l.layer_type_mapping,
@@ -432,7 +596,7 @@ FROM (
                 'min_value', 0,
                 # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
                 'max_value', l.kpi_value * 1000 * 2,
-                'interpolation', 'lin'
+                'interpolation', :interpolationTypeLin
               )
             ),
             JSON_OBJECT()
@@ -445,6 +609,7 @@ FROM (
           #   FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
           # ),
           'name', l.layer_name,
+          'short', l.layer_short,
           'tags', JSON_EXTRACT(l.layer_tags, '$'),
           'types', l.layer_type_types,
           'data', l.layer_data
@@ -461,7 +626,8 @@ SQL,
                     $region->toArray(),
                     [
                         'region' => $dataModel['region'],
-                        'projection' => $dataModel['projection']
+                        'projection' => $dataModel['projection'],
+                        'interpolationTypeLin' => self::INTERPOLATION_TYPE_LIN
                     ]
                 )
             );
@@ -498,9 +664,23 @@ SQL,
                 }
             }
         }
+
+        // to make sure the arrays are re-indexed
+        $rasterLayers = array_values($rasterLayers);
+        $vectorLayers = array_values($vectorLayers);
+    }
+
+    private function normaliseAndExtendRasterMappings(array &$rasterLayers): void
+    {
+        foreach ($rasterLayers as &$layer) {
+            $this->normaliseAndExtendRasterMapping($layer['mapping']);
+        }
+        unset($layer);
     }
 
     /**
+     * Extracts the region from the raster layers and updates the layer data and coordinates
+     *
      * @throws Exception
      */
     private function extractRegionFromRasterLayers(Region $region, array &$rasterLayers, string $dir): void
@@ -536,20 +716,21 @@ SQL,
             // now set the region coordinates, clamped by input coordinates (see extractPartFromImageByRegion)
             $layer['coordinate0'] = $outputRegion->getBottomLeft();
             $layer['coordinate1'] = $outputRegion->getTopRight();
-            $this->handleRasterMapping($layer['mapping']);
         }
         unset($layer);
     }
 
-    private function handleRasterMapping(array &$mapping): void
+    /**
+     * Given the layer mapping, normalises the max values, up to 255 max, and:
+     *   sets the "min" value based on the previous mapping entry's max
+     */
+    private function normaliseAndExtendRasterMapping(array &$mapping): void
     {
         $m = &$mapping;
         if (count($m) == 0) {
             return;
         }
         $maxValue = $m[count($m)-1]['max'];
-        // normalise the max values , up to 255 max. And:
-        //   set the "min" value based on the previous mapping entry's max
         $m[0]['min'] = 0;
         $m[0]['max'] = (int)ceil(($m[0]['max'] / $maxValue) * 255);
         for ($n = 1; $n < count($m); ++$n) {
