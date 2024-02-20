@@ -105,6 +105,7 @@ class ResetCommand extends Command
                 $this->kernel->getProjectDir()."/ServerManager/log/log_session_{$session->getId()}.log",
                 $this->kernel->getProjectDir()."/ServerManager/session_archive/session_archive_{$session->getId()}.zip",
                 $this->kernel->getProjectDir()."/session_archive/session_archive_{$session->getId()}.zip",
+                $this->kernel->getProjectDir()."/raster/{$session->getId()}/archive/",
                 $this->kernel->getProjectDir()."/raster/{$session->getId()}/",
                 $this->kernel->getProjectDir()."/running_session_config/session_config_{$session->getId()}.json"
             ];

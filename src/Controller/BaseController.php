@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Controller\SessionAPI;
+namespace App\Controller;
 
-class BaseController
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+class BaseController extends AbstractController
 {
-
     public static function wrapPayloadForResponse(array $payload, ?string $message = null): array
     {
         return [

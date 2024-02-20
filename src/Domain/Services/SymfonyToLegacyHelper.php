@@ -3,6 +3,7 @@
 namespace App\Domain\Services;
 
 use App\Domain\API\APIHelper;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Kernel;
 use App\VersionsProvider;
 use Closure;
@@ -29,11 +30,14 @@ class SymfonyToLegacyHelper
     private Kernel $kernel;
     private TranslatorInterface $translator;
     private ?Closure $fnControllerForwarder = null;
+    private MessageBusInterface $messageBus;
     private EntityManagerInterface $em;
 
     private VersionsProvider $provider;
     private MessageBusInterface $analyticsMessageBus;
     private LoggerInterface $analyticsLogger;
+
+    private WatchdogCommunicator $watchdogCommunicator;
 
     private AuthenticationSuccessHandler $authenticationSuccessHandler;
 
@@ -45,9 +49,11 @@ class SymfonyToLegacyHelper
         Kernel $kernel,
         TranslatorInterface $translator,
         EntityManagerInterface $em,
+        MessageBusInterface $messageBus,
         VersionsProvider $provider,
         MessageBusInterface $analyticsMessageBus,
         LoggerInterface $analyticsLogger,
+        WatchdogCommunicator $watchdogCommunicator,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
         ConnectionManager $connectionManager,
@@ -60,9 +66,11 @@ class SymfonyToLegacyHelper
         $this->kernel = $kernel;
         $this->translator = $translator;
         $this->em = $em;
+        $this->messageBus = $messageBus;
         $this->provider = $provider;
         $this->analyticsMessageBus = $analyticsMessageBus;
         $this->analyticsLogger = $analyticsLogger;
+        $this->watchdogCommunicator = $watchdogCommunicator;
         $this->authenticationSuccessHandler = $authenticationSuccessHandler;
         self::$instance = $this;
     }
@@ -90,6 +98,14 @@ class SymfonyToLegacyHelper
         return $this->translator;
     }
 
+    /**
+     * @return MessageBusInterface
+     */
+    public function getMessageBus(): MessageBusInterface
+    {
+        return $this->messageBus;
+    }
+
     public function getEntityManager(): EntityManagerInterface
     {
         return $this->em;
@@ -108,6 +124,11 @@ class SymfonyToLegacyHelper
     public function getAnalyticsLogger(): LoggerInterface
     {
         return $this->analyticsLogger;
+    }
+
+    public function getWatchdogCommunicator(): WatchdogCommunicator
+    {
+        return $this->watchdogCommunicator;
     }
 
     /**

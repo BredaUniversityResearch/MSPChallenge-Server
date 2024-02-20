@@ -28,6 +28,6 @@ final class Version20240117213025 extends MSPMigration
 
     public function onDown(Schema $schema): void
     {
-        $this->addSql("ALTER TABLE `layer` DROP `layer_tags`");
+        $this->addSql("ALTER TABLE `layer` DROP IF EXISTS `layer_tags`");
     }
 }

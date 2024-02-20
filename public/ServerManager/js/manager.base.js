@@ -214,6 +214,15 @@ function LogToastContentItemCleanUp(item, index, arr)
     item = item.replace("[ ERROR ]", '<div style="color: red;">');
     item = item.replace("[ WARN ]", '<div style="color: navy;">');
     item = item.replace("[ DEBUG ]", '<div style="color: grey;">');
+
+    item = item.replace("INFO:", '<div style="color: green;">');
+    item = item.replace("NOTICE:", '<div style="color: green;">');
+    item = item.replace("ERROR:", '<div style="color: red;">');
+    item = item.replace("WARNING:", '<div style="color: navy;">');
+    item = item.replace("DEBUG:", '<div style="color: grey;">');
+    item = item.replace(/\[[0-9\-\s:+.T]+\]/, "");
+    item = item.replace("game_session.", "");
+    item = item.replace(/\{["\w:,]+\} \[\]/, "");
     item += "</div>";
     arr[index] = item;
 }

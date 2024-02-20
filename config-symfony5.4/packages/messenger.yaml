@@ -13,6 +13,11 @@ framework:
                 options:
                     table_name: 'messenger_analytics'
                     queue_name: 'message'
+            async:
+                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                options:
+                    table_name: 'messenger_async_processes'
+                    queue_name: 'message'
             failed:
                 dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
                 options:
@@ -23,3 +28,12 @@ framework:
         routing:
             # Route your messages to the transports
             'App\Message\Analytics\AnalyticsMessageBase': analytics
+            'App\Message\GameList\GameListCreationMessage': async
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async_test: 'in-memory://'
+            routing:
+                'App\Message\GameList\GameListCreationMessage': [async, async_test]

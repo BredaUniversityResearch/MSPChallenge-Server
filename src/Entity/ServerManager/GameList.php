@@ -8,6 +8,7 @@ use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
 class GameList
@@ -17,9 +18,11 @@ class GameList
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 128)]
     private ?string $name = null;
 
+    #[Assert\NotNull]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
     private ?GameConfigVersion $gameConfigVersion = null;
@@ -37,7 +40,7 @@ class GameList
     private ?GameWatchdogServer $gameWatchdogServer = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $gameCreationTime = null;
+    private ?int $gameCreationTime = null;
 
     #[ORM\Column]
     private ?int $gameStartYear = null;
@@ -46,15 +49,16 @@ class GameList
     private ?int $gameEndMonth = null;
 
     #[ORM\Column]
-    private ?int $gameCurrentMonth = null;
+    private int $gameCurrentMonth = 0;
 
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $gameRunningTilTime = null;
+    private ?int $gameRunningTilTime = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $passwordAdmin = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $passwordPlayer = null;
 
     #[ORM\Column(length: 255)]
@@ -73,17 +77,25 @@ class GameList
     private ?int $playersPastHour = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
-    private ?int $demoSession = null;
+    private int $demoSession = 0;
 
-    #[ORM\Column(length: 32)]
+    #[ORM\Column(length: 32, nullable: true)]
     private ?string $apiAccessToken = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne]
     #[ORM\JoinColumn(name: 'save_id', nullable: true, options: ['default' => null])]
     private ?GameSave $gameSave = null;
 
-    #[ORM\Column(length: 45)]
+    #[ORM\Column(length: 45, nullable: true)]
     private ?string $serverVersion = null;
+
+    /**
+     * @param int|null $id
+     */
+    public function __construct(?int $id = null)
+    {
+        $this->id = $id;
+    }
 
     public function getId(): ?int
     {
@@ -150,12 +162,12 @@ class GameList
         return $this;
     }
 
-    public function getGameCreationTime(): ?string
+    public function getGameCreationTime(): ?int
     {
         return $this->gameCreationTime;
     }
 
-    public function setGameCreationTime(string $gameCreationTime): self
+    public function setGameCreationTime(int $gameCreationTime): self
     {
         $this->gameCreationTime = $gameCreationTime;
 
@@ -191,7 +203,7 @@ class GameList
         return $this;
     }
 
-    public function getGameCurrentMonth(): ?int
+    public function getGameCurrentMonth(): int
     {
         return $this->gameCurrentMonth;
     }
@@ -215,12 +227,12 @@ class GameList
         return $this;
     }
 
-    public function getGameRunningTilTime(): ?string
+    public function getGameRunningTilTime(): ?int
     {
         return $this->gameRunningTilTime;
     }
 
-    public function setGameRunningTilTime(string $gameRunningTilTime): self
+    public function setGameRunningTilTime(int $gameRunningTilTime): self
     {
         $this->gameRunningTilTime = $gameRunningTilTime;
 
@@ -234,7 +246,7 @@ class GameList
 
     public function setPasswordAdmin(string $passwordAdmin): self
     {
-        $this->passwordAdmin = $passwordAdmin;
+        $this->passwordAdmin = $this->checkPasswordFormat('password_admin', $passwordAdmin);
 
         return $this;
     }
@@ -246,7 +258,7 @@ class GameList
 
     public function setPasswordPlayer(string $passwordPlayer): self
     {
-        $this->passwordPlayer = $passwordPlayer;
+        $this->passwordPlayer = $this->checkPasswordFormat('password_player', $passwordPlayer);
 
         return $this;
     }
@@ -320,7 +332,7 @@ class GameList
         return $this;
     }
 
-    public function getDemoSession(): ?int
+    public function getDemoSession(): int
     {
         return $this->demoSession;
     }
@@ -366,5 +378,90 @@ class GameList
         $this->serverVersion = $serverVersion;
 
         return $this;
+    }
+
+    private function checkPasswordFormat(string $adminorplayer, string $string): bool|string
+    {
+        if (is_object(json_decode($string))) {
+            // backwards compatibility
+            $stringDecoded = json_decode($string, true);
+            if (isset($stringDecoded['admin'])) {
+                if (isset($stringDecoded['admin']['password'])) {
+                    $stringDecoded['admin']['value'] = $stringDecoded['admin']['password'];
+                    unset($stringDecoded['admin']['password']);
+                } elseif (isset($stringDecoded['admin']['users'])) {
+                    if (is_array($stringDecoded['admin']['users'])) {
+                        $stringDecoded['admin']['users'] = implode(' ', $stringDecoded['admin']['users']);
+                    }
+                    $stringDecoded['admin']['value'] = $stringDecoded['admin']['users'];
+                    unset($stringDecoded['admin']['users']);
+                }
+                if (isset($stringDecoded['region']['password'])) {
+                    $stringDecoded['region']['value'] = $stringDecoded['region']['password'];
+                    unset($stringDecoded['region']['password']);
+                } elseif (isset($stringDecoded['region']['users'])) {
+                    if (is_array($stringDecoded['region']['users'])) {
+                        $stringDecoded['region']['users'] = implode(' ', $stringDecoded['region']['users']);
+                    }
+                    $stringDecoded['region']['value'] = $stringDecoded['region']['users'];
+                    unset($stringDecoded['region']['users']);
+                }
+            } elseif (isset($stringDecoded['password'])) {
+                $stringDecoded['value'] = $stringDecoded['password'];
+                unset($stringDecoded['password']);
+            } elseif (isset($stringDecoded['users'])) {
+                if (is_array($stringDecoded['users'])) {
+                    $stringDecoded['users'] = implode(' ', $stringDecoded['users']);
+                }
+                $stringDecoded['value'] = $stringDecoded['users'];
+                unset($stringDecoded['users']);
+            }
+
+            return json_encode($stringDecoded);
+        }
+
+        // only used when creating new session or loading a save from pre-beta8
+        if ('password_admin' == $adminorplayer) {
+            $newArray['admin']['provider'] = 'local';
+            $newArray['admin']['value'] = (string) $string;
+            $newArray['region']['provider'] = 'local';
+            $newArray['region']['value'] = (string) $string;
+        } else {
+            $newArray['provider'] = 'local';
+            $countries = $this->getCountries();
+            foreach ($countries as $country_data) {
+                $newArray['value'][$country_data['country_id']] = (string) $string;
+            }
+        }
+
+        return json_encode($newArray);
+    }
+
+    private function getCountries(): array
+    {
+        if (!is_null($this->getGameSave())) { // session eminates from a save
+            $configData = []; // to do
+        } else { // session eminates from a config file, so from scratch
+            $configData = $this->getGameConfigVersion()->getGameConfigComplete();
+        }
+
+        $countries = [];
+        if (!isset($configData['datamodel']) || !isset($configData['datamodel']['meta'])) {
+            return $countries;
+        }
+
+        foreach ($configData['datamodel']['meta'] as $layerMeta) {
+            if ($layerMeta['layer_name'] == $configData['datamodel']['countries']) {
+                foreach ($layerMeta['layer_type'] as $country) {
+                    $countries[] = [
+                        'country_id' => $country['value'],
+                        'country_name' => $country['displayName'],
+                        'country_colour' => $country['polygonColor'],
+                    ];
+                }
+            }
+        }
+
+        return $countries;
     }
 }

@@ -2,6 +2,23 @@ version: "3.7"
 
 # Development environment override
 services:
+  phpredisadmin:
+    image: mspserver-phpredisadmin
+    build:
+      context: .
+      target: phpredisadmin_base
+    environment:
+      - ADMIN_USER=admin
+      - ADMIN_PASS=admin
+      - REDIS_1_HOST=redis
+      - REDIS_1_PORT=6379
+    links:
+      - redis
+    ports:
+      - "8001:80"
+    networks:
+      - redis
+
   adminer:
     image: mspserver-adminer
     build:

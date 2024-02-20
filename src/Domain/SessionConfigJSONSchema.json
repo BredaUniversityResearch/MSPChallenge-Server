@@ -1,0 +1,1700 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Generated schema for Root",
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "date_modified": {
+          "type": "string"
+        },
+        "data_model_hash": {
+          "type": "string"
+        },
+        "errors": {
+          "type": "number"
+        },
+        "editor_version": {
+          "type": "string"
+        },
+        "config_version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date_modified",
+        "data_model_hash",
+        "errors",
+        "editor_version",
+        "config_version"
+      ]
+    },
+    "datamodel": {
+      "type": "object",
+      "properties": {
+        "restrictions": {
+          "type": "object",
+          "patternProperties": {
+            "[a-zA-Z_|]+" : {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "startlayer": {
+                    "type": "string"
+                  },
+                  "starttype": {
+                    "type": "string"
+                  },
+                  "endlayer": {
+                    "type": "string"
+                  },
+                  "endtype": {
+                    "type": "string"
+                  },
+                  "sort": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "message",
+                  "value",
+                  "type",
+                  "startlayer",
+                  "starttype",
+                  "endlayer",
+                  "endtype",
+                  "sort"
+                ]
+              }
+            }
+          }
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "plan_id": {
+                "type": "number"
+              },
+              "plan_country_id": {
+                "type": "number"
+              },
+              "plan_name": {
+                "type": "string"
+              },
+              "plan_gametime": {
+                "type": "number"
+              },
+              "plan_type": {
+                "type": "string"
+              },
+              "plan_alters_energy_distribution": {
+                "type": "number"
+              },
+              "layers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "layer_id": {
+                      "type": "number"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "layer_editing_type": {
+                      "type": "string"
+                    },
+                    "geometry": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "geometry_id": {
+                            "type": "number"
+                          },
+                          "FID": {
+                            "type": "string"
+                          },
+                          "geometry_persistent": {
+                            "type": "number"
+                          },
+                          "geometry": {
+                            "type": "string"
+                          },
+                          "data": {
+                            "type": ["object", "null"],
+                            "properties": {
+                              "Type_1": {
+                                "type": "string"
+                              },
+                              "edited": {
+                                "type": "string"
+                              },
+                              "length_km": {
+                                "type": "string"
+                              },
+                              "scalerank": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "string"
+                              },
+                              "Name": {
+                                "type": "string"
+                              },
+                              "starttime": {
+                                "type": "string"
+                              },
+                              "Title": {
+                                "type": "string"
+                              },
+                              "direction": {
+                                "type": "string"
+                              },
+                              "Shipping_Intensity": {
+                                "type": "string"
+                              },
+                              "ShippingDirection": {
+                                "type": "string"
+                              },
+                              "ShippingWidth": {
+                                "type": "string"
+                              },
+                              "Status": {
+                                "type": "string"
+                              },
+                              "WEBSITE_": {
+                                "type": "string"
+                              },
+                              "YEAR_": {
+                                "type": "string"
+                              },
+                              "Status_CA": {
+                                "type": "string"
+                              },
+                              "OBJECTID": {
+                                "type": "string"
+                              },
+                              "COUNTRY": {
+                                "type": "string"
+                              },
+                              "Quelle": {
+                                "type": "string"
+                              },
+                              "N_TURBINES": {
+                                "type": "string"
+                              },
+                              "POWER_MW": {
+                                "type": "string"
+                              },
+                              "Shape_Area": {
+                                "type": "string"
+                              },
+                              "Shape_Leng": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            },
+                            "required": []
+                          },
+                          "country": {
+                            "type": ["number", "null"]
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "base_geometry_info": {
+                            "type": "object",
+                            "properties": {
+                              "geometry_id": {
+                                "type": "number"
+                              },
+                              "geometry_mspid": {
+                                "type": "number"
+                              },
+                              "geometry_persistent": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "geometry_id",
+                              "geometry_mspid",
+                              "geometry_persistent"
+                            ]
+                          },
+                          "cable": {
+                            "type": ["object", "null"],
+                            "properties": {
+                              "start": {
+                                "type": "object",
+                                "properties": {
+                                  "geometry_id": {
+                                    "type": "number"
+                                  },
+                                  "geometry_persistent": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "geometry_id",
+                                  "geometry_persistent"
+                                ]
+                              },
+                              "end": {
+                                "type": "object",
+                                "properties": {
+                                  "geometry_id": {
+                                    "type": "number"
+                                  },
+                                  "geometry_persistent": {
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "geometry_id",
+                                  "geometry_persistent"
+                                ]
+                              },
+                              "coordinates": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "start",
+                              "end",
+                              "coordinates"
+                            ]
+                          },
+                          "energy_output": {
+                            "type": ["array", "null"],
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "maxcapacity": {
+                                  "type": "number"
+                                },
+                                "active": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "maxcapacity",
+                                "active"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "geometry_id",
+                          "FID",
+                          "geometry_persistent",
+                          "geometry",
+                          "type",
+                          "base_geometry_info"
+                        ]
+                      }
+                    },
+                    "warnings": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "deleted": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "geometry_id": {
+                            "type": "number"
+                          },
+                          "geometry_mspid": {
+                            "type": "number"
+                          },
+                          "base_geometry_info": {
+                            "type": "object",
+                            "properties": {
+                              "geometry_id": {
+                                "type": "number"
+                              },
+                              "geometry_mspid": {
+                                "type": "number"
+                              },
+                              "geometry_persistent": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "geometry_id",
+                              "geometry_mspid",
+                              "geometry_persistent"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "geometry_id",
+                          "geometry_mspid",
+                          "base_geometry_info"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "layer_id",
+                    "name",
+                    "layer_editing_type",
+                    "geometry",
+                    "warnings",
+                    "deleted"
+                  ]
+                }
+              },
+              "grids": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "grid_id": {
+                      "type": "number"
+                    },
+                    "grid_persistent": {
+                      "type": "number"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "active": {
+                      "type": "number"
+                    },
+                    "energy": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "country": {
+                            "type": "number"
+                          },
+                          "expected": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "country",
+                          "expected"
+                        ]
+                      }
+                    },
+                    "removed": {
+                      "type": "array",
+                      "items": {}
+                    },
+                    "sockets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "geometry": {
+                            "type": "object",
+                            "properties": {
+                              "geometry_id": {
+                                "type": "number"
+                              },
+                              "geometry_persistent": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "geometry_id",
+                              "geometry_persistent"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "geometry"
+                        ]
+                      }
+                    },
+                    "sources": {
+                      "type": ["array", "null"],
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "geometry": {
+                            "type": "object",
+                            "properties": {
+                              "geometry_id": {
+                                "type": "number"
+                              },
+                              "geometry_persistent": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "geometry_id",
+                              "geometry_persistent"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "geometry"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "grid_id",
+                    "grid_persistent",
+                    "name",
+                    "active",
+                    "energy",
+                    "removed",
+                    "sockets"
+                  ]
+                }
+              },
+              "fishing": {
+                "type": "array",
+                "items": {}
+              },
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "country_id": {
+                      "type": "number"
+                    },
+                    "user_name": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "country_id",
+                    "user_name",
+                    "text",
+                    "time"
+                  ]
+                }
+              },
+              "restriction_settings": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "plan_id",
+              "plan_country_id",
+              "plan_name",
+              "plan_gametime",
+              "plan_type",
+              "plan_alters_energy_distribution",
+              "layers",
+              "grids",
+              "fishing",
+              "messages",
+              "restriction_settings"
+            ]
+          }
+        },
+        "dependencies": {
+          "type": "object",
+          "properties": {
+            "groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "entries": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "number"
+                        },
+                        "multiline": {
+                          "type": "boolean"
+                        },
+                        "link": {
+                          "type": ["string", "null"]
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "id",
+                        "multiline"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "entries"
+                ]
+              }
+            },
+            "links": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "fromId": {
+                    "type": "number"
+                  },
+                  "toId": {
+                    "type": "number"
+                  },
+                  "severity": {
+                    "type": "number"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "fromId",
+                  "toId",
+                  "severity",
+                  "description"
+                ]
+              }
+            }
+          },
+          "required": [
+            "groups",
+            "links"
+          ]
+        },
+        "CEL": {
+          "type": "object",
+          "properties": {
+            "grey_centerpoint_color": {
+              "type": "string"
+            },
+            "grey_centerpoint_sprite": {
+              "type": "string"
+            },
+            "green_centerpoint_color": {
+              "type": "string"
+            },
+            "green_centerpoint_sprite": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "grey_centerpoint_color",
+            "grey_centerpoint_sprite",
+            "green_centerpoint_color",
+            "green_centerpoint_sprite"
+          ]
+        },
+        "SEL": {
+          "type": ["object", "null"],
+          "properties": {
+            "shipping_lane_layers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "country_border_layer": {
+              "type": "string"
+            },
+            "shipping_lane_point_merge_distance": {
+              "type": "number"
+            },
+            "shipping_lane_subdivide_distance": {
+              "type": "number"
+            },
+            "shipping_lane_implicit_distance_limit": {
+              "type": "number"
+            },
+            "port_layers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "layer_name": {
+                    "type": "string"
+                  },
+                  "port_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "layer_name",
+                  "port_type"
+                ]
+              }
+            },
+            "port_intensity": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "port_id": {
+                    "type": "string"
+                  },
+                  "ship_intensity_values": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "start_time": {
+                          "type": "number"
+                        },
+                        "ship_type_id": {
+                          "type": "number"
+                        },
+                        "ship_intensity": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "start_time",
+                        "ship_type_id",
+                        "ship_intensity"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "port_id",
+                  "ship_intensity_values"
+                ]
+              }
+            },
+            "maintenance_destinations": {
+              "type": "object",
+              "properties": {
+                "construction_intensity_multiplier": {
+                  "type": "number"
+                },
+                "base_intensity_per_square_km": {
+                  "type": "number"
+                },
+                "point_construction_intensity": {
+                  "type": "number"
+                },
+                "point_intensity": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "construction_intensity_multiplier",
+                "base_intensity_per_square_km",
+                "point_construction_intensity",
+                "point_intensity"
+              ]
+            },
+            "configured_routes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source_port_id": {
+                    "type": "string"
+                  },
+                  "destination_port_id": {
+                    "type": "string"
+                  },
+                  "ship_type_id": {
+                    "type": "number"
+                  },
+                  "intensity_percentage": {
+                    "type": "number"
+                  },
+                  "start_time": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "source_port_id",
+                  "destination_port_id",
+                  "ship_type_id",
+                  "intensity_percentage",
+                  "start_time"
+                ]
+              }
+            },
+            "restriction_layer_exceptions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "layer_name": {
+                    "type": "string"
+                  },
+                  "layer_types": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "allowed_ships": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "ship_type_ids": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          }
+                        },
+                        "cost_multiplier": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "ship_type_ids",
+                        "cost_multiplier"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "layer_name",
+                  "layer_types",
+                  "allowed_ships"
+                ]
+              }
+            },
+            "layer_type_restriction_group_mapping": {},
+            "output_configuration": {
+              "type": "object",
+              "properties": {
+                "pixels_per_mel_cell": {
+                  "type": "number"
+                },
+                "simulation_area_cell_size": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "pixels_per_mel_cell",
+                "simulation_area_cell_size"
+              ]
+            },
+            "risk_heatmap_settings": {
+              "type": ["object", "null"],
+              "properties": {
+                "restriction_layer_exceptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "shipping_intensity_risk_value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "restriction_layer_exceptions",
+                "shipping_intensity_risk_value"
+              ]
+            },
+            "heatmap_settings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "output_for_mel": {
+                    "type": "boolean"
+                  },
+                  "heatmap_type": {
+                    "type": "string"
+                  },
+                  "layer_name": {
+                    "type": "string"
+                  },
+                  "ship_type_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "heatmap_range": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "input": {
+                          "type": "number"
+                        },
+                        "output": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "input",
+                        "output"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "output_for_mel",
+                  "heatmap_type",
+                  "layer_name",
+                  "ship_type_ids",
+                  "heatmap_range"
+                ]
+              }
+            },
+            "heatmap_bleed_config": {
+              "type": "object",
+              "properties": {
+                "bleed_treshold": {
+                  "type": "number"
+                },
+                "bleed_overflow_curve_power": {
+                  "type": "number"
+                },
+                "bleed_overflow_curve_multiplier": {
+                  "type": "number"
+                },
+                "bleed_number_of_kernels": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "bleed_treshold",
+                "bleed_overflow_curve_power",
+                "bleed_overflow_curve_multiplier",
+                "bleed_number_of_kernels"
+              ]
+            },
+            "ship_types": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ship_type_id": {
+                    "type": "number"
+                  },
+                  "ship_type_name": {
+                    "type": "string"
+                  },
+                  "ship_restriction_group": {},
+                  "ship_routing_type": {
+                    "type": "string"
+                  },
+                  "ship_agility": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "ship_type_id",
+                  "ship_type_name",
+                  "ship_restriction_group",
+                  "ship_routing_type",
+                  "ship_agility"
+                ]
+              }
+            },
+            "ship_restriction_groups": {},
+            "layer_type_ship_type_mapping": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "layer_type": {
+                    "type": "string"
+                  },
+                  "ship_type_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "required": [
+                  "layer_type",
+                  "ship_type_ids"
+                ]
+              }
+            },
+            "shipping_kpi_config": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "categoryName": {
+                    "type": "string"
+                  },
+                  "categoryColor": {
+                    "type": "string"
+                  },
+                  "unit": {
+                    "type": "string"
+                  },
+                  "generateValuesPerPort": {
+                    "type": ["string", "null"]
+                  },
+                  "categoryValueType": {
+                    "type": "string"
+                  },
+                  "valueDefinitions": {
+                    "type": ["array", "null"],
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "valueName": {
+                          "type": "string"
+                        },
+                        "valueColor": {
+                          "type": "string"
+                        },
+                        "unit": {},
+                        "valueDependentCountry": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "valueName",
+                        "valueColor",
+                        "unit",
+                        "valueDependentCountry"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "categoryName",
+                  "categoryColor",
+                  "unit",
+                  "categoryValueType"
+                ]
+              }
+            }
+          },
+          "required": [
+            "shipping_lane_layers",
+            "country_border_layer",
+            "shipping_lane_point_merge_distance",
+            "shipping_lane_subdivide_distance",
+            "shipping_lane_implicit_distance_limit",
+            "port_layers",
+            "port_intensity",
+            "maintenance_destinations",
+            "configured_routes",
+            "restriction_layer_exceptions",
+            "layer_type_restriction_group_mapping",
+            "output_configuration",
+            "risk_heatmap_settings",
+            "heatmap_settings",
+            "heatmap_bleed_config",
+            "ship_types",
+            "ship_restriction_groups",
+            "layer_type_ship_type_mapping",
+            "shipping_kpi_config"
+          ]
+        },
+        "MEL": {
+          "type": ["object", "null"],
+          "properties": {
+            "modelfile": {
+              "type": "string"
+            },
+            "mode": {},
+            "rows": {
+              "type": "number"
+            },
+            "columns": {
+              "type": "number"
+            },
+            "cellsize": {
+              "type": "number"
+            },
+            "x_min": {
+              "type": "number"
+            },
+            "y_min": {
+              "type": "number"
+            },
+            "x_max": {
+              "type": "number"
+            },
+            "y_max": {
+              "type": "number"
+            },
+            "initialFishingMapping": {
+              "type": "number"
+            },
+            "fishingDisplayScale": {
+              "type": "number"
+            },
+            "pressures": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "layers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "influence": {
+                          "type": "number"
+                        },
+                        "construction": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "influence",
+                        "construction"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "layers"
+                ]
+              }
+            },
+            "fishing_policy_settings": {
+              "type": "object",
+              "properties": {
+                "all_country_approval": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "all_country_approval"
+              ]
+            },
+            "fishing": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "initialFishingDistribution": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "country_id": {
+                          "type": "number"
+                        },
+                        "weight": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "country_id",
+                        "weight"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "initialFishingDistribution"
+                ]
+              }
+            },
+            "outcomes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "subcategory": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "subcategory"
+                ]
+              }
+            },
+            "ecologyCategories": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "categoryName": {
+                    "type": "string"
+                  },
+                  "categoryColor": {
+                    "type": "string"
+                  },
+                  "unit": {
+                    "type": "string"
+                  },
+                  "valueDefinitions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "valueName": {
+                          "type": "string"
+                        },
+                        "valueColor": {
+                          "type": "string"
+                        },
+                        "unit": {
+                          "type": "string"
+                        },
+                        "valueDependentCountry": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "valueName",
+                        "valueColor",
+                        "unit",
+                        "valueDependentCountry"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "categoryName",
+                  "categoryColor",
+                  "unit",
+                  "valueDefinitions"
+                ]
+              }
+            }
+          },
+          "required": [
+            "modelfile",
+            "mode",
+            "rows",
+            "columns",
+            "cellsize",
+            "x_min",
+            "y_min",
+            "x_max",
+            "y_max",
+            "initialFishingMapping",
+            "fishingDisplayScale",
+            "pressures",
+            "fishing_policy_settings",
+            "fishing",
+            "outcomes",
+            "ecologyCategories"
+          ]
+        },
+        "meta": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "layer_name": {
+                "type": "string"
+              },
+              "layer_geotype": {
+                "type": "string"
+              },
+              "layer_entity_value_max": {
+                "type": ["number", "null"]
+              },
+              "layer_short": {
+                "type": "string"
+              },
+              "layer_category": {
+                "type": "string"
+              },
+              "layer_subcategory": {
+                "type": "string"
+              },
+              "layer_download_from_geoserver": {
+                "type": "number"
+              },
+              "layer_width": {
+                "type": "number"
+              },
+              "layer_height": {
+                "type": "number"
+              },
+              "layer_raster_material": {
+                "type": "string"
+              },
+              "layer_raster_filter_mode": {
+                "type": "number"
+              },
+              "layer_raster_color_interpolation": {
+                "type": "number"
+              },
+              "layer_raster_pattern": {
+                "type": "string"
+              },
+              "layer_raster_minimum_value_cutoff": {
+                "type": "number"
+              },
+              "layer_active": {
+                "type": "number"
+              },
+              "layer_selectable": {
+                "type": "number"
+              },
+              "layer_editable": {
+                "type": "number"
+              },
+              "layer_toggleable": {
+                "type": "number"
+              },
+              "layer_active_on_start": {
+                "type": "number"
+              },
+              "layer_green": {
+                "type": "number"
+              },
+              "layer_tooltip": {
+                "type": ["string", "null"]
+              },
+              "layer_information": {
+                "type": ["string", "null"]
+              },
+              "layer_media": {
+                "type": ["string", "null"]
+              },
+              "layer_text_info": {
+                "type": ["object", "null"],
+                "properties": {
+                  "property_per_state": {
+                    "type": "object",
+                    "properties": {
+                      "Current": {
+                        "type": "string"
+                      },
+                      "View": {
+                        "type": "string"
+                      },
+                      "Edit": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "Current",
+                      "View",
+                      "Edit"
+                    ]
+                  },
+                  "text_color": {
+                    "type": "string"
+                  },
+                  "text_size": {
+                    "type": "string"
+                  },
+                  "zoom_cutoff": {
+                    "type": "number"
+                  },
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "z": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "property_per_state",
+                  "text_color",
+                  "text_size",
+                  "zoom_cutoff",
+                  "x",
+                  "y",
+                  "z"
+                ]
+              },
+              "layer_states": {
+                "type": ["array", "null"],
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "string"
+                    },
+                    "time": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "state",
+                    "time"
+                  ]
+                }
+              },
+              "layer_editing_type": {
+                "type": "string"
+              },
+              "layer_special_entity_type": {
+                "type": "string"
+              },
+              "layer_depth": {
+                "type": "number"
+              },
+              "layer_property_as_type": {},
+              "layer_type": {
+                "type": "object",
+                "patternProperties": {
+                  "[0-9]+": {
+                    "type": "object",
+                    "properties": {
+                      "displayName": {
+                        "type": "string"
+                      },
+                      "approval": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "number"
+                      },
+                      "map_type": {},
+                      "displayPolygon": {
+                        "type": "number"
+                      },
+                      "polygonColor": {
+                        "type": "string"
+                      },
+                      "polygonPatternName": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "innerGlowEnabled": {
+                        "type": "number"
+                      },
+                      "innerGlowRadius": {
+                        "type": "number"
+                      },
+                      "innerGlowIterations": {
+                        "type": "number"
+                      },
+                      "innerGlowMultiplier": {
+                        "type": "number"
+                      },
+                      "innerGlowPixelSize": {
+                        "type": "number"
+                      },
+                      "displayLines": {
+                        "type": "number"
+                      },
+                      "lineColor": {
+                        "type": "string"
+                      },
+                      "lineWidth": {
+                        "type": "number"
+                      },
+                      "lineIcon": {},
+                      "linePatternType": {
+                        "type": "string"
+                      },
+                      "displayPoints": {
+                        "type": "number"
+                      },
+                      "pointColor": {
+                        "type": "string"
+                      },
+                      "pointSize": {
+                        "type": "number"
+                      },
+                      "pointSpriteName": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": ["string", "null"]
+                      },
+                      "capacity": {
+                        "type": "number"
+                      },
+                      "investmentCost": {
+                        "type": "number"
+                      },
+                      "availability": {
+                        "type": "number"
+                      },
+                      "media": {
+                        "type": ["string", "null"]
+                      }
+                    },
+                    "required": [
+                      "displayName",
+                      "approval",
+                      "value",
+                      "map_type",
+                      "displayPolygon",
+                      "polygonColor",
+                      "innerGlowEnabled",
+                      "innerGlowRadius",
+                      "innerGlowIterations",
+                      "innerGlowMultiplier",
+                      "innerGlowPixelSize",
+                      "displayLines",
+                      "lineColor",
+                      "lineWidth",
+                      "lineIcon",
+                      "linePatternType",
+                      "displayPoints",
+                      "pointColor",
+                      "pointSize",
+                      "pointSpriteName",
+                      "capacity",
+                      "investmentCost",
+                      "availability",
+                      "media"
+                    ]
+                  }
+                }
+              },
+              "layer_info_properties": {
+                "type": ["array", "null"],
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "property_name": {
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "type": "number"
+                    },
+                    "editable": {
+                      "type": "number"
+                    },
+                    "display_name": {
+                      "type": ["string", "null"]
+                    },
+                    "sprite_name": {},
+                    "update_visuals": {
+                      "type": "boolean"
+                    },
+                    "update_text": {
+                      "type": "boolean"
+                    },
+                    "update_calculation": {
+                      "type": "boolean"
+                    },
+                    "content_type": {
+                      "type": "number"
+                    },
+                    "content_validation": {
+                      "type": "number"
+                    },
+                    "unit": {
+                      "type": ["string", "null"]
+                    },
+                    "default_value": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": [
+                    "property_name",
+                    "enabled",
+                    "editable",
+                    "display_name",
+                    "sprite_name",
+                    "update_visuals",
+                    "update_text",
+                    "update_calculation",
+                    "content_type",
+                    "content_validation"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "layer_name",
+              "layer_geotype",
+              "layer_short",
+              "layer_category",
+              "layer_subcategory",
+              "layer_download_from_geoserver",
+              "layer_width",
+              "layer_height",
+              "layer_raster_material",
+              "layer_raster_filter_mode",
+              "layer_raster_color_interpolation",
+              "layer_raster_pattern",
+              "layer_raster_minimum_value_cutoff",
+              "layer_active",
+              "layer_selectable",
+              "layer_editable",
+              "layer_toggleable",
+              "layer_active_on_start",
+              "layer_green",
+              "layer_states",
+              "layer_editing_type",
+              "layer_special_entity_type",
+              "layer_depth",
+              "layer_property_as_type",
+              "layer_type"
+            ]
+          }
+        },
+        "expertise_definitions": {
+          "type": ["array", "null"],
+          "items": {}
+        },
+        "objectives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "country_id": {
+                "type": "number"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "deadline": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "country_id",
+              "title",
+              "description",
+              "deadline"
+            ]
+          }
+        },
+        "edition_name": {
+          "type": "string"
+        },
+        "edition_colour": {
+          "type": "string"
+        },
+        "edition_letter": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "start": {
+          "type": "number"
+        },
+        "end": {
+          "type": "number"
+        },
+        "era_total_months": {
+          "type": "number"
+        },
+        "era_planning_months": {
+          "type": "number"
+        },
+        "era_planning_realtime": {
+          "type": "number"
+        },
+        "countries": {
+          "type": "string"
+        },
+        "minzoom": {
+          "type": "number"
+        },
+        "maxzoom": {
+          "type": "number"
+        },
+        "user_admin_name": {
+          "type": "string"
+        },
+        "user_region_manager_name": {
+          "type": "string"
+        },
+        "user_admin_color": {
+          "type": "string"
+        },
+        "user_region_manager_color": {
+          "type": "string"
+        },
+        "team_info_base_url": {
+          "type": "string"
+        },
+        "restriction_point_size": {
+          "type": "number"
+        },
+        "wiki_base_url": {
+          "type": "string"
+        },
+        "windfarm_data_api_url": {}
+      },
+      "required": [
+        "restrictions",
+        "plans",
+        "dependencies",
+        "CEL",
+        "SEL",
+        "MEL",
+        "meta",
+        "expertise_definitions",
+        "objectives",
+        "edition_name",
+        "edition_colour",
+        "edition_letter",
+        "region",
+        "start",
+        "end",
+        "era_total_months",
+        "era_planning_months",
+        "era_planning_realtime",
+        "countries",
+        "minzoom",
+        "maxzoom",
+        "user_admin_name",
+        "user_region_manager_name",
+        "user_admin_color",
+        "user_region_manager_color",
+        "team_info_base_url",
+        "restriction_point_size",
+        "wiki_base_url",
+        "windfarm_data_api_url"
+      ]
+    }
+  },
+  "required": [
+    "metadata",
+    "datamodel"
+  ]
+}

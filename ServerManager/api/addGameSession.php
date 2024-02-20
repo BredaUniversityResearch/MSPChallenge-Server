@@ -1,5 +1,7 @@
 <?php
 
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Message\GameList\GameListCreationMessage;
 use ServerManager\API;
 use ServerManager\GameSession;
 use ServerManager\ServerManager;
@@ -32,7 +34,9 @@ $gamesession->save_id = 0;
 $gamesession->server_version = ServerManager::getInstance()->getCurrentVersion();
 
 $gamesession->add();
-$gamesession->sendCreateRequest();
+//$gamesession->sendCreateRequest();
+// alternative to the above:
+SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(new GameListCreationMessage($gamesession->id));
 
 $api->setStatusSuccess();
 $api->setPayload(["gamesession" => get_object_vars($gamesession)]);
