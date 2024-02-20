@@ -7,7 +7,7 @@ use App\Entity\Geometry;
 use App\Entity\Grid;
 use App\Entity\Layer;
 
-class FinaliseSessionContext
+class SessionSetupContext
 {
     /**
      * @var array<int, Country> // countryId, Country

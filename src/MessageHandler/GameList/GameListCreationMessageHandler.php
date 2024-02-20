@@ -233,7 +233,7 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * finalise session will create all the necessary entities for a game session *without intermediate flushes*
+     * setup all entities for a game session *without intermediate flushes*
      *
      * @throws \Exception
      * @throws ExceptionInterface
@@ -248,7 +248,7 @@ class GameListCreationMessageHandler
      */
     private function setupAllEntities(): void
     {
-        $context = new FinaliseSessionContext();
+        $context = new SessionSetupContext();
         // entities are created in the order of their dependencies
         $this->setupGame();
         $this->setupGameCountries($context);
@@ -296,7 +296,7 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      */
-    private function setupGameCountries(FinaliseSessionContext $context): void
+    private function setupGameCountries(SessionSetupContext $context): void
     {
         $country1 = (new Country())
             ->setCountryId(1)
@@ -328,7 +328,7 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @return void
      * @throws ClientExceptionInterface
      * @throws ContainerExceptionInterface
@@ -340,7 +340,7 @@ class GameListCreationMessageHandler
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    private function importLayerData(FinaliseSessionContext $context): void
+    private function importLayerData(SessionSetupContext $context): void
     {
         $geoServerCommunicator = new GeoServerCommunicator($this->client, $this->downloadsCache, $this->resultsCache);
         $geoServerCommunicator
@@ -440,7 +440,7 @@ class GameListCreationMessageHandler
     /**
      * @param Layer $layer
      * @param GeoServerCommunicator $geoServerCommunicator
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws InvalidArgumentException
@@ -451,7 +451,7 @@ class GameListCreationMessageHandler
     private function importLayerGeometryData(
         Layer $layer,
         GeoServerCommunicator $geoServerCommunicator,
-        FinaliseSessionContext $context
+        SessionSetupContext $context
     ): void {
         if ($layer->getLayerDownloadFromGeoserver()) {
             $this->debug('Calling GeoServer to obtain layer description.');
@@ -497,13 +497,13 @@ class GameListCreationMessageHandler
     /**
      * @param Layer $layer
      * @param array $feature
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @return string
      */
     private function addLayerGeometryFromFeatureDataSet(
         Layer $layer,
         array $feature,
-        FinaliseSessionContext $context
+        SessionSetupContext $context
     ): string {
         $geometryData = $feature['geometry'];
         if (empty($geometryData)) {
@@ -554,7 +554,7 @@ class GameListCreationMessageHandler
         return $geometryData['type'];
     }
 
-    public function checkForDuplicateMspIds(FinaliseSessionContext $context): void
+    public function checkForDuplicateMspIds(SessionSetupContext $context): void
     {
         $geometries = $context->getGeometriesWithDuplicateMspId();
         if (empty($geometries)) {
@@ -602,9 +602,9 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      */
-    private function setupRestrictions(FinaliseSessionContext $context): void
+    private function setupRestrictions(SessionSetupContext $context): void
     {
         if (empty($this->dataModel['restrictions'])) {
             $this->info('No layer restrictions to set up.');
@@ -647,11 +647,11 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    private function setupSimulations(FinaliseSessionContext $context): void
+    private function setupSimulations(SessionSetupContext $context): void
     {
         $simulationsDone = [];
         $possibleSims = array_keys($this->provider->getComponentsVersions());
@@ -673,13 +673,13 @@ class GameListCreationMessageHandler
 
     /**
      * @param string $simulation
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @return bool
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws \Exception
      */
-    private function createSessionForSimulation(string $simulation, FinaliseSessionContext $context): bool
+    private function createSessionForSimulation(string $simulation, SessionSetupContext $context): bool
     {
         switch ($simulation) {
             case 'MEL':
@@ -697,10 +697,10 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @throws \Exception
      */
-    private function MELSessionCreation(FinaliseSessionContext $context): void
+    private function MELSessionCreation(SessionSetupContext $context): void
     {
         $this->info('Setting up simulation MEL...');
         $config = $this->dataModel['MEL'];
@@ -752,11 +752,11 @@ class GameListCreationMessageHandler
 
     /**
      * @param string $melLayerName
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @return Layer
      * @throws \Exception
      */
-    private function setupMELLayer(string $melLayerName, FinaliseSessionContext $context): Layer
+    private function setupMELLayer(string $melLayerName, SessionSetupContext $context): Layer
     {
         $layerName = "mel_" . str_replace(" ", "_", $melLayerName);
         if (null === $layer = $context->getLayer($layerName)) {
@@ -780,19 +780,19 @@ class GameListCreationMessageHandler
         return $layer;
     }
 
-    private function getPlayAreaGeometryFromContext(FinaliseSessionContext $context): Geometry
+    private function getPlayAreaGeometryFromContext(SessionSetupContext $context): Geometry
     {
         $playAreaLayer = $context->filterOneLayer(fn($v, $k) => Util::hasPrefix($k, '_playarea'));
         return $playAreaLayer->getGeometry()->first();
     }
 
     /**
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws \Exception
      */
-    private function SELSessionCreation(FinaliseSessionContext $context): void
+    private function SELSessionCreation(SessionSetupContext $context): void
     {
         $this->info('Setting up simulation SEL...');
         $boundsConfig = SELController::calculateAlignedSimulationBounds(
@@ -844,11 +844,11 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @throws ExceptionInterface
      * @throws \Exception
      */
-    private function setupPlans(FinaliseSessionContext $context): void
+    private function setupPlans(SessionSetupContext $context): void
     {
         if (empty($this->dataModel['plans'])) {
             $this->info('No plans defined, so nothing to import there.');
@@ -911,10 +911,10 @@ class GameListCreationMessageHandler
     /**
      * @param array $planConfig
      * @param Plan $plan
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @throws \Exception
      */
-    private function setupPlannedLayerGeometry(array $planConfig, Plan $plan, FinaliseSessionContext $context): void
+    private function setupPlannedLayerGeometry(array $planConfig, Plan $plan, SessionSetupContext $context): void
     {
         $planCableConnectionsConfig = [];
         $planEnergyOutputConfig = [];
@@ -989,10 +989,10 @@ class GameListCreationMessageHandler
 
     /**
      * @param array $cablesConfig
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @throws \Exception
      */
-    private function setupPlannedCableConnections(array $cablesConfig, FinaliseSessionContext $context): void
+    private function setupPlannedCableConnections(array $cablesConfig, SessionSetupContext $context): void
     {
         //Import energy connections now we know all geometry is known by the importer.
         foreach ($cablesConfig as $cableConfig) {
@@ -1008,10 +1008,10 @@ class GameListCreationMessageHandler
 
     /**
      * @param array $energyOutputsConfig
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @throws \Exception
      */
-    private function setupPlannedEnergyOutput(array $energyOutputsConfig, FinaliseSessionContext $context): void
+    private function setupPlannedEnergyOutput(array $energyOutputsConfig, SessionSetupContext $context): void
     {
         foreach ($energyOutputsConfig as $energyOutputConfig) {
             $energyOutput = new EnergyOutput();
@@ -1025,7 +1025,7 @@ class GameListCreationMessageHandler
     /**
      * @throws \Exception
      */
-    private function setupPlannedGrids(?array $planGridsConfig, Plan $plan, FinaliseSessionContext $context): void
+    private function setupPlannedGrids(?array $planGridsConfig, Plan $plan, SessionSetupContext $context): void
     {
         foreach ($planGridsConfig as $gridConfig) {
             $grid = new Grid();
@@ -1078,15 +1078,15 @@ class GameListCreationMessageHandler
      * ... and we'll need to be able to map *references* to any original geometry in there to the original geometry
      * as it was imported into the database earlier. For the second purpose we have this function.
      * @param array $baseGeometryInfo
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @param Geometry|null $geometry
      * @return Geometry|null
      * @throws \Exception
      */
     private function findNewPersistentGeometry(
-        array $baseGeometryInfo,
-        FinaliseSessionContext $context,
-        ?Geometry $geometry = null
+        array               $baseGeometryInfo,
+        SessionSetupContext $context,
+        ?Geometry           $geometry = null
     ): ?Geometry {
         if (!empty($baseGeometryInfo['geometry_mspid'])) {
             return $context->findOneGeometryByIdentifier(
@@ -1118,11 +1118,11 @@ class GameListCreationMessageHandler
      * ... and we'll need to be able to map *references* to any original geometry in there to the original geometry
      * as it was imported into the database earlier. For the first purpose we have this function.
      * @param array $baseGeometryInfo
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @return Geometry|null
      * @throws \Exception
      */
-    private function findNewGeometry(array $baseGeometryInfo, FinaliseSessionContext $context): ?Geometry
+    private function findNewGeometry(array $baseGeometryInfo, SessionSetupContext $context): ?Geometry
     {
         if (null !== $geometry = $context->findOneGeometryByIdentifier(
             new GeometryIdentifierType(GeometryIdentifierType::OLD_ID),
@@ -1147,10 +1147,10 @@ class GameListCreationMessageHandler
     }
 
     /**
-     * @param FinaliseSessionContext $context
+     * @param SessionSetupContext $context
      * @return void
      */
-    private function setupObjectives(FinaliseSessionContext $context): void
+    private function setupObjectives(SessionSetupContext $context): void
     {
         if (empty($this->dataModel['objectives'])) {
             $this->info('No objectives to set up.');
