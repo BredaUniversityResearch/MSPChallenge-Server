@@ -383,7 +383,9 @@ class GameListCreationMessageHandler
             }
         }
         if ($counter > 0) {
-            $this->info("Added {$counter} availability restrictions for layer {$layer->getLayerName()}'s types.");
+            $this->info(
+                "Added {$counter} temporal availability restrictions for layer {$layer->getLayerName()}'s types."
+            );
         }
     }
 
