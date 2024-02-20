@@ -35,8 +35,10 @@ class GeoServerCommunicator extends AbstractCommunicator
      *   If null, caching is disabled. 0 = infinite.
      * @return GeoServerCommunicator
      */
-    public function setCacheLifeTimeDefaults(?int $downloadsCacheLifetime = null, ?int $resultsCacheLifetime = null): self
-    {
+    public function setCacheLifeTimeDefaults(
+        ?int $downloadsCacheLifetime = null,
+        ?int $resultsCacheLifetime = null
+    ): self {
         $this->downloadsCacheLifetime = $downloadsCacheLifetime ?? $_ENV['GEO_SERVER_DOWNLOADS_CACHE_LIFETIME'] ?? null;
         $this->resultsCacheLifetime = $resultsCacheLifetime ?? $_ENV['GEO_SERVER_RESULTS_CACHE_LIFETIME'] ?? null;
         return $this;
@@ -54,8 +56,11 @@ class GeoServerCommunicator extends AbstractCommunicator
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    private function getResource(string $endPoint, bool $asArray = true, ?CacheItemConfig $cacheItemConfig = null): string|array
-    {
+    private function getResource(
+        string $endPoint,
+        bool $asArray = true,
+        ?CacheItemConfig $cacheItemConfig = null
+    ): string|array {
         if (is_null($this->getUsername()) || is_null($this->getPassword()) || is_null($this->getBaseURL())) {
             return [];
         }
