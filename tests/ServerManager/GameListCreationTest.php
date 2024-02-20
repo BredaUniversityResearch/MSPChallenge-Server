@@ -75,8 +75,6 @@ class GameListCreationTest extends KernelTestCase
         foreach ($emServerManager->getRepository(GameList::class)->findAll() as $gameSession) {
             $handler = $container->get(GameListCreationMessageHandler::class);
             $handler->__invoke(new GameListCreationMessage($gameSession->getId()));
-            sleep(3);
-            $handler->__invoke(new GameListCreationMessage($gameSession->getId()));
         }
     }
 
