@@ -113,3 +113,7 @@ phpstan.neon
 /config/jwt/*.pem
 /config-symfony5.4/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+
+###> phpstan/phpstan ###
+phpstan.neon
+###< phpstan/phpstan ###

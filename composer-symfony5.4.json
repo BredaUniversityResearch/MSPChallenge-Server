@@ -75,7 +75,10 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/",
+            "App\\": [
+                "src/",
+                "src-symfony5.4/"
+            ],
             "App\\Domain\\API\\": "api",
             "DoctrineMigrations\\": "migrations/src/",
             "ServerManager\\": "ServerManager/classes/"

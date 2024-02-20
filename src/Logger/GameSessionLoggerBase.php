@@ -4,7 +4,7 @@ namespace App\Logger;
 use Monolog\Handler\AbstractProcessingHandler;
 use Symfony\Component\Filesystem\Filesystem;
 
-class GameSessionLogger extends AbstractProcessingHandler
+abstract class GameSessionLoggerBase extends AbstractProcessingHandler
 {
     public function __construct(
         private readonly string $kernelLogsDir,
@@ -13,7 +13,7 @@ class GameSessionLogger extends AbstractProcessingHandler
         parent::__construct();
     }
 
-    protected function write(array $record): void
+    protected function handleWriteByArray(array $record): void
     {
         $path = ($_ENV['APP_ENV'] !== 'test') ?
             $this->kernelProjectDir.'/ServerManager/log/' :
