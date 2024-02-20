@@ -75,7 +75,7 @@ class GeoServerCommunicator extends AbstractCommunicator
 
         // Try to use cache
         return $this->resultsCache->get(
-            $cacheItemConfig?->getKey() ?? md5($endPoint),
+            $cacheItemConfig?->getKey(),
             function (ItemInterface $item) use ($endPoint, $asArray, $cacheLifetime) {
                 // update cache
                 if ($cacheLifetime > 0) {
