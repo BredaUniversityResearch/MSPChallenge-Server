@@ -169,3 +169,4 @@ FROM mariadb:10.6.16 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
 FROM adminer AS adminer_base
 FROM mitmproxy/mitmproxy:9.0.1 as mitmproxy_base
+FROM redis:7.2.4-alpine AS redis_base

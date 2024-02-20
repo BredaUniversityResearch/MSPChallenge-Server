@@ -1,6 +1,17 @@
 version: '3.7'
 
 services:
+  redis:
+    image: 'mspserver-redis'
+    build:
+      context: .
+      target: redis_base
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - redis
+
   database:
     # check https://hub.docker.com/_/mariadb for info.
     image: 'mspserver-mariadb'
@@ -37,6 +48,9 @@ services:
 
   php:
     image: mspserver-php
+    depends_on:
+      - database
+      - redis
     restart: unless-stopped
     volumes:
       - php_socket:/var/run/php
@@ -45,6 +59,7 @@ services:
       - database
       - php
       - caddy
+      - redis
     healthcheck:
       interval: 10s
       timeout: 3s
@@ -164,3 +179,4 @@ networks:
   database:
   php:
   caddy:
+  redis:
