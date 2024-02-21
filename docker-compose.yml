@@ -80,6 +80,7 @@ services:
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
       APP_ENV: ${APP_ENV:-dev}
       SYMFONY_VERSION: ${SYMFONY_VERSION:-5.4}
+      FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
 
       # web server
       WEB_SERVER_HOST: ${WEB_SERVER_HOST:-caddy}
