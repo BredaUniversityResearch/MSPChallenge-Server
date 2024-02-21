@@ -5,6 +5,7 @@ namespace App\Domain\Common;
 use Closure;
 use React\Promise\CancellablePromiseInterface;
 use React\Promise\ExtendedPromiseInterface;
+
 class ToPromiseFunction
 {
     private Closure $function;
