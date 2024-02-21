@@ -89,7 +89,7 @@ class GameListCreationMessageHandler
     public function __invoke(GameListCreationMessage $gameList): void
     {
         $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
-                ?? throw new \Exception('Game session not found, so cannot continue.');
+            ?? throw new \Exception('Game session not found, so cannot continue.');
         $sessionId = $this->gameSession->getId();
         $this->database = $this->connectionManager->getGameSessionDbName($sessionId);
         $this->entityManager = $this->connectionManager->getGameSessionEntityManager($sessionId);

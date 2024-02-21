@@ -1,5 +1,7 @@
 security:
-    enable_authenticator_manager: true
+    # Symfony 6+ The "enable_authenticator_manager" option at "security" is deprecated.
+    # enable_authenticator_manager: true
+
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         jwt:

@@ -2,25 +2,27 @@
 
 namespace App\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Predis\Client;
 use Symfony\Component\Console\Input\InputOption;
 
+#[AsCommand(
+    name: 'app:redis-items',
+    description: 'Retrieve all items from Redis',
+)]
 class RedisItemsCommand extends Command
 {
-    protected static $defaultName = 'app:redis-items';
-
-    protected function configure()
+    protected function configure(): void
     {
         $this
-            ->setDescription('Retrieve all items from Redis')
             ->setHelp('This command retrieves all items from Redis')
             ->addOption('key', 'k', InputOption::VALUE_OPTIONAL, 'Get the value of a specific key');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $key = $input->getOption('key');
 

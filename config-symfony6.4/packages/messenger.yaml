@@ -1,7 +1,7 @@
 framework:
     messenger:
-        # reset services after consuming messages
-        reset_on_message: true
+        # Symfony 6+ Option "reset_on_message" at "framework.messenger" is deprecated. It does nothing and will be removed in version 7.0.
+        # reset_on_message: true
 
         # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
         failure_transport: failed
