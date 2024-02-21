@@ -115,5 +115,6 @@ phpstan.neon
 ###< lexik/jwt-authentication-bundle ###
 
 ###> phpstan/phpstan ###
+# Allow the user to override settings in phpstan.dist.neon, by creating phpstan.neon locally
 phpstan.neon
 ###< phpstan/phpstan ###
