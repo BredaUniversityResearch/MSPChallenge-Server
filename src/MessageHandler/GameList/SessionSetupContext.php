@@ -60,6 +60,10 @@ class SessionSetupContext
     public function addLayer(Layer $layer): void
     {
         $this->layers[strtolower($layer->getLayerName())] = $layer;
+
+        foreach ($layer->getGeometry() as $geometry) {
+            $this->addGeometry($geometry);
+        }
     }
 
     /**
