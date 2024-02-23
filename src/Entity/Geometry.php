@@ -124,7 +124,7 @@ class Geometry
         return $this;
     }
 
-    public function getLayer(): Layer
+    public function getLayer(): ?Layer
     {
         return $this->layer;
     }
