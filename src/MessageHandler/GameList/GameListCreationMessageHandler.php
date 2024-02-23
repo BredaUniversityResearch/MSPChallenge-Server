@@ -383,7 +383,9 @@ class GameListCreationMessageHandler
             }
         }
         if ($counter > 0) {
-            $this->info("Added {$counter} availability restrictions for layer {$layer->getLayerName()}'s types.");
+            $this->info(
+                "Added {$counter} temporal availability restrictions for layer {$layer->getLayerName()}'s types."
+            );
         }
     }
 
@@ -475,8 +477,7 @@ class GameListCreationMessageHandler
                     $feature['properties']['original_layer_name'] = $layerWithinParts[1] ?? $layerWithinParts[0];
                     $geometryTypeAdded = $this->addLayerGeometryFromFeatureDataSet($layer, $feature, $context);
                     isset($counter[$geometryTypeAdded]) ?
-                        $counter[$geometryTypeAdded]++ :
-                        $counter[$geometryTypeAdded] = 1;
+                        $counter[$geometryTypeAdded]++ : $counter[$geometryTypeAdded] = 1;
                 }
                 $geometryTypeDetails = http_build_query($counter ?? '', '', ' ');
                 $this->debug("Import of layer geometry features completed: {$geometryTypeDetails}.");
@@ -527,7 +528,6 @@ class GameListCreationMessageHandler
                         ->setGeometryGeometry($polygon)
                         ->setGeometryPropertiesThroughFeature($feature['properties'])
                         ->setGeometryToSubtractFrom($geometryToSubtractFrom);
-                    $context->addGeometry($geometry);
                     $layer->addGeometry($geometry);
                     if (sizeof($multiPolygon) > 1 && $key == 0) {
                         $geometryToSubtractFrom = $geometry;
@@ -540,7 +540,6 @@ class GameListCreationMessageHandler
                 $geometry
                     ->setGeometryGeometry($line)
                     ->setGeometryPropertiesThroughFeature($feature['properties']);
-                $context->addGeometry($geometry);
                 $layer->addGeometry($geometry);
             }
         } elseif (strcasecmp($geometryData['type'], 'MultiPoint') == 0) {
@@ -548,7 +547,6 @@ class GameListCreationMessageHandler
             $geometry
                 ->setGeometryGeometry($geometryData["coordinates"])
                 ->setGeometryPropertiesThroughFeature($feature['properties']);
-            $context->addGeometry($geometry);
             $layer->addGeometry($geometry);
         }
         return $geometryData['type'];
@@ -561,32 +559,28 @@ class GameListCreationMessageHandler
             $this->info("No duplicate MSP IDs. Yay!");
             return;
         }
-
+        $this->error("Duplicate MSP IDs found.");
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
-            $this->error(
-                "MSP ID {$mspId} has {$counted} duplicates, used by layers: ".PHP_EOL.
-                implode(',', array_map(fn($x) => $x->getLayer()->getLayerName(), $geometryList)).
-                PHP_EOL
-            );
+            $this->error("MSP ID {$mspId} has {$counted} duplicates");
             $previousGeometryData = null;
             foreach ($geometryList as $key => $geometry) {
-                $geometryData = $geometry->getGeometryData().
-                    PHP_EOL; //just a little hack to get rid of stupid 'no line ending' notice
-                $this->error("MSP ID {$mspId} was used for a feature with properties ".$geometryData);
+                $geometryData = $geometry->getGeometryData();
                 if ($previousGeometryData === null) {
+                    $this->error(
+                        "MSP ID {$mspId} was used in layer {$geometry->getLayer()->getLayerName()} ".
+                        "for a feature with properties {$geometryData}"
+                    );
                     $previousGeometryData = $geometryData;
                 } else {
-                    $diff = DiffHelper::calculate($previousGeometryData, $geometryData);
-                    // only using $diff to ascertain differences, as the rendered difference has so far been useless...
-                    if (!empty($diff)) {
-                        $this->error("...and for a feature with somehow differing properties: ".$geometryData);
+                    if ($previousGeometryData !== $geometryData) {
+                        $this->error("...and for a feature with somehow differing properties: {$geometryData}");
                     } else {
-                        $this->error("...and for another feature but seemingly with the same properties.".PHP_EOL);
+                        $this->error("...and for another feature but seemingly with the same properties.");
                     }
                 }
-                if ($key == 4) {
-                    $this->error("Now terminating the listing of duplicated geometry to not clog up this log.".PHP_EOL);
+                if ($key == 4 && count($geometryList) > 5) {
+                    $this->error("Now terminating the listing of duplicated geometry to not clog up this log.");
                     break;
                 }
             }

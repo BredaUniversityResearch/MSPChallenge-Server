@@ -82,7 +82,7 @@ when@prod:
                 channels: ["!event", "!doctrine", "!game_session"]
             deprecation:
                 type: stream
-                channels: ["deprecation", "!game_session"]
+                channels: ["deprecation"]
                 path: php://stderr
             session_log_handler:
                 type: service
