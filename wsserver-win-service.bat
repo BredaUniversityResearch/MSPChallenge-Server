@@ -8,7 +8,8 @@ if "%PHP_PATH%"=="" (
   set PHP_PATH=C:\xampp\php\php.exe
 )
 set php="%PHP_PATH%"
-set service=MSPWsServer
+set MSPWsServerService=MSPWsServer
+set MSPMessengerConsumerService=MSPMessengerConsumer
 reg Query "HKLM\Hardware\Description\System\CentralProcessor\0" | find /i "x86" > NUL && set OS=32BIT || set OS=64BIT
 set exe=tools\Win\nssm\nssm-win64.exe
 if %OS%==32BIT set exe=tools\Win\nssm\nssm-win32.exe
@@ -25,21 +26,8 @@ if "%~1"=="firewall_remove" goto firewall_remove
 goto default
 
 :install
-if not exist %php% (
-    echo Could not find php.exe file location at %php%
-    set ERRORLEVEL=1
-    goto eof
-)
-call :FirewallAddRule
-%exe% status %service% 1>NUL 2>NUL
-IF %ERRORLEVEL% NEQ 0 (
-    %exe% install %service% %php% bin/console app:ws-server %2 %3 %4 %5 %6 %7 %8 %9
-)
-%exe% set %service% AppDirectory %~dp0
-%exe% stop %service%
-%php% bin/console cache:clear
-%exe% start %service%
-%exe% status %service%
+call :InstallSymfonyCommandAsService %MSPWsServerService% app:ws-server -v %2 %3 %4 %5 %6 %7 %8 %9
+call :InstallSymfonyCommandAsService %MSPMessengerConsumerService% messenger:consume analytics async -vv %2 %3 %4 %5 %6 %7 %8 %9
 goto get
 
 :blank
@@ -48,28 +36,19 @@ echo Followed by any additional parameter supported by the command
 goto eof
 
 :default
-%exe% %1 %service% %2 %3 %4 %5 %6 %7 %8 %9
+call :RunServiceManager %MSPWsServerService% %1 %2 %3 %4 %5 %6 %7 %8 %9
 goto eof
 
 :remove
-%exe% stop %service%
-%exe% remove %service% confirm
-call :FirewallRemoveRule
+call :RemoveService %MSPWsServerService%
 goto eof
 
 :logging_on
-%exe% set %service% AppStdout %~dp0var\log\%service%.log
-%exe% set %service% AppStderr %~dp0var\log\%service%.log
-%exe% set %service% AppRotateFiles 1
-%exe% restart %service%
-%exe% status %service%
+call :SetServiceLoggingOn %MSPWsServerService%
 goto get
 
 :logging_off
-%exe% set %service% AppStdout ""
-%exe% set %service% AppStderr ""
-%exe% restart %service%
-%exe% status %service%
+call :SetServiceLoggingOff %MSPWsServerService%
 goto get
 
 :firewall_add
@@ -81,25 +60,7 @@ call :FirewallRemoveRule
 goto eof
 
 :get
-set singleparam=0
-if not "%~2"=="" (
-  if not "%~1"=="install" (
-    set singleparam=1
-  )
-)
-if "%singleparam%"=="1" (
-  echo %2:
-  %exe% get %service% %2
-) else (
-  echo AppDirectory:
-  %exe% get %service% AppDirectory
-  echo Application:
-  %exe% get %service% Application
-  echo AppParameters:
-  %exe% get %service% AppParameters
-  echo Log path is:
-  %exe% get %service% AppStdout
-)
+call :GetServiceParameters %MSPWsServerService% %1 %2
 goto eof
 
 :eof
@@ -117,4 +78,76 @@ exit /b 0
 
 :FirewallRemoveRule
 netsh advfirewall firewall delete rule name="MSP Websocket server"
+exit /b 0
+
+:InstallSymfonyCommandAsService
+set service=%1
+set symfonyCommand=%2
+if not exist %php% (
+    echo Could not find php.exe file location at %php%
+    set ERRORLEVEL=1
+    goto eof
+)
+call :FirewallAddRule
+%exe% status %service% 1>NUL 2>NUL
+IF %ERRORLEVEL% NEQ 0 (
+    %exe% install %service% %php% -d memory_limit=-1 bin/console %symfonyCommand% %3 %4 %5 %6 %7 %8 %9
+)
+%exe% set %service% AppDirectory %~dp0
+%exe% stop %service%
+%php% bin/console cache:clear
+%exe% start %service%
+%exe% status %service%
+exit /b 0
+
+:RemoveService
+set service=%1
+%exe% stop %service%
+%exe% remove %service% confirm
+call :FirewallRemoveRule
+exit /b 0
+
+:SetServiceLoggingOn
+set service=%1
+%exe% set %service% AppStdout %~dp0var\log\%service%.log
+%exe% set %service% AppStderr %~dp0var\log\%service%.log
+%exe% set %service% AppRotateFiles 1
+%exe% restart %service%
+%exe% status %service%
+exit /b 0
+
+:SetServiceLoggingOff
+set service=%1
+%exe% set %service% AppStdout ""
+%exe% set %service% AppStderr ""
+%exe% restart %service%
+%exe% status %service%
+exit /b 0
+
+:GetServiceParameters
+set service=%1
+set singleparam=0
+if not "%~3"=="" (
+  if not "%~2"=="install" (
+    set singleparam=1
+  )
+)
+if "%singleparam%"=="1" (
+  echo %3:
+  %exe% get %service% %3
+) else (
+  echo AppDirectory:
+  %exe% get %service% AppDirectory
+  echo Application:
+  %exe% get %service% Application
+  echo AppParameters:
+  %exe% get %service% AppParameters
+  echo Log path is:
+  %exe% get %service% AppStdout
+)
+exit /b 0
+
+:RunServiceManager
+set service=%1
+%exe% %2 %service% %3 %4 %5 %6 %7 %8 %9
 exit /b 0
