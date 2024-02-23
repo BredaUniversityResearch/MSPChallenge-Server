@@ -49,18 +49,30 @@ class SessionSetupContext
 
     public function getLayer(string $layerName): ?Layer
     {
-        return $this->layers[strtolower($layerName)] ?? null;
+        if (null === $layer = $this->layers[strtolower($layerName)] ?? null) {
+            return null;
+        }
+        $this->updateGeometriesByLayer($layer);
+        return $layer;
     }
 
     public function filterOneLayer(callable $filter): ?Layer
     {
-        return current(array_filter($this->layers, $filter, ARRAY_FILTER_USE_BOTH)) ?: null;
+        if (null === $layer = current(array_filter($this->layers, $filter, ARRAY_FILTER_USE_BOTH)) ?: null) {
+            return null;
+        }
+        $this->updateGeometriesByLayer($layer);
+        return $layer;
     }
 
     public function addLayer(Layer $layer): void
     {
         $this->layers[strtolower($layer->getLayerName())] = $layer;
+        $this->updateGeometriesByLayer($layer);
+    }
 
+    private function updateGeometriesByLayer(Layer $layer): void
+    {
         foreach ($layer->getGeometry() as $geometry) {
             $this->addGeometry($geometry);
         }
