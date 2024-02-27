@@ -1,7 +1,24 @@
 # Development environment override
 services:
+  phpredisadmin:
+    image: 'mspserver-phpredisadmin-dev'
+    build:
+      context: .
+      target: phpredisadmin_base
+    environment:
+      - ADMIN_USER=admin
+      - ADMIN_PASS=admin
+      - REDIS_1_HOST=redis
+      - REDIS_1_PORT=6379
+    links:
+      - redis
+    ports:
+      - "8001:80"
+    networks:
+      - redis
+
   adminer:
-    image: mspserver-adminer
+    image: 'mspserver-adminer-dev'
     build:
       context: .
       target: adminer_base
@@ -20,7 +37,7 @@ services:
       - ./docker/adminer/index.php:/var/www/html/index.php:ro
 
   mitmproxy:
-    image: mspserver-mitmproxy
+    image: 'mspserver-mitmproxy-dev'
     build:
       context: .
       target: mitmproxy_base
@@ -35,6 +52,7 @@ services:
       - php
 
   php:
+    image: 'mspserver-php-dev'
     build:
       context: .
       target: frankenphp_dev
@@ -51,10 +69,10 @@ services:
       # this forces non-ssl
       SERVER_NAME: :80
       MERCURE_EXTRA_DIRECTIVES: demo
-      # force web(socket) server over 8080 (mitmproxy reverse proxy)      
+      # force web(socket) server over 8080 (mitmproxy reverse proxy)
       WEB_SERVER_HOST: mitmproxy
       URL_WEB_SERVER_HOST: mitmproxy
-      URL_WS_SERVER_HOST: mitmproxy      
+      URL_WS_SERVER_HOST: mitmproxy
       WEB_SERVER_PORT: 8080
       URL_WEB_SERVER_PORT: 8080
       URL_WS_SERVER_PORT: 8080
@@ -64,7 +82,7 @@ services:
     extra_hosts:
       # Ensure that host.docker.internal is correctly defined on Linux
       - host.docker.internal:host-gateway
-    tty: true      
+    tty: true
     # on dev the internal and external web server port need to match because of mitmproxy reserve proxy
     ports:
       # HTTP

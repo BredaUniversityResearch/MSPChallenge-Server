@@ -2,23 +2,21 @@
 
 namespace App\Controller\ServerManager;
 
-use App\Controller\SessionAPI\BaseController;
+use App\Controller\BaseController;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\Setting;
 use App\IncompatibleClientException;
 use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Version\Exception\InvalidVersionString;
 
-class GameListController extends AbstractController
+class GameListController extends BaseController
 {
-
     #[Route(
         '/manager/gamelist/{sessionState}',
         name: 'manager_gamelist',
@@ -35,7 +33,7 @@ class GameListController extends AbstractController
             $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
         } catch (IncompatibleClientException $e) {
             return new JsonResponse(
-                BaseController::wrapPayloadForResponse(
+                self::wrapPayloadForResponse(
                     [
                         'clients_url' => $this->getParameter('app.clients_url'),
                         'server_version' => $provider->getVersion()
@@ -45,12 +43,12 @@ class GameListController extends AbstractController
                 403
             );
         } catch (InvalidVersionString $e) {
-            return new JsonResponse(BaseController::wrapPayloadForResponse([], $e->getMessage()), 400);
+            return new JsonResponse(self::wrapPayloadForResponse([], $e->getMessage()), 400);
         }
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         return is_null($request->headers->get('Turbo-Frame')) ?
-            $this->json(BaseController::wrapPayloadForResponse([
+            $this->json(self::wrapPayloadForResponse([
                 'sessionslist' => $gameList,
                 'server_description' => $serverDesc->getValue(),
                 'clients_url' => $this->getParameter('app.clients_url'),

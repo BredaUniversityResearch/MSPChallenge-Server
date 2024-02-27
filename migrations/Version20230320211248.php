@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -31,7 +30,7 @@ final class Version20230320211248 extends MSPMigration
 
     protected function onDown(Schema $schema): void
     {
-        $this->addSql("ALTER TABLE `api_batch` DROP INDEX `api_batch_guid`");
-        $this->addSql("ALTER TABLE `api_batch` DROP `api_batch_guid`");
+        $this->addSql("ALTER TABLE `api_batch` DROP INDEX IF EXISTS `api_batch_guid`");
+        $this->addSql("ALTER TABLE `api_batch` DROP IF EXISTS `api_batch_guid`");
     }
 }

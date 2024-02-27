@@ -2,7 +2,7 @@
 
 namespace App\EventListener;
 
-use App\Controller\SessionAPI\BaseController;
+use App\Controller\BaseController;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationFailureEvent;
 use Symfony\Component\HttpFoundation\JsonResponse;
 

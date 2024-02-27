@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "02/10/2023",
-    "data_model_hash": "92413A4E767ED98A8EC1700CFBBD62A90B68BB71CFF043853F8EE937A6504636",
+    "date_modified": "1/31/2024",
+    "data_model_hash": "E41E2B792C7A3323F66EE7DA7FEA706ECDD047982E1A98324ADBFDE38DEB58FF",
     "errors": 0,
-    "editor_version": "1.0.0",
-    "config_version": "1.0.0"
+    "editor_version": "1.1.0",
+    "config_version": "1.1.0"
   },
   "datamodel": {
     "restrictions": {
@@ -22782,6 +22782,9 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon"
         ]
       },
       {
@@ -22942,6 +22945,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Country"
         ]
       },
       {
@@ -23032,6 +23039,9 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon"
         ]
       },
       {
@@ -23372,6 +23382,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "City"
         ]
       },
       {
@@ -23560,6 +23574,9 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point"
         ]
       },
       {
@@ -23775,7 +23792,11 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Topography"
+        ]
       },
       {
         "layer_name": "NS_Combined_rivers_europe_NE",
@@ -23921,6 +23942,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "River"
         ]
       },
       {
@@ -24207,6 +24232,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "TerritorialWater"
         ]
       },
       {
@@ -24507,6 +24536,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "EEZ"
         ]
       },
       {
@@ -24695,6 +24728,9 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon"
         ]
       },
       {
@@ -24910,7 +24946,11 @@
             "media": "wiki://Wind_Speed"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "WindSpeed"
+        ]
       },
       {
         "layer_name": "NS_Wave_height_raster",
@@ -25125,7 +25165,11 @@
             "media": "wiki://Wave_Height"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "WaveHeight"
+        ]
       },
       {
         "layer_name": "NS_Currents_Raster",
@@ -25340,7 +25384,11 @@
             "media": "wiki://Currents_Speed"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Currents"
+        ]
       },
       {
         "layer_name": "NS_Bathymetry_Raster",
@@ -25611,7 +25659,11 @@
             "media": "wiki://Bathymetry"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Bathymetry"
+        ]
       },
       {
         "layer_name": "NS_Eutrophication_Status",
@@ -25855,6 +25907,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Eutrophication"
         ]
       },
       {
@@ -26393,7 +26449,11 @@
             "media": "wiki://Sediment"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "TypeMap",
+          "Sediment"
+        ]
       },
       {
         "layer_name": "NS_Fossil_Fuel_Availability",
@@ -26539,6 +26599,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "FossilFuel",
+          "Availability"
         ]
       },
       {
@@ -26685,6 +26750,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "SandAndGravel",
+          "Availability"
         ]
       },
       {
@@ -26943,6 +27013,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Military"
         ]
       },
       {
@@ -27215,6 +27289,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "CableAndPipe",
+          "Telecom"
         ]
       },
       {
@@ -27739,6 +27818,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "CableAndPipe"
         ]
       },
       {
@@ -27941,6 +28024,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Deposit",
+          "Dredging"
         ]
       },
       {
@@ -28157,6 +28245,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Recreation"
         ]
       },
       {
@@ -28441,6 +28533,12 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Electricity",
+          "Production",
+          "Wind"
         ]
       },
       {
@@ -28599,6 +28697,12 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Electricity",
+          "Production",
+          "Wave"
         ]
       },
       {
@@ -28743,6 +28847,12 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Electricity",
+          "Production",
+          "Tidal"
         ]
       },
       {
@@ -28987,6 +29097,13 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Electricity",
+          "Production",
+          "Planned",
+          "Wind"
         ]
       },
       {
@@ -29203,6 +29320,13 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Electricity",
+          "Production",
+          "Planned",
+          "Wave"
         ]
       },
       {
@@ -29419,6 +29543,13 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Electricity",
+          "Production",
+          "Planned",
+          "Tidal"
         ]
       },
       {
@@ -29661,6 +29792,11 @@
             "unit": null,
             "default_value": "1"
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "Electricity",
+          "CableAndPipe"
         ]
       },
       {
@@ -29751,6 +29887,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Corridor",
+          "CableAndPipe"
         ]
       },
       {
@@ -29909,6 +30050,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "Electricity",
+          "Socket"
         ]
       },
       {
@@ -30067,6 +30213,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "Electricity",
+          "Converter"
         ]
       },
       {
@@ -30479,6 +30630,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "FossilFuel",
+          "Production"
         ]
       },
       {
@@ -30569,6 +30725,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "CableAndPipe",
+          "FossilFuel"
         ]
       },
       {
@@ -30869,6 +31030,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "CableAndPipe",
+          "FossilFuel"
         ]
       },
       {
@@ -31099,6 +31265,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "FossilFuel",
+          "Planned"
         ]
       },
       {
@@ -31273,6 +31444,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "SandAndGravel",
+          "Extraction"
         ]
       },
       {
@@ -31517,6 +31693,12 @@
             "unit": "km",
             "default_value": "1"
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "Shipping",
+          "Lane",
+          "IMO"
         ]
       },
       {
@@ -31789,6 +31971,12 @@
             "unit": "km",
             "default_value": "1"
           }
+        ],
+        "layer_tags": [
+          "Line",
+          "Shipping",
+          "Lane",
+          "National"
         ]
       },
       {
@@ -31905,6 +32093,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "Port"
         ]
       },
       {
@@ -32121,6 +32313,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Exclusion",
+          "Shipping"
         ]
       },
       {
@@ -32308,7 +32505,12 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping",
+          "Total"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_ferry",
@@ -32495,7 +32697,12 @@
             "media": "wiki://Ferry_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping",
+          "Ferry"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_passenger",
@@ -32682,7 +32889,12 @@
             "media": "wiki://Passenger_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping",
+          "Passenger"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_tanker",
@@ -32869,7 +33081,12 @@
             "media": "wiki://Tanker_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping",
+          "Tanker"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_maintenance",
@@ -33056,7 +33273,12 @@
             "media": "wiki://Maintenance_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping",
+          "Maintenance"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_cargo",
@@ -33243,7 +33465,12 @@
             "media": "wiki://Cargo_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping",
+          "Cargo"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Intensity_raster",
@@ -33458,7 +33685,11 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Risk",
@@ -33645,7 +33876,12 @@
             "media": "wiki://Shipping_Risk"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping",
+          "Risk"
+        ]
       },
       {
         "layer_name": "NS_Bat_20_shipping",
@@ -33749,6 +33985,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Shipping",
+          "Bathymetry"
         ]
       },
       {
@@ -33839,7 +34080,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "NS_Connection_Points_25km_2",
@@ -33999,7 +34241,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "NS_Shipping_Invisible_Lanes",
@@ -34103,7 +34346,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "NS_Lighthouses",
@@ -34235,6 +34479,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "Lighthouse"
         ]
       },
       {
@@ -34353,6 +34601,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Anchorage"
         ]
       },
       {
@@ -34428,7 +34680,12 @@
             "media": "wiki://Anchorages"
           }
         },
-        "layer_info_properties": []
+        "layer_info_properties": [],
+        "layer_tags": [
+          "Polygon",
+          "Shipping",
+          "Risk"
+        ]
       },
       {
         "layer_name": "NS_shipping_intensity_passengers_raster_EM",
@@ -34671,7 +34928,11 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping"
+        ]
       },
       {
         "layer_name": "NS_shipping_intensity_tanker_raster_EM",
@@ -34914,7 +35175,11 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping"
+        ]
       },
       {
         "layer_name": "NS_shipping_intensity_cargo_raster_EM",
@@ -35157,7 +35422,11 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Shipping"
+        ]
       },
       {
         "layer_name": "NS_Aquaculture_Freshwater",
@@ -35415,6 +35684,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "Production",
+          "FishCatch"
         ]
       },
       {
@@ -35645,6 +35919,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "Production",
+          "FishCatch"
         ]
       },
       {
@@ -35903,6 +36182,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "Production",
+          "FishCatch"
         ]
       },
       {
@@ -36049,6 +36333,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Point",
+          "Production",
+          "FishCatch"
         ]
       },
       {
@@ -36377,6 +36666,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Protection",
+          "Natura2000"
         ]
       },
       {
@@ -36845,6 +37139,11 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "Protection",
+          "Marine"
         ]
       },
       {
@@ -37032,7 +37331,12 @@
             "media": "wiki://Noise"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Pressure",
+          "Noise"
+        ]
       },
       {
         "layer_name": "mel_Artificial_Substrate",
@@ -37219,7 +37523,11 @@
             "media": "wiki://Artificial_Substrate"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Pressure"
+        ]
       },
       {
         "layer_name": "mel_Bottom_Disturbance",
@@ -37406,7 +37714,11 @@
             "media": "wiki://Bottom_Disturbance"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Pressure"
+        ]
       },
       {
         "layer_name": "mel_Surface_Disturbance",
@@ -37593,7 +37905,11 @@
             "media": "wiki://Surface_Disturbance"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Pressure"
+        ]
       },
       {
         "layer_name": "mel_Protection_industrial_trawl",
@@ -37780,7 +38096,11 @@
             "media": "wiki://No_Industrial_Trawl_Fishing"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Protection_bottom_trawl",
@@ -37967,7 +38287,11 @@
             "media": "wiki://No_Bottom_Trawl_Fishing"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Protection_nets",
@@ -38154,7 +38478,12 @@
             "media": "wiki://No_Nets_Fishing"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Exclusion",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Benthic_invertebrates",
@@ -38341,7 +38670,11 @@
             "media": "wiki://Benthic_invertebrates"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass"
+        ]
       },
       {
         "layer_name": "mel_Cod",
@@ -38528,7 +38861,13 @@
             "media": "wiki://Cod"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass",
+          "Cod",
+          "Fish"
+        ]
       },
       {
         "layer_name": "mel_Demersal_fish",
@@ -38715,7 +39054,13 @@
             "media": "wiki://Demersal_fish"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass",
+          "Demersal",
+          "Fish"
+        ]
       },
       {
         "layer_name": "mel_Flatfish",
@@ -38902,7 +39247,13 @@
             "media": "wiki://Flatfish"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass",
+          "Flatfish",
+          "Fish"
+        ]
       },
       {
         "layer_name": "mel_Mackerel",
@@ -39089,7 +39440,13 @@
             "media": "wiki://Mackerel"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass",
+          "Mackerel",
+          "Fish"
+        ]
       },
       {
         "layer_name": "mel_Herring",
@@ -39276,7 +39633,13 @@
             "media": "wiki://Herring"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass",
+          "Herring",
+          "Fish"
+        ]
       },
       {
         "layer_name": "mel_Sandeel",
@@ -39463,7 +39826,13 @@
             "media": "wiki://Sandeel"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass",
+          "Sandeel",
+          "Fish"
+        ]
       },
       {
         "layer_name": "mel_Windfarm_indifferent_seabird",
@@ -39650,7 +40019,11 @@
             "media": "wiki://Windfarm_indifferent_seabird"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass"
+        ]
       },
       {
         "layer_name": "mel_Windfarm_avoiding_seabird",
@@ -39837,7 +40210,11 @@
             "media": "wiki://Windfarm_avoiding_seabird"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass"
+        ]
       },
       {
         "layer_name": "mel_Cetacean",
@@ -40024,7 +40401,13 @@
             "media": "wiki://Cetacean"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass",
+          "Cetacean",
+          "Mammals"
+        ]
       },
       {
         "layer_name": "mel_Seal",
@@ -40211,7 +40594,13 @@
             "media": "wiki://Seal"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Biomass",
+          "Seal",
+          "Mammals"
+        ]
       },
       {
         "layer_name": "NS_Fishing_Priority_Areas",
@@ -40286,7 +40675,11 @@
             "media": "wiki://Fishing_Priority_Areas"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "Polygon",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Bottom_trawl_Catch",
@@ -40473,7 +40866,11 @@
             "media": "wiki://Bottom_Trawl_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Drift_and_fixed_Nets_Catch",
@@ -40660,7 +41057,11 @@
             "media": "wiki://Drift_and_Fixed_Nets_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Industrial_and_Pelagic_Trawl_Catch",
@@ -40847,7 +41248,11 @@
             "media": "wiki://Industrial_and_Pelagic_Trawl_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Shannon_Diversity_Indicator",
@@ -41034,7 +41439,11 @@
             "media": "wiki://Shannon_Diversity_Indicator"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Diversity"
+        ]
       },
       {
         "layer_name": "mel_Large_Fish_Indicator",
@@ -41221,7 +41630,11 @@
             "media": "wiki://Large_Fish_Indicator"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Diversity"
+        ]
       }
     ],
     "expertise_definitions": [],
@@ -41363,6 +41776,7 @@
     "edition_colour": "#7ECEFDFF",
     "edition_letter": "N",
     "region": "northsee",
+    "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2018,
     "end": 2050,
     "era_total_months": 96,

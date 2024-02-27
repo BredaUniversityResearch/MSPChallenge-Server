@@ -23,6 +23,39 @@ class ToolsController extends AbstractController
         return $this->render('tools/index.html.twig');
     }
 
+    public function apcu(string $projectDir): Response
+    {
+        $apcRelativePath = 'var/tools/apc.php';
+        $apcFilePath = $projectDir . '/' . $apcRelativePath;
+        // Check if the file exists
+        if (!file_exists($apcFilePath)) {
+            throw new \RuntimeException($apcRelativePath . ' not found. Please call: bash install-tools.sh');
+        }
+
+
+        // Include the apc.php file
+        ob_start();
+        // setup apc.php
+        define('USE_AUTHENTICATION', 0);
+        // make global variables required by apc.php available
+        global $time;
+        global $col_black;
+        global $MYREQUEST, $MY_SELF_WO_SORT;
+        global $MYREQUEST,$MY_SELF;
+        global $MY_SELF,$MYREQUEST,$AUTHENTICATED;
+        $_SERVER['PHP_SELF'] = $this->generateUrl('_tools_apcu');
+        // Temporarily suppress warnings
+        $previousErrorReporting = error_reporting();
+        error_reporting($previousErrorReporting & ~E_WARNING);
+        require $apcFilePath;
+        // Restore previous error reporting level
+        error_reporting($previousErrorReporting);
+        $content = ob_get_clean();
+
+        // Return the response
+        return new Response($content);
+    }
+
     /**
      * @throws DBALException
      */

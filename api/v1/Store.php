@@ -8,6 +8,7 @@ use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use stdClass;
+use Symfony\Component\Filesystem\Filesystem;
 use ZipArchive;
 use function App\rcopy;
 use function App\rrmdir;
@@ -175,7 +176,8 @@ class Store extends Base
                     Log::LogError($layerDescriptionRequest["error"]);
                 }
                 foreach ($layerDescriptionRequest["layerDescriptions"] as $individualLayer) {
-                    $json = $layer->GetExport($region, $individualLayer["layerName"], "JSON", [], null);
+                    $json = $layer->GetExport($region, $individualLayer["layerName"], "JSON");
+                    $layerMetaData['original_layer_name'] = $individualLayer["layerName"];
                     $this->LoadJSON($json, $filename, $region, $layerMetaData);
                 }
             } else {
@@ -309,20 +311,26 @@ class Store extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function ExtractRasterFilesFromZIP(string $raster_zip, int $gameSessionId): void
     {
+        $tempStore = self::GetRasterStoreFolder(-1);
         $folder = self::GetRasterStoreFolder($gameSessionId);
         self::EnsureFolderExists($folder);
-        self::EnsureFolderExists("temp");
-
-        $zip = new ZipArchive;
-        $res = $zip->open($raster_zip);
-        if ($res === true) {
-            $total = $zip->numFiles - 3;
-            Log::LogDebug("There are ".$total." raster files in this save, unpacking... This could take a bit longer.");
-            $zip->extractTo("temp/");
-            $zip->close();
-            Log::LogDebug("Now moving all ".$total." raster files to their proper place...");
-            rcopy("temp/raster", $folder);
-            rrmdir("temp/");
+        try {
+            $zip = new ZipArchive;
+            $res = $zip->open($raster_zip);
+            if ($res === true) {
+                Log::LogDebug("There are raster files in this save, unpacking... This could take a bit longer.");
+                if (!$zip->extractTo($tempStore)) {
+                    throw new \Exception('ExtractTo failed.');
+                } else {
+                    Log::LogDebug('ExtractTo succeeded.');
+                }
+                $zip->close();
+                Log::LogDebug("Now moving all raster files to their proper place...");
+                rcopy($tempStore."raster", $folder);
+                rrmdir($tempStore);
+            }
+        } catch (\Exception $e) {
+            Log::LogError($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
     }
 
@@ -333,21 +341,32 @@ class Store extends Base
         ?int &$mspId,
         ?int &$countryId
     ): void {
+        if (!empty($layerMetaData['original_layer_name'])) {
+            $featureProperties['original_layer_name'] = $layerMetaData['original_layer_name'];
+        }
 
         if (!empty($layerMetaData["layer_property_as_type"])) {
             // check if the layer_property_as_type value exists in $featureProperties
             $type = '-1';
             if (!empty($featureProperties[$layerMetaData["layer_property_as_type"]])) {
                 $featureTypeProperty = $featureProperties[$layerMetaData["layer_property_as_type"]];
-                foreach ($layerMetaData["layer_type"] as $layerTypeMetaData) {
+                foreach ($layerMetaData["layer_type"] as $typeValue => $layerTypeMetaData) {
                     if (!empty($layerTypeMetaData["map_type"])) {
                         // identify the 'other' category
                         if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                            $typeOther = $layerTypeMetaData["value"];
+                            $typeOther = $typeValue;
                         }
-                        // translate the found $featureProperties value to the type value
-                        if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
-                            $type = $layerTypeMetaData["value"];
+                        if (str_contains($layerTypeMetaData["map_type"], '-')) {
+                            // assumes a range of minimum to maximum (but not including) integer or float values
+                            $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
+                            if ((float) $featureTypeProperty >= (float) $typeValues[0]
+                                && (float) $featureTypeProperty < (float) $typeValues[1]) {
+                                $type = $typeValue;
+                            }
+                        } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+                            // translate the found $featureProperties value to the type value
+                            // can be integer, float, string
+                            $type = $typeValue;
                             break;
                         }
                     }

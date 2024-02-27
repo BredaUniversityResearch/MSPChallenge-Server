@@ -1,4 +1,15 @@
 services:
+  redis:
+    image: 'mspserver-redis'
+    build:
+      context: .
+      target: redis_base
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - redis
+
   database:
     # check https://hub.docker.com/_/mariadb for info.
     image: 'mspserver-mariadb'
@@ -34,25 +45,37 @@ services:
       - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
 
   php:
-    image: mspserver-php
+    image: 'mspserver-php'
+    depends_on:
+      - database
+      - redis
     restart: unless-stopped
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - database
+      - php
+      - redis
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
-      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
       TRUSTED_HOSTS: ^${SERVER_NAME:-localhost}|php$$
+      DOCKER: 1
       DATABASE_HOST: database
 
       # Run "composer require symfony/mercure-bundle" to install and configure the Mercure integration
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      DOCKER: 1
       # Exposes BLACKFIRE_CLIENT_* environment variables allowing the client to communicate with Blackfire's API:
+      BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED:-0}
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
       APP_ENV: ${APP_ENV:-dev}
+      FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
 
       # web server
       WEB_SERVER_HOST: ${WEB_SERVER_HOST:-php}
@@ -72,9 +95,6 @@ services:
       # watchdog
       WATCHDOG_ADDRESS: ${WATCHDOG_ADDRESS:-localhost}
       WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
     ports:
       # Watchdog
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
@@ -92,12 +112,9 @@ services:
       - target: 443
         published: ${HTTP3_PORT:-443}
         protocol: udp
-    networks:
-      - database
-      - php
 
   blackfire:
-    image: mspserver-blackfire
+    image: 'mspserver-blackfire'
     build:
       context: .
       target: blackfire_base
@@ -134,3 +151,4 @@ volumes:
 networks:
   database:
   php:
+  redis:

@@ -2,32 +2,26 @@
 
 namespace App\Controller\SessionAPI;
 
+use App\Controller\BaseController;
 use App\Domain\API\v1\User;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Security\BearerTokenValidator;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use ServerManager\ServerManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
-class UserController extends AbstractController
+class UserController extends BaseController
 {
-
-    #[Route(
-        '/{sessionId}/api/User/RequestSession/',
-        name: 'session_api_user_request_session',
-        requirements: ['sessionId' => '\d+'],
-        methods: ['POST']
-    )]
     public function requestSession(
         int $sessionId,
         Request $request,
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
+        ServerManager $serverManager,
         AuthenticationSuccessHandler $authenticationSuccessHandler
     ): Response {
         try {
@@ -45,21 +39,15 @@ class UserController extends AbstractController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse(BaseController::wrapPayloadForResponse($payload));
+            return new JsonResponse(self::wrapPayloadForResponse($payload));
         } catch (\Exception $e) {
             return new JsonResponse(
-                BaseController::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                self::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
                 500
             );
         }
     }
 
-    #[Route(
-        '/{sessionId}/api/User/RequestToken/',
-        name: 'session_api_user_request_token',
-        requirements: ['sessionId' => '\d+'],
-        methods: ['POST']
-    )]
     public function requestToken(
         int $sessionId,
         Request $request,
@@ -100,10 +88,10 @@ class UserController extends AbstractController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse(BaseController::wrapPayloadForResponse($payload));
+            return new JsonResponse(self::wrapPayloadForResponse($payload));
         } catch (\Exception $e) {
             return new JsonResponse(
-                BaseController::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                self::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
                 500
             );
         }

@@ -17,12 +17,14 @@ fi
 alias ede='unset $(bash docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(bash docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
 PRE_DCU="bash set_symfony_version.sh"
-DCU_BASE="MSYS_NO_PATHCONV=1 BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID} BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN} BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID} BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN} CADDY_MERCURE_JWT_SECRET=${CADDY_MERCURE_JWT_SECRET} docker compose"
+DCU_BASE="MSYS_NO_PATHCONV=1 BLACKFIRE_APM_ENABLED="${BLACKFIRE_APM_ENABLED:-0}" BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID} BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN} BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID} BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN} CADDY_MERCURE_JWT_SECRET=${CADDY_MERCURE_JWT_SECRET} docker compose"
 alias dcu="ede && $PRE_DCU && ${DCU_BASE} up -d --remove-orphans"
 # dcu + xdebug (x)
 alias dcux="ede && $PRE_DCU && XDEBUG_MODE=debug ${DCU_BASE} up -d --remove-orphans"
 # dcu + production (p)}
 alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
+# dcu + hybrid (h)}
+alias dcuh='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.hybrid.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
 [[ -z "${COMPOSE_PROJECT_NAME}" ]] && COMPOSE_PROJECT_NAME="mspchallenge"
 [[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER="${COMPOSE_PROJECT_NAME}-php-1"
@@ -62,6 +64,11 @@ alias dewss="de ${ALIAS_WSS}"
 # dewss + xdebug (x)
 alias dewssx="${ALIAS_DE_BASE} -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" ${PHP_CONTAINER} ${ALIAS_WSS}"
 # docker (d) run (r) grafana (g)
-MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec ${DATABASE_CONTAINER} bash -c 'mysql -u root -p${DATABASE_PASSWORD} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
-alias drg="${MY2_SETUP} && docker stop grafana ; docker rm grafana ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana --label com.docker.compose.project=mspchallenge-server --network=mspchallenge-server_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
+if [ -z "${DATABASE_PASSWORD}" ]; then
+    MYSQL_PARAMS=""
+else
+    MYSQL_PARAMS="-p${DATABASE_PASSWORD}"
+fi
+MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec ${DATABASE_CONTAINER} bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
+alias drg="${MY2_SETUP} && docker stop grafana ; docker rm grafana ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana --label com.docker.compose.project=mspchallenge --network=mspchallenge_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
 

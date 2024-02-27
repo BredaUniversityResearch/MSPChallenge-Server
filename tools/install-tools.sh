@@ -65,6 +65,11 @@ function downloadDevTools() {
     return
   fi
 
+  # install apc.php
+  if [[ $FORCE == 1 || ! -f "${DOWNLOAD_DIR}apc.php" ]]; then
+    curl -Lso "${DOWNLOAD_DIR}apc.php" https://raw.githubusercontent.com/krakjoe/apcu/master/apc.php
+  fi
+
   # we do not need adminer on docker, it has its own container.
   if [[ "${DOCKER}" == "1" ]]; then
     echo "Docker detected, skipping adminer installation"

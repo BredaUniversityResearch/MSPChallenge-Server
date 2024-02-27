@@ -22,7 +22,6 @@ RUN apk add --no-cache \
 		file \
 		gettext \
 		git \
-        openssl1.1-compat \
         libgdiplus \
         bash \
         supervisor \
@@ -36,6 +35,8 @@ RUN set -eux; \
 		opcache \
 		zip \
         pcntl \
+        imagick \
+        gd \
 	;
 
 # if you want to debug on prod, enable below lines:
@@ -43,7 +44,7 @@ RUN set -eux; \
 #ENV XDEBUG_MODE=debug
 #RUN set -eux; \
 #	install-php-extensions \
-#		xdebug \
+#		xdebug-^3.2 \
 #	;
 
 ###> recipes ###
@@ -62,6 +63,7 @@ COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor.d/
 COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
 COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
+COPY --link docker/supervisor/supervisor.d/messenger-worker.ini /etc/supervisor.d/messenger-worker.ini
 
 ENTRYPOINT ["docker-entrypoint"]
 
@@ -101,8 +103,8 @@ RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 RUN set -eux; \
 	install-php-extensions \
-		xdebug \
-	;
+    	xdebug-^3.2 \
+    ;
 
 COPY --link frankenphp/conf.d/app.dev.ini $PHP_INI_DIR/conf.d/
 
@@ -139,3 +141,6 @@ FROM mariadb:10.6.16 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
 FROM adminer AS adminer_base
 FROM mitmproxy/mitmproxy:9.0.1 as mitmproxy_base
+FROM redis:7.2.4-alpine AS redis_base
+FROM erikdubbelboer/phpredisadmin as phpredisadmin_base
+
