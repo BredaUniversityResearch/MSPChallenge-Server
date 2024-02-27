@@ -118,6 +118,9 @@ class Layer
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $layerEntityValueMax;
 
+    #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
+    private ?string $layerTags = null;
+
     #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'])]
     private Collection $geometry;
 
@@ -735,6 +738,24 @@ class Layer
     public function setLayerEntityValueMax(?float $layerEntityValueMax): Layer
     {
         $this->layerEntityValueMax = $layerEntityValueMax;
+        return $this;
+    }
+
+    public function getLayerTags(): ?array
+    {
+        if ($this->layerTags === null) {
+            return null;
+        }
+        return json_decode($this->layerTags, true);
+    }
+
+    public function setLayerTags(?array $layerTags): Layer
+    {
+        if ($layerTags == null) {
+            $this->layerTags = null;
+            return $this;
+        }
+        $this->layerTags = json_encode($layerTags);
         return $this;
     }
 
