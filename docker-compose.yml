@@ -47,7 +47,7 @@ services:
       - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
 
   php:
-    image: mspserver-php
+    image: 'mspserver-php'
     depends_on:
       - database
       - redis
@@ -106,7 +106,7 @@ services:
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
 
   blackfire:
-    image: mspserver-blackfire
+    image: 'mspserver-blackfire'
     build:
       context: .
       target: blackfire_base
@@ -127,7 +127,7 @@ services:
       - php
 
   caddy:
-    image: mspserver-caddy
+    image: 'mspserver-caddy'
     depends_on:
       - php
     environment:

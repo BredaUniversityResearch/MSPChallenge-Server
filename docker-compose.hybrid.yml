@@ -3,6 +3,7 @@ version: "3.7"
 # Production environment override
 services:
   php:
+    image: 'mspserver-php'
     build:
       context: .
       target: php_prod
@@ -17,6 +18,7 @@ services:
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
 
   caddy:
+    image: 'mspserver-caddy'
     build:
       context: .
       target: caddy_prod
