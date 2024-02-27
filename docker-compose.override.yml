@@ -54,6 +54,7 @@ services:
       - caddy
 
   php:
+    image: mspserver-php
     build:
       context: .
       target: php_dev
