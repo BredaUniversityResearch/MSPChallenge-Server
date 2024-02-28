@@ -33,22 +33,26 @@ goto get
 :blank
 echo Argument 1 must be either: remove/install/stop/start/restart/status/get/logging_on/logging_off/firewall_add/firewall_remove
 echo Followed by any additional parameter supported by the command
+echo You can also open up the Non-Sucking Service Manager in edit mode for a service using: edit <service_name>
 goto eof
 
 :default
-call :RunServiceManager %MSPWsServerService% %1 %2 %3 %4 %5 %6 %7 %8 %9
+call :RunServiceManager %1 %2 %3 %4 %5 %6 %7 %8 %9
 goto eof
 
 :remove
 call :RemoveService %MSPWsServerService%
+call :RemoveService %MSPMessengerConsumerService%
 goto eof
 
 :logging_on
 call :SetServiceLoggingOn %MSPWsServerService%
+call :SetServiceLoggingOn %MSPMessengerConsumerService%
 goto get
 
 :logging_off
 call :SetServiceLoggingOff %MSPWsServerService%
+call :SetServiceLoggingOff %MSPMessengerConsumerService%
 goto get
 
 :firewall_add
@@ -105,6 +109,7 @@ exit /b 0
 set service=%1
 %exe% stop %service%
 %exe% remove %service% confirm
+echo %exe% remove %service% confirm
 call :FirewallRemoveRule
 exit /b 0
 
@@ -149,6 +154,5 @@ if "%singleparam%"=="1" (
 exit /b 0
 
 :RunServiceManager
-set service=%1
-%exe% %2 %service% %3 %4 %5 %6 %7 %8 %9
+%exe% %1 %2 %3 %4 %5 %6 %7 %8 %9
 exit /b 0
