@@ -33,7 +33,6 @@ use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Jfcherng\Diff\DiffHelper;
 use JsonSchema\Validator;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
@@ -45,6 +44,7 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -65,6 +65,8 @@ class GameListCreationMessageHandler
     private GameList $gameSession;
     private array $dataModel;
     private ObjectNormalizer $normalizer;
+
+    private ?string $phpBinary = null;
 
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager,
@@ -141,8 +143,9 @@ class GameListCreationMessageHandler
 
     private function resetSessionDatabase(): void
     {
+        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
         $process = new Process([
-            'php',
+            $this->phpBinary,
             'bin/console',
             'doctrine:database:drop',
             '--connection='.$this->database,
@@ -157,8 +160,9 @@ class GameListCreationMessageHandler
 
     private function createSessionDatabase(): void
     {
+        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
         $process = new Process([
-            'php',
+            $this->phpBinary,
             'bin/console',
             'doctrine:database:create',
             '--connection='.$this->database,
@@ -170,8 +174,9 @@ class GameListCreationMessageHandler
 
     private function migrateSessionDatabase(): void
     {
+        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
         $process = new Process([
-            'php',
+            $this->phpBinary,
             'bin/console',
             'doctrine:migrations:migrate',
             '--em='.$this->database,
