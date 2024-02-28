@@ -114,10 +114,6 @@ class CreatePOVConfigCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!extension_loaded('imagick')) {
-            $output->writeln('Imagick extension is not loaded.');
-            return Command::FAILURE;
-        }
         $io = new SymfonyStyle($input, $output);
         $sessionId = $input->getArgument(self::ARG_SESSION_ID);
         if (!ctype_digit($sessionId)) {
