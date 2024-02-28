@@ -61,6 +61,7 @@ goto eof
 
 :get
 call :GetServiceParameters %MSPWsServerService% %1 %2
+call :GetServiceParameters %MSPMessengerConsumerService% %1 %2
 goto eof
 
 :eof
