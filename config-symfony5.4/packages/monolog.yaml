@@ -76,6 +76,12 @@ when@prod:
                 level: debug
                 formatter: monolog.formatter.json
                 channels: ["!game_session"]
+                handler: rotating_nested
+            rotating_nested:
+                type: rotating_file
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                max_files: 7
+                channels: ["!game_session"]
             console:
                 type: console
                 process_psr_3_messages: false
