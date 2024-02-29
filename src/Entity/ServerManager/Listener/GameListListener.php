@@ -16,6 +16,10 @@ class GameListListener
     public function prePersist(GameList $gameSession, PrePersistEventArgs $event): void
     {
         $gameConfigContentComplete = $gameSession->getGameConfigVersion()->getGameConfigComplete();
+        $gameSession->setPasswordAdmin(base64_encode($gameSession->getPasswordAdmin()), true);
+        if (!is_null($gameSession->getPasswordPlayer())) {
+            $gameSession->setPasswordPlayer(base64_encode($gameSession->getPasswordPlayer()), true);
+        }
         if (is_null($gameSession->getGameCreationTime())) {
             $gameSession->setGameCreationTime(time());
         }

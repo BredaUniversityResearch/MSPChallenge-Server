@@ -7,7 +7,6 @@ use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Message\GameList\GameListCreationMessage;
 use App\MessageHandler\GameList\GameListCreationMessageHandler;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -17,8 +16,7 @@ use Symfony\Component\Finder\Finder;
 
 class GameListCreationTest extends KernelTestCase
 {
-
-    public function testGameListCreation(): void
+    public static function testGameListCreation(): void
     {
         $container = static::getContainer();
         $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
@@ -67,14 +65,16 @@ class GameListCreationTest extends KernelTestCase
         self::assertCount(count($gameConfigs), $emServerManager->getRepository(GameList::class)->findAll());
     }
 
-    public function testGameListCreationMessageHandler(): void
+    public static function testGameListCreationMessageHandler(): void
     {
-        self::expectNotToPerformAssertions();
         $container = static::getContainer();
         $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
         foreach ($emServerManager->getRepository(GameList::class)->findAll() as $gameSession) {
+            $timePre = microtime(true);
             $handler = $container->get(GameListCreationMessageHandler::class);
             $handler->__invoke(new GameListCreationMessage($gameSession->getId()));
+            $timePost = microtime(true);
+            self::assertTrue($timePost - $timePre > 10, 'Looks like session creation failed?');
         }
     }
 

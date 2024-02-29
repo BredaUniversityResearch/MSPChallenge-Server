@@ -244,9 +244,10 @@ class GameList
         return $this->passwordAdmin;
     }
 
-    public function setPasswordAdmin(string $passwordAdmin): self
+    public function setPasswordAdmin(string $passwordAdmin, $directly = false): self
     {
-        $this->passwordAdmin = $this->checkPasswordFormat('password_admin', $passwordAdmin);
+        $this->passwordAdmin = $directly ?
+            $passwordAdmin : $this->checkPasswordFormat('password_admin', $passwordAdmin);
 
         return $this;
     }
@@ -256,9 +257,10 @@ class GameList
         return $this->passwordPlayer;
     }
 
-    public function setPasswordPlayer(string $passwordPlayer): self
+    public function setPasswordPlayer(string $passwordPlayer, $directly = false): self
     {
-        $this->passwordPlayer = $this->checkPasswordFormat('password_player', $passwordPlayer);
+        $this->passwordPlayer = $directly ?
+            $passwordPlayer : $this->checkPasswordFormat('password_player', $passwordPlayer);
 
         return $this;
     }

@@ -58,31 +58,25 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
 #[AsMessageHandler]
-class GameListCreationMessageHandler
+class GameListCreationMessageHandler extends CommonSessionHandler
 {
-    private string $database;
-    private EntityManagerInterface $entityManager;
-    private GameList $gameSession;
     private array $dataModel;
-    private ObjectNormalizer $normalizer;
-
-    private ?string $phpBinary = null;
 
     public function __construct(
-        private readonly EntityManagerInterface $mspServerManagerEntityManager,
-        private readonly LoggerInterface $gameSessionLogger,
+        KernelInterface $kernel,
+        LoggerInterface $gameSessionLogger,
+        EntityManagerInterface $mspServerManagerEntityManager,
+        ConnectionManager $connectionManager,
+        ContainerBagInterface $params,
         private readonly GameSessionLogger $gameSessionLogFileHandler,
         private readonly HttpClientInterface $client,
-        private readonly KernelInterface $kernel,
-        private readonly ContainerBagInterface $params,
         private readonly VersionsProvider $provider,
         private readonly WatchdogCommunicator $watchdogCommunicator,
-        private readonly ConnectionManager $connectionManager,
         // e.g. used by GeoServerCommunicator
         private readonly CacheInterface $downloadsCache,
         private readonly CacheInterface $resultsCache
     ) {
-        $this->normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        parent::__construct(...func_get_args());
     }
 
     /**
@@ -90,13 +84,9 @@ class GameListCreationMessageHandler
      */
     public function __invoke(GameListCreationMessage $gameList): void
     {
-        $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
-                ?? throw new \Exception('Game session not found, so cannot continue.');
-        $sessionId = $this->gameSession->getId();
-        $this->database = $this->connectionManager->getGameSessionDbName($sessionId);
-        $this->entityManager = $this->connectionManager->getGameSessionEntityManager($sessionId);
+        $this->setGameSessionAndDatabase($gameList);
         try {
-            $this->gameSessionLogFileHandler->empty($sessionId);
+            $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
             $this->validateGameConfigComplete();
             $this->notice("Session {$this->gameSession->getName()} creation initiated. Please wait.");
             $this->setupSessionDatabase();
@@ -143,18 +133,7 @@ class GameListCreationMessageHandler
 
     private function resetSessionDatabase(): void
     {
-        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
-        $process = new Process([
-            $this->phpBinary,
-            'bin/console',
-            'doctrine:database:drop',
-            '--connection='.$this->database,
-            '--force',
-            '--no-interaction',
-            '--env='.$_ENV['APP_ENV']
-        ], $this->kernel->getProjectDir());
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
-
+        $this->dropSessionDatabase();
         $this->createSessionDatabase();
     }
 
@@ -193,10 +172,7 @@ class GameListCreationMessageHandler
      */
     private function resetSessionRasterStore(): void
     {
-        $sessionRasterStore = $_ENV['APP_ENV'] == 'test' ?
-            $this->params->get('app.session_raster_dir_test') :
-            $this->params->get('app.session_raster_dir');
-        $sessionRasterStore .= $this->gameSession->getId();
+        $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
         $fileSystem = new Filesystem();
         if ($fileSystem->exists($sessionRasterStore)) {
             $finder = new Finder();
@@ -223,10 +199,8 @@ class GameListCreationMessageHandler
      */
     private function createSessionRunningConfig(): void
     {
-        $sessionConfigStore = $_ENV['APP_ENV'] == 'test' ?
-            $this->params->get('app.session_config_dir_test') :
-            $this->params->get('app.session_config_dir');
-        $sessionConfigStore .= sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId());
+        $sessionConfigStore = $this->params->get('app.session_config_dir').
+            sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId());
         $fileSystem = new Filesystem();
         $fileSystem->copy(
             $this->params->get('app.server_manager_config_dir').
@@ -410,10 +384,8 @@ class GameListCreationMessageHandler
         Layer $layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
-        $rasterPath = ($_ENV['APP_ENV'] == 'test' ?
-            $this->params->get('app.session_raster_dir_test') :
-            $this->params->get('app.session_raster_dir'))
-            . "{$this->gameSession->getId()}/{$layer->getLayerName()}.png";
+        $rasterPath = $this->params->get('app.session_raster_dir').
+            "{$this->gameSession->getId()}/{$layer->getLayerName()}.png";
         if ($layer->getLayerDownloadFromGeoserver()) {
             $this->debug('Calling GeoServer to obtain raster metadata.');
             $rasterMetaData = $geoServerCommunicator->getRasterMetaData(
@@ -1245,36 +1217,5 @@ class GameListCreationMessageHandler
             throw new \Exception('Game config is null, so not continuing.');
         }
         $this->dataModel = $gameConfig['datamodel'];
-    }
-
-    private function log(string $level, string $message, array $contextVars = []): void
-    {
-        $contextVars['gameSession'] = $this->gameSession->getId();
-        $this->gameSessionLogger->$level($message, $contextVars);
-    }
-
-    private function info(string $message, array $contextVars = []): void
-    {
-        $this->log('info', $message, $contextVars);
-    }
-
-    private function debug(string $message, array $contextVars = []): void
-    {
-        $this->log('debug', $message, $contextVars);
-    }
-
-    private function notice(string $message, array $contextVars = []): void
-    {
-        $this->log('notice', $message, $contextVars);
-    }
-
-    private function warning(string $message, array $contextVars = []): void
-    {
-        $this->log('warning', $message, $contextVars);
-    }
-
-    private function error(string $message, array $contextVars = []): void
-    {
-        $this->log('error', $message, $contextVars);
     }
 }

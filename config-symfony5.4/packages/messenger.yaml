@@ -29,6 +29,7 @@ framework:
             # Route your messages to the transports
             'App\Message\Analytics\AnalyticsMessageBase': analytics
             'App\Message\GameList\GameListCreationMessage': async
+            'App\Message\GameSave\GameSaveCreationMessage': async
 
 when@test:
     framework:
