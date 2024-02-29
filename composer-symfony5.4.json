@@ -4,7 +4,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "suggest": {
-        "ext-imagick": "Optional, but recommended for image processing. Need for POV config creation."
+        "ext-imagick": "You only require imagick for image processing, e.g. for POV config creation."
     },
     "require":
     {
