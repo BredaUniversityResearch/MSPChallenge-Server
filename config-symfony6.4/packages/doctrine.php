@@ -18,7 +18,11 @@ return static function (DoctrineConfig $doctrineConfig) {
     $dbalConfig = new DbalConfig();
     $dbalConfig->defaultConnection($connectionManager->getServerManagerDbName());
     $ormConfig = new OrmConfig([
-        'enable_lazy_ghost_objects' => true
+        # Since doctrine/doctrine-bundle 2.11:
+        #   Not setting "doctrine.orm.enable_lazy_ghost_objects" to true is deprecated.
+        # @todo(MH): for now, still set to false.
+        #   Otherwise the GameConfigVersion::getGameConfigCompleteRaw() will return null.
+        'enable_lazy_ghost_objects' => false
     ]);
     $ormConfig
         ->defaultEntityManager($connectionManager->getServerManagerDbName());

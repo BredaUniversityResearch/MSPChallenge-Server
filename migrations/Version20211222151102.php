@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaException;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 
 /**
@@ -29,11 +32,15 @@ final class Version20211222151102 extends MSPMigration
         return new MSPDatabaseType(MSPDatabaseType::DATABASE_TYPE_GAME_SESSION);
     }
 
+    /**
+     * @throws SchemaException
+     * @throws Exception
+     */
     protected function onUp(Schema $schema): void
     {
         foreach (self::COLUMNS_MISSING_DEFAULT as $tableName => $columnName) {
             $column = $schema->getTable($tableName)->getColumn($columnName);
-            $requiredDefaultValue = $column->getType()->getName() == Types::BOOLEAN ? 0 : '';
+            $requiredDefaultValue = Type::lookupName($column->getType()) == Types::BOOLEAN ? 0 : '';
             if ($column->getDefault() === $requiredDefaultValue) {
                 $this->write("Column {$columnName} for table {$tableName} already has required default value");
                 continue;

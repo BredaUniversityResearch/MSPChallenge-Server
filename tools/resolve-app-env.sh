@@ -12,10 +12,11 @@ if [[ -z "${APP_ENV}" ]]; then
 
   if [[ ! -f $DOTENV_FILE ]]; then
     echo "Could not find file ${DOTENV_FILE}"
+    pwd
     exit 1
   fi
 
-  echo "No APP_ENV enviromental variable found, checking .env file"
+  echo "No APP_ENV environmental variable found, checking .env file"
   set -o allexport; source "${DOTENV_FILE}"; set +o allexport
   if [[ -f $DOTENV_LOCAL_FILE ]]; then
     echo "Checking .env.local file"

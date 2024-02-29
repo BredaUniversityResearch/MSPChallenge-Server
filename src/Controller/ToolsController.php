@@ -8,6 +8,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Types\Type;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -183,7 +184,7 @@ class ToolsController extends AbstractController
                 }
                 unset($pregMatches);
                 if (!empty($data['regexp_type']) &&
-                    preg_match($data['regexp_type'], $column->getType()->getName(), $pregMatches) !== 1
+                    preg_match($data['regexp_type'], Type::lookupName($column->getType()), $pregMatches) !== 1
                 ) {
                     continue;
                 }
@@ -244,7 +245,7 @@ class ToolsController extends AbstractController
 
                 $missingIndices[$tableName][$column->getName()] = $column->getName();
                 $messages[] = '<span style="color: red;">Missing index for table ' . $tableName . ' and field ' .
-                    $column->getName() . ' of type ' . $column->getType()->getName() . '</span>...';
+                    $column->getName() . ' of type ' . Type::lookupName($column->getType()) . '</span>...';
             }
         }
 

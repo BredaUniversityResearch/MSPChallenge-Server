@@ -6,8 +6,8 @@ if [[ "${DOCKER}" == "1" ]]; then
 fi
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-DOTENV_FILE="../.env"
-DOTENV_LOCAL_FILE="../.env.local"
+DOTENV_FILE="${SCRIPT_DIR}/../.env"
+DOTENV_LOCAL_FILE="${SCRIPT_DIR}/../.env.local"
 source "${SCRIPT_DIR}/resolve-app-env.sh"
 
 if [[ "${APP_ENV}" == "prod" ]]; then

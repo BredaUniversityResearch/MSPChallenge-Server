@@ -1,0 +1,51 @@
+framework:
+    messenger:
+        # Symfony 6+ Option "reset_on_message" at "framework.messenger" is deprecated. It does nothing and will be removed in version 7.0.
+        # reset_on_message: true
+
+        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
+        failure_transport: failed
+
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            analytics:
+                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                options:
+                    table_name: 'messenger_analytics'
+                    queue_name: 'message'
+            async:
+#                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                options:
+                    table_name: 'messenger_async_processes'
+                    queue_name: 'message'                
+#                    use_notify: true
+#                    check_delayed_interval: 60000
+#                retry_strategy:
+#                    max_retries: 3
+#                    multiplier: 2
+#            failed: 'doctrine://default?queue_name=failed'
+            failed:
+                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                options:
+                    table_name: 'messenger_analytics'
+                    queue_name: 'failed'
+            # sync: 'sync://'
+
+        routing:
+#            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+#            Symfony\Component\Notifier\Message\ChatMessage: async
+#            Symfony\Component\Notifier\Message\SmsMessage: async
+
+            # Route your messages to the transports
+#            'App\Message\YourMessage': async
+            'App\Message\Analytics\AnalyticsMessageBase': analytics
+            'App\Message\GameList\GameListCreationMessage': async            
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async_test: 'in-memory://'
+            routing:
+                'App\Message\GameList\GameListCreationMessage': [async, async_test]

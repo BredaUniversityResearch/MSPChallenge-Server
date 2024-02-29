@@ -122,6 +122,7 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getEntityManagerConfig(string $dbName): array
     {
+        $config['report_fields_where_declared'] = true;
         // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
         $config['connection'] = $dbName;
         $config['mappings']['App'] = [
@@ -130,8 +131,7 @@ class ConnectionManager extends DatabaseDefaults
             'prefix' => 'App\Entity',
             'alias' => 'App'
         ];
-        // @todo change default? In 6.2: doctrine.orm.naming_strategy.underscore_number_aware
-        $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore';
+        $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';
         $config['metadata_cache_driver'] = [
             'type' => 'pool',
             'pool' => 'doctrine.meta_cache_pool'
