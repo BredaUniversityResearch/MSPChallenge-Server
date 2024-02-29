@@ -3,12 +3,14 @@
     "license": "proprietary",
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "require": 
+    "suggest": {
+        "ext-imagick": "Optional, but recommended for image processing. Need for POV config creation."
+    },
+    "require":
     {
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
-        "ext-imagick": "*",
         "ext-intl": "*",
         "ext-json": "*",
         "ext-openssl": "*",
