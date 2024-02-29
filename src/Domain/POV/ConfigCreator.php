@@ -149,6 +149,8 @@ class ConfigCreator
                 '. Error: ' . $e->getMessage());
         }
         $this->log('json decoded, extracting region from raster layers');
+        $json['datamodel']['raster_layers'] ??= [];
+        $json['datamodel']['vector_layers'] ??= [];
         $this->excludeLayersByTags($json['datamodel']['raster_layers'], $json['datamodel']['vector_layers']);
         $this->normaliseAndExtendRasterMappings($json['datamodel']['raster_layers']);
         $this->fixMissingRasterLayerScales($json['datamodel']['raster_layers']);
@@ -377,7 +379,7 @@ WITH
       ROW_NUMBER() OVER (PARTITION BY geometry_persistent ORDER BY geometry_id DESC) AS rn
     FROM
       geometry
-    WHERE geometry_deleted = 0 AND geometry_active = 1 AND geometry_subtractive = 0
+    WHERE geometry_deleted = 0 AND geometry_active = 1 AND geometry_subtractive IS NULL
   ),
   # filter latest geometries, so only with row number 1
   LatestGeometryStep2 AS (
@@ -500,7 +502,7 @@ WITH
       # join as json table to control which fields we want to extract and alias afterwards
       #   see https://community.mspchallenge.info/wiki/Configuration_data_schema_documentation
       INNER JOIN JSON_TABLE(
-        JSON_EXTRACT(l.layer_type, '$.*'),
+        JSON_EXTRACT(l.layer_type, '$[*]'),
           '$[*]' COLUMNS (
             id for ordinality,
             display_name VARCHAR(255) PATH '$.displayName',
