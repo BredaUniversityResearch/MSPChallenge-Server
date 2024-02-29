@@ -330,19 +330,41 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         foreach ($this->dataModel['meta'] as $layerMetaData) {
             $layer = $this->normalizer->denormalize($layerMetaData, Layer::class);
             $layer->setLayerGroup($this->dataModel['region']);
-            $layer->setContextCreatingGameSession($this->gameSession->getId()); // indicator for SessionEntityListener
             $this->info("Starting import of layer {$layer->getLayerName()}...");
             if ($layer->getLayerGeotype() == "raster") {
                 $this->importLayerRasterData($layer, $geoServerCommunicator);
             } else {
                 $this->importLayerGeometryData($layer, $geoServerCommunicator, $context);
             }
-            $this->info("Finished importing layer {$layer->getLayerName()}.");
             $this->importLayerTypeAvailabilityRestrictions($layer);
+            $this->removeLayerGeometryDuplicates($layer);
             $this->entityManager->persist($layer);
             $context->addLayer($layer);
+            $this->info("Finished importing layer {$layer->getLayerName()}.");
         }
         $this->checkForDuplicateMspIds($context);
+    }
+
+    private function removeLayerGeometryDuplicates(Layer $layer): void
+    {
+        $geometryCoordsDataSets = [];
+        foreach ($layer->getGeometry() as $geometry) {
+            $array = [
+                'coords' => $geometry->getGeometryGeometry(),
+                'data' => $geometry->getGeometryData()
+            ];
+            if (in_array($array, $geometryCoordsDataSets)) {
+                $geometryText = substr($geometry->getGeometryGeometry(), 0, 50).'... - '.
+                    substr($geometry->getGeometryData(), 0, 50).'...';
+                $this->warning(
+                    "Avoided adding duplicate geometry (based on the combination of coordinates and complete ".
+                    "properties set) to layer {$layer->getLayerName()}. Some geometry data: {$geometryText}"
+                );
+                $layer->removeGeometry($geometry);
+            } else {
+                $geometryCoordsDataSets[] = $array;
+            }
+        }
     }
 
     private function importLayerTypeAvailabilityRestrictions(Layer $layer): void

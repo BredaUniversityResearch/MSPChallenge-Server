@@ -13,16 +13,13 @@
 namespace App\EventListener;
 
 use App\Entity\Game;
-use App\Entity\Layer;
 use Doctrine\ORM\Event\PrePersistEventArgs;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class SessionEntityListener
 {
     public function __construct(
-        private readonly ParameterBagInterface $params,
-        private readonly LoggerInterface $gameSessionLogger
+        private readonly ParameterBagInterface $params
     ) {
     }
 
@@ -30,8 +27,6 @@ class SessionEntityListener
     {
         if ($event->getObject() instanceof Game) {
             $this->prePersistGame($event);
-        } elseif ($event->getObject() instanceof Layer) {
-            $this->prePersistLayer($event);
         }
     }
 
@@ -42,32 +37,5 @@ class SessionEntityListener
         $game->setGameEratime(max($game->getGameEratime(), $this->params->get('app.min_game_era_time')));
         $game->setGameAutosaveMonthInterval($this->params->get('app.game_auto_save_interval'));
         $game->setGameIsRunningUpdate(0);
-    }
-
-    private function prePersistLayer(PrePersistEventArgs $event): void
-    {
-        $layer = $event->getObject();
-        if (is_null($layer->getContextCreatingGameSession())) {
-            return;
-        }
-        $geometryCoordsDataSets = [];
-        foreach ($layer->getGeometry() as $geometry) {
-            $array = [
-                'coords' => $geometry->getGeometryGeometry(),
-                'data' => $geometry->getGeometryData()
-            ];
-            if (in_array($array, $geometryCoordsDataSets)) {
-                $geometryText = substr($geometry->getGeometryGeometry(), 0, 50).'... - '.
-                    substr($geometry->getGeometryData(), 0, 50).'...';
-                $this->gameSessionLogger->warning(
-                    "Avoided adding duplicate geometry (based on the combination of coordinates and complete ".
-                    "properties set) to layer {$layer->getLayerName()}. Some geometry data: {$geometryText}",
-                    ['gameSession' => $layer->getContextCreatingGameSession()]
-                );
-                $layer->removeGeometry($geometry);
-            } else {
-                $geometryCoordsDataSets[] = $array;
-            }
-        }
     }
 }
