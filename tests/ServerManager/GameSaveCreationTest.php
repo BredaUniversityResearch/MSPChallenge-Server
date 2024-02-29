@@ -14,6 +14,7 @@ use App\Entity\ServerManager\GameWatchdogServer;
 use App\MessageHandler\GameSave\GameSaveCreationMessageHandler;
 use App\Message\GameSave\GameSaveCreationMessage;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -28,8 +29,8 @@ class GameSaveCreationTest extends KernelTestCase
      */
     public function testGameSaveCreation(): void
     {
-        //GameListCreationTest::testGameListCreation();
-        //GameListCreationTest::testGameListCreationMessageHandler();
+        GameListCreationTest::testGameListCreation();
+        GameListCreationTest::testGameListCreationMessageHandler();
 
         $container = static::getContainer();
         $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
@@ -70,13 +71,18 @@ class GameSaveCreationTest extends KernelTestCase
         $gameSave->setSaveVisibility(new GameSaveVisibilityValue('active'));
         $emServerManager->persist($gameSave);
         $emServerManager->flush();
-        //self::assertCount(1, $emServerManager->getRepository(GameSave::class)->findAll());
+        self::assertCount(1, $emServerManager->getRepository(GameSave::class)->findAll());
         $handler = $container->get(GameSaveCreationMessageHandler::class);
         $handler->__invoke(new GameSaveCreationMessage(1, 1));
+        $params = $container->get(ContainerBagInterface::class);
+        self::assertFileExists(
+            $params->get('app.server_manager_save_dir').
+            sprintf($params->get('app.server_manager_save_name'), 1)
+        );
     }
 
     public static function setUpBeforeClass(): void
     {
-        //GameListCreationTest::setUpBeforeClass();
+        GameListCreationTest::setUpBeforeClass();
     }
 }
