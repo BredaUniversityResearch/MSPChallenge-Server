@@ -67,7 +67,7 @@ class GameSaveCreationTest extends KernelTestCase
         $gameSave = $serializer->denormalize($normalizedGameList, GameSave::class, null, $denormalizeContext);
         $gameSave->setGameConfigFilesFilename($gameSave->getGameConfigVersion()->getGameConfigFile()?->getFilename());
         $gameSave->setGameConfigVersionsRegion($gameSave->getGameConfigVersion()?->getRegion());
-        $gameSave->setSaveType(new GameSaveTypeValue('full'));
+        $gameSave->setSaveType(new GameSaveTypeValue('layers'));
         $gameSave->setSaveVisibility(new GameSaveVisibilityValue('active'));
         $emServerManager->persist($gameSave);
         $emServerManager->flush();

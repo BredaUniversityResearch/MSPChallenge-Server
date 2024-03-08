@@ -380,6 +380,13 @@ class GameSave
         return $this;
     }
 
+    public function addToSaveNotes(string $saveNotes): self
+    {
+        $this->saveNotes = $this->getSaveNotes().$saveNotes;
+
+        return $this;
+    }
+
     public function getSaveVisibility(): ?GameSaveVisibilityValue
     {
         if (null === $this->saveVisibility) {

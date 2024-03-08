@@ -2,7 +2,9 @@
 
 namespace App\MessageHandler\GameSave;
 
+use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\Layer;
 use App\Entity\ServerManager\GameSave;
 use App\MessageHandler\GameList\CommonSessionHandler;
 use App\Message\GameSave\GameSaveCreationMessage;
@@ -10,6 +12,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
+use Shapefile\Shapefile;
+use Shapefile\ShapefileException;
+use Shapefile\ShapefileWriter;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -48,13 +53,152 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
             $gameSave->gameSaveId
         ) ?? throw new \Exception('Game save not found, so cannot continue.');
 
-        // no try-catch here as we don't want to use the session log to store any save errors
         $this->createSaveZip();
-        $this->addSessionDatabaseExportToZip();
-        $this->addSessionRunningConfigToZip();
-        $this->addSessionRasterStoreToZip();
-        $this->addGameListRecordToZip();
+        if ($this->gameSave->getSaveType() == GameSaveTypeValue::LAYERS) {
+            $this->addLayerShapeFilesExportsToZip();
+            $this->addLayerRasterExportsToZip();
+        } else {
+            $this->addSessionDatabaseExportToZip();
+            $this->addSessionRunningConfigToZip();
+            $this->addSessionRasterStoreToZip();
+            $this->addGameListRecordToZip();
+        }
         $this->saveZip->close();
+        $this->mspServerManagerEntityManager->flush();
+    }
+
+    private function createShapeFilesTempStore(): string
+    {
+        $tempDir = $this->params->get('app.server_manager_save_dir').'temp_'.rand(0, 1000).'/';
+        $fileSystem = new Filesystem();
+        $fileSystem->mkdir($tempDir);
+        return $tempDir;
+    }
+
+    private function deleteShapeFilesTempStore(string $tempDir): void
+    {
+        $fileSystem = new Filesystem();
+        $finder = new Finder();
+        $finder->files()->in($tempDir);
+        foreach ($finder as $file) {
+            $fileSystem->remove($file->getRealPath());
+        }
+        $fileSystem->remove($tempDir);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function createLayerShapeFilesAndStore(string $layerName, array $geometryContent, string $tempDir): void
+    {
+        if ($geometryContent['layerGeoType'] == 'polygon') {
+            $shapeType = Shapefile::SHAPE_TYPE_POLYGON;
+            $shapeTypeClass = "Shapefile\Geometry\MultiPolygon";
+        } elseif ($geometryContent['layerGeoType'] == 'line') {
+            $shapeType = Shapefile::SHAPE_TYPE_POLYLINE;
+            $shapeTypeClass = "Shapefile\Geometry\MultiLinestring";
+        } elseif ($geometryContent['layerGeoType'] == 'point') {
+            $shapeType = Shapefile::SHAPE_TYPE_POINT;
+            $shapeTypeClass = "Shapefile\Geometry\Point";
+        } else {
+            $this->gameSave->addToSaveNotes("Unable to identify type of geometry for {$layerName}, so skipping.\n\n");
+            return;
+        }
+        $newShapefile = new ShapefileWriter("{$tempDir}{$layerName}.shp", [
+            Shapefile::OPTION_EXISTING_FILES_MODE => Shapefile::MODE_OVERWRITE,
+            Shapefile::OPTION_DBF_FORCE_ALL_CAPS => false]);
+        $newShapefile->setShapeType($shapeType);
+        // all other fields under 'data' will be defined further down
+        $newShapefile->addField('mspid', Shapefile::DBF_TYPE_CHAR, 80, 0);
+        $newShapefile->addField('type', Shapefile::DBF_TYPE_CHAR, 80, 0);
+        $additionalFieldsAdded = [];
+        $alreadySavedErrorType = [];
+        foreach ($geometryContent['geometry'] as $count => $geometryEntry) {
+            if (empty($geometryEntry['the_geom'])) {
+                continue;
+            }
+            try {
+                $dataArray = [];
+                $dataArray['mspid'] = $geometryEntry['mspid'] ?? '';
+                $dataArray['type'] = $geometryEntry['type'] ?? '';
+                $additionalData = $geometryEntry['data'] ?? [];
+                foreach ($additionalData as $fieldName => $fieldValue) {
+                    // 1. skipping duplicate TYPE definition here - it's completely unnecessary and creates problems
+                    // 2. skipping anything with name > 10 char (notably Shipping_Intensity) - ShapeFile no likey
+                    if ('type' != $fieldName && 'TYPE' != $fieldName && strlen($fieldName) <= 10) {
+                        if (!in_array($fieldName, $additionalFieldsAdded) && 0 == $count) {
+                            $newShapefile->addField($fieldName, Shapefile::DBF_TYPE_CHAR, 254, 0);
+                            $additionalFieldsAdded[] = $fieldName;
+                        }
+                        if (in_array($fieldName, $additionalFieldsAdded)) {
+                            $dataArray[$fieldName] = $fieldValue;
+                        }
+                    }
+                }
+                foreach ($additionalFieldsAdded as $fieldNameToCheck) {
+                    if (!isset($dataArray[$fieldNameToCheck])) {
+                        $dataArray[$fieldNameToCheck] = '';
+                    }
+                }
+                if ("Shapefile\Geometry\MultiPolygon" == $shapeTypeClass) {
+                    $geometry = new $shapeTypeClass([], Shapefile::ACTION_FORCE);
+                } else {
+                    $geometry = new $shapeTypeClass();
+                }
+                $geometry->initFromGeoJSON(json_encode($geometryEntry['the_geom']));
+                $geometry->setDataArray($dataArray);
+                $newShapefile->writeRecord($geometry);
+            } catch (ShapefileException $e) {
+                if (!in_array($e->getErrorType(), $alreadySavedErrorType)) {
+                    $this->gameSave->addToSaveNotes(
+                        "Problem adding geometry from {$layerName}. {$e->getErrorType()}: {$e->getMessage()}."
+                    );
+                    if (!empty($e->getDetails())) {
+                        $this->gameSave->addToSaveNotes("Details: {$e->getDetails()}. ");
+                    }
+                    $this->gameSave->addToSaveNotes(
+                        'Further errors of this type for this entire layer will not be logged.\n\n'
+                    );
+                    $alreadySavedErrorType[] = $e->getErrorType();
+                }
+                continue;
+            }
+        }
+        $newShapefile = null; // might seem trivial, but without this the library can fail
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \Exception
+     */
+    private function addLayerShapeFilesExportsToZip(): void
+    {
+        $tempDir = $this->createShapeFilesTempStore();
+        $layerGeometry = $this->entityManager->getRepository(Layer::class)->getAllGeometryDecodedGeoJSON();
+        foreach ($layerGeometry as $layerName => $geometryContent) {
+            $this->createLayerShapeFilesAndStore($layerName, $geometryContent, $tempDir);
+        }
+        $finder = new Finder();
+        $finder->files()->in($tempDir);
+        foreach ($finder as $file) {
+            $this->addFileToSaveZip($file->getRealPath());
+        }
+        $this->deleteShapeFilesTempStore($tempDir);
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \Exception
+     */
+    private function addLayerRasterExportsToZip(): void
+    {
+        $finder = new Finder();
+        $finder->files()->in("{$this->params->get('app.session_raster_dir')}{$this->gameSession->getId()}/");
+        foreach ($finder as $rasterFile) {
+            $this->addFileToSaveZip($rasterFile->getRealPath());
+        }
     }
 
     private function addGameListRecordToZip(): void
@@ -78,6 +222,11 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         $this->saveZip->addFromString('game_list.json', $gameList);
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \Exception
+     */
     private function addSessionRasterStoreToZip(): void
     {
         $rasterStore = $this->params->get('app.session_raster_dir')."{$this->gameSession->getId()}/";
@@ -100,6 +249,11 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         );
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \Exception
+     */
     private function addSessionRunningConfigToZip(): void
     {
         $sessionConfigStore = $this->params->get('app.session_config_dir').
@@ -125,8 +279,13 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     private function addFileToSaveZip(string $file, ?string $subFolder = null): void
     {
-        $this->saveZip->addFile($file, $subFolder.pathinfo($file, PATHINFO_BASENAME));
+        if (!$this->saveZip->addFile($file, $subFolder.pathinfo($file, PATHINFO_BASENAME))) {
+            throw new \Exception("Could not add {$file} to zip");
+        }
     }
 }

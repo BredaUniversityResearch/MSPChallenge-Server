@@ -966,4 +966,18 @@ class Layer
 
         return $this;
     }
+
+    public function exportToDecodedGeoJSON(): array
+    {
+        $arrayToEncode = [];
+        foreach ($this->getGeometry() as $geometry) {
+            $arrayToEncode[] = $geometry->exportToDecodedGeoJSON();
+        }
+        foreach ($this->getDerivedLayer() as $derivedLayer) {
+            foreach ($derivedLayer->getGeometry() as $derivedLayerGeometry) {
+                $arrayToEncode[] = $derivedLayerGeometry->exportToDecodedGeoJSON();
+            }
+        }
+        return $arrayToEncode;
+    }
 }
