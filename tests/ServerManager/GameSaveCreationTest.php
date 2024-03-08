@@ -67,17 +67,32 @@ class GameSaveCreationTest extends KernelTestCase
         $gameSave = $serializer->denormalize($normalizedGameList, GameSave::class, null, $denormalizeContext);
         $gameSave->setGameConfigFilesFilename($gameSave->getGameConfigVersion()->getGameConfigFile()?->getFilename());
         $gameSave->setGameConfigVersionsRegion($gameSave->getGameConfigVersion()?->getRegion());
-        $gameSave->setSaveType(new GameSaveTypeValue('layers'));
+        $gameSave->setSaveType(new GameSaveTypeValue('full'));
         $gameSave->setSaveVisibility(new GameSaveVisibilityValue('active'));
+        $gameSave2 = clone $gameSave;
+        $gameSave2->setSaveType(new GameSaveTypeValue('layers'));
         $emServerManager->persist($gameSave);
+        $emServerManager->persist($gameSave2);
         $emServerManager->flush();
-        self::assertCount(1, $emServerManager->getRepository(GameSave::class)->findAll());
+        self::assertCount(2, $emServerManager->getRepository(GameSave::class)->findAll());
         $handler = $container->get(GameSaveCreationMessageHandler::class);
         $handler->__invoke(new GameSaveCreationMessage(1, 1));
         $params = $container->get(ContainerBagInterface::class);
         self::assertFileExists(
             $params->get('app.server_manager_save_dir').
             sprintf($params->get('app.server_manager_save_name'), 1)
+        );
+    }
+
+    public static function testGameSaveLayersCreation(): void
+    {
+        $container = static::getContainer();
+        $handler = $container->get(GameSaveCreationMessageHandler::class);
+        $handler->__invoke(new GameSaveCreationMessage(1, 2));
+        $params = $container->get(ContainerBagInterface::class);
+        self::assertFileExists(
+            $params->get('app.server_manager_save_dir').
+            sprintf($params->get('app.server_manager_save_name'), 2)
         );
     }
 

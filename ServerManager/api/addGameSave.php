@@ -6,6 +6,8 @@ use ServerManager\GameConfig;
 use ServerManager\GameSave;
 use ServerManager\GameSession;
 use ServerManager\User;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Message\GameSave\GameSaveCreationMessage;
 
 ini_set('upload_max_filesize', '200M');
 ini_set('post_max_size', '200M');
@@ -57,7 +59,10 @@ if ($gamesession->id == 0 && isset($_FILES['uploadedSaveFile']['tmp_name'])) {
     $gamesave->add();
     
     // then perform request for save zip
-    $gamesave->createZip($gamesession);
+    //$gamesave->createZip($gamesession);
+    SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(
+        new GameSaveCreationMessage($gamesession->id, $gamesave->id)
+    );
 } else {
     throw new Exception("Confusing request, cannot continue.");
 }

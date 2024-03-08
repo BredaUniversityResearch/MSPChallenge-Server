@@ -31,6 +31,8 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     private ZipArchive $saveZip;
     private GameSave $gameSave;
 
+    private ?string $shapeFileTempStore = null;
+
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $gameSessionLogger,
@@ -63,33 +65,60 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
             $this->addSessionRasterStoreToZip();
             $this->addGameListRecordToZip();
         }
-        $this->saveZip->close();
+        $this->closeSaveZip();
         $this->mspServerManagerEntityManager->flush();
     }
 
-    private function createShapeFilesTempStore(): string
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \Exception
+     */
+    private function closeSaveZip(): void
     {
-        $tempDir = $this->params->get('app.server_manager_save_dir').'temp_'.rand(0, 1000).'/';
-        $fileSystem = new Filesystem();
-        $fileSystem->mkdir($tempDir);
-        return $tempDir;
+        $this->saveZip->close();
+        $this->deleteShapeFilesTempStore();
     }
 
-    private function deleteShapeFilesTempStore(string $tempDir): void
+    private function createShapeFilesTempStore(): void
     {
+        $this->shapeFileTempStore = $this->params->get('app.server_manager_save_dir').'temp_'.rand(0, 1000).'/';
         $fileSystem = new Filesystem();
+        $fileSystem->mkdir($this->shapeFileTempStore);
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \Exception
+     */
+    private function deleteShapeFilesTempStore(): void
+    {
+        if (is_null($this->shapeFileTempStore)) {
+            return; // full saves don't create a temp store
+        }
+        $saveZipStore = $this->params->get('app.server_manager_save_dir').
+            sprintf($this->params->get('app.server_manager_save_name'), $this->gameSave->getId());
+        $fileSystem = new Filesystem();
+        while (!$fileSystem->exists($saveZipStore)) {
+            sleep(1); // bit ugly, I know, but Zip file creation takes a bit of time...
+            $counter = ($counter ?? 0) + 1;
+            if ($counter > 9) {
+                throw new \Exception("Waited {$counter} seconds, but Zip file {$saveZipStore} still not there...");
+            }
+        }
         $finder = new Finder();
-        $finder->files()->in($tempDir);
+        $finder->files()->in($this->shapeFileTempStore);
         foreach ($finder as $file) {
             $fileSystem->remove($file->getRealPath());
         }
-        $fileSystem->remove($tempDir);
+        $fileSystem->remove($this->shapeFileTempStore);
     }
 
     /**
      * @throws \Exception
      */
-    private function createLayerShapeFilesAndStore(string $layerName, array $geometryContent, string $tempDir): void
+    private function createLayerShapeFilesAndStore(string $layerName, array $geometryContent): void
     {
         if ($geometryContent['layerGeoType'] == 'polygon') {
             $shapeType = Shapefile::SHAPE_TYPE_POLYGON;
@@ -104,7 +133,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
             $this->gameSave->addToSaveNotes("Unable to identify type of geometry for {$layerName}, so skipping.\n\n");
             return;
         }
-        $newShapefile = new ShapefileWriter("{$tempDir}{$layerName}.shp", [
+        $newShapefile = new ShapefileWriter("{$this->shapeFileTempStore}{$layerName}.shp", [
             Shapefile::OPTION_EXISTING_FILES_MODE => Shapefile::MODE_OVERWRITE,
             Shapefile::OPTION_DBF_FORCE_ALL_CAPS => false]);
         $newShapefile->setShapeType($shapeType);
@@ -114,9 +143,6 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         $additionalFieldsAdded = [];
         $alreadySavedErrorType = [];
         foreach ($geometryContent['geometry'] as $count => $geometryEntry) {
-            if (empty($geometryEntry['the_geom'])) {
-                continue;
-            }
             try {
                 $dataArray = [];
                 $dataArray['mspid'] = $geometryEntry['mspid'] ?? '';
@@ -174,17 +200,16 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
      */
     private function addLayerShapeFilesExportsToZip(): void
     {
-        $tempDir = $this->createShapeFilesTempStore();
+        $this->createShapeFilesTempStore();
         $layerGeometry = $this->entityManager->getRepository(Layer::class)->getAllGeometryDecodedGeoJSON();
         foreach ($layerGeometry as $layerName => $geometryContent) {
-            $this->createLayerShapeFilesAndStore($layerName, $geometryContent, $tempDir);
+            $this->createLayerShapeFilesAndStore($layerName, $geometryContent);
         }
         $finder = new Finder();
-        $finder->files()->in($tempDir);
+        $finder->files()->in($this->shapeFileTempStore);
         foreach ($finder as $file) {
             $this->addFileToSaveZip($file->getRealPath());
         }
-        $this->deleteShapeFilesTempStore($tempDir);
     }
 
     /**
@@ -273,6 +298,10 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     {
         $saveZipStore = $this->params->get('app.server_manager_save_dir').
             sprintf($this->params->get('app.server_manager_save_name'), $this->gameSave->getId());
+        $fileSystem = new Filesystem();
+        if ($fileSystem->exists($saveZipStore)) {
+            $fileSystem->remove($saveZipStore);
+        }
         $this->saveZip = new ZipArchive();
         if ($this->saveZip->open($saveZipStore, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             throw new \Exception("Wasn't able to create the ZIP file: {$saveZipStore}");
@@ -284,7 +313,11 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
      */
     private function addFileToSaveZip(string $file, ?string $subFolder = null): void
     {
-        if (!$this->saveZip->addFile($file, $subFolder.pathinfo($file, PATHINFO_BASENAME))) {
+        $fileSystem = new Filesystem();
+        if (!$fileSystem->exists($file)) {
+            throw new \Exception("Could not add {$file} to zip as it does not exist");
+        }
+        if (!$this->saveZip->addFile($file, $subFolder . pathinfo($file, PATHINFO_BASENAME))) {
             throw new \Exception("Could not add {$file} to zip");
         }
     }

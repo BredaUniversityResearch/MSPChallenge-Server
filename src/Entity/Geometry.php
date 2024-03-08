@@ -231,6 +231,9 @@ class Geometry
 
     public function getGeometryGeometryAsArray(): array
     {
+        if (is_null($this->geometryGeometry)) {
+            return [];
+        }
         return json_decode($this->geometryGeometry, true);
     }
 
@@ -606,19 +609,15 @@ class Geometry
         $g["the_geom"] = $this->exportGeometryToDecodedGeoJSON();
         $g["type"] = $this->getGeometryType();
         $g["mspid"] = $this->getGeometryMspid();
-        $data = json_decode($this->getGeometryData(), true);
-        if (!empty($data) && is_array($data)) {
-            foreach ($data as $key => $metadata) {
-                $g['data'][$key] = $metadata;
-            }
-        }
+        $g["data"] = json_decode($this->getGeometryData(), true);
         return $g;
     }
 
     private function exportGeometryToDecodedGeoJSON(): array
     {
         $jsonArray = [];
-        switch ($this->getLayer()->getLayerGeotype()) {
+        $layer = $this->getLayer()->getOriginalLayer() ?? $this->getLayer();
+        switch ($layer->getLayerGeotype()) {
             case 'polygon':
                 $jsonArray['type'] = 'MultiPolygon';
                 $jsonArray['coordinates'][] = [$this->getGeometryGeometryAsArray()];

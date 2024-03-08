@@ -21,7 +21,7 @@ class Layer
 
     #[ORM\ManyToOne(targetEntity: Layer::class, cascade: ['persist'], inversedBy: 'derivedLayer')]
     #[ORM\JoinColumn(name: 'layer_original_id', referencedColumnName: 'layer_id')]
-    private ?Layer $originalLayer;
+    private ?Layer $originalLayer = null;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $layerActive = 1;
