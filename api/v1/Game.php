@@ -150,6 +150,9 @@ class Game extends Base
             return $cache[$path];
         }
         $cacheTime = time();
+        if (!file_exists($path)) {
+            return '';
+        }
         $cache[$path] = file_get_contents($path);
         return $cache[$path];
     }

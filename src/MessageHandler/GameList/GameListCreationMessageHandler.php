@@ -28,6 +28,7 @@ use App\Entity\Restriction;
 use App\Entity\ServerManager\GameList;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
+use App\Message\GameSave\GameSaveLoadMessage;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,6 +39,7 @@ use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -68,10 +70,11 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
-        private readonly GameSessionLogger $gameSessionLogFileHandler,
+        GameSessionLogger $gameSessionLogFileHandler,
+        WatchdogCommunicator $watchdogCommunicator,
+        private readonly MessageBusInterface $messageBus,
         private readonly HttpClientInterface $client,
         private readonly VersionsProvider $provider,
-        private readonly WatchdogCommunicator $watchdogCommunicator,
         // e.g. used by GeoServerCommunicator
         private readonly CacheInterface $downloadsCache,
         private readonly CacheInterface $resultsCache
@@ -85,6 +88,12 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     public function __invoke(GameListCreationMessage $gameList): void
     {
         $this->setGameSessionAndDatabase($gameList);
+        if (!is_null($this->gameSession->getGameSave())) {
+            $this->messageBus->dispatch(
+                new GameSaveLoadMessage($this->gameSession->getId(), $this->gameSession->getGameSave()->getId())
+            );
+            return;
+        }
         try {
             $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
             $this->validateGameConfigComplete();
@@ -131,26 +140,6 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         $this->createSessionDatabase();
     }
 
-    private function resetSessionDatabase(): void
-    {
-        $this->dropSessionDatabase();
-        $this->createSessionDatabase();
-    }
-
-    private function createSessionDatabase(): void
-    {
-        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
-        $process = new Process([
-            $this->phpBinary,
-            'bin/console',
-            'doctrine:database:create',
-            '--connection='.$this->database,
-            '--no-interaction',
-            '--env='.$_ENV['APP_ENV']
-        ], $this->kernel->getProjectDir());
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
-    }
-
     private function migrateSessionDatabase(): void
     {
         $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
@@ -168,45 +157,17 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
-     */
-    private function resetSessionRasterStore(): void
-    {
-        $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
-        $fileSystem = new Filesystem();
-        if ($fileSystem->exists($sessionRasterStore)) {
-            $finder = new Finder();
-            if ($fileSystem->exists($sessionRasterStore . '/archive')) {
-                $finder->files()->in($sessionRasterStore . '/archive');
-                if ($finder->hasResults()) {
-                    $fileSystem->remove($finder->files()->getIterator());
-                }
-            }
-            $finder->files()->in($sessionRasterStore);
-            if ($finder->hasResults()) {
-                $fileSystem->remove($finder->files()->getIterator());
-            }
-            $fileSystem->remove($sessionRasterStore);
-        }
-        $fileSystem->mkdir($sessionRasterStore);
-        $fileSystem->mkdir($sessionRasterStore . '/archive');
-        $this->info("Reset the session raster store at {$sessionRasterStore}");
-    }
-
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     private function createSessionRunningConfig(): void
     {
         $sessionConfigStore = $this->params->get('app.session_config_dir').
             sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId());
-        $fileSystem = new Filesystem();
-        $fileSystem->copy(
-            $this->params->get('app.server_manager_config_dir').
-            $this->gameSession->getGameConfigVersion()->getFilePath(),
+        file_put_contents(
             $sessionConfigStore,
-            true
+            file_get_contents(
+                $this->params->get('app.server_manager_config_dir').
+                $this->gameSession->getGameConfigVersion()->getFilePath()
+            )
         );
         $this->info("Created the running session config file at {$sessionConfigStore}");
     }

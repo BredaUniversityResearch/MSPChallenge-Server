@@ -3,9 +3,11 @@
 namespace App\MessageHandler\GameSave;
 
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Layer;
 use App\Entity\ServerManager\GameSave;
+use App\Logger\GameSessionLogger;
 use App\MessageHandler\GameList\CommonSessionHandler;
 use App\Message\GameSave\GameSaveCreationMessage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,8 +30,6 @@ use ZipArchive;
 #[AsMessageHandler]
 class GameSaveCreationMessageHandler extends CommonSessionHandler
 {
-    private ZipArchive $saveZip;
-    private GameSave $gameSave;
 
     private ?string $shapeFileTempStore = null;
 
@@ -39,6 +39,8 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
+        GameSessionLogger $gameSessionLogFileHandler,
+        WatchdogCommunicator $watchdogCommunicator
     ) {
         parent::__construct(...func_get_args());
     }
@@ -232,6 +234,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         $serializer = new Serializer([$this->normalizer], [$encoder]);
         $normalizeContext = [
             AbstractNormalizer::CALLBACKS => [
+                'id' => fn() => $this->gameSession->getId(),
                 'gameConfigVersion' => fn($innerObject) => $innerObject->getId(),
                 'gameServer' => fn($innerObject) => $innerObject->getId(),
                 'gameWatchdogServer' => fn($innerObject) => $innerObject->getId(),

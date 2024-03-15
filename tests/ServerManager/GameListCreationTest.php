@@ -86,6 +86,7 @@ class GameListCreationTest extends KernelTestCase
         $input = new ArrayInput([
             'command' => 'doctrine:database:drop',
             '--connection' => $_ENV['DBNAME_SERVER_MANAGER'],
+            '--if-exists' => true,
             '--force' => true,
             '--no-interaction' => true,
         ]);
@@ -96,6 +97,18 @@ class GameListCreationTest extends KernelTestCase
         $input = new ArrayInput([
             'command' => 'doctrine:database:drop',
             '--connection' => 'msp_session_1', // don't worry, only removes msp_session_1_test database
+            '--if-exists' => true,
+            '--force' => true,
+            '--no-interaction' => true,
+        ]);
+        $input->setInteractive(false);
+        $app->doRun($input, new NullOutput());
+
+        $app = new Application(static::bootKernel());
+        $input = new ArrayInput([
+            'command' => 'doctrine:database:drop',
+            '--connection' => 'msp_session_2', // don't worry, only removes msp_session_2_test database
+            '--if-exists' => true,
             '--force' => true,
             '--no-interaction' => true,
         ]);

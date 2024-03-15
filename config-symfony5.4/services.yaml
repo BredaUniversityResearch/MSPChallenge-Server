@@ -18,6 +18,10 @@ parameters:
     app.server_manager_save_dir: '%kernel.project_dir%/ServerManager/saves/'
     # format of the filename of a game session's save ZIP file
     app.server_manager_save_name: 'save_%d.zip'
+    # directory to store and from which to retrieve game session creation log files
+    app.server_manager_log_dir: '%kernel.project_dir%/ServerManager/log/'
+    # format of the filename of a game session creation log file
+    app.server_manager_log_name: 'log_session_%d.log'
     # number of seconds between automatic game session database file dumps (as backup of a game session's state)
     app.game_auto_save_interval: 120
     # minimal number of months that make up each of a game session's four eras
@@ -94,9 +98,6 @@ services:
     ServerManager\ServerManager:
 
     App\Logger\GameSessionLogger:
-        arguments:
-            $kernelLogsDir: '%kernel.logs_dir%'
-            $kernelProjectDir: '%kernel.project_dir%'
 
     App\Entity\ServerManager\Listener\GameListListener:
         tags:
@@ -119,7 +120,11 @@ services:
 
     App\MessageHandler\GameList\GameListCreationMessageHandler:
 
+    App\MessageHandler\GameList\GameListArchiveMessageHandler:
+
     App\MessageHandler\GameSave\GameSaveCreationMessageHandler:
+
+    App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
 
     App\Domain\Communicator\WatchdogCommunicator:
 
@@ -149,6 +154,7 @@ when@test:
         app.session_raster_dir: '%kernel.logs_dir%/raster/'
         app.session_config_dir: '%kernel.logs_dir%/running_session_config/'
         app.server_manager_save_dir: '%kernel.logs_dir%/'
+        app.server_manager_log_dir: '%kernel.logs_dir%/'
     services:
         # make classes in src/DataFixtures available to be used as services
         # and have a tag that allows actions to type-hint services

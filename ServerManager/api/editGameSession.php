@@ -38,6 +38,7 @@ if (method_exists($gamesession, $action) && in_array($action, $allowed_actions))
 // alternative to recreate function in GameSession class
 $gamesession->edit();
 if ($action == 'recreate') {
+    // GameListCreationMessageHandler will dispatch the GameSaveLoadMessage if this is actually a save reload instead
     SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(new GameListCreationMessage($gamesession->id));
 }
 
