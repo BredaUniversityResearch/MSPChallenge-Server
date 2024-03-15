@@ -41,7 +41,7 @@ class UnitTestSupport extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function RecordApiCall(string $class, string $method, array $data, array $result): void
     {
-        $requestHeaders = apache_request_headers();
+        $requestHeaders = \getallheaders();
         $requestHeaders = array_change_key_case($requestHeaders, CASE_LOWER);
         
         if (isset($requestHeaders["msp_force_no_call_log"])) {
