@@ -40,6 +40,7 @@ class WatchdogCommunicator extends AbstractCommunicator
      * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      * @throws Exception
+     * @throws \Exception
      */
     public function changeState(
         GameList $gameList,
@@ -135,9 +136,10 @@ class WatchdogCommunicator extends AbstractCommunicator
     {
         $result = [];
         $possibleSims = $this->versionsProvider->getComponentsVersions();
-        $config = $this->connectionManager->getGameSessionEntityManager($this->gameList->getId())
-            ->getRepository(Game::class)->retrieve()
-            ->getRunningGameConfigFileContents()['datamodel'];
+        $em = $this->connectionManager->getGameSessionEntityManager($this->gameList->getId());
+        $game = $em->getRepository(Game::class)->retrieve();
+        $em->refresh($game); // don't really know why, but without this the postLoad event isn't initiated
+        $config = $game->getRunningGameConfigFileContents()['datamodel'];
         foreach ($possibleSims as $possibleSim => $possibleSimVersion) {
             if (array_key_exists($possibleSim, $config) && is_array($config[$possibleSim])) {
                 $versionString = $possibleSimVersion;
