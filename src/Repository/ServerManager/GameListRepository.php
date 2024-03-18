@@ -123,6 +123,7 @@ class GameListRepository extends EntityRepository
     }
     public function defaultDenormalizeContext(): array
     {
+        // @todo (HW): member names via reflection
         return [
             AbstractNormalizer::CALLBACKS => [
                 'id' => fn() => null,
@@ -142,8 +143,9 @@ class GameListRepository extends EntityRepository
         ];
     }
 
-    public function defaultNormalizeContext(): array
+    public static function defaultNormalizeContext(): array
     {
+        // @todo (HW): member names via reflection
         return [
             AbstractNormalizer::CALLBACKS => [
                 'sessionState' => fn($innerObject) => ((string) $innerObject),

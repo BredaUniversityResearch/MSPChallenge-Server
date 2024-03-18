@@ -83,6 +83,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->start();
         $layer = new Layer();
         $layer->setLayerName('test');
+        // @todo (HW) use enum FieldType: string
         $layer->setLayerGeotype('polygon');
         $layer->setLayerGroup('northsee');
         $layer->setLayerEditable(0);
@@ -165,6 +166,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->start();
         $layer = new Layer();
         $layer->setLayerName('test2');
+        // @todo (HW) use enum FieldType: string
         $layer->setLayerGeotype('polygon');
         $layer->setLayerGroup('northsee2');
         $layer->setLayerEditable(0);
@@ -230,7 +232,9 @@ class GameSessionEntitiesTest extends KernelTestCase
     {
         $this->start();
         $restriction = new Restriction();
+        // @todo (HW) use enum FieldType: string
         $restriction->setRestrictionSort("INCLUSION");
+        // @todo (HW) use enum FieldType: string
         $restriction->setRestrictionType('WARNING');
         $restriction->setRestrictionMessage('Precautionary areas are reserved for shipping.');
         $restriction2 = clone $restriction;
@@ -269,12 +273,14 @@ class GameSessionEntitiesTest extends KernelTestCase
 
         $layer2 = new Layer();
         $layer2->setLayerName('First layer generating pressure');
+        // @todo (HW) use enum FieldType: string
         $layer2->setLayerGeotype('raster');
         $layer2->setLayerGroup('northsee');
         $layer2->setLayerEditable(0);
 
         $layer3 = new Layer();
         $layer3->setLayerName('Second layer generating pressure');
+        // @todo (HW) use enum FieldType: string
         $layer3->setLayerGeotype('raster');
         $layer3->setLayerGroup('northsee');
         $layer3->setLayerEditable(0);
@@ -296,6 +302,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $plan->setPlanDescription('this is a test plan');
         $plan->setCountry($this->em->getRepository(Country::class)->find(1));
         $plan->setPlanGametime(5);
+        // @todo (HW) use enum FieldType: string
         $plan->setPlanState('APPROVED');
         $this->em->persist($plan);
 
@@ -304,6 +311,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $plan2 = $this->normalizer->denormalize($planFromConfig, Plan::class);
         $plan2->setPlanDescription('test description');
         $plan2->setCountry($this->em->getRepository(Country::class)->find($planFromConfig['plan_country_id']));
+        // @todo (HW) use enum FieldType: string
         $plan2->setPlanState('APPROVED');
         $derivedLayer = new Layer();
         $derivedLayer->setOriginalLayer($this->em->getRepository(Layer::class)->find(1));
