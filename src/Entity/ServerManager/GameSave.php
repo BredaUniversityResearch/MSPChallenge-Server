@@ -241,7 +241,7 @@ class GameSave
         return $this->passwordAdmin;
     }
 
-    public function setPasswordAdmin(string $passwordAdmin, bool $directly = true): self
+    public function setPasswordAdmin(string $passwordAdmin): self
     {
         $this->passwordAdmin = $passwordAdmin;
 
@@ -253,7 +253,7 @@ class GameSave
         return $this->passwordPlayer;
     }
 
-    public function setPasswordPlayer(?string $passwordPlayer, bool $directly = true): self
+    public function setPasswordPlayer(?string $passwordPlayer): self
     {
         $this->passwordPlayer = $passwordPlayer;
 

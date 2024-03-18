@@ -21,7 +21,7 @@ $gamesave = new GameSave;
 $gamesession = new GameSession;
 $user = new User();
 
-//$user->hasToBeLoggedIn();
+$user->hasToBeLoggedIn();
 
 // first check if the save_id referred to can even be obtained
 $gamesave->id = $_POST["save_id"] ?? "";

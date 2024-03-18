@@ -5,6 +5,7 @@ use ServerManager\DB;
 use ServerManager\GameConfig;
 use ServerManager\GameSave;
 use ServerManager\GameSession;
+use ServerManager\ServerManagerAPIException;
 use ServerManager\User;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Message\GameSave\GameSaveCreationMessage;
@@ -28,8 +29,17 @@ if ($gamesession->id == 0 && isset($_FILES['uploadedSaveFile']['tmp_name'])) {
 } elseif ($gamesession->id > 0) {
     $gamesession->get();
 
-    $gameconfig->id = $gamesession->game_config_version_id;
-    $gameconfig->get();
+    if (!is_null($gamesession->game_config_version_id)) {
+        $gameconfig->id = $gamesession->game_config_version_id;
+        $gameconfig->get();
+    } elseif (!is_null($gamesession->save_id)) {
+        $gamesave->id = $gamesession->save_id;
+        $gamesave->get();
+        $gameconfig->filename = $gamesave->game_config_files_filename;
+        $gameconfig->region = $gamesave->game_config_versions_region;
+    } else {
+        throw new ServerManagerAPIException("Cannot determine key config variables, so not continuing.");
+    }
 
     $gamesave->name = DB::getInstance()->ensure_unique_name($gamesession->name, "name", "game_saves");
     $gamesave->game_config_version_id = $gamesession->game_config_version_id;

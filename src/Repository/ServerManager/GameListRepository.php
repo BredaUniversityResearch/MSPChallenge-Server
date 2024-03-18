@@ -126,9 +126,9 @@ class GameListRepository extends EntityRepository
         return [
             AbstractNormalizer::CALLBACKS => [
                 'id' => fn() => null,
-                'gameConfigVersion' => fn($innerObject) => $this->getEntityManager()->getRepository(
-                    GameConfigVersion::class
-                )->find($innerObject['id']),
+                'gameConfigVersion' => fn($innerObject) => (isset($innerObject['id'])) ?
+                    $this->getEntityManager()->getRepository(GameConfigVersion::class)->find($innerObject['id']) :
+                    null,
                 'gameServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
                     GameServer::class
                 )->find($innerObject['id']),

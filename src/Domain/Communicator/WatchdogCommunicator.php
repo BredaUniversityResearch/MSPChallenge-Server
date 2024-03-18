@@ -5,6 +5,7 @@ namespace App\Domain\Communicator;
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\Game;
 use App\Entity\ServerManager\GameList;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
@@ -26,7 +27,8 @@ class WatchdogCommunicator extends AbstractCommunicator
         HttpClientInterface $client,
         private readonly VersionsProvider $versionsProvider,
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
-        private readonly string $projectDir
+        private readonly string $projectDir,
+        private readonly ConnectionManager $connectionManager
     ) {
         parent::__construct($client);
     }
@@ -126,11 +128,16 @@ class WatchdogCommunicator extends AbstractCommunicator
         return $protocol.$address.':'.$port.'/'.$sessionId.'/';
     }
 
+    /**
+     * @throws \Exception
+     */
     private function getRequiredSimulations(): string
     {
         $result = [];
         $possibleSims = $this->versionsProvider->getComponentsVersions();
-        $config = $this->gameList->getGameConfigVersion()->getGameConfigComplete()['datamodel'];
+        $config = $this->connectionManager->getGameSessionEntityManager($this->gameList->getId())
+            ->getRepository(Game::class)->retrieve()
+            ->getRunningGameConfigFileContents()['datamodel'];
         foreach ($possibleSims as $possibleSim => $possibleSimVersion) {
             if (array_key_exists($possibleSim, $config) && is_array($config[$possibleSim])) {
                 $versionString = $possibleSimVersion;

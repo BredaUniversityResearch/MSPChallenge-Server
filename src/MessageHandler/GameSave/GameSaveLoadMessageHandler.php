@@ -7,6 +7,7 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\Game;
 use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
 use App\MessageHandler\GameList\CommonSessionHandler;
@@ -88,6 +89,8 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
      * @throws RedirectionExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
      */
     private function finaliseSaveLoad(): void
     {
@@ -103,6 +106,11 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             ->where($qb->expr()->eq('1', '1'))
             ->executeStatement();
         // end of backward compatibility code
+
+        $game = $this->entityManager->getRepository(Game::class)->retrieve();
+        $game->setGameConfigfile(sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
+        $this->entityManager->flush();
+
         $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('pause'));
         if ($_ENV['APP_ENV'] !== 'test') {
             $this->info("Watchdog called successfully at {$this->watchdogCommunicator->getLastCompleteURLCalled()}");

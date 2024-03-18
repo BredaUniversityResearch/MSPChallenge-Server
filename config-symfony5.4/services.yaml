@@ -117,6 +117,7 @@ services:
     App\EventListener\SessionEntityListener:
         tags:
             - { name: 'doctrine.event_listener', event: 'prePersist' }
+            - { name: 'doctrine.event_listener', event: 'postLoad' }
 
     App\MessageHandler\GameList\GameListCreationMessageHandler:
 
@@ -127,6 +128,8 @@ services:
     App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
 
     App\Domain\Communicator\WatchdogCommunicator:
+
+    App\Repository\GameRepository:
 
 when@dev:
     parameters:

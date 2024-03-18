@@ -6,13 +6,10 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Entity\ServerManager\GameGeoServer;
-use App\Entity\ServerManager\GameSave;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\ServerManager\GameList;
-use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 class GameListListener
 {
