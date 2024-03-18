@@ -2,6 +2,8 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\ConnectionManager;
+use Doctrine\ORM\AbstractQuery;
 use Exception;
 
 class MEL extends Base
@@ -338,6 +340,15 @@ class MEL extends Base
     }
 
     /**
+     * @todo change name of this parameter to something more descriptive like $geometryTypeFilter
+     * @param int $layer_type this is a filter for the layer's geometry field "geometry_type" which holds an optional
+     *   comma separated string holding integers.
+     * E.g. For MPAs those refer to a fleet 1,2 or 3.
+     *   So if the filter is set to 1,2 or 3, it will only return geometries referring that fleet in the string
+     *   1 = No Bottom Trawl Fleets
+     *   2 = No Industrial and Pelagic Trawl Fleets
+     *   3 = No Drift and Fixed Nets Fleets
+     *
      * @apiGroup MEL
      * @apiDescription Gets all the geometry data of a layer
      * @throws Exception
@@ -350,55 +361,205 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GeometryExportName(string $name, int $layer_type = -1, bool $construction_only = false): ?array
     {
-        $id = $this->getDatabase()->query(
-            "SELECT layer_id, layer_geotype, layer_raster FROM layer WHERE layer_name=?",
-            array($name)
-        );
-
-        $result = array("geotype" => "");
-            
-        if (empty($id)) {
+        $conn = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
+        $qb = $conn->createQueryBuilder();
+        /** @var null|array $layer */
+        $layer = $qb
+            ->from('App:Layer', 'l')
+            ->select('l.layerId, l.layerGeotype, l.layerRaster')
+            ->where('l.layerName = :name')
+            ->setParameter('name', $name)
+            ->getQuery()
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
+        if (null === $layer) {
             return null;
         }
 
-        $original = $id[0]['layer_id'];
-
-        if ($id[0]['layer_geotype'] == "raster") {
-            $rasterJson = json_decode($id[0]['layer_raster']);
-
-            $result["geotype"] = $id[0]['layer_geotype'];
-            $result["raster"] = $rasterJson->url;
-
+        $result = array("geotype" => "");
+        $layerGeoType = $layer['layerGeotype'] ?? '';
+        if ($layerGeoType == "raster") {
+            $rasterJson = json_decode($layer['layerRaster'], true);
+            $result["geotype"] = $layerGeoType;
+            $result["raster"] = $rasterJson['url'] ?? '';
             return $result;
         }
 
-        $arguments = array($original, $original);
-        $planStateSelector = "(plan_layer_state=\"ACTIVE\" OR plan_layer_state IS NULL)";
-        $optionalStatements = "";
-
-        if ($layer_type != -1) {
-            $optionalStatements = " AND geometry_type LIKE ?";
-            $arguments[] =  "%" . $layer_type . "%";
-        }
+        $layerId = $layer['layerId'] ?? 0;
+        $qb = $conn->createQueryBuilder();
+        $qb
+            ->from('App:Layer', 'l')
+            ->leftJoin('l.planLayer', 'pl')
+            ->leftJoin('l.geometry', 'ge')
+            ->leftJoin('l.originalLayer', 'ol')
+            ->select('l.layerId, ge.geometryGeometry as geometryPoints, ge.geometryType as geometryType')
+            ->where('l.layerId = :layerId OR ol.layerId = :layerId')
+            ->setParameter('layerId', $layerId)
+            ->andWhere('ge.geometryActive = 1');
         if ($construction_only) {
-            $planStateSelector = "plan_layer_state=\"ASSEMBLY\"";
+            $qb
+                ->andWhere('pl.planLayerState = :active')
+                ->setParameter('active', 'ASSEMBLY');
+        } else {
+            $qb
+                ->andWhere(
+                    $qb->expr()->orX(
+                        'pl.planLayerState = :active',
+                        'pl.planLayerState IS NULL'
+                    )
+                )
+                ->setParameter('active', 'ACTIVE');
         }
-
-        $geometry = $this->getDatabase()->query("SELECT layer_id, geometry_geometry as g FROM layer 
-                LEFT JOIN plan_layer ON plan_layer_layer_id=layer_id
-                LEFT JOIN geometry ON geometry_layer_id=layer_id
-                WHERE (
-                    layer_id=? OR layer_original_id=?
-                ) AND ".$planStateSelector." AND geometry_active=1".$optionalStatements, $arguments);
-
-        $result["geotype"] = $id[0]['layer_geotype'];
-        $result["geometry"] = array();
-
-        foreach ($geometry as $geom) {
-            if (!empty($geom['g'])) {
-                $result["geometry"][] = json_decode($geom['g']);
+        $q = $qb->getQuery();
+        $geometry = $q->getResult(AbstractQuery::HYDRATE_ARRAY);
+        // convert comma separated string to array of integers
+        $geometry = collect($geometry)->map(
+            function ($g) {
+                $g['geometryType'] = explode(',', $g['geometryType']);
+                return $g;
             }
+        )->toArray();
+        $geometryTypeFilter = $layer_type === -1 ? null : $layer_type;
+        $result["geotype"] = $layerGeoType;
+        $result["geometry"] = [];
+        foreach ($geometry as $geom) {
+            if ($geometryTypeFilter != null && !in_array($geometryTypeFilter, $geom['geometryType'])) {
+                continue;
+            }
+            if (empty($geom['geometryPoints'])) {
+                continue;
+            }
+            // add extra array layer.
+            // needed for polygons: 1 entry is exterior ring, 2nd and onwards are interior rings
+            //   only an exterior ring in this case.
+            $result["geometry"][] = [json_decode($geom['geometryPoints'], true)];
+        }
+        // currently only needed and support for polygons
+        if ($layerGeoType == 'polygon') {
+            $this->onGeometryExportNameResult($layer, $geometry, $result, $geometryTypeFilter);
         }
         return $result;
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    private function onGeometryExportNameResult(
+        array $layer,
+        array $geometry,
+        array &$result,
+        ?int $geometryTypeFilter = null
+    ): void {
+        $result['debug-message'] ??= '';
+        $result['debug-message'] .= 'hook activated for layer: '.$layer['layerId'].'.'.PHP_EOL;
+        $connManager = ConnectionManager::getInstance();
+        $conn = $connManager->getGameSessionEntityManager($this->getGameSessionId());
+        $qb = $conn->createQueryBuilder();
+        $qb
+            ->from('App:Policy', 'p')
+            ->select('pt.name, p.value as value, l.layerId')
+            ->innerJoin('p.type', 'pt')
+            ->leftJoin('p.policyLayers', 'pl')
+            ->leftJoin('pl.layer', 'l')
+            ->leftJoin('l.originalLayer', 'ol')
+            ->where('l.layerId = :layerId OR ol.layerId = :layerId')
+            ->setParameter('layerId', $layer['layerId']);
+        if ($geometryTypeFilter !== null) {
+            $qb
+                ->leftJoin('p.policyFilterLinks', 'pfl')
+                ->leftJoin('pfl.policyFilter', 'pf')
+                ->leftJoin('pf.type', 'pft')
+                ->andWhere('pft.name = :filterTypeName')
+                ->setParameter('filterTypeName', 'fleet')
+                ->andWhere('pf.value = :filterTypeValue')
+                ->setParameter('filterTypeValue', $geometryTypeFilter);
+        }
+        $policies = $qb
+            ->getQuery()
+            ->getResult(AbstractQuery::HYDRATE_ARRAY);
+        $result['debug-message'] .= 'policies: '.implode(',', array_column($policies, 'name')).'.'.PHP_EOL;
+        // todo(MH) there is probably a way to
+        //   ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->getNativeConnection()
+        $pdo = new \PDO("mysql:host=$_ENV[DATABASE_HOST];port=$_ENV[DATABASE_PORT]", 'root', '');
+        foreach ($policies as $policy) {
+            if ($policy['name'] == 'buffer') {
+                $this->applyBufferPolicy(
+                    $policy,
+                    collect($geometry)->filter(fn($g) => $g['layerId'] == $policy['layerId'])->all(),
+                    $result,
+                    $pdo
+                );
+            }
+        }
+    }
+
+    private static function toWkt(array $coordinates): string
+    {
+        $originalPolygonCoordsText = implode(
+            ',',
+            array_map(fn($p) => implode(' ', $p), $coordinates)
+        );
+        return 'POLYGON(('.$originalPolygonCoordsText.'))';
+    }
+
+    private static function fromWkt(string $wkt): array
+    {
+        // Strip "POLYGON(" and the trailing ")"
+        $wkt = substr($wkt, strlen("POLYGON("), -1);
+        // Match inner parts between parentheses
+        preg_match_all('/\((.*?)\)/', $wkt, $matches);
+        $rings = $matches[1];
+        $coordinates = array();
+        // Iterate through each ring
+        foreach ($rings as $ring) {
+            $points = explode(',', $ring);
+            $rCoordinates = array();
+            // Iterate through each point
+            foreach ($points as $point) {
+                list($x, $y) = explode(' ', trim($point));
+                $rCoordinates[] = array((float)$x, (float)$y);
+            }
+            $coordinates[] = $rCoordinates;
+        }
+        return $coordinates;
+    }
+
+    public function applyBufferPolicy(
+        array $policy,
+        array $geometry,
+        array &$result,
+        $pdo
+    ): void {
+        if (empty($geometry)) {
+            return;
+        }
+        $result['debug-message'] ??= '';
+        $result['debug-message'] .= 'applied policy ' . $policy['name'] . ' with value: ' . $policy['value'] . '.' .
+            PHP_EOL;
+        foreach ($geometry as $geom) {
+            // convert our geometry using mariadb's GIS features
+            try {
+                $st = $pdo->prepare(
+                    <<< 'SQL'
+                    SELECT AsText(ST_SYMDIFFERENCE(
+                      BUFFER(GeomFromText(:text, 3035), :buffer),
+                      GeomFromText(:text, 3035)
+                    ))
+                    SQL
+                );
+                $st->bindValue('text', self::toWkt(json_decode($geom['geometryPoints'], true)));
+                $st->bindValue('buffer', $policy['value']);
+                $st->execute();
+                // for debugging use https://wktmap.com/ to visualize using EPSG:3035 !
+                $bufferedPolygonText = $st->fetchColumn();
+                $result['geometry'][] = self::fromWkt($bufferedPolygonText);
+            } catch (\Exception $e) {
+                while (null !== $prev = $e->getPrevious()) {
+                    $e = $prev;
+                }
+                $result['debug-message'] .= $e->getMessage() . PHP_EOL;
+                continue;
+            }
+        }
     }
 }

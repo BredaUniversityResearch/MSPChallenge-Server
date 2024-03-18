@@ -116,7 +116,8 @@ class WatchdogCommunicator extends AbstractCommunicator
     {
         $sessionId = $this->gameList->getId();
         if (getenv('DOCKER') !== false) {
-            return 'http://caddy:80/'.$sessionId.'/';
+            return 'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'caddy').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).'/'.$sessionId.
+                '/';
         }
         /** @noinspection HttpUrlsUsage */
         $protocol = $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http://';

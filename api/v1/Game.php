@@ -21,8 +21,6 @@ use function App\tpf;
 
 class Game extends Base
 {
-    private ?string $watchdog_address = null;
-    const DEFAULT_WATCHDOG_PORT = 45000;
     const MIN_GAME_ERATIME = 12;
 
     private const ALLOWED = array(
@@ -526,49 +524,6 @@ class Game extends Base
     }
 
     /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetWatchdogAddress(): string
-    {
-        $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
-        if (null === $this->watchdog_address) {
-            return '';
-        }
-        /** @noinspection HttpUrlsUsage */
-        $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
-        return $this->watchdog_address.':'.($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT);
-    }
-
-    private function getWatchdogAddressFromDb(): ?string
-    {
-        $result = $this->getDatabase()->query(
-            "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
-        );
-        if (count($result) == 0) {
-            return null;
-        }
-        return $result[0]['game_session_watchdog_address'];
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function getWatchdogSessionUniqueToken(): PromiseInterface
-    {
-        return $this->getAsyncDatabase()->query(
-            $this->getAsyncDatabase()->createQueryBuilder()
-                ->select('game_session_watchdog_token')
-                ->from('game_session')
-                ->setMaxResults(1)
-        )
-        ->then(function (Result $result) {
-            $row = $result->fetchFirstRow();
-            return $row['game_session_watchdog_token'] ?? '0';
-        });
-    }
-
-    /**
      * @ForceNoTransaction
      * @noinspection PhpUnused
      * @throws Exception
@@ -731,7 +686,6 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
-                // $apiRoot is passed to watchdog, so if DOCKER env.var is defined we should use http://caddy:80
                 return GameSession::getRequestApiRootAsync(getenv('DOCKER') !== false);
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
@@ -765,7 +719,8 @@ class Game extends Base
                             'game_state' => $newWatchdogGameState,
                             'required_simulations' => $simulations,
                             'api_access_token' => $newAccessToken,
-                            'api_access_renew_token' => $recoveryToken
+                            'api_access_renew_token' => $recoveryToken,
+                            'month' => $this->GetCurrentMonthAsId()
                         ];
                         return $browser->post(
                             $url,
@@ -777,37 +732,7 @@ class Game extends Base
                     });
             })
             ->then(function (ResponseInterface $response) {
-                $log = new Log();
-                $this->asyncDataTransferTo($log);
-                $log->setAsync(true); // force async in this context
-
-                $responseContent = $response->getBody()->getContents();
-                $decodedResponse = json_decode($responseContent, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    $funcArgs = [
-                        "Watchdog",
-                        Log::ERROR,
-                        "Received invalid response from watchdog. Response: \"".$responseContent."\"",
-                        "changeWatchdogState()"
-                    ];
-                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
-                        return $funcArgs;
-                    });
-                }
-
-                if ($decodedResponse["success"] != 1) {
-                    $funcArgs = [
-                        "Watchdog",
-                        Log::ERROR,
-                        "Watchdog responded with failure to change game state request. Response: \"".
-                        $decodedResponse["message"]."\"",
-                        "changeWatchdogState()"
-                    ];
-                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
-                        return $funcArgs;
-                    });
-                }
-                return resolveOnFutureTick(new Deferred(), $decodedResponse)->promise();
+                return $this->logWatchdogResponse("/Watchdog/UpdateState", $response);
             });
     }
 

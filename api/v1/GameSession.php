@@ -78,10 +78,13 @@ class GameSession extends Base
         $apiRoot = preg_replace('/(.*)\/(api|_profiler)\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
         $apiRoot = str_replace("//", "/", $apiRoot);
 
-        // this is always called from inside the docker environment,so just use http://caddy:80/...
+
         if ($forDocker) {
             $deferred = new Deferred();
-            $GLOBALS['RequestApiRoot'][1] = 'http://caddy:80'.$apiRoot;
+            // this is always called from inside the docker environment,so just use http://caddy:80/ or
+            //   http://mitmproxy:8080/
+            $GLOBALS['RequestApiRoot'][1] = 'http://'.
+                ($_ENV['WEB_SERVER_HOST'] ?? 'caddy').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiRoot;
             return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][1])->promise();
         }
 
@@ -137,9 +140,11 @@ class GameSession extends Base
         $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
         $apiFolder = "/ServerManager/api/";
 
-        // this is always called from inside the docker environment,so just use http://caddy:80/...
         if ($forDocker) {
-            $GLOBALS['ServerManagerApiRoot'][1] = 'http://caddy:80'.$apiFolder;
+            // this is always called from inside the docker environment,so just use http://caddy:80/ or
+            //   http://mitmproxy:8080/
+            $GLOBALS['ServerManagerApiRoot'][1] = 'http://'.
+                ($_ENV['WEB_SERVER_HOST'] ?? 'caddy').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiFolder;
             return $GLOBALS['ServerManagerApiRoot'][1];
         }
 
