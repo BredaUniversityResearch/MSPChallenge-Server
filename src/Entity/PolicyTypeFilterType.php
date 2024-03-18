@@ -6,7 +6,12 @@ use App\Repository\PolicyTypeFilterTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PolicyTypeFilterTypeRepository::class)]
-#[ORM\UniqueConstraint(name: 'policy_type_id_policy_filter_type_id', columns: ['policy_type_id', 'policy_filter_type_id'])]
+#[
+    ORM\UniqueConstraint(
+        name: 'policy_type_id_policy_filter_type_id',
+        columns: ['policy_type_id', 'policy_filter_type_id']
+    )
+]
 class PolicyTypeFilterType
 {
     #[ORM\Id]
