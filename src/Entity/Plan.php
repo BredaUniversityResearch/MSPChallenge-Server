@@ -498,13 +498,8 @@ class Plan
 
     public function removePlanPolicy(PlanPolicy $planPolicy): static
     {
-        if ($this->planPolicies->removeElement($planPolicy)) {
-            // set the owning side to null (unless already changed)
-            if ($planPolicy->getPlan() === $this) {
-                $planPolicy->setPlan(null);
-            }
-        }
-
+        $this->planPolicies->removeElement($planPolicy);
+        // Since orphanRemoval is set, no need to explicitly remove $planMessage from the database
         return $this;
     }
 }

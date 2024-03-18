@@ -41,16 +41,16 @@ final class Version20240304230022 extends MSPMigration
       `id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
       `plan_id` int(11) NOT NULL,
       `policy_id` int(10) unsigned NOT NULL,
-      FOREIGN KEY (`plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-      FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+      FOREIGN KEY (`plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+      FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
       CONSTRAINT `plan_id_policy_id` UNIQUE (`plan_id`, `policy_id`)
     ) ENGINE='InnoDB' COLLATE 'utf8mb4_unicode_ci';
     CREATE TABLE `policy_layer` (
       `id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
       `policy_id` int(10) unsigned NOT NULL,
       `layer_id` int(11) NOT NULL,
-      FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-      FOREIGN KEY (`layer_id`) REFERENCES `layer` (`layer_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+      FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+      FOREIGN KEY (`layer_id`) REFERENCES `layer` (`layer_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
       CONSTRAINT `policy_id_layer_id` UNIQUE (`policy_id`, `layer_id`),
       INDEX (`policy_id`)
     ) ENGINE='InnoDB' COLLATE 'utf8mb4_unicode_ci';
@@ -72,7 +72,7 @@ final class Version20240304230022 extends MSPMigration
       `policy_id` int(10) unsigned NOT NULL,
       `policy_filter_id` int(10) unsigned NOT NULL,
       FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-      FOREIGN KEY (`policy_filter_id`) REFERENCES `policy_filter` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+      FOREIGN KEY (`policy_filter_id`) REFERENCES `policy_filter` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
       CONSTRAINT `policy_id_policy_filter_id` UNIQUE (`policy_id`, `policy_filter_id`),
       INDEX (`policy_id`)
     ) ENGINE='InnoDB' COLLATE 'utf8mb4_unicode_ci';
@@ -80,8 +80,8 @@ final class Version20240304230022 extends MSPMigration
       `id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
       `policy_type_id` int(10) unsigned NOT NULL,
       `policy_filter_type_id` int(10) unsigned NOT NULL,
-      FOREIGN KEY (`policy_type_id`) REFERENCES `policy_type` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-      FOREIGN KEY (`policy_filter_type_id`) REFERENCES `policy_filter_type` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+      FOREIGN KEY (`policy_type_id`) REFERENCES `policy_type` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+      FOREIGN KEY (`policy_filter_type_id`) REFERENCES `policy_filter_type` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
       CONSTRAINT `policy_type_id_policy_filter_type_id` UNIQUE (`policy_type_id`, `policy_filter_type_id`),
       INDEX (`policy_type_id`)
     ) ENGINE='InnoDB' COLLATE 'utf8mb4_unicode_ci';
