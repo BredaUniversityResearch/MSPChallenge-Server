@@ -629,7 +629,7 @@ class GameSession extends Base
         if ('simulation' == $this->game_state) {
             throw new ServerManagerAPIException('The session is simulating, so cannot archive it at this time.');
         }
-        $server_call = self::callServer(
+        /*$server_call = self::callServer(
             'GameSession/ArchiveGameSession',
             ['response_url' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php'],
             $this->id,
@@ -637,7 +637,7 @@ class GameSession extends Base
         );
         if (!$server_call['success']) {
             throw new ServerManagerAPIException($server_call['message'] ?? 'unknown error');
-        }
+        }*/
         $this->session_state = 'archived';
         $this->edit();
 

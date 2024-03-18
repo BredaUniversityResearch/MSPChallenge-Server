@@ -246,7 +246,7 @@ class GameList
 
     public function setPasswordAdmin(string $passwordAdmin): self
     {
-        $this->passwordAdmin = $this->checkPasswordFormat('password_admin', $passwordAdmin);
+        $this->passwordAdmin = $passwordAdmin;
 
         return $this;
     }
@@ -256,9 +256,9 @@ class GameList
         return $this->passwordPlayer;
     }
 
-    public function setPasswordPlayer(string $passwordPlayer): self
+    public function setPasswordPlayer(?string $passwordPlayer): self
     {
-        $this->passwordPlayer = $this->checkPasswordFormat('password_player', $passwordPlayer);
+        $this->passwordPlayer = $passwordPlayer;
 
         return $this;
     }
@@ -349,7 +349,7 @@ class GameList
         return $this->apiAccessToken;
     }
 
-    public function setApiAccessToken(string $apiAccessToken): self
+    public function setApiAccessToken(?string $apiAccessToken): self
     {
         $this->apiAccessToken = $apiAccessToken;
 
@@ -373,14 +373,14 @@ class GameList
         return $this->serverVersion;
     }
 
-    public function setServerVersion(string $serverVersion): self
+    public function setServerVersion(?string $serverVersion): self
     {
         $this->serverVersion = $serverVersion;
 
         return $this;
     }
 
-    private function checkPasswordFormat(string $adminorplayer, string $string): bool|string
+    public function checkPasswordFormat(string $adminorplayer, string $string): bool|string
     {
         if (is_object(json_decode($string))) {
             // backwards compatibility

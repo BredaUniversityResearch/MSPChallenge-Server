@@ -157,7 +157,7 @@ function copyToClipboard(text)
 }
 
 var log_concise_old, regularLogToastAutoCloseCheck, regularLogToastBodyUpdate,
-    logUpdateIntervalSec = 3, logCleanupIntervalSec = 60, logElapsedSec = 0;
+    logUpdateIntervalSec = 3, logCleanupIntervalSec = 120, logElapsedSec = 0;
 function ShowLogToast(session_id)
 {
     // first cancel any previous logtoast updates that might still be running

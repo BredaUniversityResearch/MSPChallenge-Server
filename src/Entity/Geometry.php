@@ -229,6 +229,14 @@ class Geometry
         return $this->geometryGeometry;
     }
 
+    public function getGeometryGeometryAsArray(): array
+    {
+        if (is_null($this->geometryGeometry)) {
+            return [];
+        }
+        return json_decode($this->geometryGeometry, true);
+    }
+
     public function setGeometryGeometry(array|string|null $geometryGeometry): Geometry
     {
         if (is_array($geometryGeometry)) {
@@ -593,5 +601,39 @@ class Geometry
         }
 
         return $this;
+    }
+
+    public function exportToDecodedGeoJSON(): array
+    {
+        $g["id"] = $this->getGeometryId();
+        $g["the_geom"] = $this->exportGeometryToDecodedGeoJSON();
+        $g["type"] = $this->getGeometryType();
+        $g["mspid"] = $this->getGeometryMspid();
+        $g["data"] = json_decode($this->getGeometryData(), true);
+        return $g;
+    }
+
+    private function exportGeometryToDecodedGeoJSON(): array
+    {
+        $jsonArray = [];
+        $layer = $this->getLayer()->getOriginalLayer() ?? $this->getLayer();
+        switch ($layer->getLayerGeotype()) {
+            case 'polygon':
+                $jsonArray['type'] = 'MultiPolygon';
+                $jsonArray['coordinates'][] = [$this->getGeometryGeometryAsArray()];
+                foreach ($this->getGeometrySubtractives() as $subtractiveGeometry) {
+                    $jsonArray['coordinates'][] = [$subtractiveGeometry->getGeometryGeometryAsArray()];
+                }
+                break;
+            case 'line':
+                $jsonArray['type'] = 'MultiLineString';
+                $jsonArray['coordinates'][] = $this->getGeometryGeometryAsArray();
+                break;
+            case 'point':
+                $jsonArray['type'] = 'Point';
+                $jsonArray['coordinates'] = $this->getGeometryGeometryAsArray()[0]; // single point!
+                break;
+        }
+        return $jsonArray;
     }
 }

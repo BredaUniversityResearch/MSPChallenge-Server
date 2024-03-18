@@ -5,6 +5,7 @@ namespace App\Domain\Communicator;
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\Game;
 use App\Entity\ServerManager\GameList;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
@@ -26,7 +27,8 @@ class WatchdogCommunicator extends AbstractCommunicator
         HttpClientInterface $client,
         private readonly VersionsProvider $versionsProvider,
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
-        private readonly string $projectDir
+        private readonly string $projectDir,
+        private readonly ConnectionManager $connectionManager
     ) {
         parent::__construct($client);
     }
@@ -38,6 +40,7 @@ class WatchdogCommunicator extends AbstractCommunicator
      * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      * @throws Exception
+     * @throws \Exception
      */
     public function changeState(
         GameList $gameList,
@@ -126,11 +129,17 @@ class WatchdogCommunicator extends AbstractCommunicator
         return $protocol.$address.':'.$port.'/'.$sessionId.'/';
     }
 
+    /**
+     * @throws \Exception
+     */
     private function getRequiredSimulations(): string
     {
         $result = [];
         $possibleSims = $this->versionsProvider->getComponentsVersions();
-        $config = $this->gameList->getGameConfigVersion()->getGameConfigComplete()['datamodel'];
+        $em = $this->connectionManager->getGameSessionEntityManager($this->gameList->getId());
+        $game = $em->getRepository(Game::class)->retrieve();
+        $em->refresh($game); // don't really know why, but without this the postLoad event isn't initiated
+        $config = $game->getRunningGameConfigFileContents()['datamodel'];
         foreach ($possibleSims as $possibleSim => $possibleSimVersion) {
             if (array_key_exists($possibleSim, $config) && is_array($config[$possibleSim])) {
                 $versionString = $possibleSimVersion;

@@ -21,7 +21,7 @@ class Layer
 
     #[ORM\ManyToOne(targetEntity: Layer::class, cascade: ['persist'], inversedBy: 'derivedLayer')]
     #[ORM\JoinColumn(name: 'layer_original_id', referencedColumnName: 'layer_id')]
-    private ?Layer $originalLayer;
+    private ?Layer $originalLayer = null;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $layerActive = 1;
@@ -437,7 +437,7 @@ class Layer
         return $this->layerGeotype;
     }
 
-    public function setLayerGeotype(?string $layerGeotype): Layer
+    public function setLayerGeotype($layerGeotype): Layer
     {
         $this->layerGeotype = $layerGeotype;
         return $this;
@@ -965,5 +965,19 @@ class Layer
         }
 
         return $this;
+    }
+
+    public function exportToDecodedGeoJSON(): array
+    {
+        $arrayToEncode = [];
+        foreach ($this->getGeometry() as $geometry) {
+            $arrayToEncode[] = $geometry->exportToDecodedGeoJSON();
+        }
+        foreach ($this->getDerivedLayer() as $derivedLayer) {
+            foreach ($derivedLayer->getGeometry() as $derivedLayerGeometry) {
+                $arrayToEncode[] = $derivedLayerGeometry->exportToDecodedGeoJSON();
+            }
+        }
+        return $arrayToEncode;
     }
 }

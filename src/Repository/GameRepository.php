@@ -41,7 +41,6 @@ class GameRepository extends EntityRepository
     public function retrieve(): Game
     {
         return $this->createQueryBuilder('g')
-            ->setMaxResults(1)
             ->getQuery()
             ->getSingleResult()
         ;
