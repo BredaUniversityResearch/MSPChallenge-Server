@@ -235,7 +235,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         $normalizeContext = [
             AbstractNormalizer::CALLBACKS => [
                 'id' => fn() => $this->gameSession->getId(),
-                'gameConfigVersion' => fn($innerObject) => $innerObject->getId(),
+                'gameConfigVersion' => fn($innerObject) => (!is_null($innerObject)) ? $innerObject->getId() : null,
                 'gameServer' => fn($innerObject) => $innerObject->getId(),
                 'gameWatchdogServer' => fn($innerObject) => $innerObject->getId(),
                 'sessionState' => fn($innerObject) => ((string) $innerObject),
