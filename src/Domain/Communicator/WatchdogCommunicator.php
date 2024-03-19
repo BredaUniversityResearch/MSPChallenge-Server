@@ -64,7 +64,8 @@ class WatchdogCommunicator extends AbstractCommunicator
             'api_access_renew_token' => json_encode([
                 'token' => $tokens['api_refresh_token'],
                 'valid_until' => \DateTime::createFromFormat('U', $tokens['exp'])->format('Y-m-d H:i:s')
-            ])
+            ]),
+            'month' => $gameList->getGameCurrentMonth()
         ];
         $response = $this->client->request("POST", $this->lastCompleteURLCalled, [
             'body' => http_build_query($postValues)
