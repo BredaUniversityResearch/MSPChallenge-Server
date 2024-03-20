@@ -478,7 +478,7 @@ class MEL extends Base
             ->getQuery()
             ->getResult(AbstractQuery::HYDRATE_ARRAY);
         $result['debug-message'] .= 'policies: '.implode(',', array_column($policies, 'name')).'.'.PHP_EOL;
-        // todo(MH) there is probably a way to
+        // todo(MH) there is probably a way to it working with 
         //   ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->getNativeConnection()
         $pdo = new \PDO("mysql:host=$_ENV[DATABASE_HOST];port=$_ENV[DATABASE_PORT]", 'root', '');
         foreach ($policies as $policy) {
