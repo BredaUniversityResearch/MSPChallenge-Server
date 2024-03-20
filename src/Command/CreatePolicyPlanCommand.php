@@ -24,9 +24,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CreatePolicyPlanCommand extends Command
@@ -55,24 +57,27 @@ class CreatePolicyPlanCommand extends Command
 
     /**
      * @throws NonUniqueResultException
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $io->note('Press CTRL+C (+enter) to exit at any time.');
         $gameSessionId = $input->getOption(self::OPTION_GAME_SESSION_ID);
-        if (ctype_digit($gameSessionId)) {
-            $gameSessionId = (int) $gameSessionId;
-        } else {
-            $io->error('The game session ID must be a number');
-            return Command::FAILURE;
+        while ((false == $rs = ctype_digit($gameSessionId)) ||
+            (false === $this->connectionManager->getCachedServerManagerDbConnection()->executeQuery(
+                'SHOW DATABASES LIKE :dbName',
+                ['dbName' => $this->connectionManager->getGameSessionDbName((int)$gameSessionId)]
+            )->fetchOne())) {
+            if ($rs) { // meaning that the game session ID is a number but the database does not exist
+                $io->error('Game session database with ID '.$gameSessionId.' does not exist');
+            }
+            $gameSessionId = $io->ask('Please enter a valid game session ID');
         }
+        $gameSessionId = (int) $gameSessionId;
         $io->write('Creating a policy plan for game session ID: '.$gameSessionId);
-        $choices = ['Marine Protected Areas', 'Exit'];
-        $layerShort = $io->choice('Choose a layer', $choices, $choices[0]);
-        if ($layerShort === 'Exit') {
-            return Command::SUCCESS;
-        }
-
+        $choices = [1 => 'Marine Protected Areas'];
+        $layerShort = $io->choice('Choose a layer', $choices, current($choices));
         $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         if (null === $layer = $em->createQueryBuilder()->select('l')->from(Layer::class, 'l')
             ->where('l.layerShort = :layerShort')
@@ -85,11 +90,38 @@ class CreatePolicyPlanCommand extends Command
         }
         $layerGeometryName = null;
         if ($layer['layerGeotype'] !== 'raster') {
-            $choices = ['Friese front'];
-            $layerGeometryName = $io->choice('Choose a '.$layer['layerGeotype'], $choices, $choices[0]);
+            $names = collect($this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
+                ->executeQuery(
+                    'SELECT JSON_EXTRACT(geometry_data, \'$.NAME\') FROM geometry WHERE geometry_layer_id = :layerId',
+                    ['layerId' => $layer['layerId']]
+                )->fetchFirstColumn())->map(fn($name) => json_decode($name))->unique()->sort()->toArray();
+            /** @var QuestionHelper $helper */
+            $helper = $this->getHelper('question');
+            $defaultValue = in_array('Friese Front', $names) ? 'Friese Front' : current($names);
+            $question = new Question(
+                " \e[32mChoose a ".$layer['layerGeotype']."\e[39m [\e[33m$defaultValue\e[39m]:".PHP_EOL.'> ',
+                $defaultValue
+            );
+            $question->setValidator(function ($answer) use ($names, $layer) {
+                if (!in_array($answer, $names)) {
+                    throw new \RuntimeException('Invalid '.$layer['layerGeotype']);
+                }
+                return $answer;
+            });
+            $question->setAutocompleterValues($names);
+            $validInput = false;
+            while (!$validInput) {
+                try {
+                    $layerGeometryName = $helper->ask($input, $output, $question);
+                    $validInput = true;
+                } catch (\RunTimeException $e) {
+                    $io->error($e->getMessage());
+                }
+            }
         }
-        $choices = ['Buffer zone'];
-        $policyType = $io->choice('Choose a policy type', $choices, $choices[0]);
+        // @todo migrate all policy types to the database, then query all and display them here
+        $choices = [1 => 'Buffer zone'];
+        $policyType = $io->choice('Choose a policy type', $choices, current($choices));
         $policyValue = null;
         while ($policyValue === null) {
             $policyValue = $io->ask("Enter a $policyType value", '40000');
@@ -99,13 +131,15 @@ class CreatePolicyPlanCommand extends Command
                 $io->error('The value must be a number between 0 and 100000');
             }
         }
-        $choices = ['fleet', 'Skip, no filter'];
-        $policyFilterType = $io->choice('Choose a policy filter', $choices, $choices[0]);
+        $choices = [1 => 'fleet', 2 => 'Skip, no filter'];
+        $policyFilterTypeName = null;
+        if (2 !== $choice = self::ioChoice($io, 'Choose a policy filter', $choices, current($choices))) {
+            $policyFilterTypeName = $choices[$choice];
+        }
         $policyFilterValue = null;
-        if ($policyFilterType === 'fleet') {
-            $choices = ['Bottom Trawl', 'Industrial and Pelagic Trawl', 'Drift and Fixed Nets'];
-            $policyFilterValue = $io->choice('Enter a fleet', $choices, $choices[0]);
-            $policyFilterValue = array_search($policyFilterValue, $choices) + 1;
+        if ($choice === 1) { // fleet
+            $choices = [1 => 'Bottom Trawl', 2 => 'Industrial and Pelagic Trawl', 3 => 'Drift and Fixed Nets'];
+            $policyFilterValue = self::ioChoice($io, 'Enter a fleet', $choices, current($choices));
         }
         try {
             $this->createPlan(
@@ -114,7 +148,7 @@ class CreatePolicyPlanCommand extends Command
                 $layerGeometryName,
                 $policyType,
                 $policyValue,
-                $policyFilterType,
+                $policyFilterTypeName,
                 $policyFilterValue
             );
         } catch (\Exception $e) {
@@ -123,6 +157,13 @@ class CreatePolicyPlanCommand extends Command
         }
         $io->success('Plan created successfully.');
         return Command::SUCCESS;
+    }
+
+    private static function ioChoice(SymfonyStyle $io, string $question, array $choices, mixed $default): string|int
+    {
+        $choiceValues = array_flip($choices);
+        $choice = $io->choice($question, $choices, $default);
+        return $choiceValues[$choice];
     }
 
     /**
@@ -199,7 +240,7 @@ class CreatePolicyPlanCommand extends Command
         ?string $layerGeometryName,
         string $policyTypeName,
         mixed $policyValue,
-        string $policyFilterTypeName,
+        ?string $policyFilterTypeName,
         mixed $policyFilterValue
     ): void {
         $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
@@ -302,6 +343,9 @@ class CreatePolicyPlanCommand extends Command
                 ->setLayer($layerEntity)
                 ->setPolicy($policy);
             // no need to persist, it's cascaded
+            if ($policyFilterTypeName == null) {
+                return;
+            }
             $policyFilterType = $this->getPolicyFilterType($policyFilterTypeName);
             $em->persist($policyFilterType);
             $policyFilter = new PolicyFilter();
