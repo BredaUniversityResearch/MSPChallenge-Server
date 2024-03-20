@@ -205,6 +205,10 @@ class GameList
 
     public function getGameCurrentMonth(): int
     {
+        // taken from api/v1/Game.php GetCurrentMonthAsId()
+        if ($this->gameState == 'SETUP') {
+            $this->gameCurrentMonth = -1;
+        }
         return $this->gameCurrentMonth;
     }
 
