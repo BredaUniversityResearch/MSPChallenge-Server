@@ -14,13 +14,18 @@ parameters:
     app.session_config_name: 'session_config_%d.json'
     # directory to store and from which to retrieve configuration files used for session creation
     app.server_manager_config_dir: '%kernel.project_dir%/ServerManager/configfiles/'
-    # minimal number of months that make up each of a game session's four eras
+    # directory to store and from which to retrieve game session save files
+    app.server_manager_save_dir: '%kernel.project_dir%/ServerManager/saves/'
+    # format of the filename of a game session's save ZIP file
+    app.server_manager_save_name: 'save_%d.zip'
+    # directory to store and from which to retrieve game session creation log files
+    app.server_manager_log_dir: '%kernel.project_dir%/ServerManager/log/'
+    # format of the filename of a game session creation log file
+    app.server_manager_log_name: 'log_session_%d.log'
     # number of seconds between automatic game session database file dumps (as backup of a game session's state)
     app.game_auto_save_interval: 120
+    # minimal number of months that make up each of a game session's four eras
     app.min_game_era_time: 12
-    # test environment specific directories, when relevant
-    app.session_raster_dir_test: '%kernel.logs_dir%/raster/'
-    app.session_config_dir_test: '%kernel.logs_dir%/running_session_config/'
     app.guraas_game_id: '00000000-0000-0000-0000-000000000000'
     app.guraas_analytics_version: '0.1'
 
@@ -93,9 +98,6 @@ services:
     ServerManager\ServerManager:
 
     App\Logger\GameSessionLogger:
-        arguments:
-            $kernelLogsDir: '%kernel.logs_dir%'
-            $kernelProjectDir: '%kernel.project_dir%'
 
     App\Entity\ServerManager\Listener\GameListListener:
         tags:
@@ -115,16 +117,15 @@ services:
     App\EventListener\SessionEntityListener:
         tags:
             - { name: 'doctrine.event_listener', event: 'prePersist' }
+            - { name: 'doctrine.event_listener', event: 'postLoad' }
 
     App\MessageHandler\GameList\GameListCreationMessageHandler:
-        public: true
-        arguments:
-            $mspServerManagerEntityManager: '@Doctrine\ORM\EntityManagerInterface'
-            $gameSessionLogger: '@monolog.logger.game_session'
-            $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
-            $kernel: '@Symfony\Component\HttpKernel\KernelInterface'
-            $params: '@Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface'
-            $provider: '@App\VersionsProvider'
+
+    App\MessageHandler\GameList\GameListArchiveMessageHandler:
+
+    App\MessageHandler\GameSave\GameSaveCreationMessageHandler:
+
+    App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
 
     App\Domain\Communicator\WatchdogCommunicator:
 
@@ -150,6 +151,11 @@ when@dev:
                 - 'controller.service_arguments'
 
 when@test:
+    parameters:
+        app.session_raster_dir: '%kernel.logs_dir%/raster/'
+        app.session_config_dir: '%kernel.logs_dir%/running_session_config/'
+        app.server_manager_save_dir: '%kernel.logs_dir%/'
+        app.server_manager_log_dir: '%kernel.logs_dir%/'
     services:
         # make classes in src/DataFixtures available to be used as services
         # and have a tag that allows actions to type-hint services

@@ -441,7 +441,7 @@ class Layer
         return $this->layerGeotype;
     }
 
-    public function setLayerGeotype(?string $layerGeotype): Layer
+    public function setLayerGeotype($layerGeotype): Layer
     {
         $this->layerGeotype = $layerGeotype;
         return $this;
@@ -984,5 +984,19 @@ class Layer
         $this->policyLayers->removeElement($policyLayer);
         // Since orphanRemoval is set, no need to explicitly remove policyLayer from the database
         return $this;
+    }
+
+    public function exportToDecodedGeoJSON(): array
+    {
+        $arrayToEncode = [];
+        foreach ($this->getGeometry() as $geometry) {
+            $arrayToEncode[] = $geometry->exportToDecodedGeoJSON();
+        }
+        foreach ($this->getDerivedLayer() as $derivedLayer) {
+            foreach ($derivedLayer->getGeometry() as $derivedLayerGeometry) {
+                $arrayToEncode[] = $derivedLayerGeometry->exportToDecodedGeoJSON();
+            }
+        }
+        return $arrayToEncode;
     }
 }

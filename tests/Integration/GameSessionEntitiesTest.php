@@ -18,6 +18,7 @@ use App\Entity\PlanMessage;
 use App\Entity\PlanRestrictionArea;
 use App\Entity\Restriction;
 use App\Entity\ServerManager\GameConfigVersion;
+use App\Tests\ServerManager\GameListCreationTest;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -82,7 +83,8 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->start();
         $layer = new Layer();
         $layer->setLayerName('test');
-        $layer->setLayerGeotype('raster');
+        // @todo (HW) use enum FieldType: string
+        $layer->setLayerGeotype('polygon');
         $layer->setLayerGroup('northsee');
         $layer->setLayerEditable(0);
 
@@ -163,9 +165,9 @@ class GameSessionEntitiesTest extends KernelTestCase
     {
         $this->start();
         $layer = new Layer();
-        $layer->setContextCreatingGameSession(1);
         $layer->setLayerName('test2');
-        $layer->setLayerGeotype('raster2');
+        // @todo (HW) use enum FieldType: string
+        $layer->setLayerGeotype('polygon');
         $layer->setLayerGroup('northsee2');
         $layer->setLayerEditable(0);
 
@@ -183,9 +185,6 @@ class GameSessionEntitiesTest extends KernelTestCase
         $geometry5->setGeometryMspid('abcdefg');
 
         $layer->addGeometry($geometry5);
-
-        $geometry6 = clone $geometry5;
-        $layer->addGeometry($geometry6);
         $this->em->persist($layer); // SessionEntityListener should have prevented addition of geometry6
         $this->em->flush();
 
@@ -233,7 +232,9 @@ class GameSessionEntitiesTest extends KernelTestCase
     {
         $this->start();
         $restriction = new Restriction();
+        // @todo (HW) use enum FieldType: string
         $restriction->setRestrictionSort("INCLUSION");
+        // @todo (HW) use enum FieldType: string
         $restriction->setRestrictionType('WARNING');
         $restriction->setRestrictionMessage('Precautionary areas are reserved for shipping.');
         $restriction2 = clone $restriction;
@@ -272,12 +273,14 @@ class GameSessionEntitiesTest extends KernelTestCase
 
         $layer2 = new Layer();
         $layer2->setLayerName('First layer generating pressure');
+        // @todo (HW) use enum FieldType: string
         $layer2->setLayerGeotype('raster');
         $layer2->setLayerGroup('northsee');
         $layer2->setLayerEditable(0);
 
         $layer3 = new Layer();
         $layer3->setLayerName('Second layer generating pressure');
+        // @todo (HW) use enum FieldType: string
         $layer3->setLayerGeotype('raster');
         $layer3->setLayerGroup('northsee');
         $layer3->setLayerEditable(0);
@@ -299,6 +302,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $plan->setPlanDescription('this is a test plan');
         $plan->setCountry($this->em->getRepository(Country::class)->find(1));
         $plan->setPlanGametime(5);
+        // @todo (HW) use enum FieldType: string
         $plan->setPlanState('APPROVED');
         $this->em->persist($plan);
 
@@ -307,10 +311,25 @@ class GameSessionEntitiesTest extends KernelTestCase
         $plan2 = $this->normalizer->denormalize($planFromConfig, Plan::class);
         $plan2->setPlanDescription('test description');
         $plan2->setCountry($this->em->getRepository(Country::class)->find($planFromConfig['plan_country_id']));
-        $planLayer = new PlanLayer();
-        $planLayer->setLayer(
-            (new Layer())->setOriginalLayer($this->em->getRepository(Layer::class)->find(1))
+        // @todo (HW) use enum FieldType: string
+        $plan2->setPlanState('APPROVED');
+        $derivedLayer = new Layer();
+        $derivedLayer->setOriginalLayer($this->em->getRepository(Layer::class)->find(1));
+        $geometry = new Geometry();
+        $geometry->setGeometryGeometry(
+            '[[1800176.69845479,748903.878],[4800176.69845479,2483199.127],[7398173.756,2483199.127]]'
+        ); // coordinates following a certain projection mode
+        $geometry->setGeometryData(
+            '{"minx":1800176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.127}'
+        ); // json representation of feature properties
+        $geometry->setCountry(
+            $this->em->getRepository(Country::class)->find(1)
         );
+        $geometry->setGeometryType('0');
+        $geometry->setGeometryMspid('z4fba98446ce9d9ff');
+        $derivedLayer->addGeometry($geometry);
+        $planLayer = new PlanLayer();
+        $planLayer->setLayer($derivedLayer);
         $plan2->addPlanLayer($planLayer);
 
         $planDelete = new PlanDelete();
@@ -404,6 +423,12 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertSame($grid2->getPlanToRemove()[0], $plan2);
     }
 
+    public function testLayerRepository(): void
+    {
+        $this->start();
+        dd($this->em->getRepository(Layer::class)->getAllGeometryGeoJSON());
+    }
+
     private function start(): void
     {
         $container = static::getContainer();
@@ -416,6 +441,7 @@ class GameSessionEntitiesTest extends KernelTestCase
 
     public static function setUpBeforeClass(): void
     {
+        GameListCreationTest::setUpBeforeClass();
         // completely removes, creates and migrates the test database
 
         $app = new Application(static::bootKernel());
