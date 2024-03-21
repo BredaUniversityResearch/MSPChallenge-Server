@@ -20,10 +20,10 @@ class Plan
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'plan')]
     #[ORM\JoinColumn(name: 'plan_country_id', referencedColumnName: 'country_id')]
-    private ?Country $country;
+    private ?Country $country = null;
 
     #[ORM\Column(type: Types::STRING, length: 75)]
-    private ?string $planName;
+    private ?string $planName = null;
 
     #[ORM\Column(type: Types::TEXT, length: 75)]
     private ?string $planDescription = "";
@@ -32,13 +32,13 @@ class Plan
     private \DateTime $planTime;
 
     #[ORM\Column(type: Types::INTEGER, length: 5)]
-    private ?int $planGametime;
+    private ?int $planGametime = null;
 
     #[ORM\Column(type: Types::STRING, length: 20, options: ['default' => 'DESIGN'])]
     private ?string $planState = 'DESIGN';
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
-    private ?int $planLockUserId;
+    private ?int $planLockUserId = null;
 
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0])]
     private ?float $planLastupdate = 0;
@@ -50,7 +50,7 @@ class Plan
     private ?int $planActive = 1;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
-    private ?int $planConstructionstart;
+    private ?int $planConstructionstart = null;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, options: ['default' => 0])]
     private ?int $planType = 0;
