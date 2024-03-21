@@ -42,6 +42,199 @@ class CreatePolicyPlanCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * @param Question $question
+     * @param array $names
+     * @param QuestionHelper $helper
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param SymfonyStyle $io
+     * @return string
+     */
+    public function askAndValidateName(
+        Question $question,
+        array $names,
+        QuestionHelper $helper,
+        InputInterface $input,
+        OutputInterface $output,
+        SymfonyStyle $io
+    ): string {
+        $question->setAutocompleterValues($names);
+        $validInput = false;
+        $layerGeometryName = '';
+        while (!$validInput) {
+            try {
+                $layerGeometryName = $helper->ask($input, $output, $question);
+                $validInput = true;
+            } catch (\RunTimeException $e) {
+                $io->error($e->getMessage());
+            }
+        }
+        return $layerGeometryName;
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param SymfonyStyle $io
+     * @return int
+     * @throws Exception
+     */
+    public function getGameSessionId(InputInterface $input, SymfonyStyle $io): int
+    {
+        $gameSessionId = $input->getOption(self::OPTION_GAME_SESSION_ID);
+        while ((false == $rs = ctype_digit($gameSessionId)) ||
+            (false === $this->connectionManager->getCachedServerManagerDbConnection()->executeQuery(
+                    'SHOW DATABASES LIKE :dbName',
+                    ['dbName' => $this->connectionManager->getGameSessionDbName((int)$gameSessionId)]
+                )->fetchOne())) {
+            if ($rs) { // meaning that the game session ID is a number but the database does not exist
+                $io->error('Game session database with ID ' . $gameSessionId . ' does not exist');
+            }
+            $gameSessionId = $io->ask('Please enter a valid game session ID');
+        }
+        return (int)$gameSessionId;
+    }
+
+    public function askPolicyLayerShortName(
+        int $gameSessionId,
+        InputInterface $input,
+        OutputInterface $output,
+        SymfonyStyle $io,
+        ?string $default = null
+    ): ?string {
+        try {
+            $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
+        } catch (\Exception $e) {
+            $io->error('Could not connect to the database');
+            return null;
+        }
+        $names = collect(
+            $em->createQueryBuilder()
+                ->select('l.layerShort')
+                ->from(Layer::class, 'l')
+                ->getQuery()->getSingleColumnResult()
+        )->filter()->unique()->sort()->toArray();
+        if (empty($names)) {
+            return null;
+        }
+        /** @var QuestionHelper $helper */
+        $helper = $this->getHelper('question');
+        $defaultValue = in_array($default, $names) ? $default : current($names);
+        $question = new Question(
+            " \e[32mChoose a layer\e[39m [\e[33m$defaultValue\e[39m]:" . PHP_EOL . '> ',
+            $defaultValue
+        );
+        $question->setValidator(function ($answer) use ($names) {
+            if (!in_array($answer, $names)) {
+                throw new \RuntimeException('Non-exisiting layer: '.$answer);
+            }
+            return $answer;
+        });
+        return $this->askAndValidateName($question, $names, $helper, $input, $output, $io);
+
+    }
+
+    /**
+     * @param int $gameSessionId
+     * @param mixed $layerShort
+     * @return array|null
+     * @throws NonUniqueResultException
+     * @throws \Exception
+     */
+    public function getLayer(int $gameSessionId, mixed $layerShort): ?array
+    {
+        $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
+        return $em->createQueryBuilder()->select('l')->from(Layer::class, 'l')
+            ->where('l.layerShort = :layerShort')
+            ->setParameter('layerShort', $layerShort)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
+    }
+
+    public function askPolicyFilterTypeValue(int $choice, SymfonyStyle $io): string
+    {
+        $policyFilterValue = null;
+        if ($choice === 1) { // fleet
+            $choices = [1 => 'Bottom Trawl', 2 => 'Industrial and Pelagic Trawl', 3 => 'Drift and Fixed Nets'];
+            $policyFilterValue = self::ioChoice($io, 'Enter a fleet', $choices, current($choices));
+        }
+        return $policyFilterValue;
+    }
+
+    public function askPolicyFilterTypeName(SymfonyStyle $io, int &$choice): string
+    {
+        $choices = [1 => 'fleet', 2 => 'Skip, no filter'];
+        $policyFilterTypeName = null;
+        if (2 !== $choice = self::ioChoice($io, 'Choose a policy filter', $choices, current($choices))) {
+            $policyFilterTypeName = $choices[$choice];
+        }
+        return $policyFilterTypeName;
+    }
+
+    public function askPolicyValue(SymfonyStyle $io, string $policyTypeName): mixed
+    {
+        $policyValue = null;
+        while ($policyValue === null) {
+            $policyValue = $io->ask("Enter a $policyTypeName value", '40000');
+            if (is_numeric($policyValue) && $policyValue >= 0 && $policyValue <= 100000) {
+                $policyValue = (int)$policyValue;
+            } else {
+                $io->error('The value must be a number between 0 and 100000');
+            }
+        }
+        return $policyValue;
+    }
+
+    public function askPolicyTypeName(SymfonyStyle $io): string
+    {
+        // @todo migrate all policy types to the database, then query all and display them here
+        $choices = [1 => 'Buffer zone'];
+        return $io->choice('Choose a policy type', $choices, current($choices));
+    }
+
+    /**
+     * @param int $gameSessionId
+     * @param mixed $layer
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @param SymfonyStyle $io
+     * @param string|null $default
+     * @return string|null
+     * @throws Exception
+     */
+    public function askLayerGeometryName(
+        int $gameSessionId,
+        mixed $layer,
+        InputInterface $input,
+        OutputInterface $output,
+        SymfonyStyle $io,
+        ?string $default = null
+    ): ?string {
+        $names = collect($this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
+            ->executeQuery(
+                'SELECT JSON_EXTRACT(geometry_data, \'$.NAME\') FROM geometry WHERE geometry_layer_id = :layerId',
+                ['layerId' => $layer['layerId']]
+            )->fetchFirstColumn())->map(fn($name) => json_decode($name))->unique()->sort()->toArray();
+        if (empty($names)) {
+            return null;
+        }
+        /** @var QuestionHelper $helper */
+        $helper = $this->getHelper('question');
+        $defaultValue = in_array($default, $names) ? $default : current($names);
+        $question = new Question(
+            " \e[32mChoose a " . $layer['layerGeotype'] . "\e[39m [\e[33m$defaultValue\e[39m]:" . PHP_EOL . '> ',
+            $defaultValue
+        );
+        $question->setValidator(function ($answer) use ($names, $layer) {
+            if (!in_array($answer, $names)) {
+                throw new \RuntimeException('Non-exisiting '.$layer['layerGeotype'].': '.$answer);
+            }
+            return $answer;
+        });
+        return $this->askAndValidateName($question, $names, $helper, $input, $output, $io);
+    }
+
     protected function configure(): void
     {
         $this
@@ -63,90 +256,47 @@ class CreatePolicyPlanCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $io->note('Press CTRL+C (+enter) to exit at any time.');
-        $gameSessionId = $input->getOption(self::OPTION_GAME_SESSION_ID);
-        while ((false == $rs = ctype_digit($gameSessionId)) ||
-            (false === $this->connectionManager->getCachedServerManagerDbConnection()->executeQuery(
-                'SHOW DATABASES LIKE :dbName',
-                ['dbName' => $this->connectionManager->getGameSessionDbName((int)$gameSessionId)]
-            )->fetchOne())) {
-            if ($rs) { // meaning that the game session ID is a number but the database does not exist
-                $io->error('Game session database with ID '.$gameSessionId.' does not exist');
-            }
-            $gameSessionId = $io->ask('Please enter a valid game session ID');
-        }
-        $gameSessionId = (int) $gameSessionId;
+        $gameSessionId = $this->getGameSessionId($input, $io);
         $io->write('Creating a policy plan for game session ID: '.$gameSessionId);
-        $choices = [1 => 'Marine Protected Areas'];
-        $layerShort = $io->choice('Choose a layer', $choices, current($choices));
-        $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
-        if (null === $layer = $em->createQueryBuilder()->select('l')->from(Layer::class, 'l')
-            ->where('l.layerShort = :layerShort')
-            ->setParameter('layerShort', $layerShort)
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY)) {
-            $io->error('Layer not found');
+        if (null === $layerShort = $this->askPolicyLayerShortName(
+            $gameSessionId,
+            $input,
+            $output,
+            $io,
+            'Marine Protected Areas'
+        )) {
+            $io->error('Could not retrieve layers from the database');
+            return Command::FAILURE;
+        }
+        if (null === $layer = $this->getLayer($gameSessionId, $layerShort)) {
+            $io->error("Layer $layerShort not found");
             return Command::FAILURE;
         }
         $layerGeometryName = null;
         if ($layer['layerGeotype'] !== 'raster') {
-            $names = collect($this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
-                ->executeQuery(
-                    'SELECT JSON_EXTRACT(geometry_data, \'$.NAME\') FROM geometry WHERE geometry_layer_id = :layerId',
-                    ['layerId' => $layer['layerId']]
-                )->fetchFirstColumn())->map(fn($name) => json_decode($name))->unique()->sort()->toArray();
-            /** @var QuestionHelper $helper */
-            $helper = $this->getHelper('question');
-            $defaultValue = in_array('Friese Front', $names) ? 'Friese Front' : current($names);
-            $question = new Question(
-                " \e[32mChoose a ".$layer['layerGeotype']."\e[39m [\e[33m$defaultValue\e[39m]:".PHP_EOL.'> ',
-                $defaultValue
-            );
-            $question->setValidator(function ($answer) use ($names, $layer) {
-                if (!in_array($answer, $names)) {
-                    throw new \RuntimeException('Invalid '.$layer['layerGeotype']);
-                }
-                return $answer;
-            });
-            $question->setAutocompleterValues($names);
-            $validInput = false;
-            while (!$validInput) {
-                try {
-                    $layerGeometryName = $helper->ask($input, $output, $question);
-                    $validInput = true;
-                } catch (\RunTimeException $e) {
-                    $io->error($e->getMessage());
-                }
+            if (null === $layerGeometryName = $this->askLayerGeometryName(
+                $gameSessionId,
+                $layer,
+                $input,
+                $output,
+                $io,
+                'Friese Front'
+            )) {
+                $io->error('No geometry found for the layer: '.$layerShort);
+                return Command::FAILURE;
             }
         }
-        // @todo migrate all policy types to the database, then query all and display them here
-        $choices = [1 => 'Buffer zone'];
-        $policyType = $io->choice('Choose a policy type', $choices, current($choices));
-        $policyValue = null;
-        while ($policyValue === null) {
-            $policyValue = $io->ask("Enter a $policyType value", '40000');
-            if (is_numeric($policyValue) && $policyValue >= 0 && $policyValue <= 100000) {
-                $policyValue = (int) $policyValue;
-            } else {
-                $io->error('The value must be a number between 0 and 100000');
-            }
-        }
-        $choices = [1 => 'fleet', 2 => 'Skip, no filter'];
-        $policyFilterTypeName = null;
-        if (2 !== $choice = self::ioChoice($io, 'Choose a policy filter', $choices, current($choices))) {
-            $policyFilterTypeName = $choices[$choice];
-        }
-        $policyFilterValue = null;
-        if ($choice === 1) { // fleet
-            $choices = [1 => 'Bottom Trawl', 2 => 'Industrial and Pelagic Trawl', 3 => 'Drift and Fixed Nets'];
-            $policyFilterValue = self::ioChoice($io, 'Enter a fleet', $choices, current($choices));
-        }
+        $policyTypeName = $this->askPolicyTypeName($io);
+        $policyValue = $this->askPolicyValue($io, $policyTypeName);
+        $choice = 0;
+        $policyFilterTypeName = $this->askPolicyFilterTypeName($io, $choice);
+        $policyFilterValue = $this->askPolicyFilterTypeValue($choice, $io);
         try {
             $this->createPlan(
                 $gameSessionId,
                 $layer,
                 $layerGeometryName,
-                $policyType,
+                $policyTypeName,
                 $policyValue,
                 $policyFilterTypeName,
                 $policyFilterValue
