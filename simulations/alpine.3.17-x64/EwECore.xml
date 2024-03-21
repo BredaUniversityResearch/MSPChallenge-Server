@@ -232,9 +232,24 @@ EwECore
   Looks up a localized string similar to Average Other Mortality across modeled area.
 </summary>
 </member>
-<member name="P:EwECore.My.Resources.CoreDefaults.ECOSPACE_REGION_AREA_UNIT">
+<member name="P:EwECore.My.Resources.CoreDefaults.ECOSPACE_REGAVG_LANDINGS_UNIT">
 <summary>
-  Looks up a localized string similar to Region {0} area ({1}).
+  Looks up a localized string similar to Average regional landings by fleet, group ({0}).
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreDefaults.ECOSPACE_REGAVG_TL">
+<summary>
+  Looks up a localized string similar to Average regional trophic level by group.
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreDefaults.ECOSPACE_REGAVG_VALUE_UNIT">
+<summary>
+  Looks up a localized string similar to Average regional value by fleet, group ({0}).
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreDefaults.ECOSPACE_REGION">
+<summary>
+  Looks up a localized string similar to Region {0}.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.ECOSPACE_WRITER_ASC_BIOMASS">
@@ -350,6 +365,11 @@ EwECore
 <member name="P:EwECore.My.Resources.CoreDefaults.PARAM_MEAN">
 <summary>
   Looks up a localized string similar to Mean.
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreDefaults.PARAM_MIN">
+<summary>
+  Looks up a localized string similar to Min..
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.PARAM_RIGHT_BOTTOM">
@@ -564,47 +584,47 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_AREA_KM2">
 <summary>
-  Looks up a localized string similar to km².
+  Looks up a localized string similar to km^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_AREA_MI2">
 <summary>
-  Looks up a localized string similar to mi².
+  Looks up a localized string similar to mi^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_CURRENCY_CALORIE">
 <summary>
-  Looks up a localized string similar to kcal/m².
+  Looks up a localized string similar to kcal/m^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_CURRENCY_CARBON">
 <summary>
-  Looks up a localized string similar to g/m².
+  Looks up a localized string similar to g/m^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_CURRENCY_DRYWEIGHT">
 <summary>
-  Looks up a localized string similar to g/m².
+  Looks up a localized string similar to g/m^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_CURRENCY_JOULES">
 <summary>
-  Looks up a localized string similar to J/m².
+  Looks up a localized string similar to J/m^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_CURRENCY_NITROGEN">
 <summary>
-  Looks up a localized string similar to mg N/m².
+  Looks up a localized string similar to mg N/m^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_CURRENCY_PHOSPOROUS">
 <summary>
-  Looks up a localized string similar to mg P/m².
+  Looks up a localized string similar to mg P/m^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_CURRENCY_WETWEIGHT">
 <summary>
-  Looks up a localized string similar to t/km².
+  Looks up a localized string similar to t/km^2.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.UNIT_DECIMALDEGREE">
@@ -7404,6 +7424,10 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="F:EwECore.cCore.MAX_RUN_LENGTH">
  <summary>Max number of years ecosim or ecospace can run for</summary>
 </member>
+<member name="F:EwECore.cCore.USE_SHARED_ARENAS">
+ <summary>Because the shared arenas logic still causes issues in Ecospace and the Monte Carlo diet searches,
+ this flag can be used to bypass shared arenas data loading, logic, and user interfaces</summary>
+</member>
 <member name="T:EwECore.cCore.CoreMessageDelegate">
  <summary>
  Delegate defintion used to pass a message from the core to the interface.
@@ -7971,7 +7995,7 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  Load (and optionally apply) a single time series dataset
  </summary>
  <param name="tsd">The dataset to load. Provide 'nothing' to unload any dataset.</param>
- <param name="bEnable">Flag stating whether loaded time series should be enabled immediately.</param>
+ <param name="bEnable">Flag stating whether loaded time series should be enabled immediately. True by default</param>
  <returns>True if successful.</returns>
  -----------------------------------------------------------------------
 </member>
@@ -7981,7 +8005,7 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  Load (and optionally apply) a single time series dataset
  </summary>
  <param name="iDataset">One-based index of the dataset to load. Provide 0 to unload any dataset.</param>
- <param name="bEnable">Flag stating whether loaded time series should be enabled immediately.</param>
+ <param name="bEnable">Flag stating whether loaded time series should be enabled immediately. True by default.</param>
  <returns>True if successful.</returns>
  -----------------------------------------------------------------------
 </member>
@@ -8187,30 +8211,18 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <summary>
  Flag, stating whether results should be saved with default header information.
  </summary>
- <seealso cref="P:EwECore.cCore.ExtraFileHeaderFields"/>
- <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32)"/>
- <seealso cref="M:EwECore.cCore.DefaultFileHeader(System.Xml.XmlDocument,EwEUtils.Core.eAutosaveTypes,System.Int32)"/>
+ <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})"/>
+ <seealso cref="M:EwECore.cCore.DefaultFileHeader(System.Xml.XmlDocument,EwEUtils.Core.eAutosaveTypes,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})"/>
  -----------------------------------------------------------------------
 </member>
-<member name="P:EwECore.cCore.ExtraFileHeaderFields">
- -----------------------------------------------------------------------
- <summary>
- A 'fieldname'='fieldvalue' dictionary of extra fields to append to the default 
- file header.
- </summary>
- <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32)"/>
- <seealso cref="M:EwECore.cCore.DefaultFileHeader(System.Xml.XmlDocument,EwEUtils.Core.eAutosaveTypes,System.Int32)"/>
- <seealso cref="P:EwECore.cCore.SaveWithFileHeader"/>
- -----------------------------------------------------------------------
-</member>
-<member name="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32)">
+<member name="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})">
  -----------------------------------------------------------------------
  <summary>
  Returns a default file header for text files for a given 
  <see cref="T:EwEUtils.Core.eAutosaveTypes">auto-save type</see>, representing loaded
  aspects of ecopath, ecosim, ecospace and ecotracer, where applicable.
  This header block can be integrated in CSV files.
- <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32)"/>
+ <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})"/>
  </summary>
  <param name="savetype">The <see cref="T:EwEUtils.Core.eAutosaveTypes">auto-save type</see>
  to obtain the generic file header for.</param>
@@ -8218,18 +8230,17 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  omitted, the <see cref="M:EwECore.cCore.EcosimFirstYear"/> will be used.</param>
  <returns>A text block safe for integration in CSV files.</returns>
  <seealso cref="P:EwECore.cCore.SaveWithFileHeader"/>
- <seealso cref="M:EwECore.cCore.DefaultFileHeader(System.Xml.XmlDocument,EwEUtils.Core.eAutosaveTypes,System.Int32)"/>
- <seealso cref="P:EwECore.cCore.ExtraFileHeaderFields"/>
+ <seealso cref="M:EwECore.cCore.DefaultFileHeader(System.Xml.XmlDocument,EwEUtils.Core.eAutosaveTypes,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})"/>
  -----------------------------------------------------------------------
 </member>
-<member name="M:EwECore.cCore.DefaultFileHeader(System.Xml.XmlDocument,EwEUtils.Core.eAutosaveTypes,System.Int32)">
+<member name="M:EwECore.cCore.DefaultFileHeader(System.Xml.XmlDocument,EwEUtils.Core.eAutosaveTypes,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})">
  -----------------------------------------------------------------------
  <summary>
  Returns a default file header for XML files for a given 
  <see cref="T:EwEUtils.Core.eAutosaveTypes">auto-save type</see>, representing loaded
  aspects of ecopath, ecosim, ecospace and ecotracer, where applicable.
  This header block can be integrated in XML files.
- <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32)"/>
+ <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})"/>
  </summary>
  <param name="savetype">The <see cref="T:EwEUtils.Core.eAutosaveTypes">auto-save type</see>
  to obtain the generic file header for.</param>
@@ -8237,8 +8248,7 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  omitted, the <see cref="M:EwECore.cCore.EcosimFirstYear"/> will be used.</param>
  <returns>A XML node structure describing the EwE run, safe for integration in XML files.</returns>
  <seealso cref="P:EwECore.cCore.SaveWithFileHeader"/>
- <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32)"/>
- <seealso cref="P:EwECore.cCore.ExtraFileHeaderFields"/>
+ <seealso cref="M:EwECore.cCore.DefaultFileHeader(EwEUtils.Core.eAutosaveTypes,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String})"/>
  -----------------------------------------------------------------------
 </member>
 <member name="M:EwECore.cCore.OnSettingsChanged">
@@ -18529,7 +18539,7 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <returns>True if a mapping exists.</returns>
  -----------------------------------------------------------------------
 </member>
-<member name="M:EwECore.DataSources.cDBDataSource.LogMessage(System.String,EwEUtils.Core.eMessageType,EwEUtils.Core.eMessageImportance)">
+<member name="M:EwECore.DataSources.cDBDataSource.LogMessage(System.String,System.Boolean)">
  -------------------------------------------------------------------
  <summary>
  Logs a message to the application log.
@@ -19506,13 +19516,6 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <param name="iLayerID">Database ID of the layer to remove.</param>
  <returns>True if successful.</returns>
  -------------------------------------------------------------------
-</member>
-<member name="M:EwECore.DataSources.cDBDataSource.EcospaceScenarioLayerConnectionDisabled(System.Int32)">
- <summary>
- Loads the layers for which external data has been disabled.
- </summary>
- <param name="iScenarioID">The scenario identifier.</param>
- <returns></returns>
 </member>
 <member name="M:EwECore.DataSources.cDBDataSource.AddEcospaceDriverLayer(System.String,System.String,System.String,System.Int32@)">
  -------------------------------------------------------------------
@@ -20816,6 +20819,17 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  is passed in.
  </remarks>
 </member>
+<member name="M:EwECore.cEcoFunctions.Omniv(System.Single[0:,0:],System.Single[],System.Single[],System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Calculate the per-group omnivory index
+ </summary>
+ <param name="DC">Diet</param>
+ <param name="TTLX">TTL</param>
+ <param name="BQB"></param>
+ <param name="NumGroups"></param>
+ -----------------------------------------------------------------------
+</member>
 <member name="M:EwECore.cEcoFunctions.getStanzaIndexForGroup(System.Int32)">
  -----------------------------------------------------------------------
  <summary>
@@ -21729,7 +21743,8 @@ Run after the parameters have been estimated.
  This code was originally at the bottom of ParamEstimate1.
  </remarks>
 </member>
-<member name="M:EwECore.cEcopathDataStructures.Compute_M2_Resp_and_Stats(EwECore.cEcoFunctions,System.Boolean)">
+<member name="M:EwECore.cEcopathDataStructures.Compute_M2_Resp_and_Stats(EwECore.cEcoFunctions)">
+ -----------------------------------------------------------------------
 <summary>
 Computes the following:
 M2(): Predator mortality for group i.
@@ -21739,11 +21754,12 @@ ConSum: sum of consumption.
 SumBio: sum of biomass.
 min_B_QB: minimum B*QB.
  </summary>
- <param name="bQuiet">Flag to suppress any system warning messages that this method may produce.</param>
- <returns>True if there were all respiration is valied</returns>
  <remarks>
- Was Public Sub ParamEstimate2() in original code
+ Was Public Sub ParamEstimate2() in original EwE5 code. 
+ Sept 2023: this method no longer checks for negative Respiration; this check is
+ now better integrated in the Ecopath parameter checks
  </remarks>
+ -----------------------------------------------------------------------
 </member>
 <member name="M:EwECore.cEcopathDataStructures.ComputeMoreStats(EwECore.cEcoFunctions)">
  <summary>
@@ -21768,7 +21784,6 @@ min_B_QB: minimum B*QB.
  <summary>
  Compute missing <see cref="F:EwECore.cEcopathDataStructures.BH">BH</see> (Biomass/Area) values.
  </summary>
- <returns>True if successfully.</returns>
  <remarks>
  EwE5 performed differently here; BH() value was left at its NULL input value,
  and was computed in the interface for display. I hope this doesn't mess anything up.
@@ -21807,10 +21822,10 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.Ecopath.eEcopathRunState.NotRun">
  <summary>Model has not been run yet.</summary>
 </member>
-<member name="F:EwECore.Ecopath.eEcopathRunState.ValidEE">
+<member name="F:EwECore.Ecopath.eEcopathRunState.Balanced">
  <summary>Model ran with a balanced model. EE in bounds. </summary>
 </member>
-<member name="F:EwECore.Ecopath.eEcopathRunState.InValidEE">
+<member name="F:EwECore.Ecopath.eEcopathRunState.InvalidEE">
  <summary>Failed EE out of bounds.</summary>
 </member>
 <member name="F:EwECore.Ecopath.eEcopathRunState.MissingParameter">
@@ -21821,6 +21836,9 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="F:EwECore.Ecopath.eEcopathRunState.InValidInitialization">
  <summary>Failed due to invalid initialization of data.  </summary>
+</member>
+<member name="F:EwECore.Ecopath.eEcopathRunState.InValidRespiration">
+ <summary>Failed Respiration negative.</summary>
 </member>
 <member name="F:EwECore.Ecopath.eEcopathRunState.Error">
  <summary>Failed to run because an error was encountered. </summary>
@@ -21894,8 +21912,7 @@ min_B_QB: minimum B*QB.
  Estimate the unknown parameters in EcoPath
  </summary>
  <returns>
- True if successfull 
- False if something went wrong
+ True if the model balanced
  </returns>
  <remarks>
  EcoPath must be initialized before this can be called
@@ -21923,6 +21940,24 @@ min_B_QB: minimum B*QB.
  Set all QB values that are CORE_NULL to Zero
  </summary>
  <remarks>QB is used by Ecosim which assumes that null values are zero</remarks>
+</member>
+<member name="M:EwECore.Ecopath.cEcopathModel.CheckIfEEsAreOK(System.Boolean)">
+ --------------------------------------------------------------------------
+ <summary>
+ CheckIfEEsAreOK
+ </summary>
+ <param name="bSendMessage"></param>
+ <returns></returns>
+ --------------------------------------------------------------------------
+</member>
+<member name="M:EwECore.Ecopath.cEcopathModel.CheckIfRespirationOK(System.Boolean)">
+ --------------------------------------------------------------------------
+ <summary>
+ Check if respiration is OK
+ </summary>
+ <param name="bSendMessage"></param>
+ <returns></returns>
+ --------------------------------------------------------------------------
 </member>
 <member name="M:EwECore.Ecopath.cEcopathModel.Chesson">
  <summary>
@@ -22186,6 +22221,12 @@ min_B_QB: minimum B*QB.
  Reloads and rebuilds the arena data structures.
  </summary>
 </member>
+<member name="P:EwECore.cEcosimArenaManager.InUpdates">
+ <summary>
+ Flag to temporarily stop cascading updates
+ </summary>
+ <returns></returns>
+</member>
 <member name="M:EwECore.cEcosimArenaManager.ResetArenas(System.Int32)">
  <summary>
  Resets the arenas for a given prey. If Prey is 0 or less, all arenas will be reset.
@@ -22265,6 +22306,16 @@ min_B_QB: minimum B*QB.
  <value></value>
  <returns></returns>
  <remarks></remarks>
+</member>
+<member name="P:EwECore.cEcosimFleetInput.RelQ(System.Int32)">
+ <summary>
+ Start-up catchability
+ </summary>
+</member>
+<member name="P:EwECore.cEcosimFleetInput.RelQStatus(System.Int32)">
+ <summary>
+ Start-up catchability
+ </summary>
 </member>
 <member name="T:EwECore.cEcosimGroupInput">
  <summary>
@@ -22828,11 +22879,7 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.cEcosimDatastructures.MoPredBase">
  <summary>
  Predation mortality rate at base
- </summary>
-</member>
-<member name="F:EwECore.cEcosimDatastructures.PhHalf">
- <summary>
- 1 / PaddP - 1
+ StartEatenOf / [Ecopath biomass]
  </summary>
 </member>
 <member name="T:EwECore.cEcosimDatastructures.ShapeParameters">
@@ -22974,6 +23021,11 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.cEcosimDatastructures.NlinksSet">
  <summary> note number of arena foraging links set from or to database </summary>
 </member>
+<member name="F:EwECore.cEcosimDatastructures.FisForced">
+ <summary>
+ Fishing mortality is forced
+ </summary>
+</member>
 <member name="F:EwECore.cEcosimDatastructures.SS">
  <summary>
  Sum of squares fit to reference data
@@ -23011,7 +23063,7 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.cEcosimDatastructures.PropLandedTime">
  <summary>Proportion of regulated landings (by gear group) for the current time step</summary>
 </member>
-<member name="F:EwECore.cEcosimDatastructures.Propdiscardtime">
+<member name="F:EwECore.cEcosimDatastructures.PropDiscardTime">
  <summary>
  Proportion of the total catch that suffered mortality for the current time step (by gear group). Does not include discards that survived.
  Initialized in cEcosim.InitPropLanded() Propdiscardtime(iflt, igrp) = PropDiscard(iflt, igrp) * PropDiscardMort(iflt, igrp)
@@ -23335,7 +23387,7 @@ min_B_QB: minimum B*QB.
  <param name="iTime"></param>
  <remarks></remarks>
 </member>
-<member name="M:EwECore.Ecosim.cEcosimModel.LandingsValue(System.Int32,System.Int32,System.Int32,System.Int32)">
+<member name="M:EwECore.Ecosim.cEcosimModel.MarketValue(System.Int32,System.Int32,System.Int32,System.Int32)">
  -------------------------------------------------------------------
  <summary>
  Return the Ecopath market value (off vessel price) as a function of 
@@ -23348,10 +23400,14 @@ min_B_QB: minimum B*QB.
  <param name="iTime">Cummulative time step.</param>
  <param name="iYear">Current year.</param>
  <returns>([Ecopath market value] or [OffVesselPrice time series]) * [PES multiplier]</returns>
- <remarks>Any <see cref="F:EwECore.eTimeSeriesType.OffVesselPrice">absolute landings time series</see> are 
+ <remarks>
+ <para>Any <see cref="F:EwECore.eTimeSeriesType.OffVesselPrice">absolute landings time series</see> are 
  used if provided. if not, Ecopath base off-vessel prices are multiplied with 
  <see cref="F:EwECore.eTimeSeriesType.OffVesselPriceRel">relative time series</see> 
- and applied price elasticity functions.</remarks>
+ and applied price elasticity functions.</para>
+ <para>Note that <see cref="F:EwECore.eTimeSeriesType.OffVesselPriceRel">relative time series</see>
+ can vary prices for all caught groups by the same magnitude by specifying group code 0.</para>
+ </remarks>
  -------------------------------------------------------------------
 </member>
 <member name="M:EwECore.Ecosim.cEcosimModel.EffortCost(System.Int32,System.Int32,System.Int32)">
@@ -23621,7 +23677,7 @@ min_B_QB: minimum B*QB.
  FishTime() is the total fishing mortality used by Ecosim in Deritt
  </remarks>
 </member>
-<member name="M:EwECore.Ecosim.cEcosimModel.SetFtimeFromGear(System.Int32,System.Single[],System.Boolean)">
+<member name="M:EwECore.Ecosim.cEcosimModel.SetFtimeFromGear(System.Int32,System.Single[],System.Boolean,System.Boolean)">
  <summary>
  Populates FishTime(ngroups) and FishRateNo(group,time) with fishing mortality rates for a timestep from the current Biomass, Effort
  </summary>
@@ -24304,6 +24360,7 @@ min_B_QB: minimum B*QB.
  Get/set whether data should be written only for groups and fleets that 
  are selected.
  </summary>
+ <seealso cref="P:EwECore.cEcospaceModelParameters.UseAnnualOuput"/>
  -----------------------------------------------------------------------
 </member>
 <member name="P:EwECore.cEcospaceModelParameters.UseCoreOutputDirectory">
@@ -25527,10 +25584,21 @@ min_B_QB: minimum B*QB.
  This paves the way to allow a custom depth layer name
  </summary>
 </member>
+<member name="P:EwECore.cEcospaceLayerDepth.IsCapacityEnabled">
+ <summary>
+ This used to be cEcospaceLayer.IsActive()
+ </summary>
+</member>
 <member name="T:EwECore.cEcospaceLayerDriver">
  <summary>
  Layer providing access to Ecospace external driving data.
  </summary>
+</member>
+<member name="P:EwECore.cEcospaceLayerDriver.IsCapacityEnabled">
+ <summary>
+ This used to be cEcospaceLayer.IsActive()
+ </summary>
+ <returns></returns>
 </member>
 <member name="T:EwECore.cEcospaceLayerEffortZone">
  <summary>
@@ -26210,13 +26278,12 @@ min_B_QB: minimum B*QB.
  <inheritdocs cref="M:EwECore.cEcospaceBaseResultsWriter.FileExtension"/>
  -----------------------------------------------------------------------
 </member>
-<member name="M:EwECore.cEcospaceXYZTResultsWriter.WriteHeader(System.IO.StreamWriter@,System.Int32,EwEUtils.Core.eVarNameFlags,System.String,System.String)">
+<member name="M:EwECore.cEcospaceXYZTResultsWriter.WriteHeader(System.IO.StreamWriter@,EwEUtils.Core.eVarNameFlags,System.String,System.String)">
  -----------------------------------------------------------------------
  <summary>
  Write run info header.
  </summary>
  <param name="strm">The writer to write to.</param>
- <param name="igrp">The group to write the header for.</param>
  <param name="varname">The variable name to write the header for.</param>
  -----------------------------------------------------------------------
 </member>
@@ -26256,6 +26323,22 @@ min_B_QB: minimum B*QB.
  </summary>
  <param name="varname"></param>
  -----------------------------------------------------------------------
+</member>
+<member name="T:EwECore.cBiomassResultsDataSource">
+ <summary>
+ Implementation of <see cref="T:EwECore.cEcospaceResultsWriterDataSourceBase">cResultsDataSourceBase</see> for biomass averaged over the total modeled area.
+ </summary>
+</member>
+<member name="T:EwECore.cCatchResultsDataSource">
+ <summary>
+ Implementation of <see cref="T:EwECore.cEcospaceResultsWriterDataSourceBase">cResultsDataSourceBase</see> for catch averaged over the total modeled area.
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="T:EwECore.cCatchResultsDataSource.cCatch">
+ <summary>
+ Local helper class for remembering bits of a landing record.
+ </summary>
 </member>
 <member name="T:EwECore.cEcospaceResultsWriterDataSourceBase">
  <summary>
@@ -26310,13 +26393,6 @@ min_B_QB: minimum B*QB.
  Name of the result field. This can be a group name, fleet name, or a combo of both
  </summary>
 </member>
-<member name="M:EwECore.cEcospaceResultsWriterDataSourceBase.FileNameAbbreviation">
- <summary>
- Four character abbreviation of Variable and Area
- </summary>
- <returns></returns>
- <remarks></remarks>
-</member>
 <member name="P:EwECore.cEcospaceResultsWriterDataSourceBase.AreaIndex">
  <summary>
  Index of the Region for this datasource
@@ -26324,22 +26400,6 @@ min_B_QB: minimum B*QB.
  <value></value>
  <returns></returns>
  <remarks></remarks>
-</member>
-<member name="T:EwECore.cBiomassResultsDataSource">
- <summary>
- Implementation of <see cref="T:EwECore.cEcospaceResultsWriterDataSourceBase">cResultsDataSourceBase</see> for biomass averaged over the total modeled area.
- </summary>
-</member>
-<member name="T:EwECore.cCatchResultsDataSource">
- <summary>
- Implementation of <see cref="T:EwECore.cEcospaceResultsWriterDataSourceBase">cResultsDataSourceBase</see> for catch averaged over the total modeled area.
- </summary>
- <remarks></remarks>
-</member>
-<member name="T:EwECore.cCatchResultsDataSource.cCatch">
- <summary>
- Local helper class for remembering bits of a landing record.
- </summary>
 </member>
 <member name="T:EwECore.cMOTotalResultsDataSource">
  <summary>
@@ -26369,12 +26429,41 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="T:EwECore.cRegionConsuptionResultsDataSource">
  <summary>
- Implementation of <see cref="T:EwECore.cEcospaceResultsWriterDataSourceBase">cResultsDataSourceBase</see> for averaged biomass by region.
+ Implementation of <see cref="T:EwECore.cEcospaceResultsWriterDataSourceBase">cResultsDataSourceBase</see> for averaged consumption by region.
  </summary>
+ <remarks>
+ This code was built for project EcoStar, 2020-2023 St Adrews University, on behalf of Janneke Ransijn and Chris Lynam.
+ </remarks>
 </member>
 <member name="T:EwECore.cRegionConsuptionResultsDataSource.cRegion">
  <summary>
+ Local helper class for remembering bits of a consumption record.
+ </summary>
+</member>
+<member name="T:EwECore.cRegionLandingsResultsDataSource">
+ <summary>
+ Implementation of <see cref="T:EwECore.cEcospaceResultsWriterDataSourceBase">cResultsDataSourceBase</see> for averaged landings by region.
+ </summary>
+ <remarks>
+ This code was built for EU project FutureMares on behalf of Chris Lynam.
+ </remarks>
+</member>
+<member name="T:EwECore.cRegionLandingsResultsDataSource.cRegion">
+ <summary>
  Local helper class for remembering bits of a landing record.
+ </summary>
+</member>
+<member name="T:EwECore.cRegionValueResultsDataSource">
+ <summary>
+ Implementation of <see cref="T:EwECore.cEcospaceResultsWriterDataSourceBase">cResultsDataSourceBase</see> for averaged value by region.
+ </summary>
+ <remarks>
+ This code was built for EU project FutureMares on behalf of Chris Lynam.
+ </remarks>
+</member>
+<member name="T:EwECore.cRegionValueResultsDataSource.cRegion">
+ <summary>
+ Local helper class for remembering bits of a value record.
  </summary>
 </member>
 <member name="T:EwECore.EcoSpaceTimeStepDelegate">
@@ -26420,7 +26509,7 @@ min_B_QB: minimum B*QB.
  <summary>
  Converts an iGroup into a cumulative stanza index Nvarsplit
  </summary>
- <remarks>Populated in initSpatialEqulibrium().  
+ <remarks>Populated in initSpatialEqulibrium().
  Use to access stanza varaibles that are stored after the groups in biologial indexes of spatial matrixes.
  </remarks>
 </member>
@@ -26443,16 +26532,16 @@ min_B_QB: minimum B*QB.
  </summary>
 </member>
 <member name="F:EwECore.cEcoSpace.nSpinUp">
- <summary>Number of timesteps in the total Spin-Up period</summary>   
+ <summary>Number of timesteps in the total Spin-Up period</summary>
 </member>
 <member name="F:EwECore.cEcoSpace.nSpinUpYear">
- <summary>Number of timesteps in one year used by Spin-Up.</summary>   
+ <summary>Number of timesteps in one year used by Spin-Up.</summary>
 </member>
 <member name="F:EwECore.cEcoSpace.iSpinUp">
- <summary>Cumulative Spin-Up counter</summary>   
+ <summary>Cumulative Spin-Up counter</summary>
 </member>
 <member name="F:EwECore.cEcoSpace.iSpinUpYear">
- <summary>Yearly Spin-Up counter</summary>   
+ <summary>Yearly Spin-Up counter</summary>
 </member>
 <member name="F:EwECore.cEcoSpace.bInitSpinUpBase">
  <summary>Does the Spin-Up base biomass need initialization</summary>
@@ -26461,7 +26550,7 @@ min_B_QB: minimum B*QB.
  <summary>
  Converts a cumulative stanza index(Nvarsplit) into an iGroup index
  </summary>
- <remarks>Computed in initSpatialEquilibrium(). 
+ <remarks>Computed in initSpatialEquilibrium().
  This is the opposite of IecoCode().
  </remarks>
 </member>
@@ -26483,10 +26572,10 @@ min_B_QB: minimum B*QB.
  Exposes the MessagePublisher instance so that the core can add message handlers
  </summary>
  <remarks>
-  All messages from EcoSpace to the core are passed via this MessagePublisher. 
-  The core adds a message handler during Ecospace initialization <see cref="M:EwECore.cCore.InitEcospace"> InitEcospace()</see> 
+  All messages from EcoSpace to the core are passed via this MessagePublisher.
+  The core adds a message handler during Ecospace initialization <see cref="M:EwECore.cCore.InitEcospace"> InitEcospace()</see>
  </remarks>
- ----------------------------------------------------------------------- 
+ -----------------------------------------------------------------------
 </member>
 <member name="P:EwECore.cEcoSpace.EcoPathData">
  <summary>
@@ -26511,10 +26600,10 @@ min_B_QB: minimum B*QB.
  </summary>
  <returns>True if Ecospace ran successfully. False otherwise.</returns>
  <remarks>
- cEcoSpace.Run() runs Ecospace on the same thread as the calling routine. 
- It is used when you need run Ecospace in some kind of a looping structure 
- and gather the results at the end of each run. 
- <see cref="M:EwECore.cMPARandomSearch.runSearch">MPA Optimization </see> 
+ cEcoSpace.Run() runs Ecospace on the same thread as the calling routine.
+ It is used when you need run Ecospace in some kind of a looping structure
+ and gather the results at the end of each run.
+ <see cref="M:EwECore.cMPARandomSearch.runSearch">MPA Optimization </see>
  </remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.RunThreaded">
@@ -26523,9 +26612,9 @@ min_B_QB: minimum B*QB.
  </summary>
  <returns>True if the EcoSpace run was successfully started, this does not mean the run has successfully completed. False otherwise.</returns>
  <remarks>
- Starts EcoSpace running on a seperate thread and returns immediately. 
- Once the EcoSpace run has completed the <see cref="P:EwECore.cEcoSpace.RunCompletedDelegate">RunCompletedDelegate</see> 
- will be called with the success or failure of the run.   
+ Starts EcoSpace running on a seperate thread and returns immediately.
+ Once the EcoSpace run has completed the <see cref="P:EwECore.cEcoSpace.RunCompletedDelegate">RunCompletedDelegate</see>
+ will be called with the success or failure of the run.
  Used by the interface so running EcoSpace does not block the interface.
 </remarks>
 </member>
@@ -26537,7 +26626,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.FindSpatialEquilibrium">
  <summary>
- 
+
  </summary>
  <remarks>
  This routine attempts to seek spatial equilibrium in ecosim biomasses, given mpa pattern
@@ -26567,8 +26656,8 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.ForceBiomassWithEcosimTimeSeries(System.Int32)">
  <summary>
- VC stole this from Ecosim 
- Force Ecospace Biomass with Ecosim time series forced biomass 
+ VC stole this from Ecosim
+ Force Ecospace Biomass with Ecosim time series forced biomass
  </summary>
 </member>
 <member name="M:EwECore.cEcoSpace.UpdateDepthMap">
@@ -26602,14 +26691,14 @@ min_B_QB: minimum B*QB.
  <summary>
  Redim or Clear all variables that are needed for an Ecospace run
  </summary>
- <remarks>In EwE5 this was handled inside FindSpatialEquilibrium. 
+ <remarks>In EwE5 this was handled inside FindSpatialEquilibrium.
  These are variables that will be populated by the Ecospace initialization initSpatialEquilibrium().
  This should not contain any data that was populated by the database.
  </remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.derivtRed(System.Single[],System.Single[]@,System.Single[]@,System.Single[],System.Single[]@,System.Single)">
  <summary>
- Local version of derivtRed() used by Ecospace during initialization ONLY 
+ Local version of derivtRed() used by Ecospace during initialization ONLY
  </summary>
  <param name="Biomass">Input Biomass of all the groups</param>
  <param name="Flowin">Ouput Flow of biomass into a cell  </param>
@@ -26624,7 +26713,7 @@ min_B_QB: minimum B*QB.
 <member name="M:EwECore.cEcoSpace.ScaleRelativePrimaryProductivityToEcopathLevel">
  -----------------------------------------------------------------------
  <summary>
- Returns a scaling factor to ensure that the total primary productivity 
+ Returns a scaling factor to ensure that the total primary productivity
  is the same in Ecospace and Ecopath.
  </summary>
  <returns>
@@ -26635,7 +26724,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.ScaleSailingCost">
  <summary>
- Scaling Sailing cost 
+ Scaling Sailing cost
  </summary>
  <remarks></remarks>
 </member>
@@ -26649,7 +26738,7 @@ min_B_QB: minimum B*QB.
 <member name="M:EwECore.cEcoSpace.RelMove(System.Int32,System.Int32,System.Int32)">
  <summary>
  Returns the relative movement from bad habitat multiplier based on preferred habitat and percentage of habitat type in the cell.
- <see cref="F:EwECore.cEcospaceDataStructures.PrefHab">Preferred habitat</see> 
+ <see cref="F:EwECore.cEcospaceDataStructures.PrefHab">Preferred habitat</see>
  <see cref="F:EwECore.cEcospaceDataStructures.PHabType">Percentage of habitat type in a cell</see>
  </summary>
  <param name="ip">Group index</param>
@@ -26660,8 +26749,8 @@ min_B_QB: minimum B*QB.
  Otherwise returns Relative movement from bad habitat from the interface.
  </returns>
  <remarks>
- This is only used for the migration movement <see cref="M:EwECore.cEcoSpace.VaryMigMovementParameters(System.Int32)"> Migration movement</see>. 
- Movement/difussion rates across cells are set in <see cref="M:EwECore.cEcoSpace.SetMovementParameters">SetMovementParameters</see> 
+ This is only used for the migration movement <see cref="M:EwECore.cEcoSpace.VaryMigMovementParameters(System.Int32)"> Migration movement</see>.
+ Movement/difussion rates across cells are set in <see cref="M:EwECore.cEcoSpace.SetMovementParameters">SetMovementParameters</see>
  based on habitat capacity <see cref="F:EwECore.cEcospaceDataStructures.HabCap">HabCap</see>.
  </remarks>
 </member>
@@ -26681,7 +26770,7 @@ min_B_QB: minimum B*QB.
  in proportion to relative profitability (catch rate x price sum) for that cell for the gear
  </summary>
  <remarks>
- The load sharing works by spinning in a loop requesting the next available fleet to process. 
+ The load sharing works by spinning in a loop requesting the next available fleet to process.
  Once all the fleets have been processed the thread will exit.
  </remarks>
 </member>
@@ -26700,8 +26789,8 @@ min_B_QB: minimum B*QB.
  <param name="iMonth"></param>
  <param name="iCumMonth"></param>
  <remarks>
- In this version the effort distribution threads will request the next available fleet for effort distribution. 
- Once all the fleets have been completed all the threads will exit.  
+ In this version the effort distribution threads will request the next available fleet for effort distribution.
+ Once all the fleets have been completed all the threads will exit.
  </remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.AdjustTotalEffort">
@@ -26727,9 +26816,15 @@ min_B_QB: minimum B*QB.
  <param name="Dt"></param>
  <remarks></remarks>
 </member>
+<member name="M:EwECore.cEcoSpace.SetMigGradThreaded">
+ <summary>
+ Multi-threaded version of <see cref="M:EwECore.cEcoSpace.SetMigGrad"/>
+ </summary>
+ <seealso cref="M:EwECore.cEcoSpace.CalcMigGradThread(System.Int32,System.Int32,System.Int32,System.Int32)"/>
+</member>
 <member name="M:EwECore.cEcoSpace.getMigMoveRate(System.Single[0:,0:,0:],System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
  <summary>
- Calculate the directional flow rate (Bcw,c,d,e) dependant on migratory movement. 
+ Calculate the directional flow rate (Bcw,c,d,e) dependant on migratory movement.
  Base dispersal if inside a migratory area, rapid dispersal if outside migratory area.
  </summary>
  <param name="BaseFlow">Directional flow rate for a cell. Bcw, c, d or e arrays</param>
@@ -26767,14 +26862,14 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.SpaceSplitUpdate">
  <summary>
-  updates numbers, weight, and biomass for multiple stanza species using information 
+  updates numbers, weight, and biomass for multiple stanza species using information
   on average performance (eatenby, loss) over ecospace grid cells used by the species
  </summary>
  <remarks></remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.InitIBM">
  <summary>
- Wraps the initialization of Ecospace IBM 
+ Wraps the initialization of Ecospace IBM
  </summary>
  <remarks>Initialize IMB packet numbers, weights, and positions</remarks>
 </member>
@@ -26791,7 +26886,7 @@ min_B_QB: minimum B*QB.
  Finds nearest suitable cell for IBM packets entering a stanza in a cell not suitable for that stanza
  </summary>
  <remarks>
- 
+
  </remarks>
 </member>
 <member name="M:EwECore.cEcoSpace.setHabCapFromHabitat">
@@ -26802,7 +26897,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cEcoSpace.SetHabCap">
  <summary>
- Set capacity maps from all input sources 
+ Set capacity maps from all input sources
  Habitats, habitat preference, habitat proportion in cell, Input Capacity Maps and enviromental response functions.
  </summary>
  <remarks>
@@ -26822,8 +26917,8 @@ min_B_QB: minimum B*QB.
  <summary>
  Multithreaded version
  Adjust habcap’s so as to cause oriented movement toward nearest good cells. It should be much, much faster than 
- old habgrad, uses dynamic programming to find minimum distances from bad cells to good ones and then exponential 
- decrease in habcap with those distances; I have used the same algorithm to find things like minimum distances to 
+ old habgrad, uses dynamic programming to find minimum distances from bad cells to good ones and then exponential
+ decrease in habcap with those distances; I have used the same algorithm to find things like minimum distances to
  fishing ports, nice because it even works for moving creatures around island barriers and such.
  </summary>
 </member>
@@ -26859,12 +26954,23 @@ min_B_QB: minimum B*QB.
  </summary>
  <returns>True if enviromental response functions were used to set habitat capacity. False otherwise.</returns>
  <remarks>
- Enviromental response functions are multiplied onto the existing capacity. 
+ Enviromental response functions are multiplied onto the existing capacity.
  This allows the response function to reduce the capacity.
  </remarks>
 </member>
 <member name="F:EwECore.cEcospaceDataStructures.DEFAULT_COORDINATESYSTEM">
  <summary>ESRI projection string of the default WGS_84 projection of Ecospace.</summary>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.UseSystemMutex">
+ <summary>
+ Flag to indicate that a system-wide mutex should be used to safeguard spat temp data exchange. 
+ </summary>
+ <remarks>
+ This will be used in cEcospace.SetSpatialTemporal data. Commented:
+ When running multiple cores on the same computer at the same time, different processes reading the same files from disk can cause funky behaviour. 
+ Model that should run the same sometimes give different results. Mutex is an attempt to solve this to enforce that only ONE ecospace instance at 
+ the time can ask for external spat temp data.
+ </remarks>
 </member>
 <member name="F:EwECore.cEcospaceDataStructures.GroupDBID">
  <summary>Array of ecospace group database IDs.</summary>
@@ -27042,6 +27148,12 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.cEcospaceDataStructures.CellArea">
  <summary>Modeled area, in area units^2 by Row, Col.</summary>
 </member>
+<member name="F:EwECore.cEcospaceDataStructures.RegionArea">
+ <summary>Region area, in area units^2. Region 0 represents the entire area.</summary>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.RegionCells">
+ <summary>Region cells. Region 0 represents the entire area.</summary>
+</member>
 <member name="F:EwECore.cEcospaceDataStructures.TL">
  <summary>Trophic Level by Row, Col, Group.</summary>
 </member>
@@ -27141,6 +27253,15 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.cEcospaceDataStructures.ResultsCatchRegionGearGroupYear">
  <summary>ResultsCatchRegionGearGroup( nRegions, nFleets, nGroups, nYears)</summary>
 </member>
+<member name="F:EwECore.cEcospaceDataStructures.ResultsLandingsRegionGearGroup">
+ <summary>ResultsRegionLandingsGearGroup(nRegions, nFleets, nGroups, nTimesteps)</summary>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.ResultsValueRegionGearGroup">
+ <summary>ResultsRegionValueGearGroup(nRegions, nFleets, nGroups, nTimesteps)</summary>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.ResultsRegionConsumptionPredPrey">
+ <summary>ResultsConsumptionPredPrey(nRegions, nGroups, nGroups, nTimesteps)</summary>
+</member>
 <member name="F:EwECore.cEcospaceDataStructures.ResultsByFleet">
  <summary>ResultsByFleet(nvars,nFleets,NumberOfTimeSteps)</summary>
 </member>
@@ -27152,9 +27273,6 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="F:EwECore.cEcospaceDataStructures.ResultsRegionGroupYear">
  <summary>ResultsRegionGroup(nRegions, nGroups, nYears)</summary>
-</member>
-<member name="F:EwECore.cEcospaceDataStructures.ResultsRegionConsumptionPredPrey">
- <summary>ResultsConsumptionPredPrey(nRegions, nGroups, nGroups, nTimesteps)</summary>
 </member>
 <member name="F:EwECore.cEcospaceDataStructures.ResultsByGroup">
  <summary> Summarized time step data </summary>
@@ -27505,6 +27623,11 @@ min_B_QB: minimum B*QB.
  <summary>
  Save the threading run time log. By default this will be turned off, the log will not be saved. 
  Used by plugins or external process to optimize run threading.
+ </summary>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.ConKdetSpace">
+ <summary>
+ Flow of detritus for each cell in the Ecospace map 
  </summary>
 </member>
 <member name="P:EwECore.cEcospaceDataStructures.isCapacityChanged">
@@ -27888,10 +28011,10 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="F:EwECore.cSpaceSolver.WaitHandle">
  <summary>
- Wait handle
+ Wait handle 
  </summary>
  <remarks>
- When the Solve() thread is running (SignalState in a non-signaled state SignalState.Reset())
+ When the Solve() thread is running (SignalState in a non-signaled state SignalState.Reset()) 
  calls to SignalState.WaitOne() will block until Solve() has completed (SignalState in a signaled state SignalState.Set())
  </remarks>
 </member>
@@ -27904,25 +28027,35 @@ min_B_QB: minimum B*QB.
  <summary>
  Sum of Effort, Sailing Effort, Catch and Value across cells by fleet
  </summary>
- <remarks></remarks>
 </member>
 <member name="F:EwECore.cSpaceSolver.ResultsByGroup">
  <summary>
  Sum of Biomass, Relative Biomass and Catch by group across cells by group
  </summary>
- <remarks></remarks>
 </member>
 <member name="F:EwECore.cSpaceSolver.ResultsByFleetGroup">
- <summary>
- Sum of Catch and Value across cells by fleet group
- </summary>
- <remarks></remarks>
+ <summary>Sum of Catch and Value across cells by fleet group</summary>
+</member>
+<member name="F:EwECore.cSpaceSolver.ResultsCatchRegionGearGroup">
+ <summary>Sum of Catch (absolute) by region x fleet x group.</summary>
+ <remarks>Cell catches are multiplied by <see cref="F:EwECore.cEcospaceDataStructures.CellArea"/></remarks>
+</member>
+<member name="F:EwECore.cSpaceSolver.ResultsLandingsRegionGearGroup">
+ <summary>Average landings (absolute) by region x fleet x group</summary>
+ <remarks>Cell landings are multiplied by <see cref="F:EwECore.cEcospaceDataStructures.CellArea"/></remarks>
+</member>
+<member name="F:EwECore.cSpaceSolver.ResultsValueRegionGearGroup">
+ <summary>Average value (absolute) by region x fleet x group</summary>
+ <remarks>Cell values are multiplied by <see cref="F:EwECore.cEcospaceDataStructures.CellArea"/></remarks>
+</member>
+<member name="F:EwECore.cSpaceSolver.ResultsConsumptionRegionPredPrey">
+ <summary>Sum of consumption by region x pred x prey</summary>
+ <remarks>Cell consumptions are multiplied by <see cref="F:EwECore.cEcospaceDataStructures.CellArea"/></remarks>
 </member>
 <member name="F:EwECore.cSpaceSolver.Landings">
  <summary>
  Sum of Landings across cells by group fleet
  </summary>
- <remarks></remarks>
 </member>
 <member name="F:EwECore.cSpaceSolver.FishRateGear">
  <summary>
@@ -27959,14 +28092,14 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cSpaceSolver.Solve(System.Object)">
  <summary>
- This is the method that the ThreadPool calls.
+ This is the method that the ThreadPool calls. 
  It must have the object argument to match the Delegate signature required by ThreadPool.QueueUserWorkItem()
  </summary>
  <remarks></remarks>
 </member>
 <member name="M:EwECore.cSpaceSolver.SetRelaSwitch(System.Single[])">
  <summary>
- Sets RelaSwitch()
+ Sets RelaSwitch() 
  </summary>
  <param name="B">Biomass at this time step for this spatial cell</param>
  <remarks>Sets RelaSwitch() using local B() and  Ecosim.A(), Ecosim.SwitchPower(), Ecosim.BaseTimeSwitch()  </remarks>
@@ -27995,7 +28128,7 @@ min_B_QB: minimum B*QB.
 </member>
 <member name="M:EwECore.cSpaceSolver.accumCatchData(System.Int32,System.Int32,System.Single[],System.Single[],System.Int32,System.Int32)">
  <summary>
- Accumulate the fisheries data (catch) for a single group for this map cell.
+ Accumulate the fisheries data (catch) for a single group for this map cell. 
  This is called before DerivtRed(), in the time step, so it is the condition at the start of the time step.
  </summary>
  <param name="Biomass">Biomass for all the groups at this time step</param>
@@ -28012,6 +28145,22 @@ min_B_QB: minimum B*QB.
  <param name="Consumpt">Consumption by consumer,prey  </param>
  <param name="EatenBy">Total biomass consumed by a group </param>
  <remarks>Trophic level is only calculated if <see cref="F:EwECore.cEcospaceDataStructures.bCalTrophicLevel">bCalTrophicLevel</see> = True</remarks>
+</member>
+<member name="M:EwECore.cENAData.Populate(EwECore.cEcospaceDataStructures,System.Single[],System.Single[],System.Single[0:,0:],System.Single[],System.Single[],System.Single[],System.Single[],System.Single)">
+ -----------------------------------------------------------------------
+ <summary>
+ Populate the internal <see cref="T:EwECore.cENARDataStructures"/> with new data.
+ </summary>
+ <param name="SpaceData"></param>
+ <param name="Biomass"></param>
+ <param name="Production"></param>
+ <param name="consumpt"></param>
+ <param name="FishingMort"></param>
+ <param name="EatenOf"></param>
+ <param name="FlowToDertitus"></param>
+ <param name="DetritusFlowByGroup"></param>
+ <param name="TotfisheriesDiscards"></param>
+ -----------------------------------------------------------------------
 </member>
 <member name="F:EwECore.cENARDataStructures.CatchExport">
  <summary>
@@ -29116,7 +29265,7 @@ pass in params that this method needs instead of obtaining them from the manager
 </member>
 <member name="M:EwECore.cEcosimMonteCarlo.CalculateUpperLowerLimits(System.Boolean,EwECore.eMCParams)">
  <summary>
- Calculte the Upper and Lower Parameter limits from CV values
+ Calculate the Upper and Lower Parameter limits from CV values
  </summary>
  <param name="IsCrashEvaluated">Not USED!</param>
  <param name="param">The parameter to calculate, or <see cref="F:EwECore.eMCParams.NotSet"/> to calculate all.</param>
@@ -29130,6 +29279,14 @@ pass in params that this method needs instead of obtaining them from the manager
  <param name="cv"></param>
  <param name="iPred"></param>
  <param name="EcopathDiet"></param>
+</member>
+<member name="M:EwECore.cEcosimMonteCarlo.RandomNormal">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns a random normal distributed value between -1 and 1
+ </summary>
+ <returns></returns>
+ -----------------------------------------------------------------------
 </member>
 <member name="T:EwECore.cMonteCarloManager">
  <summary>
@@ -33753,10 +33910,27 @@ Passed into the Constructor
  <inheritdocs cref="P:EwECore.cShapeFunction.nParameters"/>
  -----------------------------------------------------------------------
 </member>
+<member name="P:EwECore.cComputedShapeFunction.ParamName(System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the name of a parameter. By default, one of the four standard
+ shape paramter names is returned (e.g., YZero, YEnd, YBase and Steepness)
+ </summary>
+ <param name="iParam">The one-based parameter index [1, <see cref="P:EwECore.cComputedShapeFunction.nParameters"/>]
+ to obtain the name for.</param>
+ -----------------------------------------------------------------------
+</member>
 <member name="P:EwECore.cComputedShapeFunction.ShapeFunctionType">
  -----------------------------------------------------------------------
  <inheritdocs cref="M:EwECore.cShapeFunction.Defaults"/>
  -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cComputedShapeFunction.ShapeData(System.Int32)">
+ <summary>
+ 
+ </summary>
+ <param name="iPoint">One-based index!</param>
+ <returns></returns>
 </member>
 <member name="P:EwECore.cExponentialShapeFunction.ParamName(System.Int32)">
  -----------------------------------------------------------------------
@@ -34092,7 +34266,7 @@ Passed into the Constructor
 <member name="M:EwECore.cShapeFunction.Max">
  -----------------------------------------------------------------------
  <summary>
- Returns the max value in the shape buffer.
+ Returns the max value in the shape points buffer.
  </summary>
  <returns></returns>
  -----------------------------------------------------------------------
@@ -34369,6 +34543,13 @@ Passed into the Constructor
  </summary>
  -----------------------------------------------------------------------
 </member>
+<member name="P:EwECore.cFleetTimeSeries.CanApplyToAllGroups">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns whether this fleet time series type can be broadly applied to all groups at once
+ </summary>
+ -----------------------------------------------------------------------
+</member>
 <member name="T:EwECore.cGroupTimeSeries">
  -----------------------------------------------------------------------
  <summary>
@@ -34502,12 +34683,43 @@ Passed into the Constructor
  <returns>True if successful.</returns>
  -----------------------------------------------------------------------
 </member>
+<member name="M:EwECore.cTimeSeries.IsDriver">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns whether a time series is a driver series.
+ </summary>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
 <member name="M:EwECore.cTimeSeries.IsReference">
  -----------------------------------------------------------------------
  <summary>
- Helper method, states whether a time series is a reference series.
+ Returns whether a time series is a reference series.
  </summary>
  <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cTimeSeries.IsRelative">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns whether a time series uses relative data.
+ </summary>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cTimeSeries.IsAbsolute">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns whether a time series uses absolute.
+ </summary>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cTimeSeries.IsValid">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns whether this time series has all necessary data to be applied.
+ </summary>
  -----------------------------------------------------------------------
 </member>
 <member name="P:EwECore.cTimeSeries.ValidationStatus">
@@ -34531,6 +34743,27 @@ Passed into the Constructor
  <summary>
  Get the <see cref="T:EwECore.eTSDataSetInterval">interval</see> for the time series.
  </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cTimeSeries.Category(EwECore.eTimeSeriesType)">
+ -----------------------------------------------------------------------
+ <summary>
+ Determine the <see cref="T:EwECore.eTimeSeriesCategoryType">Time series category</see>
+ based on a <see cref="T:EwECore.eTimeSeriesType">Time series type</see>. For instance,
+ time series types <see cref="F:EwECore.eTimeSeriesType.Catches"/>
+ and <see cref="F:EwECore.eTimeSeriesType.FishingEffort"/>
+ are <see cref="F:EwECore.eTimeSeriesCategoryType.Fleet"/>-related time series. With the
+ Discardless changes time series category <see cref="F:EwECore.eTimeSeriesCategoryType.FleetGroup"/>
+ was introduced.
+ </summary>
+ <param name="DatType">The type to get the category for.</param>
+ <remarks>
+ This method was added to centralize interpretation of the awkward enumerator 
+ <see cref="T:EwECore.eTimeSeriesType">eTimeSeriesType</see>.
+ </remarks>
+ <returns>
+ A time series category for the provided time series type.
+ </returns>
  -----------------------------------------------------------------------
 </member>
 <member name="T:EwECore.cTimeSeriesDataset">
@@ -34759,6 +34992,12 @@ Passed into the Constructor
  Index to the current year/datatype
  </summary>
  <remarks>This is increment for each data type each time the stats are collected. Once a year.</remarks>
+</member>
+<member name="F:EwECore.cTimeSeriesDataStructures.Yhat">
+ <summary>
+ Value predicted by the model (log). 
+ Used by cF2TSModel fit to time series to tell how much change each parameter tweak made.
+ </summary>
 </member>
 <member name="F:EwECore.cTimeSeriesDataStructures.Erpred">
  <summary>log(observed/predicted) by observation</summary>
@@ -35513,7 +35752,7 @@ Passed into the Constructor
 <member name="M:EwECore.Shapes.Utility.cShapeImportData.ShapeFunctions">
  -------------------------------------------------------------------
  <summary>
- Returns all avaliable <see cref="T:EwEUtils.Core.IShapeFunction">shape functions</see>, provuded
+ Returns all avaliable <see cref="T:EwEUtils.Core.IShapeFunction">shape functions</see>, provided
  by the EwE core and plug-ins.
  </summary>
  <returns>All avaliable <see cref="T:EwEUtils.Core.IShapeFunction">shape functions</see>.</returns>
@@ -37831,12 +38070,6 @@ Passed into the Constructor
  <remarks>Validator are created in the constructor and kept in a dictionary. 
  Only one instance of each validator is use. This will return the same validator on each call for a VarName.
  </remarks>
-</member>
-<member name="T:EwECore.cValidatorOutput">
- <summary>
- Validate output objects. This will set the status flag to a value appropriate to the output
- </summary>
- <remarks></remarks>
 </member>
 </members>
 </doc>
