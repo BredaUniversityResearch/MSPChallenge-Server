@@ -84,9 +84,9 @@ class CreatePolicyPlanCommand extends Command
         $gameSessionId = $input->getOption(self::OPTION_GAME_SESSION_ID);
         while ((false == $rs = ctype_digit($gameSessionId)) ||
             (false === $this->connectionManager->getCachedServerManagerDbConnection()->executeQuery(
-                    'SHOW DATABASES LIKE :dbName',
-                    ['dbName' => $this->connectionManager->getGameSessionDbName((int)$gameSessionId)]
-                )->fetchOne())) {
+                'SHOW DATABASES LIKE :dbName',
+                ['dbName' => $this->connectionManager->getGameSessionDbName((int)$gameSessionId)]
+            )->fetchOne())) {
             if ($rs) { // meaning that the game session ID is a number but the database does not exist
                 $io->error('Game session database with ID ' . $gameSessionId . ' does not exist');
             }
@@ -131,7 +131,6 @@ class CreatePolicyPlanCommand extends Command
             return $answer;
         });
         return $this->askAndValidateName($question, $names, $helper, $input, $output, $io);
-
     }
 
     /**
