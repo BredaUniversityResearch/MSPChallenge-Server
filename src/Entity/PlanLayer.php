@@ -43,6 +43,7 @@ class PlanLayer
     public function setPlan(?Plan $plan): PlanLayer
     {
         $this->plan = $plan;
+        $this->plan?->addPlanLayer($this);
         return $this;
     }
 
@@ -54,6 +55,7 @@ class PlanLayer
     public function setLayer(?Layer $layer): PlanLayer
     {
         $this->layer = $layer;
+        $this->layer?->addPlanLayer($this);
         return $this;
     }
 

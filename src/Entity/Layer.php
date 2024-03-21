@@ -14,7 +14,7 @@ class Layer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, length: 11)]
-    private ?int $layerId;
+    private ?int $layerId = null;
 
     #[ORM\OneToMany(mappedBy: 'originalLayer', targetEntity: Layer::class, cascade: ['persist'])]
     private Collection $derivedLayer;
@@ -63,16 +63,16 @@ class Layer
     private ?string $layerKpiCategory = 'Miscellaneous';
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $layerType;
+    private ?string $layerType = null;
 
     #[ORM\Column(type: Types::SMALLINT, length: 3, options: ['default' => 1])]
     private ?int $layerDepth = 1;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $layerInfoProperties;
+    private ?string $layerInfoProperties = null;
 
     #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
-    private ?string $layerInformation;
+    private ?string $layerInformation = null;
 
     #[ORM\Column(type: Types::STRING, length: 1024, options: ['default' => '{}'])]
     private ?string $layerTextInfo = '{}';
@@ -89,7 +89,7 @@ class Layer
         '[{"state":"ASSEMBLY","time":2},{"state":"ACTIVE","time":10},{"state":"DISMANTLE","time":2}]';
 
     #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]
-    private ?string $layerRaster;
+    private ?string $layerRaster = null;
 
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 100])]
     private ?float $layerLastupdate = 100;
@@ -98,7 +98,7 @@ class Layer
     private ?int $layerMelupdate = 0;
 
     #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]
-    private ?string $layerEditingType;
+    private ?string $layerEditingType = null;
 
     #[ORM\Column(type: Types::STRING, length: 512, options: ['default' => 'Default'])]
     private ?string $layerSpecialEntityType = 'Default';
@@ -113,10 +113,10 @@ class Layer
     private ?float $layerFilecreationtime = 0;
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private ?string $layerMedia;
+    private ?string $layerMedia = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    private ?float $layerEntityValueMax;
+    private ?float $layerEntityValueMax = null;
 
     #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
     private ?string $layerTags = null;
@@ -150,23 +150,23 @@ class Layer
 
     private bool $layerGeometryWithGeneratedMspids = false;
 
-    private ?bool $layerDownloadFromGeoserver;
+    private ?bool $layerDownloadFromGeoserver = null;
 
-    private ?string $layerPropertyAsType;
+    private ?string $layerPropertyAsType = null;
 
-    private ?int $layerWidth;
+    private ?int $layerWidth = null;
 
-    private ?int $layerHeight;
+    private ?int $layerHeight = null;
 
-    private ?string $layerRasterMaterial;
+    private ?string $layerRasterMaterial = null;
 
-    private ?bool $layerRasterFilterMode;
+    private ?bool $layerRasterFilterMode = null;
 
-    private ?bool $layerRasterColorInterpolation;
+    private ?bool $layerRasterColorInterpolation = null;
 
-    private ?string $layerRasterPattern;
+    private ?string $layerRasterPattern = null;
 
-    private ?float $layerRasterMinimumValueCutoff;
+    private ?float $layerRasterMinimumValueCutoff = null;
 
     private ?string $layerRasterURL = null;
 
@@ -437,7 +437,7 @@ class Layer
         return $this->layerGeotype;
     }
 
-    public function setLayerGeotype($layerGeotype): Layer
+    public function setLayerGeotype(?string $layerGeotype): Layer
     {
         $this->layerGeotype = $layerGeotype;
         return $this;
@@ -573,7 +573,7 @@ class Layer
             $layerTextInfo = "";
         }
         if (is_array($layerTextInfo)) {
-            $layerTextInfo = json_encode($layerTextInfo);
+            $layerTextInfo = json_encode($layerTextInfo, JSON_FORCE_OBJECT);
         }
         $this->layerTextInfo = $layerTextInfo;
         return $this;

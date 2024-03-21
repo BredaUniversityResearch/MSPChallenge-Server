@@ -132,6 +132,7 @@ class Geometry
     public function setLayer(?Layer $layer): Geometry
     {
         $this->layer = $layer;
+        $this->layer?->addGeometry($this);
         return $this;
     }
 
