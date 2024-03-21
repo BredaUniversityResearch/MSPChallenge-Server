@@ -19,6 +19,8 @@
 [Ss]imulations/**/*_[Ll]og.*
 [Ss]imulations/v1/win-x64/mel-ewe-dump/**
 [Ss]imulations/**/MSP games.xml
+[Ss]imulations/**/MSP game load.xml
+[Ss]imulations/**/MSP game save.xml
 
 #Stuff for Simulations
 Simulations/MEL/EwE/**
