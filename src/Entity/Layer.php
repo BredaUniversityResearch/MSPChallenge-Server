@@ -441,7 +441,7 @@ class Layer
         return $this->layerGeotype;
     }
 
-    public function setLayerGeotype($layerGeotype): Layer
+    public function setLayerGeotype(?string $layerGeotype): Layer
     {
         $this->layerGeotype = $layerGeotype;
         return $this;
