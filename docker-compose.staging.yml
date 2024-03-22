@@ -14,7 +14,7 @@ services:
       - /srv/app/vendor
       - /srv/app/var/cache
     environment:
-      URL_WEB_SERVER_HOST: localhost
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
       APP_SECRET: ${APP_SECRET}
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
 
@@ -24,7 +24,7 @@ services:
       context: .
       target: caddy_prod
     environment:
-      SERVER_NAME: :80
+      SERVER_NAME: ${SERVER_NAME:-:80}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
 
