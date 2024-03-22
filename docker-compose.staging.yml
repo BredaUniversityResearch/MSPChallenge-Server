@@ -3,7 +3,7 @@ version: "3.7"
 # Production environment override
 services:
   php:
-    image: 'mspserver-php-hybrid'
+    image: 'mspserver-php-staging'
     build:
       context: .
       target: php_prod
@@ -14,14 +14,35 @@ services:
       - /srv/app/vendor
       - /srv/app/var/cache
     environment:
+      URL_WEB_SERVER_HOST: localhost
       APP_SECRET: ${APP_SECRET}
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
 
   caddy:
-    image: 'mspserver-caddy-hybrid'
+    image: 'mspserver-caddy-staging'
     build:
       context: .
       target: caddy_prod
     environment:
+      SERVER_NAME: :80
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+
+  adminer:
+    image: 'mspserver-adminer-staging'
+    build:
+      context: .
+      target: adminer_base
+    restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+      ADMINER_PLUGINS: 'sql-log'
+      APP_ENV: ${APP_ENV:-dev}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
+    ports:
+      # run Adminer on port 8082 since 8080 will be used by mitmproxy
+      - 8082:8080
+    networks:
+      - database
+    volumes:
+      - ./docker/adminer/index.php:/var/www/html/index.php:ro
