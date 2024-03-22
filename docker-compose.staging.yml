@@ -37,7 +37,8 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: database
       ADMINER_PLUGINS: 'sql-log'
-      APP_ENV: ${APP_ENV:-dev}
+      # dev enforced here otherwise you won't be able to log in if no password was set
+      APP_ENV: dev
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
     ports:
       # run Adminer on port 8082 since 8080 will be used by mitmproxy
