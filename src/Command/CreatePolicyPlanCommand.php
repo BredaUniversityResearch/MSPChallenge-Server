@@ -42,6 +42,20 @@ class CreatePolicyPlanCommand extends Command
         parent::__construct();
     }
 
+    public function askBannedFleets(SymfonyStyle $io): int
+    {
+        $choices = [
+            1 => 'Bottom Trawl',
+            2 => 'Industrial and Pelagic Trawl',
+            4 => 'Drift and Fixed Nets',
+            3 => 'Bottom Trawl + Industrial and Pelagic Trawl',
+            5 => 'Bottom Trawl + Drift and Fixed Nets',
+            6 => 'Industrial and Pelagic Trawl + Drift and Fixed Nets',
+            7 => 'Bottom Trawl + Industrial and Pelagic Trawl + Drift and Fixed Nets'
+        ];
+        return self::ioChoice($io, 'Choose banned fleets', $choices, current($choices));
+    }
+
     /**
      * @param Question $question
      * @param array $names
@@ -151,14 +165,12 @@ class CreatePolicyPlanCommand extends Command
             ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
     }
 
-    public function askPolicyFilterTypeValue(int $choice, SymfonyStyle $io): string
+    public function askPolicyFilterTypeValue(int $choice, SymfonyStyle $io): ?string
     {
-        $policyFilterValue = null;
         if ($choice === 1) { // fleet
-            $choices = [1 => 'Bottom Trawl', 2 => 'Industrial and Pelagic Trawl', 3 => 'Drift and Fixed Nets'];
-            $policyFilterValue = self::ioChoice($io, 'Enter a fleet', $choices, current($choices));
+            return $this->askBannedFleets($io);
         }
-        return $policyFilterValue;
+        throw new \Exception('Invalid choice');
     }
 
     public function askPolicyFilterTypeName(SymfonyStyle $io, int &$choice): string
@@ -250,13 +262,14 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @throws NonUniqueResultException
      * @throws Exception
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->note('Press CTRL+C (+enter) to exit at any time.');
         $gameSessionId = $this->getGameSessionId($input, $io);
-        $io->write('Creating a policy plan for game session ID: '.$gameSessionId);
+        $io->writeln('Creating a policy plan for game session ID: '.$gameSessionId);
         if (null === $layerShort = $this->askPolicyLayerShortName(
             $gameSessionId,
             $input,
@@ -272,6 +285,7 @@ class CreatePolicyPlanCommand extends Command
             return Command::FAILURE;
         }
         $layerGeometryName = null;
+        $geometryBannedFleets = null;
         if ($layer['layerGeotype'] !== 'raster') {
             if (null === $layerGeometryName = $this->askLayerGeometryName(
                 $gameSessionId,
@@ -284,6 +298,7 @@ class CreatePolicyPlanCommand extends Command
                 $io->error('No geometry found for the layer: '.$layerShort);
                 return Command::FAILURE;
             }
+            $geometryBannedFleets = $this->askBannedFleets($io);
         }
         $policyTypeName = $this->askPolicyTypeName($io);
         $policyValue = $this->askPolicyValue($io, $policyTypeName);
@@ -295,6 +310,7 @@ class CreatePolicyPlanCommand extends Command
                 $gameSessionId,
                 $layer,
                 $layerGeometryName,
+                $geometryBannedFleets,
                 $policyTypeName,
                 $policyValue,
                 $policyFilterTypeName,
@@ -377,6 +393,24 @@ class CreatePolicyPlanCommand extends Command
         return $policyFilterValue;
     }
 
+    private function convertBannedFleetFlagsToCommaSeparatedString(int $bannedFleetFlags): string
+    {
+        $result = [];
+        if (($bannedFleetFlags & 1) == 1) {
+            $result[] = '1';
+        }
+        if (($bannedFleetFlags & 2) == 2) {
+            $result[] = '2';
+        }
+        if (($bannedFleetFlags & 4) == 4) {
+            $result[] = '3';
+        }
+        if (empty($result)) {
+            return '0';
+        }
+        return implode(',', $result);
+    }
+
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
@@ -387,6 +421,7 @@ class CreatePolicyPlanCommand extends Command
         int $gameSessionId,
         array $layer,
         ?string $layerGeometryName,
+        ?int $geometryBannedFleets,
         string $policyTypeName,
         mixed $policyValue,
         ?string $policyFilterTypeName,
@@ -411,6 +446,7 @@ class CreatePolicyPlanCommand extends Command
             $layer,
             $gameCurrentMonth,
             $geometry,
+            $geometryBannedFleets,
             $policyTypeName,
             $policyValue,
             $policyFilterTypeName,
@@ -475,9 +511,12 @@ class CreatePolicyPlanCommand extends Command
                 ->setCountry($em->getReference(Country::class, 7))
                 ->setGeometryActive(1)
                 ->setGeometryToSubtractFrom(null)
-                //->setGeometryType('1,2,3')
                 ->setGeometryDeleted(0)
                 ->setGeometryMspid(null);
+            if (null !== $geometryBannedFleets) {
+                $geometryEntity
+                    ->setGeometryType($this->convertBannedFleetFlagsToCommaSeparatedString($geometryBannedFleets));
+            }
             $em->persist($geometryEntity);
             $planLayer = new PlanLayer();
             $planLayer->setLayer($layerEntity)->setPlan($plan)->setPlanLayerState('ACTIVE');

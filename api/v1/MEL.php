@@ -466,13 +466,14 @@ class MEL extends Base
             ->setParameter('layerId', $layer['layerId']);
         if ($geometryTypeFilter !== null) {
             $qb
+                ->addSelect('pf.value as filterValue')
                 ->leftJoin('p.policyFilterLinks', 'pfl')
                 ->leftJoin('pfl.policyFilter', 'pf')
                 ->leftJoin('pf.type', 'pft')
                 ->andWhere('pft.name = :filterTypeName')
                 ->setParameter('filterTypeName', 'fleet')
-                ->andWhere('pf.value = :filterTypeValue')
-                ->setParameter('filterTypeValue', $geometryTypeFilter);
+                ->andWhere('BIT_AND(pf.value,:filterValue) = :filterValue')
+                ->setParameter('filterValue', $geometryTypeFilter);
         }
         $policies = $qb
             ->getQuery()
@@ -533,26 +534,42 @@ class MEL extends Base
         if (empty($geometry)) {
             return;
         }
+        $newResultGeometry = [];
         $result['debug-message'] ??= '';
         $result['debug-message'] .= 'applied policy ' . $policy['name'] . ' with value: ' . $policy['value'] . '.' .
             PHP_EOL;
         foreach ($geometry as $geom) {
+            $geomTypePolicyMatch = array_reduce(
+                $geom['geometryType'],
+                fn($carry, $item) => $carry || ($item & $policy['filterValue']),
+                false
+            );
             // convert our geometry using mariadb's GIS features
             try {
-                $st = $pdo->prepare(
-                    <<< 'SQL'
-                    SELECT AsText(ST_SYMDIFFERENCE(
-                      BUFFER(GeomFromText(:text, 3035), :buffer),
-                      GeomFromText(:text, 3035)
-                    ))
-                    SQL
-                );
+                if ($geomTypePolicyMatch) {
+                    // buffer including the original polygon
+                    $st = $pdo->prepare(
+                        <<< 'SQL'
+                        SELECT AsText(BUFFER(GeomFromText(:text, 3035), :buffer))
+                        SQL
+                    );
+                } else {
+                    // buffer excluding the original polygon
+                    $st = $pdo->prepare(
+                        <<< 'SQL'
+                        SELECT AsText(ST_SYMDIFFERENCE(
+                          BUFFER(GeomFromText(:text, 3035), :buffer),
+                          GeomFromText(:text, 3035)
+                        ))
+                        SQL
+                    );
+                }
                 $st->bindValue('text', self::toWkt(json_decode($geom['geometryPoints'], true)));
                 $st->bindValue('buffer', $policy['value']);
                 $st->execute();
                 // for debugging use https://wktmap.com/ to visualize using EPSG:3035 !
                 $bufferedPolygonText = $st->fetchColumn();
-                $result['geometry'][] = self::fromWkt($bufferedPolygonText);
+                $newResultGeometry[] = self::fromWkt($bufferedPolygonText);
             } catch (\Exception $e) {
                 while (null !== $prev = $e->getPrevious()) {
                     $e = $prev;
@@ -561,5 +578,9 @@ class MEL extends Base
                 continue;
             }
         }
+        if (empty($newResultGeometry)) {
+            return;
+        }
+        $result['geometry'] = $newResultGeometry;
     }
 }
