@@ -165,7 +165,7 @@ class CreatePolicyPlanCommand extends Command
             ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
     }
 
-    public function askPolicyFilterTypeValue(int $choice, SymfonyStyle $io): ?string
+    public function askPolicyFilterTypeValue(int $choice, SymfonyStyle $io): mixed
     {
         if ($choice === 1) { // fleet
             return $this->askBannedFleets($io);
