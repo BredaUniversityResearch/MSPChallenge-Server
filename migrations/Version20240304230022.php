@@ -87,7 +87,10 @@ final class Version20240304230022 extends MSPMigration
     ) ENGINE='InnoDB' COLLATE 'utf8mb4_unicode_ci';
     ALTER TABLE `plan_message` DROP FOREIGN KEY `fk_plan_message_plan1`, ADD FOREIGN KEY (`plan_message_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
     ALTER TABLE `plan_layer` DROP FOREIGN KEY `fk_plan_layer_plan1`, ADD FOREIGN KEY (`plan_layer_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-    ALTER TABLE `approval` DROP FOREIGN KEY `fk_table1_plan2`, ADD FOREIGN KEY (`approval_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION
+    ALTER TABLE `approval` DROP FOREIGN KEY `fk_table1_plan2`, ADD FOREIGN KEY (`approval_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+    INSERT INTO `policy_filter_type` (`id`, `name`, `field_type`, `field_schema`) VALUES (1, 'fleet', 'smallint',	NULL);
+    INSERT INTO `policy_type` (`id`, `name`, `display_name`, `data_type`, `data_config`) VALUES (1,	'buffer', 'Buffer zone', 'ranged', '{\"min\":0,\"unit_step_size\":10000,\"max\":100000}');
+    INSERT INTO `policy_type_filter_type` (`id`, `policy_type_id`, `policy_filter_type_id`) VALUES (1, 1, 1)    
     SQL
         );
     }

@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Domain\Common\EntityEnums\FieldType;
-use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Country;
 use App\Entity\Geometry;
@@ -17,7 +16,6 @@ use App\Entity\PolicyFilterLink;
 use App\Entity\PolicyFilterType;
 use App\Entity\PolicyLayer;
 use App\Entity\PolicyType;
-use App\Entity\PolicyTypeFilterType;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
@@ -346,42 +344,24 @@ class CreatePolicyPlanCommand extends Command
             ->setParameter('layerName', 'policy-plan-test')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:Policy', 'p')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:PolicyFilter', 'pf')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:PolicyTypeFilterType', 'ptft')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:PolicyFilterLink', 'pfl')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:PolicyFilterType', 'pft')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:PolicyType', 'pt')->getQuery()->execute();
         $em->flush();
     }
 
-    private function getPolicyType(string $name): PolicyType
+    private function getPolicyTypes(EntityManagerInterface $em): array
     {
-        // @todo migrate all policy types to the database
-        // define all policy types here
-        $policyType = new PolicyType();
-        $policyType
-            ->setName('buffer')
-            ->setDisplayName('Buffer zone')
-            ->setDataType(PolicyTypeDataType::Ranged)
-            ->setDataConfig(['min' => 0, 'unit_step_size' => 10000, 'max' => 100000]);
-        $policyTypes['Buffer zone'] = $policyType;
-        return $policyTypes[$name];
+        return collect($em->createQueryBuilder()->select('pt')->from(PolicyType::class, 'pt')
+            ->getQuery()->getResult())->keyBy(fn(PolicyType $pt) => $pt->getDisplayName())->all();
     }
 
-    private function getPolicyFilterType(string $name): PolicyFilterType
+    private function getPolicyFilterTypes(EntityManagerInterface $em): array
     {
-        // @todo migrate all policy filter types to the database
-        // define all policy filter types here
-        $policyFilterType = new PolicyFilterType();
-        $policyFilterType
-            ->setName('fleet')
-            ->setFieldType(FieldType::SMALLINT);
-        $policyFilterTypes['fleet'] = $policyFilterType;
-        return $policyFilterTypes[$name];
+        return collect($em->createQueryBuilder()->select('pft')->from(PolicyFilterType::class, 'pft')
+            ->getQuery()->getResult())->keyBy(fn(PolicyFilterType $pft) => $pft->getName())->all();
     }
 
-    private function processPolicyFilterValue(string $policyFilterType, string $policyFilterValue): mixed
+    private function processPolicyFilterValue(PolicyFilterType $policyFilterType, string $policyFilterValue): mixed
     {
-        $policyFilterType = $this->getPolicyFilterType($policyFilterType);
         switch ($policyFilterType->getFieldType()) {
             case FieldType::SMALLINT:
                 return (int) $policyFilterValue;
@@ -441,8 +421,19 @@ class CreatePolicyPlanCommand extends Command
         if ($geometry === false) {
             throw new \Exception('MPA not found');
         }
+
+        $policyTypes = $this->getPolicyTypes($em);
+        if (empty($policyTypes)) {
+            throw new \Exception('No policy types found');
+        }
+        $policyFilterTypes = $this->getPolicyFilterTypes($em);
+        if (empty($policyFilterTypes)) {
+            throw new \Exception('No policy filter types found');
+        }
         $em->wrapInTransaction(function () use (
             $em,
+            $policyTypes,
+            $policyFilterTypes,
             $layer,
             $gameCurrentMonth,
             $geometry,
@@ -452,7 +443,7 @@ class CreatePolicyPlanCommand extends Command
             $policyFilterTypeName,
             $policyFilterValue
         ) {
-            $policyType = $this->getPolicyType($policyTypeName);
+            $policyType = $policyTypes[$policyTypeName];
             $em->persist($policyType);
             $policy = new Policy();
             $policy
@@ -534,22 +525,17 @@ class CreatePolicyPlanCommand extends Command
             if ($policyFilterTypeName == null) {
                 return;
             }
-            $policyFilterType = $this->getPolicyFilterType($policyFilterTypeName);
+            $policyFilterType = $policyFilterTypes[$policyFilterTypeName];
             $em->persist($policyFilterType);
             $policyFilter = new PolicyFilter();
             $policyFilter
                 ->setType($policyFilterType)
-                ->setValue($this->processPolicyFilterValue($policyFilterTypeName, $policyFilterValue));
+                ->setValue($this->processPolicyFilterValue($policyFilterType, $policyFilterValue));
             $em->persist($policyFilter);
             $policyFilterLink = new PolicyFilterLink();
             $policyFilterLink
                 ->setPolicy($policy)
                 ->setPolicyFilter($policyFilter);
-            // no need to persist, it's cascaded
-            $policyTypeFilterType = new PolicyTypeFilterType();
-            $policyTypeFilterType
-                ->setPolicyType($policyType)
-                ->setPolicyFilterType($policyFilterType);
              // no need to persist, it's cascaded
         });
     }
