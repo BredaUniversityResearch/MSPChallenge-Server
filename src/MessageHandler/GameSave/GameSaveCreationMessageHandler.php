@@ -87,6 +87,8 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         $this->shapeFileTempStore = $this->params->get('app.server_manager_save_dir').'temp_'.rand(0, 1000).'/';
         $fileSystem = new Filesystem();
         $fileSystem->mkdir($this->shapeFileTempStore);
+        // umask issues in prod can prevent mkdir to create with default 0777
+        $fileSystem->chmod($this->shapeFileTempStore, 0777);
     }
 
     /**

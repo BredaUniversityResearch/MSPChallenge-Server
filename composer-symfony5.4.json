@@ -21,6 +21,7 @@
         "cboden/ratchet": "^0.4",
         "clue/http-proxy-react": "^1.8",
         "doctrine/doctrine-bundle": "^2.6",
+        "doctrine/doctrine-fixtures-bundle": "*",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.12",
         "drift/dbal": "dev-master",
@@ -61,6 +62,7 @@
         "symfony/twig-bundle": "5.4.*",
         "symfony/uid": "5.4.*",
         "symfony/validator": "5.4.*",
+        "symfony/web-profiler-bundle": "5.4.*",
         "symfony/yaml": "5.4.*"
     },
     "config": {
@@ -84,7 +86,9 @@
             "App\\": "src/",
             "App\\Domain\\API\\": "api",
             "DoctrineMigrations\\": "migrations/src/",
-            "ServerManager\\": "ServerManager/classes/"
+            "ServerManager\\": "ServerManager/classes/",
+            "App\\Tests\\": "tests/",
+            "App\\DataFixtures\\": "fixtures/"
         },
         "files": [
             "src/helpers.php",

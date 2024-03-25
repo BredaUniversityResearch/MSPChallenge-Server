@@ -147,8 +147,9 @@ class CommonSessionHandler
         $this->removeSessionRasterStore();
         $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
         $fileSystem = new Filesystem();
-        $fileSystem->mkdir($sessionRasterStore);
-        $fileSystem->mkdir($sessionRasterStore . '/archive');
+        $dirs = [$sessionRasterStore, $sessionRasterStore . '/archive'];
+        $fileSystem->mkdir($dirs);
+        $fileSystem->chmod($dirs, 0777); // umask issues in prod can prevent mkdir to create with default 0777
         $this->info("Reset the session raster store at {$sessionRasterStore}");
     }
 

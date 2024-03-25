@@ -234,6 +234,8 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
         $outputDirectory = "{$this->kernel->getProjectDir()}/export/DatabaseDumps/";
         if (!$fileSystem->exists($outputDirectory)) {
             $fileSystem->mkdir($outputDirectory);
+            // umask issues in prod can prevent mkdir to create with default 0777
+            $fileSystem->chmod($outputDirectory, 0777);
         }
         for ($i = 0; $i < $this->saveZip->numFiles; $i++) {
             $stat = $this->saveZip->statIndex($i);

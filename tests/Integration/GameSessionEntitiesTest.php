@@ -423,12 +423,6 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertSame($grid2->getPlanToRemove()[0], $plan2);
     }
 
-    public function testLayerRepository(): void
-    {
-        $this->start();
-        dd($this->em->getRepository(Layer::class)->getAllGeometryGeoJSON());
-    }
-
     private function start(): void
     {
         $container = static::getContainer();
