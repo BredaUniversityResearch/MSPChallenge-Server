@@ -40,10 +40,10 @@ class PlanLayer
         return $this->plan;
     }
 
-    public function setPlan(?Plan $plan): PlanLayer
+    public function setPlan(Plan $plan): PlanLayer
     {
         $this->plan = $plan;
-        $this->plan?->addPlanLayer($this);
+        $this->plan->addPlanLayer($this);
         return $this;
     }
 
@@ -52,10 +52,10 @@ class PlanLayer
         return $this->layer;
     }
 
-    public function setLayer(?Layer $layer): PlanLayer
+    public function setLayer(Layer $layer): PlanLayer
     {
         $this->layer = $layer;
-        $this->layer?->addPlanLayer($this);
+        $this->layer->addPlanLayer($this);
         return $this;
     }
 

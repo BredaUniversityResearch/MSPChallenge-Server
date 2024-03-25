@@ -334,6 +334,12 @@ class Router
             "Request URI: " . $_SERVER['REQUEST_URI'];
         }
 
+        // @marin debug feature: setting a debug-message through a payload field
+        if (is_array($payload) && isset($payload['debug-message']) && is_string($payload['debug-message'])) {
+            $message .= $payload['debug-message'];
+            unset($payload['debug-message']);
+        }
+
         return array(
             // no need for header information from api, only needed for websocket server communication.
             "header_type" => null,

@@ -61,7 +61,7 @@ class Plan
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
     private ?int $planAltersEnergyDistribution = 0;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanLayer::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanLayer::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $planLayer;
 
     #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanDelete::class, cascade: ['persist'])]
@@ -70,7 +70,7 @@ class Plan
     #[ORM\OneToMany(mappedBy: 'plan', targetEntity: Fishing::class, cascade: ['persist'])]
     private Collection $fishing;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanMessage::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanMessage::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $planMessage;
 
     #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
@@ -82,6 +82,9 @@ class Plan
     #[ORM\ManyToMany(targetEntity: Grid::class, inversedBy: 'planToRemove', cascade: ['persist'])]
     private Collection $gridToRemove;
 
+    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanPolicy::class, cascade: ['persist'], orphanRemoval: true)]
+    private Collection $planPolicies;
+
     public function __construct()
     {
         $this->planLayer = new ArrayCollection();
@@ -90,6 +93,7 @@ class Plan
         $this->planMessage = new ArrayCollection();
         $this->planRestrictionArea = new ArrayCollection();
         $this->gridToRemove = new ArrayCollection();
+        $this->planPolicies = new ArrayCollection();
     }
 
     public function getPlanId(): ?int
@@ -317,13 +321,8 @@ class Plan
 
     public function removePlanLayer(PlanLayer $planLayer): self
     {
-        if ($this->planLayer->removeElement($planLayer)) {
-            // set the owning side to null (unless already changed)
-            if ($planLayer->getPlan() === $this) {
-                $planLayer->setPlan(null);
-            }
-        }
-
+        $this->planLayer->removeElement($planLayer);
+        // Since orphanRemoval is set, no need to explicitly remove $planLayer from the database
         return $this;
     }
 
@@ -347,13 +346,8 @@ class Plan
 
     public function removePlanDelete(PlanDelete $planDelete): self
     {
-        if ($this->planDelete->removeElement($planDelete)) {
-            // set the owning side to null (unless already changed)
-            if ($planDelete->getPlan() === $this) {
-                $planDelete->setPlan(null);
-            }
-        }
-
+        $this->planDelete->removeElement($planDelete);
+        // Since orphanRemoval is set, no need to explicitly remove $planDelete from the database
         return $this;
     }
 
@@ -397,11 +391,8 @@ class Plan
 
     public function addPlanMessage(PlanMessage $planMessage): self
     {
-        if (!$this->planMessage->contains($planMessage)) {
-            $this->planMessage->add($planMessage);
-            $planMessage->setPlan($this);
-        }
-
+        $this->planMessage->contains($planMessage);
+        // Since orphanRemoval is set, no need to explicitly remove $planMessage from the database
         return $this;
     }
 
@@ -484,6 +475,31 @@ class Plan
         }
         $this->setPlanLastupdate(microtime(true));
         $this->setPlanConstructionstart($this->getPlanGametime() - $highest);
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlanPolicy>
+     */
+    public function getPlanPolicies(): Collection
+    {
+        return $this->planPolicies;
+    }
+
+    public function addPlanPolicy(PlanPolicy $planPolicy): static
+    {
+        if (!$this->planPolicies->contains($planPolicy)) {
+            $this->planPolicies->add($planPolicy);
+            $planPolicy->setPlan($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlanPolicy(PlanPolicy $planPolicy): static
+    {
+        $this->planPolicies->removeElement($planPolicy);
+        // Since orphanRemoval is set, no need to explicitly remove $planMessage from the database
         return $this;
     }
 }
