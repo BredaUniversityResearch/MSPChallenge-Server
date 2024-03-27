@@ -134,14 +134,6 @@ when@dev:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'
 
     services:
-        # make classes in src/DataFixtures available to be used as services
-        # and have a tag that allows actions to type-hint services
-        App\DataFixtures\:
-            resource: '../fixtures/'
-            tags:
-                - 'doctrine.fixture.orm'
-                - 'kernel.event_subscriber'
-
         App\DataCollector\MSPDataCollector:
             tags:
                 -
