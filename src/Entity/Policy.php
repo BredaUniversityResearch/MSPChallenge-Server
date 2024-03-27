@@ -22,7 +22,7 @@ class Policy
     /**
      * @var mixed $value this will be a json string with the value for the policy
      */
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(type: 'json', nullable: true, options: ['default' => 'NULL'])]
     private mixed $value = null;
 
     #[ORM\OneToMany(mappedBy: 'policy', targetEntity: PlanPolicy::class, cascade: ['persist'], orphanRemoval: true)]
