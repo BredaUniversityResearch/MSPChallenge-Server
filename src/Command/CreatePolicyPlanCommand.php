@@ -380,9 +380,7 @@ class CreatePolicyPlanCommand extends Command
             return [(int)$monthsString];
         }
         $months = [];
-        if (false === $ranges = explode(',', $monthsString)) {
-            $ranges = [$monthsString];
-        }
+        $ranges = explode(',', $monthsString);
         foreach ($ranges as $range) {
             [$start, $end] = explode('-', $range);
             $months = array_merge($months, range((int)$start, (int)$end));
@@ -696,7 +694,6 @@ class CreatePolicyPlanCommand extends Command
                 ->setLayerInfoProperties(null)
                 ->setLayerTextInfo('{}')
                 ->setLayerStates($layer['layerStates'])
-                ->setLayerRaster(null)
                 ->setLayerLastupdate(100)
                 ->setLayerEditingType(null)
                 ->setLayerSpecialEntityType($layer['layerSpecialEntityType'])
