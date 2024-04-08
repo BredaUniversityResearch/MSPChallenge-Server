@@ -129,7 +129,9 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     {
         if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
             $this->notice('Resetting the session database, as this is a session recreate.');
-            $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+            if ($this->gameSession->getSessionState() != GameSessionStateValue::FAILED) {
+                $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+            }
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->gameSession->setGameState(new GameStateValue('setup'));
             $this->mspServerManagerEntityManager->flush();
