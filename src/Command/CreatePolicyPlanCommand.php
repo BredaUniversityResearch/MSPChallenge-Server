@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Domain\Common\EntityEnums\FieldType;
 use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\Country;
 use App\Entity\Game;
 use App\Entity\Geometry;
@@ -38,8 +39,11 @@ class CreatePolicyPlanCommand extends Command
 
     private ?EntityManagerInterface $em = null;
 
-    public function __construct(private readonly ConnectionManager $connectionManager)
-    {
+    public function __construct(
+        private readonly ConnectionManager $connectionManager,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        private readonly SymfonyToLegacyHelper $symfonyToLegacyHelper
+    ) {
         parent::__construct();
     }
 
@@ -63,8 +67,10 @@ class CreatePolicyPlanCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $context = [];
         $io = new SymfonyStyle($input, $output);
         $gameSessionId = $this->getGameSessionId($input, $io);
+        $context['gameSessionId'] = $gameSessionId;
         $this->em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         if (null === $game = $this->getGame()) {
             $io->error('Could not retrieve game record');
@@ -82,6 +88,7 @@ class CreatePolicyPlanCommand extends Command
             'See datetime format reference: https://www.php.net/manual/en/datetime.format.php'
         );
         $planGameTime = $this->askPlanImplementationTime($io, $game, $gameCurrentMonth);
+        $context['planGameTime'] = $planGameTime;
         $policyTypes = $this->getPolicyTypes();
         if (empty($policyTypes)) {
             throw new \Exception('No policy types found');
@@ -100,6 +107,7 @@ class CreatePolicyPlanCommand extends Command
             $io->error("Layer $layerShort not found");
             return Command::FAILURE;
         }
+        $context['layerName'] = $layer['layerName'];
         $layerGeometryName = null;
         $geometryBannedFleets = null;
         if ($layer['layerGeotype'] !== 'raster') {
@@ -114,7 +122,7 @@ class CreatePolicyPlanCommand extends Command
                 $io->error('No geometry found for the layer: '.$layerShort);
                 return Command::FAILURE;
             }
-            $geometryBannedFleets = $this->askBannedFleets($io, true);
+            $geometryBannedFleets = $this->askBannedFleets($io, $context, true);
         }
         // assuming the display name to be unique
         $policyTypeName = $this->askPolicyTypeName($io);
@@ -123,9 +131,7 @@ class CreatePolicyPlanCommand extends Command
         $policyFilterTypes = $this->getPolicyFilterTypes($policyType);
         $policyFilters = [];
         if (!empty($policyFilterTypes)) {
-            $policyFilters = $this->askPolicyFilters($io, $policyFilterTypes, [
-                'planGameTime' => $planGameTime
-            ]);
+            $policyFilters = $this->askPolicyFilters($io, $policyFilterTypes, $context);
         }
         try {
             $plan = $this->createPlan(
@@ -233,22 +239,73 @@ class CreatePolicyPlanCommand extends Command
         return $policyFilters;
     }
 
-    public function askBannedFleets(SymfonyStyle $io, bool $canBeNone = false): int
+    /**
+     * @throws \Exception
+     */
+    private function getDataModel(int $gameSessionId): array
     {
-        $choices = [
-            1 => 'Bottom Trawl',
-            2 => 'Industrial and Pelagic Trawl',
-            4 => 'Drift and Fixed Nets',
-            3 => 'Bottom Trawl + Industrial and Pelagic Trawl',
-            5 => 'Bottom Trawl + Drift and Fixed Nets',
-            6 => 'Industrial and Pelagic Trawl + Drift and Fixed Nets',
-            7 => 'Bottom Trawl + Industrial and Pelagic Trawl + Drift and Fixed Nets'
-        ];
-        if ($canBeNone) {
-            $choices[0] = 'None';
-            ksort($choices);
+        $game = new \App\Domain\API\v1\Game();
+        $game->setGameSessionId($gameSessionId);
+        return $game->GetGameConfigValues();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function askBannedFleets(SymfonyStyle $io, array $context, bool $canBeNone = false): int
+    {
+        return $this->askLayerType($io, 'Choose banned fleets', $context, $canBeNone);
+    }
+
+    public static function generatePermutations(int $n, bool $oneBased = false): array {
+        $permutations = [];
+        for ($i = 1; $i < (1 << $n); $i++) {
+            $permutation = [];
+            for ($j = 0; $j < $n; $j++) {
+                if ($i & (1 << $j)) {
+                    $permutation[] = $j + ($oneBased ? 1 : 0);
+                }
+            }
+            $permutations[] = $permutation;
         }
-        return self::ioChoice($io, 'Choose banned fleets', $choices, current($choices));
+        return $permutations;
+    }
+
+    public function askLayerType(SymfonyStyle $io, string $question, array $context, bool $canBeNone = false): int
+    {
+        if (!array_key_exists('layerName', $context)) {
+            throw new \Exception('Layer name not found in the context of question: '.$question);
+        }
+        if (!array_key_exists('gameSessionId', $context)) {
+            throw new \Exception('Game session ID not found in the context of question:'.$question);
+        }
+        $dataModel = $this->getDataModel($context['gameSessionId']);
+        if (null === $layerConfig = collect($dataModel['meta'])
+            ->filter(fn($l) => $l['layer_name'] == $context['layerName'])->first()) {
+            throw new \Exception('Layer not found in the game config: '. $context['layerName']);
+        }
+        if (!isset($layerConfig['layer_type'][0]['displayName'])) {
+            throw new \Exception('Layer does not have any required types, or expected field displayName: '.
+                $context['layerName']);
+        }
+
+        if ($canBeNone) {
+            $choices[0] = $layerConfig['layer_type'][0]['displayName'];
+        }
+        $permutations = self::generatePermutations(count($layerConfig['layer_type'])-1, true);
+        foreach ($permutations as $permutation) {
+            $displayName = '';
+            $key = 0;
+            foreach ($permutation as $index) {
+                $key |= (2 ** ($index-1));
+                $displayName .= $layerConfig['layer_type'][$index]['displayName'] . ' + ';
+            }
+            // Remove the trailing ' + ' from the display name
+            $displayName = rtrim($displayName, ' + ');
+            $choices[$key] = $displayName;
+        }
+        assert(!empty($choices));
+        return self::ioChoice($io, $question, $choices, current($choices));
     }
 
     /**
@@ -367,7 +424,7 @@ class CreatePolicyPlanCommand extends Command
     {
         switch ($policyFilterTypeName) {
             case 'fleet':
-                return $this->askBannedFleets($io);
+                return $this->askLayerType($io, 'Choose banned fleets', $context);
             case 'schedule':
                 return $this->askSchedule($io, $context);
         }

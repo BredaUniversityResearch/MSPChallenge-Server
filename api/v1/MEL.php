@@ -35,8 +35,8 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Config(): ?array
     {
-        $game = (new Game())->GetGameConfigValues();
-        return $game['MEL'] ?? null;
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        return $gameConfigValues['MEL'] ?? null;
     }
 
     public function getFishingPolicySettings(): array
