@@ -295,8 +295,7 @@ class Geometry
 
     public function getGeometryTypes(): array
     {
-        preg_match_all('/\d+/', $this->getGeometryType() ?? 0, $matches);
-        return array_map('intval', $matches[0] ?? []);
+        return array_map('intval', explode(',', $this->getGeometryType() ?? '0'));
     }
 
     public function setGeometryType(string|array|null $geometryType): Geometry
