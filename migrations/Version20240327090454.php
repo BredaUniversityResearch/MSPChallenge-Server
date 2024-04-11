@@ -35,7 +35,8 @@ final class Version20240327090454  extends MSPMigration
     (2,	'schedule',	'json',	'{\r\n  \"$schema\": \"http://json-schema.org/draft-04/schema#\",\r\n  \"type\": \"array\",\r\n  \"items\": [\r\n    {\r\n      \"type\": \"integer\"\r\n    }\r\n  ]\r\n}');
     REPLACE INTO `policy_type` (`id`, `name`, `display_name`, `data_type`, `data_config`) VALUES
     (1,	'buffer',	'Buffer zone',	'ranged',	'{\"min\":0,\"unit_step_size\":10000,\"max\":100000}'),
-    (2,	'seasonal_closures',	'Seasonal closures',	'temporal',	NULL);
+    (2,	'seasonal_closures',	'Seasonal closures',	'temporal',	NULL),
+    (3,	'ecological_fishing_gear',	'Ecological fishing gear',	'boolean', NULL);
     REPLACE INTO `policy_type_filter_type` (`id`, `policy_type_id`, `policy_filter_type_id`) VALUES
     (1,	1,	1),
     (2,	2,	1),
