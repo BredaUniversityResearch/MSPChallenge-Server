@@ -257,7 +257,8 @@ class CreatePolicyPlanCommand extends Command
         return $this->askLayerType($io, 'Choose banned fleets', $context, $canBeNone);
     }
 
-    public static function generatePermutations(int $n, bool $oneBased = false): array {
+    public static function generatePermutations(int $n, bool $oneBased = false): array
+    {
         $permutations = [];
         for ($i = 1; $i < (1 << $n); $i++) {
             $permutation = [];
