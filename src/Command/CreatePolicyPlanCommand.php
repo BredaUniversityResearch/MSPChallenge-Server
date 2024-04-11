@@ -121,14 +121,14 @@ class CreatePolicyPlanCommand extends Command
         $policyType = $policyTypes[$policyTypeName];
         $policyValue = $this->askPolicyValue($io, $policyType);
         $policyFilterTypes = $this->getPolicyFilterTypes($policyType);
-        if (empty($policyFilterTypes)) {
-            throw new \Exception('No policy filter types found');
+        $policyFilters = [];
+        if (!empty($policyFilterTypes)) {
+            $policyFilters = $this->askPolicyFilters($io, $policyFilterTypes, [
+                'planGameTime' => $planGameTime
+            ]);
         }
-        $policyFilters = $this->askPolicyFilters($io, $policyFilterTypes, [
-            'planGameTime' => $planGameTime
-        ]);
         try {
-            $this->createPlan(
+            $plan = $this->createPlan(
                 $gameSessionId,
                 $planGameTime,
                 $policyTypes,
@@ -144,7 +144,7 @@ class CreatePolicyPlanCommand extends Command
             $io->error('Failed to create plan: '.$e->getMessage());
             return Command::FAILURE;
         }
-        $io->success('Plan created successfully.');
+        $io->success('Plan created successfully: ' . $plan->getPlanName());
         return Command::SUCCESS;
     }
 
@@ -434,10 +434,13 @@ class CreatePolicyPlanCommand extends Command
 
     public function askPolicyValue(SymfonyStyle $io, PolicyType $policyType): mixed
     {
+        $policyTypeDisplayName = $policyType->getDisplayName();
+        if ($policyType->getDataType() === PolicyTypeDataType::Boolean) {
+            return $io->confirm("Enable $policyTypeDisplayName?");
+        }
         if ($policyType->getDataType() !== PolicyTypeDataType::Ranged) {
             return null;
         }
-        $policyTypeDisplayName = $policyType->getDisplayName();
         $policyValue = null;
         while ($policyValue === null) {
             $policyValue = $io->ask("Enter a $policyTypeDisplayName value", '40000');
@@ -548,8 +551,8 @@ class CreatePolicyPlanCommand extends Command
         $result = collect($em->createQueryBuilder()
             ->select('pt, ptft, pft')
             ->from(PolicyType::class, 'pt')
-            ->innerJoin('pt.policyTypeFilterTypes', 'ptft')
-            ->innerJoin('ptft.policyFilterType', 'pft')
+            ->leftJoin('pt.policyTypeFilterTypes', 'ptft')
+            ->leftJoin('ptft.policyFilterType', 'pft')
             ->getQuery()->getResult())->keyBy(fn(PolicyType $pt) => $pt->getName())->all();
         return $result;
     }
@@ -617,7 +620,7 @@ class CreatePolicyPlanCommand extends Command
      * @param string $policyTypeName
      * @param mixed $policyValue
      * @param array $policyFilters
-     * @throws Exception
+     * @return Plan
      * @throws \Exception
      */
     private function createPlan(
@@ -631,7 +634,7 @@ class CreatePolicyPlanCommand extends Command
         string $policyTypeName,
         mixed $policyValue,
         array $policyFilters
-    ): void {
+    ): Plan {
         $this->cleanUpPreviousPlan();
         $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
             ->executeQuery(
@@ -641,6 +644,7 @@ class CreatePolicyPlanCommand extends Command
         if ($geometry === false) {
             throw new \Exception('MPA not found');
         }
+        $plan = new Plan();
         $this->getGameSessionEntityManager()->wrapInTransaction(function () use (
             $policyTypes,
             $policyFilterTypes,
@@ -650,7 +654,8 @@ class CreatePolicyPlanCommand extends Command
             $geometryBannedFleets,
             $policyTypeName,
             $policyValue,
-            $policyFilters
+            $policyFilters,
+            $plan
         ) {
             $policyType = $policyTypes[$policyTypeName];
             $em = $this->getGameSessionEntityManager();
@@ -660,14 +665,13 @@ class CreatePolicyPlanCommand extends Command
                 ->setType($policyType)
                 ->setValue($policyValue);
             $em->persist($policy);
-            $plan = new Plan();
             $plan
                 ->setPlanName(self::TEST_DATA_PREFIX.'-'.uniqid())
                 ->setCountry($em->getReference(Country::class, 1))
                 ->setPlanDescription('')
                 ->setPlanTime(new \DateTime())
                 ->setPlanGametime($planGameTime)
-                ->setPlanState('DESIGN')
+                ->setPlanState('APPROVED')
                 ->setPlanLastupdate(time())
                 ->setPlanPreviousstate('NONE')
                 ->setPlanActive(1)
@@ -746,5 +750,6 @@ class CreatePolicyPlanCommand extends Command
                 }
             }
         });
+        return $plan;
     }
 }

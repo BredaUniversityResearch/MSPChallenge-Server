@@ -2,11 +2,11 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\PlanLayer;
 use App\Entity\PlanPolicy;
 use App\Entity\Policy;
-use App\Entity\PolicyFilterLink;
 use Doctrine\ORM\AbstractQuery;
 use Exception;
 
@@ -23,7 +23,7 @@ class MEL extends Base
         "GeometryExportName",
         "InitialFishing"
     );
-        
+
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
@@ -93,7 +93,7 @@ class MEL extends Base
                     );
                     if (!empty($layerid)) {
                         $layerid = $layerid[0]['layer_id'];
-                            
+
                         $mellayer = $db->query(
                             "
                             SELECT mel_layer_id FROM mel_layer WHERE mel_layer_pressurelayer=? AND mel_layer_layer_id=?
@@ -208,7 +208,7 @@ class MEL extends Base
 
                 if (isset($fishingFleet["initialFishingDistribution"])) {
                     $fishingValues = $fishingFleet["initialFishingDistribution"];
-                    
+
                     //We need to average the weights over the available countries
                     $sum = 0.0;
                     foreach ($fishingValues as $val) {
@@ -217,7 +217,7 @@ class MEL extends Base
                             $weightsByCountry[$val["country_id"]] = $val["weight"];
                         }
                     }
-                    
+
                     $weightMultiplier = ($sum > 0)? 1.0 / $sum : 1.0 / $numCountries;
                     foreach ($weightsByCountry as &$countryWeight) {
                         $countryWeight *= $weightMultiplier;
@@ -264,45 +264,45 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Update(): array
     {
-        // @todo how to do this correctly ?
-        // force a mel update for all layers having a seasonal closure policy
-        $this->getDatabase()->query(
-            "UPDATE layer
-            SET layer_melupdate = 1
-            WHERE layer_id IN (
+        $currentMonth = (new Game())->GetCurrentMonthAsId();
+        $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $qb = $conn->createQueryBuilder();
+        $qb
+            ->select('l.layer_name')
+            ->from('layer', 'l')
+            // layers that have a melupdate flag set
+            ->where($qb->expr()->eq('l.layer_melupdate', 1))
+            // or, any layer with a schedule policy filter matching one of these criteria:
+            // * the previous month was not listed but the current month is
+            // * the current month is listed, but the previous month is not
+            ->orWhere($qb->expr()->in(
+                'l.layer_id',
+                <<< 'SUBQUERY'
                 SELECT DISTINCT l.layer_original_id
-                FROM layer l 
+                FROM layer l
                 JOIN plan_layer pl ON l.layer_id = pl.plan_layer_layer_id
                 JOIN plan_policy pp ON pl.plan_layer_plan_id = pp.plan_id
                 JOIN policy p ON pp.policy_id = p.id
                 JOIN policy_filter_link pfl ON p.id = pfl.policy_id
                 JOIN policy_filter pf ON pfl.policy_filter_id = pf.id
-                JOIN policy_filter_type pft ON pf.type_id = pft.id
-                JOIN policy_type_filter_type ptft ON pft.id = ptft.policy_filter_type_id
-                JOIN policy_type pt ON ptft.policy_type_id = pt.id
-                WHERE pt.name = 'seasonal_closures'
-            )"
-        );
-
-        $r = $this->getDatabase()->query(
-            "SELECT layer_name, layer_melupdate_construction FROM layer WHERE layer_melupdate=?",
-            array(1)
-        );
-            
-        $layers = [];
-        foreach ($r as $l) {
-            // if($l['layer_melupdate_construction'] == 1){
-            //  $str .= $l['layer_name'] . "(c,";
-            // }
-            // else{
-                $layers[] = $l['layer_name'];
-            // }
-        }
+                JOIN policy_filter_type pft ON pf.type_id = pft.id AND pft.name = 'schedule' AND (
+                  (
+                    JSON_SEARCH(pf.value, 'one', :prevMonth, NULL, '$[*]') IS NOT NULL
+                    AND JSON_SEARCH(pf.value, 'one', :month, NULL, '$[*]') IS NULL
+                  ) OR (
+                    JSON_SEARCH(pf.value, 'one', :prevMonth, NULL, '$[*]') IS NULL
+                    AND JSON_SEARCH(pf.value, 'one', :month, NULL, '$[*]') IS NOT NULL
+                  )
+               )
+SUBQUERY
+            ))
+            ->setParameter('month', ($currentMonth % 12) + 1)
+            ->setParameter('prevMonth', (($currentMonth-1) % 12) + 1);
+        $r = $qb->executeQuery()->fetchAllAssociative();
 
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query("UPDATE layer SET layer_melupdate=0");
-
-        return $layers;
+        return array_column($r, 'layer_name');
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -352,7 +352,7 @@ class MEL extends Base
 									GROUP BY fishing_type",
             array($game_month)
         );
-                
+
         //Make sure fishing scalars never exceed 1.0
         foreach ($data as &$fishingValues) {
             if (floatval($fishingValues['scalar']) > 1.0) {
@@ -364,6 +364,8 @@ class MEL extends Base
     }
 
     /**
+     * @todo change method name to something more descriptive, why not GetLayerData?
+     *   can be layer geometry data or raster data, but also plan policies linked to that layer
      * @todo change name of this parameter to something more descriptive like $geometryTypeFilter
      * @param int $layer_type this is a filter for the layer's geometry field "geometry_type" which holds an optional
      *   comma separated string holding integers.
@@ -445,6 +447,7 @@ class MEL extends Base
         $result["geotype"] = $layerGeoType;
         $result["geometry"] = [];
         foreach ($planLayers as $planLayer) {
+            // add the geometry linked to the layer to be pressed, these do not include the policy ones
             foreach ($planLayer->getLayer()->getGeometry() as $geom) {
                 if ($geometryTypeFilter !== null && !in_array($geometryTypeFilter, $geom->getGeometryTypes())) {
                     continue;
@@ -506,21 +509,26 @@ class MEL extends Base
                     /** @var \App\Entity\Geometry[] $geometry */
                     $geometry = array_merge($geometry, $pl->getLayer()->getGeometry()->toArray());
                 }
-                switch ($planPolicy->getPolicy()->getType()->getName()) {
-                    case 'buffer':
-                        $this->applyBufferPolicy(
-                            $planPolicy->getPolicy(),
-                            $geometry,
-                            $result,
-                            $pdo,
-                            $geometryTypeFilter
-                        );
-                        break;
-                    default:
-                        foreach ($geometry as $geom) {
-                            $result["geometry"][] = [json_decode($geom->getGeometryGeometry(), true)];
-                        }
-                        break;
+                $policy = $planPolicy->getPolicy();
+                if ($policy->getType()->getDataType() == PolicyTypeDataType::Boolean) {
+                    // the boolean policies are just passed through to mel
+                    $result["policies"][] = [
+                        "name" => $planPolicy->getPolicy()->getType()->getName(),
+                        "value" => json_encode((bool)$planPolicy->getPolicy()->getValue())
+                    ];
+                } elseif ($planPolicy->getPolicy()->getType()->getName() == 'buffer') {
+                    $this->applyBufferPolicy(
+                        $planPolicy->getPolicy(),
+                        $geometry,
+                        $result,
+                        $pdo,
+                        $geometryTypeFilter
+                    );
+                } else {
+                    // add the geometry linked to the policy to be pressured
+                    foreach ($geometry as $geom) {
+                        $result["geometry"][] = [json_decode($geom->getGeometryGeometry(), true)];
+                    }
                 }
             }
         }
@@ -560,50 +568,20 @@ class MEL extends Base
     /**
      * @param PlanPolicy[] $planPolicies
      * @param int|null $geometryTypeFilter
-     * @return array
+     * @return PlanPolicy[]
      * @throws Exception
      */
     private function applyPolicyFilters(array $planPolicies, ?int $geometryTypeFilter = null): array
     {
         $result = [];
-        $game = new Game();
-        $currentMonth = $game->GetCurrentMonthAsId();
+        $currentMonth = (new Game())->GetCurrentMonthAsId();
         foreach ($planPolicies as $planPolicy) {
             $policy = $planPolicy->getPolicy();
-            $policyFilterLinks = $policy->getPolicyFilterLinks()->toArray();
-            if ($geometryTypeFilter !== null) {
-                /** @var PolicyFilterLink[] $fleetFilters */
-                $fleetFilters = collect($policyFilterLinks)
-                    ->filter(fn($pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'fleet')->all();
-                if (!empty($fleetFilters)) {
-                    // is there any fleet filter matching the geometry type?
-                    if (false === array_reduce(
-                        $fleetFilters,
-                        fn($carry, PolicyFilterLink $item) => $carry ||
-                            (($item->getPolicyFilter()->getValue() & $geometryTypeFilter) == $geometryTypeFilter),
-                        false
-                    )) {
-                        continue; // no there is no match
-                    }
-                }
+            if ($geometryTypeFilter !== null && false === $policy->hasFleetFiltersMatch($geometryTypeFilter)) {
+                 continue; // no fleet filter matching the geometry type
             }
-            /** @var PolicyFilterLink[] $seasonalClosureFilters */
-            $seasonalClosureFilters = collect($policyFilterLinks)
-                ->filter(
-                    fn(PolicyFilterLink $pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'schedule'
-                )
-                ->all();
-            if (!empty($seasonalClosureFilters)) {
-                // is there any seasonal filter matching the current game month?
-                if (false === array_reduce(
-                    $seasonalClosureFilters,
-                    fn($carry, PolicyFilterLink $item) => $carry ||
-                        // convert "number of months" to a month number 1-12
-                        in_array(($currentMonth % 12) + 1, $item->getPolicyFilter()->getValue()),
-                    false
-                )) {
-                    continue; // meaning there should not be a seasonal closure for this month, so no pressures
-                }
+            if (false === $policy->hasScheduleFiltersMatch($currentMonth)) {
+                 continue; // meaning there should not be a seasonal closure for this month, so no pressures
             }
             $result[] = $planPolicy;
         }
