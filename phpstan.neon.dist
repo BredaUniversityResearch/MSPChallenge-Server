@@ -10,6 +10,7 @@ parameters:
     - '#has an unused parameter \$(helper|pluginHelper|apiHelper|connectionManager|serverManager|symfonyToLegacyHelper)#'
     - '#^Access to an undefined property Ratchet\\ConnectionInterface\:\:\$httpRequest\.$#'
     - '#^Access to an undefined property Ratchet\\ConnectionInterface\:\:\$resourceId\.$#'
+    - '#\$symfonyToLegacyHelper is never read, only written\.#'
   stubFiles:
     - stubs/Doctrine-Common-DataFixtures-FixtureInterface.stub
     - stubs/Doctrine-DBAL-Exception.stub

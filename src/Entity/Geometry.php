@@ -293,6 +293,11 @@ class Geometry
         return $this->geometryType;
     }
 
+    public function getGeometryTypes(): array
+    {
+        return array_map('intval', explode(',', $this->getGeometryType() ?? '0'));
+    }
+
     public function setGeometryType(string|array|null $geometryType): Geometry
     {
         if (is_array($geometryType)) {

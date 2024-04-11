@@ -2,7 +2,11 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\PlanLayer;
+use App\Entity\PlanPolicy;
+use App\Entity\Policy;
 use Doctrine\ORM\AbstractQuery;
 use Exception;
 
@@ -19,7 +23,7 @@ class MEL extends Base
         "GeometryExportName",
         "InitialFishing"
     );
-        
+
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
@@ -31,8 +35,8 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Config(): ?array
     {
-        $game = (new Game())->GetGameConfigValues();
-        return $game['MEL'] ?? null;
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        return $gameConfigValues['MEL'] ?? null;
     }
 
     public function getFishingPolicySettings(): array
@@ -89,7 +93,7 @@ class MEL extends Base
                     );
                     if (!empty($layerid)) {
                         $layerid = $layerid[0]['layer_id'];
-                            
+
                         $mellayer = $db->query(
                             "
                             SELECT mel_layer_id FROM mel_layer WHERE mel_layer_pressurelayer=? AND mel_layer_layer_id=?
@@ -204,7 +208,7 @@ class MEL extends Base
 
                 if (isset($fishingFleet["initialFishingDistribution"])) {
                     $fishingValues = $fishingFleet["initialFishingDistribution"];
-                    
+
                     //We need to average the weights over the available countries
                     $sum = 0.0;
                     foreach ($fishingValues as $val) {
@@ -213,7 +217,7 @@ class MEL extends Base
                             $weightsByCountry[$val["country_id"]] = $val["weight"];
                         }
                     }
-                    
+
                     $weightMultiplier = ($sum > 0)? 1.0 / $sum : 1.0 / $numCountries;
                     foreach ($weightsByCountry as &$countryWeight) {
                         $countryWeight *= $weightMultiplier;
@@ -260,25 +264,45 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Update(): array
     {
-        $r = $this->getDatabase()->query(
-            "SELECT layer_name, layer_melupdate_construction FROM layer WHERE layer_melupdate=?",
-            array(1)
-        );
-            
-        $layers = [];
-        foreach ($r as $l) {
-            // if($l['layer_melupdate_construction'] == 1){
-            //  $str .= $l['layer_name'] . "(c,";
-            // }
-            // else{
-                $layers[] = $l['layer_name'];
-            // }
-        }
+        $currentMonth = (new Game())->GetCurrentMonthAsId();
+        $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $qb = $conn->createQueryBuilder();
+        $qb
+            ->select('l.layer_name')
+            ->from('layer', 'l')
+            // layers that have a melupdate flag set
+            ->where($qb->expr()->eq('l.layer_melupdate', 1))
+            // or, any layer with a schedule policy filter matching one of these criteria:
+            // * the previous month was not listed but the current month is
+            // * the current month is listed, but the previous month is not
+            ->orWhere($qb->expr()->in(
+                'l.layer_id',
+                <<< 'SUBQUERY'
+                SELECT DISTINCT l.layer_original_id
+                FROM layer l
+                JOIN plan_layer pl ON l.layer_id = pl.plan_layer_layer_id
+                JOIN plan_policy pp ON pl.plan_layer_plan_id = pp.plan_id
+                JOIN policy p ON pp.policy_id = p.id
+                JOIN policy_filter_link pfl ON p.id = pfl.policy_id
+                JOIN policy_filter pf ON pfl.policy_filter_id = pf.id
+                JOIN policy_filter_type pft ON pf.type_id = pft.id AND pft.name = 'schedule' AND (
+                  (
+                    JSON_SEARCH(pf.value, 'one', :prevMonth, NULL, '$[*]') IS NOT NULL
+                    AND JSON_SEARCH(pf.value, 'one', :month, NULL, '$[*]') IS NULL
+                  ) OR (
+                    JSON_SEARCH(pf.value, 'one', :prevMonth, NULL, '$[*]') IS NULL
+                    AND JSON_SEARCH(pf.value, 'one', :month, NULL, '$[*]') IS NOT NULL
+                  )
+               )
+SUBQUERY
+            ))
+            ->setParameter('month', ($currentMonth % 12) + 1)
+            ->setParameter('prevMonth', (($currentMonth-1) % 12) + 1);
+        $r = $qb->executeQuery()->fetchAllAssociative();
 
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query("UPDATE layer SET layer_melupdate=0");
-
-        return $layers;
+        return array_column($r, 'layer_name');
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -328,7 +352,7 @@ class MEL extends Base
 									GROUP BY fishing_type",
             array($game_month)
         );
-                
+
         //Make sure fishing scalars never exceed 1.0
         foreach ($data as &$fishingValues) {
             if (floatval($fishingValues['scalar']) > 1.0) {
@@ -340,6 +364,8 @@ class MEL extends Base
     }
 
     /**
+     * @todo change method name to something more descriptive, why not GetLayerData?
+     *   can be layer geometry data or raster data, but also plan policies linked to that layer
      * @todo change name of this parameter to something more descriptive like $geometryTypeFilter
      * @param int $layer_type this is a filter for the layer's geometry field "geometry_type" which holds an optional
      *   comma separated string holding integers.
@@ -387,11 +413,16 @@ class MEL extends Base
         $layerId = $layer['layerId'] ?? 0;
         $qb = $conn->createQueryBuilder();
         $qb
-            ->from('App:Layer', 'l')
-            ->leftJoin('l.planLayer', 'pl')
+            ->select('pl, l, ge, p, pp, pol, pfl, pf')
+            ->from('App:PlanLayer', 'pl')
+            ->leftJoin('pl.layer', 'l')
             ->leftJoin('l.geometry', 'ge')
             ->leftJoin('l.originalLayer', 'ol')
-            ->select('l.layerId, ge.geometryGeometry as geometryPoints, ge.geometryType as geometryType')
+            ->leftJoin('pl.plan', 'p')
+            ->leftJoin('p.planPolicies', 'pp')
+            ->leftJoin('pp.policy', 'pol')
+            ->leftJoin('pol.policyFilterLinks', 'pfl')
+            ->leftJoin('pfl.policyFilter', 'pf')
             ->where('l.layerId = :layerId OR ol.layerId = :layerId')
             ->setParameter('layerId', $layerId)
             ->andWhere('ge.geometryActive = 1');
@@ -410,86 +441,95 @@ class MEL extends Base
                 ->setParameter('active', 'ACTIVE');
         }
         $q = $qb->getQuery();
-        $geometry = $q->getResult(AbstractQuery::HYDRATE_ARRAY);
-        // convert comma separated string to array of integers
-        $geometry = collect($geometry)->map(
-            function ($g) {
-                $g['geometryType'] = explode(',', $g['geometryType']);
-                return $g;
-            }
-        )->toArray();
+        /** @var PlanLayer[] $planLayers */
+        $planLayers = $q->getResult();
         $geometryTypeFilter = $layer_type === -1 ? null : $layer_type;
         $result["geotype"] = $layerGeoType;
         $result["geometry"] = [];
-        foreach ($geometry as $geom) {
-            if ($geometryTypeFilter != null && !in_array($geometryTypeFilter, $geom['geometryType'])) {
-                continue;
+        foreach ($planLayers as $planLayer) {
+            // add the geometry linked to the layer to be pressed, these do not include the policy ones
+            foreach ($planLayer->getLayer()->getGeometry() as $geom) {
+                if ($geometryTypeFilter !== null && !in_array($geometryTypeFilter, $geom->getGeometryTypes())) {
+                    continue;
+                }
+                $geometryPoints = $geom->getGeometryGeometry();
+                if (empty($geometryPoints)) {
+                    continue;
+                }
+                // add extra array layer.
+                // needed for polygons: 1 entry is exterior ring, 2nd and onwards are interior rings
+                //   only an exterior ring in this case.
+                $result["geometry"][] = [json_decode($geometryPoints, true)];
             }
-            if (empty($geom['geometryPoints'])) {
-                continue;
-            }
-            // add extra array layer.
-            // needed for polygons: 1 entry is exterior ring, 2nd and onwards are interior rings
-            //   only an exterior ring in this case.
-            $result["geometry"][] = [json_decode($geom['geometryPoints'], true)];
         }
         // currently only needed and support for polygons
         if ($layerGeoType == 'polygon') {
-            $this->onGeometryExportNameResult($layer, $geometry, $result, $geometryTypeFilter);
+            $this->onGeometryExportNameResult($layer, $planLayers, $result, $geometryTypeFilter);
         }
         return $result;
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
+     * @param PlanLayer[] $planLayers
+     *
      * @throws Exception
      */
     private function onGeometryExportNameResult(
         array $layer,
-        array $geometry,
+        array $planLayers,
         array &$result,
         ?int $geometryTypeFilter = null
     ): void {
         $result['debug-message'] ??= '';
         $result['debug-message'] .= 'hook activated for layer: '.$layer['layerId'].'.'.PHP_EOL;
-        $connManager = ConnectionManager::getInstance();
-        $conn = $connManager->getGameSessionEntityManager($this->getGameSessionId());
-        $qb = $conn->createQueryBuilder();
-        $qb
-            ->from('App:Policy', 'p')
-            ->select('pt.name, p.value as value, l.layerId')
-            ->innerJoin('p.type', 'pt')
-            ->leftJoin('p.policyLayers', 'pl')
-            ->leftJoin('pl.layer', 'l')
-            ->leftJoin('l.originalLayer', 'ol')
-            ->where('l.layerId = :layerId OR ol.layerId = :layerId')
-            ->setParameter('layerId', $layer['layerId']);
-        if ($geometryTypeFilter !== null) {
-            $qb
-                ->addSelect('pf.value as filterValue')
-                ->leftJoin('p.policyFilterLinks', 'pfl')
-                ->leftJoin('pfl.policyFilter', 'pf')
-                ->leftJoin('pf.type', 'pft')
-                ->andWhere('pft.name = :filterTypeName')
-                ->setParameter('filterTypeName', 'fleet')
-                ->andWhere('BIT_AND(pf.value,:filterValue) = :filterValue')
-                ->setParameter('filterValue', $geometryTypeFilter);
-        }
-        $policies = $qb
-            ->getQuery()
-            ->getResult(AbstractQuery::HYDRATE_ARRAY);
-        $result['debug-message'] .= 'policies: '.implode(',', array_column($policies, 'name')).'.'.PHP_EOL;
+
         // todo(MH) there is probably a way to get it working with
         //   ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->getNativeConnection()
         $pdo = new \PDO("mysql:host=$_ENV[DATABASE_HOST];port=$_ENV[DATABASE_PORT]", 'root', '');
-        foreach ($policies as $policy) {
-            if ($policy['name'] == 'buffer') {
-                $this->applyBufferPolicy(
-                    $policy,
-                    collect($geometry)->filter(fn($g) => $g['layerId'] == $policy['layerId'])->all(),
-                    $result,
-                    $pdo
-                );
+        foreach ($planLayers as $planLayer) {
+            $planPolicies = $planLayer->getPlan()->getPlanPolicies()->toArray();
+            if (empty($planPolicies)) {
+                continue;
+            }
+            $result['debug-message'] .= 'policies: '.
+                implode(
+                    ',',
+                    array_map(fn(PlanPolicy $pp) => $pp->getPolicy()->getType()->getName(), $planPolicies)
+                ).'.'.PHP_EOL;
+            $planPolicies = $this->applyPolicyFilters($planPolicies, $geometryTypeFilter);
+            $result['debug-message'] .= 'policies filtered: '.
+                implode(
+                    ',',
+                    array_map(fn(PlanPolicy $pp) => $pp->getPolicy()->getType()->getName(), $planPolicies)
+                ).'.'.PHP_EOL;
+            foreach ($planPolicies as $planPolicy) {
+                $planLayers = $planLayer->getPlan()->getPlanLayer();
+                $geometry = [];
+                foreach ($planLayers as $pl) {
+                    /** @var \App\Entity\Geometry[] $geometry */
+                    $geometry = array_merge($geometry, $pl->getLayer()->getGeometry()->toArray());
+                }
+                $policy = $planPolicy->getPolicy();
+                if ($policy->getType()->getDataType() == PolicyTypeDataType::Boolean) {
+                    // the boolean policies are just passed through to mel
+                    $result["policies"][] = [
+                        "name" => $planPolicy->getPolicy()->getType()->getName(),
+                        "value" => json_encode((bool)$planPolicy->getPolicy()->getValue())
+                    ];
+                } elseif ($planPolicy->getPolicy()->getType()->getName() == 'buffer') {
+                    $this->applyBufferPolicy(
+                        $planPolicy->getPolicy(),
+                        $geometry,
+                        $result,
+                        $pdo,
+                        $geometryTypeFilter
+                    );
+                } else {
+                    // add the geometry linked to the policy to be pressured
+                    foreach ($geometry as $geom) {
+                        $result["geometry"][] = [json_decode($geom->getGeometryGeometry(), true)];
+                    }
+                }
             }
         }
     }
@@ -525,28 +565,62 @@ class MEL extends Base
         return $coordinates;
     }
 
+    /**
+     * @param PlanPolicy[] $planPolicies
+     * @param int|null $geometryTypeFilter
+     * @return PlanPolicy[]
+     * @throws Exception
+     */
+    private function applyPolicyFilters(array $planPolicies, ?int $geometryTypeFilter = null): array
+    {
+        $result = [];
+        $currentMonth = (new Game())->GetCurrentMonthAsId();
+        foreach ($planPolicies as $planPolicy) {
+            $policy = $planPolicy->getPolicy();
+            if ($geometryTypeFilter !== null && false === $policy->hasFleetFiltersMatch($geometryTypeFilter)) {
+                 continue; // no fleet filter matching the geometry type
+            }
+            if (false === $policy->hasScheduleFiltersMatch($currentMonth)) {
+                 continue; // meaning there should not be a seasonal closure for this month, so no pressures
+            }
+            $result[] = $planPolicy;
+        }
+        return $result;
+    }
+
+    /**
+     * @param Policy $policy
+     * @param \App\Entity\Geometry[] $geometry
+     * @param array $result
+     * @param $pdo
+     * @param int|null $geometryTypeFilter
+     */
     public function applyBufferPolicy(
-        array $policy,
+        Policy $policy,
         array $geometry,
         array &$result,
-        $pdo
+        $pdo,
+        ?int $geometryTypeFilter = null
     ): void {
         if (empty($geometry)) {
             return;
         }
+        if ($geometryTypeFilter === null) {
+            return; // mpa should always have a geometry type filter
+        }
         $newResultGeometry = [];
         $result['debug-message'] ??= '';
-        $result['debug-message'] .= 'applied policy ' . $policy['name'] . ' with value: ' . $policy['value'] . '.' .
-            PHP_EOL;
+        $result['debug-message'] .= 'applied policy '.$policy->getType()->getName().' with value: '.
+            $policy->getValue().'.'.PHP_EOL;
         foreach ($geometry as $geom) {
-            $geomTypePolicyMatch = array_reduce(
-                $geom['geometryType'],
-                fn($carry, $item) => $carry || ($item & $policy['filterValue']),
+            $geomTypeMatch = array_reduce(
+                $geom->getGeometryTypes(),
+                fn($carry, $item) => $carry || ($item & $geometryTypeFilter),
                 false
             );
             // convert our geometry using mariadb's GIS features
             try {
-                if ($geomTypePolicyMatch) {
+                if ($geomTypeMatch) {
                     // buffer including the original polygon
                     $st = $pdo->prepare(
                         <<< 'SQL'
@@ -564,8 +638,8 @@ class MEL extends Base
                         SQL
                     );
                 }
-                $st->bindValue('text', self::toWkt(json_decode($geom['geometryPoints'], true)));
-                $st->bindValue('buffer', $policy['value']);
+                $st->bindValue('text', self::toWkt(json_decode($geom->getGeometryGeometry(), true)));
+                $st->bindValue('buffer', $policy->getValue());
                 $st->execute();
                 // for debugging use https://wktmap.com/ to visualize using EPSG:3035 !
                 $bufferedPolygonText = $st->fetchColumn();
