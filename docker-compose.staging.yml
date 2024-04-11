@@ -13,6 +13,7 @@ services:
       #  from the bind-mount for better performance by enabling the next line:
       - /srv/app/vendor
       - /srv/app/var/cache
+      - /srv/app/var/log
     environment:
       URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
       APP_SECRET: ${APP_SECRET}
