@@ -652,7 +652,12 @@ class CreatePolicyPlanCommand extends Command
         $this->cleanUpPreviousPlan();
         $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
             ->executeQuery(
-                'SELECT * FROM geometry WHERE JSON_EXTRACT(geometry_data, \'$.NAME\') = :geometryName',
+                <<< 'SQL'
+                SELECT * FROM geometry
+                 WHERE JSON_EXTRACT(geometry_data, '$.NAME') = :geometryName OR
+                  JSON_EXTRACT(geometry_data, '$.name') = :geometryName OR
+                  JSON_EXTRACT(geometry_data, '$.Name') = :geometryName
+                SQL,
                 ['geometryName' => $layerGeometryName]
             )->fetchAssociative();
         if ($geometry === false) {
