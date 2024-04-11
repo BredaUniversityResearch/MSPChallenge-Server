@@ -120,7 +120,7 @@ class GameSession extends Base
             if (false === $log_contents) {
                 $this->log = 'Session log does not exist (yet).';
             } else {
-                $this->log = explode(PHP_EOL, rtrim($log_contents));
+                $this->log = explode("\n", rtrim($log_contents));
             }
         }
         $this->old = clone $this;

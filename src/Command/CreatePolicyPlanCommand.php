@@ -3,8 +3,10 @@
 namespace App\Command;
 
 use App\Domain\Common\EntityEnums\FieldType;
+use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Country;
+use App\Entity\Game;
 use App\Entity\Geometry;
 use App\Entity\Layer;
 use App\Entity\Plan;
@@ -14,13 +16,11 @@ use App\Entity\Policy;
 use App\Entity\PolicyFilter;
 use App\Entity\PolicyFilterLink;
 use App\Entity\PolicyFilterType;
-use App\Entity\PolicyLayer;
 use App\Entity\PolicyType;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,16 +31,209 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CreatePolicyPlanCommand extends Command
 {
+    const TEST_DATA_PREFIX = 'policy-plan-test';
     const OPTION_GAME_SESSION_ID = 'game-session-id';
 
     protected static $defaultName = 'app:create-policy-plan';
+
+    private ?EntityManagerInterface $em = null;
 
     public function __construct(private readonly ConnectionManager $connectionManager)
     {
         parent::__construct();
     }
 
-    public function askBannedFleets(SymfonyStyle $io): int
+    protected function configure(): void
+    {
+        $this
+            ->setDescription('Create a policy plan')
+            ->addOption(
+                self::OPTION_GAME_SESSION_ID,
+                's',
+                InputOption::VALUE_REQUIRED,
+                'ID of the game session to create the plan for',
+                '1'
+            );
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws Exception
+     * @throws \Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+        $gameSessionId = $this->getGameSessionId($input, $io);
+        $this->em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
+        if (null === $game = $this->getGame()) {
+            $io->error('Could not retrieve game record');
+            return Command::FAILURE;
+        }
+        if (null == $game->getGameStart()) {
+            $io->error('Game start year not set');
+            return Command::FAILURE;
+        }
+        $gameCurrentMonth = $game->getGameCurrentmonth();
+        // show info to the user
+        $io->note(
+            'Press CTRL+C (+enter) to exit at any time'.PHP_EOL.
+            'Creating a policy plan for game session ID: '.$gameSessionId.PHP_EOL.
+            'See datetime format reference: https://www.php.net/manual/en/datetime.format.php'
+        );
+        $planGameTime = $this->askPlanImplementationTime($io, $game, $gameCurrentMonth);
+        $policyTypes = $this->getPolicyTypes();
+        if (empty($policyTypes)) {
+            throw new \Exception('No policy types found');
+        }
+        if (null === $layerShort = $this->askPlanLayerShortName(
+            $gameSessionId,
+            $input,
+            $output,
+            $io,
+            'Marine Protected Areas'
+        )) {
+            $io->error('Could not retrieve layers from the database');
+            return Command::FAILURE;
+        }
+        if (null === $layer = $this->getLayer($gameSessionId, $layerShort)) {
+            $io->error("Layer $layerShort not found");
+            return Command::FAILURE;
+        }
+        $layerGeometryName = null;
+        $geometryBannedFleets = null;
+        if ($layer['layerGeotype'] !== 'raster') {
+            if (null === $layerGeometryName = $this->askLayerGeometryName(
+                $gameSessionId,
+                $layer,
+                $input,
+                $output,
+                $io,
+                'Friese Front'
+            )) {
+                $io->error('No geometry found for the layer: '.$layerShort);
+                return Command::FAILURE;
+            }
+            $geometryBannedFleets = $this->askBannedFleets($io, true);
+        }
+        // assuming the display name to be unique
+        $policyTypeName = $this->askPolicyTypeName($io);
+        $policyType = $policyTypes[$policyTypeName];
+        $policyValue = $this->askPolicyValue($io, $policyType);
+        $policyFilterTypes = $this->getPolicyFilterTypes($policyType);
+        $policyFilters = [];
+        if (!empty($policyFilterTypes)) {
+            $policyFilters = $this->askPolicyFilters($io, $policyFilterTypes, [
+                'planGameTime' => $planGameTime
+            ]);
+        }
+        try {
+            $plan = $this->createPlan(
+                $gameSessionId,
+                $planGameTime,
+                $policyTypes,
+                $policyFilterTypes,
+                $layer,
+                $layerGeometryName,
+                $geometryBannedFleets,
+                $policyTypeName,
+                $policyValue,
+                $policyFilters
+            );
+        } catch (\Exception $e) {
+            $io->error('Failed to create plan: '.$e->getMessage());
+            return Command::FAILURE;
+        }
+        $io->success('Plan created successfully: ' . $plan->getPlanName());
+        return Command::SUCCESS;
+    }
+
+    private function getGameSessionEntityManager(): EntityManagerInterface
+    {
+        assert($this->em !== null);
+        return $this->em;
+    }
+
+    /**
+     * @param SymfonyStyle $io
+     * @param Game $game
+     * @param int|null $gameCurrentMonth
+     * @return int
+     * @throws \Exception
+     */
+    public function askPlanImplementationTime(SymfonyStyle $io, Game $game, ?int $gameCurrentMonth): int
+    {
+        $planImplementationTimeString = $io->ask(
+            'Set plan "implementation time" in format Y-m',
+            self::addMonthsToYear(
+                $game->getGameStart(),
+                $gameCurrentMonth === -1 ? 0 : $gameCurrentMonth + 1 // next month
+            ),
+            fn($s) => (bool)preg_match('/^\d{4}-\d{2}$/', $s) ? $s :
+                throw new \RuntimeException('Invalid implementation time format. Use Y-m')
+        );
+        // Create DateTime objects
+        $planImplementationTime = new \DateTime($planImplementationTimeString);
+        $startingYear = new \DateTime($game->getGameStart() . "-01-01");
+
+        // Calculate the difference in months
+        $interval = $startingYear->diff($planImplementationTime);
+        return $interval->y * 12 + $interval->m;
+    }
+
+    private function getGame(): ?Game
+    {
+        static $game = null;
+        if ($game !== null) {
+            return $game;
+        }
+        $em = $this->getGameSessionEntityManager();
+        try {
+            return $em->createQueryBuilder()
+                ->select('g')
+                ->from('App:Game', 'g')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    private static function addMonthsToYear(int $startingYear, int $monthsToAdd): string
+    {
+        // Create a DateTime object from the starting year and a default month (January)
+        $date = new \DateTime("{$startingYear}-01-01");
+        // Add the specified number of months to the date
+        $date->modify("+{$monthsToAdd} months");
+        return $date->format('Y-m');
+    }
+
+    /**
+     * @param SymfonyStyle $io
+     * @param array $policyFilterTypes
+     * @param array $context
+     * @return array
+     * @throws \Exception
+     */
+    public function askPolicyFilters(SymfonyStyle $io, array $policyFilterTypes, array $context): array
+    {
+        $policyFilters = [];
+        while (true) {
+            $linkFilter = $io->confirm(count($policyFilters) > 0 ? "Link another filter?" : "Link a filter?");
+            if (!$linkFilter) {
+                break;
+            }
+            if (null === $policyFilterTypeName = $this->askPolicyFilterTypeName($io, $policyFilterTypes)) {
+                continue;
+            }
+            $policyFilterValue = $this->askPolicyFilterTypeValue($policyFilterTypeName, $io, $context);
+            $policyFilters[$policyFilterTypeName][] = $policyFilterValue;
+        }
+        return $policyFilters;
+    }
+
+    public function askBannedFleets(SymfonyStyle $io, bool $canBeNone = false): int
     {
         $choices = [
             1 => 'Bottom Trawl',
@@ -51,6 +244,10 @@ class CreatePolicyPlanCommand extends Command
             6 => 'Industrial and Pelagic Trawl + Drift and Fixed Nets',
             7 => 'Bottom Trawl + Industrial and Pelagic Trawl + Drift and Fixed Nets'
         ];
+        if ($canBeNone) {
+            $choices[0] = 'None';
+            ksort($choices);
+        }
         return self::ioChoice($io, 'Choose banned fleets', $choices, current($choices));
     }
 
@@ -107,7 +304,7 @@ class CreatePolicyPlanCommand extends Command
         return (int)$gameSessionId;
     }
 
-    public function askPolicyLayerShortName(
+    public function askPlanLayerShortName(
         int $gameSessionId,
         InputInterface $input,
         OutputInterface $output,
@@ -163,29 +360,90 @@ class CreatePolicyPlanCommand extends Command
             ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
     }
 
-    public function askPolicyFilterTypeValue(int $choice, SymfonyStyle $io): mixed
+    /**
+     * @throws \Exception
+     */
+    public function askPolicyFilterTypeValue(string $policyFilterTypeName, SymfonyStyle $io, array $context): mixed
     {
-        if ($choice === 1) { // fleet
-            return $this->askBannedFleets($io);
+        switch ($policyFilterTypeName) {
+            case 'fleet':
+                return $this->askBannedFleets($io);
+            case 'schedule':
+                return $this->askSchedule($io, $context);
         }
-        throw new \Exception('Invalid choice');
+        throw new \Exception('Unknown policy filter type: '.$policyFilterTypeName);
     }
 
-    public function askPolicyFilterTypeName(SymfonyStyle $io, int &$choice): string
+    private function parseMonths(string $monthsString): array
     {
-        $choices = [1 => 'fleet', 2 => 'Skip, no filter'];
+        if (ctype_digit($monthsString)) {
+            return [(int)$monthsString];
+        }
+        $months = [];
+        $ranges = explode(',', $monthsString);
+        foreach ($ranges as $range) {
+            [$start, $end] = explode('-', $range);
+            $months = array_merge($months, range((int)$start, (int)$end));
+        }
+        return $months;
+    }
+
+    /**
+     * @param SymfonyStyle $io
+     * @param array{planGameTime: int} $context
+     * @return array
+     */
+    private function askSchedule(SymfonyStyle $io, array $context): array
+    {
+        $nextMonth = ($context['planGameTime'] % 12) + 1;
+        $nextNextMonth = ($nextMonth % 12) + 1;
+        $monthsString = $io->ask(
+            'Enter nothing, a single month, or more in format n-n,n-n,... (e.g., 1-3,6-11): ',
+            "$nextMonth-$nextNextMonth", // 1-based
+            function ($input) {
+                $pattern = "/^(\d{1,2}(-\d{1,2})?(,)?)*$/";
+                if (!preg_match($pattern, $input)) {
+                    throw new \RuntimeException(
+                        'Invalid input format. Enter nothing, a single month or more in format n-n,n-n,...'
+                    );
+                }
+                return $input;
+            }
+        );
+        return $this->parseMonths($monthsString);
+    }
+
+    /**
+     * @param SymfonyStyle $io
+     * @param array<PolicyFilterType> $policyFilterTypes
+     * @return ?string
+     */
+    public function askPolicyFilterTypeName(SymfonyStyle $io, array $policyFilterTypes): ?string
+    {
+        $n = 0;
+        foreach ($policyFilterTypes as $policyFilterType) {
+            $choices[$n++] = $policyFilterType->getName();
+        }
+        $choices[$n] = 'Skip, no filter';
         $policyFilterTypeName = null;
-        if (2 !== $choice = self::ioChoice($io, 'Choose a policy filter', $choices, current($choices))) {
+        if ($n !== $choice = self::ioChoice($io, 'Choose a policy filter', $choices, current($choices))) {
             $policyFilterTypeName = $choices[$choice];
         }
         return $policyFilterTypeName;
     }
 
-    public function askPolicyValue(SymfonyStyle $io, string $policyTypeName): mixed
+    public function askPolicyValue(SymfonyStyle $io, PolicyType $policyType): mixed
     {
+        $policyTypeDisplayName = $policyType->getDisplayName();
+        if ($policyType->getDataType() === PolicyTypeDataType::Boolean) {
+            return $io->confirm("Enable $policyTypeDisplayName?");
+        }
+        if ($policyType->getDataType() !== PolicyTypeDataType::Ranged) {
+            return null;
+        }
         $policyValue = null;
         while ($policyValue === null) {
-            $policyValue = $io->ask("Enter a $policyTypeName value", '40000');
+            $policyValue = $io->ask("Enter a $policyTypeDisplayName value", '40000');
             if (is_numeric($policyValue) && $policyValue >= 0 && $policyValue <= 100000) {
                 $policyValue = (int)$policyValue;
             } else {
@@ -197,9 +455,17 @@ class CreatePolicyPlanCommand extends Command
 
     public function askPolicyTypeName(SymfonyStyle $io): string
     {
-        // @todo migrate all policy types to the database, then query all and display them here
-        $choices = [1 => 'Buffer zone'];
-        return $io->choice('Choose a policy type', $choices, current($choices));
+        $choices = [];
+        $n = 0;
+        $policyTypes = $this->getPolicyTypes();
+        foreach ($policyTypes as $policyType) {
+            // @note(MH): the dot is force Symfony to use a map such that it returns the chosen key instead of the value
+            //  we do not want it return the display name.
+            $choices[($n++).'.'] = $policyType->getDisplayName();
+        }
+        assert(!empty($choices));
+        $choice = (int)$io->choice('Choose a policy type', $choices, key($choices));
+        return array_values($policyTypes)[$choice]->getName();
     }
 
     /**
@@ -244,84 +510,6 @@ class CreatePolicyPlanCommand extends Command
         return $this->askAndValidateName($question, $names, $helper, $input, $output, $io);
     }
 
-    protected function configure(): void
-    {
-        $this
-            ->setDescription('Create a policy plan')
-            ->addOption(
-                self::OPTION_GAME_SESSION_ID,
-                's',
-                InputOption::VALUE_REQUIRED,
-                'ID of the game session to create the plan for',
-                '1'
-            );
-    }
-
-    /**
-     * @throws NonUniqueResultException
-     * @throws Exception
-     * @throws \Exception
-     */
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $io = new SymfonyStyle($input, $output);
-        $io->note('Press CTRL+C (+enter) to exit at any time.');
-        $gameSessionId = $this->getGameSessionId($input, $io);
-        $io->writeln('Creating a policy plan for game session ID: '.$gameSessionId);
-        if (null === $layerShort = $this->askPolicyLayerShortName(
-            $gameSessionId,
-            $input,
-            $output,
-            $io,
-            'Marine Protected Areas'
-        )) {
-            $io->error('Could not retrieve layers from the database');
-            return Command::FAILURE;
-        }
-        if (null === $layer = $this->getLayer($gameSessionId, $layerShort)) {
-            $io->error("Layer $layerShort not found");
-            return Command::FAILURE;
-        }
-        $layerGeometryName = null;
-        $geometryBannedFleets = null;
-        if ($layer['layerGeotype'] !== 'raster') {
-            if (null === $layerGeometryName = $this->askLayerGeometryName(
-                $gameSessionId,
-                $layer,
-                $input,
-                $output,
-                $io,
-                'Friese Front'
-            )) {
-                $io->error('No geometry found for the layer: '.$layerShort);
-                return Command::FAILURE;
-            }
-            $geometryBannedFleets = $this->askBannedFleets($io);
-        }
-        $policyTypeName = $this->askPolicyTypeName($io);
-        $policyValue = $this->askPolicyValue($io, $policyTypeName);
-        $choice = 0;
-        $policyFilterTypeName = $this->askPolicyFilterTypeName($io, $choice);
-        $policyFilterValue = $this->askPolicyFilterTypeValue($choice, $io);
-        try {
-            $this->createPlan(
-                $gameSessionId,
-                $layer,
-                $layerGeometryName,
-                $geometryBannedFleets,
-                $policyTypeName,
-                $policyValue,
-                $policyFilterTypeName,
-                $policyFilterValue
-            );
-        } catch (\Exception $e) {
-            $io->error('Failed to create plan: '.$e->getMessage());
-            return Command::FAILURE;
-        }
-        $io->success('Plan created successfully.');
-        return Command::SUCCESS;
-    }
-
     private static function ioChoice(SymfonyStyle $io, string $question, array $choices, mixed $default): string|int
     {
         $choiceValues = array_flip($choices);
@@ -332,41 +520,68 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @throws \Exception
      */
-    private function cleanUpPreviousPlan(EntityManagerInterface $em): void
+    private function cleanUpPreviousPlan(): void
     {
-        $em->createQueryBuilder()->delete('App:Geometry', 'g')->where('g.geometryFID = :fid')
-            ->setParameter('fid', 'policy-plan-test')->getQuery()->execute();
+        $em = $this->getGameSessionEntityManager();
+        $em->createQueryBuilder()->delete('App:Geometry', 'g')->where('g.geometryFID LIKE :fid')
+            ->setParameter('fid', self::TEST_DATA_PREFIX.'%')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:PlanPolicy', 'pp')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:Plan', 'p')->where('p.planName = :planName')
-            ->setParameter('planName', 'policy-plan-test')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:PolicyLayer', 'pl')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:Layer', 'l')->where('l.layerName = :layerName')
-            ->setParameter('layerName', 'policy-plan-test')->getQuery()->execute();
+        $em->createQueryBuilder()->delete('App:Plan', 'p')->where('p.planName LIKE :planName')
+            ->setParameter('planName', self::TEST_DATA_PREFIX.'%')->getQuery()->execute();
+        $em->createQueryBuilder()->delete('App:Layer', 'l')->where('l.layerName LIKE :layerName')
+            ->setParameter('layerName', self::TEST_DATA_PREFIX.'%')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:Policy', 'p')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:PolicyFilter', 'pf')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:PolicyFilterLink', 'pfl')->getQuery()->execute();
         $em->flush();
     }
 
-    private function getPolicyTypes(EntityManagerInterface $em): array
+    /**
+     * Retrieves the policy types incl. its filters keyed by the name
+     *
+     * @return array<PolicyType>
+     */
+    private function getPolicyTypes(): array
     {
-        return collect($em->createQueryBuilder()->select('pt')->from(PolicyType::class, 'pt')
-            ->getQuery()->getResult())->keyBy(fn(PolicyType $pt) => $pt->getDisplayName())->all();
+        static $result = null;
+        if ($result !== null) {
+            return $result;
+        }
+        $em = $this->getGameSessionEntityManager();
+        $result = collect($em->createQueryBuilder()
+            ->select('pt, ptft, pft')
+            ->from(PolicyType::class, 'pt')
+            ->leftJoin('pt.policyTypeFilterTypes', 'ptft')
+            ->leftJoin('ptft.policyFilterType', 'pft')
+            ->getQuery()->getResult())->keyBy(fn(PolicyType $pt) => $pt->getName())->all();
+        return $result;
     }
 
-    private function getPolicyFilterTypes(EntityManagerInterface $em): array
+    /**
+     * returns the policy filter types for a given policy type keyed by the filter type name
+     *
+     * @param PolicyType $policyType
+     * @return array<PolicyFilterType>
+     */
+    private function getPolicyFilterTypes(PolicyType $policyType): array
     {
-        return collect($em->createQueryBuilder()->select('pft')->from(PolicyFilterType::class, 'pft')
-            ->getQuery()->getResult())->keyBy(fn(PolicyFilterType $pft) => $pft->getName())->all();
+        $policyFilterTypes = [];
+        $policyTypeFilterTypes = $policyType->getPolicyTypeFilterTypes();
+        foreach ($policyTypeFilterTypes as $policyTypeFilterType) {
+            $policyFilterTypes[$policyTypeFilterType->getPolicyFilterType()->getName()] =
+                $policyTypeFilterType->getPolicyFilterType();
+        }
+        return $policyFilterTypes;
     }
 
-    private function processPolicyFilterValue(PolicyFilterType $policyFilterType, string $policyFilterValue): mixed
+    private function processPolicyFilterValue(PolicyFilterType $policyFilterType, mixed $policyFilterValue): mixed
     {
         switch ($policyFilterType->getFieldType()) {
             case FieldType::SMALLINT:
                 return (int) $policyFilterValue;
             case FieldType::BOOLEAN:
                 return (bool) $policyFilterValue;
+            case FieldType::JSON: // fall-through
             default:
                 break; // nothing to do.
         }
@@ -392,27 +607,35 @@ class CreatePolicyPlanCommand extends Command
     }
 
     /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     * @throws Exception
+     * array<PolicyType> $policyTypes
+     * array<PolicyFilterType> $policyFilterTypes
+     *
+     * @param int $gameSessionId
+     * @param int $planGameTime
+     * @param array $policyTypes
+     * @param array $policyFilterTypes
+     * @param array $layer
+     * @param string|null $layerGeometryName
+     * @param int|null $geometryBannedFleets
+     * @param string $policyTypeName
+     * @param mixed $policyValue
+     * @param array $policyFilters
+     * @return Plan
      * @throws \Exception
      */
     private function createPlan(
         int $gameSessionId,
+        int $planGameTime,
+        array $policyTypes,
+        array $policyFilterTypes,
         array $layer,
         ?string $layerGeometryName,
         ?int $geometryBannedFleets,
         string $policyTypeName,
         mixed $policyValue,
-        ?string $policyFilterTypeName,
-        mixed $policyFilterValue
-    ): void {
-        $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
-        $this->cleanUpPreviousPlan($em);
-        $gameCurrentMonth = (int)$em->createQueryBuilder()->select('g.gameCurrentmonth')->from('App:Game', 'g')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getSingleScalarResult();
+        array $policyFilters
+    ): Plan {
+        $this->cleanUpPreviousPlan();
         $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
             ->executeQuery(
                 'SELECT * FROM geometry WHERE JSON_EXTRACT(geometry_data, \'$.NAME\') = :geometryName',
@@ -421,43 +644,34 @@ class CreatePolicyPlanCommand extends Command
         if ($geometry === false) {
             throw new \Exception('MPA not found');
         }
-
-        $policyTypes = $this->getPolicyTypes($em);
-        if (empty($policyTypes)) {
-            throw new \Exception('No policy types found');
-        }
-        $policyFilterTypes = $this->getPolicyFilterTypes($em);
-        if (empty($policyFilterTypes)) {
-            throw new \Exception('No policy filter types found');
-        }
-        $em->wrapInTransaction(function () use (
-            $em,
+        $plan = new Plan();
+        $this->getGameSessionEntityManager()->wrapInTransaction(function () use (
             $policyTypes,
             $policyFilterTypes,
             $layer,
-            $gameCurrentMonth,
+            $planGameTime,
             $geometry,
             $geometryBannedFleets,
             $policyTypeName,
             $policyValue,
-            $policyFilterTypeName,
-            $policyFilterValue
+            $policyFilters,
+            $plan
         ) {
             $policyType = $policyTypes[$policyTypeName];
+            $em = $this->getGameSessionEntityManager();
             $em->persist($policyType);
             $policy = new Policy();
             $policy
                 ->setType($policyType)
                 ->setValue($policyValue);
             $em->persist($policy);
-            $plan = new Plan();
             $plan
-                ->setPlanName('policy-plan-test')
+                ->setPlanName(self::TEST_DATA_PREFIX.'-'.uniqid())
                 ->setCountry($em->getReference(Country::class, 1))
                 ->setPlanDescription('')
                 ->setPlanTime(new \DateTime())
-                ->setPlanGametime($gameCurrentMonth === -1 ? -1 : $gameCurrentMonth + 1)
-                ->setPlanState('DESIGN')
+                ->setPlanGametime($planGameTime)
+                ->setPlanState('APPROVED')
                 ->setPlanLastupdate(time())
                 ->setPlanPreviousstate('NONE')
                 ->setPlanActive(1)
@@ -474,7 +688,7 @@ class CreatePolicyPlanCommand extends Command
                 ->setLayerActiveOnStart(0)
                 ->setLayerToggleable(1)
                 ->setLayerEditable(1)
-                ->setLayerName('policy-plan-test')
+                ->setLayerName(self::TEST_DATA_PREFIX.'-'.uniqid())
                 ->setLayerGeotype('')->setLayerShort('')->setLayerGroup('')->setLayerTooltip('')
                 ->setLayerCategory($layer['layerCategory'])
                 ->setLayerSubcategory($layer['layerSubcategory'])
@@ -484,7 +698,6 @@ class CreatePolicyPlanCommand extends Command
                 ->setLayerInfoProperties(null)
                 ->setLayerTextInfo('{}')
                 ->setLayerStates($layer['layerStates'])
-                ->setLayerRaster(null)
                 ->setLayerLastupdate(100)
                 ->setLayerEditingType(null)
                 ->setLayerSpecialEntityType($layer['layerSpecialEntityType'])
@@ -496,7 +709,7 @@ class CreatePolicyPlanCommand extends Command
             $geometryEntity
                 ->setLayer($layerEntity)
                 ->setOriginalGeometry($em->getReference(Geometry::class, $geometry['geometry_id']))
-                ->setGeometryFID('policy-plan-test')
+                ->setGeometryFID(self::TEST_DATA_PREFIX.'-'.uniqid())
                 ->setGeometryGeometry($geometry['geometry_geometry'])
                 ->setGeometryData($geometry['geometry_data'])
                 ->setCountry($em->getReference(Country::class, 7))
@@ -504,7 +717,7 @@ class CreatePolicyPlanCommand extends Command
                 ->setGeometryToSubtractFrom(null)
                 ->setGeometryDeleted(0)
                 ->setGeometryMspid(null);
-            if (null !== $geometryBannedFleets) {
+            if (null !== $geometryBannedFleets && $geometryBannedFleets !== 0) {
                 $geometryEntity
                     ->setGeometryType($this->convertBannedFleetFlagsToCommaSeparatedString($geometryBannedFleets));
             }
@@ -517,26 +730,26 @@ class CreatePolicyPlanCommand extends Command
                 ->setPlan($plan)
                 ->setPolicy($policy);
             // no need to persist, it's cascaded
-            $policyLayer = new PolicyLayer();
-            $policyLayer
-                ->setLayer($layerEntity)
-                ->setPolicy($policy);
-            // no need to persist, it's cascaded
-            if ($policyFilterTypeName == null) {
+            if (empty(array_filter($policyFilters))) {
                 return;
             }
-            $policyFilterType = $policyFilterTypes[$policyFilterTypeName];
-            $em->persist($policyFilterType);
-            $policyFilter = new PolicyFilter();
-            $policyFilter
-                ->setType($policyFilterType)
-                ->setValue($this->processPolicyFilterValue($policyFilterType, $policyFilterValue));
-            $em->persist($policyFilter);
-            $policyFilterLink = new PolicyFilterLink();
-            $policyFilterLink
-                ->setPolicy($policy)
-                ->setPolicyFilter($policyFilter);
-             // no need to persist, it's cascaded
+            foreach ($policyFilters as $policyFilterTypeName => $policyFilterValues) {
+                foreach ($policyFilterValues as $policyFilterValue) {
+                    $policyFilterType = $policyFilterTypes[$policyFilterTypeName];
+                    $em->persist($policyFilterType);
+                    $policyFilter = new PolicyFilter();
+                    $policyFilter
+                        ->setType($policyFilterType)
+                        ->setValue($this->processPolicyFilterValue($policyFilterType, $policyFilterValue));
+                    $em->persist($policyFilter);
+                    $policyFilterLink = new PolicyFilterLink();
+                    $policyFilterLink
+                        ->setPolicy($policy)
+                        ->setPolicyFilter($policyFilter);
+                     // no need to persist, it's cascaded
+                }
+            }
         });
+        return $plan;
     }
 }

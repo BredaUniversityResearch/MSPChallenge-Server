@@ -54,13 +54,13 @@
                     "type": "string"
                   },
                   "starttype": {
-                    "type": "string"
+                    "type": ["string", "null"]
                   },
                   "endlayer": {
                     "type": "string"
                   },
                   "endtype": {
-                    "type": "string"
+                    "type": ["string", "null"]
                   },
                   "sort": {
                     "type": "string"
@@ -788,7 +788,6 @@
                 ]
               }
             },
-            "layer_type_restriction_group_mapping": {},
             "output_configuration": {
               "type": "object",
               "properties": {
@@ -904,7 +903,6 @@
                   "ship_type_name": {
                     "type": "string"
                   },
-                  "ship_restriction_group": {},
                   "ship_routing_type": {
                     "type": "string"
                   },
@@ -915,13 +913,11 @@
                 "required": [
                   "ship_type_id",
                   "ship_type_name",
-                  "ship_restriction_group",
                   "ship_routing_type",
                   "ship_agility"
                 ]
               }
             },
-            "ship_restriction_groups": {},
             "layer_type_ship_type_mapping": {
               "type": "array",
               "items": {
@@ -1008,13 +1004,11 @@
             "maintenance_destinations",
             "configured_routes",
             "restriction_layer_exceptions",
-            "layer_type_restriction_group_mapping",
             "output_configuration",
             "risk_heatmap_settings",
             "heatmap_settings",
             "heatmap_bleed_config",
             "ship_types",
-            "ship_restriction_groups",
             "layer_type_ship_type_mapping",
             "shipping_kpi_config"
           ]
@@ -1381,7 +1375,7 @@
                     "type": "object",
                     "properties": {
                       "displayName": {
-                        "type": "string"
+                        "type": ["string", "null"]
                       },
                       "approval": {
                         "type": "string"

@@ -22,7 +22,7 @@ class Policy
     /**
      * @var mixed $value this will be a json string with the value for the policy
      */
-    #[ORM\Column(type: 'json')]
+    #[ORM\Column(type: 'json', nullable: true, options: ['default' => 'NULL'])]
     private mixed $value = null;
 
     #[ORM\OneToMany(mappedBy: 'policy', targetEntity: PlanPolicy::class, cascade: ['persist'], orphanRemoval: true)]
@@ -150,5 +150,51 @@ class Policy
         $this->policyFilterLinks->removeElement($policyFilterLink);
         // Since orphanRemoval is set, no need to explicitly remove $policyFilterLink from the database
         return $this;
+    }
+
+    public function hasFleetFiltersMatch(int $fleet): ?bool
+    {
+        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
+        /** @var PolicyFilterLink[] $fleetFilters */
+        $fleetFilters = collect($policyFilterLinks)
+            ->filter(fn($pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'fleet')->all();
+        if (empty($fleetFilters)) {
+            return null; // no fleet filters found
+        }
+        // if there is no fleet filter matching the geometry type
+        if (false === array_reduce(
+            $fleetFilters,
+            fn($carry, PolicyFilterLink $item) => $carry ||
+                (($item->getPolicyFilter()->getValue() & $fleet) == $fleet),
+            false
+        )) {
+            return false; // no there is no match
+        }
+        return true;
+    }
+
+    public function hasScheduleFiltersMatch(int $currentMonth): ?bool
+    {
+        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
+        /** @var PolicyFilterLink[] $scheduleFilters */
+        $scheduleFilters = collect($policyFilterLinks)
+            ->filter(
+                fn(PolicyFilterLink $pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'schedule'
+            )
+            ->all();
+        if (empty($scheduleFilters)) {
+            return null; // no filters schedule found
+        }
+        // is there any seasonal filter matching the current game month?
+        if (false === array_reduce(
+            $scheduleFilters,
+            fn($carry, PolicyFilterLink $item) => $carry ||
+                // convert "number of months" to a month number 1-12
+                in_array(($currentMonth % 12) + 1, $item->getPolicyFilter()->getValue()),
+            false
+        )) {
+            return false; // meaning there should not be a seasonal closure for this month, so no pressures
+        }
+        return true;
     }
 }

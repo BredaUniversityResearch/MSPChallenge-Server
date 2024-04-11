@@ -293,6 +293,12 @@ class Geometry
         return $this->geometryType;
     }
 
+    public function getGeometryTypes(): array
+    {
+        preg_match_all('/\d+/', $this->getGeometryType() ?? 0, $matches);
+        return array_map('intval', $matches[0] ?? []);
+    }
+
     public function setGeometryType(string|array|null $geometryType): Geometry
     {
         if (is_array($geometryType)) {
