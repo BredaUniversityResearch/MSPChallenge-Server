@@ -45,15 +45,6 @@ final class Version20240304230022 extends MSPMigration
       FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
       CONSTRAINT `plan_id_policy_id` UNIQUE (`plan_id`, `policy_id`)
     ) ENGINE='InnoDB' COLLATE 'utf8mb4_unicode_ci';
-    CREATE TABLE `policy_layer` (
-      `id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-      `policy_id` int(10) unsigned NOT NULL,
-      `layer_id` int(11) NOT NULL,
-      FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-      FOREIGN KEY (`layer_id`) REFERENCES `layer` (`layer_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-      CONSTRAINT `policy_id_layer_id` UNIQUE (`policy_id`, `layer_id`),
-      INDEX (`policy_id`)
-    ) ENGINE='InnoDB' COLLATE 'utf8mb4_unicode_ci';
     CREATE TABLE `policy_filter_type` (
       `id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
       `name` varchar(255) NOT NULL,
@@ -88,9 +79,6 @@ final class Version20240304230022 extends MSPMigration
     ALTER TABLE `plan_message` DROP FOREIGN KEY `fk_plan_message_plan1`, ADD FOREIGN KEY (`plan_message_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
     ALTER TABLE `plan_layer` DROP FOREIGN KEY `fk_plan_layer_plan1`, ADD FOREIGN KEY (`plan_layer_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
     ALTER TABLE `approval` DROP FOREIGN KEY `fk_table1_plan2`, ADD FOREIGN KEY (`approval_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-    INSERT INTO `policy_filter_type` (`id`, `name`, `field_type`, `field_schema`) VALUES (1, 'fleet', 'smallint',	NULL);
-    INSERT INTO `policy_type` (`id`, `name`, `display_name`, `data_type`, `data_config`) VALUES (1,	'buffer', 'Buffer zone', 'ranged', '{\"min\":0,\"unit_step_size\":10000,\"max\":100000}');
-    INSERT INTO `policy_type_filter_type` (`id`, `policy_type_id`, `policy_filter_type_id`) VALUES (1, 1, 1)    
     SQL
         );
     }
@@ -99,7 +87,7 @@ final class Version20240304230022 extends MSPMigration
     {
         $this->addSql(
             <<< 'SQL'
-DROP TABLE `policy_type`; DROP TABLE `policy`; DROP TABLE `plan_policy`; DROP TABLE `policy_layer`;
+DROP TABLE `policy_type`; DROP TABLE `policy`; DROP TABLE `plan_policy`;
 DROP TABLE `policy_filter_type`; DROP TABLE `policy_filter`;
 ALTER TABLE `plan_message` DROP FOREIGN KEY `plan_message_ibfk_1`, ADD FOREIGN KEY (`plan_message_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE `plan_layer` DROP FOREIGN KEY `plan_layer_ibfk_1`, ADD FOREIGN KEY (`plan_layer_plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
