@@ -488,7 +488,15 @@ class CreatePolicyPlanCommand extends Command
     ): ?string {
         $names = collect($this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
             ->executeQuery(
-                'SELECT JSON_EXTRACT(geometry_data, \'$.NAME\') FROM geometry WHERE geometry_layer_id = :layerId',
+                <<< 'SQL'
+                SELECT
+                  CONCAT(
+                  IFNULL(JSON_EXTRACT(geometry_data, '$.name'), ''),
+                  IFNULL(JSON_EXTRACT(geometry_data, '$.NAME'), ''),
+                  IFNULL(JSON_EXTRACT(geometry_data, '$.Name'), '')
+                )
+                FROM geometry WHERE geometry_layer_id = :layerId
+                SQL,
                 ['layerId' => $layer['layerId']]
             )->fetchFirstColumn())->map(fn($name) => json_decode($name))->unique()->sort()->toArray();
         if (empty($names)) {
