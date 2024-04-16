@@ -1,5 +1,8 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
+    # Symfony 6+ Enabling the integration of Doctrine annotations is deprecated. Set the "framework.annotations.enabled" config option to false.
+    annotations:
+        enabled: false
     secret: '%env(APP_SECRET)%'
     #csrf_protection: true
     http_method_override: false

@@ -15,7 +15,7 @@ use ServerManager\ServerManager;
 use Symfony\Component\Uid\Uuid;
 use function App\await;
 
-class User extends Base implements JWTUserInterface
+abstract class UserBase extends Base implements JWTUserInterface
 {
     private const ALLOWED = array(
         ["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE],
@@ -28,7 +28,9 @@ class User extends Base implements JWTUserInterface
     private ?string $user_name;
     private ?int $user_id;
 
-    public function __construct(string $method = '')
+    // @note "Make the constructor final to prevent the class from being extended"
+    //  see https://phpstan.org/blog/solving-phpstan-error-unsafe-usage-of-new-static
+    final public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
     }
@@ -342,11 +344,6 @@ class User extends Base implements JWTUserInterface
         return ['ROLE_USER'];
     }
 
-    public function getUserIdentifier(): ?int
-    {
-        return $this->user_id;
-    }
-
     /**
      * @return int|null
      */
@@ -377,9 +374,9 @@ class User extends Base implements JWTUserInterface
         return $this;
     }
 
-    public static function createFromPayload($username, array $payload): User
+    public static function createFromPayload($username, array $payload): UserBase
     {
-        $user = new self;
+        $user = new static;
         $user->setUserId($payload['uid']);
         $user->setUsername($username);
         return $user;

@@ -7,7 +7,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-class GameSessionLogger extends AbstractProcessingHandler
+abstract class GameSessionLoggerBase extends AbstractProcessingHandler
 {
     public function __construct(
         private readonly ContainerBagInterface $params
@@ -19,7 +19,7 @@ class GameSessionLogger extends AbstractProcessingHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    protected function write(array $record): void
+    protected function handleWriteByArray(array $record): void
     {
         // hack to make the placeholders work (not sure why monolog fails to do this)
         foreach ($record['context'] as $key => $val) {
