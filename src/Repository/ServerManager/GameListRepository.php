@@ -23,7 +23,8 @@ use Symfony\Component\Serializer\Serializer;
 
 class GameListRepository extends EntityRepository
 {
-    private ?ObjectNormalizer $normalizer = null; private ?Serializer $serializer = null; // to be created upon usage// to be created upon usage
+    private ?ObjectNormalizer $normalizer = null;
+    private ?Serializer $serializer = null; // to be created upon usage// to be created upon usage
 
 
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
