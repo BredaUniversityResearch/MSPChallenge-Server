@@ -15,7 +15,7 @@ jobs:
       - name: Install composer dependencies
         run: bash install.sh
       - name: Phpstan analyse
-        run: vendor/bin/phpstan --memory_limit=-1
+        run: vendor/bin/phpstan analyse --memory-limit=-1
       - name: Run our own custom linter script
         run: bash test.sh
 
