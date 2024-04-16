@@ -1,4 +1,4 @@
-{
+ {
   "metadata": {
     "date_modified": "3/13/2024",
     "data_model_hash": "C85D0C24459C546C938FCB742DFDF18131946C74571D2F74AF8990E37F9EA00C",
@@ -20510,14 +20510,8 @@
           "unit": "km2",
           "valueDefinitions": [
             {
-              "valueName": "No protection",
+              "valueName": "No Protection",
               "valueColor": "#FF7272FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No protection against fisheries",
-              "valueColor": "#73FFBCFF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
@@ -20541,6 +20535,24 @@
             },
             {
               "valueName": "No Unreported Fleets",
+              "valueColor": "#CEFF73FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+			{
+              "valueName": "Habitats Directive",
+              "valueColor": "#CEFF73FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+			{
+              "valueName": "Birds Directive",
+              "valueColor": "#CEFF73FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+			{
+              "valueName": "Habitats and Birds Directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
@@ -32134,7 +32146,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No protection",
+            "displayName": "No Protection",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
