@@ -41,11 +41,6 @@ framework:
 #            'App\Message\YourMessage': async
             'App\Message\Analytics\AnalyticsMessageBase': analytics
             'App\Message\GameList\GameListCreationMessage': async            
-
-when@test:
-    framework:
-        messenger:
-            transports:
-                async_test: 'in-memory://'
-            routing:
-                'App\Message\GameList\GameListCreationMessage': [async, async_test]
+            'App\Message\GameList\GameListArchiveMessage': async
+            'App\Message\GameSave\GameSaveCreationMessage': async
+            'App\Message\GameSave\GameSaveLoadMessage': async

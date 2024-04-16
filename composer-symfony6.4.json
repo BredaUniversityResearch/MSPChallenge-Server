@@ -3,12 +3,15 @@
     "license": "proprietary",
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "require": {
+    "suggest": {
+        "ext-imagick": "You only require imagick for image processing, e.g. for POV config creation."
+    },
+    "require":
+    {    
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
-        "ext-imagick": "*",
         "ext-intl": "*",
         "ext-json": "*",
         "ext-openssl": "*",
@@ -31,6 +34,7 @@
         "lexik/jwt-authentication-bundle": "^2.20",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpstan/phpdoc-parser": "^1.25",
+        "phpunit/phpunit": "^9.5",
         "predis/predis": "^2.2",
         "react/http": "^1.5",
         "react/mysql": "^0.5.6",
@@ -91,9 +95,14 @@
             ],
             "App\\Domain\\API\\": "api",
             "DoctrineMigrations\\": "migrations/src/",
-            "ServerManager\\": "ServerManager/classes/"
+            "ServerManager\\": "ServerManager/classes/",
+            "App\\Tests\\": "tests/",
+            "App\\DataFixtures\\": "fixtures/"
         },
         "files": [
+            "src/helpers.php",
+            "src/functions.php",
+            "src/Domain/WsServer/functions.php",
             "ServerManager/helpers.php"
         ]
     },
