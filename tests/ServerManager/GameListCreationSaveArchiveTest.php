@@ -96,9 +96,13 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
         $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
         $countGameList = count($emServerManager->getRepository(GameList::class)->findAll());
 
-        $gameSave = $emServerManager->getRepository(GameSave::class)->find(1);
-        $normalizedGameSave = GameSaveRepository::createDataFromGameSave($gameSave);
-        $newGameSessionFromLoad = GameListRepository::createGameListFromData($normalizedGameSave);
+        /** @var GameSaveRepository $gameSaveRepo */
+        $gameSaveRepo = $emServerManager->getRepository(GameSave::class);
+        $gameSave = $gameSaveRepo->find(1);
+        $normalizedGameSave = $gameSaveRepo->createDataFromGameSave($gameSave);
+        /** @var GameListRepository $gameListRepo */
+        $gameListRepo = $emServerManager->getRepository(GameSave::class);
+        $newGameSessionFromLoad = $gameListRepo->createGameListFromData($normalizedGameSave);
         $newGameSessionFromLoad->setName('testReloadIntoSession');
         $newGameSessionFromLoad->setGameSave($gameSave);
         $newGameSessionFromLoad->setPasswordAdmin('test');
