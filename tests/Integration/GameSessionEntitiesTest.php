@@ -20,6 +20,7 @@ use App\Entity\PlanMessage;
 use App\Entity\PlanRestrictionArea;
 use App\Entity\Restriction;
 use App\Entity\ServerManager\GameConfigVersion;
+use App\Repository\LayerRepository;
 use App\Tests\ServerManager\GameListCreationTest;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,6 +29,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -80,6 +82,10 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertSame($country, $country2);
     }
 
+    /**
+     * @throws \ReflectionException
+     * @throws ExceptionInterface
+     */
     public function testLayerEntity(): void
     {
         $this->start();
@@ -95,11 +101,10 @@ class GameSessionEntitiesTest extends KernelTestCase
         self::assertSame($layer, $layer2);
 
         $gameConfig = $this->emServerManager->getRepository(GameConfigVersion::class)->find(1);
-
-        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
         $allLayers = $gameConfig->getGameConfigComplete()['datamodel']['meta'];
-        $layer3 = $normalizer->denormalize($allLayers[0], Layer::class);
-        self::assertInstanceOf(Layer::class, $layer3); //good enough, normalizer throws exceptions anyway
+        /** @var LayerRepository $layerRepo */
+        $layerRepo = $this->em->getRepository(Layer::class);
+        self::assertInstanceOf(Layer::class, $layerRepo->createLayerFromData($allLayers[0])); //good enough, normalizer throws exceptions anyway
 
         $planLayer = new Layer();
         $planLayer->setOriginalLayer($layer);

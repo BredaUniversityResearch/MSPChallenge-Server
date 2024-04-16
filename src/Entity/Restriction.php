@@ -92,11 +92,8 @@ class Restriction
         return $this->restrictionSort;
     }
 
-    public function setRestrictionSort(RestrictionSort|string $restrictionSort): Restriction
+    public function setRestrictionSort(RestrictionSort $restrictionSort): Restriction
     {
-        if (is_string($restrictionSort)) {
-            $restrictionSort = RestrictionSort::from(strtoupper($restrictionSort));
-        }
         $this->restrictionSort = $restrictionSort;
         return $this;
     }
@@ -106,11 +103,8 @@ class Restriction
         return $this->restrictionType;
     }
 
-    public function setRestrictionType(RestrictionType|string $restrictionType): Restriction
+    public function setRestrictionType(RestrictionType $restrictionType): Restriction
     {
-        if (is_string($restrictionType)) {
-            $restrictionType = RestrictionType::from(strtoupper($restrictionType));
-        }
         $this->restrictionType = $restrictionType;
         return $this;
     }

@@ -32,6 +32,7 @@ use App\Entity\Restriction;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
+use App\Repository\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,6 +43,7 @@ use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
+use ReflectionException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -281,6 +283,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws ReflectionException
      */
     private function importLayerData(SessionSetupContext $context): void
     {
@@ -291,8 +294,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             ->setPassword($this->gameSession->getGameGeoServer()->getPassword());
 
         foreach ($this->dataModel['meta'] as $layerMetaData) {
-            /** @var Layer $layer */
-            $layer = $this->normalizer->denormalize($layerMetaData, Layer::class);
+            $layer = LayerRepository::createLayerFromData($layerMetaData);
             $layer->setLayerGroup($this->dataModel['region']);
             $this->info("Starting import of layer {$layer->getLayerName()}...");
             if ($layer->getLayerGeoType() == LayerGeoType::RASTER) {
@@ -591,9 +593,9 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                 }
                 $restriction->setRestrictionStartLayer($startLayer)
                     ->setRestrictionEndLayer($endLayer)
-                    ->setRestrictionSort($restrictionItem['sort'])
+                    ->setRestrictionSort(RestrictionSort::from(strtoupper($restrictionItem['sort'])))
                     ->setRestrictionValue($restrictionItem['value'])
-                    ->setRestrictionType($restrictionItem['type'])
+                    ->setRestrictionType(RestrictionType::from(strtoupper($restrictionItem['type'])))
                     ->setRestrictionMessage($restrictionItem['message'])
                     ->setRestrictionStartLayerType($restrictionItem['starttype'])
                     ->setRestrictionEndLayerType($restrictionItem['endtype']);

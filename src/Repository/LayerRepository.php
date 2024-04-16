@@ -2,11 +2,17 @@
 
 namespace App\Repository;
 
+use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\Layer;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
+use ReflectionException;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class LayerRepository extends EntityRepository
 {
@@ -102,5 +108,24 @@ class LayerRepository extends EntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @throws ExceptionInterface|ReflectionException
+     */
+    public static function createLayerFromData(array $layerData): Layer
+    {
+        // fix name inconsistencies
+        $layerData['layer_geo_type'] = $layerData['layer_geotype'];
+        unset($layerData['layer_geotype']);
+        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        return $normalizer->denormalize(
+            $layerData,
+            Layer::class,
+            null,
+            (new NormalizerContextBuilder(Layer::class))->withCallbacks([
+                'layerGeoType' => fn($value) => LayerGeoType::from($value)
+            ])->toArray()
+        );
     }
 }

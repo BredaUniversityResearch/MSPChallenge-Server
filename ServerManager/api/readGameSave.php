@@ -2,10 +2,11 @@
 
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave as GameSaveNew;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Message\GameSave\GameSaveLoadMessage;
+use App\Repository\ServerManager\GameListRepository;
+use App\Repository\ServerManager\GameSaveRepository;
 use ServerManager\API;
 use ServerManager\GameSave;
 use ServerManager\GameSession;
@@ -36,20 +37,10 @@ if (method_exists($gamesave, $action) && in_array($action, $allowed_actions)) {
 }*/
 $action = $_POST["action"] ?? "";
 if ($action == 'load') {
-    $normalizers = [new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter())];
-    $serializer = new Serializer($normalizers, []);
     $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
     $gameSave = $em->getRepository(GameSaveNew::class)->find($gamesave->id);
-    $normalizedGameSave = $serializer->normalize(
-        $gameSave,
-        null,
-        $em->getRepository(GameSaveNew::class)->defaultNormalizeContext()
-    );
-    $newGameSessionFromLoad = $serializer->denormalize(
-        $normalizedGameSave,
-        GameList::class,
-        null,
-        $em->getRepository(GameList::class)->defaultDenormalizeContext()
+    $newGameSessionFromLoad = GameListRepository::createGameListFromData(
+        GameSaveRepository::createDataFromGameSave($gameSave)
     );
     $newGameSessionFromLoad->setGameSave($gameSave);
     $newGameSessionFromLoad->setName($_POST['name']);

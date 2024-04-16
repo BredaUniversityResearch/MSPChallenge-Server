@@ -167,11 +167,8 @@ class Plan
         return $this->planState;
     }
 
-    public function setPlanState(PlanState|string $planState): Plan
+    public function setPlanState(PlanState $planState): Plan
     {
-        if (is_string($planState)) {
-            $planState = PlanState::from(strtoupper($planState));
-        }
         $this->planState = $planState;
         return $this;
     }

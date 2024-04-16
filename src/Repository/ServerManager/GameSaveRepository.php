@@ -13,6 +13,10 @@ use App\Entity\ServerManager\GameWatchdogServer;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use ReflectionException;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class GameSaveRepository extends EntityRepository
 {
@@ -39,30 +43,47 @@ class GameSaveRepository extends EntityRepository
         }
     }
 
-    public function defaultDenormalizeContext(): array
+    /**
+     * @throws ExceptionInterface|ReflectionException
+     */
+    public static function createGameSaveFromData(array $gameSaveData)
     {
-        return (new NormalizerContextBuilder(GameSave::class))->withCallbacks([
-            'gameConfigVersion' => fn($innerObject) => $this->getEntityManager()->getRepository(
-                GameConfigVersion::class
-            )->find($innerObject['id']),
-            'gameServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
-                GameServer::class
-            )->find($innerObject['id']),
-            'gameWatchdogServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
-                GameWatchdogServer::class
-            )->find($innerObject['id']),
-            'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
-            'gameState' => fn($innerObject) => new GameStateValue($innerObject),
-            'gameVisibility' => fn($innerObject) => new GameVisibilityValue($innerObject)
-        ])->toArray();
+        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        return $normalizer->denormalize(
+            $gameSaveData,
+            GameSave::class,
+            null,
+            (new NormalizerContextBuilder(GameSave::class))->withCallbacks([
+                'gameConfigVersion' => fn($innerObject) => $this->getEntityManager()->getRepository(
+                    GameConfigVersion::class
+                )->find($innerObject['id']),
+                'gameServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
+                    GameServer::class
+                )->find($innerObject['id']),
+                'gameWatchdogServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
+                    GameWatchdogServer::class
+                )->find($innerObject['id']),
+                'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
+                'gameState' => fn($innerObject) => new GameStateValue($innerObject),
+                'gameVisibility' => fn($innerObject) => new GameVisibilityValue($innerObject)
+            ])->toArray()
+        );
     }
 
-    public static function defaultNormalizeContext(): array
+    /**
+     * @throws ExceptionInterface|ReflectionException
+     */
+    public static function createDataFromGameSave(GameSave $gameSave)
     {
-        return (new NormalizerContextBuilder(GameSave::class))->withCallbacks([
-            'sessionState' => fn($innerObject) => ((string) $innerObject),
-            'gameState' => fn($innerObject) => ((string) $innerObject),
-            'gameVisibility' => fn($innerObject) => ((string) $innerObject)
-        ])->toArray();
+        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        return $normalizer->normalize(
+            $gameSave,
+            null,
+            (new NormalizerContextBuilder(GameSave::class))->withCallbacks([
+                'sessionState' => fn($innerObject) => ((string) $innerObject),
+                'gameState' => fn($innerObject) => ((string) $innerObject),
+                'gameVisibility' => fn($innerObject) => ((string) $innerObject)
+            ])->toArray()
+        );
     }
 }

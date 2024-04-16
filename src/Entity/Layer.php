@@ -8,9 +8,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
-class Layer
+class Layer implements NormalizerInterface, DenormalizerInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -42,7 +44,7 @@ class Layer
     #[ORM\Column(type: Types::STRING, length: 125, options: ['default' => ''])]
     private ?string $layerName = '';
 
-    #[ORM\Column(name: "layer_geotype", length: 255, nullable: true, enumType: LayerGeoType::class)]
+    #[ORM\Column(name: 'layer_geotype', length: 255, nullable: true, enumType: LayerGeoType::class)]
     private ?LayerGeoType $layerGeoType = null;
 
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
@@ -442,11 +444,8 @@ class Layer
         return $this->layerGeoType;
     }
 
-    public function setLayerGeoType(LayerGeoType|string|null $layerGeoType): Layer
+    public function setLayerGeoType(?LayerGeoType $layerGeoType): Layer
     {
-        if (is_string($layerGeoType)) {
-            $layerGeoType = LayerGeoType::from(strtolower($layerGeoType));
-        }
         $this->layerGeoType = $layerGeoType;
         return $this;
     }
@@ -1002,5 +1001,25 @@ class Layer
             }
         }
         return $arrayToEncode;
+    }
+
+    public function denormalize($data, string $type, ?string $format = null, array $context = [])
+    {
+        // TODO: Implement denormalize() method.
+    }
+
+    public function supportsDenormalization($data, string $type, ?string $format = null): bool
+    {
+        return $type === self::class;
+    }
+
+    public function normalize($object, ?string $format = null, array $context = [])
+    {
+        // TODO: Implement normalize() method.
+    }
+
+    public function supportsNormalization($data, ?string $format = null): bool
+    {
+        return $data instanceof self;
     }
 }

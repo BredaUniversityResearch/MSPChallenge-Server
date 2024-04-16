@@ -18,6 +18,9 @@ use App\MessageHandler\GameList\GameListArchiveMessageHandler;
 use App\MessageHandler\GameSave\GameSaveCreationMessageHandler;
 use App\Message\GameSave\GameSaveCreationMessage;
 use App\MessageHandler\GameSave\GameSaveLoadMessageHandler;
+use App\Repository\ServerManager\GameListRepository;
+use App\Repository\ServerManager\GameSaveRepository;
+use ReflectionException;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
@@ -30,7 +33,7 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
 {
 
     /**
-     * @throws ExceptionInterface
+     * @throws ExceptionInterface|ReflectionException
      */
     public function testGameSaveCreation(): void
     {
@@ -40,22 +43,8 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
         $container = static::getContainer();
         $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
 
-        $normalizers = [new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter())];
-        $serializer = new Serializer($normalizers, []);
-
         $gameList = $emServerManager->getRepository(GameList::class)->find(1);
-
-        $normalizedGameList = $serializer->normalize(
-            $gameList,
-            null,
-            $emServerManager->getRepository(GameList::class)->defaultNormalizeContext()
-        );
-        $gameSave = $serializer->denormalize(
-            $normalizedGameList,
-            GameSave::class,
-            null,
-            $emServerManager->getRepository(GameSave::class)->defaultDenormalizeContext()
-        );
+        $gameSave = GameSaveRepository::createGameSaveFromData(GameListRepository::createDataFromGameList($gameList));
         $gameSave->setGameConfigFilesFilename($gameSave->getGameConfigVersion()->getGameConfigFile()?->getFilename());
         $gameSave->setGameConfigVersionsRegion($gameSave->getGameConfigVersion()?->getRegion());
         $gameSave->setSaveType(new GameSaveTypeValue('full'));
@@ -95,7 +84,7 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
     }
 
     /**
-     * @throws ExceptionInterface
+     * @throws ExceptionInterface|ReflectionException
      */
     public static function testGameSaveLoad(): void
     {
@@ -103,21 +92,9 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
         $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
         $countGameList = count($emServerManager->getRepository(GameList::class)->findAll());
 
-        $normalizers = [new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter())];
-        $serializer = new Serializer($normalizers, []);
-
         $gameSave = $emServerManager->getRepository(GameSave::class)->find(1);
-        $normalizedGameSave = $serializer->normalize(
-            $gameSave,
-            null,
-            $emServerManager->getRepository(GameSave::class)->defaultNormalizeContext()
-        );
-        $newGameSessionFromLoad = $serializer->denormalize(
-            $normalizedGameSave,
-            GameList::class,
-            null,
-            $emServerManager->getRepository(GameList::class)->defaultDenormalizeContext()
-        );
+        $normalizedGameSave = GameSaveRepository::createDataFromGameSave($gameSave);
+        $newGameSessionFromLoad = GameListRepository::createGameListFromData($normalizedGameSave);
         $newGameSessionFromLoad->setName('testReloadIntoSession');
         $newGameSessionFromLoad->setGameSave($gameSave);
         $newGameSessionFromLoad->setPasswordAdmin('test');
