@@ -13,10 +13,12 @@ use ReflectionException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class LayerRepository extends EntityRepository
 {
     private ?ObjectNormalizer $normalizer = null; // to be created upon usage
+    private ?Serializer $serializer = null; // to be created upon usage
 
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
@@ -121,7 +123,8 @@ class LayerRepository extends EntityRepository
         $layerData['layer_geo_type'] = $layerData['layer_geotype'];
         unset($layerData['layer_geotype']);
         $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        return $this->normalizer->denormalize(
+        $this->serializer ??= new Serializer([$this->normalizer]);
+        return $this->serializer->denormalize(
             $layerData,
             Layer::class,
             null,

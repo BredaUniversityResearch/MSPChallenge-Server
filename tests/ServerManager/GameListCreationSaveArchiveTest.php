@@ -101,7 +101,7 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
         $gameSave = $gameSaveRepo->find(1);
         $normalizedGameSave = $gameSaveRepo->createDataFromGameSave($gameSave);
         /** @var GameListRepository $gameListRepo */
-        $gameListRepo = $emServerManager->getRepository(GameSave::class);
+        $gameListRepo = $emServerManager->getRepository(GameList::class);
         $newGameSessionFromLoad = $gameListRepo->createGameListFromData($normalizedGameSave);
         $newGameSessionFromLoad->setName('testReloadIntoSession');
         $newGameSessionFromLoad->setGameSave($gameSave);

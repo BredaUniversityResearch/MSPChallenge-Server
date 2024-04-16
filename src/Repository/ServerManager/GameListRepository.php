@@ -19,10 +19,12 @@ use ReflectionException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class GameListRepository extends EntityRepository
 {
-    private ?ObjectNormalizer $normalizer = null; // to be created upon usage
+    private ?ObjectNormalizer $normalizer = null; private ?Serializer $serializer = null; // to be created upon usage// to be created upon usage
+
 
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
@@ -134,7 +136,8 @@ class GameListRepository extends EntityRepository
     public function createGameListFromData(array $gameListData)
     {
         $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        return $this->normalizer->denormalize(
+        $this->serializer ??= new Serializer([$this->normalizer]);
+        return $this->serializer->denormalize(
             $gameListData,
             GameList::class,
             null,
@@ -162,7 +165,8 @@ class GameListRepository extends EntityRepository
     public function createDataFromGameList(GameList $gameList): array
     {
         $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        return $this->normalizer->normalize(
+        $this->serializer ??= new Serializer([$this->normalizer]);
+        return $this->serializer->normalize(
             $gameList,
             null,
             (new NormalizerContextBuilder(GameList::class))->withCallbacks([
