@@ -53,7 +53,7 @@ class NormalizerContextBuilder
         if (empty($callbacks)) {
             return;
         }
-        $invalidFields = [];// array_diff(array_keys($callbacks), self::getClassProperties($this->className));
+        $invalidFields = array_diff(array_keys($callbacks), self::getClassProperties($this->className));
         if (empty($invalidFields)) {
             return;
         }
