@@ -253,7 +253,7 @@ class GameSave
         return $this->passwordPlayer;
     }
 
-    public function setPasswordPlayer(string $passwordPlayer): self
+    public function setPasswordPlayer(?string $passwordPlayer): self
     {
         $this->passwordPlayer = $passwordPlayer;
 
@@ -346,7 +346,7 @@ class GameSave
         return $this->apiAccessToken;
     }
 
-    public function setApiAccessToken(string $apiAccessToken): self
+    public function setApiAccessToken(?string $apiAccessToken): self
     {
         $this->apiAccessToken = $apiAccessToken;
 
@@ -376,6 +376,13 @@ class GameSave
     public function setSaveNotes(string $saveNotes): self
     {
         $this->saveNotes = $saveNotes;
+
+        return $this;
+    }
+
+    public function addToSaveNotes(string $saveNotes): self
+    {
+        $this->saveNotes = $this->getSaveNotes().$saveNotes;
 
         return $this;
     }
@@ -412,7 +419,7 @@ class GameSave
         return $this->serverVersion;
     }
 
-    public function setServerVersion(string $serverVersion): self
+    public function setServerVersion(?string $serverVersion): self
     {
         $this->serverVersion = $serverVersion;
 

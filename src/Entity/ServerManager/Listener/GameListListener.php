@@ -13,9 +13,10 @@ use Doctrine\ORM\Event\PrePersistEventArgs;
 
 class GameListListener
 {
+
     public function prePersist(GameList $gameSession, PrePersistEventArgs $event): void
     {
-        $gameConfigContentComplete = $gameSession->getGameConfigVersion()->getGameConfigComplete();
+        $gameConfigContentComplete = $gameSession->getGameConfigVersion()?->getGameConfigComplete();
         if (is_null($gameSession->getGameCreationTime())) {
             $gameSession->setGameCreationTime(time());
         }

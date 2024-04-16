@@ -6,6 +6,7 @@ use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Repository\GameRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Filesystem\Filesystem;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
 
@@ -71,6 +72,10 @@ class Game
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
     private ?int $gameIsRunningUpdate = 0;
+
+    private string $runningGameConfigFileContentsRaw = '';
+
+    private array $runningGameConfigFileContents = [];
 
     public function getGameId(): ?int
     {
@@ -279,6 +284,28 @@ class Game
     public function setGameConfigfile(?string $gameConfigfile): Game
     {
         $this->gameConfigfile = $gameConfigfile;
+        return $this;
+    }
+
+    public function getRunningGameConfigFileContents(): array
+    {
+        return $this->runningGameConfigFileContents;
+    }
+
+    public function setRunningGameConfigFileContents(array $runningGameConfigFileContents): Game
+    {
+        $this->runningGameConfigFileContents = $runningGameConfigFileContents;
+        return $this;
+    }
+
+    public function getRunningGameConfigFileContentsRaw(): string
+    {
+        return $this->runningGameConfigFileContentsRaw;
+    }
+
+    public function setRunningGameConfigFileContentsRaw(string $runningGameConfigFileContentsRaw): Game
+    {
+        $this->runningGameConfigFileContentsRaw = $runningGameConfigFileContentsRaw;
         return $this;
     }
 

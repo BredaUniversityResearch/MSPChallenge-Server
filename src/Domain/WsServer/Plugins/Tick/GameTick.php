@@ -4,10 +4,12 @@ namespace App\Domain\WsServer\Plugins\Tick;
 
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
+use App\Domain\Common\MSPBrowserFactory;
 use App\Domain\Services\ConnectionManager;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\Loop;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
@@ -96,7 +98,6 @@ class GameTick extends TickBase
             wdo("Trying to tick the server", OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
 
-
         $game = new Game();
         $this->asyncDataTransferTo($game);
         if (!$game->areSimulationsUpToDate($tickData)) {
@@ -105,7 +106,6 @@ class GameTick extends TickBase
             }
             return null;
         }
-
 
         return $this->serverTickInternal($showDebug)
             ->otherwise(function (SilentFailException $e) {
@@ -171,6 +171,29 @@ class GameTick extends TickBase
             return $plan->updateLayerState($currentMonth)
                 ->then(function (/* array $results */) use ($currentMonth, $monthsDone, $state, $tick) {
                     return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
+                })
+                ->then(function () use ($currentMonth) {
+                    // no return! so we don't wait for the response
+                    $this->getWatchdogSessionUniqueToken()->then(
+                        function (string $watchdogSessionUniqueToken) use ($currentMonth) {
+                            // note(MH): GetWatchdogAddress is not async, but it is cached once it
+                            //   has been retrieved once, so that's "fine"
+                            $url = $this->GetWatchdogAddress()."/Watchdog/SetMonth";
+                            MSPBrowserFactory::create($url)->post(
+                                $url,
+                                [
+                                    'Content-Type' => 'application/x-www-form-urlencoded'
+                                ],
+                                http_build_query([
+                                    'game_session_token' => $watchdogSessionUniqueToken,
+                                    'month' => $currentMonth
+                                ])
+                            )
+                            ->then(function (ResponseInterface $response) use ($url) {
+                                return $this->logWatchdogResponse($url, $response);
+                            });
+                        }
+                    );
                 })
                 ->then(function () use ($tick) {
                     if (($tick['month'] % $tick['autosave_interval_months']) == 0) {

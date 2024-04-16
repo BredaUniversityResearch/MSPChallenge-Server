@@ -18,6 +18,9 @@
 [Ss]cripts/**
 [Ss]imulations/**/*_[Ll]og.*
 [Ss]imulations/v1/win-x64/mel-ewe-dump/**
+[Ss]imulations/**/MSP games.xml
+[Ss]imulations/**/MSP game load.xml
+[Ss]imulations/**/MSP game save.xml
 
 #Stuff for Simulations
 Simulations/MEL/EwE/**
@@ -91,8 +94,10 @@ symfony.lock
 # github hooks lock file
 cghooks.lock
 
-# local PHPStan configuration
+###> phpstan/phpstan ###
+# Allow the user to override settings in phpstan.dist.neon, by creating phpstan.neon locally
 phpstan.neon
+###< phpstan/phpstan ###
 
 ###> squizlabs/php_codesniffer ###
 /.phpcs-cache
@@ -100,21 +105,17 @@ phpstan.neon
 ###< squizlabs/php_codesniffer ###
 
 ###> symfony/phpunit-bridge ###
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
-
 ###> phpunit/phpunit ###
-/phpunit.xml
 .phpunit.result.cache
+/phpunit.xml
 ###< phpunit/phpunit ###
+###< symfony/phpunit-bridge ###
 
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 /config-symfony5.4/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
 
-###> phpstan/phpstan ###
-# Allow the user to override settings in phpstan.dist.neon, by creating phpstan.neon locally
-phpstan.neon
-###< phpstan/phpstan ###
+# to solve issues with GitHub: https://chipperci.com/docs/issues/composer-github-authentication/
+# which creates this file, which should be ignored
+auth.json
