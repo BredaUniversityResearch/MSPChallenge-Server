@@ -32174,7 +32174,7 @@
             "media": "wiki://Natura_2000"
           },
           "1": {
-            "displayName": "Birds directive",
+            "displayName": "Birds Directive",
             "approval": "NotDependent",
             "value": 1,
             "map_type": null,
@@ -32230,7 +32230,7 @@
             "media": "wiki://Natura_2000"
           },
           "3": {
-            "displayName": "Habitat and Birds Directive",
+            "displayName": "Habitats and Birds Directive",
             "approval": "NotDependent",
             "value": 3,
             "map_type": null,
