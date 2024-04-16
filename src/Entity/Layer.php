@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
-class Layer implements NormalizerInterface, DenormalizerInterface
+class Layer
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -1001,25 +1001,5 @@ class Layer implements NormalizerInterface, DenormalizerInterface
             }
         }
         return $arrayToEncode;
-    }
-
-    public function denormalize($data, string $type, ?string $format = null, array $context = [])
-    {
-        // TODO: Implement denormalize() method.
-    }
-
-    public function supportsDenormalization($data, string $type, ?string $format = null): bool
-    {
-        return $type === self::class;
-    }
-
-    public function normalize($object, ?string $format = null, array $context = [])
-    {
-        // TODO: Implement normalize() method.
-    }
-
-    public function supportsNormalization($data, ?string $format = null): bool
-    {
-        return $data instanceof self;
     }
 }
