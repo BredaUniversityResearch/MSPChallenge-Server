@@ -18,6 +18,9 @@
 [Ss]cripts/**
 [Ss]imulations/**/*_[Ll]og.*
 [Ss]imulations/v1/win-x64/mel-ewe-dump/**
+[Ss]imulations/**/MSP games.xml
+[Ss]imulations/**/MSP game load.xml
+[Ss]imulations/**/MSP game save.xml
 
 #Stuff for Simulations
 Simulations/MEL/EwE/**
@@ -113,3 +116,7 @@ phpstan.neon
 /config/jwt/*.pem
 /config-symfony5.4/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+
+# to solve issues with GitHub: https://chipperci.com/docs/issues/composer-github-authentication/
+# which creates this file, which should be ignored
+auth.json

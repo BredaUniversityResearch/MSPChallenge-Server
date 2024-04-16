@@ -14,14 +14,14 @@ class Layer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, length: 11)]
-    private ?int $layerId;
+    private ?int $layerId = null;
 
     #[ORM\OneToMany(mappedBy: 'originalLayer', targetEntity: Layer::class, cascade: ['persist'])]
     private Collection $derivedLayer;
 
     #[ORM\ManyToOne(targetEntity: Layer::class, cascade: ['persist'], inversedBy: 'derivedLayer')]
     #[ORM\JoinColumn(name: 'layer_original_id', referencedColumnName: 'layer_id')]
-    private ?Layer $originalLayer;
+    private ?Layer $originalLayer = null;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $layerActive = 1;
@@ -63,16 +63,16 @@ class Layer
     private ?string $layerKpiCategory = 'Miscellaneous';
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $layerType;
+    private ?string $layerType = null;
 
     #[ORM\Column(type: Types::SMALLINT, length: 3, options: ['default' => 1])]
     private ?int $layerDepth = 1;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $layerInfoProperties;
+    private ?string $layerInfoProperties = null;
 
     #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
-    private ?string $layerInformation;
+    private ?string $layerInformation = null;
 
     #[ORM\Column(type: Types::STRING, length: 1024, options: ['default' => '{}'])]
     private ?string $layerTextInfo = '{}';
@@ -89,7 +89,7 @@ class Layer
         '[{"state":"ASSEMBLY","time":2},{"state":"ACTIVE","time":10},{"state":"DISMANTLE","time":2}]';
 
     #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]
-    private ?string $layerRaster;
+    private ?string $layerRaster = null;
 
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 100])]
     private ?float $layerLastupdate = 100;
@@ -98,7 +98,7 @@ class Layer
     private ?int $layerMelupdate = 0;
 
     #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]
-    private ?string $layerEditingType;
+    private ?string $layerEditingType = null;
 
     #[ORM\Column(type: Types::STRING, length: 512, options: ['default' => 'Default'])]
     private ?string $layerSpecialEntityType = 'Default';
@@ -113,15 +113,15 @@ class Layer
     private ?float $layerFilecreationtime = 0;
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    private ?string $layerMedia;
+    private ?string $layerMedia = null;
 
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    private ?float $layerEntityValueMax;
+    private ?float $layerEntityValueMax = null;
 
     #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
     private ?string $layerTags = null;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $geometry;
 
     #[ORM\OneToMany(mappedBy: 'restrictionStartLayer', targetEntity: Restriction::class, cascade: ['persist'])]
@@ -139,7 +139,7 @@ class Layer
     #[ORM\ManyToMany(targetEntity: Layer::class, inversedBy: 'pressure', cascade: ['persist'])]
     private Collection $pressureGeneratingLayer;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanLayer::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanLayer::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $planLayer;
 
     #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanDelete::class, cascade: ['persist'])]
@@ -150,29 +150,30 @@ class Layer
 
     private bool $layerGeometryWithGeneratedMspids = false;
 
-    private ?bool $layerDownloadFromGeoserver;
+    private ?bool $layerDownloadFromGeoserver = null;
 
-    private ?string $layerPropertyAsType;
+    private ?string $layerPropertyAsType = null;
 
-    private ?int $layerWidth;
+    private ?int $layerWidth = null;
 
-    private ?int $layerHeight;
+    private ?int $layerHeight = null;
 
-    private ?string $layerRasterMaterial;
+    private ?string $layerRasterMaterial = null;
 
-    private ?bool $layerRasterFilterMode;
+    private ?bool $layerRasterFilterMode = null;
 
-    private ?bool $layerRasterColorInterpolation;
+    private ?bool $layerRasterColorInterpolation = null;
 
-    private ?string $layerRasterPattern;
+    private ?string $layerRasterPattern = null;
 
-    private ?float $layerRasterMinimumValueCutoff;
+    private ?float $layerRasterMinimumValueCutoff = null;
 
     private ?string $layerRasterURL = null;
 
     private ?array $layerRasterBoundingbox = null;
 
-    private ?int $contextCreatingGameSession = null;
+    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PolicyLayer::class, cascade: ['persist'], orphanRemoval: true)]
+    private Collection $policyLayers;
 
     public function __construct()
     {
@@ -185,17 +186,7 @@ class Layer
         $this->planLayer = new ArrayCollection();
         $this->planDelete = new ArrayCollection();
         $this->planRestrictionArea = new ArrayCollection();
-    }
-
-    public function getContextCreatingGameSession(): ?int
-    {
-        return $this->contextCreatingGameSession;
-    }
-
-    public function setContextCreatingGameSession(?int $contextCreatingGameSession): Layer
-    {
-        $this->contextCreatingGameSession = $contextCreatingGameSession;
-        return $this;
+        $this->policyLayers = new ArrayCollection();
     }
 
     public function getDerivedLayer(): Collection
@@ -586,7 +577,7 @@ class Layer
             $layerTextInfo = "";
         }
         if (is_array($layerTextInfo)) {
-            $layerTextInfo = json_encode($layerTextInfo);
+            $layerTextInfo = json_encode($layerTextInfo, JSON_FORCE_OBJECT);
         }
         $this->layerTextInfo = $layerTextInfo;
         return $this;
@@ -779,13 +770,8 @@ class Layer
 
     public function removeGeometry(Geometry $geometry): self
     {
-        if ($this->geometry->removeElement($geometry)) {
-            // set the owning side to null (unless already changed)
-            if ($geometry->getLayer() === $this) {
-                $geometry->setLayer(null);
-            }
-        }
-
+        $this->geometry->removeElement($geometry);
+        // Since orphanRemoval is set, no need to explicitly remove $geometry from the database
         return $this;
     }
 
@@ -910,13 +896,8 @@ class Layer
 
     public function removePlanLayer(PlanLayer $planLayer): self
     {
-        if ($this->planLayer->removeElement($planLayer)) {
-            // set the owning side to null (unless already changed)
-            if ($planLayer->getLayer() === $this) {
-                $planLayer->setLayer(null);
-            }
-        }
-
+        $this->planLayer->removeElement($planLayer);
+        // Since orphanRemoval is set, no need to explicitly remove $planLayer from the database
         return $this;
     }
 
@@ -978,5 +959,44 @@ class Layer
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, PolicyLayer>
+     */
+    public function getPolicyLayers(): Collection
+    {
+        return $this->policyLayers;
+    }
+
+    public function addPolicyLayer(PolicyLayer $policyLayer): static
+    {
+        if (!$this->policyLayers->contains($policyLayer)) {
+            $this->policyLayers->add($policyLayer);
+            $policyLayer->setLayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removePolicyLayer(PolicyLayer $policyLayer): static
+    {
+        $this->policyLayers->removeElement($policyLayer);
+        // Since orphanRemoval is set, no need to explicitly remove policyLayer from the database
+        return $this;
+    }
+
+    public function exportToDecodedGeoJSON(): array
+    {
+        $arrayToEncode = [];
+        foreach ($this->getGeometry() as $geometry) {
+            $arrayToEncode[] = $geometry->exportToDecodedGeoJSON();
+        }
+        foreach ($this->getDerivedLayer() as $derivedLayer) {
+            foreach ($derivedLayer->getGeometry() as $derivedLayerGeometry) {
+                $arrayToEncode[] = $derivedLayerGeometry->exportToDecodedGeoJSON();
+            }
+        }
+        return $arrayToEncode;
     }
 }

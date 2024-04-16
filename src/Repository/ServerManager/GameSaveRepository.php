@@ -2,10 +2,17 @@
 
 namespace App\Repository\ServerManager;
 
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\EntityEnums\GameVisibilityValue;
+use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameSave;
+use App\Entity\ServerManager\GameServer;
+use App\Entity\ServerManager\GameWatchdogServer;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class GameSaveRepository extends EntityRepository
 {
@@ -32,28 +39,36 @@ class GameSaveRepository extends EntityRepository
         }
     }
 
-//    /**
-//     * @return GameSave[] Returns an array of GameSave objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('g')
-//            ->andWhere('g.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('g.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function defaultDenormalizeContext(): array
+    {
+        // @todo (HW): member names via reflection
+        return [
+            AbstractNormalizer::CALLBACKS => [
+                'gameConfigVersion' => fn($innerObject) => $this->getEntityManager()->getRepository(
+                    GameConfigVersion::class
+                )->find($innerObject['id']),
+                'gameServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
+                    GameServer::class
+                )->find($innerObject['id']),
+                'gameWatchdogServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
+                    GameWatchdogServer::class
+                )->find($innerObject['id']),
+                'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
+                'gameState' => fn($innerObject) => new GameStateValue($innerObject),
+                'gameVisibility' => fn($innerObject) => new GameVisibilityValue($innerObject)
+            ],
+        ];
+    }
 
-//    public function findOneBySomeField($value): ?GameSave
-//    {
-//        return $this->createQueryBuilder('g')
-//            ->andWhere('g.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public static function defaultNormalizeContext(): array
+    {
+        // @todo (HW): member names via reflection
+        return [
+            AbstractNormalizer::CALLBACKS => [
+                'sessionState' => fn($innerObject) => ((string) $innerObject),
+                'gameState' => fn($innerObject) => ((string) $innerObject),
+                'gameVisibility' => fn($innerObject) => ((string) $innerObject)
+            ]
+        ];
+    }
 }

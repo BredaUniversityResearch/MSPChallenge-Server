@@ -13,16 +13,15 @@
 namespace App\EventListener;
 
 use App\Entity\Game;
-use App\Entity\Layer;
+use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 class SessionEntityListener
 {
     public function __construct(
-        private readonly ParameterBagInterface $params,
-        private readonly LoggerInterface $gameSessionLogger
+        private readonly ParameterBagInterface $params
     ) {
     }
 
@@ -30,8 +29,16 @@ class SessionEntityListener
     {
         if ($event->getObject() instanceof Game) {
             $this->prePersistGame($event);
-        } elseif ($event->getObject() instanceof Layer) {
-            $this->prePersistLayer($event);
+        }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function postLoad(PostLoadEventArgs $event): void
+    {
+        if ($event->getObject() instanceof Game) {
+            $this->postLoadGame($event);
         }
     }
 
@@ -44,30 +51,25 @@ class SessionEntityListener
         $game->setGameIsRunningUpdate(0);
     }
 
-    private function prePersistLayer(PrePersistEventArgs $event): void
+    /**
+     * @throws \Exception
+     */
+    private function postLoadGame(PostLoadEventArgs $event): void
     {
-        $layer = $event->getObject();
-        if (is_null($layer->getContextCreatingGameSession())) {
-            return;
-        }
-        $geometryCoordsDataSets = [];
-        foreach ($layer->getGeometry() as $geometry) {
-            $array = [
-                'coords' => $geometry->getGeometryGeometry(),
-                'data' => $geometry->getGeometryData()
-            ];
-            if (in_array($array, $geometryCoordsDataSets)) {
-                $geometryText = substr($geometry->getGeometryGeometry(), 0, 50).'... - '.
-                    substr($geometry->getGeometryData(), 0, 50).'...';
-                $this->gameSessionLogger->warning(
-                    "Avoided adding duplicate geometry (based on the combination of coordinates and complete ".
-                    "properties set) to layer {$layer->getLayerName()}. Some geometry data: {$geometryText}",
-                    ['gameSession' => $layer->getContextCreatingGameSession()]
+        $game = $event->getObject();
+
+        $runningConfigPath = $this->params->get('app.session_config_dir').$game->getGameConfigfile();
+        $fileSystem = new Filesystem();
+        if ($fileSystem->exists($runningConfigPath)) {
+            $gameConfigContentCompleteRaw = file_get_contents($runningConfigPath);
+            $gameConfigContentComplete = json_decode($gameConfigContentCompleteRaw, true);
+            if ($gameConfigContentComplete === false) {
+                throw new \Exception(
+                    "Cannot read contents of the session's running configuration file: {$runningConfigPath}"
                 );
-                $layer->removeGeometry($geometry);
-            } else {
-                $geometryCoordsDataSets[] = $array;
             }
+            $game->setRunningGameConfigFileContentsRaw($gameConfigContentCompleteRaw);
+            $game->setRunningGameConfigFileContents($gameConfigContentComplete);
         }
     }
 }

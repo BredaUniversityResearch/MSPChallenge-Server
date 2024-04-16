@@ -30,7 +30,7 @@ OPENSSL_CONF_DEFAULT="${EXEPATH}\mingw64\ssl\openssl.cnf" # if the git bash is s
 if [ ! -f "${OPENSSL_CONF_DEFAULT}" ]; then
     OPENSSL_CONF_DEFAULT="${EXEPATH}\..\mingw64\ssl\openssl.cnf" # if the git bash is started from bin/bash.exe (Windows Terminal)
 fi
-if [ -z "${OPENSSL_CONF}" ] && [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
+if [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
     OPENSSL_CONF="${OPENSSL_CONF_DEFAULT}"
 fi
 if [ -n "${OPENSSL_CONF}" ]; then

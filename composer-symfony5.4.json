@@ -3,12 +3,14 @@
     "license": "proprietary",
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "require": 
+    "suggest": {
+        "ext-imagick": "You only require imagick for image processing, e.g. for POV config creation."
+    },
+    "require":
     {
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
-        "ext-imagick": "*",
         "ext-intl": "*",
         "ext-json": "*",
         "ext-openssl": "*",
@@ -19,6 +21,7 @@
         "cboden/ratchet": "^0.4",
         "clue/http-proxy-react": "^1.8",
         "doctrine/doctrine-bundle": "^2.6",
+        "doctrine/doctrine-fixtures-bundle": "*",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.12",
         "drift/dbal": "dev-master",
@@ -30,12 +33,15 @@
         "lexik/jwt-authentication-bundle": "*",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpstan/phpdoc-parser": "^1.25",
+        "phpunit/phpunit": "^9.5",
         "predis/predis": "^2.2",
         "react/http": "^1.5",
         "react/mysql": "^0.5.6",
         "react/promise": "2.10.*",
         "shivas/versioning-bundle": "*",
+        "symfony/browser-kit": "5.4.*",
         "symfony/console": "5.4.*",
+        "symfony/css-selector": "5.4.*",
         "symfony/doctrine-messenger": "5.4.*",
         "symfony/dotenv": "5.4.*",
         "symfony/finder": "5.4.*",
@@ -45,6 +51,7 @@
         "symfony/http-client": "5.4.*",
         "symfony/messenger": "5.4.*",
         "symfony/monolog-bundle": "^3.8",
+        "symfony/phpunit-bridge": "^6.3",
         "symfony/property-access": "5.4.*",
         "symfony/property-info": "5.4.*",
         "symfony/proxy-manager-bridge": "5.4.*",
@@ -55,6 +62,7 @@
         "symfony/twig-bundle": "5.4.*",
         "symfony/uid": "5.4.*",
         "symfony/validator": "5.4.*",
+        "symfony/web-profiler-bundle": "5.4.*",
         "symfony/yaml": "5.4.*"
     },
     "config": {
@@ -78,7 +86,9 @@
             "App\\": "src/",
             "App\\Domain\\API\\": "api",
             "DoctrineMigrations\\": "migrations/src/",
-            "ServerManager\\": "ServerManager/classes/"
+            "ServerManager\\": "ServerManager/classes/",
+            "App\\Tests\\": "tests/",
+            "App\\DataFixtures\\": "fixtures/"
         },
         "files": [
             "src/helpers.php",
