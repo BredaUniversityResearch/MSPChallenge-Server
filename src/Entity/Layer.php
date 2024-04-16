@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Repository\LayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -41,8 +42,8 @@ class Layer
     #[ORM\Column(type: Types::STRING, length: 125, options: ['default' => ''])]
     private ?string $layerName = '';
 
-    #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
-    private ?string $layerGeotype = '';
+    #[ORM\Column(name: "layer_geotype", length: 255, nullable: true, enumType: LayerGeoType::class)]
+    private ?LayerGeoType $layerGeoType = null;
 
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
     private ?string $layerShort = '';
@@ -436,14 +437,17 @@ class Layer
         return $this;
     }
 
-    public function getLayerGeotype(): ?string
+    public function getLayerGeoType(): ?LayerGeoType
     {
-        return $this->layerGeotype;
+        return $this->layerGeoType;
     }
 
-    public function setLayerGeotype(?string $layerGeotype): Layer
+    public function setLayerGeoType(LayerGeoType|string|null $layerGeoType): Layer
     {
-        $this->layerGeotype = $layerGeotype;
+        if (is_string($layerGeoType)) {
+            $layerGeoType = LayerGeoType::from(strtolower($layerGeoType));
+        }
+        $this->layerGeoType = $layerGeoType;
         return $this;
     }
 

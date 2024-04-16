@@ -3,6 +3,8 @@
 namespace App\Command;
 
 use App\Domain\Common\EntityEnums\FieldType;
+use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
@@ -107,10 +109,10 @@ class CreatePolicyPlanCommand extends Command
             $io->error("Layer $layerShort not found");
             return Command::FAILURE;
         }
-        $context['layerName'] = $layer['layerName'];
+        $context['layerName'] = $layer->getLayerName();
         $layerGeometryName = null;
         $geometryBannedFleets = null;
-        if ($layer['layerGeotype'] !== 'raster') {
+        if ($layer->getLayerGeoType() == LayerGeoType::RASTER) {
             if (null === $layerGeometryName = $this->askLayerGeometryName(
                 $gameSessionId,
                 $layer,
@@ -403,11 +405,11 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @param int $gameSessionId
      * @param mixed $layerShort
-     * @return array|null
+     * @return Layer|null
      * @throws NonUniqueResultException
      * @throws \Exception
      */
-    public function getLayer(int $gameSessionId, mixed $layerShort): ?array
+    public function getLayer(int $gameSessionId, mixed $layerShort): ?Layer
     {
         $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         return $em->createQueryBuilder()->select('l')->from(Layer::class, 'l')
@@ -415,7 +417,7 @@ class CreatePolicyPlanCommand extends Command
             ->setParameter('layerShort', $layerShort)
             ->setMaxResults(1)
             ->getQuery()
-            ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT);
     }
 
     /**
@@ -528,7 +530,7 @@ class CreatePolicyPlanCommand extends Command
 
     /**
      * @param int $gameSessionId
-     * @param mixed $layer
+     * @param Layer $layer
      * @param InputInterface $input
      * @param OutputInterface $output
      * @param SymfonyStyle $io
@@ -538,7 +540,7 @@ class CreatePolicyPlanCommand extends Command
      */
     public function askLayerGeometryName(
         int $gameSessionId,
-        mixed $layer,
+        Layer $layer,
         InputInterface $input,
         OutputInterface $output,
         SymfonyStyle $io,
@@ -561,7 +563,7 @@ class CreatePolicyPlanCommand extends Command
                 WHERE r.geometry_name != '""' and r.geometry_name != ''
                 ORDER BY r.geometry_name
                 SQL,
-                ['layerId' => $layer['layerId']]
+                ['layerId' => $layer->getLayerId()]
             )->fetchFirstColumn())->map(fn($name) => json_decode($name))->toArray();
         if (empty($names)) {
             return null;
@@ -570,12 +572,14 @@ class CreatePolicyPlanCommand extends Command
         $helper = $this->getHelper('question');
         $defaultValue = in_array($default, $names) ? $default : current($names);
         $question = new Question(
-            " \e[32mChoose a " . $layer['layerGeotype'] . "\e[39m [\e[33m$defaultValue\e[39m]:" . PHP_EOL . '> ',
+            " \e[32mChoose a ".($layer->getLayerGeoType()?->value ?? 'geometry').
+                "\e[39m [\e[33m$defaultValue\e[39m]:".PHP_EOL.'> ',
             $defaultValue
         );
         $question->setValidator(function ($answer) use ($names, $layer) {
             if (!in_array($answer, $names)) {
-                throw new \RuntimeException('Non-exisiting '.$layer['layerGeotype'].': '.$answer);
+                throw new \RuntimeException('Non-exisiting '.
+                    ($layer->getLayerGeoType()?->value ?? 'geometry').': '.$answer);
             }
             return $answer;
         });
@@ -686,7 +690,7 @@ class CreatePolicyPlanCommand extends Command
      * @param int $planGameTime
      * @param array $policyTypes
      * @param array $policyFilterTypes
-     * @param array $layer
+     * @param Layer $layer
      * @param string|null $layerGeometryName
      * @param int|null $geometryBannedFleets
      * @param string $policyTypeName
@@ -700,7 +704,7 @@ class CreatePolicyPlanCommand extends Command
         int $planGameTime,
         array $policyTypes,
         array $policyFilterTypes,
-        array $layer,
+        Layer $layer,
         ?string $layerGeometryName,
         ?int $geometryBannedFleets,
         string $policyTypeName,
@@ -748,7 +752,7 @@ class CreatePolicyPlanCommand extends Command
                 ->setPlanDescription('')
                 ->setPlanTime(new \DateTime())
                 ->setPlanGametime($planGameTime)
-                ->setPlanState('APPROVED')
+                ->setPlanState(PlanState::APPROVED)
                 ->setPlanLastupdate(time())
                 ->setPlanPreviousstate('NONE')
                 ->setPlanActive(1)
@@ -759,25 +763,25 @@ class CreatePolicyPlanCommand extends Command
             $em->persist($plan);
             $layerEntity = new Layer();
             $layerEntity
-                ->setOriginalLayer($em->getReference(Layer::class, $layer['layerId']))
+                ->setOriginalLayer($em->getReference(Layer::class, $layer->getLayerId()))
                 ->setLayerActive(1)
                 ->setLayerSelectable(1)
                 ->setLayerActiveOnStart(0)
                 ->setLayerToggleable(1)
                 ->setLayerEditable(1)
                 ->setLayerName(self::TEST_DATA_PREFIX.'-'.uniqid())
-                ->setLayerGeotype('')->setLayerShort('')->setLayerGroup('')->setLayerTooltip('')
-                ->setLayerCategory($layer['layerCategory'])
-                ->setLayerSubcategory($layer['layerSubcategory'])
-                ->setLayerKpiCategory($layer['layerKpiCategory'])
+                ->setLayerGeoType(null)->setLayerShort('')->setLayerGroup('')->setLayerTooltip('')
+                ->setLayerCategory($layer->getLayerCategory())
+                ->setLayerSubcategory($layer->getLayerSubcategory())
+                ->setLayerKpiCategory($layer->getLayerKpiCategory())
                 ->setLayerType(null)
                 ->setLayerDepth(1)
                 ->setLayerInfoProperties(null)
                 ->setLayerTextInfo('{}')
-                ->setLayerStates($layer['layerStates'])
+                ->setLayerStates($layer->getLayerStates())
                 ->setLayerLastupdate(100)
                 ->setLayerEditingType(null)
-                ->setLayerSpecialEntityType($layer['layerSpecialEntityType'])
+                ->setLayerSpecialEntityType($layer->getLayerSpecialEntityType())
                 ->setLayerGreen(0)->setLayerMelupdateConstruction(0)->setLayerFilecreationtime(0)->setLayerMedia(null)
                 ->setLayerEntityValueMax(null)->setLayerTags(null);
             $layerEntity->getOriginalLayer()->setLayerMelupdate(1);

@@ -19,7 +19,6 @@ final class Version20240327090454  extends MSPMigration
     protected function getDatabaseType(): ?MSPDatabaseType
     {
         return new MSPDatabaseType(MSPDatabaseType::DATABASE_TYPE_GAME_SESSION);
-
     }
 
     protected function onUp(Schema $schema): void

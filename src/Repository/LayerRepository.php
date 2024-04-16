@@ -7,7 +7,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 
 class LayerRepository extends EntityRepository
 {
@@ -26,7 +25,7 @@ class LayerRepository extends EntityRepository
             $layer = $this->getLayerCurrentAndPlannedGeometry($layer['layerId']);
             if (!is_null($layer)) {
                 $layerReturn[$layer->getLayerName()] = [
-                    'layerGeoType' => $layer->getLayerGeoType(),
+                    'layerGeoType' => $layer->getLayerGeoType()?->value ?? '',
                     'geometry' => $layer->exportToDecodedGeoJSON()
                 ];
             }
@@ -39,7 +38,7 @@ class LayerRepository extends EntityRepository
         $qb = $this->createQueryBuilder('l');
         return $qb
             ->select('l.layerId')
-            ->where($qb->expr()->in('l.layerGeotype', ['polygon', 'line', 'point']))
+            ->where($qb->expr()->in('l.layerGeoType', ['polygon', 'line', 'point']))
             ->andWhere($qb->expr()->orX(
                 $qb->expr()->eq('l.originalLayer', 0),
                 $qb->expr()->isNull('l.originalLayer')

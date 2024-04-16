@@ -4,6 +4,10 @@ namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\EntityEnums\PlanState;
+use App\Domain\Common\EntityEnums\RestrictionSort;
+use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
 use App\Entity\Country;
@@ -25,7 +29,6 @@ use App\Entity\PlanLayer;
 use App\Entity\PlanMessage;
 use App\Entity\PlanRestrictionArea;
 use App\Entity\Restriction;
-use App\Entity\ServerManager\GameList;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
@@ -42,15 +45,12 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -291,10 +291,11 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             ->setPassword($this->gameSession->getGameGeoServer()->getPassword());
 
         foreach ($this->dataModel['meta'] as $layerMetaData) {
+            /** @var Layer $layer */
             $layer = $this->normalizer->denormalize($layerMetaData, Layer::class);
             $layer->setLayerGroup($this->dataModel['region']);
             $this->info("Starting import of layer {$layer->getLayerName()}...");
-            if ($layer->getLayerGeotype() == "raster") {
+            if ($layer->getLayerGeoType() == LayerGeoType::RASTER) {
                 $this->importLayerRasterData($layer, $geoServerCommunicator);
             } else {
                 $this->importLayerGeometryData($layer, $geoServerCommunicator, $context);
@@ -339,8 +340,8 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                 $restriction = new Restriction();
                 $restriction->setRestrictionStartLayerType($typeId);
                 $restriction->setRestrictionEndLayerType($typeId);
-                $restriction->setRestrictionSort('TYPE_UNAVAILABLE');
-                $restriction->setRestrictionType('ERROR');
+                $restriction->setRestrictionSort(RestrictionSort::TYPE_UNAVAILABLE);
+                $restriction->setRestrictionType(RestrictionType::ERROR);
                 $restriction->setRestrictionMessage('Type not yet available at the plan implementation time.');
                 $layer->addRestrictionStart($restriction);
                 $layer->addRestrictionEnd($restriction);
@@ -816,7 +817,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             ]);
             $this->info("Starting import of plan {$plan->getPlanName()}.");
             $plan->setCountry($context->getCountry($planConfig['plan_country_id'] ?? -1));
-            $plan->setPlanState('APPROVED');
+            $plan->setPlanState(PlanState::APPROVED);
             foreach ($planConfig['fishing'] as $fishingConfig) {
                 $fishing = $this->normalizer->denormalize($fishingConfig, Fishing::class);
                 $fishing->setCountry($context->getCountry($fishingConfig['fishing_country_id'] ?? -1));

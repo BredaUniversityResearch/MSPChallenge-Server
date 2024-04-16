@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\RestrictionSort;
+use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Repository\RestrictionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -26,11 +28,11 @@ class Restriction
     #[ORM\Column(type: Types::STRING, length: 45, nullable: true)]
     private ?string $restrictionStartLayerType;
 
-    #[ORM\Column(type: Types::STRING, length: 45, options: ['default' => 'INCLUSION'])]
-    private ?string $restrictionSort = 'INCLUSION';
+    #[ORM\Column(length: 255, enumType: RestrictionSort::class)]
+    private RestrictionSort $restrictionSort = RestrictionSort::INCLUSION;
 
-    #[ORM\Column(type: Types::STRING, length: 45)]
-    private ?string $restrictionType;
+    #[ORM\Column(length: 255, enumType: RestrictionType::class)]
+    private RestrictionType $restrictionType;
 
     #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]
     private ?string $restrictionMessage;
@@ -85,24 +87,30 @@ class Restriction
         return $this;
     }
 
-    public function getRestrictionSort(): ?string
+    public function getRestrictionSort(): RestrictionSort
     {
         return $this->restrictionSort;
     }
 
-    public function setRestrictionSort(?string $restrictionSort): Restriction
+    public function setRestrictionSort(RestrictionSort|string $restrictionSort): Restriction
     {
+        if (is_string($restrictionSort)) {
+            $restrictionSort = RestrictionSort::from(strtoupper($restrictionSort));
+        }
         $this->restrictionSort = $restrictionSort;
         return $this;
     }
 
-    public function getRestrictionType(): ?string
+    public function getRestrictionType(): RestrictionType
     {
         return $this->restrictionType;
     }
 
-    public function setRestrictionType(?string $restrictionType): Restriction
+    public function setRestrictionType(RestrictionType|string $restrictionType): Restriction
     {
+        if (is_string($restrictionType)) {
+            $restrictionType = RestrictionType::from(strtoupper($restrictionType));
+        }
         $this->restrictionType = $restrictionType;
         return $this;
     }
