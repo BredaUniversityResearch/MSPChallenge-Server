@@ -22,6 +22,8 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class GameListRepository extends EntityRepository
 {
+    private ?ObjectNormalizer $normalizer = null; // to be created upon usage
+
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
         parent::__construct($em, $class);
@@ -129,10 +131,10 @@ class GameListRepository extends EntityRepository
     /**
      * @throws ReflectionException|ExceptionInterface
      */
-    public static function createGameListFromData(array $gameListData)
+    public function createGameListFromData(array $gameListData)
     {
-        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        return $normalizer->denormalize(
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        return $this->normalizer->denormalize(
             $gameListData,
             GameList::class,
             null,
@@ -157,10 +159,10 @@ class GameListRepository extends EntityRepository
     /**
      * @throws ExceptionInterface|ReflectionException
      */
-    public static function createDataFromGameList(GameList $gameList): array
+    public function createDataFromGameList(GameList $gameList): array
     {
-        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        return $normalizer->normalize(
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        return $this->normalizer->normalize(
             $gameList,
             null,
             (new NormalizerContextBuilder(GameList::class))->withCallbacks([

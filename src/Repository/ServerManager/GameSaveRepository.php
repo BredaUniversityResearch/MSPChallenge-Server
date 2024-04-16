@@ -20,6 +20,8 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class GameSaveRepository extends EntityRepository
 {
+    private ?ObjectNormalizer $normalizer = null; // to be created upon usage
+
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
         parent::__construct($em, $class);
@@ -46,10 +48,10 @@ class GameSaveRepository extends EntityRepository
     /**
      * @throws ExceptionInterface|ReflectionException
      */
-    public static function createGameSaveFromData(array $gameSaveData)
+    public function createGameSaveFromData(array $gameSaveData)
     {
-        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        return $normalizer->denormalize(
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        return $this->normalizer->denormalize(
             $gameSaveData,
             GameSave::class,
             null,
@@ -73,10 +75,10 @@ class GameSaveRepository extends EntityRepository
     /**
      * @throws ExceptionInterface|ReflectionException
      */
-    public static function createDataFromGameSave(GameSave $gameSave)
+    public function createDataFromGameSave(GameSave $gameSave)
     {
-        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        return $normalizer->normalize(
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        return $this->normalizer->normalize(
             $gameSave,
             null,
             (new NormalizerContextBuilder(GameSave::class))->withCallbacks([

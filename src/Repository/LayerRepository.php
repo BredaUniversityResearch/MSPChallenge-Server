@@ -16,6 +16,8 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class LayerRepository extends EntityRepository
 {
+    private ?ObjectNormalizer $normalizer = null; // to be created upon usage
+
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
         parent::__construct($em, $class);
@@ -113,13 +115,13 @@ class LayerRepository extends EntityRepository
     /**
      * @throws ExceptionInterface|ReflectionException
      */
-    public static function createLayerFromData(array $layerData): Layer
+    public function createLayerFromData(array $layerData): Layer
     {
         // fix name inconsistencies
         $layerData['layer_geo_type'] = $layerData['layer_geotype'];
         unset($layerData['layer_geotype']);
-        $normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        return $normalizer->denormalize(
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        return $this->normalizer->denormalize(
             $layerData,
             Layer::class,
             null,

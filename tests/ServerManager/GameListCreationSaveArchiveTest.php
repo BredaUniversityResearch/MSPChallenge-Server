@@ -43,8 +43,12 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
         $container = static::getContainer();
         $emServerManager = $container->get("doctrine.orm.msp_server_manager_entity_manager");
 
-        $gameList = $emServerManager->getRepository(GameList::class)->find(1);
-        $gameSave = GameSaveRepository::createGameSaveFromData(GameListRepository::createDataFromGameList($gameList));
+        /** @var GameListRepository $gameListRepo */
+        $gameListRepo = $emServerManager->getRepository(GameList::class);
+        $gameList = $gameListRepo->find(1);
+        /** @var GameSaveRepository $gameSaveRepo */
+        $gameSaveRepo = $emServerManager->getRepository(GameSave::class);
+        $gameSave = $gameSaveRepo->createGameSaveFromData($gameListRepo->createDataFromGameList($gameList));
         $gameSave->setGameConfigFilesFilename($gameSave->getGameConfigVersion()->getGameConfigFile()?->getFilename());
         $gameSave->setGameConfigVersionsRegion($gameSave->getGameConfigVersion()?->getRegion());
         $gameSave->setSaveType(new GameSaveTypeValue('full'));

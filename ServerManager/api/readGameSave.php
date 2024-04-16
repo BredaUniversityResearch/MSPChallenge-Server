@@ -2,6 +2,7 @@
 
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave as GameSaveNew;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Message\GameSave\GameSaveLoadMessage;
@@ -11,9 +12,6 @@ use ServerManager\API;
 use ServerManager\GameSave;
 use ServerManager\GameSession;
 use ServerManager\User;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 require __DIR__ . '/../init.php';
 
@@ -38,10 +36,12 @@ if (method_exists($gamesave, $action) && in_array($action, $allowed_actions)) {
 $action = $_POST["action"] ?? "";
 if ($action == 'load') {
     $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
-    $gameSave = $em->getRepository(GameSaveNew::class)->find($gamesave->id);
-    $newGameSessionFromLoad = GameListRepository::createGameListFromData(
-        GameSaveRepository::createDataFromGameSave($gameSave)
-    );
+    /** @var GameSaveRepository $gameSaveRepo */
+    $gameSaveRepo = $em->getRepository(GameSave::class);
+    $gameSave = $gameSaveRepo->find($gamesave->id);
+    /** @var GameListRepository $gameListRepo */
+    $gameListRepo = $em->getRepository(GameList::class);
+    $newGameSessionFromLoad = $gameListRepo->createGameListFromData($gameSaveRepo->createDataFromGameSave($gameSave));
     $newGameSessionFromLoad->setGameSave($gameSave);
     $newGameSessionFromLoad->setName($_POST['name']);
     $newGameSessionFromLoad->setGameWatchdogServer(
