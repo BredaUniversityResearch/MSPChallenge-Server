@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -22,26 +23,42 @@ final class Version20240416142355 extends MSPMigration
         return new MSPDatabaseType(MSPDatabaseType::DATABASE_TYPE_SERVER_MANAGER);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function onUp(Schema $schema): void
     {
-        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
-        $this->addSql(
-            <<< 'SQL'
-            INSERT INTO `game_config_files` (`id`, `filename`, `description`) VALUES
-            (6,	'Western_Baltic_Sea_basic',	'Western Baltic Sea basic configuration file supplied by BUas');
-            
-            INSERT INTO `game_config_version` (`id`, `game_config_files_id`, `version`, `version_message`, `visibility`, `upload_time`, `upload_user`, `last_played_time`, `file_path`, `region`, `client_versions`) VALUES
-            (6,	6,	1,	'See www.mspchallenge.info',	'active',	1713277131,	1,	0,	'Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json',	'balticline',	'Any');
-SQL
-        );
+        if (1 !== $this->connection->insert('game_config_files', [
+            'filename' => 'Western_Baltic_Sea_basic',
+            'description' => 'Western Baltic Sea basic configuration file supplied by BUas',
+        ])) {
+            throw new Exception('Failed to insert game_config_files record');
+        }
+
+        $gameConfigFileId = $this->connection->lastInsertId();
+        if (1 !== $this->connection->insert('game_config_version', [
+            'game_config_files_id' => $gameConfigFileId,
+            'version' => 1,
+            'version_message' => 'See www.mspchallenge.info',
+            'visibility' => 'active',
+            'upload_time' => 1713277131,
+            'upload_user' => 1,
+            'last_played_time' => 0,
+            'file_path' => 'Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json',
+            'region' => 'balticline',
+            'client_versions' => 'Any',
+        ])) {
+            throw new Exception('Failed to insert game_config_version record');
+        }
     }
 
     protected function onDown(Schema $schema): void
     {
+        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $this->addSql(
             <<< 'SQL'
-            DELETE FROM `game_config_version` WHERE `id` = 6;
-            DELETE FROM `game_config_files` WHERE `id` = 6;
+            DELETE FROM `game_config_version` WHERE `filename` = 'Western_Baltic_Sea_basic';
+            DELETE FROM `game_config_files` WHERE `file_path` = 'Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json';
 SQL
         );
     }
