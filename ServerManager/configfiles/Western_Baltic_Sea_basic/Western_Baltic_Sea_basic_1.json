@@ -19921,11 +19921,6 @@
               "construction": true
             },
             {
-              "name": "mel_Demersal_Fleet_Catch",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "BS_Pipelines",
               "influence": 0.5,
               "construction": true
@@ -20563,7 +20558,7 @@
     },
     "meta": [
       {
-        "layer_name": "_PLAYAREA_BALTIC",
+        "layer_name": "_PLAYAREAWESTBS",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Play Area",
