@@ -79,19 +79,34 @@ class SEL extends Base
             $config = $game->GetGameConfigValues();
         }
 
-        $data = $this->getDatabase()->query(
+        $geometryDataContainer = $this->getDatabase()->query(
             "
             SELECT geometry.geometry_geometry as geometry FROM geometry
 			LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
 			WHERE layer.layer_name LIKE '_PLAYAREA%'
 			"
         );
-        if (empty($data)) {
+        if (empty($geometryDataContainer)) {
             throw new Exception(
                 "_PLAYAREA layer geometry not (yet) found, so its bounds could not be calculated at this time."
             );
         }
-        $bounds = $this->CalculateBoundsFromGeometry(json_decode($data[0]["geometry"]));
+
+        // find the largest bounds for SEL to be used
+        $bounds = collect($geometryDataContainer)->reduce(
+            function ($result, $geometryData) {
+                $curSize = ($result["x_max"] - $result["x_min"]) * ($result["y_max"] - $result["y_min"]);
+                $bounds = $this->CalculateBoundsFromGeometry(json_decode($geometryData["geometry"]));
+                $newSize = ($bounds["x_max"] - $bounds["x_min"]) * ($bounds["y_max"] - $bounds["y_min"]);
+                if ($newSize > $curSize) {
+                    $result = $bounds;
+                }
+                return $result;
+            },
+            [
+                "x_min" => 0, "y_min" => 0, "x_max" => 0, "y_max" => 0
+            ]
+        );
 
         if (isset($config["MEL"])) {
             $melConfig = &$config["MEL"];
