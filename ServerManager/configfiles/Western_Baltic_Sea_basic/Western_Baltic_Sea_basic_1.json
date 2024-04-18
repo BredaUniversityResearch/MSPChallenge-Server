@@ -20136,11 +20136,11 @@
             },
             {
               "country_id": 4,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 5,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 6,
@@ -20148,7 +20148,7 @@
             },
             {
               "country_id": 7,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 8,
@@ -20160,28 +20160,28 @@
             },
             {
               "country_id": 10,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 11,
-              "weight": 1.0
+              "weight": 0
             }
           ]
         },
         {
           "name": "Fishing Pelagic Fleet",
           "initialFishingDistribution": [
-             {
+            {
               "country_id": 3,
               "weight": 1.0
             },
             {
               "country_id": 4,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 5,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 6,
@@ -20189,7 +20189,7 @@
             },
             {
               "country_id": 7,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 8,
@@ -20201,11 +20201,11 @@
             },
             {
               "country_id": 10,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 11,
-              "weight": 1.0
+              "weight": 0
             }
           ]
         },
@@ -20218,11 +20218,11 @@
             },
             {
               "country_id": 4,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 5,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 6,
@@ -20230,7 +20230,7 @@
             },
             {
               "country_id": 7,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 8,
@@ -20242,11 +20242,11 @@
             },
             {
               "country_id": 10,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 11,
-              "weight": 1.0
+              "weight": 0
             }
           ]
         },
@@ -20259,11 +20259,11 @@
             },
             {
               "country_id": 4,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 5,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 6,
@@ -20271,11 +20271,11 @@
             },
             {
               "country_id": 7,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 8,
-              "weight": 1.0
+              "weight": 0
             },
             {
               "country_id": 9,
@@ -20283,11 +20283,11 @@
             },
             {
               "country_id": 10,
-              "weight": 1.0
+              "weight": 1
             },
             {
               "country_id": 11,
-              "weight": 1.0
+              "weight": 0
             }
           ]
         }
