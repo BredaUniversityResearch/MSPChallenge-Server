@@ -16,17 +16,6 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	#fi
 	bash install.sh
 
-	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX config
-	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX config
-	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
-	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
-	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
-	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
-	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
-	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
-
-	bash install.sh
-
 	if grep -q ^DATABASE_URL= .env; then
 		echo "Waiting for database to be ready..."
 		ATTEMPTS_LEFT_TO_REACH_DATABASE=60

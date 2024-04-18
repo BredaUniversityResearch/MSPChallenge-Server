@@ -1,31 +1,20 @@
-version: "3.7"
-
 # Production environment override
 services:
   php:
     image: 'mspserver-php-staging'
     build:
       context: .
-      target: php_prod
+      target: frankenphp_prod
     volumes:
-      - ./:/srv/app
+      - ./:/app
       # If you develop on Mac or Windows you can remove the vendor/ directory
       #  from the bind-mount for better performance by enabling the next line:
-      - /srv/app/vendor
-      - /srv/app/var/cache
-      - /srv/app/var/log
+      - /app/vendor
+      - /app/var/cache
+      - /app/var/log
     environment:
       URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
       APP_SECRET: ${APP_SECRET}
-      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
-
-  caddy:
-    image: 'mspserver-caddy-staging'
-    build:
-      context: .
-      target: caddy_prod
-    environment:
-      SERVER_NAME: ${SERVER_NAME:-:80}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
 

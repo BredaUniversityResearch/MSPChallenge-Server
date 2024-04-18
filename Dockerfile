@@ -1,14 +1,11 @@
 #syntax=docker/dockerfile:1.4
 
-# Versions
-FROM dunglas/frankenphp:latest-php8.2-alpine AS frankenphp_upstream
-FROM composer/composer:2-bin AS composer_upstream
-
+# Versions, use debian instead of alpine, see: https://github.com/dunglas/symfony-docker/issues/555
+FROM dunglas/frankenphp:latest-php8.2 AS frankenphp_upstream
 
 # The different stages of this Dockerfile are meant to be built into separate images
 # https://docs.docker.com/develop/develop-images/multistage-build/#stop-at-a-specific-build-stage
 # https://docs.docker.com/compose/compose-file/#target
-
 
 # Base FrankenPHP image
 FROM frankenphp_upstream AS frankenphp_base
@@ -16,8 +13,8 @@ FROM frankenphp_upstream AS frankenphp_base
 WORKDIR /app
 
 # persistent / runtime deps
-# hadolint ignore=DL3018
-RUN apk add --no-cache \
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
 		acl \
 		file \
 		gettext \
@@ -25,11 +22,12 @@ RUN apk add --no-cache \
         libgdiplus \
         bash \
         supervisor \
-        mysql-client \
+        default-mysql-client \
 	;
 
 RUN set -eux; \
 	install-php-extensions \
+        @composer \
 		apcu \
 		intl \
 		opcache \
@@ -39,12 +37,15 @@ RUN set -eux; \
         gd \
 	;
 
+# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 # if you want to debug on prod, enable below lines:
 ##   Also check ./frankenphp/conf.d/app.prod.ini
 #ENV XDEBUG_MODE=debug
 #RUN set -eux; \
 #	install-php-extensions \
-#		xdebug-^3.2 \
+#		xdebug \
 #	;
 
 ###> recipes ###
@@ -84,12 +85,6 @@ ENTRYPOINT ["docker-entrypoint"]
 #    && mv /tmp/blackfire/blackfire /usr/bin/blackfire \
 #    && rm -Rf /tmp/blackfire
 
-# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV PATH="${PATH}:/root/.composer/vendor/bin"
-
-COPY --from=composer_upstream --link /composer /usr/bin/composer
-
 HEALTHCHECK --start-period=60s CMD curl -f http://localhost:2019/metrics || exit 1
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 
@@ -103,7 +98,7 @@ RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 RUN set -eux; \
 	install-php-extensions \
-    	xdebug-^3.2 \
+    	xdebug \
     ;
 
 COPY --link frankenphp/conf.d/app.dev.ini $PHP_INI_DIR/conf.d/

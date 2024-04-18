@@ -27,7 +27,8 @@
 	}
 
 	root * /app/public
-	encode zstd gzip
+	# add Brotli compression support, see https://github.com/dunglas/symfony-docker/commit/f063b11fb8d3522e3811124f43b2145dad205199
+	encode zstd br gzip
 
 	mercure {
 		# Transport to use (default to Bolt)
@@ -45,6 +46,8 @@
 	}
 
 	vulcain
+
+	{$CADDY_SERVER_EXTRA_DIRECTIVES}
 
 	# Disable Topics tracking if not enabled explicitly: https://github.com/jkarlin/topics
 	header ?Permissions-Policy "browsing-topics=()"
