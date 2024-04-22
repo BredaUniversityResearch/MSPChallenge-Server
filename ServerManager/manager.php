@@ -33,9 +33,9 @@ require 'init.php';
 $user = new User();
 if (!$user->isAuthorised()) {
     if ($user->isLoggedIn()) {
-        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'logout.php');
+        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'logout_php');
     } else {
-        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'index.php');
+        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'index_php');
     }
 }
 

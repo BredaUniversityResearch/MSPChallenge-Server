@@ -17,7 +17,7 @@ fi
 alias ede='unset $(bash docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(bash docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
 PRE_DCU="bash set_symfony_version.sh"
-DCU_BASE="MSYS_NO_PATHCONV=1 BLACKFIRE_APM_ENABLED="${BLACKFIRE_APM_ENABLED:-0}" BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID} BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN} BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID} BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN} CADDY_MERCURE_JWT_SECRET=${CADDY_MERCURE_JWT_SECRET} docker compose"
+DCU_BASE="MSYS_NO_PATHCONV=1 docker compose"
 alias dcu="ede && $PRE_DCU && ${DCU_BASE} up -d --remove-orphans"
 # dcu + xdebug (x)
 alias dcux="ede && $PRE_DCU && XDEBUG_MODE=debug ${DCU_BASE} up -d --remove-orphans"
@@ -59,7 +59,7 @@ alias decpf='de pkill -SIGUSR1 -f "php bin/console app:ws-server"'
 # de + choose profile (rpf) to "Run Blackfire profile on running websocket server process"
 alias derpf='de pkill -SIGUSR2 -f "php bin/console app:ws-server"'
 # de + Run websocket server manually (wss)
-ALIAS_WSS='php /srv/app/bin/console app:ws-server'
+ALIAS_WSS='php /app/bin/console app:ws-server'
 alias dewss="de ${ALIAS_WSS}"
 # dewss + xdebug (x)
 alias dewssx="${ALIAS_DE_BASE} -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" ${PHP_CONTAINER} ${ALIAS_WSS}"

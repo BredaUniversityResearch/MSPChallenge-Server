@@ -178,7 +178,7 @@ class GameSave extends Base
         if (getenv('DOCKER') !== false) {
             // this is always called from inside the docker environment,so just use http://caddy:80/ or
             //   http://mitmproxy:8080/
-            $urlBase = 'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'caddy').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).
+            $urlBase = 'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).
                 ServerManager::getInstance()->getAbsolutePathBase();
         }
         $server_call = self::callServer(
@@ -189,7 +189,7 @@ class GameSave extends Base
                 'preferredname' => ('layers' == $this->save_type) ? 'temp_'.$this->getPrefix() : $this->getPrefix(),
                 'preferredfolder' => $this->getStore(),
                 'nooverwrite' => true,
-                'response_url' => $urlBase.'api/editGameSave.php',
+                'response_url' => $urlBase.'api/editGameSave_php',
             ],
             $gameSession->id,
             $gameSession->api_access_token

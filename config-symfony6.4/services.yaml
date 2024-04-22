@@ -1,0 +1,158 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    # URL to the MSP Challenge download page
+    app.clients_url: 'https://community.mspchallenge.info/wiki/Download'
+    # directory to store and from which to retrieve game session raster files
+    app.session_raster_dir: '%kernel.project_dir%/raster/'
+    # directory to store and from which to retrieve a game session's configuration after its creation
+    app.session_config_dir: '%kernel.project_dir%/running_session_config/'
+    # format of the filename of a game session's configuration file after its creation
+    app.session_config_name: 'session_config_%d.json'
+    # directory to store and from which to retrieve configuration files used for session creation
+    app.server_manager_config_dir: '%kernel.project_dir%/ServerManager/configfiles/'
+    # directory to store and from which to retrieve game session save files
+    app.server_manager_save_dir: '%kernel.project_dir%/ServerManager/saves/'
+    # format of the filename of a game session's save ZIP file
+    app.server_manager_save_name: 'save_%d.zip'
+    # directory to store and from which to retrieve game session creation log files
+    app.server_manager_log_dir: '%kernel.project_dir%/ServerManager/log/'
+    # format of the filename of a game session creation log file
+    app.server_manager_log_name: 'log_session_%d.log'
+    # number of seconds between automatic game session database file dumps (as backup of a game session's state)
+    app.game_auto_save_interval: 120
+    # minimal number of months that make up each of a game session's four eras
+    app.min_game_era_time: 12
+    app.guraas_game_id: '00000000-0000-0000-0000-000000000000'
+    app.guraas_analytics_version: '0.1'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: false       # Allows optimizing the container by removing unused services; this also means
+          # fetching services directly from the container via $container->get() won't work.
+        # The best practice is to be explicit about your dependencies anyway.
+        bind:
+            string $projectDir: '%kernel.project_dir%'
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/{Command,Controller}'
+    App\Domain\:
+        resource: '../src/Domain/{Services}'
+
+    App\MessageHandler\Analytics\AnalyticsMessageHandler:
+        arguments:
+            $guraasGameId: '%app.guraas_game_id%'
+            $guraasAnalyticsVersion: '%app.guraas_analytics_version%'
+            $logger: '@monolog.logger.analytics'
+        tags:
+            - { name: messenger.message_handler, handles: App\Message\Analytics\SessionCreatedMessage }
+            - { name: messenger.message_handler, handles: App\Message\Analytics\UserLogOnOffSessionMessage }
+
+    App\Domain\Services\SymfonyToLegacyHelper:
+        arguments:
+            $analyticsLogger: '@monolog.logger.analytics'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    App\Domain\WsServer\WsServer:
+
+    App\Domain\API\APIHelper:
+
+    App\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
+    App\EventListener\AttachRefreshTokenOnSuccessListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_success }
+
+    App\EventListener\CustomiseResponseOnFailureListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_authentication_failure }
+
+    App\EventListener\AddUserIdToTokens:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created }
+
+    App\EventListener\AccessTokenAuthenticatedListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_authenticated }
+
+    App\Domain\WsServer\Plugins\PluginHelper:
+        arguments:
+            $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
+
+    App\VersionsProvider:
+        public: true
+        tags:
+            - { name: shivas_versioning.provider, alias: versions_provider, priority: 200 }
+
+    ServerManager\ServerManager:
+
+    App\Logger\GameSessionLogger:
+
+    App\Entity\ServerManager\Listener\GameListListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList' }
+
+    App\Entity\ServerManager\Listener\GameConfigVersionListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion' }
+
+    App\Entity\ServerManager\Listener\GameGeoServerListener:
+        arguments:
+            $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameGeoServer' }
+
+    App\EventListener\SessionEntityListener:
+        tags:
+            - { name: 'doctrine.event_listener', event: 'prePersist' }
+            - { name: 'doctrine.event_listener', event: 'postLoad' }
+
+    App\MessageHandler\GameList\GameListCreationMessageHandler:
+
+    App\MessageHandler\GameList\GameListArchiveMessageHandler:
+
+    App\MessageHandler\GameSave\GameSaveCreationMessageHandler:
+
+    App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
+
+    App\Domain\Communicator\WatchdogCommunicator:
+
+when@dev:
+    parameters:
+        app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'
+
+    services:
+        App\DataCollector\MSPDataCollector:
+            tags:
+                -
+                    name: data_collector
+                    id: 'App\DataCollector\MSPDataCollector'
+                    template: 'data_collector/msp.html.twig'
+                - 'controller.service_arguments'
+
+when@test:
+    parameters:
+        app.session_raster_dir: '%kernel.logs_dir%/raster/'
+        app.session_config_dir: '%kernel.logs_dir%/running_session_config/'
+        app.server_manager_save_dir: '%kernel.logs_dir%/'
+        app.server_manager_log_dir: '%kernel.logs_dir%/'
+    services:
+        # make classes in src/DataFixtures available to be used as services
+        # and have a tag that allows actions to type-hint services
+        App\DataFixtures\:
+            resource: '../fixtures/'
+            tags:
+                - 'doctrine.fixture.orm'
+                - 'kernel.event_subscriber'

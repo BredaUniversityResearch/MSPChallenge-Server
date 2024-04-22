@@ -1,7 +1,7 @@
 
 function getConfigFileInfo(configFileVersionId)
 {
-    var url = 'api/readGameConfig.php';
+    var url = 'api/readGameConfig_php';
     var data = {
         config_version_id: configFileVersionId
     }
@@ -78,7 +78,7 @@ function configVersionsListToTable(configVersionsList)
 
 function setConfigVersionArchived(configFileVersionId)
 {
-    var url = 'api/deleteGameConfig.php';
+    var url = 'api/deleteGameConfig_php';
     var data = {
         config_version_id: configFileVersionId
     }
@@ -94,13 +94,13 @@ function setConfigVersionArchived(configFileVersionId)
 
 function downloadConfigVersion(configFileVersionId)
 {
-    window.location = "api/downloader.php?id="+configFileVersionId+"&request=GameConfig/getFile";
+    window.location = "api/downloader_php?id="+configFileVersionId+"&request=GameConfig/getFile";
 }
 
 function updateConfigVersionsTable(visibility)
 {
     $("#buttonRefreshConfigVersionsListIcon").addClass("fa-spin");
-    var url = 'api/browseGameConfig.php';
+    var url = 'api/browseGameConfig_php';
     var data = {
         visibility: visibility
     }
@@ -115,7 +115,7 @@ function updateConfigVersionsTable(visibility)
 function updateSelectNewConfigVersion(configFileId)
 {
     $('#newConfigVersion').empty();
-    var url = 'api/browseGameConfig.php';
+    var url = 'api/browseGameConfig_php';
     var data = {
         visibility: 'active'
     }
@@ -140,7 +140,7 @@ function configListToOptions()
 {
     $('#newConfigFile').empty();
     $('#newConfigFileOriginal').empty();
-    var url = 'api/browseGameConfig.php';
+    var url = 'api/browseGameConfig_php';
     var data = {
         visibility: 'active'
     }
@@ -165,7 +165,7 @@ function onUploadConfigFileOriginalSelected(selectedValue)
     if (isNewVersion) {
         $("#newConfigDescription").val("");
     } else {
-        var url = 'api/readGameConfig.php';
+        var url = 'api/readGameConfig_php';
         var data = {
             config_file_id: selectedValue
         }
@@ -182,7 +182,7 @@ function onUploadConfigFileOriginalSelected(selectedValue)
 function submitNewConfigFile()
 {
     if (isFormValid($('#formNewConfig')) && $("#newConfigFileContent").val()) {
-        var url = 'api/addGameConfig.php';
+        var url = 'api/addGameConfig_php';
         var data = new FormData();
         data.append("config_file", $("#newConfigFileContent")[0].files[0]);
         data.append("game_config_files_id", $("#newConfigFileOriginal").val());
