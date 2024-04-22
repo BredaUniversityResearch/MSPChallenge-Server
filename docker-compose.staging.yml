@@ -13,6 +13,7 @@ services:
       - /app/var/cache
       - /app/var/log
     environment:
+      SERVER_NAME: ${SERVER_NAME:-:80}
       URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}

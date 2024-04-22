@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bash \
         supervisor \
         default-mysql-client \
+        procps \
 	;
 
 RUN set -eux; \
@@ -109,7 +110,9 @@ CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
 FROM frankenphp_base AS frankenphp_prod
 
 ENV APP_ENV=prod
-ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
+# this line enables the Blazing-fast performance thanks to the worker mode of FrankenPHP
+#   @todo however, disable for MSP, gives request issues in ServerManager
+# ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
@@ -138,4 +141,3 @@ FROM adminer AS adminer_base
 FROM mitmproxy/mitmproxy:9.0.1 as mitmproxy_base
 FROM redis:7.2.4-alpine AS redis_base
 FROM erikdubbelboer/phpredisadmin as phpredisadmin_base
-

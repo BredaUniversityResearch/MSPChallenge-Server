@@ -189,7 +189,7 @@ class GameSave extends Base
                 'preferredname' => ('layers' == $this->save_type) ? 'temp_'.$this->getPrefix() : $this->getPrefix(),
                 'preferredfolder' => $this->getStore(),
                 'nooverwrite' => true,
-                'response_url' => $urlBase.'api/editGameSave.php',
+                'response_url' => $urlBase.'api/editGameSave_php',
             ],
             $gameSession->id,
             $gameSession->api_access_token

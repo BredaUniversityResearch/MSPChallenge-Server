@@ -1,3 +1,5 @@
+# see https://frankenphp.dev/docs/config/
+
 {
 	{$CADDY_GLOBAL_OPTIONS}
 
@@ -14,6 +16,11 @@
 {$CADDY_EXTRA_CONFIG}
 
 {$SERVER_NAME:localhost} {
+    @phpFile {
+        path /ServerManager/*.php*
+    }
+    error @phpFile "Not found" 404
+
 	log {
 		# Redact the authorization query parameter that can be set by Mercure
 		format filter {

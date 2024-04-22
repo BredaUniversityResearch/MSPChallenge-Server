@@ -1,6 +1,6 @@
 function getSessionInfo(session_id, show_modal = false)
 {
-    const url = 'api/readGameSession.php';
+    const url = 'api/readGameSession_php';
     const data = {
         session_id: session_id
     };
@@ -264,7 +264,7 @@ function toggleSessionInfoLog()
 
 function callUpgrade(session_id)
 {
-    var url = 'api/editGameSession.php';
+    var url = 'api/editGameSession_php';
     var data = {
         session_id: session_id,
         action: 'upgrade'
@@ -282,7 +282,7 @@ function callUpgrade(session_id)
 
 function editSessionName(session_id)
 {
-    const url = 'api/editGameSession.php';
+    const url = 'api/editGameSession_php';
     const data = {
         session_id: session_id,
         name: $('#sessionModalCenterTitle').val()
@@ -302,7 +302,7 @@ function submitNewSession()
 {
     if (isFormValid($('#formNewSession'))) {
         showToast(MessageType.INFO, 'Please wait...');
-        var url = 'api/addGameSession.php';
+        var url = 'api/addGameSession_php';
         var data = {
             name: $('#newSessionName').val(),
             game_config_version_id: $('#newConfigVersion').val(),
@@ -332,7 +332,7 @@ function RecreateSession(sessionId)
 {
     if (confirm('This will delete and recreate the session. All existing data will be lost. Are you sure?')) {
         showToast(MessageType.INFO, 'Please wait...');
-        const url = 'api/editGameSession.php';
+        const url = 'api/editGameSession_php';
         const data = {
             jwt: currentToken,
             session_id: sessionId,
@@ -362,7 +362,7 @@ function showUserAccessManagement(sessionId)
     $('#playerPasswordExtraFields').empty();
     $('#playerUserExtraFields').empty();
 
-    const url = 'api/readGameSession.php';
+    const url = 'api/readGameSession_php';
     const data = {
         session_id: sessionId
     };
@@ -558,7 +558,7 @@ function addUserFields(type, country)
 
 function saveUserAccess()
 {
-    const url = 'api/editGameSession.php';
+    const url = 'api/editGameSession_php';
     const data = {
         session_id: $('#sessionInfoID').html(),
         password_admin: JSON.stringify(getPasswordAdmin()),
@@ -701,7 +701,7 @@ function findUsersAtProvider(div, provider)
     div = div.replace("[", "\\[");
     div = div.replace("]", "\\]");
     const userTextInput = unWrapWords($(div).html());
-    const url = 'api/readGameSession.php';
+    const url = 'api/readGameSession_php';
     const session_id = $('#sessionInfoID').html();
     const data = {
         session_id: session_id
@@ -732,7 +732,7 @@ function findUsersAtProvider(div, provider)
 function GeoServerListToOptions()
 {
     $('#newGeoServer').empty();
-    const url = 'api/browseGeoServer.php';
+    const url = 'api/browseGeoServer_php';
     const data = {
         jwt: currentToken
     };
@@ -749,7 +749,7 @@ function changeGameState(newState, sessionId)
 {
     $('#sessionInfoButtonStartPause').prop('disabled', 1);
     showToast(MessageType.INFO, 'Please wait...');
-    const url = 'api/editGameSession.php';
+    const url = 'api/editGameSession_php';
     const data = {
         session_id: sessionId,
         game_state: newState,
@@ -775,7 +775,7 @@ function toggleDemoSession(toggle, sessionId)
         text = 'By disabling demo mode, the simulation will remain running (until you change the simulation state again), but it will not be recreated automatically anymore. Are you sure you want to disable demo mode?';
     }
     if (confirm(text)) {
-        const url = 'api/editGameSession.php';
+        const url = 'api/editGameSession_php';
         const data = {
             session_id: sessionId,
             demo_session: toggle,
@@ -795,18 +795,18 @@ function toggleDemoSession(toggle, sessionId)
 
 function downloadArchive(sessionId)
 {
-    window.location = "api/downloader.php?id="+sessionId+"&request=GameSession/getArchive";
+    window.location = "api/downloader_php?id="+sessionId+"&request=GameSession/getArchive";
 }
 
 function downloadExportedPlansWithConfig(sessionId)
 {
-    window.location = "api/downloader.php?id="+sessionId+"&request=GameSession/getConfigWithPlans";
+    window.location = "api/downloader_php?id="+sessionId+"&request=GameSession/getConfigWithPlans";
 }
 
 function archiveSession(sessionId)
 {
     if (confirm('This will permanently archive the session. It will subsequently no longer be usable by end users. If you want a backup, then *first* save this session, *before* continuing! Are you sure you want to archive this session?')) {
-        const url = 'api/deleteGameSession.php';
+        const url = 'api/deleteGameSession_php';
         const data = {
             session_id: sessionId
         };
@@ -827,7 +827,7 @@ function archiveSession(sessionId)
 function updateSessionsTable(visibility)
 {
     $("#buttonRefreshSessionsListIcon").addClass("fa-spin");
-    const url = 'api/browseGameSession.php';
+    const url = 'api/browseGameSession_php';
     const data = {
         session_state: visibility
     };

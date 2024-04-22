@@ -63,10 +63,10 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX POV
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX POV
-	chmod 777 simulations/alpine.3.17-x64/MSW
-	chmod 777 simulations/alpine.3.17-x64/MEL
-	chmod 777 simulations/alpine.3.17-x64/SEL
-	chmod 777 simulations/alpine.3.17-x64/CEL
+	chmod 777 simulations/debian.12-x64/MSW
+	chmod 777 simulations/debian.12-x64/MEL
+	chmod 777 simulations/debian.12-x64/SEL
+	chmod 777 simulations/debian.12-x64/CEL
 
 	echo "Starting supervisor..."
 	rm -f /run/supervisord.sock ; /usr/bin/supervisord -c /etc/supervisord.conf
