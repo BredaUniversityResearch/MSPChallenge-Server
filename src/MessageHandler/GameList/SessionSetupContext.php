@@ -65,6 +65,15 @@ class SessionSetupContext
         return $layer;
     }
 
+    public function filterLayers(callable $filter): array
+    {
+        $layers = array_filter($this->layers, $filter, ARRAY_FILTER_USE_BOTH);
+        foreach ($layers as $layer) {
+            $this->updateGeometriesByLayer($layer);
+        }
+        return $layers;
+    }
+
     public function addLayer(Layer $layer): void
     {
         $this->layers[strtolower($layer->getLayerName())] = $layer;
