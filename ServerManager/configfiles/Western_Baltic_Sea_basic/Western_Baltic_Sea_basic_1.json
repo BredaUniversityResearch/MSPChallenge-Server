@@ -19429,7 +19429,7 @@
           ]
         },
         {
-          "output_for_mel": true,
+          "output_for_mel": false,
           "heatmap_type": "ShippingIntensity",
           "layer_name": "BS_Shipping_Intensity_raster",
           "ship_type_ids": [
@@ -19467,7 +19467,7 @@
           ]
         },
         {
-          "output_for_mel": true,
+          "output_for_mel": false,
           "heatmap_type": "ShippingIntensity",
           "layer_name": "BS_Cargo_Intensity_Raster",
           "ship_type_ids": [
@@ -19499,7 +19499,7 @@
           ]
         },
         {
-          "output_for_mel": true,
+          "output_for_mel": false,
           "heatmap_type": "ShippingIntensity",
           "layer_name": "BS_Passenger_Intensity_Raster",
           "ship_type_ids": [
@@ -19530,7 +19530,7 @@
           ]
         },
         {
-          "output_for_mel": true,
+          "output_for_mel": false,
           "heatmap_type": "ShippingIntensity",
           "layer_name": "BS_Maintenance_Intensity_Raster",
           "ship_type_ids": [
@@ -19560,7 +19560,7 @@
           ]
         },
         {
-          "output_for_mel": true,
+          "output_for_mel": false,
           "heatmap_type": "ShippingIntensity",
           "layer_name": "BS_Tanker_Intensity_Raster",
           "ship_type_ids": [
@@ -19591,7 +19591,7 @@
           ]
         },
         {
-          "output_for_mel": true,
+          "output_for_mel": false,
           "heatmap_type": "ShippingIntensity",
           "layer_name": "BS_AutomatedVessels_Intensity_Raster",
           "ship_type_ids": [
