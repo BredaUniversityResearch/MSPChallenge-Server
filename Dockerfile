@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         supervisor \
         default-mysql-client \
         procps \
+        nano \
 	;
 
 RUN set -eux; \

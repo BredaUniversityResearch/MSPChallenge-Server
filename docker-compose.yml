@@ -101,10 +101,7 @@ services:
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
-      # HTTP
-      - target: 80
-        published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
-        protocol: tcp
+      # HTTP needs to be defined in the override/prod/staging/... yml files
       # HTTPS
       - target: 443
         published: ${HTTPS_PORT:-443}
