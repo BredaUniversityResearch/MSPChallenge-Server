@@ -19,7 +19,6 @@ if [[ "${APP_ENV}" == "prod" ]]; then
   COMPOSER_ARGS="--no-dev"
 fi
 
-# such that outdated doctrine metadata cache won't interfere with a composer install running cache clear
 eval "APP_ENV=${APP_ENV} ${COMPOSER_BINARY} check-platform-reqs && APP_ENV=${APP_ENV} ${COMPOSER_BINARY} install --prefer-dist --no-progress --no-interaction ${COMPOSER_ARGS} && APP_ENV=${APP_ENV} ${COMPOSER_BINARY} dump-autoload -o ${COMPOSER_ARGS}"
 if [ $? -ne 0 ]; then
   echo "Composer install & dump-autoload failed."
