@@ -1,7 +1,7 @@
- {
+{
   "metadata": {
-    "date_modified": "3/13/2024",
-    "data_model_hash": "C85D0C24459C546C938FCB742DFDF18131946C74571D2F74AF8990E37F9EA00C",
+    "date_modified": "4/24/2024",
+    "data_model_hash": "CDB27AD4FE95DC2CA17940574E885F94F52E139C4C58AF098EF1D9B5C7DBDA0F",
     "errors": 0,
     "editor_version": "1.0.0",
     "config_version": "1.0.0"
@@ -7814,22 +7814,28 @@
           "name": "Fishing",
           "entries": [
             {
-              "name": "Active Demersal Catch",
+              "name": "Demersal Catch",
               "id": 20,
               "multiline": true,
-              "link": "Active_Demersal_Catch"
-            },
-            {
-              "name": "Passive Demersal Catch",
-              "id": 21,
-              "multiline": true,
-              "link": "Passive_Demersal_Catch"
+              "link": ""
             },
             {
               "name": "Pelagic Catch",
+              "id": 21,
+              "multiline": true,
+              "link": ""
+            },
+            {
+              "name": "Recreational Catch",
               "id": 22,
               "multiline": false,
-              "link": "Pelagic_Catch"
+              "link": ""
+            },
+            {
+              "name": "Unreported Catch",
+              "id": 47,
+              "multiline": true,
+              "link": ""
             }
           ]
         },
@@ -7878,7 +7884,7 @@
               "link": "Bottom_Disturbace"
             },
             {
-              "name": "Noise",
+              "name": "Continuous Noise",
               "id": 27,
               "multiline": false,
               "link": "Noise"
@@ -7888,6 +7894,24 @@
               "id": 28,
               "multiline": true,
               "link": "Surface_Disturbance"
+            },
+            {
+              "name": "Impulse Noise",
+              "id": 40,
+              "multiline": true,
+              "link": null
+            },
+            {
+              "name": "Bottom Vibration",
+              "id": 41,
+              "multiline": true,
+              "link": null
+            },
+            {
+              "name": "Air Disturbance",
+              "id": 46,
+              "multiline": true,
+              "link": null
             }
           ]
         },
@@ -7901,10 +7925,10 @@
               "link": "Cod"
             },
             {
-              "name": "Herring Baltic Proper",
+              "name": "Flatfish",
               "id": 30,
               "multiline": true,
-              "link": "Herring"
+              "link": "Flatfish"
             },
             {
               "name": "Sprat",
@@ -7913,10 +7937,22 @@
               "link": "Sprat"
             },
             {
-              "name": "Herring Bothnian Sea",
+              "name": "Herring",
               "id": 32,
               "multiline": true,
               "link": "Herring"
+            },
+            {
+              "name": "Other Demersal Fish",
+              "id": 43,
+              "multiline": true,
+              "link": null
+            },
+            {
+              "name": "Other Pelagic Fish",
+              "id": 44,
+              "multiline": true,
+              "link": null
             }
           ]
         },
@@ -7924,16 +7960,40 @@
           "name": "Birds, Mammals, Benthos",
           "entries": [
             {
-              "name": "Seal",
+              "name": "Seals",
               "id": 33,
-              "multiline": false,
+              "multiline": true,
               "link": "Seals"
+            },
+            {
+              "name": "Harbour Porpoise",
+              "id": 45,
+              "multiline": true,
+              "link": null
+            },
+            {
+              "name": "Seabirds",
+              "id": 42,
+              "multiline": true,
+              "link": null
             },
             {
               "name": "Benthos",
               "id": 34,
               "multiline": false,
-              "link": "Benthic_Invertebrates"
+              "link": ""
+            },
+            {
+              "name": "Phytoplankton\r",
+              "id": 48,
+              "multiline": false,
+              "link": null
+            },
+            {
+              "name": "Zooplankton",
+              "id": 49,
+              "multiline": false,
+              "link": null
             }
           ]
         }
@@ -7942,38 +8002,32 @@
         {
           "fromId": 1,
           "toId": 25,
-          "severity": 2,
+          "severity": 3,
           "description": "Wind turbine pylons in the water as well as their foundations on the seabed. "
         },
         {
           "fromId": 2,
           "toId": 25,
-          "severity": 2,
+          "severity": 3,
           "description": "Oil & gas rig pylons in the water as well as their foundations on the seabed. "
         },
         {
           "fromId": 4,
           "toId": 25,
-          "severity": 1,
+          "severity": 2,
           "description": "Pipelines laid on the seabed (so not dug into it). "
         },
         {
           "fromId": 15,
           "toId": 25,
-          "severity": 2,
+          "severity": 1,
           "description": "Fish pond / tank components in the water. "
         },
         {
           "fromId": 16,
           "toId": 25,
-          "severity": 2,
+          "severity": 1,
           "description": "Fish pond / tank components in the water. "
-        },
-        {
-          "fromId": 6,
-          "toId": 25,
-          "severity": 3,
-          "description": "All the port infrastructure in the water and on the seabed. "
         },
         {
           "fromId": 8,
@@ -7988,34 +8042,22 @@
           "description": "Cranes, shovels and pipes in the water and on the seabed. "
         },
         {
-          "fromId": 17,
-          "toId": 27,
-          "severity": 1,
-          "description": "Military exercises or dumping of ammunitions. "
-        },
-        {
-          "fromId": 2,
-          "toId": 27,
-          "severity": 2,
-          "description": "Drill pipes in the water and drill bits on the seabed. "
-        },
-        {
           "fromId": 4,
-          "toId": 27,
+          "toId": 40,
           "severity": 2,
           "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
         },
         {
           "fromId": 1,
-          "toId": 27,
+          "toId": 40,
           "severity": 3,
-          "description": "Wind energy turbine construction in water and on the seabed. Diminished once completed. "
+          "description": "Wind energy turbine construction in water and on the seabed. Non-existent once completed."
         },
         {
           "fromId": 1,
           "toId": 27,
           "severity": 1,
-          "description": "Residual wind energy turbine vibrations in water and seabed. "
+          "description": "Residual wind energy turbine noise in water and seabed. "
         },
         {
           "fromId": 10,
@@ -8050,13 +8092,7 @@
         {
           "fromId": 6,
           "toId": 27,
-          "severity": 3,
-          "description": "Vessels arriving and departing, loading and unloading cargo and passengers. "
-        },
-        {
-          "fromId": 6,
-          "toId": 27,
-          "severity": 3,
+          "severity": 1,
           "description": "Vessels arriving and departing, loading and unloading cargo and passengers. "
         },
         {
@@ -8120,12 +8156,6 @@
           "description": "Fish pond / tank components in the water. "
         },
         {
-          "fromId": 17,
-          "toId": 28,
-          "severity": 1,
-          "description": "Military exercise contributes to surface disturbance. "
-        },
-        {
           "fromId": 8,
           "toId": 26,
           "severity": 3,
@@ -8140,20 +8170,14 @@
         {
           "fromId": 2,
           "toId": 26,
-          "severity": 2,
+          "severity": 1,
           "description": "Oil & gas rig drilling and extraction operations on the seabed. "
         },
         {
           "fromId": 4,
           "toId": 26,
-          "severity": 2,
+          "severity": 3,
           "description": "Pipelines laid on the seabed or dug into it. Almost non-existent once completed. "
-        },
-        {
-          "fromId": 4,
-          "toId": 26,
-          "severity": 1,
-          "description": "Pipelines laid on the seabed or dug into it "
         },
         {
           "fromId": 7,
@@ -8177,79 +8201,73 @@
           "fromId": 1,
           "toId": 20,
           "severity": -3,
-          "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. "
+          "description": "Demersal fleets are not allowed to fish in wind farms. "
         },
         {
           "fromId": 35,
           "toId": 20,
           "severity": -3,
-          "description": "Active demersal fleets always steer clear of known or popular shipping routes. "
+          "description": "Demersal fleets always steer clear of known or popular shipping routes. "
         },
         {
           "fromId": 6,
           "toId": 20,
           "severity": -3,
-          "description": "Bottom trawlers never fish right next to or just outside of ports, they sail out a bit first. "
+          "description": "Demersal fleets fish right next to or just outside of ports, they sail out a bit first. "
         },
         {
           "fromId": 24,
           "toId": 20,
           "severity": -3,
-          "description": "If desired, active demersal fleets can be banned from operating in a particular Marine Protected Area. "
+          "description": "If desired, demersal fleets can be banned from operating in a particular Marine Protected Area. "
         },
         {
           "fromId": 38,
           "toId": 20,
           "severity": -3,
-          "description": "Active demersal fleets are banned from operating in fisheries closure. "
+          "description": "Demersal fleets are banned from operating in fisheries closure. "
         },
         {
           "fromId": 39,
           "toId": 20,
           "severity": -3,
-          "description": "Active demersal fleets are banned from operating in cod fisheries closure. "
+          "description": "Demersal fleets are banned from operating in cod fisheries closure. "
         },
         {
           "fromId": 1,
           "toId": 21,
           "severity": -3,
-          "description": "Passive demersal catch in the water column at a wind farm are dangerous. "
+          "description": "Fishing in the water column at a wind farm is dangerous. "
         },
         {
           "fromId": 38,
           "toId": 21,
           "severity": -3,
-          "description": "Passive demersal catch are banned from operating in fisheries closure. "
-        },
-        {
-          "fromId": 39,
-          "toId": 21,
-          "severity": -3,
-          "description": "Passive demersal catch are banned from operating in cod fisheries closure. "
+          "description": "Pelagic fleets are not allowed in in fisheries closures. "
         },
         {
           "fromId": 24,
           "toId": 21,
           "severity": -3,
-          "description": "If desired, passive demersal fleets can be banned from operating in a particular Marine Protected Area. "
+          "description": "If desired, pelagic fleets can be banned from operating in a particular Marine Protected Area. "
         },
         {
           "fromId": 35,
           "toId": 21,
           "severity": -3,
-          "description": "Passive demersal fleets always steer clear of known or popular shipping routes. "
+          "description": "Pelagic fleets always steer clear of known or popular shipping routes. "
         },
         {
-          "fromId": 38,
+          "fromId": 39,
           "toId": 22,
           "severity": -3,
-          "description": "Pelagic catch not allowed in fisheries closure. "
+          "description": "Recreational fisheries are not allowed in cod fisheries closure. "
         },
         {
           "fromId": 24,
           "toId": 22,
           "severity": -3,
-          "description": "If desired, passive demersal fleets can be banned from operating in a particular Marine Protected Area. "
+          "description": "If desired, recretional fleets can be banned from operating in a particular Marine Protected Area. "
         },
         {
           "fromId": 1,
@@ -8404,26 +8422,14 @@
         {
           "fromId": 27,
           "toId": 29,
-          "severity": -2,
+          "severity": -1,
           "description": "Cod avoids noisy areas "
-        },
-        {
-          "fromId": 26,
-          "toId": 29,
-          "severity": -2,
-          "description": "Cod avoids bottom disturbance "
         },
         {
           "fromId": 28,
           "toId": 29,
-          "severity": -2,
-          "description": "Cod avoids surface disturbance "
-        },
-        {
-          "fromId": 27,
-          "toId": 33,
           "severity": -1,
-          "description": "Seals avoid noise "
+          "description": "Cod avoids surface disturbance "
         },
         {
           "fromId": 28,
@@ -8432,64 +8438,58 @@
           "description": "Seals avoid surface disturbance "
         },
         {
-          "fromId": 27,
-          "toId": 30,
+          "fromId": 28,
+          "toId": 32,
           "severity": -2,
-          "description": "Herring in Baltic Proper avoids noisy areas "
+          "description": "Herring avoids surface disturbance "
         },
         {
           "fromId": 28,
-          "toId": 30,
-          "severity": -3,
-          "description": "Herring in Baltic Proper avoids surface disturbance "
+          "toId": 42,
+          "severity": -2,
+          "description": "Seabirds avoids surface disturbance "
+        },
+        {
+          "fromId": 28,
+          "toId": 31,
+          "severity": -2,
+          "description": "Sprat avoids surface disturbance "
+        },
+        {
+          "fromId": 28,
+          "toId": 44,
+          "severity": -2,
+          "description": "Other pelagic fish avoid surface disturbance"
+        },
+        {
+          "fromId": 28,
+          "toId": 45,
+          "severity": -1,
+          "description": "Harbour porpoises avoid surface disturbance"
+        },
+        {
+          "fromId": 27,
+          "toId": 33,
+          "severity": -2,
+          "description": "Seals avoid noise "
         },
         {
           "fromId": 27,
           "toId": 32,
           "severity": -2,
-          "description": "Herring in Bothnian Sea avoids noisy areas "
+          "description": "Herring avoids noisy areas "
         },
         {
-          "fromId": 28,
-          "toId": 32,
-          "severity": -3,
-          "description": "Herring in Bothnian Sea avoids surface disturbance "
+          "fromId": 27,
+          "toId": 42,
+          "severity": -2,
+          "description": "Seabirds avoids noisy areas "
         },
         {
           "fromId": 27,
           "toId": 31,
           "severity": -2,
           "description": "Sprat avoids noisy areas "
-        },
-        {
-          "fromId": 28,
-          "toId": 31,
-          "severity": -3,
-          "description": "Sprat avoids surface disturbance "
-        },
-        {
-          "fromId": 26,
-          "toId": 34,
-          "severity": -3,
-          "description": "Benthos avoids bottom disturbance "
-        },
-        {
-          "fromId": 34,
-          "toId": 34,
-          "severity": -1,
-          "description": "Species of benthos preys among each other "
-        },
-        {
-          "fromId": 30,
-          "toId": 34,
-          "severity": -1,
-          "description": "Herring (Baltic Proper) feeds on benthos species "
-        },
-        {
-          "fromId": 32,
-          "toId": 34,
-          "severity": -1,
-          "description": "Herring (Bothnian Sea) feeds on benthos species "
         },
         {
           "fromId": 29,
@@ -8499,33 +8499,9 @@
         },
         {
           "fromId": 29,
-          "toId": 31,
+          "toId": 43,
           "severity": -1,
-          "description": "Cod feeds on sprat "
-        },
-        {
-          "fromId": 33,
-          "toId": 31,
-          "severity": -1,
-          "description": "Seals feed on sprat "
-        },
-        {
-          "fromId": 29,
-          "toId": 30,
-          "severity": -1,
-          "description": "Cod feeds on herring from the Baltic Proper "
-        },
-        {
-          "fromId": 33,
-          "toId": 30,
-          "severity": -2,
-          "description": "Seals feed on herring from the Baltic Proper "
-        },
-        {
-          "fromId": 33,
-          "toId": 32,
-          "severity": -1,
-          "description": "Seals feed on herring from the Bothnian Sea "
+          "description": "Cod feeds on other demersal fish"
         },
         {
           "fromId": 33,
@@ -8534,58 +8510,496 @@
           "description": "Seals feed on cod "
         },
         {
-          "fromId": 20,
-          "toId": 31,
+          "fromId": 33,
+          "toId": 43,
           "severity": -1,
-          "description": "Active demersal fleets catch sprat "
+          "description": "Seals feed on other demersal fish"
         },
         {
-          "fromId": 22,
-          "toId": 31,
+          "fromId": 33,
+          "toId": 32,
           "severity": -3,
-          "description": "Pelagic fleets catch sprat "
+          "description": "Seals feed on herring "
+        },
+        {
+          "fromId": 33,
+          "toId": 44,
+          "severity": -2,
+          "description": "Seals feed on other pelagic fish"
+        },
+        {
+          "fromId": 42,
+          "toId": 43,
+          "severity": -2,
+          "description": "Seabirds eat other demersal fish"
+        },
+        {
+          "fromId": 42,
+          "toId": 34,
+          "severity": -2,
+          "description": "Seabirds eat benthos"
+        },
+        {
+          "fromId": 21,
+          "toId": 32,
+          "severity": -2,
+          "description": "Pelagic fleets catch herring"
+        },
+        {
+          "fromId": 21,
+          "toId": 31,
+          "severity": -2,
+          "description": "Pelagic fleets catch sprat"
+        },
+        {
+          "fromId": 21,
+          "toId": 44,
+          "severity": -2,
+          "description": "Pelagic fleets catch other pelagic fish"
+        },
+        {
+          "fromId": 20,
+          "toId": 29,
+          "severity": -2,
+          "description": "Demersal fleets catch cod"
         },
         {
           "fromId": 20,
           "toId": 30,
           "severity": -2,
-          "description": "Active demersal fleets catch herring from the Baltic Proper "
+          "description": "Demersal fleets catch flatfish"
         },
         {
-          "fromId": 21,
-          "toId": 30,
+          "fromId": 20,
+          "toId": 43,
+          "severity": -2,
+          "description": "Demersal fleets catch other demersal fish"
+        },
+        {
+          "fromId": 20,
+          "toId": 34,
           "severity": -1,
-          "description": "Passive demersal fleets catch herring from the Baltic Proper "
-        },
-        {
-          "fromId": 22,
-          "toId": 30,
-          "severity": -3,
-          "description": "Pelagic fleets catch herring from the Baltic Proper "
+          "description": "Demersal fleets catch benthos"
         },
         {
           "fromId": 22,
           "toId": 32,
-          "severity": -2,
-          "description": "Pelagic fleets catch herring from the Bothnian Sea"
-        },
-        {
-          "fromId": 20,
-          "toId": 29,
-          "severity": -2,
-          "description": "Active demersal fleets catch cod "
-        },
-        {
-          "fromId": 21,
-          "toId": 29,
-          "severity": -2,
-          "description": "Passive demersal fleets catch cod "
+          "severity": -1,
+          "description": "Recreational fleet cath herring"
         },
         {
           "fromId": 22,
           "toId": 29,
+          "severity": -1,
+          "description": "Recreational fleet cath cod"
+        },
+        {
+          "fromId": 47,
+          "toId": 33,
+          "severity": -1,
+          "description": "Unreported fleets catch seals"
+        },
+        {
+          "fromId": 47,
+          "toId": 42,
+          "severity": -1,
+          "description": "Unreported fleets catch seabirds"
+        },
+        {
+          "fromId": 47,
+          "toId": 30,
+          "severity": -1,
+          "description": "Unreported fleets catch flatfish"
+        },
+        {
+          "fromId": 47,
+          "toId": 43,
+          "severity": -1,
+          "description": "Unreported fleets catch other demersal fish"
+        },
+        {
+          "fromId": 47,
+          "toId": 32,
+          "severity": -1,
+          "description": "Unreported fleets catch herring"
+        },
+        {
+          "fromId": 47,
+          "toId": 31,
+          "severity": -1,
+          "description": "Unreported fleets catch sprat"
+        },
+        {
+          "fromId": 47,
+          "toId": 44,
+          "severity": -1,
+          "description": "Unreported fleets catch other pelagic fish"
+        },
+        {
+          "fromId": 42,
+          "toId": 32,
+          "severity": -1,
+          "description": "Seabirds eat herring"
+        },
+        {
+          "fromId": 42,
+          "toId": 31,
+          "severity": -1,
+          "description": "Seabirds eat sprat"
+        },
+        {
+          "fromId": 42,
+          "toId": 44,
           "severity": -2,
-          "description": "Pelagic fleets catch cod "
+          "description": "Seabirds eat other pelagic fish"
+        },
+        {
+          "fromId": 45,
+          "toId": 43,
+          "severity": -2,
+          "description": "Harbour purpoises eat other demersal fish"
+        },
+        {
+          "fromId": 45,
+          "toId": 32,
+          "severity": -2,
+          "description": "Harbour purpoises eat herring"
+        },
+        {
+          "fromId": 45,
+          "toId": 31,
+          "severity": -1,
+          "description": "Harbour purpoises eat sprat"
+        },
+        {
+          "fromId": 30,
+          "toId": 43,
+          "severity": -1,
+          "description": "Flatfish eat other demersal fish"
+        },
+        {
+          "fromId": 30,
+          "toId": 34,
+          "severity": -2,
+          "description": "Flatfish eat benthos"
+        },
+        {
+          "fromId": 43,
+          "toId": 31,
+          "severity": -1,
+          "description": "Other demersal fish eat sprat"
+        },
+        {
+          "fromId": 43,
+          "toId": 44,
+          "severity": -1,
+          "description": "Other demersal fish eat other pelagic fish"
+        },
+        {
+          "fromId": 43,
+          "toId": 34,
+          "severity": -2,
+          "description": "Other demersal fish eat benthos"
+        },
+        {
+          "fromId": 44,
+          "toId": 34,
+          "severity": -1,
+          "description": "Other pelagic fish eat benthos"
+        },
+        {
+          "fromId": 44,
+          "toId": 34,
+          "severity": -1,
+          "description": "Other pelagic fish eat benthos"
+        },
+        {
+          "fromId": 27,
+          "toId": 45,
+          "severity": -3,
+          "description": "Harbour porpoises  avoid noise "
+        },
+        {
+          "fromId": 27,
+          "toId": 30,
+          "severity": -2,
+          "description": "Flatfish avoid noise "
+        },
+        {
+          "fromId": 27,
+          "toId": 43,
+          "severity": -2,
+          "description": "Other demersal fish avoid noise "
+        },
+        {
+          "fromId": 27,
+          "toId": 44,
+          "severity": -2,
+          "description": "Other pelagic fish avoid noise "
+        },
+        {
+          "fromId": 27,
+          "toId": 34,
+          "severity": -2,
+          "description": "Benthos avoids noise "
+        },
+        {
+          "fromId": 27,
+          "toId": 49,
+          "severity": -2,
+          "description": "Zooplankton avoids noise "
+        },
+        {
+          "fromId": 26,
+          "toId": 29,
+          "severity": -2,
+          "description": "Cod avoids bottom disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 34,
+          "severity": -2,
+          "description": "Benthos avoids bottom disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 33,
+          "severity": -1,
+          "description": "Seals avoid bottom disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 42,
+          "severity": -1,
+          "description": "Seabirds avoid bottom disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 42,
+          "severity": -1,
+          "description": "Harbour porpoise avoids bottom disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 30,
+          "severity": -1,
+          "description": "Flatfish avoid bottom disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 43,
+          "severity": -1,
+          "description": "Other demersal fish avoid bottom disturbance "
+        },
+        {
+          "fromId": 46,
+          "toId": 42,
+          "severity": -3,
+          "description": "Seabirds avoid air disturbance "
+        },
+        {
+          "fromId": 41,
+          "toId": 45,
+          "severity": -2,
+          "description": "Harbour porpoises avoid bottom vibration"
+        },
+        {
+          "fromId": 41,
+          "toId": 29,
+          "severity": -2,
+          "description": "Cod avoids bottom vibration"
+        },
+        {
+          "fromId": 41,
+          "toId": 30,
+          "severity": -2,
+          "description": "Flatfish avoid bottom vibration"
+        },
+        {
+          "fromId": 41,
+          "toId": 43,
+          "severity": -2,
+          "description": "Other demersal fish avoid bottom vibration"
+        },
+        {
+          "fromId": 41,
+          "toId": 34,
+          "severity": -2,
+          "description": "Benthos avoids bottom vibration"
+        },
+        {
+          "fromId": 40,
+          "toId": 33,
+          "severity": -2,
+          "description": "Seals avoid impulse noise"
+        },
+        {
+          "fromId": 40,
+          "toId": 42,
+          "severity": -2,
+          "description": "Seabirds avoid impulse noise"
+        },
+        {
+          "fromId": 40,
+          "toId": 45,
+          "severity": -1,
+          "description": "Harbour porpoises avoid impulse noise"
+        },
+        {
+          "fromId": 40,
+          "toId": 32,
+          "severity": -2,
+          "description": "Herring avoids impulse noise"
+        },
+        {
+          "fromId": 40,
+          "toId": 31,
+          "severity": -2,
+          "description": "Sprat avoids impulse noise"
+        },
+        {
+          "fromId": 40,
+          "toId": 44,
+          "severity": -2,
+          "description": "Other pelagic fish avoid impulse noise"
+        },
+        {
+          "fromId": 40,
+          "toId": 34,
+          "severity": -1,
+          "description": "Benthos avoids impulse noise"
+        },
+        {
+          "fromId": 40,
+          "toId": 49,
+          "severity": -2,
+          "description": "Zooplankton avoids impulse noise"
+        },
+        {
+          "fromId": 17,
+          "toId": 40,
+          "severity": 1,
+          "description": "Military areas create impulse noise"
+        },
+        {
+          "fromId": 17,
+          "toId": 46,
+          "severity": 1,
+          "description": "Air force exercises create air disturbance"
+        },
+        {
+          "fromId": 17,
+          "toId": 21,
+          "severity": -3,
+          "description": "Pelagic fleets are not allowed in some military areas "
+        },
+        {
+          "fromId": 17,
+          "toId": 22,
+          "severity": -3,
+          "description": "Recreational fleets are not allowed in some military areas "
+        },
+        {
+          "fromId": 17,
+          "toId": 20,
+          "severity": -3,
+          "description": "Demersal fleets are not allowed in some military areas "
+        },
+        {
+          "fromId": 17,
+          "toId": 47,
+          "severity": -3,
+          "description": "Unreported fleets are not allowed in some military areas "
+        },
+        {
+          "fromId": 19,
+          "toId": 28,
+          "severity": 2,
+          "description": "Recreational fishing creates surface disturbance"
+        },
+        {
+          "fromId": 6,
+          "toId": 28,
+          "severity": 1,
+          "description": "Ports create surface disturbance"
+        },
+        {
+          "fromId": 2,
+          "toId": 26,
+          "severity": 1,
+          "description": "Oil & gas platforms create bottom vibrations"
+        },
+        {
+          "fromId": 1,
+          "toId": 26,
+          "severity": 1,
+          "description": "Wind farms create bottom vibrations"
+        },
+        {
+          "fromId": 2,
+          "toId": 46,
+          "severity": 1,
+          "description": "Wind farms create air disturbance"
+        },
+        {
+          "fromId": 4,
+          "toId": 20,
+          "severity": -3,
+          "description": "No demersal fleets allowed on top of pipelines"
+        },
+        {
+          "fromId": 3,
+          "toId": 20,
+          "severity": -3,
+          "description": "Demersal fleets avoid areas with electricity cables"
+        },
+        {
+          "fromId": 3,
+          "toId": 20,
+          "severity": -3,
+          "description": "Demersal fleets avoid areas with electricity cables"
+        },
+        {
+          "fromId": 38,
+          "toId": 22,
+          "severity": -3,
+          "description": "Recreational fleets are banned from operating in fisheries closure. "
+        },
+        {
+          "fromId": 24,
+          "toId": 47,
+          "severity": -3,
+          "description": "If desired, unreported fleets can be banned from operating in a particular Marine Protected Area."
+        },
+        {
+          "fromId": 38,
+          "toId": 47,
+          "severity": -3,
+          "description": "Unreported fleets are not allowed in fisheries closure. "
+        },
+        {
+          "fromId": 39,
+          "toId": 47,
+          "severity": -3,
+          "description": "Unreported fisheries are not allowed in cod fisheries closure. "
+        },
+        {
+          "fromId": 1,
+          "toId": 47,
+          "severity": -3,
+          "description": "Unreported fisheries are not allowed in wind farms."
+        },
+        {
+          "fromId": 35,
+          "toId": 47,
+          "severity": -3,
+          "description": "Unreported fisheries keep away from IMO routes."
+        },
+        {
+          "fromId": 1,
+          "toId": 41,
+          "severity": 2,
+          "description": "Wind farms in operation cause bottom vibrations"
         }
       ]
     },
@@ -19804,6 +20218,11 @@
               "name": "BS_Wind_Farms_existing",
               "influence": 0.6,
               "construction": true
+            },
+            {
+              "name": "BS_Pipelines_Edit",
+              "influence": 0.6,
+              "construction": true
             }
           ]
         },
@@ -19812,7 +20231,7 @@
           "layers": [
             {
               "name": "BS_Wind_Farms_existing",
-              "influence": 0.6,
+              "influence": 0.2,
               "construction": false
             },
             {
@@ -19859,6 +20278,11 @@
               "name": "BS_Wind_Farms_existing",
               "influence": 0.8,
               "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 0.8,
+              "construction": false
             }
           ]
         },
@@ -19877,7 +20301,7 @@
             },
             {
               "name": "BS_Recreational_Fishing",
-              "influence": 0.4,
+              "influence": 0.3,
               "construction": false
             },
             {
@@ -20136,11 +20560,11 @@
             },
             {
               "country_id": 4,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 5,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 6,
@@ -20148,11 +20572,11 @@
             },
             {
               "country_id": 7,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 8,
-              "weight": 1.0
+              "weight": 0.0
             },
             {
               "country_id": 9,
@@ -20160,11 +20584,11 @@
             },
             {
               "country_id": 10,
-              "weight": 0
+              "weight": 1.0
             },
             {
               "country_id": 11,
-              "weight": 0
+              "weight": 0.0
             }
           ]
         },
@@ -20177,11 +20601,11 @@
             },
             {
               "country_id": 4,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 5,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 6,
@@ -20189,7 +20613,7 @@
             },
             {
               "country_id": 7,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 8,
@@ -20201,11 +20625,11 @@
             },
             {
               "country_id": 10,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 11,
-              "weight": 0
+              "weight": 0.0
             }
           ]
         },
@@ -20218,11 +20642,11 @@
             },
             {
               "country_id": 4,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 5,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 6,
@@ -20230,7 +20654,7 @@
             },
             {
               "country_id": 7,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 8,
@@ -20242,11 +20666,11 @@
             },
             {
               "country_id": 10,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 11,
-              "weight": 0
+              "weight": 0.0
             }
           ]
         },
@@ -20259,11 +20683,11 @@
             },
             {
               "country_id": 4,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 5,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 6,
@@ -20271,11 +20695,11 @@
             },
             {
               "country_id": 7,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 8,
-              "weight": 0
+              "weight": 0.0
             },
             {
               "country_id": 9,
@@ -20283,11 +20707,11 @@
             },
             {
               "country_id": 10,
-              "weight": 1
+              "weight": 1.0
             },
             {
               "country_id": 11,
-              "weight": 0
+              "weight": 0.0
             }
           ]
         }
@@ -20301,31 +20725,31 @@
           "name": "Benthic Meiofauna",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Benthic Producers",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Cod",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Flatfish",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Herring",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Harbour Porpoise",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Other Demersal Fish",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Other Pelagic Fish",
           "subcategory": "Biomass"
         },
@@ -20345,11 +20769,11 @@
           "name": "Seals",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Sprat",
           "subcategory": "Biomass"
         },
-		{
+        {
           "name": "Zooplankton",
           "subcategory": "Biomass"
         },
@@ -20377,32 +20801,8 @@
           "unit": "g/m2",
           "valueDefinitions": [
             {
-              "valueName": "Benthic Macrofauna",
-              "valueColor": "#FF7272FF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-			{
-              "valueName": "Benthic Meiofauna",
-              "valueColor": "#FF7272FF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-			{
-              "valueName": "Benthic Producers",
-              "valueColor": "#FF7272FF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-            {
               "valueName": "Cod",
               "valueColor": "#FFC773FF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Other Demersal Fish",
-              "valueColor": "#CEFF73FF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             },
@@ -20413,8 +20813,8 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Harbour Porpoise",
-              "valueColor": "#73D9FFFF",
+              "valueName": "Other Demersal Fish",
+              "valueColor": "#CEFF73FF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             },
@@ -20424,27 +20824,21 @@
               "unit": "g/m2",
               "valueDependentCountry": -1
             },
-			{
+            {
+              "valueName": "Sprat",
+              "valueColor": "#CEFF73FF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
               "valueName": "Other Pelagic Fish",
               "valueColor": "#737DFFFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             },
-			{
-              "valueName": "Phytoplankton",
-              "valueColor": "#737DFFFF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-			{
-              "valueName": "Pelagic Macrofauna",
-              "valueColor": "#FF00ECFF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-			{
-              "valueName": "Seabirds",
-              "valueColor": "#FF7272FF",
+            {
+              "valueName": "Harbour Porpoise",
+              "valueColor": "#73D9FFFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             },
@@ -20455,12 +20849,42 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Sprat",
-              "valueColor": "#CEFF73FF",
+              "valueName": "Seabirds",
+              "valueColor": "#FF7272FF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             },
-			{
+            {
+              "valueName": "Phytoplankton",
+              "valueColor": "#737DFFFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Pelagic Macrofauna",
+              "valueColor": "#FF00ECFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Benthic Macrofauna",
+              "valueColor": "#FF7272FF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Benthic Meiofauna",
+              "valueColor": "#FF7272FF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Benthic Producers",
+              "valueColor": "#FF7272FF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
               "valueName": "Zooplankton",
               "valueColor": "#CEFF73FF",
               "unit": "g/m2",
@@ -20534,19 +20958,19 @@
               "unit": "km2",
               "valueDependentCountry": -1
             },
-			{
+            {
               "valueName": "Habitats Directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
-			{
+            {
               "valueName": "Birds Directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
-			{
+            {
               "valueName": "Habitats and Birds Directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
@@ -32454,7 +32878,7 @@
             "availability": -12,
             "media": "wiki://Marine_Protected_Areas"
           },
-		  "4": {
+          "4": {
             "displayName": "No Unreported Fleets",
             "approval": "NotDependent",
             "value": 0,
@@ -33174,9 +33598,9 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 0,
-        "layer_editable": 0,
-        "layer_toggleable": 0,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Areas where fishing is prohibited",
@@ -33320,9 +33744,9 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 0,
-        "layer_editable": 0,
-        "layer_toggleable": 0,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Areas where cod fisheries are prohibited",
@@ -36012,7 +36436,7 @@
         },
         "layer_info_properties": null
       },
-	  {
+      {
         "layer_name": "mel_Seabirds",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
@@ -36199,7 +36623,7 @@
         },
         "layer_info_properties": null
       },
-	  {
+      {
         "layer_name": "mel_Phytoplankton",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
@@ -36386,7 +36810,7 @@
         },
         "layer_info_properties": null
       },
-	  {
+      {
         "layer_name": "mel_Pelagic_Macrofauna",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
@@ -38260,9 +38684,9 @@
         "layer_name": "mel_Zooplankton",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Phytoplankton Biomass (Simulated)",
+        "layer_short": "Zooplankton Biomass (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "fish",
+        "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
         "layer_width": 76,
         "layer_height": 44,
