@@ -82,6 +82,7 @@ class UserController extends BaseController
             }
             // ok, ready to create new tokens!
             $user = new User();
+            $user->setGameSessionId($sessionId);
             $user->setUserId($decodedJwtToken->get('uid'));
             $user->setUsername($decodedJwtToken->get('username'));
             $jsonResponse = $authenticationSuccessHandler->handleAuthenticationSuccess($user);

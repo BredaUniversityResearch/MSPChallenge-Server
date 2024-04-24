@@ -6,6 +6,10 @@ source "${SCRIPT_DIR}/tools/resolve-app-env.sh"
 bash set_symfony_version.sh "${@:1}"
 set -e
 
+if [[ -z $PHP_BINARY ]]; then
+   PHP_BINARY=$(which php)
+fi
+
 if [[ -z $COMPOSER_BINARY ]]; then
    COMPOSER_BINARY=$(which composer)
 fi
@@ -15,8 +19,7 @@ if [[ "${APP_ENV}" == "prod" ]]; then
   COMPOSER_ARGS="--no-dev"
 fi
 
-# such that outdate metadaa doctrine cache won't interfere with a composer install running cache clear
-eval "APP_ENV=${APP_ENV} php bin/console doctrine:cache:clear-metadata" >/dev/null 2>&1
+# such that outdated doctrine metadata cache won't interfere with a composer install running cache clear
 eval "APP_ENV=${APP_ENV} ${COMPOSER_BINARY} check-platform-reqs && APP_ENV=${APP_ENV} ${COMPOSER_BINARY} install --prefer-dist --no-progress --no-interaction ${COMPOSER_ARGS} && APP_ENV=${APP_ENV} ${COMPOSER_BINARY} dump-autoload -o ${COMPOSER_ARGS}"
 if [ $? -ne 0 ]; then
   echo "Composer install & dump-autoload failed."
@@ -38,7 +41,7 @@ fi
 if [ -n "${OPENSSL_CONF}" ]; then
     ENV_VARS="OPENSSL_CONF=\"${OPENSSL_CONF}\""
 fi
-eval "${ENV_VARS} php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+eval "${ENV_VARS} ${PHP_BINARY} bin/console lexik:jwt:generate-keypair --skip-if-exists"
 
 if [ $? -ne 0 ]; then
   echo "Could not install JWT encoding key pair."

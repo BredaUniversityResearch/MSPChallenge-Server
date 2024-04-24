@@ -25,10 +25,10 @@ use App\Entity\PlanLayer;
 use App\Entity\PlanMessage;
 use App\Entity\PlanRestrictionArea;
 use App\Entity\Restriction;
-use App\Entity\ServerManager\GameList;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
+use App\Repository\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,15 +42,12 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -736,10 +733,18 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         return $layer;
     }
 
+    /**
+     * @throws \Exception
+     */
     private function getPlayAreaGeometryFromContext(SessionSetupContext $context): Geometry
     {
-        $playAreaLayer = $context->filterOneLayer(fn($v, $k) => Util::hasPrefix($k, '_playarea'));
-        return $playAreaLayer->getGeometry()->first();
+        $playAreaLayers = $context->filterLayers(
+            fn(Layer $l, $k) => null !== Util::hasPrefix($l->getLayerName(), LayerRepository::PLAY_AREA_LAYER_PREFIX)
+        );
+        $this->info('Found '.count($playAreaLayers).' player area layer(s)');
+        return SELController::getGeometryWithLargestBounds(collect($playAreaLayers)->map(
+            fn(Layer $layer) => $layer->getGeometry()->first()
+        )->all());
     }
 
     /**
