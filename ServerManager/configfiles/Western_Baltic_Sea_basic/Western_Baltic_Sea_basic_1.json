@@ -1,7 +1,7 @@
 {
   "metadata": {
     "date_modified": "4/24/2024",
-    "data_model_hash": "CDB27AD4FE95DC2CA17940574E885F94F52E139C4C58AF098EF1D9B5C7DBDA0F",
+    "data_model_hash": "E044E61378EF0DDC5EC97ADB57BCE9BC919F1F39AFD9E9FF9C41B78C2EB52665",
     "errors": 0,
     "editor_version": "1.0.0",
     "config_version": "1.0.0"
@@ -20438,6 +20438,11 @@
               "name": "BS_Cables_Edit",
               "influence": 1.0,
               "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
             }
           ]
         },
@@ -20483,6 +20488,11 @@
               "name": "BS_Cables_Edit",
               "influence": 1.0,
               "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
             }
           ]
         },
@@ -20513,6 +20523,11 @@
               "name": "BS_Cod_Fisheries_closure",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
             }
           ]
         },
@@ -20541,6 +20556,11 @@
             },
             {
               "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
               "influence": 1.0,
               "construction": false
             }
