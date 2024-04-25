@@ -116,10 +116,12 @@
             "cache:clear": "symfony-cmd"
         },
         "post-install-cmd": [
+            "php bin/console doctrine:cache:clear-metadata",
             "@auto-scripts",
             "bash tools/cghooks-fresh-install.sh"
         ],
         "post-update-cmd": [
+            "php bin/console doctrine:cache:clear-metadata",
             "@auto-scripts",
             "bash tools/cghooks-fresh-install.sh"
         ],
@@ -138,7 +140,7 @@
             ],
             "pre-push": [
                 "bash test.sh",
-                "vendor/bin/phpstan analyse"
+                "vendor/bin/phpstan analyse --memory-limit=1G"
             ]
         },
         "symfony": {
