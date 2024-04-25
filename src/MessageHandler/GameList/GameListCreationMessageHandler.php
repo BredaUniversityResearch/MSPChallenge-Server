@@ -741,10 +741,18 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         return $layer;
     }
 
+    /**
+     * @throws \Exception
+     */
     private function getPlayAreaGeometryFromContext(SessionSetupContext $context): Geometry
     {
-        $playAreaLayer = $context->filterOneLayer(fn($v, $k) => Util::hasPrefix($k, '_playarea'));
-        return $playAreaLayer->getGeometry()->first();
+        $playAreaLayers = $context->filterLayers(
+            fn(Layer $l, $k) => null !== Util::hasPrefix($l->getLayerName(), LayerRepository::PLAY_AREA_LAYER_PREFIX)
+        );
+        $this->info('Found '.count($playAreaLayers).' player area layer(s)');
+        return SELController::getGeometryWithLargestBounds(collect($playAreaLayers)->map(
+            fn(Layer $layer) => $layer->getGeometry()->first()
+        )->all());
     }
 
     /**

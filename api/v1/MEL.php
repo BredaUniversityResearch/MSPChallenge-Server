@@ -234,7 +234,7 @@ class MEL extends Base
 
             foreach ($countries as $country) {
                 $countryId = $country["country_id"];
-                $weight = $weightsByFleet[$name][$countryId] ?? 0.1;
+                $weight = $weightsByFleet[$name][$countryId] ?? 1;
                 $this->getDatabase()->query(
                     "
                     INSERT INTO fishing (

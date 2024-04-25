@@ -17,6 +17,8 @@ use Symfony\Component\Serializer\Serializer;
 
 class LayerRepository extends EntityRepository
 {
+    public const PLAY_AREA_LAYER_PREFIX = '_PLAYAREA';
+
     private ?ObjectNormalizer $normalizer = null; // to be created upon usage
     private ?Serializer $serializer = null; // to be created upon usage
 
@@ -41,6 +43,19 @@ class LayerRepository extends EntityRepository
             }
         }
         return $layerReturn ?? [];
+    }
+
+    /**
+     * @return Layer[]
+     */
+    public function getPlayAreaLayers(): array
+    {
+        $qb = $this->createQueryBuilder('l');
+        return $qb
+            ->where('l.layerName LIKE :name')
+            ->setParameter('name', self::PLAY_AREA_LAYER_PREFIX.'%')
+            ->getQuery()
+            ->getResult();
     }
 
     public function getAllVectorLayerIds(): array
