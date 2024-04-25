@@ -7,10 +7,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 
 class LayerRepository extends EntityRepository
 {
+    public const PLAY_AREA_LAYER_PREFIX = '_PLAYAREA';
+
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
         parent::__construct($em, $class);
@@ -32,6 +33,19 @@ class LayerRepository extends EntityRepository
             }
         }
         return $layerReturn ?? [];
+    }
+
+    /**
+     * @return Layer[]
+     */
+    public function getPlayAreaLayers(): array
+    {
+        $qb = $this->createQueryBuilder('l');
+        return $qb
+            ->where('l.layerName LIKE :name')
+            ->setParameter('name', self::PLAY_AREA_LAYER_PREFIX.'%')
+            ->getQuery()
+            ->getResult();
     }
 
     public function getAllVectorLayerIds(): array

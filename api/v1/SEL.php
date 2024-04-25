@@ -2,6 +2,8 @@
 
 namespace App\Domain\API\v1;
 
+use App\Controller\SessionAPI\SELController;
+use App\Domain\Services\ConnectionManager;
 use Exception;
 use InvalidArgumentException;
 use stdClass;
@@ -38,9 +40,10 @@ class SEL extends Base
 
     //SEL Input Queries
     /**
-    * @apiGroup SEL
-    * @api {POST} /sel/GetPlayableAreaGeometry GetPlayableAreaGeometry
-    * @apiDescription Gets the geometry associated with the playable area layer
+     * @apiGroup SEL
+     * @throws Exception
+     * @api {POST} /sel/GetAreaOutputConfiguration GetAreaOutputConfiguration
+     * @apiDescription Gets the geometry associated with the playable area layer
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -49,7 +52,13 @@ class SEL extends Base
         $game = new Game();
         $config = $game->GetGameConfigValues();
 
-        $result = array("simulation_area" => $this->CalculateAlignedSimulationBounds($config));
+        $boundsConfig = SELController::calculateAlignedSimulationBounds(
+            $config,
+            SELController::getLargestPlayAreaGeometryFromDb(
+                ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            )
+        );
+        $result = array("simulation_area" => $boundsConfig);
 
         if (isset($config["MEL"])) {
             $melConfig = &$config["MEL"];
@@ -65,83 +74,8 @@ class SEL extends Base
         if (isset($config["SEL"]["output_configuration"])) {
             $result = array_merge($result, $config["SEL"]["output_configuration"]);
         }
-        
+
         return $result; //Base::JSON($result);
-    }
-
-    // Returns the aligned simulation bounds as defined by the playarea. Bounds are aligned to the MEL area so the
-    //   pixels in the raster should line up.
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function CalculateAlignedSimulationBounds(?array $config = null): array
-    {
-        if ($config == null) {
-            $game = new Game();
-            $config = $game->GetGameConfigValues();
-        }
-
-        $data = $this->getDatabase()->query(
-            "
-            SELECT geometry.geometry_geometry as geometry FROM geometry
-			LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
-			WHERE layer.layer_name LIKE '_PLAYAREA%'
-			"
-        );
-        if (empty($data)) {
-            throw new Exception(
-                "_PLAYAREA layer geometry not (yet) found, so its bounds could not be calculated at this time."
-            );
-        }
-        $bounds = $this->CalculateBoundsFromGeometry(json_decode($data[0]["geometry"]));
-
-        if (isset($config["MEL"])) {
-            $melConfig = &$config["MEL"];
-            $xOffset = $melConfig["x_min"] - $bounds["x_min"];
-            $yOffset = $melConfig["y_min"] - $bounds["y_min"];
-
-            $melCellSize = $melConfig["cellsize"];
-            $simulationAreaShift = array(fmod($xOffset, $melCellSize), fmod($yOffset, $melCellSize));
-
-            $xSize = $this->CeilToCellSize($bounds["x_max"] - $bounds["x_min"], $melCellSize);
-            $ySize = $this->CeilToCellSize($bounds["y_max"] - $bounds["y_min"], $melCellSize);
-
-            $bounds["x_min"] += $simulationAreaShift[0];
-            $bounds["y_min"] += $simulationAreaShift[1];
-            $bounds["x_max"] = $bounds["x_min"] + $xSize;
-            $bounds["y_max"] = $bounds["y_min"] + $ySize;
-        }
-        return $bounds;
-    }
-
-    /**
-     * @param float|int $input
-     * @param float|int $cellSize
-     * @return float
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function CeilToCellSize(float|int $input, float|int $cellSize): float
-    {
-        return ceil($input / $cellSize) * $cellSize;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function CalculateBoundsFromGeometry(array $geometryData): array
-    {
-        $result = array("x_min" => 1e25, "y_min" => 1e25, "x_max" => -1e25, "y_max" => -1e25);
-        foreach ($geometryData as $g) {
-            if ($g[0] < $result["x_min"]) {
-                $result["x_min"] = $g[0];
-            }
-            if ($g[1] < $result["y_min"]) {
-                $result["y_min"] = $g[1];
-            }
-            if ($g[0] > $result["x_max"]) {
-                $result["x_max"] = $g[0];
-            }
-            if ($g[1] > $result["y_max"]) {
-                $result["y_max"] = $g[1];
-            }
-        }
-        return $result;
     }
 
     /**
@@ -734,6 +668,7 @@ class SEL extends Base
 
     /**
      * @apiGroup SEL
+     * @throws Exception
      * @api {POST} /sel/ReimportShippingLayers ReimportShippingLayers
      * @apiDescription Creates the raster layers required for shipping.
      */
@@ -761,7 +696,13 @@ class SEL extends Base
         
         $region = $globalConfig["region"];
         $config = $globalConfig["SEL"];
-        $boundsConfig = $this->CalculateAlignedSimulationBounds($globalConfig);
+
+        $boundsConfig = SELController::calculateAlignedSimulationBounds(
+            $globalConfig,
+            SELController::getLargestPlayAreaGeometryFromDb(
+                ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            )
+        );
 
         foreach ($config["heatmap_settings"] as $heatmap) {
             $existingLayer = $this->getDatabase()->query(
