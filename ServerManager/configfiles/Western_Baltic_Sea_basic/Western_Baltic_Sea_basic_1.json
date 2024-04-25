@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "4/24/2024",
-    "data_model_hash": "E044E61378EF0DDC5EC97ADB57BCE9BC919F1F39AFD9E9FF9C41B78C2EB52665",
+    "date_modified": "4/25/2024",
+    "data_model_hash": "91EAEF5CE2E0DE4185154BCA4BD3E5393A215127CD1228BA51561C151C9C0521",
     "errors": 0,
     "editor_version": "1.0.0",
     "config_version": "1.0.0"
@@ -8204,10 +8204,16 @@
           "description": "Demersal fleets are not allowed to fish in wind farms. "
         },
         {
-          "fromId": 35,
+          "fromId": 10,
           "toId": 20,
           "severity": -3,
-          "description": "Demersal fleets always steer clear of known or popular shipping routes. "
+          "description": "Demersal fleets steer clear busy cargo shipping areas. "
+        },
+        {
+          "fromId": 13,
+          "toId": 20,
+          "severity": -3,
+          "description": "Demersal fleets steer clear busy tanker shipping areas. "
         },
         {
           "fromId": 6,
@@ -8252,10 +8258,16 @@
           "description": "If desired, pelagic fleets can be banned from operating in a particular Marine Protected Area. "
         },
         {
-          "fromId": 35,
+          "fromId": 10,
           "toId": 21,
           "severity": -3,
-          "description": "Pelagic fleets always steer clear of known or popular shipping routes. "
+          "description": "Pelagic fleets steer clear from busy cargo shipping areas. "
+        },
+        {
+          "fromId": 13,
+          "toId": 21,
+          "severity": -3,
+          "description": "Pelagic fleets steer clear from busy tanker shipping areas. "
         },
         {
           "fromId": 39,
@@ -8276,10 +8288,16 @@
           "description": "Fishing in wind parks is not allowed. "
         },
         {
-          "fromId": 35,
+          "fromId": 10,
           "toId": 22,
           "severity": -3,
-          "description": "Pelagic fleets always steer clear of known or popular shipping routes. "
+          "description": "Recreational fleets steer clear from busy cargo shipping areas. "
+        },
+        {
+          "fromId": 13,
+          "toId": 22,
+          "severity": -3,
+          "description": "Recreational fleets steer clear from busy tanker shipping areas. "
         },
         {
           "fromId": 1,
@@ -8990,10 +9008,16 @@
           "description": "Unreported fisheries are not allowed in wind farms."
         },
         {
-          "fromId": 35,
+          "fromId": 10,
           "toId": 47,
           "severity": -3,
-          "description": "Unreported fisheries keep away from IMO routes."
+          "description": "Unreported fisheries steer clear from busy cargo shipping areas."
+        },
+        {
+          "fromId": 13,
+          "toId": 47,
+          "severity": -3,
+          "description": "Unreported fisheries steer clear from busy tanker shipping areas."
         },
         {
           "fromId": 1,
@@ -20637,7 +20661,7 @@
             },
             {
               "country_id": 8,
-              "weight": 1.0
+              "weight": 0.0
             },
             {
               "country_id": 9,
@@ -20645,7 +20669,7 @@
             },
             {
               "country_id": 10,
-              "weight": 0.0
+              "weight": 1.0
             },
             {
               "country_id": 11,
@@ -20678,7 +20702,7 @@
             },
             {
               "country_id": 8,
-              "weight": 1.0
+              "weight": 0.0
             },
             {
               "country_id": 9,
@@ -20686,7 +20710,7 @@
             },
             {
               "country_id": 10,
-              "weight": 0.0
+              "weight": 1.0
             },
             {
               "country_id": 11,
@@ -36649,7 +36673,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Phytoplankton Biomass (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "others",
+        "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
         "layer_width": 76,
         "layer_height": 44,
@@ -36836,7 +36860,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Pelagic Macrofauna Biomass (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "others",
+        "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
         "layer_width": 76,
         "layer_height": 44,
