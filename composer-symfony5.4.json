@@ -137,7 +137,7 @@
             ],
             "pre-push": [
                 "bash test.sh",
-                "vendor/bin/phpstan analyse --memory-limit=-1"
+                "vendor/bin/phpstan analyse --memory-limit=1G"
             ]
         },
         "symfony": {
