@@ -6,6 +6,10 @@ source "${SCRIPT_DIR}/tools/resolve-app-env.sh"
 bash set_symfony_version.sh "${@:1}"
 set -e
 
+if [[ -z $PHP_BINARY ]]; then
+   PHP_BINARY=$(which php)
+fi
+
 if [[ -z $COMPOSER_BINARY ]]; then
    COMPOSER_BINARY=$(which composer)
 fi
@@ -36,7 +40,7 @@ fi
 if [ -n "${OPENSSL_CONF}" ]; then
     ENV_VARS="OPENSSL_CONF=\"${OPENSSL_CONF}\""
 fi
-eval "${ENV_VARS} php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+eval "${ENV_VARS} ${PHP_BINARY} bin/console lexik:jwt:generate-keypair --skip-if-exists"
 
 if [ $? -ne 0 ]; then
   echo "Could not install JWT encoding key pair."
