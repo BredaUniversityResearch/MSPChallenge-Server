@@ -43888,6 +43888,7 @@
     "edition_colour": "#5C67B0FF",
     "edition_letter": "A",
     "region": "adriatic",
+    "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2020,
     "end": 2060,
     "era_total_months": 120,
