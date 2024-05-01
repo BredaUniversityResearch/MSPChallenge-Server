@@ -4,6 +4,7 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\PlanLayer;
 use App\Entity\PlanPolicy;
 use App\Entity\Policy;
@@ -363,6 +364,64 @@ SUBQUERY
         return $data;
     }
 
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GeometryExportNameLegacy(
+        string $name,
+        int $layer_type = -1,
+        bool $construction_only = false
+    ): ?array {
+        $id = $this->getDatabase()->query(
+            "SELECT layer_id, layer_geotype, layer_raster FROM layer WHERE layer_name=?",
+            array($name)
+        );
+
+        $result = array("geotype" => "");
+
+        if (empty($id)) {
+            return null;
+        }
+
+        $original = $id[0]['layer_id'];
+
+        if ($id[0]['layer_geotype'] == "raster") {
+            $rasterJson = json_decode($id[0]['layer_raster']);
+
+            $result["geotype"] = $id[0]['layer_geotype'];
+            $result["raster"] = $rasterJson->url;
+
+            return $result;
+        }
+
+        $arguments = array($original, $original);
+        $planStateSelector = "(plan_layer_state=\"ACTIVE\" OR plan_layer_state IS NULL)";
+        $optionalStatements = "";
+
+        if ($layer_type != -1) {
+            $optionalStatements = " AND geometry_type LIKE ?";
+            $arguments[] =  "%" . $layer_type . "%";
+        }
+        if ($construction_only) {
+            $planStateSelector = "plan_layer_state=\"ASSEMBLY\"";
+        }
+
+        $geometry = $this->getDatabase()->query("SELECT layer_id, geometry_geometry as g FROM layer 
+                LEFT JOIN plan_layer ON plan_layer_layer_id=layer_id
+                LEFT JOIN geometry ON geometry_layer_id=layer_id
+                WHERE (
+                    layer_id=? OR layer_original_id=?
+                ) AND ".$planStateSelector." AND geometry_active=1".$optionalStatements, $arguments);
+
+        $result["geotype"] = $id[0]['layer_geotype'];
+        $result["geometry"] = array();
+
+        foreach ($geometry as $geom) {
+            if (!empty($geom['g'])) {
+                $result["geometry"][] = [json_decode($geom['g'])]; // << added the extra array ring that MEL now expects
+            }
+        }
+        return $result;
+    }
+
     /**
      * @todo change method name to something more descriptive, why not GetLayerData?
      *   can be layer geometry data or raster data, but also plan policies linked to that layer
@@ -387,6 +446,9 @@ SUBQUERY
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GeometryExportName(string $name, int $layer_type = -1, bool $construction_only = false): ?array
     {
+        if (SymfonyToLegacyHelper::getInstance()->getProvider()->getVersionObject()->isLessThan('4.1.0')) {
+            return $this->GeometryExportNameLegacy($name, $layer_type, $construction_only);
+        }
         $conn = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
         $qb = $conn->createQueryBuilder();
         /** @var null|array $layer */
