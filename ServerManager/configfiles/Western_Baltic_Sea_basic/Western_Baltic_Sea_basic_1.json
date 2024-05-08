@@ -20600,7 +20600,7 @@
           "initialFishingDistribution": [
             {
               "country_id": 3,
-              "weight": 1.0
+              "weight": 0.03
             },
             {
               "country_id": 4,
@@ -20612,7 +20612,7 @@
             },
             {
               "country_id": 6,
-              "weight": 1.0
+              "weight": 0.02
             },
             {
               "country_id": 7,
@@ -20624,11 +20624,11 @@
             },
             {
               "country_id": 9,
-              "weight": 1.0
+              "weight": 0.03
             },
             {
               "country_id": 10,
-              "weight": 1.0
+              "weight": 0.03
             },
             {
               "country_id": 11,
@@ -20641,7 +20641,7 @@
           "initialFishingDistribution": [
             {
               "country_id": 3,
-              "weight": 1.0
+              "weight": 0.00005
             },
             {
               "country_id": 4,
@@ -20653,7 +20653,7 @@
             },
             {
               "country_id": 6,
-              "weight": 1.0
+              "weight": 0.00005
             },
             {
               "country_id": 7,
@@ -20665,11 +20665,11 @@
             },
             {
               "country_id": 9,
-              "weight": 1.0
+              "weight": 0.00005
             },
             {
               "country_id": 10,
-              "weight": 1.0
+              "weight": 0.00004
             },
             {
               "country_id": 11,
@@ -20682,7 +20682,7 @@
           "initialFishingDistribution": [
             {
               "country_id": 3,
-              "weight": 1.0
+              "weight": 0.004
             },
             {
               "country_id": 4,
@@ -20694,7 +20694,7 @@
             },
             {
               "country_id": 6,
-              "weight": 1.0
+              "weight": 0.002
             },
             {
               "country_id": 7,
@@ -20706,11 +20706,11 @@
             },
             {
               "country_id": 9,
-              "weight": 1.0
+              "weight": 0.003
             },
             {
               "country_id": 10,
-              "weight": 1.0
+              "weight": 0.003
             },
             {
               "country_id": 11,
@@ -20723,7 +20723,7 @@
           "initialFishingDistribution": [
             {
               "country_id": 3,
-              "weight": 1.0
+              "weight": 0.006
             },
             {
               "country_id": 4,
@@ -20735,7 +20735,7 @@
             },
             {
               "country_id": 6,
-              "weight": 1.0
+              "weight": 0.006
             },
             {
               "country_id": 7,
@@ -20747,11 +20747,11 @@
             },
             {
               "country_id": 9,
-              "weight": 1.0
+              "weight": 0.006
             },
             {
               "country_id": 10,
-              "weight": 1.0
+              "weight": 0.006
             },
             {
               "country_id": 11,
@@ -39825,11 +39825,10 @@
         "deadline": 192
       }
     ],
-    "edition_name": "Western Baltic Sea edition",
+    "edition_name": "Baltic Sea edition",
     "edition_colour": "#FF7979FF",
-    "edition_letter": "WB",
+    "edition_letter": "B",
     "region": "balticline",
-    "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2018,
     "end": 2050,
     "era_total_months": 96,
