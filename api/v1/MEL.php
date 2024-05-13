@@ -565,12 +565,12 @@ SUBQUERY
                             // @todo combine all fids from the policy filters into a single array and
                             //   make a comma-separated string of them
                             '3' // for testing purposes
-//                            implode(
-//                                ',',
-//                                array_merge(
-//                                    ...collect($eezPolicyFilters)->map(fn(PolicyFilter $pf) => $pf->getValue())->all()
-//                                )
-//                            ) ?: '0'
+                            //  implode(
+                            //      ',',
+                            //      array_merge(
+                            //           ...collect($eezPolicyFilters)->map(fn(PolicyFilter $pf) => $pf->getValue())->all()
+                            //      )
+                            //  ) ?: '0'
                         );
                         $st->execute();
                         if (false !== $st->fetchColumn()) {
