@@ -568,7 +568,8 @@ SUBQUERY
                             //  implode(
                             //      ',',
                             //      array_merge(
-                            //           ...collect($eezPolicyFilters)->map(fn(PolicyFilter $pf) => $pf->getValue())->all()
+                            //          ...collect($eezPolicyFilters)->map(fn(PolicyFilter $pf) => $pf->getValue()
+                            //              ->all()
                             //      )
                             //  ) ?: '0'
                         );
