@@ -7,6 +7,8 @@ use App\Domain\Services\ConnectionManager;
 use App\Entity\PlanLayer;
 use App\Entity\PlanPolicy;
 use App\Entity\Policy;
+use App\Entity\PolicyFilter;
+use App\Entity\PolicyFilterLink;
 use Doctrine\ORM\AbstractQuery;
 use Exception;
 
@@ -524,6 +526,57 @@ SUBQUERY
                         $pdo,
                         $geometryTypeFilter
                     );
+                } elseif (null !== $eezPolicyFilters = self::getEEZPolicyFilters($planPolicy)) {
+                    // add the geometry linked to the policy to be pressured but only if
+                    //   the geometry is inside or intersecting any of the selected EEZs
+                    $sql = <<<'SQL'
+                    DROP FUNCTION IF EXISTS ToWkt;
+                    DELIMITER $$
+                    CREATE FUNCTION ToWkt(input_text TEXT) RETURNS TEXT
+                    BEGIN
+                      RETURN REPLACE(
+                        REPLACE(
+                          REPLACE(REPLACE(REPLACE(input_text, '],[', '|'),',',' '),'|',','),'[[','POLYGON(('),
+                          ']]',
+                        '))'
+                      );
+                    END;
+                    $$
+                    DELIMITER ;
+                    SQL;
+                    $pdo->query($sql);
+
+                    foreach ($geometry as $geom) {
+                        $st = $pdo->prepare(
+                            <<<'SQL'
+                            select count(geometry_id)
+                            from `geometry` WHERE geometry_layer_id IN
+                              (SELECT layer_id FROM layer WHERE layer_short = 'EEZ')
+                            AND JSON_EXTRACT(geometry_data, '$.FID') IN (:ids)
+                            AND ST_Intersects(
+                            GeomFromText(ToWkt(geometry_geometry), 3035),
+                            GeomFromText(:text, 3035)
+                            )
+                            SQL
+                        );
+                        $st->bindValue('text', self::toWkt(json_decode($geom->getGeometryGeometry(), true)));
+                        $st->bindValue(
+                            'ids',
+                            // @todo combine all fids from the policy filters into a single array and
+                            //   make a comma-separated string of them
+                            '3' // for testing purposes
+//                            implode(
+//                                ',',
+//                                array_merge(
+//                                    ...collect($eezPolicyFilters)->map(fn(PolicyFilter $pf) => $pf->getValue())->all()
+//                                )
+//                            ) ?: '0'
+                        );
+                        $st->execute();
+                        if (false !== $st->fetchColumn()) {
+                            $result["geometry"][] = [json_decode($geom->getGeometryGeometry(), true)];
+                        }
+                    }
                 } else {
                     // add the geometry linked to the policy to be pressured
                     foreach ($geometry as $geom) {
@@ -532,6 +585,23 @@ SUBQUERY
                 }
             }
         }
+    }
+
+    /**
+     * @param PlanPolicy $planPolicy
+     * @return PolicyFilter[]|null
+     */
+    private static function getEEZPolicyFilters(PlanPolicy $planPolicy): ?array
+    {
+        $arr = collect($planPolicy->getPolicy()->getPolicyFilterLinks())->filter(
+            function (PolicyFilterLink $pfl, $k) {
+                return $pfl->getPolicyFilter()->getType() == 'EEZ';
+            }
+        )->map(fn(PolicyFilterLink $pfl) => $pfl->getPolicyFilter())->all();
+        if (empty($arr)) {
+            return null;
+        }
+        return $arr;
     }
 
     private static function toWkt(array $coordinates): string

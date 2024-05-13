@@ -167,7 +167,7 @@ class CreatePolicyPlanCommand extends Command
      * @return int
      * @throws \Exception
      */
-    public function askPlanImplementationTime(SymfonyStyle $io, Game $game, ?int $gameCurrentMonth): int
+    private function askPlanImplementationTime(SymfonyStyle $io, Game $game, ?int $gameCurrentMonth): int
     {
         $planImplementationTimeString = $io->ask(
             'Set plan "implementation time" in format Y-m',
@@ -222,7 +222,7 @@ class CreatePolicyPlanCommand extends Command
      * @return array
      * @throws \Exception
      */
-    public function askPolicyFilters(SymfonyStyle $io, array $policyFilterTypes, array $context): array
+    private function askPolicyFilters(SymfonyStyle $io, array $policyFilterTypes, array $context): array
     {
         $policyFilters = [];
         while (true) {
@@ -252,7 +252,7 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @throws \Exception
      */
-    public function askBannedFleets(SymfonyStyle $io, array $context, bool $canBeNone = false): int
+    private function askBannedFleets(SymfonyStyle $io, array $context, bool $canBeNone = false): int
     {
         return $this->askLayerType($io, 'Choose banned fleets', $context, $canBeNone);
     }
@@ -272,7 +272,7 @@ class CreatePolicyPlanCommand extends Command
         return $permutations;
     }
 
-    public function askLayerType(SymfonyStyle $io, string $question, array $context, bool $canBeNone = false): int
+    private function askLayerType(SymfonyStyle $io, string $question, array $context, bool $canBeNone = false): int
     {
         if (!array_key_exists('layerName', $context)) {
             throw new \Exception('Layer name not found in the context of question: '.$question);
@@ -318,7 +318,7 @@ class CreatePolicyPlanCommand extends Command
      * @param SymfonyStyle $io
      * @return string
      */
-    public function askAndValidateName(
+    private function askAndValidateName(
         Question $question,
         array $names,
         QuestionHelper $helper,
@@ -346,7 +346,7 @@ class CreatePolicyPlanCommand extends Command
      * @return int
      * @throws Exception
      */
-    public function getGameSessionId(InputInterface $input, SymfonyStyle $io): int
+    private function getGameSessionId(InputInterface $input, SymfonyStyle $io): int
     {
         $gameSessionId = $input->getOption(self::OPTION_GAME_SESSION_ID);
         while ((false == $rs = ctype_digit($gameSessionId)) ||
@@ -362,7 +362,7 @@ class CreatePolicyPlanCommand extends Command
         return (int)$gameSessionId;
     }
 
-    public function askPlanLayerShortName(
+    private function askPlanLayerShortName(
         int $gameSessionId,
         InputInterface $input,
         OutputInterface $output,
@@ -407,7 +407,7 @@ class CreatePolicyPlanCommand extends Command
      * @throws NonUniqueResultException
      * @throws \Exception
      */
-    public function getLayer(int $gameSessionId, mixed $layerShort): ?array
+    private function getLayer(int $gameSessionId, mixed $layerShort): ?array
     {
         $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         return $em->createQueryBuilder()->select('l')->from(Layer::class, 'l')
@@ -421,9 +421,11 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @throws \Exception
      */
-    public function askPolicyFilterTypeValue(string $policyFilterTypeName, SymfonyStyle $io, array $context): mixed
+    private function askPolicyFilterTypeValue(string $policyFilterTypeName, SymfonyStyle $io, array $context): mixed
     {
         switch ($policyFilterTypeName) {
+            case 'EEZ':
+                return $this->askLayerType($io, 'Choose banned EEZ', $context);
             case 'fleet':
                 return $this->askLayerType($io, 'Choose banned fleets', $context);
             case 'schedule':
@@ -476,7 +478,7 @@ class CreatePolicyPlanCommand extends Command
      * @param array<PolicyFilterType> $policyFilterTypes
      * @return ?string
      */
-    public function askPolicyFilterTypeName(SymfonyStyle $io, array $policyFilterTypes): ?string
+    private function askPolicyFilterTypeName(SymfonyStyle $io, array $policyFilterTypes): ?string
     {
         $n = 0;
         foreach ($policyFilterTypes as $policyFilterType) {
@@ -490,7 +492,7 @@ class CreatePolicyPlanCommand extends Command
         return $policyFilterTypeName;
     }
 
-    public function askPolicyValue(SymfonyStyle $io, PolicyType $policyType): mixed
+    private function askPolicyValue(SymfonyStyle $io, PolicyType $policyType): mixed
     {
         $policyTypeDisplayName = $policyType->getDisplayName();
         if ($policyType->getDataType() === PolicyTypeDataType::Boolean) {
@@ -511,7 +513,7 @@ class CreatePolicyPlanCommand extends Command
         return $policyValue;
     }
 
-    public function askPolicyTypeName(SymfonyStyle $io): string
+    private function askPolicyTypeName(SymfonyStyle $io): string
     {
         $choices = [];
         $n = 0;
@@ -536,7 +538,7 @@ class CreatePolicyPlanCommand extends Command
      * @return string|null
      * @throws Exception
      */
-    public function askLayerGeometryName(
+    private function askLayerGeometryName(
         int $gameSessionId,
         mixed $layer,
         InputInterface $input,
