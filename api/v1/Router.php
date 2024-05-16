@@ -298,7 +298,10 @@ class Router
             }
         }
 
-        if (count($inValues) > 0) {
+        // to show error if more parameters are given than expected by the method
+        //  disabled for dev, since for development it is useful to be able to pass extra parameters like:
+        //  XDEBUG_TRIGGER=1, PHP_IDE_CONFIG="serverName=symfony"
+        if ((($_ENV['APP_ENV'] ?? 'prod') !== 'dev') && count($inValues) > 0) {
             throw new Exception(
                 "Call to " . $className . "::" . $methodData->getName() .
                 " was provided the following parameters that were not taken by any argument matching this name: \"" .
