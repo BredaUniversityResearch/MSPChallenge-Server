@@ -413,9 +413,9 @@ SUBQUERY
         $layerId = $layer['layerId'] ?? 0;
         $qb = $conn->createQueryBuilder();
         $qb
-            ->select('pl, l, ge, p, pp, pol, pfl, pf')
-            ->from('App:PlanLayer', 'pl')
-            ->leftJoin('pl.layer', 'l')
+            ->select('l, pl, ge, p, pp, pol, pfl, pf')
+            ->from('App:Layer', 'l')
+            ->leftJoin('l.planLayer', 'pl')
             ->leftJoin('l.geometry', 'ge')
             ->leftJoin('l.originalLayer', 'ol')
             ->leftJoin('pl.plan', 'p')
@@ -441,14 +441,14 @@ SUBQUERY
                 ->setParameter('active', 'ACTIVE');
         }
         $q = $qb->getQuery();
-        /** @var PlanLayer[] $planLayers */
-        $planLayers = $q->getResult();
+        /** @var \App\Entity\Layer[] $layers */
+        $layers = $q->getResult();
         $geometryTypeFilter = $layer_type === -1 ? null : $layer_type;
         $result["geotype"] = $layerGeoType;
         $result["geometry"] = [];
-        foreach ($planLayers as $planLayer) {
+        foreach ($layers as $l) {
             // add the geometry linked to the layer to be pressed, these do not include the policy ones
-            foreach ($planLayer->getLayer()->getGeometry() as $geom) {
+            foreach ($l->getGeometry() as $geom) {
                 if ($geometryTypeFilter !== null && !in_array($geometryTypeFilter, $geom->getGeometryTypes())) {
                     continue;
                 }
@@ -464,6 +464,7 @@ SUBQUERY
         }
         // currently only needed and support for polygons
         if ($layerGeoType == 'polygon') {
+            $planLayers = collect($layers)->map(fn($l) => $l->getPlanLayer()->toArray())->flatten()->toArray();
             $this->onGeometryExportNameResult($layer, $planLayers, $result, $geometryTypeFilter);
         }
         return $result;
