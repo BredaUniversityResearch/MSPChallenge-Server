@@ -2,13 +2,6 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Common\EntityEnums\PolicyTypeDataType;
-use App\Domain\Services\ConnectionManager;
-use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Entity\PlanLayer;
-use App\Entity\PlanPolicy;
-use App\Entity\Policy;
-use Doctrine\ORM\AbstractQuery;
 use Exception;
 
 class MEL extends Base
@@ -344,6 +337,16 @@ class MEL extends Base
         return $data;
     }
 
+    /**
+     * @apiGroup MEL
+     * @apiDescription Gets all the geometry data of a layer
+     * @throws Exception
+     * @api {POST} /mel/GeometryExportName Geometry Export Name
+     * @apiParam {string} layer name to return the geometry data for
+     * @apiParam {int} layer_type type within the layer to return. -1 for all types.
+     * @apiParam {bool} construction_only whether or not to return data only if it's being constructed.
+     * @apiSuccess {string} JSON JSON Object
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GeometryExportName(string $name, int $layer_type = -1, bool $construction_only = false): ?array
     {
