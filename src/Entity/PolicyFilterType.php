@@ -20,12 +20,9 @@ class PolicyFilterType
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, enumType: FieldType::class)]
-    private FieldType $fieldType = FieldType::JSON;
-
     // just use https://transform.tools/json-to-json-schema to create a json schema
     #[ORM\Column(type: 'json', nullable: true)]
-    private mixed $fieldSchema = null;
+    private mixed $schema = null;
 
     #[
         ORM\OneToMany(
@@ -59,26 +56,14 @@ class PolicyFilterType
         return $this;
     }
 
-    public function getFieldType(): FieldType
+    public function getSchema(): mixed
     {
-        return $this->fieldType;
+        return $this->schema;
     }
 
-    public function setFieldType(FieldType $fieldType): static
+    public function setSchema(mixed $schema): static
     {
-        $this->fieldType = $fieldType;
-
-        return $this;
-    }
-
-    public function getFieldSchema(): mixed
-    {
-        return $this->fieldSchema;
-    }
-
-    public function setFieldSchema(mixed $fieldSchema): static
-    {
-        $this->fieldSchema = $fieldSchema;
+        $this->schema = $schema;
         return $this;
     }
 

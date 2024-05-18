@@ -20,10 +20,10 @@ class Policy
     private ?PolicyType $type = null;
 
     /**
-     * @var mixed $value this will be a json string with the value for the policy
+     * @var mixed $data this will be a json string with the data for the policy
      */
     #[ORM\Column(type: 'json', nullable: true, options: ['default' => 'NULL'])]
-    private mixed $value = null;
+    private mixed $data = null;
 
     #[ORM\OneToMany(mappedBy: 'policy', targetEntity: PlanPolicy::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $planPolicies;
@@ -31,21 +31,10 @@ class Policy
     #[ORM\OneToMany(mappedBy: 'policy', targetEntity: PolicyLayer::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $policyLayers;
 
-    #[
-        ORM\OneToMany(
-            mappedBy: 'policy',
-            targetEntity: PolicyFilterLink::class,
-            cascade: ['persist'],
-            orphanRemoval: true
-        )
-    ]
-    private Collection $policyFilterLinks;
-
     public function __construct()
     {
         $this->planPolicies = new ArrayCollection();
         $this->policyLayers = new ArrayCollection();
-        $this->policyFilterLinks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -65,14 +54,14 @@ class Policy
         return $this;
     }
 
-    public function getValue(): mixed
+    public function getData(): mixed
     {
-        return $this->value;
+        return $this->data;
     }
 
-    public function setValue(mixed $value): static
+    public function setData(mixed $data): static
     {
-        $this->value = $value;
+        $this->data = $data;
 
         return $this;
     }
@@ -127,74 +116,49 @@ class Policy
         return $this;
     }
 
-    /**
-     * @return Collection<int, PolicyFilterLink>
-     */
-    public function getPolicyFilterLinks(): Collection
-    {
-        return $this->policyFilterLinks;
-    }
-
-    public function addPolicyFilterLink(PolicyFilterLink $policyFilterLink): static
-    {
-        if (!$this->policyFilterLinks->contains($policyFilterLink)) {
-            $this->policyFilterLinks->add($policyFilterLink);
-            $policyFilterLink->setPolicy($this);
-        }
-
-        return $this;
-    }
-
-    public function removePolicyFilterLink(PolicyFilterLink $policyFilterLink): static
-    {
-        $this->policyFilterLinks->removeElement($policyFilterLink);
-        // Since orphanRemoval is set, no need to explicitly remove $policyFilterLink from the database
-        return $this;
-    }
-
     public function hasFleetFiltersMatch(int $fleet): ?bool
     {
-        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
-        /** @var PolicyFilterLink[] $fleetFilters */
-        $fleetFilters = collect($policyFilterLinks)
-            ->filter(fn($pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'fleet')->all();
-        if (empty($fleetFilters)) {
-            return null; // no fleet filters found
-        }
-        // if there is no fleet filter matching the geometry type
-        if (false === array_reduce(
-            $fleetFilters,
-            fn($carry, PolicyFilterLink $item) => $carry ||
-                (($item->getPolicyFilter()->getValue() & $fleet) == $fleet),
-            false
-        )) {
-            return false; // no there is no match
-        }
-        return true;
+//        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
+//        /** @var PolicyFilterLink[] $fleetFilters */
+//        $fleetFilters = collect($policyFilterLinks)
+//            ->filter(fn($pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'fleet')->all();
+//        if (empty($fleetFilters)) {
+//            return null; // no fleet filters found
+//        }
+//        // if there is no fleet filter matching the geometry type
+//        if (false === array_reduce(
+//            $fleetFilters,
+//            fn($carry, PolicyFilterLink $item) => $carry ||
+//                (($item->getPolicyFilter()->getValue() & $fleet) == $fleet),
+//            false
+//        )) {
+//            return false; // no there is no match
+//        }
+//        return true;
     }
 
     public function hasScheduleFiltersMatch(int $currentMonth): ?bool
     {
-        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
-        /** @var PolicyFilterLink[] $scheduleFilters */
-        $scheduleFilters = collect($policyFilterLinks)
-            ->filter(
-                fn(PolicyFilterLink $pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'schedule'
-            )
-            ->all();
-        if (empty($scheduleFilters)) {
-            return null; // no filters schedule found
-        }
-        // is there any seasonal filter matching the current game month?
-        if (false === array_reduce(
-            $scheduleFilters,
-            fn($carry, PolicyFilterLink $item) => $carry ||
-                // convert "number of months" to a month number 1-12
-                in_array(($currentMonth % 12) + 1, $item->getPolicyFilter()->getValue()),
-            false
-        )) {
-            return false; // meaning there should not be a seasonal closure for this month, so no pressures
-        }
-        return true;
+//        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
+//        /** @var PolicyFilterLink[] $scheduleFilters */
+//        $scheduleFilters = collect($policyFilterLinks)
+//            ->filter(
+//                fn(PolicyFilterLink $pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'schedule'
+//            )
+//            ->all();
+//        if (empty($scheduleFilters)) {
+//            return null; // no filters schedule found
+//        }
+//        // is there any seasonal filter matching the current game month?
+//        if (false === array_reduce(
+//            $scheduleFilters,
+//            fn($carry, PolicyFilterLink $item) => $carry ||
+//                // convert "number of months" to a month number 1-12
+//                in_array(($currentMonth % 12) + 1, $item->getPolicyFilter()->getValue()),
+//            false
+//        )) {
+//            return false; // meaning there should not be a seasonal closure for this month, so no pressures
+//        }
+//        return true;
     }
 }

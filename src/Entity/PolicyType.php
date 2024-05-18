@@ -23,15 +23,8 @@ class PolicyType
     #[ORM\Column(length: 255)]
     private ?string $displayName = null;
 
-    #[ORM\Column(length: 255, enumType: PolicyTypeDataType::class)]
-    private PolicyTypeDataType $dataType = PolicyTypeDataType::Boolean;
-
-    /**
-     * @var mixed $dataConfig this will be a json with the configuration for the data type,
-     *   or null if not needed
-     */
     #[ORM\Column(type: 'json', nullable: true)]
-    private mixed $dataConfig = null;
+    private mixed $schema = null;
 
     #[
         ORM\OneToMany(
@@ -77,27 +70,14 @@ class PolicyType
         return $this;
     }
 
-    public function getDataType(): PolicyTypeDataType
+    public function getSchema(): mixed
     {
-        return $this->dataType;
+        return $this->schema;
     }
 
-    public function setDataType(PolicyTypeDataType $dataType): static
+    public function setSchema(mixed $schema): static
     {
-        $this->dataType = $dataType;
-
-        return $this;
-    }
-
-    public function getDataConfig(): mixed
-    {
-        return $this->dataConfig;
-    }
-
-    public function setDataConfig(mixed $dataConfig): static
-    {
-        $this->dataConfig = $dataConfig;
-
+        $this->schema = $schema;
         return $this;
     }
 
