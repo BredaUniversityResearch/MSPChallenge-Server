@@ -319,7 +319,7 @@ class Router
      * @return array
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private static function formatResponse(
+    public static function formatResponse(
         bool $success,
         ?string $message,
         $payload = null,

@@ -67,6 +67,27 @@ class Region
         return [$this->topRightX, $this->topRightY];
     }
 
+    public function createClampedBy(Region $other): ?Region
+    {
+        list($inputBottomLeftX, $inputBottomLeftY, $inputTopRightX, $inputTopRightY) = array_values($other->toArray());
+        list($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY) =
+            array_values($this->toArray());
+
+        // Check for no overlap
+        if ($outputTopRightX <= $inputBottomLeftX || $outputBottomLeftX >= $inputTopRightX ||
+            $outputTopRightY <= $inputBottomLeftY || $outputBottomLeftY >= $inputTopRightY) {
+            return null; // No overlap, return null
+        }
+
+        // clamp by input coordinates.
+        $outputBottomLeftX = max($outputBottomLeftX, $inputBottomLeftX);
+        $outputBottomLeftY = max($outputBottomLeftY, $inputBottomLeftY);
+        $outputTopRightX = min($outputTopRightX, $inputTopRightX);
+        $outputTopRightY = min($outputTopRightY, $inputTopRightY);
+
+        return new Region($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY);
+    }
+
     public function toArray(): array
     {
         return [

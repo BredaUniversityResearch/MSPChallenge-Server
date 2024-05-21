@@ -23,6 +23,8 @@ alias dcu="ede && $PRE_DCU && ${DCU_BASE} up -d --remove-orphans"
 alias dcux="ede && $PRE_DCU && XDEBUG_MODE=debug ${DCU_BASE} up -d --remove-orphans"
 # dcu + production (p)}
 alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
+# dcu + hybrid (h)}
+alias dcus='ede && '"$PRE_DCU && APP_ENV=prod ${DCU_BASE} -f docker-compose.yml -f docker-compose.staging.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
 [[ -z "${COMPOSE_PROJECT_NAME}" ]] && COMPOSE_PROJECT_NAME="mspchallenge"
 [[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER="${COMPOSE_PROJECT_NAME}-php-1"

@@ -34,6 +34,7 @@ RUN apk add --no-cache \
 # php extensions installer: https://github.com/mlocati/docker-php-extension-installer
 COPY --from=php_extension_installer_upstream --link /usr/bin/install-php-extensions /usr/local/bin/
 
+# gd is required by apc.php
 RUN set -eux; \
     install-php-extensions \
 		apcu \
@@ -42,6 +43,7 @@ RUN set -eux; \
     	zip \
         pcntl \
         imagick \
+        gd \
     ;
 
 # if you want to debug on prod, enable below lines:
@@ -72,6 +74,7 @@ COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor.d/
 COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
 COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
+COPY --link docker/supervisor/supervisor.d/messenger-worker.ini /etc/supervisor.d/messenger-worker.ini
 
 COPY --link docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
@@ -166,3 +169,6 @@ FROM mariadb:10.6.16 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
 FROM adminer AS adminer_base
 FROM mitmproxy/mitmproxy:9.0.1 as mitmproxy_base
+FROM redis:7.2.4-alpine AS redis_base
+FROM erikdubbelboer/phpredisadmin as phpredisadmin_base
+

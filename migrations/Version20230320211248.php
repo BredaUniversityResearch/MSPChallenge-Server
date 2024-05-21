@@ -30,7 +30,7 @@ final class Version20230320211248 extends MSPMigration
 
     protected function onDown(Schema $schema): void
     {
-        $this->addSql("ALTER TABLE `api_batch` DROP INDEX `api_batch_guid`");
-        $this->addSql("ALTER TABLE `api_batch` DROP `api_batch_guid`");
+        $this->addSql("ALTER TABLE `api_batch` DROP INDEX IF EXISTS `api_batch_guid`");
+        $this->addSql("ALTER TABLE `api_batch` DROP IF EXISTS `api_batch_guid`");
     }
 }

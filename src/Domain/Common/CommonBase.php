@@ -8,14 +8,20 @@ use App\Domain\API\v1\Log;
 use App\Domain\API\v1\Security;
 use App\Domain\Services\ConnectionManager;
 use Drift\DBAL\Connection;
+use Drift\DBAL\Result;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\Loop;
 use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
 use function App\await;
 use function App\resolveOnFutureTick;
 
 abstract class CommonBase
 {
+    private ?string $watchdog_address = null;
+    const DEFAULT_WATCHDOG_PORT = 45000;
+
     private ?Connection $asyncDatabase = null;
     private ?int $gameSessionId = null;
     private ?string $token = null;
@@ -117,5 +123,87 @@ abstract class CommonBase
             $this->asyncDataTransferTo($this->logger);
         }
         return $this->logger;
+    }
+
+    /**
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetWatchdogAddress(): string
+    {
+        $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
+        if (null === $this->watchdog_address) {
+            return '';
+        }
+        /** @noinspection HttpUrlsUsage */
+        $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
+        return $this->watchdog_address.':'.($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT);
+    }
+
+    private function getWatchdogAddressFromDb(): ?string
+    {
+        $result = $this->getDatabase()->query(
+            "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
+        );
+        if (count($result) == 0) {
+            return null;
+        }
+        return $result[0]['game_session_watchdog_address'];
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function getWatchdogSessionUniqueToken(): PromiseInterface
+    {
+        return $this->getAsyncDatabase()->query(
+            $this->getAsyncDatabase()->createQueryBuilder()
+                ->select('game_session_watchdog_token')
+                ->from('game_session')
+                ->setMaxResults(1)
+        )
+        ->then(function (Result $result) {
+            $row = $result->fetchFirstRow();
+            return $row['game_session_watchdog_token'] ?? '0';
+        });
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function logWatchdogResponse(string $requestName, ResponseInterface $response): PromiseInterface
+    {
+        $log = new Log();
+        $this->asyncDataTransferTo($log);
+        $log->setAsync(true); // force async in this context
+
+        $responseContent = $response->getBody()->getContents();
+        $decodedResponse = json_decode($responseContent, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $funcArgs = [
+                "Watchdog",
+                Log::ERROR,
+                "Received invalid response from watchdog. Response: \"" . $responseContent . "\"",
+                "..."
+            ];
+            return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
+                return $funcArgs;
+            });
+        }
+
+        if ($decodedResponse["success"] != 1) {
+            $funcArgs = [
+                "Watchdog",
+                Log::ERROR,
+                "Watchdog responded with failure on requesting $requestName. Response: \"" .
+                $decodedResponse["message"] . "\"",
+                "..."
+            ];
+            return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
+                return $funcArgs;
+            });
+        }
+
+        return resolveOnFutureTick(new Deferred(), $decodedResponse)->promise();
     }
 }

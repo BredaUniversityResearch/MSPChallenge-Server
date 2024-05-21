@@ -17,7 +17,7 @@ class MEL extends Base
         "GeometryExportName",
         "InitialFishing"
     );
-        
+
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
@@ -29,8 +29,8 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Config(): ?array
     {
-        $game = (new Game())->GetGameConfigValues();
-        return $game['MEL'] ?? null;
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        return $gameConfigValues['MEL'] ?? null;
     }
 
     public function getFishingPolicySettings(): array
@@ -87,7 +87,7 @@ class MEL extends Base
                     );
                     if (!empty($layerid)) {
                         $layerid = $layerid[0]['layer_id'];
-                            
+
                         $mellayer = $db->query(
                             "
                             SELECT mel_layer_id FROM mel_layer WHERE mel_layer_pressurelayer=? AND mel_layer_layer_id=?
@@ -122,6 +122,14 @@ class MEL extends Base
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name=?",
             array($layerName)
         );
+
+        $game = new Game();
+        $globalConfig = $game->GetGameConfigValues();
+        $layerMeta = current(array_filter($globalConfig['meta'], function ($meta) use ($layerName) {
+            return strcasecmp($meta['layer_name'], $layerName) === 0;
+        }));
+        // take the config's layer name since the case of the characters can be different from MEL's layer name.
+        $layerName = $layerMeta['layer_name'] ?? $layerName;
         $rasterProperties = array(
             "url" => "$layerName.tif",
             "boundingbox" => array(
@@ -132,8 +140,6 @@ class MEL extends Base
         if (empty($data)) {
             //create new layer
             Log::LogDebug("Note: found reference to MEL layer {$layerName}. Please check its existence under 'meta'.");
-            $game = new Game();
-            $globalConfig = $game->GetGameConfigValues();
             $rasterFormat = json_encode($rasterProperties);
             $layerId = $this->getDatabase()->query(
                 "
@@ -196,7 +202,7 @@ class MEL extends Base
 
                 if (isset($fishingFleet["initialFishingDistribution"])) {
                     $fishingValues = $fishingFleet["initialFishingDistribution"];
-                    
+
                     //We need to average the weights over the available countries
                     $sum = 0.0;
                     foreach ($fishingValues as $val) {
@@ -205,7 +211,7 @@ class MEL extends Base
                             $weightsByCountry[$val["country_id"]] = $val["weight"];
                         }
                     }
-                    
+
                     $weightMultiplier = ($sum > 0)? 1.0 / $sum : 1.0 / $numCountries;
                     foreach ($weightsByCountry as &$countryWeight) {
                         $countryWeight *= $weightMultiplier;
@@ -221,7 +227,7 @@ class MEL extends Base
 
             foreach ($countries as $country) {
                 $countryId = $country["country_id"];
-                $weight = $weightsByFleet[$name][$countryId] ?? 0.1;
+                $weight = $weightsByFleet[$name][$countryId] ?? 1;
                 $this->getDatabase()->query(
                     "
                     INSERT INTO fishing (
@@ -256,7 +262,7 @@ class MEL extends Base
             "SELECT layer_name, layer_melupdate_construction FROM layer WHERE layer_melupdate=?",
             array(1)
         );
-            
+
         $layers = [];
         foreach ($r as $l) {
             // if($l['layer_melupdate_construction'] == 1){
@@ -320,7 +326,7 @@ class MEL extends Base
 									GROUP BY fishing_type",
             array($game_month)
         );
-                
+
         //Make sure fishing scalars never exceed 1.0
         foreach ($data as &$fishingValues) {
             if (floatval($fishingValues['scalar']) > 1.0) {
@@ -350,7 +356,7 @@ class MEL extends Base
         );
 
         $result = array("geotype" => "");
-            
+
         if (empty($id)) {
             return null;
         }

@@ -2,8 +2,25 @@ version: "3.7"
 
 # Development environment override
 services:
+  phpredisadmin:
+    image: 'mspserver-phpredisadmin-dev'
+    build:
+      context: .
+      target: phpredisadmin_base
+    environment:
+      - ADMIN_USER=admin
+      - ADMIN_PASS=admin
+      - REDIS_1_HOST=redis
+      - REDIS_1_PORT=6379
+    links:
+      - redis
+    ports:
+      - "8001:80"
+    networks:
+      - redis
+
   adminer:
-    image: mspserver-adminer
+    image: 'mspserver-adminer-dev'
     build:
       context: .
       target: adminer_base
@@ -22,7 +39,7 @@ services:
       - ./docker/adminer/index.php:/var/www/html/index.php:ro
 
   mitmproxy:
-    image: mspserver-mitmproxy
+    image: 'mspserver-mitmproxy-dev'
     build:
       context: .
       target: mitmproxy_base
@@ -37,6 +54,7 @@ services:
       - caddy
 
   php:
+    image: 'mspserver-php-dev'
     build:
       context: .
       target: php_dev
@@ -65,6 +83,7 @@ services:
 
   caddy:
     command: [ "caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile", "--watch" ]
+    image: 'mspserver-caddy-dev'
     build:
       context: .
       target: caddy_base

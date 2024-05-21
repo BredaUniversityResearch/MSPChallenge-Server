@@ -14,10 +14,15 @@
 ![Ss]erverManager/[Cc]onfigfiles/[Ee]astern_Med_Sea_5km_basic/Eastern_Med_Sea_5km_basic_1.json**
 ![Ss]erverManager/[Cc]onfigfiles/[Ee]astern_Med_Sea_10km_basic**
 ![Ss]erverManager/[Cc]onfigfiles/[Ee]astern_Med_Sea_10km_basic/Eastern_Med_Sea_10km_basic_1.json**
+![Ss]erverManager/[Cc]onfigfiles/Western_Baltic_Sea_basic**
+![Ss]erverManager/[Cc]onfigfiles/Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json**
 [Ff]iles/**
 [Ss]cripts/**
 [Ss]imulations/**/*_[Ll]og.*
 [Ss]imulations/v1/win-x64/mel-ewe-dump/**
+[Ss]imulations/**/MSP games.xml
+[Ss]imulations/**/MSP game load.xml
+[Ss]imulations/**/MSP game save.xml
 
 #Stuff for Simulations
 Simulations/MEL/EwE/**
@@ -113,3 +118,7 @@ phpstan.neon
 /config/jwt/*.pem
 /config-symfony5.4/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+
+# to solve issues with GitHub: https://chipperci.com/docs/issues/composer-github-authentication/
+# which creates this file, which should be ignored
+auth.json

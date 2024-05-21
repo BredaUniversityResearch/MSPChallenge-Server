@@ -6,6 +6,10 @@ source "${SCRIPT_DIR}/tools/resolve-app-env.sh"
 bash set_symfony_version.sh "${@:1}"
 set -e
 
+if [[ -z $PHP_BINARY ]]; then
+   PHP_BINARY=$(which php)
+fi
+
 if [[ -z $COMPOSER_BINARY ]]; then
    COMPOSER_BINARY=$(which composer)
 fi
@@ -30,13 +34,13 @@ OPENSSL_CONF_DEFAULT="${EXEPATH}\mingw64\ssl\openssl.cnf" # if the git bash is s
 if [ ! -f "${OPENSSL_CONF_DEFAULT}" ]; then
     OPENSSL_CONF_DEFAULT="${EXEPATH}\..\mingw64\ssl\openssl.cnf" # if the git bash is started from bin/bash.exe (Windows Terminal)
 fi
-if [ -z "${OPENSSL_CONF}" ] && [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
+if [ -n "${EXEPATH}" ] && [ -f "${OPENSSL_CONF_DEFAULT}" ]; then
     OPENSSL_CONF="${OPENSSL_CONF_DEFAULT}"
 fi
 if [ -n "${OPENSSL_CONF}" ]; then
     ENV_VARS="OPENSSL_CONF=\"${OPENSSL_CONF}\""
 fi
-eval "${ENV_VARS} php bin/console lexik:jwt:generate-keypair --skip-if-exists"
+eval "${ENV_VARS} ${PHP_BINARY} bin/console lexik:jwt:generate-keypair --skip-if-exists"
 
 if [ $? -ne 0 ]; then
   echo "Could not install JWT encoding key pair."

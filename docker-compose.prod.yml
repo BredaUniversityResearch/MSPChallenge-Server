@@ -3,6 +3,7 @@ version: "3.7"
 # Production environment override
 services:
   php:
+    image: 'mspserver-php'
     build:
       context: .
       target: php_prod
@@ -11,9 +12,16 @@ services:
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
 
   caddy:
+    image: 'mspserver-caddy'
     build:
       context: .
       target: caddy_prod
     environment:
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+    ports:
+      # HTTP
+      - target: 80
+        published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
+        protocol: tcp
+

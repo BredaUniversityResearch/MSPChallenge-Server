@@ -33,6 +33,6 @@ SQL);
     public function onDown(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP TABLE api_refresh_token');
+        $this->addSql('DROP TABLE IF EXISTS api_refresh_token');
     }
 }

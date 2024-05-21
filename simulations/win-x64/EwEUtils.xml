@@ -1168,7 +1168,7 @@ EwEUtils
  <summary>To document</summary>
 </member>
 <member name="F:EwEUtils.Core.eVarNameFlags.OmnivoryIndex">
- <summary>To document</summary>
+ <summary>Per-group omnivory index</summary>
 </member>
 <member name="F:EwEUtils.Core.eVarNameFlags.Respiration">
  <summary>To document</summary>
@@ -1243,6 +1243,9 @@ EwEUtils
 <member name="F:EwEUtils.Core.eVarNameFlags.PacketsMultiplier">
  <summary>A multiplier to change the number of packets for the IBM model</summary>
  <remarks>..but what about Dell? Acer? Toshiba? This is simply not fair!</remarks>
+</member>
+<member name="F:EwEUtils.Core.eVarNameFlags.VulnerabilityCap">
+ <summary>Vulnerability cap in the Fit to Time series routine</summary>
 </member>
 <member name="F:EwEUtils.Core.eVarNameFlags.InRow">
  <summary>Number of rows in the Ecospace basemap</summary>
@@ -9919,7 +9922,7 @@ types.</remarks>
  <returns>A string.</returns>
  -----------------------------------------------------------------------
 </member>
-<member name="M:EwEUtils.Utilities.cStringUtils.ArrayToString(System.Array,System.Int32,System.Int32,System.Single[0:,0:],System.Boolean,System.Object,System.Object)">
+<member name="M:EwEUtils.Utilities.cStringUtils.ArrayToString(System.Array,System.Int32,System.Int32,System.Single[0:,0:],System.Boolean,System.Object,System.Object,System.IO.Compression.CompressionLevel)">
  -----------------------------------------------------------------------
  <summary>
  Convert a 2-dimensional (map) array to a string for database storage.
@@ -9962,7 +9965,7 @@ types.</remarks>
  </summary>
  -------------------------------------------------------------------
 </member>
-<member name="M:EwEUtils.Utilities.cStringUtils.ArrayToString(System.Array,System.Int32,EwEUtils.Utilities.cStringUtils.eFilterIndexTypes,System.Int32,System.Int32,System.Single[0:,0:],System.Boolean,System.Object)">
+<member name="M:EwEUtils.Utilities.cStringUtils.ArrayToString(System.Array,System.Int32,EwEUtils.Utilities.cStringUtils.eFilterIndexTypes,System.Int32,System.Int32,System.Single[0:,0:],System.Boolean,System.Object,System.IO.Compression.CompressionLevel)">
  -----------------------------------------------------------------------
  <summary>
  Convert a 3-dimensional (map) array to a string for database storage.
@@ -10149,6 +10152,28 @@ types.</remarks>
  </summary>
  <param name="strsIn">The <see cref="T:System.Security.SecureString">secure string</see> to convert.</param>
  <returns>A <see cref="T:System.String">regular string</see>.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEUtils.Utilities.cStringUtils.Compress(System.String,System.IO.Compression.CompressionLevel,System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Compress and base64 encode a provided string.
+ </summary>
+ <param name="strIn">The string to compress</param>
+ <param name="level">The <see cref="T:System.IO.Compression.CompressionLevel">compression level</see> to use.</param>
+ <param name="method">.NET standard is offering other algorithms</param>
+ <returns>The compressed and base64-encoded string.</returns>
+ <seealso cref="M:EwEUtils.Utilities.cStringUtils.Decompress(System.String)"/>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEUtils.Utilities.cStringUtils.Decompress(System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Base64 decode and decompress a provided string.
+ </summary>
+ <param name="strIn">The string to decode and decompress.</param>
+ <returns></returns>
+ <seealso cref="M:EwEUtils.Utilities.cStringUtils.Compress(System.String,System.IO.Compression.CompressionLevel,System.String)"/>
  -------------------------------------------------------------------
 </member>
 <member name="T:EwEUtils.Utilities.cStringUtils.cAlphanumComparer">

@@ -28,6 +28,6 @@ final class Version20230209151519 extends MSPMigration
 
     protected function onDown(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE `api_batch` DROP `api_batch_lastupdate`');
+        $this->addSql('ALTER TABLE `api_batch` DROP IF EXISTS `api_batch_lastupdate`');
     }
 }

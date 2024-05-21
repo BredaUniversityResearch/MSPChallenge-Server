@@ -2,6 +2,7 @@
 
 namespace App\Domain\POV;
 
+use App\Domain\API\v1\Game;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use Doctrine\DBAL\Connection;
@@ -10,15 +11,58 @@ use Psr\Log\LoggerInterface;
 
 class ConfigCreator
 {
+    const DEFAULT_IMAGE_FORMAT = 'PNG';
     const DEFAULT_CONFIG_FILENAME = 'pov-config.json';
 
     const SUB_DIR = 'POV';
+
+    const INTERPOLATION_TYPE_LIN = 'Lin';
+    const INTERPOLATION_TYPE_LIN_GROUPED = 'LinGrouped';
+
+    private string $outputImageFormat = self::DEFAULT_IMAGE_FORMAT;
+
+    /** @var LayerTags[] $excludedLayersByTags */
+    private array $excludedLayersByTags = [];
+
+    private ?array $gameConfigDataModel = null;
 
     public function __construct(
         private readonly string $projectDir,
         private readonly int $sessionId,
         private readonly LoggerInterface $logger
     ) {
+    }
+
+    public function getOutputImageFormat(): string
+    {
+        return $this->outputImageFormat;
+    }
+
+    public function setOutputImageFormat(string $outputImageFormat): self
+    {
+        $formats = \Imagick::queryFormats('PNG*'); // png formats supported
+        if (!in_array(strtoupper($outputImageFormat), $formats)) {
+            throw new Exception('Invalid image format: ' . $outputImageFormat);
+        }
+        $this->outputImageFormat = $outputImageFormat;
+        return $this;
+    }
+
+    /**
+     * @return LayerTags[]
+     */
+    public function getExcludedLayersByTags(): array
+    {
+        return $this->excludedLayersByTags;
+    }
+
+    /**
+     * @param LayerTags[] $excludedLayersByTags
+     */
+    public function setExcludedLayersByTags(array $excludedLayersByTags): self
+    {
+        $this->excludedLayersByTags = $excludedLayersByTags;
+        return $this;
     }
 
     /**
@@ -105,17 +149,170 @@ class ConfigCreator
                 '. Error: ' . $e->getMessage());
         }
         $this->log('json decoded, extracting region from raster layers');
+        $json['datamodel']['raster_layers'] ??= [];
+        $json['datamodel']['vector_layers'] ??= [];
+        $this->excludeLayersByTags($json['datamodel']['raster_layers'], $json['datamodel']['vector_layers']);
+        $this->normaliseAndExtendRasterMappings($json['datamodel']['raster_layers']);
+        $this->fixMissingRasterLayerScales($json['datamodel']['raster_layers']);
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
-        if (false !== $bathymetryLayer = current(array_filter(
-            $json['datamodel']['raster_layers'],
-            fn($x) => $x['name'] === 'Bathymetry'
-        ))) {
-            $json['datamodel']['bathymetry'] = $bathymetryLayer;
-        }
         $this->log('region extracted, creating json config file');
         $this->createJsonConfigFile($json, $dir, $configFilename);
         $this->log('json config file created: ' . realpath($dir . DIRECTORY_SEPARATOR . $configFilename));
         return $dir;
+    }
+
+    /**
+     * The game config data model (from the config file) has a ["SEL"]["heatmap_settings"]["heatmap_range"],
+     *   that is available for each SEL layer. E.g. for shipping intensity layers.
+     * This function will try to retrieve that heatmap_range array for the specified layer
+     *   or null if it is not available, e.g. if it is not a SEL layer
+     * @throws Exception
+     */
+    private function getSELHeatmapRange(string $layerName): ?array
+    {
+        $gameConfigDataModel = $this->getGameConfigDataModel();
+        $heatmapSettings = array_filter(
+            $gameConfigDataModel['SEL']['heatmap_settings'],
+            fn($x) => $x['layer_name'] === $layerName
+        );
+        if (empty($heatmapSettings)) {
+            return null;
+        }
+        $heatMapSetting = current($heatmapSettings);
+        if (!array_key_exists('heatmap_range', $heatMapSetting)) {
+            return null;
+        }
+        if (empty($heatMapSetting['heatmap_range'])) {
+            return null;
+        }
+        return $heatMapSetting['heatmap_range'];
+    }
+
+    /**
+     * Given a layer's SEL heatmap range from the game config file, it will try to create a scale from it
+     * The scale can be of interpolation type Lin or LinGrouped
+     *
+     * @throws Exception
+     */
+    private function getScaleFromSELHeatMapRange(?array $heatmapRange): ?array
+    {
+        if (null === $heatmapRange) {
+            return null;
+        }
+        if (empty($heatmapRange) || count($heatmapRange) < 2) {
+            return null;
+        }
+        $scale = [
+            'min_value' => current($heatmapRange)['input'],
+            'max_value' => end($heatmapRange)['input'],
+            'interpolation' => self::INTERPOLATION_TYPE_LIN
+        ];
+
+        if (count($heatmapRange) < 3) {
+            return $scale;
+        }
+
+        $scale['interpolation'] = self::INTERPOLATION_TYPE_LIN_GROUPED;
+        $scale['groups'] = array_map(fn($x) => [
+            'normalised_input_value' => $x['output'],
+            'min_output_value' => $x['input']
+        ], $heatmapRange);
+
+        return $scale;
+    }
+
+    /**
+     * Given layer mapping and type names data from the game config data model, it will try to create a scale
+     *
+     * e.g. for "NO Hywind Metcentre"'s Bathymetry layer has mapping:
+     *  [
+     *      {"max": 0,"type": 0,"min": 0},
+     *      {"max": 37,"type": 1,"min": 1},
+     *      {"max": 73,"type": 2,"min": 38},
+     *      {"max": 110,"type": 3,"min": 74},
+     *      {"max": 146,"type": 4,"min": 111},
+     *      {"max": 183,"type": 5,"min": 147},
+     *      {"max": 219,"type": 6,"min": 184},
+     *      {"max": 255,"type": 7,"min": 220}
+     *  ]
+     * and type names:
+     *   ["0 - 20 m","20 - 40 m","40 - 60 m","60 -100 m","100 - 200 m","200 - 500 m ","500 - 1000 m ","> 1000 m"]
+     *
+     * it also supports the special case "<" for the first type name, e.g. for "NO Hywind Metcentre"'s Wind Speed layer:
+     *   ["< 5.0 m\\/s","5.0 - 6.0 m\\/s","6.0 - 7.0 m\\/s","7.0 - 8.0 m\\/s","8.0 - 9.0 m\\/s","> 9.0 m\\/s"]
+     * @param string[] $layerTypeNames
+     * @throws Exception
+     */
+    private function getScaleFromTypeMapping(array $layerMapping, array $layerTypeNames): ?array
+    {
+        // using heatmap format as intermediate format
+        $heatmapRange= [];
+        foreach ($layerMapping as $mapping) {
+            $typeIndex = $mapping['type'];
+            if (!array_key_exists($typeIndex, $layerTypeNames)) {
+                return null;
+            }
+            $layerTypeName = $layerTypeNames[$typeIndex];
+            if (false === preg_match_all('/(\d+(?:\.\d+)?)|<\s/', $layerTypeName, $matches)) {
+                return null;
+            }
+            if (!isset($matches[0][0])) {
+                return null;
+            }
+            if ($matches[0][0] === '<') {
+                $matches[0][0] = 0;
+            }
+            $heatmapRangeEl['input'] = (float)$matches[0][0];
+            $heatmapRangeEl['output'] = $mapping['min'] / 255;
+            $heatmapRange[] = $heatmapRangeEl;
+        }
+
+        $num = count($heatmapRange);
+        if ($num < 3) {
+            return $this->getScaleFromSELHeatMapRange($heatmapRange);
+        }
+
+        // add additional element to fill-up to 255, use the same range as the one of the last 2 elements
+        $lastRange = $heatmapRange[$num - 1]['input'] - $heatmapRange[$num - 2]['input'];
+        $heatmapRangeEl['input'] = $heatmapRange[$num - 1]['input'] + $lastRange;
+        $heatmapRangeEl['output'] = 1;
+        $heatmapRange[] = $heatmapRangeEl;
+
+        return $this->getScaleFromSELHeatMapRange($heatmapRange);
+    }
+
+    /**
+     * Adds a scale to the raster layers that are missing it.
+     * It can add missing scales to raster layers of type ValueMap only if:
+     * - the layer has a heatmap range data in the game config data model.
+     *   The scale will be of interpolation type LinGrouped
+     * - the layer type names can be parsed to extract min and max values. The scale will be of interpolation type Lin
+     * @throws Exception
+     */
+    private function fixMissingRasterLayerScales(array &$rasterLayers): void
+    {
+        $targetRasterLayers = array_filter(
+            $rasterLayers,
+            fn($x) => !array_key_exists('scale', $x) && in_array('ValueMap', $x['tags'])
+        );
+        foreach ($targetRasterLayers as $key => &$layer) {
+            // create a scale based on the SELs heatmap range data, if available
+            if (null !== $scale = $this->getScaleFromSELHeatMapRange(
+                $this->getSELHeatmapRange($layer['name'])
+            )) {
+                $rasterLayers[$key]['scale'] = $scale;
+                continue;
+            }
+            // create a scale based on the layer type names, if available
+            if (null === $scale = $this->getScaleFromTypeMapping(
+                $layer['mapping'],
+                array_column($layer['types'], 'name')
+            )) {
+                continue;
+            }
+            $rasterLayers[$key]['scale'] = $scale;
+        }
+        unset($layer);
     }
 
     /**
@@ -138,21 +335,25 @@ class ConfigCreator
 
     /**
      * @throws Exception
+     */
+    private function getGameConfigDataModel(): array
+    {
+        if ($this->gameConfigDataModel !== null) {
+            return $this->gameConfigDataModel;
+        }
+        $game = new Game();
+        $game->setGameSessionId($this->sessionId);
+        $this->gameConfigDataModel = $game->GetGameConfigValues();
+        return $this->gameConfigDataModel;
+    }
+
+    /**
+     * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
     private function queryJson(Region $region): string
     {
-        try {
-            $gameConfigRegion = ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->executeQuery(
-                'select c.region from game_list l inner join game_config_version c ' .
-                'on l.game_config_version_id=c.id and l.id=:game_session_id',
-                ['game_session_id' => $this->sessionId]
-            )->fetchAssociative();
-        } catch (Exception $e) {
-            throw new Exception('Could not retrieve the game config region for the given session id: ' .
-                $this->sessionId);
-        }
-
+        $dataModel = $this->getGameConfigDataModel();
         try {
             $result = $this->getConnection()->executeQuery(
                 <<<'SQL'
@@ -178,7 +379,7 @@ WITH
       ROW_NUMBER() OVER (PARTITION BY geometry_persistent ORDER BY geometry_id DESC) AS rn
     FROM
       geometry
-    WHERE geometry_deleted = 0 AND geometry_active = 1 AND geometry_subtractive = 0
+    WHERE geometry_deleted = 0 AND geometry_active = 1 AND geometry_subtractive IS NULL
   ),
   # filter latest geometries, so only with row number 1
   LatestGeometryStep2 AS (
@@ -235,7 +436,8 @@ WITH
   ),
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
-      SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype
+      SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype,
+             lorg.layer_tags, lorg.layer_category, lorg.layer_subcategory
       FROM layer l
       LEFT JOIN plan_layer pl ON l.layer_id=pl.plan_layer_layer_id
       LEFT JOIN plan p ON p.plan_id=pl.plan_layer_plan_id
@@ -261,7 +463,6 @@ WITH
         l.*,
         k.kpi_value,
         JSON_ARRAYAGG(JSON_OBJECT(
-          'channel', 'r',
           'max', t.value,
           'type', t.id-1
         )) AS layer_type_mapping,
@@ -301,7 +502,7 @@ WITH
       # join as json table to control which fields we want to extract and alias afterwards
       #   see https://community.mspchallenge.info/wiki/Configuration_data_schema_documentation
       INNER JOIN JSON_TABLE(
-        JSON_EXTRACT(l.layer_type, '$.*'),
+        JSON_EXTRACT(l.layer_type, '$[*]'),
           '$[*]' COLUMNS (
             id for ordinality,
             display_name VARCHAR(255) PATH '$.displayName',
@@ -332,9 +533,7 @@ WITH
             media VARCHAR(255) PATH '$.media'     
         )
       ) AS t
-      LEFT JOIN LatestEcologyKpiFinal k ON (
-        l.layer_short != '' AND CONCAT('mel_',LOWER(REPLACE(k.kpi_name,' ','_'))) = l.layer_name
-      )
+      LEFT JOIN LatestEcologyKpiFinal k ON (CONCAT('mel_',LOWER(REPLACE(k.kpi_name,' ','_'))) = l.layer_name)
       GROUP BY l.layer_id
   ),
   LayerFinal AS (
@@ -343,7 +542,7 @@ WITH
         JSON_ARRAYAGG(
           JSON_OBJECT(
             'points', JSON_EXTRACT(g.geometry_geometry, '$'),
-            'types', JSON_ARRAY(JSON_EXTRACT(g.geometry_type, '$')),
+            'types', JSON_EXTRACT(CONCAT('[',g.geometry_type,']'), '$'),
             'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
             # just add some aliases to the metadata
             'metadata', JSON_EXTRACT(g.geometry_data, '$')
@@ -367,8 +566,7 @@ SELECT
         JSON_OBJECT(
           'coordinate0', JSON_ARRAY(CAST(:bottomLeftX AS DOUBLE), CAST(:bottomLeftY AS DOUBLE)),
           'coordinate1', JSON_ARRAY(CAST(:topRightX AS DOUBLE), CAST(:topRightY AS DOUBLE)),
-          # @todo (MH): add projection
-          'projection', '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs'
+          'projection', :projection
         ),
         JSON_OBJECTAGG(subquery.prop, JSON_EXTRACT(subquery.value, '$.*'))
       )      
@@ -384,12 +582,14 @@ FROM (
         JSON_MERGE_PRESERVE(
           JSON_OBJECT(
             #'db-layer-id', l.layer_id,
-            'name', REPLACE(l.layer_short,'mel_',''),
+            'name', l.layer_name,
+            'short', l.layer_short,
             'coordinate0', JSON_EXTRACT(l.layer_raster, '$.boundingbox[0]'),
             'coordinate1', JSON_EXTRACT(l.layer_raster, '$.boundingbox[1]'),
             'mapping', l.layer_type_mapping,
             'types', l.layer_type_types,
-            'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url')))
+            'data', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(l.layer_raster, '$.url'))),
+            'tags', JSON_EXTRACT(l.layer_tags, '$')
           ),
           IF(
             l.kpi_value IS NOT NULL,
@@ -398,7 +598,7 @@ FROM (
                 'min_value', 0,
                 # convert from t/km2 to kg/km2, times 2 since 0.5 is the reference value
                 'max_value', l.kpi_value * 1000 * 2,
-                'interpolation', 'lin'
+                'interpolation', :interpolationTypeLin
               )
             ),
             JSON_OBJECT()
@@ -411,7 +611,8 @@ FROM (
           #   FROM LatestGeometryInRegion WHERE geometry_Layer_id=l.layer_id
           # ),
           'name', l.layer_name,
-          'tags', JSON_ARRAY(l.layer_geotype),
+          'short', l.layer_short,
+          'tags', JSON_EXTRACT(l.layer_tags, '$'),
           'types', l.layer_type_types,
           'data', l.layer_data
         )
@@ -425,7 +626,11 @@ FROM (
 SQL,
                 array_merge(
                     $region->toArray(),
-                    $gameConfigRegion
+                    [
+                        'region' => $dataModel['region'],
+                        'projection' => $dataModel['projection'],
+                        'interpolationTypeLin' => self::INTERPOLATION_TYPE_LIN
+                    ]
                 )
             );
             $jsonString = $result->fetchOne();
@@ -440,7 +645,44 @@ SQL,
         return $jsonString;
     }
 
+    private function excludeLayersByTags(array &$rasterLayers, array &$vectorLayers): void
+    {
+        $excludedLayersByTags = $this->getExcludedLayersByTags();
+        if (count($excludedLayersByTags) == 0) {
+            return;
+        }
+
+        foreach ($this->excludedLayersByTags as $exclTags) {
+            foreach ($rasterLayers as $key => $layer) {
+                if ($exclTags->matches(new LayerTags($layer['tags']))) {
+                    $this->log('Excluding raster layer: ' . $layer['name']);
+                    unset($rasterLayers[$key]);
+                }
+            }
+            foreach ($vectorLayers as $key => $layer) {
+                if ($exclTags->matches(new LayerTags($layer['tags']))) {
+                    $this->log('Excluding raster layer: ' . $layer['name']);
+                    unset($vectorLayers[$key]);
+                }
+            }
+        }
+
+        // to make sure the arrays are re-indexed
+        $rasterLayers = array_values($rasterLayers);
+        $vectorLayers = array_values($vectorLayers);
+    }
+
+    private function normaliseAndExtendRasterMappings(array &$rasterLayers): void
+    {
+        foreach ($rasterLayers as &$layer) {
+            $this->normaliseAndExtendRasterMapping($layer['mapping']);
+        }
+        unset($layer);
+    }
+
     /**
+     * Extracts the region from the raster layers and updates the layer data and coordinates
+     *
      * @throws Exception
      */
     private function extractRegionFromRasterLayers(Region $region, array &$rasterLayers, string $dir): void
@@ -476,20 +718,21 @@ SQL,
             // now set the region coordinates, clamped by input coordinates (see extractPartFromImageByRegion)
             $layer['coordinate0'] = $outputRegion->getBottomLeft();
             $layer['coordinate1'] = $outputRegion->getTopRight();
-            $this->handleRasterMapping($layer['mapping']);
         }
         unset($layer);
     }
 
-    private function handleRasterMapping(array &$mapping): void
+    /**
+     * Given the layer mapping, normalises the max values, up to 255 max, and:
+     *   sets the "min" value based on the previous mapping entry's max
+     */
+    private function normaliseAndExtendRasterMapping(array &$mapping): void
     {
         $m = &$mapping;
         if (count($m) == 0) {
             return;
         }
         $maxValue = $m[count($m)-1]['max'];
-        // normalise the max values , up to 255 max. And:
-        //   set the "min" value based on the previous mapping entry's max
         $m[0]['min'] = 0;
         $m[0]['max'] = (int)ceil(($m[0]['max'] / $maxValue) * 255);
         for ($n = 1; $n < count($m); ++$n) {
@@ -512,36 +755,36 @@ SQL,
     ): void {
         list($inputBottomLeftX, $inputBottomLeftY, $inputTopRightX, $inputTopRightY) =
             array_values($inputRegion->toArray());
-        list($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY) =
-            array_values($outputRegion->toArray());
 
         // clamp by input coordinates.
-        $outputBottomLeftX = max($outputRegion->getBottomLeftX(), $inputRegion->getBottomLeftX());
-        $outputBottomLeftY = max($outputBottomLeftY, $inputBottomLeftY);
-        $outputTopRightX = min($outputRegion->getTopRightX(), $inputRegion->getTopRightX());
-        $outputTopRightY = min($outputTopRightY, $inputTopRightY);
+        if (null === $clampedOutputRegion = $outputRegion->createClampedBy($inputRegion)) {
+            // this should be impossible, since the region coordinates were used for a query input resulting into this
+            //  layer
+            throw new Exception("Specified region does not overlap with the input image: $inputImageFilePath");
+        }
+        list($outputBottomLeftX, $outputBottomLeftY, $outputTopRightX, $outputTopRightY) =
+            array_values($clampedOutputRegion->toArray());
 
-        $image = new \Imagick();
-        $image->readImage($inputImageFilePath);
+        $image = new \Imagick($inputImageFilePath);
         $inputWidth = $image->getImageWidth();
         $inputHeight = $image->getImageHeight();
 
-        $coordinateToPixelWidthFactor = $inputWidth / abs($inputTopRightX - $inputBottomLeftX);
-        $coordinateToPixelHeightFactor = $inputHeight / abs($inputTopRightY - $inputBottomLeftY);
+        $coordinateToPixelWidthFactor = $inputWidth / ($inputTopRightX - $inputBottomLeftX);
+        $coordinateToPixelHeightFactor = $inputHeight / ($inputTopRightY - $inputBottomLeftY);
 
-        // map coordinate to the pixel coordinate of the image, still as real number
-        $outputPixel0XRealNumber = abs($outputBottomLeftX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
-        $outputPixel0YRealNumber = abs($outputBottomLeftY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
-        $outputPixel1XRealNumber = abs($outputTopRightX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
-        $outputPixel1YRealNumber = abs($outputTopRightY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
+        // map coordinate to the pixel "size", still as real number
+        $outputPixel0XRealNumber = ($outputBottomLeftX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
+        $outputPixel0YRealNumber = ($outputBottomLeftY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
+        $outputPixel1XRealNumber = ($outputTopRightX - $inputBottomLeftX) * $coordinateToPixelWidthFactor;
+        $outputPixel1YRealNumber = ($outputTopRightY - $inputBottomLeftY) * $coordinateToPixelHeightFactor;
 
-        // now convert to actual pixel, clamp by image input size
-        $outputPixel0X = max(0, min($inputWidth - 1, (int)($outputPixel0XRealNumber)));
-        $outputPixel0Y = max(0, min($inputHeight - 1, (int)($outputPixel0YRealNumber)));
-        $outputPixel1X = max(0, min($inputWidth - 1, (int)ceil($outputPixel1XRealNumber)));
-        $outputPixel1Y = max(0, min($inputHeight - 1, (int)ceil($outputPixel1YRealNumber)));
+        // now convert to actual pixel "size", so int
+        $outputPixel0X = (int)($outputPixel0XRealNumber);
+        $outputPixel0Y = (int)($outputPixel0YRealNumber);
+        $outputPixel1X = (int)ceil($outputPixel1XRealNumber);
+        $outputPixel1Y = (int)ceil($outputPixel1YRealNumber);
 
-        // Calculate the size of the extracted region
+        // Calculate the size of the extracted region in pixel "size"
         $regionWidth = $outputPixel1X - $outputPixel0X + 1;
         $regionHeight = $outputPixel1Y - $outputPixel0Y + 1;
 
@@ -550,23 +793,31 @@ SQL,
         }
 
         // set the actual outputted region coordinates
-        $pixelToCoordinateWidthFactor = abs($inputTopRightX - $inputBottomLeftX) / $inputWidth;
-        $pixelToCoordinateHeightFactor = abs($inputTopRightY - $inputBottomLeftY) / $inputHeight;
+        $pixelToCoordinateWidthFactor = ($inputTopRightX - $inputBottomLeftX) / $inputWidth;
+        $pixelToCoordinateHeightFactor = ($inputTopRightY - $inputBottomLeftY) / $inputHeight;
         $outputRegion->setBottomLeftX(
-            $outputBottomLeftX - abs($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor
+            $outputBottomLeftX - ($outputPixel0XRealNumber - $outputPixel0X) * $pixelToCoordinateWidthFactor
         );
         $outputRegion->setBottomLeftY(
-            $outputBottomLeftY - abs($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor
+            $outputBottomLeftY - ($outputPixel0YRealNumber - $outputPixel0Y) * $pixelToCoordinateHeightFactor
         );
         $outputRegion->setTopRightX(
-            $outputTopRightX + abs($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor
+            $outputTopRightX + ($outputPixel1X - $outputPixel1XRealNumber) * $pixelToCoordinateWidthFactor
         );
         $outputRegion->setTopRightY(
-            $outputTopRightY + abs($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor
+            $outputTopRightY + ($outputPixel1Y - $outputPixel1YRealNumber) * $pixelToCoordinateHeightFactor
         );
 
+        // finally convert to pixel coordinates.
+        $outputPixel0Y = $inputHeight - $regionHeight - $outputPixel0Y;
+
+        // clamp by image input size
+        $outputPixel0X = max(0, min($inputWidth - 1, $outputPixel0X));
+        $outputPixel0Y = max(0, min($inputHeight - 1, $outputPixel0Y));
+
+        $image->setImageFormat($this->outputImageFormat);
+        $image->setFormat($this->outputImageFormat);
         $image->cropImage($regionWidth, $regionHeight, $outputPixel0X, $outputPixel0Y);
-        $image->setImageFormat('PNG');
         $image->writeImage($outputImageFilePath);
     }
 }

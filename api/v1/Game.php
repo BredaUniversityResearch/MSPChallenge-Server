@@ -21,8 +21,6 @@ use function App\tpf;
 
 class Game extends Base
 {
-    private ?string $watchdog_address = null;
-    const DEFAULT_WATCHDOG_PORT = 45000;
     const MIN_GAME_ERATIME = 12;
 
     private const ALLOWED = array(
@@ -150,6 +148,9 @@ class Game extends Base
             return $cache[$path];
         }
         $cacheTime = time();
+        if (!file_exists($path)) {
+            return '';
+        }
         $cache[$path] = file_get_contents($path);
         return $cache[$path];
     }
@@ -158,7 +159,7 @@ class Game extends Base
      * @throws Exception
      * @todo: use https://github.com/karriereat/json-decoder "to convert your JSON data into an actual php class"
      * phpcs:ignore Generic.Files.LineLength.TooLong
-     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing_policy_settings: array}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
+     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing_policy_settings: array}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, projection: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameConfigValues(string $overrideFileName = ''): array
@@ -526,49 +527,6 @@ class Game extends Base
     }
 
     /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetWatchdogAddress(): string
-    {
-        $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
-        if (null === $this->watchdog_address) {
-            return '';
-        }
-        /** @noinspection HttpUrlsUsage */
-        $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
-        return $this->watchdog_address.':'.($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT);
-    }
-
-    private function getWatchdogAddressFromDb(): ?string
-    {
-        $result = $this->getDatabase()->query(
-            "SELECT game_session_watchdog_address FROM game_session LIMIT 0,1"
-        );
-        if (count($result) == 0) {
-            return null;
-        }
-        return $result[0]['game_session_watchdog_address'];
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function getWatchdogSessionUniqueToken(): PromiseInterface
-    {
-        return $this->getAsyncDatabase()->query(
-            $this->getAsyncDatabase()->createQueryBuilder()
-                ->select('game_session_watchdog_token')
-                ->from('game_session')
-                ->setMaxResults(1)
-        )
-        ->then(function (Result $result) {
-            $row = $result->fetchFirstRow();
-            return $row['game_session_watchdog_token'] ?? '0';
-        });
-    }
-
-    /**
      * @ForceNoTransaction
      * @noinspection PhpUnused
      * @throws Exception
@@ -731,7 +689,6 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
-                // $apiRoot is passed to watchdog, so if DOCKER env.var is defined we should use http://caddy:80
                 return GameSession::getRequestApiRootAsync(getenv('DOCKER') !== false);
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
@@ -765,7 +722,8 @@ class Game extends Base
                             'game_state' => $newWatchdogGameState,
                             'required_simulations' => $simulations,
                             'api_access_token' => $newAccessToken,
-                            'api_access_renew_token' => $recoveryToken
+                            'api_access_renew_token' => $recoveryToken,
+                            'month' => $this->GetCurrentMonthAsId()
                         ];
                         return $browser->post(
                             $url,
@@ -777,37 +735,7 @@ class Game extends Base
                     });
             })
             ->then(function (ResponseInterface $response) {
-                $log = new Log();
-                $this->asyncDataTransferTo($log);
-                $log->setAsync(true); // force async in this context
-
-                $responseContent = $response->getBody()->getContents();
-                $decodedResponse = json_decode($responseContent, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    $funcArgs = [
-                        "Watchdog",
-                        Log::ERROR,
-                        "Received invalid response from watchdog. Response: \"".$responseContent."\"",
-                        "changeWatchdogState()"
-                    ];
-                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
-                        return $funcArgs;
-                    });
-                }
-
-                if ($decodedResponse["success"] != 1) {
-                    $funcArgs = [
-                        "Watchdog",
-                        Log::ERROR,
-                        "Watchdog responded with failure to change game state request. Response: \"".
-                        $decodedResponse["message"]."\"",
-                        "changeWatchdogState()"
-                    ];
-                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
-                        return $funcArgs;
-                    });
-                }
-                return resolveOnFutureTick(new Deferred(), $decodedResponse)->promise();
+                return $this->logWatchdogResponse("/Watchdog/UpdateState", $response);
             });
     }
 
@@ -862,7 +790,7 @@ class Game extends Base
                     ) active_last_minute'
                 )
                 ->from('game', 'g')
-                ->join('g', 'user', 'u')
+                ->leftJoin('g', 'user', 'u', '1=1')
         )
         ->then(function (Result $result) {
             if (null === $state = $result->fetchFirstRow()) {
