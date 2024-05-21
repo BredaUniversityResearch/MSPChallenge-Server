@@ -128,6 +128,7 @@ class Policy
 
     public function hasFleetFiltersMatch(int $fleet): ?bool
     {
+        // todo : rewrite based on "data"
 //        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
 //        /** @var PolicyFilterLink[] $fleetFilters */
 //        $fleetFilters = collect($policyFilterLinks)
@@ -145,10 +146,12 @@ class Policy
 //            return false; // no there is no match
 //        }
 //        return true;
+        return false;
     }
 
     public function hasScheduleFiltersMatch(int $currentMonth): ?bool
     {
+        // todo : rewrite based on "data"
 //        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
 //        /** @var PolicyFilterLink[] $scheduleFilters */
 //        $scheduleFilters = collect($policyFilterLinks)
@@ -170,5 +173,6 @@ class Policy
 //            return false; // meaning there should not be a seasonal closure for this month, so no pressures
 //        }
 //        return true;
+        return false;
     }
 }

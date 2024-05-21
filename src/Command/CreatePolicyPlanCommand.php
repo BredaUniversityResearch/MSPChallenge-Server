@@ -139,7 +139,6 @@ class CreatePolicyPlanCommand extends Command
                 $gameSessionId,
                 $planGameTime,
                 $policyTypes,
-                $policyFilterTypes,
                 $layer,
                 $layerGeometryName,
                 $geometryBannedFleets,
@@ -684,7 +683,6 @@ class CreatePolicyPlanCommand extends Command
      * @param int $gameSessionId
      * @param int $planGameTime
      * @param array $policyTypes
-     * @param array $policyFilterTypes
      * @param array $layer
      * @param string|null $layerGeometryName
      * @param int|null $geometryBannedFleets
@@ -698,7 +696,6 @@ class CreatePolicyPlanCommand extends Command
         int     $gameSessionId,
         int     $planGameTime,
         array   $policyTypes,
-        array   $policyFilterTypes,
         array   $layer,
         ?string $layerGeometryName,
         ?int    $geometryBannedFleets,
@@ -723,7 +720,6 @@ class CreatePolicyPlanCommand extends Command
         $plan = new Plan();
         $this->getGameSessionEntityManager()->wrapInTransaction(function () use (
             $policyTypes,
-            $policyFilterTypes,
             $layer,
             $planGameTime,
             $geometry,
