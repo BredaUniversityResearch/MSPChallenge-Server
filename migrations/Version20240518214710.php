@@ -56,7 +56,7 @@ final class Version20240518214710 extends MSPMigration
             <<< 'SQL'
             REPLACE INTO `policy_filter_type` (`id`, `name`, `schema`) VALUES
             (1,	'fleet',	'{\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"fleets\": {\r\n      \"type\": \"integer\"\r\n    }\r\n  },\r\n  \"required\": [\"fleets\"]\r\n}'),
-            (2,	'schedule',	'{\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"months\": {\r\n      \"type\": \"array\",\r\n      \"items\": {\r\n        \"type\": \"integer\"\r\n      }\r\n    }\r\n  },\r\n  \"required\": [\"radius\"]\r\n}');    
+            (2,	'schedule',	'{\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"months\": {\r\n      \"type\": \"array\",\r\n      \"items\": {\r\n        \"type\": \"integer\"\r\n      }\r\n    }\r\n  },\r\n  \"required\": [\"months"]\r\n}');    
             REPLACE INTO `policy_type` (`id`, `name`, `display_name`, `schema`) VALUES
             (1,	'buffer_zone',	'Buffer zone',	'{\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"radius\": {\r\n      \"type\": \"number\",\r\n      \"default\": 40000\r\n    }\r\n  },\r\n  \"required\": [\"radius\"]\r\n}'),
             (2,	'seasonal_closure',	'Seasonal closure',	NULL),

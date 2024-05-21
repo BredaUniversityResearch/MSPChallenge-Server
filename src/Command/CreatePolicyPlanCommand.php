@@ -233,8 +233,7 @@ class CreatePolicyPlanCommand extends Command
             if (null === $policyFilterTypeName = $this->askPolicyFilterTypeName($io, $policyFilterTypes)) {
                 continue;
             }
-            $policyFilterValue = $this->askPolicyFilterTypeValue($policyFilterTypeName, $io, $context);
-            $policyFilters[$policyFilterTypeName] = $policyFilterValue;
+            $policyFilters += $this->askPolicyFilterTypeValue($policyFilterTypeName, $io, $context);
         }
         return $policyFilters;
     }
@@ -423,12 +422,14 @@ class CreatePolicyPlanCommand extends Command
      */
     public function askPolicyFilterTypeValue(string $policyFilterTypeName, SymfonyStyle $io, array $context): mixed
     {
+        // todo : ask values based on schema. E.g. loop properties and their type, collect to array
         switch ($policyFilterTypeName) {
             case 'fleet':
-                return $this->askLayerType($io, 'Choose banned fleets', $context);
+                return ['fleets' => $this->askLayerType($io, 'Choose banned fleets', $context)];
             case 'schedule':
-                return $this->askSchedule($io, $context);
+                return ['months' => $this->askSchedule($io, $context)];
         }
+        // todo validate on schema
         throw new \Exception('Unknown policy filter type: '.$policyFilterTypeName);
     }
 

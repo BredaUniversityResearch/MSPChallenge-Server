@@ -421,7 +421,7 @@ SUBQUERY
             ->leftJoin('pl.plan', 'p')
             ->leftJoin('p.planPolicies', 'pp')
             ->leftJoin('pp.policy', 'pol')
-            ->leftJoin('pol.policyType', 'pt')
+            ->leftJoin('pol.type', 'pt')
             ->leftJoin('pt.policyTypeFilterTypes', 'ptft')
             ->leftJoin('ptft.policyFilterType', 'pft')
             ->where('l.layerId = :layerId OR ol.layerId = :layerId')

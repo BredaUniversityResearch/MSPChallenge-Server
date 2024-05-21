@@ -6,6 +6,7 @@ use App\Repository\PolicyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JsonSchema\Validator;
 
 #[ORM\Entity(repositoryClass: PolicyRepository::class)]
 class Policy
@@ -128,51 +129,49 @@ class Policy
 
     public function hasFleetFiltersMatch(int $fleet): ?bool
     {
-        // todo : rewrite based on "data"
-//        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
-//        /** @var PolicyFilterLink[] $fleetFilters */
-//        $fleetFilters = collect($policyFilterLinks)
-//            ->filter(fn($pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'fleet')->all();
-//        if (empty($fleetFilters)) {
-//            return null; // no fleet filters found
-//        }
-//        // if there is no fleet filter matching the geometry type
-//        if (false === array_reduce(
-//            $fleetFilters,
-//            fn($carry, PolicyFilterLink $item) => $carry ||
-//                (($item->getPolicyFilter()->getValue() & $fleet) == $fleet),
-//            false
-//        )) {
-//            return false; // no there is no match
-//        }
-//        return true;
-        return false;
+        $validator = new Validator();
+        foreach ($this->getType()->getPolicyTypeFilterTypes() as $policyTypeFilterType) {
+            if ($policyTypeFilterType->getPolicyFilterType()->getName() !== 'fleet') {
+                continue;
+            }
+            // no fleet filter data found
+            if (!isset($this->data['fleets'])) {
+                return null;
+            }
+            // data should not match the required schema
+            $obj = (object)$this->data;
+            $validator->validate($obj, $policyTypeFilterType->getPolicyFilterType()->getSchema());
+            if (!$validator->isValid()) {
+                return null;
+            }
+            // false if there is no fleet filter matching the geometry type
+            return $fleet == ($this->data['fleets'] & $fleet);
+        }
+        // no filters fleet relation found
+        return null;
     }
 
     public function hasScheduleFiltersMatch(int $currentMonth): ?bool
     {
-        // todo : rewrite based on "data"
-//        $policyFilterLinks = $this->getPolicyFilterLinks()->toArray();
-//        /** @var PolicyFilterLink[] $scheduleFilters */
-//        $scheduleFilters = collect($policyFilterLinks)
-//            ->filter(
-//                fn(PolicyFilterLink $pfl) => $pfl->getPolicyFilter()->getType()->getName() === 'schedule'
-//            )
-//            ->all();
-//        if (empty($scheduleFilters)) {
-//            return null; // no filters schedule found
-//        }
-//        // is there any seasonal filter matching the current game month?
-//        if (false === array_reduce(
-//            $scheduleFilters,
-//            fn($carry, PolicyFilterLink $item) => $carry ||
-//                // convert "number of months" to a month number 1-12
-//                in_array(($currentMonth % 12) + 1, $item->getPolicyFilter()->getValue()),
-//            false
-//        )) {
-//            return false; // meaning there should not be a seasonal closure for this month, so no pressures
-//        }
-//        return true;
-        return false;
+        $validator = new Validator();
+        foreach ($this->getType()->getPolicyTypeFilterTypes() as $policyTypeFilterType) {
+            if ($policyTypeFilterType->getPolicyFilterType()->getName() !== 'schedule') {
+                continue;
+            }
+            // no filters schedule data found
+            if (!isset($this->data['months'])) {
+                return null;
+            }
+            // data should not match the required schema
+            $obj = (object)$this->data;
+            $validator->validate($obj, $policyTypeFilterType->getPolicyFilterType()->getSchema());
+            if (!$validator->isValid()) {
+                return null;
+            }
+            // false if there is no a seasonal closure for this month, so no pressures
+            return in_array(($currentMonth % 12) + 1, $this->data['months']);
+        }
+         // no filters schedule relation found
+        return null;
     }
 }
