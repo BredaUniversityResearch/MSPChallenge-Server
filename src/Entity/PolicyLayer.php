@@ -15,11 +15,11 @@ class PolicyLayer
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'policyLayers')]
-    #[ORM\JoinColumn(name: 'policy_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(name: 'policy_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?Policy $policy = null;
 
     #[ORM\ManyToOne(inversedBy: 'policyLayers')]
-    #[ORM\JoinColumn(name: 'layer_id', referencedColumnName: 'layer_id', nullable: false)]
+    #[ORM\JoinColumn(name: 'layer_id', referencedColumnName: 'layer_id', nullable: false, onDelete: 'CASCADE')]
     private ?Layer $layer = null;
 
     public function getId(): ?int

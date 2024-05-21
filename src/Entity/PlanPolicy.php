@@ -15,11 +15,11 @@ class PlanPolicy
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'planPolicies')]
-    #[ORM\JoinColumn(name: 'plan_id', referencedColumnName: 'plan_id', nullable: false)]
+    #[ORM\JoinColumn(name: 'plan_id', referencedColumnName: 'plan_id', nullable: false, onDelete: 'CASCADE')]
     private ?Plan $plan = null;
 
     #[ORM\ManyToOne(inversedBy: 'planPolicies')]
-    #[ORM\JoinColumn(name: 'policy_id', referencedColumnName: 'id', nullable: false)]
+    #[ORM\JoinColumn(name: 'policy_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?Policy $policy = null;
 
     public function getId(): ?int

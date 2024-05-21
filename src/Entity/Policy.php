@@ -25,10 +25,20 @@ class Policy
     #[ORM\Column(type: 'json', nullable: true, options: ['default' => 'NULL'])]
     private mixed $data = null;
 
-    #[ORM\OneToMany(mappedBy: 'policy', targetEntity: PlanPolicy::class, cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OneToMany(
+        mappedBy: 'policy',
+        targetEntity: PlanPolicy::class,
+        cascade: ['persist','remove'],
+        orphanRemoval: true
+    )]
     private Collection $planPolicies;
 
-    #[ORM\OneToMany(mappedBy: 'policy', targetEntity: PolicyLayer::class, cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OneToMany(
+        mappedBy: 'policy',
+        targetEntity: PolicyLayer::class,
+        cascade: ['persist','remove'],
+        orphanRemoval: true
+    )]
     private Collection $policyLayers;
 
     public function __construct()

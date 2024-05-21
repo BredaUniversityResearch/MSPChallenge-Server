@@ -413,7 +413,7 @@ SUBQUERY
         $layerId = $layer['layerId'] ?? 0;
         $qb = $conn->createQueryBuilder();
         $qb
-            ->select('l, pl, ge, p, pp, pol, pfl, pf')
+            ->select('l, pl, ge, p, pp, pol, pt, ptft, pft')
             ->from('App:Layer', 'l')
             ->leftJoin('l.planLayer', 'pl')
             ->leftJoin('l.geometry', 'ge')
@@ -421,8 +421,9 @@ SUBQUERY
             ->leftJoin('pl.plan', 'p')
             ->leftJoin('p.planPolicies', 'pp')
             ->leftJoin('pp.policy', 'pol')
-            ->leftJoin('pol.policyFilterLinks', 'pfl')
-            ->leftJoin('pfl.policyFilter', 'pf')
+            ->leftJoin('pol.policyType', 'pt')
+            ->leftJoin('pt.policyTypeFilterTypes', 'ptft')
+            ->leftJoin('ptft.policyFilterType', 'pft')
             ->where('l.layerId = :layerId OR ol.layerId = :layerId')
             ->setParameter('layerId', $layerId)
             ->andWhere('ge.geometryActive = 1');
@@ -510,14 +511,17 @@ SUBQUERY
                     /** @var \App\Entity\Geometry[] $geometry */
                     $geometry = array_merge($geometry, $pl->getLayer()->getGeometry()->toArray());
                 }
-                $policy = $planPolicy->getPolicy();
-                if ($policy->getType()->getDataType() == PolicyTypeDataType::Boolean) {
-                    // the boolean policies are just passed through to mel
-                    $result["policies"][] = [
-                        "name" => $planPolicy->getPolicy()->getType()->getName(),
-                        "value" => json_encode((bool)$planPolicy->getPolicy()->getValue())
-                    ];
-                } elseif ($planPolicy->getPolicy()->getType()->getName() == 'buffer') {
+
+//                $policy = $planPolicy->getPolicy();
+//                if ($policy->getType()->getDataType() == PolicyTypeDataType::Boolean) {
+//                    // the boolean policies are just passed through to mel
+//                    $result["policies"][] = [
+//                        "name" => $planPolicy->getPolicy()->getType()->getName(),
+//                        "value" => json_encode((bool)$planPolicy->getPolicy()->getValue())
+//                    ];
+//                } else
+
+                if ($planPolicy->getPolicy()->getType()->getName() == 'buffer_zone') {
                     $this->applyBufferPolicy(
                         $planPolicy->getPolicy(),
                         $geometry,
@@ -611,8 +615,14 @@ SUBQUERY
         }
         $newResultGeometry = [];
         $result['debug-message'] ??= '';
-        $result['debug-message'] .= 'applied policy '.$policy->getType()->getName().' with value: '.
-            $policy->getValue().'.'.PHP_EOL;
+
+        if (null === ($radius = $policy->getData()['radius'] ?? null)) {
+            $result['debug-message'] .= 'no radius found in policy '.$policy->getType()->getName().'.'.PHP_EOL;
+            return;
+        }
+
+        $result['debug-message'] .= 'applied policy '.$policy->getType()->getName().' with : '.
+            $radius.'.'.PHP_EOL;
         foreach ($geometry as $geom) {
             $geomTypeMatch = array_reduce(
                 $geom->getGeometryTypes(),
@@ -640,7 +650,7 @@ SUBQUERY
                     );
                 }
                 $st->bindValue('text', self::toWkt(json_decode($geom->getGeometryGeometry(), true)));
-                $st->bindValue('buffer', $policy->getValue());
+                $st->bindValue('buffer', $radius);
                 $st->execute();
                 // for debugging use https://wktmap.com/ to visualize using EPSG:3035 !
                 $bufferedPolygonText = $st->fetchColumn();

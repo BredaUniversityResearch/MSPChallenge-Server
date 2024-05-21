@@ -20,11 +20,11 @@ class PolicyTypeFilterType
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'policyTypeFilterTypes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?PolicyType $policyType = null;
 
     #[ORM\ManyToOne(inversedBy: 'policyTypeFilterTypes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?PolicyFilterType $policyFilterType = null;
 
     public function getId(): ?int

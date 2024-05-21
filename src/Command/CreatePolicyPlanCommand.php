@@ -22,6 +22,7 @@ use Doctrine\DBAL\Exception;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use JsonSchema\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -127,7 +128,7 @@ class CreatePolicyPlanCommand extends Command
         // assuming the display name to be unique
         $policyTypeName = $this->askPolicyTypeName($io);
         $policyType = $policyTypes[$policyTypeName];
-        $policyValue = $this->askPolicyValue($io, $policyType);
+        $policyBase = $this->askPolicyBase($io, $policyType);
         $policyFilterTypes = $this->getPolicyFilterTypes($policyType);
         $policyFilters = [];
         if (!empty($policyFilterTypes)) {
@@ -143,7 +144,7 @@ class CreatePolicyPlanCommand extends Command
                 $layerGeometryName,
                 $geometryBannedFleets,
                 $policyTypeName,
-                $policyValue,
+                $policyBase,
                 $policyFilters
             );
         } catch (\Exception $e) {
@@ -234,7 +235,7 @@ class CreatePolicyPlanCommand extends Command
                 continue;
             }
             $policyFilterValue = $this->askPolicyFilterTypeValue($policyFilterTypeName, $io, $context);
-            $policyFilters[$policyFilterTypeName][] = $policyFilterValue;
+            $policyFilters[$policyFilterTypeName] = $policyFilterValue;
         }
         return $policyFilters;
     }
@@ -440,6 +441,9 @@ class CreatePolicyPlanCommand extends Command
         $months = [];
         $ranges = explode(',', $monthsString);
         foreach ($ranges as $range) {
+            if (!str_contains($range, '-')) {
+                $range = $range.'-'.$range; // '1' => '1-1
+            }
             [$start, $end] = explode('-', $range);
             $months = array_merge($months, range((int)$start, (int)$end));
         }
@@ -490,25 +494,36 @@ class CreatePolicyPlanCommand extends Command
         return $policyFilterTypeName;
     }
 
-    public function askPolicyValue(SymfonyStyle $io, PolicyType $policyType): mixed
+    public function askPolicyBase(SymfonyStyle $io, PolicyType $policyType): mixed
     {
         $policyTypeDisplayName = $policyType->getDisplayName();
-        if ($policyType->getDataType() === PolicyTypeDataType::Boolean) {
-            return $io->confirm("Enable $policyTypeDisplayName?");
-        }
-        if ($policyType->getDataType() !== PolicyTypeDataType::Ranged) {
+        if (null === $schema = $policyType->getSchema()) {
             return null;
         }
-        $policyValue = null;
-        while ($policyValue === null) {
-            $policyValue = $io->ask("Enter a $policyTypeDisplayName value", '40000');
-            if (is_numeric($policyValue) && $policyValue >= 0 && $policyValue <= 100000) {
-                $policyValue = (int)$policyValue;
-            } else {
-                $io->error('The value must be a number between 0 and 100000');
-            }
+        if (empty($schema['properties'])) {
+            return null;
         }
-        return $policyValue;
+        $result = [];
+        foreach ($policyType->getSchema()['properties'] as $propertyName => $property) {
+            if ($property['type'] === 'number') {
+                $policyValue = null;
+                while ($policyValue === null) {
+                    $policyValue = $io->ask(
+                        "Enter a $policyTypeDisplayName $propertyName value",
+                        $property['default'] ?? null
+                    );
+                    if (is_numeric($policyValue) && $policyValue >= 0 && $policyValue <= 100000) {
+                        $policyValue = (int)$policyValue;
+                    } else {
+                        $io->error('The value must be a number between 0 and 100000');
+                    }
+                }
+                $result[$propertyName] = $policyValue;
+                continue;
+            }
+            // todo boolean: return $io->confirm("Enable $policyTypeDisplayName?");
+        }
+        return $result;
     }
 
     public function askPolicyTypeName(SymfonyStyle $io): string
@@ -603,8 +618,6 @@ class CreatePolicyPlanCommand extends Command
         $em->createQueryBuilder()->delete('App:Layer', 'l')->where('l.layerName LIKE :layerName')
             ->setParameter('layerName', self::TEST_DATA_PREFIX.'%')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:Policy', 'p')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:PolicyFilter', 'pf')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:PolicyFilterLink', 'pfl')->getQuery()->execute();
         $em->flush();
     }
 
@@ -646,20 +659,6 @@ class CreatePolicyPlanCommand extends Command
         return $policyFilterTypes;
     }
 
-    private function processPolicyFilterValue(PolicyFilterType $policyFilterType, mixed $policyFilterValue): mixed
-    {
-        switch ($policyFilterType->getFieldType()) {
-            case FieldType::SMALLINT:
-                return (int) $policyFilterValue;
-            case FieldType::BOOLEAN:
-                return (bool) $policyFilterValue;
-            case FieldType::JSON: // fall-through
-            default:
-                break; // nothing to do.
-        }
-        return $policyFilterValue;
-    }
-
     private function convertBannedFleetFlagsToCommaSeparatedString(int $bannedFleetFlags): string
     {
         $result = [];
@@ -690,22 +689,22 @@ class CreatePolicyPlanCommand extends Command
      * @param string|null $layerGeometryName
      * @param int|null $geometryBannedFleets
      * @param string $policyTypeName
-     * @param mixed $policyValue
+     * @param mixed $policyBase
      * @param array $policyFilters
      * @return Plan
      * @throws \Exception
      */
     private function createPlan(
-        int $gameSessionId,
-        int $planGameTime,
-        array $policyTypes,
-        array $policyFilterTypes,
-        array $layer,
+        int     $gameSessionId,
+        int     $planGameTime,
+        array   $policyTypes,
+        array   $policyFilterTypes,
+        array   $layer,
         ?string $layerGeometryName,
-        ?int $geometryBannedFleets,
-        string $policyTypeName,
-        mixed $policyValue,
-        array $policyFilters
+        ?int    $geometryBannedFleets,
+        string  $policyTypeName,
+        mixed   $policyBase,
+        array   $policyFilters
     ): Plan {
         $this->cleanUpPreviousPlan();
         $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
@@ -730,7 +729,7 @@ class CreatePolicyPlanCommand extends Command
             $geometry,
             $geometryBannedFleets,
             $policyTypeName,
-            $policyValue,
+            $policyBase,
             $policyFilters,
             $plan
         ) {
@@ -740,7 +739,7 @@ class CreatePolicyPlanCommand extends Command
             $policy = new Policy();
             $policy
                 ->setType($policyType)
-                ->setValue($policyValue);
+                ->setData(array_merge($policyBase, $policyFilters));
             $em->persist($policy);
             $plan
                 ->setPlanName(self::TEST_DATA_PREFIX.'-'.uniqid())
@@ -806,26 +805,6 @@ class CreatePolicyPlanCommand extends Command
             $planPolicy
                 ->setPlan($plan)
                 ->setPolicy($policy);
-            // no need to persist, it's cascaded
-            if (empty(array_filter($policyFilters))) {
-                return;
-            }
-            foreach ($policyFilters as $policyFilterTypeName => $policyFilterValues) {
-                foreach ($policyFilterValues as $policyFilterValue) {
-                    $policyFilterType = $policyFilterTypes[$policyFilterTypeName];
-                    $em->persist($policyFilterType);
-                    $policyFilter = new PolicyFilter();
-                    $policyFilter
-                        ->setType($policyFilterType)
-                        ->setValue($this->processPolicyFilterValue($policyFilterType, $policyFilterValue));
-                    $em->persist($policyFilter);
-                    $policyFilterLink = new PolicyFilterLink();
-                    $policyFilterLink
-                        ->setPolicy($policy)
-                        ->setPolicyFilter($policyFilter);
-                     // no need to persist, it's cascaded
-                }
-            }
         });
         return $plan;
     }

@@ -14,7 +14,7 @@ class PlanLayer
     private ?int $planLayerId;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planLayer')]
-    #[ORM\JoinColumn(name: 'plan_layer_plan_id', referencedColumnName: 'plan_id')]
+    #[ORM\JoinColumn(name: 'plan_layer_plan_id', referencedColumnName: 'plan_id', onDelete: 'CASCADE')]
     private ?Plan $plan;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planLayer')]
