@@ -278,21 +278,38 @@ class MEL extends Base
             ->orWhere($qb->expr()->in(
                 'l.layer_id',
                 <<< 'SUBQUERY'
+                WITH
+                    policy_types_with_schedule AS (
+                        SELECT ptft.*
+                        FROM policy_type_filter_type ptft
+                        JOIN policy_filter_type pft ON ptft.policy_filter_type_id = pft.id AND pft.name = 'schedule'
+                        JOIN policy_type pt ON ptft.policy_type_id = pt.id                    
+                    ),        
+                    policy_with_schedule AS (
+                        SELECT
+                            p.*,
+                            JSON_EXTRACT(p.data, '$.months') AS months
+                        FROM policy p
+                        LEFT JOIN policy_type pt ON p.type_id = pt.id
+                        LEFT JOIN policy_types_with_schedule ptft ON pt.id = ptft.policy_type_id
+                        LEFT JOIN policy_filter_type pft ON ptft.policy_filter_type_id = pft.id
+                    )
                 SELECT DISTINCT l.layer_original_id
                 FROM layer l
                 JOIN plan_layer pl ON l.layer_id = pl.plan_layer_layer_id
                 JOIN plan_policy pp ON pl.plan_layer_plan_id = pp.plan_id
-                JOIN policy p ON pp.policy_id = p.id
-                JOIN policy_filter_link pfl ON p.id = pfl.policy_id
-                JOIN policy_filter pf ON pfl.policy_filter_id = pf.id
-                JOIN policy_filter_type pft ON pf.type_id = pft.id AND pft.name = 'schedule' AND (
-                  (
-                    JSON_SEARCH(pf.value, 'one', :prevMonth, NULL, '$[*]') IS NOT NULL
-                    AND JSON_SEARCH(pf.value, 'one', :month, NULL, '$[*]') IS NULL
-                  ) OR (
-                    JSON_SEARCH(pf.value, 'one', :prevMonth, NULL, '$[*]') IS NULL
-                    AND JSON_SEARCH(pf.value, 'one', :month, NULL, '$[*]') IS NOT NULL
-                  )
+                JOIN policy_with_schedule p ON pp.policy_id = p.id
+                AND (
+                    p.months IS NULL OR
+                    (
+                        (
+                            JSON_CONTAINS(p.months, :prevMonth, '$')=1
+                            AND JSON_CONTAINS(p.months, :month, '$')=0
+                        ) OR (
+                            JSON_CONTAINS(p.months, :prevMonth, '$')=0
+                            AND JSON_CONTAINS(p.months, :month, '$')=1
+                        )
+                    )
                )
 SUBQUERY
             ))
