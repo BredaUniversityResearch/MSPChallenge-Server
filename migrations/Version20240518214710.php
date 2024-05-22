@@ -35,8 +35,6 @@ final class Version20240518214710 extends MSPMigration
             ALTER TABLE `plan_policy` ADD CONSTRAINT `fk_plan_policy_plan_id` FOREIGN KEY (`plan_id`) REFERENCES `plan` (`plan_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
             ALTER TABLE `plan_policy` ADD CONSTRAINT `fk_plan_policy_policy_id` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
             ALTER TABLE `policy` ADD CONSTRAINT `fk_policy_type_id` FOREIGN KEY (`type_id`) REFERENCES `policy_type` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-            ALTER TABLE `policy_layer` ADD CONSTRAINT `fk_policy_layer_policy_id` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-            ALTER TABLE `policy_layer` ADD CONSTRAINT `fk_policy_layer_layer_id` FOREIGN KEY (`layer_id`) REFERENCES `layer` (`layer_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
             ALTER TABLE `policy_type_filter_type` ADD CONSTRAINT `fk_policy_type_filter_type_policy_type_id` FOREIGN KEY (`policy_type_id`) REFERENCES `policy_type` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
             ALTER TABLE `policy_type_filter_type` ADD CONSTRAINT `fk_policy_type_filter_type_policy_filter_type_id` FOREIGN KEY (`policy_filter_type_id`) REFERENCES `policy_filter_type` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
             REPLACE INTO `policy_filter_type` (`id`, `name`, `schema`) VALUES
@@ -80,18 +78,10 @@ final class Version20240518214710 extends MSPMigration
     protected function onDown(Schema $schema): void
     {
         // phpcs:ignoreFile Generic.Files.LineLength.TooLong
-        $this->addSql("TRUNCATE TABLE `policy_type_filter_type`; TRUNCATE TABLE `policy_type`; TRUNCATE TABLE `policy_filter_type`");
-        $this->addSql('ALTER TABLE plan_policy DROP FOREIGN KEY FK_44251D64E899029B');
-        $this->addSql('ALTER TABLE plan_policy DROP FOREIGN KEY FK_44251D642D29E3C6');
-        $this->addSql('ALTER TABLE policy DROP FOREIGN KEY FK_F07D0516C54C8C93');
-        $this->addSql('ALTER TABLE policy_layer DROP FOREIGN KEY FK_5F1DA8E12D29E3C6');
-        $this->addSql('ALTER TABLE policy_layer DROP FOREIGN KEY FK_5F1DA8E1EA6EFDCD');
-        $this->addSql('ALTER TABLE policy_type_filter_type DROP FOREIGN KEY FK_5F4E9511A66034A7');
-        $this->addSql('ALTER TABLE policy_type_filter_type DROP FOREIGN KEY FK_5F4E9511F5CB7147');
+        $this->addSql('SET FOREIGN_KEY_CHECKS=0');
         $this->addSql('DROP TABLE plan_policy');
         $this->addSql('DROP TABLE policy');
         $this->addSql('DROP TABLE policy_filter_type');
-        $this->addSql('DROP TABLE policy_layer');
         $this->addSql('DROP TABLE policy_type');
         $this->addSql('DROP TABLE policy_type_filter_type');
     }
