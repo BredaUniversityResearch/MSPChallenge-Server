@@ -126,12 +126,12 @@
             "cache:clear": "symfony-cmd"
         },
         "post-install-cmd": [
-            "php bin/console doctrine:cache:clear-metadata --flush",
+            "(php bin/console doctrine:cache:clear-metadata -n || true)",
             "@auto-scripts",
             "bash tools/cghooks-fresh-install.sh"
         ],
         "post-update-cmd": [
-            "php bin/console doctrine:cache:clear-metadata --flush",
+            "(php bin/console doctrine:cache:clear-metadata -n || true)",
             "@auto-scripts",
             "bash tools/cghooks-fresh-install.sh"
         ],
