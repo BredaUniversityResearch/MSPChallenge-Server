@@ -2,15 +2,25 @@
 
 namespace App\Repository;
 
+use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\Layer;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
+use ReflectionException;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class LayerRepository extends EntityRepository
 {
     public const PLAY_AREA_LAYER_PREFIX = '_PLAYAREA';
+
+    private ?ObjectNormalizer $normalizer = null; // to be created upon usage
+    private ?Serializer $serializer = null; // to be created upon usage
 
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
@@ -27,7 +37,7 @@ class LayerRepository extends EntityRepository
             $layer = $this->getLayerCurrentAndPlannedGeometry($layer['layerId']);
             if (!is_null($layer)) {
                 $layerReturn[$layer->getLayerName()] = [
-                    'layerGeoType' => $layer->getLayerGeoType(),
+                    'layerGeoType' => $layer->getLayerGeoType()?->value ?? '',
                     'geometry' => $layer->exportToDecodedGeoJSON()
                 ];
             }
@@ -53,7 +63,7 @@ class LayerRepository extends EntityRepository
         $qb = $this->createQueryBuilder('l');
         return $qb
             ->select('l.layerId')
-            ->where($qb->expr()->in('l.layerGeotype', ['polygon', 'line', 'point']))
+            ->where($qb->expr()->in('l.layerGeoType', ['polygon', 'line', 'point']))
             ->andWhere($qb->expr()->orX(
                 $qb->expr()->eq('l.originalLayer', 0),
                 $qb->expr()->isNull('l.originalLayer')
@@ -117,5 +127,25 @@ class LayerRepository extends EntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    /**
+     * @throws ExceptionInterface|ReflectionException
+     */
+    public function createLayerFromData(array $layerData): Layer
+    {
+        // fix name inconsistencies
+        $layerData['layer_geo_type'] = $layerData['layer_geotype'];
+        unset($layerData['layer_geotype']);
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        $this->serializer ??= new Serializer([$this->normalizer]);
+        return $this->serializer->denormalize(
+            $layerData,
+            Layer::class,
+            null,
+            (new NormalizerContextBuilder(Layer::class))->withCallbacks([
+                'layerGeoType' => fn($value) => LayerGeoType::from($value)
+            ])->toArray()
+        );
     }
 }

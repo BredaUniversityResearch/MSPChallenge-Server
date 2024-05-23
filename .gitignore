@@ -96,8 +96,10 @@ symfony.lock
 # github hooks lock file
 cghooks.lock
 
-# local PHPStan configuration
+###> phpstan/phpstan ###
+# Allow the user to override settings in phpstan.dist.neon, by creating phpstan.neon locally
 phpstan.neon
+###< phpstan/phpstan ###
 
 ###> squizlabs/php_codesniffer ###
 /.phpcs-cache
@@ -105,14 +107,11 @@ phpstan.neon
 ###< squizlabs/php_codesniffer ###
 
 ###> symfony/phpunit-bridge ###
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
-
 ###> phpunit/phpunit ###
-/phpunit.xml
 .phpunit.result.cache
+/phpunit.xml
 ###< phpunit/phpunit ###
+###< symfony/phpunit-bridge ###
 
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem

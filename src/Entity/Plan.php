@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\PolicyTypeValue;
 use App\Repository\PlanRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -34,9 +35,8 @@ class Plan
     #[ORM\Column(type: Types::INTEGER, length: 5)]
     private ?int $planGametime = null;
 
-    #[ORM\Column(type: Types::STRING, length: 20, options: ['default' => 'DESIGN'])]
-    private ?string $planState = 'DESIGN';
-
+    #[ORM\Column(length: 255, enumType: PlanState::class)]
+    private PlanState $planState = PlanState::DESIGN;
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
     private ?int $planLockUserId = null;
 
@@ -177,12 +177,12 @@ class Plan
         return $this;
     }
 
-    public function getPlanState(): ?string
+    public function getPlanState(): PlanState
     {
         return $this->planState;
     }
 
-    public function setPlanState(?string $planState): Plan
+    public function setPlanState(PlanState $planState): Plan
     {
         $this->planState = $planState;
         return $this;

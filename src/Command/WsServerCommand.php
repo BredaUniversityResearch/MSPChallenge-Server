@@ -10,12 +10,17 @@ use App\Domain\WsServer\WsServerConsoleHelper;
 use App\Domain\WsServer\WsServerOutput;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(
+    name: 'app:ws-server',
+    description: 'Run the websocket server for MSP Challenge',
+)]
 class WsServerCommand extends Command
 {
     const OPTION_PORT = 'port';
@@ -44,7 +49,6 @@ class WsServerCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Run the websocket server for MSP Challenge')
             ->addOption(
                 self::OPTION_PORT,
                 'p',

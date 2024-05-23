@@ -15,7 +15,7 @@ require_once 'templates/header.php';
   <div class="container">
     <div id="infobox"></div>
     <h1>Logging out...</h1>
-    <p>You have logged out and are being redirected. <a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>/users/logout.php">Click here</a> if nothing happens.</p>
+    <p>You have logged out and are being redirected. <a href="<?php echo Config::GetInstance()->getMSPAuthBaseURL(); ?>/users/logout_php">Click here</a> if nothing happens.</p>
   </div>
 </div>
 <?php

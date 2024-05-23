@@ -27,7 +27,7 @@ class Redirect
       #die("Redirecting to $location<br />\n");
         if ($location) {
             if ($args) {
-                $location .= $args; // allows 'login.php?err=Error+Message' or the like
+                $location .= $args; // allows 'login_php?err=Error+Message' or the like
             }
             if (!headers_sent()) {
                 header('Location: '.$location);
