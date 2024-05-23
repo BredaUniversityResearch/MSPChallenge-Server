@@ -172,9 +172,6 @@ class Layer
 
     private ?array $layerRasterBoundingbox = null;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PolicyLayer::class, cascade: ['persist'], orphanRemoval: true)]
-    private Collection $policyLayers;
-
     public function __construct()
     {
         $this->derivedLayer = new ArrayCollection();
@@ -186,7 +183,6 @@ class Layer
         $this->planLayer = new ArrayCollection();
         $this->planDelete = new ArrayCollection();
         $this->planRestrictionArea = new ArrayCollection();
-        $this->policyLayers = new ArrayCollection();
     }
 
     public function getDerivedLayer(): Collection
@@ -958,31 +954,6 @@ class Layer
             }
         }
 
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, PolicyLayer>
-     */
-    public function getPolicyLayers(): Collection
-    {
-        return $this->policyLayers;
-    }
-
-    public function addPolicyLayer(PolicyLayer $policyLayer): static
-    {
-        if (!$this->policyLayers->contains($policyLayer)) {
-            $this->policyLayers->add($policyLayer);
-            $policyLayer->setLayer($this);
-        }
-
-        return $this;
-    }
-
-    public function removePolicyLayer(PolicyLayer $policyLayer): static
-    {
-        $this->policyLayers->removeElement($policyLayer);
-        // Since orphanRemoval is set, no need to explicitly remove policyLayer from the database
         return $this;
     }
 
