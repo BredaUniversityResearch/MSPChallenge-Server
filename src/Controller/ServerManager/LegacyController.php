@@ -26,10 +26,11 @@ class LegacyController extends MSPControllerBase
      */
     public function __invoke(Request $request, string $script): Response
     {
+        $file = str_replace('_php', '.php', $script);
         $_SERVER['PHP_SELF'] = '/ServerManager/' . $script;
-        $file = SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/ServerManager/' . $script;
+        $file = SymfonyToLegacyHelper::getInstance()->getProjectDir() . '/ServerManager/' . $file;
         if (!file_exists($file)) {
-            throw new NotFoundHttpException();
+            throw new NotFoundHttpException($script.' not found');
         }
         ob_start();
         require($file);

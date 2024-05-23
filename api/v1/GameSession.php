@@ -84,7 +84,7 @@ class GameSession extends Base
             // this is always called from inside the docker environment,so just use http://caddy:80/ or
             //   http://mitmproxy:8080/
             $GLOBALS['RequestApiRoot'][1] = 'http://'.
-                ($_ENV['WEB_SERVER_HOST'] ?? 'caddy').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiRoot;
+                ($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiRoot;
             return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][1])->promise();
         }
 
@@ -144,7 +144,7 @@ class GameSession extends Base
             // this is always called from inside the docker environment,so just use http://caddy:80/ or
             //   http://mitmproxy:8080/
             $GLOBALS['ServerManagerApiRoot'][1] = 'http://'.
-                ($_ENV['WEB_SERVER_HOST'] ?? 'caddy').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiFolder;
+                ($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiFolder;
             return $GLOBALS['ServerManagerApiRoot'][1];
         }
 
@@ -757,7 +757,7 @@ class GameSession extends Base
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $requestHeader = apache_request_headers();
+        $requestHeader = \getallheaders();
         $headers = array();
         if (isset($requestHeader[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
             $headers[] = ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.

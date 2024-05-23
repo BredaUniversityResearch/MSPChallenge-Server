@@ -2,13 +2,13 @@ server_manager_index:
     path: /
     controller: App\Controller\ServerManager\LegacyController
     defaults:
-      script: 'index.php'
+      script: 'index_php'
 
 server_manager_script:
     path: /{script}
     controller: App\Controller\ServerManager\LegacyController
     requirements:
-        script: '.+\.php'
+        script: '.+_php'
 
 server_manager_not_found:
   path: '/{anything}'

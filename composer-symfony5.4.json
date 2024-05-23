@@ -38,6 +38,7 @@
         "react/http": "^1.5",
         "react/mysql": "^0.5.6",
         "react/promise": "2.10.*",
+        "runtime/frankenphp-symfony": "^0.2.0",
         "shivas/versioning-bundle": "*",
         "symfony/browser-kit": "5.4.*",
         "symfony/console": "5.4.*",
@@ -116,12 +117,12 @@
             "cache:clear": "symfony-cmd"
         },
         "post-install-cmd": [
-            "php bin/console doctrine:cache:clear-metadata",
+            "php bin/console doctrine:cache:clear-metadata --flush",
             "@auto-scripts",
             "bash tools/cghooks-fresh-install.sh"
         ],
         "post-update-cmd": [
-            "php bin/console doctrine:cache:clear-metadata",
+            "php bin/console doctrine:cache:clear-metadata --flush",
             "@auto-scripts",
             "bash tools/cghooks-fresh-install.sh"
         ],

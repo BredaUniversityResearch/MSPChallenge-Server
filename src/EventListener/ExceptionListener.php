@@ -26,7 +26,7 @@ class ExceptionListener
             $servermanager = ServerManager::getInstance();
             $event->setResponse(new RedirectResponse(
                 $servermanager->GetMSPAuthBaseURL().'/sso?redirect='.
-                urlencode($servermanager->getAbsoluteUrlBase().'login.php')
+                urlencode($servermanager->getAbsoluteUrlBase().'login_php')
             ));
         }
     }
