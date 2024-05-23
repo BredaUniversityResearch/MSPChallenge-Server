@@ -1293,7 +1293,7 @@
                 "type": ["object", "null"],
                 "properties": {
                   "property_per_state": {
-                    "type": "object",
+                    "type": ["object", "null"],
                     "properties": {
                       "Current": {
                         "type": "string"
