@@ -2,8 +2,7 @@
 
 namespace App\Command;
 
-use App\Domain\Common\EntityEnums\FieldType;
-use App\Domain\Common\EntityEnums\PolicyTypeDataType;
+use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\Country;
@@ -14,15 +13,12 @@ use App\Entity\Plan;
 use App\Entity\PlanLayer;
 use App\Entity\PlanPolicy;
 use App\Entity\Policy;
-use App\Entity\PolicyFilter;
-use App\Entity\PolicyFilterLink;
 use App\Entity\PolicyFilterType;
 use App\Entity\PolicyType;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use JsonSchema\Validator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -744,7 +740,7 @@ class CreatePolicyPlanCommand extends Command
                 ->setPlanDescription('')
                 ->setPlanTime(new \DateTime())
                 ->setPlanGametime($planGameTime)
-                ->setPlanState('APPROVED')
+                ->setPlanState(PlanState::APPROVED)
                 ->setPlanLastupdate(time())
                 ->setPlanPreviousstate('NONE')
                 ->setPlanActive(1)
@@ -762,7 +758,7 @@ class CreatePolicyPlanCommand extends Command
                 ->setLayerToggleable(1)
                 ->setLayerEditable(1)
                 ->setLayerName(self::TEST_DATA_PREFIX.'-'.uniqid())
-                ->setLayerGeotype('')->setLayerShort('')->setLayerGroup('')->setLayerTooltip('')
+                ->setLayerGeotype(null)->setLayerShort('')->setLayerGroup('')->setLayerTooltip('')
                 ->setLayerCategory($layer['layerCategory'])
                 ->setLayerSubcategory($layer['layerSubcategory'])
                 ->setLayerKpiCategory($layer['layerKpiCategory'])
