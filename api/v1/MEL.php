@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\PlanLayer;
@@ -406,28 +407,27 @@ SUBQUERY
     {
         $conn = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
         $qb = $conn->createQueryBuilder();
-        /** @var null|array $layer */
+        /** @var ?\App\Entity\Layer $layer */
         $layer = $qb
             ->from('App:Layer', 'l')
             ->select('l.layerId, l.layerGeotype, l.layerRaster')
             ->where('l.layerName = :name')
             ->setParameter('name', $name)
             ->getQuery()
-            ->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT);
         if (null === $layer) {
             return null;
         }
 
         $result = array("geotype" => "");
-        $layerGeoType = $layer['layerGeotype'] ?? '';
-        if ($layerGeoType == "raster") {
-            $rasterJson = json_decode($layer['layerRaster'], true);
-            $result["geotype"] = $layerGeoType;
-            $result["raster"] = $rasterJson['url'] ?? '';
+        $layerGeoType = $layer->getLayerGeoType();
+        if ($layerGeoType == LayerGeoType::RASTER) {
+            $result["geotype"] = $layerGeoType?->value ?? ''; // enum to string
+            $result["raster"] = $layer->getLayerRaster()['url'] ?? '';
             return $result;
         }
 
-        $layerId = $layer['layerId'] ?? 0;
+        $layerId = $layer->getLayerId() ?? 0;
         $qb = $conn->createQueryBuilder();
         $qb
             ->select('l, pl, ge, p, pp, pol, pt, ptft, pft')
@@ -462,7 +462,7 @@ SUBQUERY
         /** @var \App\Entity\Layer[] $layers */
         $layers = $q->getResult();
         $geometryTypeFilter = $layer_type === -1 ? null : $layer_type;
-        $result["geotype"] = $layerGeoType;
+        $result["geotype"] = $layerGeoType ?->value ?? ''; // enum to string;
         $result["geometry"] = [];
         foreach ($layers as $l) {
             // add the geometry linked to the layer to be pressed, these do not include the policy ones
@@ -481,7 +481,7 @@ SUBQUERY
             }
         }
         // currently only needed and support for polygons
-        if ($layerGeoType == 'polygon') {
+        if ($layerGeoType == LayerGeoType::POLYGON) {
             $planLayers = collect($layers)->map(fn($l) => $l->getPlanLayer()->toArray())->flatten()->toArray();
             $this->onGeometryExportNameResult($layer, $planLayers, $result, $geometryTypeFilter);
         }
@@ -494,13 +494,13 @@ SUBQUERY
      * @throws Exception
      */
     private function onGeometryExportNameResult(
-        array $layer,
+        \App\Entity\Layer $layer,
         array $planLayers,
         array &$result,
         ?int $geometryTypeFilter = null
     ): void {
         $result['debug-message'] ??= '';
-        $result['debug-message'] .= 'hook activated for layer: '.$layer['layerId'].'.'.PHP_EOL;
+        $result['debug-message'] .= 'hook activated for layer: '.$layer->getLayerId().'.'.PHP_EOL;
 
         // todo(MH) there is probably a way to get it working with
         //   ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->getNativeConnection()
