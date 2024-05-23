@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Repository\GeometryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 #[ORM\Entity(repositoryClass: GeometryRepository::class)]
 #[ORM\UniqueConstraint(name: 'uq_geometry_data', columns: ['geometry_geometry', 'geometry_data', 'geometry_layer_id'])]
@@ -386,12 +388,12 @@ class Geometry
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function calculateBounds(): array
     {
         if (empty($this->geometryGeometry)) {
-            throw new \Exception('No geometry coordinates retrieved, cannot calculate bounds.');
+            throw new Exception('No geometry coordinates retrieved, cannot calculate bounds.');
         }
         $result = ["x_min" => 1e25, "y_min" => 1e25, "x_max" => -1e25, "y_max" => -1e25];
         foreach (json_decode($this->geometryGeometry, true) as $g) {
@@ -623,22 +625,26 @@ class Geometry
     {
         $jsonArray = [];
         $layer = $this->getLayer()->getOriginalLayer() ?? $this->getLayer();
-        switch ($layer->getLayerGeotype()) {
-            case 'polygon':
+        switch ($layer->getLayerGeoType()) {
+            case LayerGeoType::POLYGON:
                 $jsonArray['type'] = 'MultiPolygon';
                 $jsonArray['coordinates'][] = [$this->getGeometryGeometryAsArray()];
                 foreach ($this->getGeometrySubtractives() as $subtractiveGeometry) {
                     $jsonArray['coordinates'][] = [$subtractiveGeometry->getGeometryGeometryAsArray()];
                 }
                 break;
-            case 'line':
+            case LayerGeoType::LINE:
                 $jsonArray['type'] = 'MultiLineString';
                 $jsonArray['coordinates'][] = $this->getGeometryGeometryAsArray();
                 break;
-            case 'point':
+            case LayerGeoType::POINT:
                 $jsonArray['type'] = 'Point';
                 $jsonArray['coordinates'] = $this->getGeometryGeometryAsArray()[0]; // single point!
                 break;
+            default:
+                throw new \RuntimeException(
+                    'Encountered unexpected layer geo type: '.($layer->getLayerGeoType()?->value ?? 'empty')
+                );
         }
         return $jsonArray;
     }

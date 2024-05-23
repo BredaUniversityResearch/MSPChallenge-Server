@@ -3,6 +3,7 @@
 namespace App\MessageHandler\GameSave;
 
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
+use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Layer;
@@ -124,13 +125,13 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
      */
     private function createLayerShapeFilesAndStore(string $layerName, array $geometryContent): void
     {
-        if ($geometryContent['layerGeoType'] == 'polygon') {
+        if ($geometryContent['layerGeoType'] == LayerGeoType::POLYGON) {
             $shapeType = Shapefile::SHAPE_TYPE_POLYGON;
             $shapeTypeClass = "Shapefile\Geometry\MultiPolygon";
-        } elseif ($geometryContent['layerGeoType'] == 'line') {
+        } elseif ($geometryContent['layerGeoType'] == LayerGeoType::LINE) {
             $shapeType = Shapefile::SHAPE_TYPE_POLYLINE;
             $shapeTypeClass = "Shapefile\Geometry\MultiLinestring";
-        } elseif ($geometryContent['layerGeoType'] == 'point') {
+        } elseif ($geometryContent['layerGeoType'] == LayerGeoType::POINT) {
             $shapeType = Shapefile::SHAPE_TYPE_POINT;
             $shapeTypeClass = "Shapefile\Geometry\Point";
         } else {

@@ -2,6 +2,13 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\EntityEnums\PolicyTypeDataType;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\PlanLayer;
+use App\Entity\PlanPolicy;
+use App\Entity\Policy;
+use Doctrine\ORM\AbstractQuery;
 use Exception;
 
 class MEL extends Base
@@ -363,7 +370,7 @@ class MEL extends Base
 
         $original = $id[0]['layer_id'];
 
-        if ($id[0]['layer_geotype'] == "raster") {
+        if ($id[0]['layer_geotype'] == LayerGeoType::RASTER) {
             $rasterJson = json_decode($id[0]['layer_raster']);
 
             $result["geotype"] = $id[0]['layer_geotype'];
