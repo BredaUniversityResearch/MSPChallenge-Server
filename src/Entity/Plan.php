@@ -82,9 +82,6 @@ class Plan
     #[ORM\ManyToMany(targetEntity: Grid::class, inversedBy: 'planToRemove', cascade: ['persist'])]
     private Collection $gridToRemove;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanPolicy::class, cascade: ['persist'], orphanRemoval: true)]
-    private Collection $planPolicies;
-
     public function __construct()
     {
         $this->planLayer = new ArrayCollection();
@@ -93,7 +90,6 @@ class Plan
         $this->planMessage = new ArrayCollection();
         $this->planRestrictionArea = new ArrayCollection();
         $this->gridToRemove = new ArrayCollection();
-        $this->planPolicies = new ArrayCollection();
     }
 
     public function getPlanId(): ?int
@@ -475,31 +471,6 @@ class Plan
         }
         $this->setPlanLastupdate(microtime(true));
         $this->setPlanConstructionstart($this->getPlanGametime() - $highest);
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, PlanPolicy>
-     */
-    public function getPlanPolicies(): Collection
-    {
-        return $this->planPolicies;
-    }
-
-    public function addPlanPolicy(PlanPolicy $planPolicy): static
-    {
-        if (!$this->planPolicies->contains($planPolicy)) {
-            $this->planPolicies->add($planPolicy);
-            $planPolicy->setPlan($this);
-        }
-
-        return $this;
-    }
-
-    public function removePlanPolicy(PlanPolicy $planPolicy): static
-    {
-        $this->planPolicies->removeElement($planPolicy);
-        // Since orphanRemoval is set, no need to explicitly remove $planMessage from the database
         return $this;
     }
 }
