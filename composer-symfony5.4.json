@@ -25,6 +25,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.12",
         "drift/dbal": "dev-master",
+        "dunglas/doctrine-json-odm": "^1.4",
         "gasparesganga/php-shapefile": "3.3.3",
         "illuminate/collections": "^8.73.2",
         "jfcherng/php-diff": "*",
