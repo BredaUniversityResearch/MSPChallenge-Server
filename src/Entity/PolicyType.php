@@ -2,11 +2,18 @@
 
 namespace App\Entity;
 
-use App\Domain\Common\EntityEnums\PolicyTypeDataType;
+use App\Domain\Common\EntityEnums\PolicyTypeName;
+use App\Domain\PolicyData\BufferZonePolicyData;
+use App\Domain\PolicyData\EcoGearPolicyData;
+use App\Domain\PolicyData\PolicyDataMetaName;
+use App\Domain\PolicyData\PolicyGroup;
+use App\Domain\PolicyData\SeasonalClosurePolicyData;
 use App\Repository\PolicyTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\Schema;
 
 #[ORM\Entity(repositoryClass: PolicyTypeRepository::class)]
 #[ORM\UniqueConstraint(name: 'name', columns: ['name'])]
@@ -17,14 +24,11 @@ class PolicyType
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    #[ORM\Column(length: 255, enumType: PolicyTypeName::class)]
+    private PolicyTypeName $name = PolicyTypeName::SEASONAL_CLOSURE;
 
     #[ORM\Column(length: 255)]
     private ?string $displayName = null;
-
-    #[ORM\Column(type: 'json', nullable: true)]
-    private mixed $schema = null;
 
     #[
         ORM\OneToMany(
@@ -46,12 +50,12 @@ class PolicyType
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): PolicyTypeName
     {
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(PolicyTypeName $name): static
     {
         $this->name = $name;
 
@@ -70,15 +74,19 @@ class PolicyType
         return $this;
     }
 
-    public function getSchema(): mixed
+    /**
+     * @throws InvalidValue
+     */
+    public function getSchema(): object
     {
-        return $this->schema;
-    }
-
-    public function setSchema(mixed $schema): static
-    {
-        $this->schema = $schema;
-        return $this;
+        $schemaWrapper = match ($this->name) {
+            PolicyTypeName::BUFFER_ZONE => BufferZonePolicyData::schema(),
+            PolicyTypeName::SEASONAL_CLOSURE => SeasonalClosurePolicyData::schema(),
+            PolicyTypeName::ECO_GEAR => EcoGearPolicyData::schema()
+        };
+        assert($schemaWrapper->getMeta(PolicyDataMetaName::GROUP->value) == PolicyGroup::POLICY);
+        assert($schemaWrapper->getMeta(PolicyDataMetaName::TYPE_NAME->value) == $this->name);
+        return Schema::export($schemaWrapper);
     }
 
     /**

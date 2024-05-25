@@ -34,6 +34,8 @@ class Geometry
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $geometryData;
+    private mixed $geometryDataJsonObj = null;
+    private mixed $geometryDataJsonArr = null;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'geometry')]
     #[ORM\JoinColumn(name: 'geometry_country_id', referencedColumnName: 'country_id')]
@@ -103,6 +105,11 @@ class Geometry
         $this->socketForGrid = new ArrayCollection();
     }
 
+    public function getName(): ?string
+    {
+        $data = $this->getGeometryDataAsJsonDecoded(true);
+        return ($data['name'] ?? '').($data['NAME'] ?? '').($data['Name'] ?? '') ?: null;
+    }
 
     public function getGeometryId(): ?int
     {
@@ -249,6 +256,19 @@ class Geometry
         return $this;
     }
 
+    public function getGeometryDataAsJsonDecoded(bool $associative = false): mixed
+    {
+        if (null === $this->geometryData) {
+            return null;
+        }
+        if ($associative) {
+            $this->geometryDataJsonArr ??= json_decode($this->geometryData, true); // cache
+            return $this->geometryDataJsonArr;
+        }
+        $this->geometryDataJsonObj ??= json_decode($this->geometryData); // cache
+        return $this->geometryDataJsonObj;
+    }
+
     public function getGeometryData(): ?string
     {
         return $this->geometryData;
@@ -256,14 +276,18 @@ class Geometry
 
     public function setGeometryData(array|string|null $geometryData): Geometry
     {
+        $this->geometryDataJsonArr = $this->geometryDataJsonObj = null; // reset the cached json
+        // data is passed that needs converting to a json string
         if (is_array($geometryData)) {
             // assume $geometryData is actually a downloaded feature properties array
             unset($geometryData['type']);
             unset($geometryData['mspid']);
             unset($geometryData['country_id']);
             unset($geometryData['country_object']);
-            $geometryData = json_encode($geometryData);
+            $this->geometryData = json_encode($geometryData);
+            return $this;
         }
+        // a json string is passed
         $this->geometryData = $geometryData;
         return $this;
     }
@@ -368,7 +392,7 @@ class Geometry
         if (empty($geometryMspid)) {
             $algo = 'fnv1a64';
             $dataToHash = $this->getLayer()->getLayerName() . $this->getGeometryGeometry();
-            $dataArray = json_decode($this->getGeometryData(), true);
+            $dataArray = $this->getGeometryDataAsJsonDecoded(true);
             $dataToHash .= $dataArray['name'] ?? '';
             $this->geometryMspid = hash($algo, $dataToHash);
             $this->getLayer()->isGeometryWithGeneratedMspids();
@@ -617,7 +641,7 @@ class Geometry
         $g["the_geom"] = $this->exportGeometryToDecodedGeoJSON();
         $g["type"] = $this->getGeometryType();
         $g["mspid"] = $this->getGeometryMspid();
-        $g["data"] = json_decode($this->getGeometryData(), true);
+        $g["data"] = $this->getGeometryDataAsJsonDecoded(true);
         return $g;
     }
 

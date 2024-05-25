@@ -2,11 +2,17 @@
 
 namespace App\Entity;
 
-use App\Domain\Common\EntityEnums\FieldType;
+use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
+use App\Domain\PolicyData\FleetFilterPolicyData;
+use App\Domain\PolicyData\PolicyDataMetaName;
+use App\Domain\PolicyData\PolicyGroup;
+use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Repository\PolicyFilterTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\Schema;
 
 #[ORM\Entity(repositoryClass: PolicyFilterTypeRepository::class)]
 #[ORM\UniqueConstraint(name: 'name', columns: ['name'])]
@@ -17,13 +23,8 @@ class PolicyFilterType
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $name = null;
-
-    // just use https://transform.tools/json-to-json-schema to create a json schema
-    #[ORM\Column(type: 'json', nullable: true)]
-    private mixed $schema = null;
-
+    #[ORM\Column(length: 255, enumType: PolicyFilterTypeName::class)]
+    private PolicyFilterTypeName $name = PolicyFilterTypeName::SCHEDULE;
     #[
         ORM\OneToMany(
             mappedBy: 'policyFilterType',
@@ -44,27 +45,30 @@ class PolicyFilterType
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): PolicyFilterTypeName
     {
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(PolicyFilterTypeName $name): static
     {
         $this->name = $name;
 
         return $this;
     }
 
-    public function getSchema(): mixed
+    /**
+     * @throws InvalidValue
+     */
+    public function getSchema(): object
     {
-        return $this->schema;
-    }
-
-    public function setSchema(mixed $schema): static
-    {
-        $this->schema = $schema;
-        return $this;
+        $schemaWrapper = match ($this->name) {
+            PolicyFilterTypeName::FLEET => FleetFilterPolicyData::schema(),
+            PolicyFilterTypeName::SCHEDULE => ScheduleFilterPolicyData::schema()
+        };
+        assert($schemaWrapper->getMeta(PolicyDataMetaName::GROUP->value) == PolicyGroup::FILTER);
+        assert($schemaWrapper->getMeta(PolicyDataMetaName::TYPE_NAME->value) == $this->name);
+        return Schema::export($schemaWrapper);
     }
 
     /**

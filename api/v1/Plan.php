@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\ToPromiseFunction;
 use Drift\DBAL\Result;
 use Exception;
@@ -773,16 +774,16 @@ class Plan extends Base
         //   config done for it. I'm defaulting everything to only use the assembly time and leave it active
         //   forever. This code was implemented in the early months and has is a liability now.
 
-        if ($state == 'WAIT') {
+        if ($state == PlanLayerState::WAIT->value) {
             $assemblyTime = $json[0]['time'] ?? 0;
             if ($currentGameTime >= $planStartTime) {
-                $state = 'ACTIVE';
+                $state = PlanLayerState::ACTIVE->value;
             } elseif ($currentGameTime >= $planStartTime - $assemblyTime) {
-                $state = 'ASSEMBLY';
+                $state = PlanLayerState::ASSEMBLY->value;
             }
         } else {
             if ($currentGameTime >= $planStartTime) {
-                $state = 'ACTIVE';
+                $state = PlanLayerState::ACTIVE->value;
             }
         }
 
@@ -799,7 +800,7 @@ class Plan extends Base
             )
             ->then(function (/*Result $result*/) use ($state, $planLayer) {
                 switch ($state) {
-                    case 'ASSEMBLY':
+                    case PlanLayerState::ASSEMBLY->value:
                         //if the state of the layer is set to assembly, notify MEL that the assembly has started
                         return $this->getAsyncDatabase()->update(
                             'layer',
@@ -810,7 +811,7 @@ class Plan extends Base
                                 'layer_melupdate' => 1
                             ]
                         );
-                    case 'ACTIVE':
+                    case PlanLayerState::ACTIVE->value:
                         $qb = $this->getAsyncDatabase()->createQueryBuilder();
                         return $this->getAsyncDatabase()->query(
                             $qb

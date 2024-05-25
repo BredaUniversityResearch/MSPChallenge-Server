@@ -3,7 +3,9 @@
 namespace App\Command;
 
 use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PlanState;
+use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\Country;
@@ -12,14 +14,13 @@ use App\Entity\Geometry;
 use App\Entity\Layer;
 use App\Entity\Plan;
 use App\Entity\PlanLayer;
-use App\Entity\PlanPolicy;
-use App\Entity\Policy;
 use App\Entity\PolicyFilterType;
 use App\Entity\PolicyType;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Swaggest\JsonSchema\InvalidValue;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -417,17 +418,17 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @throws \Exception
      */
-    public function askPolicyFilterTypeValue(string $policyFilterTypeName, SymfonyStyle $io, array $context): mixed
+    public function askPolicyFilterTypeValue(PolicyFilterTypeName $policyFilterTypeName, SymfonyStyle $io, array $context): mixed
     {
         // todo : ask values based on schema. E.g. loop properties and their type, collect to array
         switch ($policyFilterTypeName) {
-            case 'fleet':
+            case PolicyFilterTypeName::FLEET:
                 return ['fleets' => $this->askLayerType($io, 'Choose banned fleets', $context)];
-            case 'schedule':
+            case PolicyFilterTypeName::SCHEDULE:
                 return ['months' => $this->askSchedule($io, $context)];
         }
         // todo validate on schema
-        throw new \Exception('Unknown policy filter type: '.$policyFilterTypeName);
+        throw new \Exception('Unknown policy filter type: '.$policyFilterTypeName->value);
     }
 
     private function parseMonths(string $monthsString): array
@@ -475,39 +476,40 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @param SymfonyStyle $io
      * @param array<PolicyFilterType> $policyFilterTypes
-     * @return ?string
+     * @return ?PolicyFilterTypeName
      */
-    public function askPolicyFilterTypeName(SymfonyStyle $io, array $policyFilterTypes): ?string
+    public function askPolicyFilterTypeName(SymfonyStyle $io, array $policyFilterTypes): ?PolicyFilterTypeName
     {
         $n = 0;
         foreach ($policyFilterTypes as $policyFilterType) {
-            $choices[$n++] = $policyFilterType->getName();
+            $choices[$n++] = $policyFilterType->getName()->value;
         }
         $choices[$n] = 'Skip, no filter';
         $policyFilterTypeName = null;
         if ($n !== $choice = self::ioChoice($io, 'Choose a policy filter', $choices, current($choices))) {
             $policyFilterTypeName = $choices[$choice];
         }
-        return $policyFilterTypeName;
+        return PolicyFilterTypeName::from($policyFilterTypeName);
     }
 
+    /**
+     * @throws InvalidValue
+     */
     public function askPolicyBase(SymfonyStyle $io, PolicyType $policyType): mixed
     {
         $policyTypeDisplayName = $policyType->getDisplayName();
-        if (null === $schema = $policyType->getSchema()) {
-            return null;
-        }
-        if (empty($schema['properties'])) {
+        $schema = $policyType->getSchema();
+        if (!property_exists($schema, 'properties') || empty($schema->properties)) {
             return null;
         }
         $result = [];
-        foreach ($policyType->getSchema()['properties'] as $propertyName => $property) {
-            if ($property['type'] === 'number') {
+        foreach ($schema->properties as $propertyName => $property) {
+            if (($property->type ?? '') === 'number') {
                 $policyValue = null;
                 while ($policyValue === null) {
                     $policyValue = $io->ask(
                         "Enter a $policyTypeDisplayName $propertyName value",
-                        $property['default'] ?? null
+                        $property->default ?? null
                     );
                     if (is_numeric($policyValue) && $policyValue >= 0 && $policyValue <= 100000) {
                         $policyValue = (int)$policyValue;
@@ -535,7 +537,7 @@ class CreatePolicyPlanCommand extends Command
         }
         assert(!empty($choices));
         $choice = (int)$io->choice('Choose a policy type', $choices, key($choices));
-        return array_values($policyTypes)[$choice]->getName();
+        return array_values($policyTypes)[$choice]->getName()->value;
     }
 
     /**
@@ -635,7 +637,7 @@ class CreatePolicyPlanCommand extends Command
             ->from(PolicyType::class, 'pt')
             ->leftJoin('pt.policyTypeFilterTypes', 'ptft')
             ->leftJoin('ptft.policyFilterType', 'pft')
-            ->getQuery()->getResult())->keyBy(fn(PolicyType $pt) => $pt->getName())->all();
+            ->getQuery()->getResult())->keyBy(fn(PolicyType $pt) => $pt->getName()->value)->all();
         return $result;
     }
 
@@ -650,7 +652,7 @@ class CreatePolicyPlanCommand extends Command
         $policyFilterTypes = [];
         $policyTypeFilterTypes = $policyType->getPolicyTypeFilterTypes();
         foreach ($policyTypeFilterTypes as $policyTypeFilterType) {
-            $policyFilterTypes[$policyTypeFilterType->getPolicyFilterType()->getName()] =
+            $policyFilterTypes[$policyTypeFilterType->getPolicyFilterType()->getName()->value] =
                 $policyTypeFilterType->getPolicyFilterType();
         }
         return $policyFilterTypes;
@@ -730,11 +732,11 @@ class CreatePolicyPlanCommand extends Command
             $policyType = $policyTypes[$policyTypeName];
             $em = $this->getGameSessionEntityManager();
             $em->persist($policyType);
-            $policy = new Policy();
-            $policy
-                ->setType($policyType)
-                ->setData(array_merge($policyBase, $policyFilters));
-            $em->persist($policy);
+//            $policy = new Policy();
+//            $policy
+//                ->setType($policyType)
+//                ->setData(array_merge($policyBase, $policyFilters));
+//            $em->persist($policy);
             $plan
                 ->setPlanName(self::TEST_DATA_PREFIX.'-'.uniqid())
                 ->setCountry($em->getReference(Country::class, 1))
@@ -776,12 +778,16 @@ class CreatePolicyPlanCommand extends Command
             $layerEntity->getOriginalLayer()->setLayerMelupdate(1);
             $em->persist($layerEntity);
             $geometryEntity = new Geometry();
+            // todo convert geometry_data to json type such that we do not need to decode/encode it ourselves
+            $geometryData = json_decode($geometry['geometry_data'], true);
+            $geometryData['policies'] ??= [];
+            $geometryData['policies'][] = array_merge(['type' => $policyTypeName], $policyBase, $policyFilters);
             $geometryEntity
                 ->setLayer($layerEntity)
                 ->setOriginalGeometry($em->getReference(Geometry::class, $geometry['geometry_id']))
                 ->setGeometryFID(self::TEST_DATA_PREFIX.'-'.uniqid())
                 ->setGeometryGeometry($geometry['geometry_geometry'])
-                ->setGeometryData($geometry['geometry_data'])
+                ->setGeometryData(json_encode($geometryData))
                 ->setCountry($em->getReference(Country::class, 7))
                 ->setGeometryActive(1)
                 ->setGeometryToSubtractFrom(null)
@@ -793,12 +799,12 @@ class CreatePolicyPlanCommand extends Command
             }
             $em->persist($geometryEntity);
             $planLayer = new PlanLayer();
-            $planLayer->setLayer($layerEntity)->setPlan($plan)->setPlanLayerState('ACTIVE');
+            $planLayer->setLayer($layerEntity)->setPlan($plan)->setPlanLayerState(PlanLayerState::ACTIVE);
             // no need to persist, it's cascaded
-            $planPolicy = new PlanPolicy();
-            $planPolicy
-                ->setPlan($plan)
-                ->setPolicy($policy);
+//            $planPolicy = new PlanPolicy();
+//            $planPolicy
+//                ->setPlan($plan)
+//                ->setPolicy($policy);
         });
         return $plan;
     }

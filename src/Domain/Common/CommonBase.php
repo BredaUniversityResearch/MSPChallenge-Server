@@ -17,7 +17,7 @@ use React\Promise\PromiseInterface;
 use function App\await;
 use function App\resolveOnFutureTick;
 
-abstract class CommonBase
+abstract class CommonBase extends LogContainer
 {
     private ?string $watchdog_address = null;
     const DEFAULT_WATCHDOG_PORT = 45000;

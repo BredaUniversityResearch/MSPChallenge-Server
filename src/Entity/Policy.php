@@ -2,11 +2,15 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
+use App\Domain\PolicyData\FleetFilterPolicyData;
+use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Repository\PolicyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use JsonSchema\Validator;
+use Swaggest\JsonSchema\Exception;
+use Swaggest\JsonSchema\InvalidValue;
 
 #[ORM\Entity(repositoryClass: PolicyRepository::class)]
 class Policy
@@ -21,9 +25,11 @@ class Policy
     private ?PolicyType $type = null;
 
     /**
-     * @var mixed $data this will be a json string with the data for the policy
+     * @var mixed $data can contain anything: array, objects, nested objects...
+     * see https://github.com/dunglas/doctrine-json-odm
+     * see https://www.doctrine-project.org/projects/doctrine-dbal/en/4.0/reference/types.html#json
      */
-    #[ORM\Column(type: 'json', nullable: true, options: ['default' => 'NULL'])]
+    #[ORM\Column(type: 'json_document', nullable: true, options: ['default' => 'NULL'])]
     private mixed $data = null;
 
     #[ORM\OneToMany(
@@ -34,18 +40,9 @@ class Policy
     )]
     private Collection $planPolicies;
 
-    #[ORM\OneToMany(
-        mappedBy: 'policy',
-        targetEntity: PolicyLayer::class,
-        cascade: ['persist','remove'],
-        orphanRemoval: true
-    )]
-    private Collection $policyLayers;
-
     public function __construct()
     {
         $this->planPolicies = new ArrayCollection();
-        $this->policyLayers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -58,7 +55,7 @@ class Policy
         return $this->type;
     }
 
-    public function setType(?PolicyType $type): static
+    public function setType(PolicyType $type): static
     {
         $this->type = $type;
 
@@ -103,73 +100,40 @@ class Policy
     }
 
     /**
-     * @return Collection<int, PolicyLayer>
+     * @throws Exception
+     * @throws InvalidValue
      */
-    public function getPolicyLayers(): Collection
-    {
-        return $this->policyLayers;
-    }
-
-    public function addPolicyLayer(PolicyLayer $policyLayer): static
-    {
-        if (!$this->policyLayers->contains($policyLayer)) {
-            $this->policyLayers->add($policyLayer);
-            $policyLayer->setPolicy($this);
-        }
-
-        return $this;
-    }
-
-    public function removePolicyLayer(PolicyLayer $policyLayer): static
-    {
-        $this->policyLayers->removeElement($policyLayer);
-        // Since orphanRemoval is set, no need to explicitly remove $policyLayer from the database
-        return $this;
-    }
-
     public function hasFleetFiltersMatch(int $fleet): ?bool
     {
-        $validator = new Validator();
         foreach ($this->getType()->getPolicyTypeFilterTypes() as $policyTypeFilterType) {
-            if ($policyTypeFilterType->getPolicyFilterType()->getName() !== 'fleet') {
+            if ($policyTypeFilterType->getPolicyFilterType()->getName() !== PolicyFilterTypeName::FLEET) {
                 continue;
             }
-            // no fleet filter data found
-            if (!isset($this->data['fleets'])) {
-                return null;
-            }
-            // data should not match the required schema
-            $obj = (object)$this->data;
-            $validator->validate($obj, $policyTypeFilterType->getPolicyFilterType()->getSchema());
-            if (!$validator->isValid()) {
-                return null;
-            }
+            // data does not match the required schema
+            /** @var FleetFilterPolicyData $data */
+            $data = FleetFilterPolicyData::import($this->data);
             // false if there is no fleet filter matching the geometry type
-            return $fleet == ($this->data['fleets'] & $fleet);
+            return $fleet == ($data->fleets & $fleet);
         }
         // no filters fleet relation found
         return null;
     }
 
+    /**
+     * @throws Exception
+     * @throws InvalidValue
+     */
     public function hasScheduleFiltersMatch(int $currentMonth): ?bool
     {
-        $validator = new Validator();
         foreach ($this->getType()->getPolicyTypeFilterTypes() as $policyTypeFilterType) {
-            if ($policyTypeFilterType->getPolicyFilterType()->getName() !== 'schedule') {
+            if ($policyTypeFilterType->getPolicyFilterType()->getName() !== PolicyFilterTypeName::SCHEDULE) {
                 continue;
             }
-            // no filters schedule data found
-            if (!isset($this->data['months'])) {
-                return null;
-            }
-            // data should not match the required schema
-            $obj = (object)$this->data;
-            $validator->validate($obj, $policyTypeFilterType->getPolicyFilterType()->getSchema());
-            if (!$validator->isValid()) {
-                return null;
-            }
+            // data does not match the required schema
+            /** @var ScheduleFilterPolicyData $data */
+            $data = ScheduleFilterPolicyData::import($this->data);
             // false if there is no a seasonal closure for this month, so no pressures
-            return in_array(($currentMonth % 12) + 1, $this->data['months']);
+            return in_array(($currentMonth % 12) + 1, $data->months);
         }
          // no filters schedule relation found
         return null;
