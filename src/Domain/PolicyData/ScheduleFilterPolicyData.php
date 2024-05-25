@@ -14,7 +14,7 @@ class ScheduleFilterPolicyData extends ClassStructure
     public array $months = [];
 
     /**
-     * @var int[] $months
+     * @param int[] $months
      */
     public function __construct(array $months = [])
     {

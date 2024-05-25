@@ -422,7 +422,7 @@ class CreatePolicyPlanCommand extends Command
         PolicyFilterTypeName $policyFilterTypeName,
         SymfonyStyle $io,
         array $context
-    ): mixed {
+    ): array {
         // todo : ask values based on schema. E.g. loop properties and their type, collect to array
         switch ($policyFilterTypeName) {
             case PolicyFilterTypeName::FLEET:
@@ -430,8 +430,6 @@ class CreatePolicyPlanCommand extends Command
             case PolicyFilterTypeName::SCHEDULE:
                 return ['months' => $this->askSchedule($io, $context)];
         }
-        // todo validate on schema
-        throw new \Exception('Unknown policy filter type: '.$policyFilterTypeName->value);
     }
 
     private function parseMonths(string $monthsString): array
