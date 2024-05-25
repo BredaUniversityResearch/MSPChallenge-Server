@@ -418,8 +418,11 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @throws \Exception
      */
-    public function askPolicyFilterTypeValue(PolicyFilterTypeName $policyFilterTypeName, SymfonyStyle $io, array $context): mixed
-    {
+    public function askPolicyFilterTypeValue(
+        PolicyFilterTypeName $policyFilterTypeName,
+        SymfonyStyle $io,
+        array $context
+    ): mixed {
         // todo : ask values based on schema. E.g. loop properties and their type, collect to array
         switch ($policyFilterTypeName) {
             case PolicyFilterTypeName::FLEET:

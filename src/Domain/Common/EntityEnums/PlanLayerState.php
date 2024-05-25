@@ -8,4 +8,3 @@ enum PlanLayerState: string
     case ASSEMBLY = 'ASSEMBLY';
     case WAIT = 'WAIT';
 }
-
