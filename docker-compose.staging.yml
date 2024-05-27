@@ -43,3 +43,6 @@ services:
       - database
     volumes:
       - ./docker/adminer/index.php:/var/www/html/index.php:ro
+    logging:
+      driver: "local"
+

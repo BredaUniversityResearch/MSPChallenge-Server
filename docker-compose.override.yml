@@ -16,6 +16,8 @@ services:
       - "8001:80"
     networks:
       - redis
+    logging:
+      driver: "local"
 
   adminer:
     image: 'mspserver-adminer-dev'
@@ -35,6 +37,8 @@ services:
       - database
     volumes:
       - ./docker/adminer/index.php:/var/www/html/index.php:ro
+    logging:
+      driver: "local"
 
   mitmproxy:
     image: 'mspserver-mitmproxy-dev'
@@ -50,6 +54,8 @@ services:
       - '8081:8081'
     depends_on:
       - php
+    logging:
+      driver: "local"
 
   php:
     image: 'mspserver-php-dev'
