@@ -689,7 +689,7 @@ SUBQUERY
         // add extra array layer.
         // needed for polygons: 1 entry is exterior ring, 2nd and onwards are interior rings
         //   only an exterior ring in this case.
-        $result["geometry"][] = [json_decode($geometryPoints, true)];
+        $result[] = [json_decode($geometryPoints, true)];
     }
 
     private static function toWkt(array $coordinates): string
