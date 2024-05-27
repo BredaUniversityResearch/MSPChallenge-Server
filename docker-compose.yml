@@ -9,6 +9,8 @@ services:
       - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
     networks:
       - redis
+    logging:
+      driver: "local"
 
   database:
     # check https://hub.docker.com/_/mariadb for info.
@@ -43,6 +45,8 @@ services:
       - database
     volumes:
       - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
+    logging:
+      driver: "local"
 
   php:
     image: 'mspserver-php'
@@ -110,6 +114,8 @@ services:
       - target: 443
         published: ${HTTP3_PORT:-443}
         protocol: udp
+    logging:
+      driver: "local"
 
   blackfire:
     image: 'mspserver-blackfire'
@@ -131,6 +137,8 @@ services:
         BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
     networks:
       - php
+    logging:
+      driver: "local"
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
