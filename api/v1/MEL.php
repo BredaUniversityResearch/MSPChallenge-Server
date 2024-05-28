@@ -284,36 +284,26 @@ class MEL extends Base
                 'l.layer_id',
                 <<< 'SUBQUERY'
                 WITH
-                    policy_types_with_schedule AS (
-                        SELECT ptft.*
-                        FROM policy_type_filter_type ptft
-                        JOIN policy_filter_type pft ON ptft.policy_filter_type_id = pft.id AND pft.name = :pftName
-                        JOIN policy_type pt ON ptft.policy_type_id = pt.id                    
-                    ),        
-                    policy_with_schedule AS (
-                        SELECT
-                            p.*,
-                            JSON_EXTRACT(p.data, '$.months') AS months
-                        FROM policy p
-                        LEFT JOIN policy_type pt ON p.type_id = pt.id
-                        LEFT JOIN policy_types_with_schedule ptft ON pt.id = ptft.policy_type_id
-                        LEFT JOIN policy_filter_type pft ON ptft.policy_filter_type_id = pft.id
+                    geometry_with_months AS (
+                        SELECT g.geometry_layer_id, jt.months
+                        FROM
+                            geometry g 
+                            JOIN JSON_TABLE(g.geometry_data, '$.policies[*]'
+                                COLUMNS (
+                                    months JSON PATH '$.months'
+                                )
+                            ) jt ON TRUE
                     )
                 SELECT DISTINCT l.layer_original_id
                 FROM layer l
-                JOIN plan_layer pl ON l.layer_id = pl.plan_layer_layer_id
-                JOIN plan_policy pp ON pl.plan_layer_plan_id = pp.plan_id
-                JOIN policy_with_schedule p ON pp.policy_id = p.id
+                JOIN geometry_with_months g ON g.geometry_layer_id=l.layer_id
                 AND (
-                    p.months IS NULL OR
                     (
-                        (
-                            JSON_CONTAINS(p.months, :prevMonth, '$')=1
-                            AND JSON_CONTAINS(p.months, :month, '$')=0
-                        ) OR (
-                            JSON_CONTAINS(p.months, :prevMonth, '$')=0
-                            AND JSON_CONTAINS(p.months, :month, '$')=1
-                        )
+                        JSON_CONTAINS(g.months, :prevMonth, '$')=1
+                        AND JSON_CONTAINS(g.months, :month, '$')=0
+                    ) OR (
+                        JSON_CONTAINS(g.months, :prevMonth, '$')=0
+                        AND JSON_CONTAINS(g.months, :month, '$')=1
                     )
                )
 SUBQUERY
@@ -642,20 +632,28 @@ SUBQUERY
                 $this->log('Could not create policy from data: '.json_encode($policyData), self::LOG_LEVEL_WARNING);
                 continue;
             }
-            $this->log('Policy detected:'.$policy->getType()->getName()->value);
-            try {
-                if (false === $policy->hasScheduleFiltersMatch((new Game())->GetCurrentMonthAsId())) {
-                    $this->log('Schedule filter detected, no match on current month, skipping policy');
-                    continue;
-                }
-                if ($geometryTypeFilter !== null && false === $policy->hasFleetFiltersMatch($geometryTypeFilter)) {
-                    $this->log('Fleet filter detected, no match on: '.$geometryTypeFilter);
-                    continue;
-                }
-            } catch (Exception $e) {
-                $this->log('Error while filtering on policy: '.$e->getMessage(), self::LOG_LEVEL_ERROR);
+            if (null !== $filterResult = $policy->hasScheduleFiltersMatch((new Game())->GetCurrentMonthAsId())) {
+                $this->log(
+                    'Schedule filter detected, found '.($filterResult === false ? '*NO* ':'').'match on current month'
+                );
+            }
+            if (false === $filterResult) {
+                $this->log('Skipping policy');
                 continue;
             }
+            if ($geometryTypeFilter !== null &&
+                (null !== $filterResult = $policy->hasFleetFiltersMatch($geometryTypeFilter))
+            ) {
+                $this->log(
+                    'Fleet filter detected, found '.($filterResult === false ? '*NO* ':'').'match on: '.
+                    $geometryTypeFilter
+                );
+            }
+            if (false === $filterResult) {
+                $this->log('Skipping policy');
+                continue;
+            }
+            $this->appendFromLogContainer($policy);
             $addGeomToResult = true;
             if (null !== $geometryResult = $this->applyGeometryPolicy(
                 $geometry,

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
+use App\Domain\Common\LogContainer;
 use App\Domain\PolicyData\FleetFilterPolicyData;
 use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Repository\PolicyRepository;
@@ -13,7 +14,7 @@ use Swaggest\JsonSchema\Exception;
 use Swaggest\JsonSchema\InvalidValue;
 
 #[ORM\Entity(repositoryClass: PolicyRepository::class)]
-class Policy
+class Policy extends LogContainer
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -99,10 +100,6 @@ class Policy
         return $this;
     }
 
-    /**
-     * @throws Exception
-     * @throws InvalidValue
-     */
     public function hasFleetFiltersMatch(int $fleet): ?bool
     {
         foreach ($this->getType()->getPolicyTypeFilterTypes() as $policyTypeFilterType) {
@@ -110,8 +107,14 @@ class Policy
                 continue;
             }
             // data does not match the required schema
-            /** @var FleetFilterPolicyData $data */
-            $data = FleetFilterPolicyData::import($this->data);
+            try {
+                /** @var FleetFilterPolicyData $data */
+                $data = FleetFilterPolicyData::import($this->data);
+            } catch (\Exception|InvalidValue $e) {
+                // data does not match the required schema
+                $this->log('No fleet filter schema found: '.$e->getMessage());
+                return null;
+            }
             // false if there is no fleet filter matching the geometry type
             return $fleet == ($data->fleets & $fleet);
         }
@@ -119,10 +122,6 @@ class Policy
         return null;
     }
 
-    /**
-     * @throws Exception
-     * @throws InvalidValue
-     */
     public function hasScheduleFiltersMatch(int $currentMonth): ?bool
     {
         foreach ($this->getType()->getPolicyTypeFilterTypes() as $policyTypeFilterType) {
@@ -130,8 +129,14 @@ class Policy
                 continue;
             }
             // data does not match the required schema
-            /** @var ScheduleFilterPolicyData $data */
-            $data = ScheduleFilterPolicyData::import($this->data);
+            try {
+                /** @var ScheduleFilterPolicyData $data */
+                $data = ScheduleFilterPolicyData::import($this->data);
+            } catch (\Exception|InvalidValue $e) {
+                // data does not match the required schema
+                $this->log('No schedule filter schema found: '.$e->getMessage());
+                return null;
+            }
             // false if there is no a seasonal closure for this month, so no pressures
             return in_array(($currentMonth % 12) + 1, $data->months);
         }

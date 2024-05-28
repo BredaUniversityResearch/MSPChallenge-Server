@@ -46,6 +46,11 @@ class LogContainer
         return $this->logs;
     }
 
+    public function appendFromLogContainer(LogContainer $logContainer): void
+    {
+        $this->logs = array_merge($this->logs, $logContainer->getLogs());
+    }
+
     public function clearLogs(): void
     {
         $this->logs = [];
