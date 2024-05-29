@@ -473,6 +473,7 @@ class CreatePolicyPlanCommand extends Command
                     break;
                 case JsonSchema::OBJECT:
                     assert(false, 'we do not support policy filter of type object');
+                    break;
                 case JsonSchema::NULL:
                     $propValue = null;
                     break;
@@ -538,24 +539,24 @@ class CreatePolicyPlanCommand extends Command
     {
          $primitives = [JsonSchema::BOOLEAN, JsonSchema::INTEGER, JsonSchema::NUMBER, JsonSchema::STRING];
          assert(in_array($primitive, $primitives));
-         while (1) {
-             try {
-                 switch ($primitive) {
-                     case JsonSchema::BOOLEAN:
-                         return $io->confirm($question, $default ?? true);
-                     case JsonSchema::INTEGER:
-                         return (int)$io->ask($question, $default, fn($s) => ctype_digit($s) ? $s :
+        while (1) {
+            try {
+                switch ($primitive) {
+                    case JsonSchema::BOOLEAN:
+                        return $io->confirm($question, $default ?? true);
+                    case JsonSchema::INTEGER:
+                        return (int)$io->ask($question, $default, fn($s) => ctype_digit($s) ? $s :
                              throw new \RuntimeException('Please enter an integer'));
-                     case JsonSchema::NUMBER:
-                         return (float)$io->ask($question, $default, fn($s) => is_numeric($s) ? $s :
+                    case JsonSchema::NUMBER:
+                        return (float)$io->ask($question, $default, fn($s) => is_numeric($s) ? $s :
                              throw new \RuntimeException('Please enter a valid number'));
-                     case JsonSchema::STRING:
-                         return $io->ask($question, $default);
-                 }
-             } catch (\Exception $e) {
-                 $io->error($e->getMessage());
-             }
-         }
+                    case JsonSchema::STRING:
+                        return $io->ask($question, $default);
+                }
+            } catch (\Exception $e) {
+                $io->error($e->getMessage());
+            }
+        }
     }
 
     private function parseMonths(string $monthsString): array
@@ -943,8 +944,11 @@ class CreatePolicyPlanCommand extends Command
      * @throws \Swaggest\JsonSchema\Exception
      * @throws InvalidValue
      */
-    private function createPolicyData(string $policyTypeName, array $policyBase, array $policyFilters): PolicyBasePolicyData
-    {
+    private function createPolicyData(
+        string $policyTypeName,
+        array $policyBase,
+        array $policyFilters
+    ): PolicyBasePolicyData {
         switch ($policyTypeName) {
             case PolicyTypeName::BUFFER_ZONE->value:
                 $policyData = new BufferZonePolicyDataPolicyData();
