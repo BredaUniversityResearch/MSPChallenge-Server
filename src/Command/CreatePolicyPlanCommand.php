@@ -30,6 +30,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\JsonSchema;
+use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\Wrapper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -444,10 +445,12 @@ class CreatePolicyPlanCommand extends Command
         array $context
     ): array {
         $schema = $this->getSchemaByPolicyFilterType($policyFilterTypeName);
-        if (null === $properties = $schema->getProperties()->toArray()) {
+        /* @var null|Schema[] $properties */
+        if (null === $properties = $schema->getProperties()?->toArray()) {
             return [];
         }
         $propValues = [];
+        /* @var Schema $prop */
         foreach ($properties as $propName => $prop) {
             if (null !== $description = $prop->getMeta(PolicyDataMetaName::ON_INPUT_DESCRIPTION->value)) {
                 $io->writeln($description);
@@ -455,11 +458,15 @@ class CreatePolicyPlanCommand extends Command
             if ($prop->getMeta(PolicyDataMetaName::ON_INPUT_SHOW_LAYER_TYPES->value)) {
                 $this->showLayerTypes($io, $context);
             }
+            $propValue = null;
             // general handling, will always work
             switch ($prop->type) {
                 case JsonSchema::_ARRAY:
                     $propValue = [];
-                    assert($prop->items->items === null, 'we do not support multidimensional arrays');
+                    assert(
+                        ($prop->items instanceof Schema) && $prop->items->items === null,
+                        'we do not support multidimensional arrays'
+                    );
                     $again = true;
                     while ($again) {
                         $propValue[] = $this->askJsonSchemaPrimitive(
@@ -472,10 +479,11 @@ class CreatePolicyPlanCommand extends Command
                     }
                     break;
                 case JsonSchema::OBJECT:
+                    // @phpstan-ignore-next-line
                     assert(false, 'we do not support policy filter of type object');
                     break;
                 case JsonSchema::NULL:
-                    $propValue = null;
+                    // nothing to do
                     break;
                 case JsonSchema::INTEGER:
                     $bitwiseHandling = $prop->getMeta(PolicyDataMetaName::ON_INPUT_BITWISE_HANDLING->value);
@@ -557,48 +565,6 @@ class CreatePolicyPlanCommand extends Command
                 $io->error($e->getMessage());
             }
         }
-    }
-
-    private function parseMonths(string $monthsString): array
-    {
-        if (ctype_digit($monthsString)) {
-            return [(int)$monthsString];
-        }
-        $months = [];
-        $ranges = explode(',', $monthsString);
-        foreach ($ranges as $range) {
-            if (!str_contains($range, '-')) {
-                $range = $range.'-'.$range; // '1' => '1-1
-            }
-            [$start, $end] = explode('-', $range);
-            $months = array_merge($months, range((int)$start, (int)$end));
-        }
-        return $months;
-    }
-
-    /**
-     * @param SymfonyStyle $io
-     * @param array{planGameTime: int} $context
-     * @return array
-     */
-    private function askSchedule(SymfonyStyle $io, array $context): array
-    {
-        $nextMonth = ($context['planGameTime'] % 12) + 1;
-        $nextNextMonth = ($nextMonth % 12) + 1;
-        $monthsString = $io->ask(
-            'Enter nothing, a single month, or more in format n-n,n-n,... (e.g., 1-3,6-11): ',
-            "$nextMonth-$nextNextMonth", // 1-based
-            function ($input) {
-                $pattern = "/^(\d{1,2}(-\d{1,2})?(,)?)*$/";
-                if (!preg_match($pattern, $input)) {
-                    throw new \RuntimeException(
-                        'Invalid input format. Enter nothing, a single month or more in format n-n,n-n,...'
-                    );
-                }
-                return $input;
-            }
-        );
-        return $this->parseMonths($monthsString);
     }
 
     /**
@@ -818,7 +784,7 @@ class CreatePolicyPlanCommand extends Command
      * @param string|null $layerGeometryName
      * @param int|null $geometryBannedFleets
      * @param string $policyTypeName
-     * @param mixed $policyBase
+     * @param array $policyBase
      * @param array $policyFilters
      * @return Plan
      * @throws \Exception
@@ -949,6 +915,7 @@ class CreatePolicyPlanCommand extends Command
         array $policyBase,
         array $policyFilters
     ): PolicyBasePolicyData {
+        $policyData = null;
         switch ($policyTypeName) {
             case PolicyTypeName::BUFFER_ZONE->value:
                 $policyData = new BufferZonePolicyDataPolicyData();
@@ -959,6 +926,9 @@ class CreatePolicyPlanCommand extends Command
             case PolicyTypeName::SEASONAL_CLOSURE->value:
                 $policyData = new SeasonalClosurePolicyData();
                 break;
+        }
+        if ($policyData === null) {
+            throw new \Exception('Policy type not found: '.$policyTypeName);
         }
 
         foreach ($policyBase as $key => $value) {

@@ -116,7 +116,7 @@ class Policy extends LogContainer
                 return null;
             }
             // false if there is no fleet filter matching the geometry type
-            return $fleet == ($data->fleets & $fleet);
+            return in_array($fleet, $data->fleets ?? []);
         }
         // no filters fleet relation found
         return null;
@@ -138,7 +138,8 @@ class Policy extends LogContainer
                 return null;
             }
             // false if there is no a seasonal closure for this month, so no pressures
-            return in_array(($currentMonth % 12) + 1, $data->months);
+            $currentMonth = ($currentMonth % 12) + 1;
+            return ($data->months & $currentMonth) === $currentMonth;
         }
          // no filters schedule relation found
         return null;
