@@ -6,6 +6,14 @@ use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
+use App\Domain\Common\EntityEnums\PolicyTypeName;
+use App\Domain\PolicyData\BufferZonePolicyDataPolicyData;
+use App\Domain\PolicyData\EcoGearPolicyData;
+use App\Domain\PolicyData\FleetFilterPolicyData;
+use App\Domain\PolicyData\PolicyBasePolicyData;
+use App\Domain\PolicyData\PolicyDataMetaName;
+use App\Domain\PolicyData\ScheduleFilterPolicyData;
+use App\Domain\PolicyData\SeasonalClosurePolicyData;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\Country;
@@ -21,6 +29,8 @@ use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\JsonSchema;
+use Swaggest\JsonSchema\Wrapper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -415,6 +425,16 @@ class CreatePolicyPlanCommand extends Command
             ->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT);
     }
 
+    private function getSchemaByPolicyFilterType(PolicyFilterTypeName $filterTypeName): Wrapper
+    {
+        switch ($filterTypeName) {
+            case PolicyFilterTypeName::FLEET:
+                return FleetFilterPolicyData::schema();
+            case PolicyFilterTypeName::SCHEDULE:
+                return ScheduleFilterPolicyData::schema();
+        }
+    }
+
     /**
      * @throws \Exception
      */
@@ -423,13 +443,119 @@ class CreatePolicyPlanCommand extends Command
         SymfonyStyle $io,
         array $context
     ): array {
-        // todo : ask values based on schema. E.g. loop properties and their type, collect to array
-        switch ($policyFilterTypeName) {
-            case PolicyFilterTypeName::FLEET:
-                return ['fleets' => $this->askLayerType($io, 'Choose banned fleets', $context)];
-            case PolicyFilterTypeName::SCHEDULE:
-                return ['months' => $this->askSchedule($io, $context)];
+        $schema = $this->getSchemaByPolicyFilterType($policyFilterTypeName);
+        if (null === $properties = $schema->getProperties()->toArray()) {
+            return [];
         }
+        $propValues = [];
+        foreach ($properties as $propName => $prop) {
+            if (null !== $description = $prop->getMeta(PolicyDataMetaName::ON_INPUT_DESCRIPTION->value)) {
+                $io->writeln($description);
+            }
+            if ($prop->getMeta(PolicyDataMetaName::ON_INPUT_SHOW_LAYER_TYPES->value)) {
+                $this->showLayerTypes($io, $context);
+            }
+            // general handling, will always work
+            switch ($prop->type) {
+                case JsonSchema::_ARRAY:
+                    $propValue = [];
+                    assert($prop->items->items === null, 'we do not support multidimensional arrays');
+                    $again = true;
+                    while ($again) {
+                        $propValue[] = $this->askJsonSchemaPrimitive(
+                            $io,
+                            "Enter value to add to $propName",
+                            $prop->items->type,
+                            $prop->items->default ?? null
+                        );
+                        $again = $io->confirm('Add another value?', false);
+                    }
+                    break;
+                case JsonSchema::OBJECT:
+                    assert(false, 'we do not support policy filter of type object');
+                case JsonSchema::NULL:
+                    $propValue = null;
+                    break;
+                case JsonSchema::INTEGER:
+                    $bitwiseHandling = $prop->getMeta(PolicyDataMetaName::ON_INPUT_BITWISE_HANDLING->value);
+                    $propValue = [];
+                    $again = true;
+                    while ($again) {
+                        $propValue[] = $this->askJsonSchemaPrimitive(
+                            $io,
+                            $bitwiseHandling ?  "Enter value to add to $propName" : "Enter $propName",
+                            $prop->type,
+                            $prop->default ?? null
+                        );
+                        $again = $bitwiseHandling && $io->confirm('Add another value?', false);
+                    }
+                    if ($bitwiseHandling) {
+                        $propValue = array_reduce($propValue, fn($carry, $item) => $carry | $item, 0);
+                    } else {
+                        $propValue = $propValue[0];
+                    }
+                    break;
+                default:
+                    $propValue = $this->askJsonSchemaPrimitive(
+                        $io,
+                        "Enter $propName",
+                        $prop->type,
+                        $prop->default ?? null
+                    );
+                    break;
+            }
+            $propValues[$propName] = $propValue;
+        }
+        return $propValues;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function showLayerTypes(SymfonyStyle $io, array $context): void
+    {
+        if (!array_key_exists('layerName', $context)) {
+            throw new \Exception('Layer name not found in the current context');
+        }
+        if (!array_key_exists('gameSessionId', $context)) {
+            throw new \Exception('Game session ID not found in the current context of question');
+        }
+        $dataModel = $this->getDataModel($context['gameSessionId']);
+        if (null === $layerConfig = collect($dataModel['meta'])
+            ->filter(fn($l) => $l['layer_name'] == $context['layerName'])->first()) {
+            throw new \Exception('Layer not found in the game config: '. $context['layerName']);
+        }
+        if (!isset($layerConfig['layer_type'][0]['displayName'])) {
+            throw new \Exception('Layer does not have any required types, or expected field displayName: '.
+                $context['layerName']);
+        }
+        foreach ($layerConfig['layer_type'] as $key => $layerType) {
+            $io->writeln($key.': '.$layerType['displayName']);
+        }
+    }
+
+    private function askJsonSchemaPrimitive($io, string $question, string $primitive, ?string $default = null): mixed
+    {
+         $primitives = [JsonSchema::BOOLEAN, JsonSchema::INTEGER, JsonSchema::NUMBER, JsonSchema::STRING];
+         assert(in_array($primitive, $primitives));
+         while (1) {
+             try {
+                 switch ($primitive) {
+                     case JsonSchema::BOOLEAN:
+                         return $io->confirm($question, $default ?? true);
+                     case JsonSchema::INTEGER:
+                         return (int)$io->ask($question, $default, fn($s) => ctype_digit($s) ? $s :
+                             throw new \RuntimeException('Please enter an integer'));
+                     case JsonSchema::NUMBER:
+                         return (float)$io->ask($question, $default, fn($s) => is_numeric($s) ? $s :
+                             throw new \RuntimeException('Please enter a valid number'));
+                     case JsonSchema::STRING:
+                         return $io->ask($question, $default);
+                 }
+             } catch (\Exception $e) {
+                 $io->error($e->getMessage());
+             }
+         }
     }
 
     private function parseMonths(string $monthsString): array
@@ -490,18 +616,21 @@ class CreatePolicyPlanCommand extends Command
         if ($n !== $choice = self::ioChoice($io, 'Choose a policy filter', $choices, current($choices))) {
             $policyFilterTypeName = $choices[$choice];
         }
+        if (null === $policyFilterTypeName) {
+            return null;
+        }
         return PolicyFilterTypeName::from($policyFilterTypeName);
     }
 
     /**
      * @throws InvalidValue
      */
-    public function askPolicyBase(SymfonyStyle $io, PolicyType $policyType): mixed
+    public function askPolicyBase(SymfonyStyle $io, PolicyType $policyType): array
     {
         $policyTypeDisplayName = $policyType->getDisplayName();
         $schema = $policyType->getSchema();
         if (!property_exists($schema, 'properties') || empty($schema->properties)) {
-            return null;
+            return [];
         }
         $result = [];
         foreach ($schema->properties as $propertyName => $property) {
@@ -701,7 +830,7 @@ class CreatePolicyPlanCommand extends Command
         ?string $layerGeometryName,
         ?int    $geometryBannedFleets,
         string  $policyTypeName,
-        mixed   $policyBase,
+        array   $policyBase,
         array   $policyFilters
     ): Plan {
         $this->cleanUpPreviousPlan();
@@ -782,7 +911,7 @@ class CreatePolicyPlanCommand extends Command
             // todo convert geometry_data to json type such that we do not need to decode/encode it ourselves
             $geometryData = json_decode($geometry['geometry_data'], true);
             $geometryData['policies'] ??= [];
-            $geometryData['policies'][] = array_merge(['type' => $policyTypeName], $policyBase, $policyFilters);
+            $geometryData['policies'][] = $this->createPolicyData($policyTypeName, $policyBase, $policyFilters);
             $geometryEntity
                 ->setLayer($layerEntity)
                 ->setOriginalGeometry($em->getReference(Geometry::class, $geometry['geometry_id']))
@@ -808,5 +937,40 @@ class CreatePolicyPlanCommand extends Command
 //                ->setPolicy($policy);
         });
         return $plan;
+    }
+
+    /**
+     * @throws \Swaggest\JsonSchema\Exception
+     * @throws InvalidValue
+     */
+    private function createPolicyData(string $policyTypeName, array $policyBase, array $policyFilters): PolicyBasePolicyData
+    {
+        switch ($policyTypeName) {
+            case PolicyTypeName::BUFFER_ZONE->value:
+                $policyData = new BufferZonePolicyDataPolicyData();
+                break;
+            case PolicyTypeName::ECO_GEAR->value:
+                $policyData = new EcoGearPolicyData();
+                break;
+            case PolicyTypeName::SEASONAL_CLOSURE->value:
+                $policyData = new SeasonalClosurePolicyData();
+                break;
+        }
+
+        foreach ($policyBase as $key => $value) {
+            $policyData->$key = $value;
+        }
+
+        $item = new \stdClass();
+        foreach ($policyFilters as $key => $value) {
+            $item->$key = $value;
+        }
+        $policyData->items ??= [];
+        $policyData->items[] = $item;
+
+        // Validate the $ecoGearPolicy instance against its schema
+        $policyData::schema()->in(json_decode(json_encode($policyData)));
+
+        return $policyData;
     }
 }

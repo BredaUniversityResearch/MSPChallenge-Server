@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Domain\Common\EntityEnums\PolicyTypeName;
-use App\Domain\PolicyData\BufferZonePolicyData;
+use App\Domain\PolicyData\BufferZonePolicyDataPolicyData;
 use App\Domain\PolicyData\EcoGearPolicyData;
 use App\Domain\PolicyData\PolicyDataMetaName;
 use App\Domain\PolicyData\PolicyGroup;
@@ -80,7 +80,7 @@ class PolicyType
     public function getSchema(): object
     {
         $schemaWrapper = match ($this->name) {
-            PolicyTypeName::BUFFER_ZONE => BufferZonePolicyData::schema(),
+            PolicyTypeName::BUFFER_ZONE => BufferZonePolicyDataPolicyData::schema(),
             PolicyTypeName::SEASONAL_CLOSURE => SeasonalClosurePolicyData::schema(),
             PolicyTypeName::ECO_GEAR => EcoGearPolicyData::schema()
         };

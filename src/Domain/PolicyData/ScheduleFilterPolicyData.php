@@ -8,18 +8,9 @@ use Swaggest\JsonSchema\Structure\ClassStructure;
 
 class ScheduleFilterPolicyData extends ClassStructure
 {
-    /**
-     * @var int[]
-     */
-    public array $months = [];
+    const DEFAULT_VALUE_MONTHS = 0;
 
-    /**
-     * @param int[] $months
-     */
-    public function __construct(array $months = [])
-    {
-        $this->months = $months;
-    }
+    public int $months = self::DEFAULT_VALUE_MONTHS;
 
     /**
      * @inheritdoc
@@ -29,8 +20,10 @@ class ScheduleFilterPolicyData extends ClassStructure
         $ownerSchema->addMeta(PolicyGroup::FILTER, PolicyDataMetaName::GROUP->value);
         $ownerSchema->addMeta(PolicyFilterTypeName::SCHEDULE, PolicyDataMetaName::TYPE_NAME->value);
         $ownerSchema->type = 'object';
-        $monthsSchema = Schema::arr();
-        $monthsSchema->items = Schema::integer();
+        $monthsSchema = Schema::integer()
+            ->addMeta(true, PolicyDataMetaName::ON_INPUT_BITWISE_HANDLING->value)
+            ->addMeta('Enter a month value between 1-12', PolicyDataMetaName::ON_INPUT_DESCRIPTION->value);
+        $monthsSchema->default = self::DEFAULT_VALUE_MONTHS;
         $properties->months = $monthsSchema;
         $ownerSchema->required = ['months'];
     }

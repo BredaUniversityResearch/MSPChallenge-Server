@@ -4,36 +4,31 @@ namespace App\Domain\PolicyData;
 
 use App\Domain\Common\EntityEnums\PolicyTypeName;
 use Swaggest\JsonSchema\Schema;
-use Swaggest\JsonSchema\Structure\ClassStructure;
 
-class EcoGearPolicyData extends ClassStructure
+class EcoGearPolicyData extends PolicyBasePolicyData
 {
-    /**
-     * @var bool[]
-     */
-    public $per_country;
-
-    /**
-     * @param bool[] $per_country
-     */
-    public function __construct(array $per_country)
+    public function __construct()
     {
-        $this->per_country = $per_country;
+        parent::__construct(PolicyTypeName::ECO_GEAR->value);
     }
 
     /**
      * @inheritdoc
      */
-    public static function setUpProperties($properties, Schema $ownerSchema)
+    public static function setUpProperties($properties, Schema $ownerSchema): void
     {
-        $ownerSchema->addMeta(PolicyGroup::POLICY, PolicyDataMetaName::GROUP->value);
         $ownerSchema->addMeta(PolicyTypeName::ECO_GEAR, PolicyDataMetaName::TYPE_NAME->value);
-        $ownerSchema->type = 'object';
-        $perCountrySchema = Schema::object();
-        $perCountrySchema->additionalProperties = false;
-        $booleanSchema = Schema::boolean();
-        $perCountrySchema->setPatternProperty('^[0-9]+$', $booleanSchema);
-        $properties->per_country = $perCountrySchema;
-        $ownerSchema->required = ['per_country'];
+        parent::setUpProperties($properties, $ownerSchema);
+
+        // items
+        $itemsSchema = Schema::arr();
+        $itemSchema = Schema::object();
+        $itemSchema->properties->enabled = Schema::boolean();
+        $itemSchema->allOf = [
+            // define the allowed filters here
+            FleetFilterPolicyData::schema()
+        ];
+        $itemsSchema->items = $itemSchema;
+        $properties->items = $itemsSchema;
     }
 }

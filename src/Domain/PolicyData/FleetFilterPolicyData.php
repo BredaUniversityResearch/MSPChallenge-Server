@@ -8,14 +8,10 @@ use Swaggest\JsonSchema\Structure\ClassStructure;
 
 class FleetFilterPolicyData extends ClassStructure
 {
-    const DEFAULT_VALUE_FLEETS = 0;
-
-    public int $fleets = self::DEFAULT_VALUE_FLEETS;
-
-    public function __construct(int $fleets = self::DEFAULT_VALUE_FLEETS)
-    {
-        $this->fleets = $fleets;
-    }
+    /**
+     * @var int[]
+     */
+    public array $fleets = [];
 
     /**
      * @inheritdoc
@@ -25,8 +21,10 @@ class FleetFilterPolicyData extends ClassStructure
         $ownerSchema->addMeta(PolicyGroup::FILTER, PolicyDataMetaName::GROUP->value);
         $ownerSchema->addMeta(PolicyFilterTypeName::FLEET, PolicyDataMetaName::TYPE_NAME->value);
         $ownerSchema->type = 'object';
-        $fleetsSchema = Schema::integer();
-        $fleetsSchema->default = self::DEFAULT_VALUE_FLEETS;
+        $fleetsSchema = Schema::arr()
+            ->addMeta(true, PolicyDataMetaName::ON_INPUT_SHOW_LAYER_TYPES->value)
+            ->addMeta('Enter one of the following fleet ids', PolicyDataMetaName::ON_INPUT_DESCRIPTION->value);
+        $fleetsSchema->items = Schema::integer();
         $properties->fleets = $fleetsSchema;
         $ownerSchema->required = ['fleets'];
     }
