@@ -23,15 +23,12 @@ abstract class PolicyBasePolicyData extends ClassStructure implements LogContain
     abstract public function getPolicyTypeName(): PolicyTypeName;
     abstract protected function getItemSchema(): Schema;
 
-    public function __construct(string $type)
-    {
-        $this->type = $type;
-    }
+    abstract public function __construct(); // enforce the constructor to have no arguments
 
     public function matchFiltersOn(object $otherItem): ?bool
     {
         $policyFilterClassNames = [];
-        foreach (($this->getItemSchema()->allOf ?? []) as $filterSchema) {
+        foreach ($this->getItemSchema()->allOf as $filterSchema) {
             if (!is_subclass_of($filterSchema->getObjectItemClass(), FilterBasePolicyData::class)) {
                 continue;
             }

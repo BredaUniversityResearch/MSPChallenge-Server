@@ -9,7 +9,7 @@ class SeasonalClosurePolicyData extends PolicyBasePolicyData
 {
     public function __construct()
     {
-        parent::__construct(PolicyTypeName::SEASONAL_CLOSURE->value);
+        $this->type = PolicyTypeName::SEASONAL_CLOSURE->value;
     }
 
     public function getPolicyTypeName(): PolicyTypeName

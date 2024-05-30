@@ -11,10 +11,20 @@ class BufferZonePolicyData extends PolicyBasePolicyData
 
     public float $radius = self::DEFAULT_VALUE_RADIUS;
 
-    public function __construct(float $radius = self::DEFAULT_VALUE_RADIUS)
+    public function __construct()
     {
-        parent::__construct(PolicyTypeName::BUFFER_ZONE->value);
+        $this->type = PolicyTypeName::BUFFER_ZONE->value;
+    }
+
+    public function getRadius(): float
+    {
+        return $this->radius;
+    }
+
+    public function setRadius(float $radius): self
+    {
         $this->radius = $radius;
+        return $this;
     }
 
     public function getPolicyTypeName(): PolicyTypeName

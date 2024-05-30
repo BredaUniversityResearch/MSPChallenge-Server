@@ -9,7 +9,7 @@ class EcoGearPolicyData extends PolicyBasePolicyData
 {
     public function __construct()
     {
-        parent::__construct(PolicyTypeName::ECO_GEAR->value);
+        $this->type = PolicyTypeName::ECO_GEAR->value;
     }
 
     public function getPolicyTypeName(): PolicyTypeName
