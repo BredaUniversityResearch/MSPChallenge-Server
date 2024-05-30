@@ -12,6 +12,22 @@ class EcoGearPolicyData extends PolicyBasePolicyData
         parent::__construct(PolicyTypeName::ECO_GEAR->value);
     }
 
+    public function getPolicyTypeName(): PolicyTypeName
+    {
+        return PolicyTypeName::ECO_GEAR;
+    }
+
+    protected function getItemSchema(): Schema
+    {
+        $schema = Schema::object();
+        $schema->properties->enabled = Schema::boolean();
+        $schema->allOf = [
+                // define the allowed filters here
+                FleetFilterPolicyData::schema()
+            ];
+        return $schema;
+    }
+
     /**
      * @inheritdoc
      */
@@ -19,16 +35,5 @@ class EcoGearPolicyData extends PolicyBasePolicyData
     {
         $ownerSchema->addMeta(PolicyTypeName::ECO_GEAR, PolicyDataMetaName::TYPE_NAME->value);
         parent::setUpProperties($properties, $ownerSchema);
-
-        // items
-        $itemsSchema = Schema::arr();
-        $itemSchema = Schema::object();
-        $itemSchema->properties->enabled = Schema::boolean();
-        $itemSchema->allOf = [
-            // define the allowed filters here
-            FleetFilterPolicyData::schema()
-        ];
-        $itemsSchema->items = $itemSchema;
-        $properties->items = $itemsSchema;
     }
 }

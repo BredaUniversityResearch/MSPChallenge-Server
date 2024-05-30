@@ -7,10 +7,11 @@ use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
-use App\Domain\PolicyData\BufferZonePolicyDataPolicyData;
+use App\Domain\PolicyData\BufferZonePolicyData;
 use App\Domain\PolicyData\EcoGearPolicyData;
 use App\Domain\PolicyData\FleetFilterPolicyData;
 use App\Domain\PolicyData\PolicyBasePolicyData;
+use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\PolicyDataMetaName;
 use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Domain\PolicyData\SeasonalClosurePolicyData;
@@ -915,36 +916,20 @@ class CreatePolicyPlanCommand extends Command
         array $policyBase,
         array $policyFilters
     ): PolicyBasePolicyData {
-        $policyData = null;
-        switch ($policyTypeName) {
-            case PolicyTypeName::BUFFER_ZONE->value:
-                $policyData = new BufferZonePolicyDataPolicyData();
-                break;
-            case PolicyTypeName::ECO_GEAR->value:
-                $policyData = new EcoGearPolicyData();
-                break;
-            case PolicyTypeName::SEASONAL_CLOSURE->value:
-                $policyData = new SeasonalClosurePolicyData();
-                break;
-        }
-        if ($policyData === null) {
-            throw new \Exception('Policy type not found: '.$policyTypeName);
-        }
-
+        $jsonObj = new \stdClass();
+        $jsonObj->type = $policyTypeName;
         foreach ($policyBase as $key => $value) {
-            $policyData->$key = $value;
+            $jsonObj->$key = $value;
         }
-
-        $item = new \stdClass();
+        $item = null;
         foreach ($policyFilters as $key => $value) {
+            $item ??= new \stdClass();
             $item->$key = $value;
         }
-        $policyData->items ??= [];
-        $policyData->items[] = $item;
-
-        // Validate the $ecoGearPolicy instance against its schema
-        $policyData::schema()->in(json_decode(json_encode($policyData)));
-
-        return $policyData;
+        $jsonObj->items ??= [];
+        if ($item !== null) {
+            $jsonObj->items[] = $item;
+        }
+        return PolicyDataFactory::createPolicyDataByJsonObject($jsonObj);
     }
 }

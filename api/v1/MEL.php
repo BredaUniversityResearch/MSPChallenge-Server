@@ -6,9 +6,14 @@ use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
+use App\Domain\PolicyData\BufferZonePolicyData;
+use App\Domain\PolicyData\FilterBasePolicyData;
+use App\Domain\PolicyData\FleetFilterPolicyData;
+use App\Domain\PolicyData\PolicyBasePolicyData;
+use App\Domain\PolicyData\PolicyDataFactory;
+use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Geometry;
-use App\Entity\Policy;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -478,7 +483,7 @@ SUBQUERY
 
     /**
      * @param Geometry $geometry
-     * @param Policy $policy
+     * @param PolicyBasePolicyData $policyData
      * @param bool $addGeometryToResult if the caller should add the geometry to the result.
      *  If not, the policy prevents it
      * @param int|null $geometryTypeFilter
@@ -486,36 +491,31 @@ SUBQUERY
      */
     private function applyGeometryPolicy(
         Geometry $geometry,
-        Policy    $policy,
-        bool     &$addGeometryToResult,
-        ?int     $geometryTypeFilter = null
+        PolicyBasePolicyData $policyData,
+        bool &$addGeometryToResult,
+        ?int $geometryTypeFilter = null
     ): ?array {
-        return match ($policy->getType()->getName()) {
-            PolicyTypeName::BUFFER_ZONE => $this->applyGeometryBufferZonePolicy(
+        if ($policyData instanceof BufferZonePolicyData) {
+            return $this->applyGeometryBufferZonePolicy(
                 $geometry,
-                $policy,
+                $policyData,
                 $addGeometryToResult,
                 $geometryTypeFilter
-            ),
-            default => null,
-        };
+            );
+        }
+        return null;
     }
 
     public function applyGeometryBufferZonePolicy(
         Geometry $geom,
-        Policy   $policy,
-        bool     &$addGeomToResult,
-        ?int     $geometryTypeFilter = null
+        BufferZonePolicyData $policyData,
+        bool &$addGeomToResult,
+        ?int $geometryTypeFilter = null
     ): ?array {
         if ($geometryTypeFilter === null) {
             return null; // mpa should always have a geometry type filter
         }
-
-        if (null === ($radius = $policy->getData()->radius ?? null)) {
-            $this->log('no radius found in policy '.$policy->getType()->getName()->value.'.');
-            return null;
-        }
-        $this->log('applied policy '.$policy->getType()->getName()->value.' with : '.$radius.'.');
+        $this->log('applied policy '.$policyData->getPolicyTypeName()->value.' with : '.$policyData->radius.'.');
 
         // todo(MH) there is probably a way to get it working with
         //   ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->getNativeConnection()
@@ -547,7 +547,7 @@ SUBQUERY
                 );
             }
             $st->bindValue('text', self::toWkt(json_decode($geom->getGeometryGeometry(), true)));
-            $st->bindValue('buffer', $radius);
+            $st->bindValue('buffer', $policyData->radius);
             $st->execute();
             // for debugging use https://wktmap.com/ to visualize using EPSG:3035 !
             $bufferedPolygonText = $st->fetchColumn();
@@ -561,55 +561,16 @@ SUBQUERY
         }
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
-    private function getPolicyTypeByName(PolicyTypeName $typeName): ?\App\Entity\PolicyType
+    private function createObjectFromFiltersPolicyData(FilterBasePolicyData ...$filters): \stdClass
     {
-        static $policyTypeCache = [];
-        if (array_key_exists($typeName->value, $policyTypeCache)) {
-            return $policyTypeCache[$typeName->value];
+        $object = new \stdClass();
+        foreach ($filters as $filter) {
+            $props = get_object_vars($filter);
+            foreach ($props as $prop => $value) {
+                $object->$prop = $value;
+            }
         }
-        $conn = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
-        $qb = $conn->createQueryBuilder();
-        if (null === $policyType = $qb
-            ->select('pt')
-            ->from('App:PolicyType', 'pt')
-            ->where('pt.name = :name')
-            ->setParameter('name', $typeName->value)
-            ->getQuery()
-            ->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT)) {
-            return null;
-        }
-        $policyTypeCache[$typeName->value] = $policyType;
-        return $policyType;
-    }
-
-    private function extractPolicyTypeNameFromData(object $policyData): ?PolicyTypeName
-    {
-        $typeName = null;
-        if (property_exists($policyData, 'type') && is_string($policyData->type)) {
-            $typeName = PolicyTypeName::from($policyData->type);
-        }
-        return $typeName;
-    }
-
-    /**
-     * @throws NonUniqueResultException
-     */
-    private function createPolicyFromData(object $policyData, ?PolicyTypeName $typeName = null): ?Policy
-    {
-        $typeName ??= $this->extractPolicyTypeNameFromData($policyData);
-        if (null === $typeName) {
-            return null;
-        }
-        if (null === $policyType = $this->getPolicyTypeByName($typeName)) {
-            return null;
-        }
-        $policy = new Policy();
-        return $policy
-            ->setType($policyType)
-            ->setData($policyData);
+        return $object;
     }
 
     /**
@@ -627,37 +588,27 @@ SUBQUERY
                 $this->log('Policy data is not a json object: '.json_encode($policyData), self::LOG_LEVEL_WARNING);
                 continue;
             }
-            $policy = $this->createPolicyFromData($policyData);
-            if (null === $policy) {
-                $this->log('Could not create policy from data: '.json_encode($policyData), self::LOG_LEVEL_WARNING);
+            // convert json object to an actual PolicyData instance
+            try {
+                $policyData = PolicyDataFactory::createPolicyDataByJsonObject($policyData);
+            } catch (\Exception $e) {
+                $this->log($e->getMessage(), self::LOG_LEVEL_ERROR);
+                $this->log('Could not create policy data from json object: '.json_encode($policyData), self::LOG_LEVEL_ERROR);
                 continue;
             }
-            if (null !== $filterResult = $policy->hasScheduleFiltersMatch((new Game())->GetCurrentMonthAsId())) {
-                $this->log(
-                    'Schedule filter detected, found '.($filterResult === false ? '*NO* ':'').'match on current month'
-                );
-            }
+            $filterResult = $policyData->matchFiltersOn($this->createObjectFromFiltersPolicyData(
+                new FleetFilterPolicyData([$geometryTypeFilter]),
+                ScheduleFilterPolicyData::createFromGameMonth((new Game())->GetCurrentMonthAsId())
+            ));
+            $this->appendFromLogContainer($policyData);
             if (false === $filterResult) {
                 $this->log('Skipping policy');
                 continue;
             }
-            if ($geometryTypeFilter !== null &&
-                (null !== $filterResult = $policy->hasFleetFiltersMatch($geometryTypeFilter))
-            ) {
-                $this->log(
-                    'Fleet filter detected, found '.($filterResult === false ? '*NO* ':'').'match on: '.
-                    $geometryTypeFilter
-                );
-            }
-            if (false === $filterResult) {
-                $this->log('Skipping policy');
-                continue;
-            }
-            $this->appendFromLogContainer($policy);
             $addGeomToResult = true;
             if (null !== $geometryResult = $this->applyGeometryPolicy(
                 $geometry,
-                $policy,
+                $policyData,
                 $addGeomToResult,
                 $geometryTypeFilter
             )) {

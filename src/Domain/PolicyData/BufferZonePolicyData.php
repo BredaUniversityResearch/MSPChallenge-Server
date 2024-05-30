@@ -5,7 +5,7 @@ namespace App\Domain\PolicyData;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
 use Swaggest\JsonSchema\Schema;
 
-class BufferZonePolicyDataPolicyData extends PolicyBasePolicyData
+class BufferZonePolicyData extends PolicyBasePolicyData
 {
     const DEFAULT_VALUE_RADIUS = 40000.0;
 
@@ -15,6 +15,22 @@ class BufferZonePolicyDataPolicyData extends PolicyBasePolicyData
     {
         parent::__construct(PolicyTypeName::BUFFER_ZONE->value);
         $this->radius = $radius;
+    }
+
+    public function getPolicyTypeName(): PolicyTypeName
+    {
+        return PolicyTypeName::BUFFER_ZONE;
+    }
+
+    protected function getItemSchema(): Schema
+    {
+        $schema = Schema::object();
+        $schema->allOf = [
+                // define the allowed filters here
+                FleetFilterPolicyData::schema(),
+                ScheduleFilterPolicyData::schema()
+            ];
+        return $schema;
     }
 
     /**
@@ -29,17 +45,5 @@ class BufferZonePolicyDataPolicyData extends PolicyBasePolicyData
         $radiusSchema = Schema::number();
         $radiusSchema->default = self::DEFAULT_VALUE_RADIUS;
         $properties->radius = $radiusSchema;
-        $ownerSchema->required[] = 'radius';
-
-        // items
-        $itemsSchema = Schema::arr();
-        $itemSchema = Schema::object();
-        $itemSchema->allOf = [
-            // define the allowed filters here
-            FleetFilterPolicyData::schema(),
-            ScheduleFilterPolicyData::schema()
-        ];
-        $itemsSchema->items = $itemSchema;
-        $properties->items = $itemsSchema;
     }
 }

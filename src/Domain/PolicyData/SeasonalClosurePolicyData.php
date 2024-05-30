@@ -12,6 +12,22 @@ class SeasonalClosurePolicyData extends PolicyBasePolicyData
         parent::__construct(PolicyTypeName::SEASONAL_CLOSURE->value);
     }
 
+    public function getPolicyTypeName(): PolicyTypeName
+    {
+        return PolicyTypeName::SEASONAL_CLOSURE;
+    }
+
+    protected function getItemSchema(): Schema
+    {
+        $schema = Schema::object();
+        $schema->allOf = [
+                // define the allowed filters here
+                FleetFilterPolicyData::schema(),
+                ScheduleFilterPolicyData::schema()
+            ];
+        return $schema;
+    }
+
     /**
      * @inheritdoc
      */
@@ -19,16 +35,5 @@ class SeasonalClosurePolicyData extends PolicyBasePolicyData
     {
         $ownerSchema->addMeta(PolicyTypeName::SEASONAL_CLOSURE, PolicyDataMetaName::TYPE_NAME->value);
         parent::setUpProperties($properties, $ownerSchema);
-
-        // items
-        $itemsSchema = Schema::arr();
-        $itemSchema = Schema::object();
-        $itemSchema->allOf = [
-            // define the allowed filters here
-            FleetFilterPolicyData::schema(),
-            ScheduleFilterPolicyData::schema()
-        ];
-        $itemsSchema->items = $itemSchema;
-        $properties->items = $itemsSchema;
     }
 }

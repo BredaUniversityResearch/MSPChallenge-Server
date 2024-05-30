@@ -7,6 +7,8 @@ use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Log;
 use App\Domain\API\v1\Security;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Log\LogContainerInterface;
+use App\Domain\Log\LogContainerTrait;
 use Drift\DBAL\Connection;
 use Drift\DBAL\Result;
 use Exception;
@@ -17,8 +19,10 @@ use React\Promise\PromiseInterface;
 use function App\await;
 use function App\resolveOnFutureTick;
 
-abstract class CommonBase extends LogContainer
+abstract class CommonBase implements LogContainerInterface
 {
+    use LogContainerTrait;
+
     private ?string $watchdog_address = null;
     const DEFAULT_WATCHDOG_PORT = 45000;
 
