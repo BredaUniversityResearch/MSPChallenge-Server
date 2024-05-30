@@ -23,7 +23,9 @@ trait LogContainerTrait
     public function hasLogs(?string $levelFilter = null): bool
     {
         if ($levelFilter !== null) {
-            return !empty(array_filter($this->logs, fn($log) => $log[LogContainerInterface::LOG_FIELD_LEVEL] === $levelFilter));
+            return !empty(
+                array_filter($this->logs, fn($log) => $log[LogContainerInterface::LOG_FIELD_LEVEL] === $levelFilter)
+            );
         }
         return !empty($this->logs);
     }

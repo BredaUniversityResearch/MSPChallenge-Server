@@ -593,7 +593,10 @@ SUBQUERY
                 $policyData = PolicyDataFactory::createPolicyDataByJsonObject($policyData);
             } catch (\Exception $e) {
                 $this->log($e->getMessage(), self::LOG_LEVEL_ERROR);
-                $this->log('Could not create policy data from json object: '.json_encode($policyData), self::LOG_LEVEL_ERROR);
+                $this->log(
+                    'Could not create policy data from json object: '.json_encode($policyData),
+                    self::LOG_LEVEL_ERROR
+                );
                 continue;
             }
             $filterResult = $policyData->matchFiltersOn($this->createObjectFromFiltersPolicyData(
