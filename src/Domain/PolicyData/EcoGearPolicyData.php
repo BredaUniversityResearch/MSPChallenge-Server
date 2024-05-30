@@ -17,7 +17,7 @@ class EcoGearPolicyData extends PolicyBasePolicyData
         return PolicyTypeName::ECO_GEAR;
     }
 
-    protected function getItemSchema(): Schema
+    public function getItemSchema(): Schema
     {
         $schema = Schema::object();
         $schema->properties->enabled = Schema::boolean();

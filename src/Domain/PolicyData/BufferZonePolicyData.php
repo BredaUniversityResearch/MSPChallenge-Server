@@ -32,7 +32,7 @@ class BufferZonePolicyData extends PolicyBasePolicyData
         return PolicyTypeName::BUFFER_ZONE;
     }
 
-    protected function getItemSchema(): Schema
+    public function getItemSchema(): Schema
     {
         $schema = Schema::object();
         $schema->allOf = [

@@ -21,11 +21,14 @@ abstract class PolicyBasePolicyData extends ClassStructure implements LogContain
     public array $items;
 
     abstract public function getPolicyTypeName(): PolicyTypeName;
-    abstract protected function getItemSchema(): Schema;
+    abstract public function getItemSchema(): Schema;
 
     abstract public function __construct(); // enforce the constructor to have no arguments
 
-    public function matchFiltersOn(object $otherItem): ?bool
+    /**
+     * @return array
+     */
+    public function getRequiredFilterClassNames(): array
     {
         $policyFilterClassNames = [];
         foreach ($this->getItemSchema()->allOf as $filterSchema) {
@@ -34,14 +37,20 @@ abstract class PolicyBasePolicyData extends ClassStructure implements LogContain
             }
             $policyFilterClassNames[] = $filterSchema->getObjectItemClass();
         }
-        if (empty($policyFilterClassNames)) {
+        return $policyFilterClassNames;
+    }
+
+    public function matchFiltersOn(object $otherItem): ?bool
+    {
+        $requiredFilterClassNames = $this->getRequiredFilterClassNames();
+        if (empty($requiredFilterClassNames)) {
             return null; // no filters for this policy
         }
         foreach ($this->items as $item) {
-            foreach ($policyFilterClassNames as $policyFilterClassName) {
+            foreach ($requiredFilterClassNames as $filterClassName) {
                 try {
                     /** @var FilterBasePolicyData $data */
-                    $data = call_user_func([$policyFilterClassName, 'import'], $item);
+                    $data = call_user_func([$filterClassName, 'import'], $item);
                 } catch (\Exception|InvalidValue $e) {
                     // data does not match the required schema
                     $this->log('Item: ' . json_encode($item), self::LOG_LEVEL_DEBUG);

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\PolicyTypeName;
 use App\Repository\PolicyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -15,9 +16,8 @@ class Policy
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?PolicyType $type = null;
+    #[ORM\Column(length: 255, enumType: PolicyTypeName::class)]
+    private PolicyTypeName $type = PolicyTypeName::SEASONAL_CLOSURE;
 
     /**
      * @var mixed $data can contain anything: array, objects, nested objects...
@@ -45,12 +45,12 @@ class Policy
         return $this->id;
     }
 
-    public function getType(): ?PolicyType
+    public function getType(): PolicyTypeName
     {
         return $this->type;
     }
 
-    public function setType(PolicyType $type): static
+    public function setType(PolicyTypeName $type): static
     {
         $this->type = $type;
 

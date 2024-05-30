@@ -5,9 +5,19 @@ namespace App\Domain\PolicyData;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
 use Swaggest\JsonSchema\Exception;
 use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\Wrapper;
 
 class PolicyDataFactory
 {
+    public static function getPolicyDataSchemaByType(PolicyTypeName $typeName): Wrapper
+    {
+        return match ($typeName) {
+            PolicyTypeName::BUFFER_ZONE => BufferZonePolicyData::schema(),
+            PolicyTypeName::SEASONAL_CLOSURE => SeasonalClosurePolicyData::schema(),
+            PolicyTypeName::ECO_GEAR => EcoGearPolicyData::schema()
+        };
+    }
+
     public static function createPolicyDataByType(
         PolicyTypeName $policyTypeName
     ): PolicyBasePolicyData|BufferZonePolicyData|SeasonalClosurePolicyData|EcoGearPolicyData {

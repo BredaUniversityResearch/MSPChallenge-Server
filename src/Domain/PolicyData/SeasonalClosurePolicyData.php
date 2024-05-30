@@ -17,7 +17,7 @@ class SeasonalClosurePolicyData extends PolicyBasePolicyData
         return PolicyTypeName::SEASONAL_CLOSURE;
     }
 
-    protected function getItemSchema(): Schema
+    public function getItemSchema(): Schema
     {
         $schema = Schema::object();
         $schema->allOf = [
