@@ -44,10 +44,10 @@ class ScheduleFilterPolicyData extends FilterBasePolicyData
     public static function setUpProperties($properties, $ownerSchema): void
     {
         parent::setUpProperties($properties, $ownerSchema);
-        $ownerSchema->addMeta(PolicyFilterTypeName::SCHEDULE, PolicyDataMetaName::TYPE_NAME->value);
+        $ownerSchema->addMeta(PolicyFilterTypeName::SCHEDULE, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value);
         $monthsSchema = Schema::integer()
-            ->addMeta(true, PolicyDataMetaName::ON_INPUT_BITWISE_HANDLING->value)
-            ->addMeta('Enter a month value between 1-12', PolicyDataMetaName::ON_INPUT_DESCRIPTION->value);
+            ->addMeta(true, PolicyDataSchemaMetaName::FIELD_ON_INPUT_BITWISE_HANDLING->value)
+            ->addMeta('Enter a month value between 1-12', PolicyDataSchemaMetaName::FIELD_ON_INPUT_DESCRIPTION->value);
         $monthsSchema->default = self::DEFAULT_VALUE_MONTHS;
         $properties->months = $monthsSchema;
     }

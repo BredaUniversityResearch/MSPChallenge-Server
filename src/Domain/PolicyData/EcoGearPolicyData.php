@@ -3,6 +3,7 @@
 namespace App\Domain\PolicyData;
 
 use App\Domain\Common\EntityEnums\PolicyTypeName;
+use Swaggest\JsonSchema\Constraint\Properties;
 use Swaggest\JsonSchema\Schema;
 
 class EcoGearPolicyData extends PolicyBasePolicyData
@@ -20,11 +21,12 @@ class EcoGearPolicyData extends PolicyBasePolicyData
     public function getItemSchema(): Schema
     {
         $schema = Schema::object();
+        $schema->properties ??= new Properties();
         $schema->properties->enabled = Schema::boolean();
         $schema->allOf = [
-                // define the allowed filters here
-                FleetFilterPolicyData::schema()
-            ];
+            // define the allowed filters here
+            FleetFilterPolicyData::schema()
+        ];
         return $schema;
     }
 
@@ -33,7 +35,7 @@ class EcoGearPolicyData extends PolicyBasePolicyData
      */
     public static function setUpProperties($properties, Schema $ownerSchema): void
     {
-        $ownerSchema->addMeta(PolicyTypeName::ECO_GEAR, PolicyDataMetaName::TYPE_NAME->value);
+        $ownerSchema->addMeta(PolicyTypeName::ECO_GEAR, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value);
         parent::setUpProperties($properties, $ownerSchema);
     }
 }

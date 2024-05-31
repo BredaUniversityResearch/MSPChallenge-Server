@@ -96,7 +96,7 @@ abstract class PolicyBasePolicyData extends ClassStructure implements LogContain
      */
     public static function setUpProperties($properties, Schema $ownerSchema): void
     {
-        $ownerSchema->addMeta(PolicyGroup::POLICY, PolicyDataMetaName::GROUP->value);
+        $ownerSchema->addMeta(PolicyGroup::POLICY, PolicyDataSchemaMetaName::POLICY_GROUP->value);
         $ownerSchema->type = 'object';
         // by default, we require all properties including the ones from the child classes
         $ownerSchema->required = Util::getClassPropertyNames(
@@ -105,9 +105,12 @@ abstract class PolicyBasePolicyData extends ClassStructure implements LogContain
             __CLASS__
         );
         $ownerSchema->additionalProperties = true; // we allow additional properties
-        $properties->type = Schema::string();
         $itemsSchema = Schema::arr();
-        $itemsSchema->items = Schema::object();
+        $itemsSchema->items = Schema::object()
+            ->addMeta(
+                fn() => (new static())->getItemSchema(),
+                PolicyDataSchemaMetaName::FIELD_OBJECT_SCHEMA_CALLABLE->value
+            );
         $properties->items = $itemsSchema;
     }
 }

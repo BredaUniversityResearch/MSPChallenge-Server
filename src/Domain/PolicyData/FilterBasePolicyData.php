@@ -18,7 +18,7 @@ abstract class FilterBasePolicyData extends ClassStructure
      */
     public static function setUpProperties($properties, Schema $ownerSchema): void
     {
-        $ownerSchema->addMeta(PolicyGroup::FILTER, PolicyDataMetaName::GROUP->value);
+        $ownerSchema->addMeta(PolicyGroup::FILTER, PolicyDataSchemaMetaName::POLICY_GROUP->value);
         $ownerSchema->type = 'object';
         // by default, we require all properties including the ones from the child classes
         $ownerSchema->required = Util::getClassPropertyNames(
