@@ -35,7 +35,9 @@ class EcoGearPolicyData extends PolicyBasePolicyData
      */
     public static function setUpProperties($properties, Schema $ownerSchema): void
     {
-        $ownerSchema->addMeta(PolicyTypeName::ECO_GEAR, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value);
+        $ownerSchema
+            ->addMeta(PolicyTypeName::ECO_GEAR, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value)
+            ->addMeta(PolicyTarget::PLAN, PolicyDataSchemaMetaName::POLICY_TARGET->value);
         parent::setUpProperties($properties, $ownerSchema);
     }
 }

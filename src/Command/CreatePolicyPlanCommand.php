@@ -12,6 +12,7 @@ use App\Domain\PolicyData\FleetFilterPolicyData;
 use App\Domain\PolicyData\PolicyBasePolicyData;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\PolicyDataSchemaMetaName;
+use App\Domain\PolicyData\PolicyTarget;
 use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
@@ -21,6 +22,8 @@ use App\Entity\Geometry;
 use App\Entity\Layer;
 use App\Entity\Plan;
 use App\Entity\PlanLayer;
+use App\Entity\PlanPolicy;
+use App\Entity\Policy;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
@@ -138,7 +141,9 @@ class CreatePolicyPlanCommand extends Command
                 $layerGeometryName,
                 $geometryBannedFleets,
                 $policyTypeName,
-                $policyData
+                $policyData,
+                PolicyDataFactory::getPolicyDataSchemaByType($policyTypeName)
+                    ->getMeta(PolicyDataSchemaMetaName::POLICY_TARGET->value) ?? PolicyTarget::PLAN
             );
         } catch (\Exception $e) {
             $io->error('Failed to create plan: '.$e->getMessage());
@@ -702,7 +707,9 @@ class CreatePolicyPlanCommand extends Command
      * @param int|null $geometryBannedFleets
      * @param PolicyTypeName $policyTypeName
      * @param array $policyData
+     * @param PolicyTarget $policyTarget
      * @return Plan
+     * @throws Exception
      * @throws \Exception
      */
     private function createPlan(
@@ -712,7 +719,8 @@ class CreatePolicyPlanCommand extends Command
         ?string        $layerGeometryName,
         ?int           $geometryBannedFleets,
         PolicyTypeName $policyTypeName,
-        array          $policyData
+        array          $policyData,
+        PolicyTarget   $policyTarget
     ): Plan {
         $this->cleanUpPreviousPlan();
         $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
@@ -736,14 +744,12 @@ class CreatePolicyPlanCommand extends Command
             $geometryBannedFleets,
             $policyTypeName,
             $policyData,
+            $policyTarget,
             $plan
         ) {
+            // create policy data object from array
+            $policyData = $this->createPolicyData($policyTypeName, $policyData);
             $em = $this->getGameSessionEntityManager();
-//            $policy = new Policy();
-//            $policy
-//                ->setType($policyTypeName)
-//                ->setData(array_merge($policyBase, $policyFilters));
-//            $em->persist($policy);
             $plan
                 ->setPlanName(self::TEST_DATA_PREFIX.'-'.uniqid())
                 ->setCountry($em->getReference(Country::class, 1))
@@ -785,10 +791,11 @@ class CreatePolicyPlanCommand extends Command
             $layerEntity->getOriginalLayer()->setLayerMelupdate(1);
             $em->persist($layerEntity);
             $geometryEntity = new Geometry();
-            // todo convert geometry_data to json type such that we do not need to decode/encode it ourselves
             $geometryData = json_decode($geometry['geometry_data'], true);
-            $geometryData['policies'] ??= [];
-            $geometryData['policies'][] = $this->createPolicyData($policyTypeName, $policyData);
+            if ($policyTarget === PolicyTarget::GEOMETRY) {
+                $geometryData['policies'] ??= [];
+                $geometryData['policies'][] = $policyData;
+            }
             $geometryEntity
                 ->setLayer($layerEntity)
                 ->setOriginalGeometry($em->getReference(Geometry::class, $geometry['geometry_id']))
@@ -808,10 +815,18 @@ class CreatePolicyPlanCommand extends Command
             $planLayer = new PlanLayer();
             $planLayer->setLayer($layerEntity)->setPlan($plan)->setPlanLayerState(PlanLayerState::ACTIVE);
             // no need to persist, it's cascaded
-//            $planPolicy = new PlanPolicy();
-//            $planPolicy
-//                ->setPlan($plan)
-//                ->setPolicy($policy);
+            if ($policyTarget === PolicyTarget::PLAN) {
+                $policy = new Policy();
+                $policy
+                    ->setType($policyTypeName)
+                    ->setData(json_decode(json_encode($policyData))); // todo: more efficient way ?
+                $em->persist($policy);
+                // no need to persist, it's cascaded
+                $planPolicy = new PlanPolicy();
+                $planPolicy
+                    ->setPlan($plan)
+                    ->setPolicy($policy);
+            }
         });
         return $plan;
     }

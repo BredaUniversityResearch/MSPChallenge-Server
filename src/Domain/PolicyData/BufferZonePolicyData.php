@@ -48,7 +48,9 @@ class BufferZonePolicyData extends PolicyBasePolicyData
      */
     public static function setUpProperties($properties, $ownerSchema): void
     {
-        $ownerSchema->addMeta(PolicyTypeName::BUFFER_ZONE, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value);
+        $ownerSchema
+            ->addMeta(PolicyTypeName::BUFFER_ZONE, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value)
+            ->addMeta(PolicyTarget::GEOMETRY, PolicyDataSchemaMetaName::POLICY_TARGET->value);
         parent::setUpProperties($properties, $ownerSchema);
 
         // radius

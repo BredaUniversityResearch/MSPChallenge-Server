@@ -33,7 +33,9 @@ class SeasonalClosurePolicyData extends PolicyBasePolicyData
      */
     public static function setUpProperties($properties, Schema $ownerSchema): void
     {
-        $ownerSchema->addMeta(PolicyTypeName::SEASONAL_CLOSURE, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value);
+        $ownerSchema
+            ->addMeta(PolicyTypeName::SEASONAL_CLOSURE, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value)
+            ->addMeta(PolicyTarget::GEOMETRY, PolicyDataSchemaMetaName::POLICY_TARGET->value);
         parent::setUpProperties($properties, $ownerSchema);
     }
 }

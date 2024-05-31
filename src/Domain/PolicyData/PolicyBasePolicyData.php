@@ -111,6 +111,7 @@ abstract class PolicyBasePolicyData extends ClassStructure implements LogContain
                 fn() => (new static())->getItemSchema(),
                 PolicyDataSchemaMetaName::FIELD_OBJECT_SCHEMA_CALLABLE->value
             );
+        $properties->type = Schema::string();
         $properties->items = $itemsSchema;
     }
 }
