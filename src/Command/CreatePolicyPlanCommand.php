@@ -484,13 +484,14 @@ class CreatePolicyPlanCommand extends Command
                 $v = [];
                 $again = true;
                 while ($again) {
-                    $v[] = $this->askJsonSchemaPrimitive(
+                    $value = $this->askJsonSchemaPrimitive(
                         $io,
                         $bitwiseHandling ?
                             "Add to $propName ($prop->type)" : "Enter $propName ($prop->type)",
                         $prop->type,
                         $prop->default ?? null
                     );
+                    $v[] = $bitwiseHandling ? pow(2, $value-1) : $value;
                     if ($bitwiseHandling) {
                         $propValue = array_reduce($v, fn($carry, $item) => $carry | $item, 0);
                     } else {
