@@ -126,7 +126,7 @@ class CreatePolicyPlanCommand extends Command
                 return Command::FAILURE;
             }
             $context = array_merge($context, ['layerGeometryName' => $layerGeometryName]);
-            $geometrySupportingLayerTypes = $this->askGeometrySupportingLayerTypes($io, $context, true);
+            $geometrySupportingLayerTypes = $this->askGeometrySupportingLayerTypes($io, $context);
         }
         // assuming the display name to be unique
         $policyTypeName = $this->askPolicyTypeName($io);
@@ -638,24 +638,6 @@ class CreatePolicyPlanCommand extends Command
             ->setParameter('layerName', self::TEST_DATA_PREFIX.'%')->getQuery()->execute();
         $em->createQueryBuilder()->delete('App:Policy', 'p')->getQuery()->execute();
         $em->flush();
-    }
-
-    private function convertBannedFleetFlagsToCommaSeparatedString(int $bannedFleetFlags): string
-    {
-        $result = [];
-        if (($bannedFleetFlags & 1) == 1) {
-            $result[] = '1';
-        }
-        if (($bannedFleetFlags & 2) == 2) {
-            $result[] = '2';
-        }
-        if (($bannedFleetFlags & 4) == 4) {
-            $result[] = '3';
-        }
-        if (empty($result)) {
-            return '0';
-        }
-        return implode(',', $result);
     }
 
     /**
