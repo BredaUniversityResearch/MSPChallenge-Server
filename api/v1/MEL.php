@@ -5,10 +5,7 @@ namespace App\Domain\API\v1;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
-use App\Domain\Common\EntityEnums\PolicyTypeName;
 use App\Domain\PolicyData\BufferZonePolicyData;
-use App\Domain\PolicyData\FilterBasePolicyData;
-use App\Domain\PolicyData\FleetFilterPolicyData;
 use App\Domain\PolicyData\PolicyBasePolicyData;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\ScheduleFilterPolicyData;
@@ -403,19 +400,38 @@ SUBQUERY
      * @apiSuccess {string} JSON Object
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GeometryExportName(string $name, int $layer_type = -1, bool $construction_only = false): ?array
-    {
-        return $this->exportAllGeometryFromLayer($name, $layer_type == -1 ? null : $layer_type, $construction_only);
+    public function GeometryExportName(
+        string $name,
+        int $layer_type = -1,
+        bool $construction_only = false,
+        ?string $policy_filters = null
+    ): ?array {
+        if ($policy_filters != null) {
+            $policy_filters = (json_decode($policy_filters) ?? false) ?: null;
+        }
+        return $this->exportAllGeometryFromLayer(
+            $name,
+            $layer_type == -1 ? null : $layer_type,
+            $construction_only,
+            $policy_filters
+        );
     }
 
     /**
+     * @param string $name
+     * @param int|null $geometryFilterTpe
+     * @param bool $constructionOnly
+     * @param object|null $policyFilters
+     *
+     * @return array|null
      * @throws NonUniqueResultException
      * @throws Exception
      */
     private function exportAllGeometryFromLayer(
         string $name,
         ?int $geometryFilterTpe = null,
-        bool $constructionOnly = false
+        bool $constructionOnly = false,
+        ?object $policyFilters = null
     ): ?array {
         $conn = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
         $qb = $conn->createQueryBuilder();
@@ -473,7 +489,7 @@ SUBQUERY
         foreach ($layers as $l) {
             // export each geometry linked to the layer
             foreach ($l->getGeometry() as $geom) {
-                $this->exportGeometryTo($geom, $geometryTypeFilter, $result["geometry"]);
+                $this->exportGeometryTo($geom, $geometryTypeFilter, $policyFilters, $result["geometry"]);
             }
         }
         $result['logs'] = json_encode($this->getLogMessages());
@@ -561,10 +577,13 @@ SUBQUERY
         }
     }
 
-    private function createObjectFromFiltersPolicyData(FilterBasePolicyData ...$filters): \stdClass
+    private function createObjectFromFiltersPolicyData(?object ...$filters): \stdClass
     {
         $object = new \stdClass();
         foreach ($filters as $filter) {
+            if (null === $filter) {
+                continue;
+            }
             $props = get_object_vars($filter);
             foreach ($props as $prop => $value) {
                 $object->$prop = $value;
@@ -574,11 +593,16 @@ SUBQUERY
     }
 
     /**
+     * @param Geometry $geometry
+     * @param int|null $geometryTypeFilter
+     * @param object|null $policyFilters
+     * @param array $exportResult
      * @throws Exception
      */
     private function exportGeometryTo(
         Geometry $geometry,
         ?int $geometryTypeFilter,
+        ?object $policyFilters,
         array &$exportResult,
     ): void {
         $data = $geometry->getGeometryDataAsJsonDecoded();
@@ -600,7 +624,7 @@ SUBQUERY
                 continue;
             }
             $filterResult = $policyData->matchFiltersOn($this->createObjectFromFiltersPolicyData(
-                new FleetFilterPolicyData([$geometryTypeFilter]),
+                $policyFilters,
                 ScheduleFilterPolicyData::createFromGameMonth((new Game())->GetCurrentMonthAsId())
             ));
             $this->appendFromLogContainer($policyData);

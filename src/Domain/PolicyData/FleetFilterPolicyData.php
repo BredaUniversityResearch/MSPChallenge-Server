@@ -2,6 +2,7 @@
 
 namespace App\Domain\PolicyData;
 
+use App\Domain\API\v1\Game;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use Swaggest\JsonSchema\Schema;
 
@@ -28,10 +29,10 @@ class FleetFilterPolicyData extends FilterBasePolicyData
     public function match(object $otherItem): bool
     {
         if (property_exists($otherItem, 'fleets') === false) {
-            return false;
+            return true; // no "filter", so just match.
         }
         if (!is_array($otherItem->fleets)) {
-            return false;
+            return false; // there seems to be a setup for a filter, but the value is not an array, so do not match
         }
         return empty(array_diff($otherItem->fleets, $this->fleets ?? []));
     }
@@ -44,9 +45,19 @@ class FleetFilterPolicyData extends FilterBasePolicyData
         parent::setUpProperties($properties, $ownerSchema);
         $ownerSchema->addMeta(PolicyFilterTypeName::FLEET, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value);
         $fleetsSchema = Schema::arr()
-            ->addMeta(true, PolicyDataSchemaMetaName::FIELD_ON_INPUT_SHOW_LAYER_TYPES->value)
+            ->addMeta(function(int $gameSessionId) {
+                $game = new Game();
+                $game->setGameSessionId($gameSessionId);
+                $dataModel = $game->getGameConfigValues();
+                $gearTypes = collect($dataModel['MEL']['fishing'])->map(fn($gear) => $gear['name'])->toArray();
+                return collect($dataModel['MEL']['fishing_policy_settings']['fleet_info'])->map(
+                    function(array $fleet) use ($gearTypes) {
+                        return $gearTypes[$fleet['gear_type']].' fleets';
+                    }
+                )->toArray();
+            }, PolicyDataSchemaMetaName::FIELD_ON_INPUT_CHOICES->value)
             ->addMeta(
-                'Enter one of the following fleet ids (integer)',
+                'Enter one of the following fleet (as integer)',
                 PolicyDataSchemaMetaName::FIELD_ON_INPUT_DESCRIPTION->value
             );
         $fleetsSchema->items = Schema::integer();

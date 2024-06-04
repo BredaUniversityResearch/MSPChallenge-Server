@@ -30,10 +30,10 @@ class ScheduleFilterPolicyData extends FilterBasePolicyData
     public function match(object $otherItem): bool
     {
         if (!property_exists($otherItem, 'months')) {
-            return false;
+            return true; // no "filter", so just match.
         }
         if (!is_int($otherItem->months)) {
-            return false;
+            return false; // there seems to be a setup for a filter, but the value is not an integer, so do not match
         }
         return ($this->months & $otherItem->months) == $otherItem->months;
     }
@@ -47,7 +47,7 @@ class ScheduleFilterPolicyData extends FilterBasePolicyData
         $ownerSchema->addMeta(PolicyFilterTypeName::SCHEDULE, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value);
         $monthsSchema = Schema::integer()
             ->addMeta(true, PolicyDataSchemaMetaName::FIELD_ON_INPUT_BITWISE_HANDLING->value)
-            ->addMeta('Enter a month value between 1-12', PolicyDataSchemaMetaName::FIELD_ON_INPUT_DESCRIPTION->value);
+            ->addMeta('Enter a month value between 1-12 (or 0 = none)', PolicyDataSchemaMetaName::FIELD_ON_INPUT_DESCRIPTION->value);
         $monthsSchema->default = self::DEFAULT_VALUE_MONTHS;
         $properties->months = $monthsSchema;
     }

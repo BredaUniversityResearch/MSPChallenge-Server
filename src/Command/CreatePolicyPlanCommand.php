@@ -8,12 +8,10 @@ use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
 use App\Domain\PolicyData\FilterBasePolicyData;
-use App\Domain\PolicyData\FleetFilterPolicyData;
 use App\Domain\PolicyData\PolicyBasePolicyData;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\PolicyDataSchemaMetaName;
 use App\Domain\PolicyData\PolicyTarget;
-use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\Country;
@@ -31,7 +29,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\JsonSchema;
 use Swaggest\JsonSchema\Schema;
-use Swaggest\JsonSchema\Wrapper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -115,7 +112,7 @@ class CreatePolicyPlanCommand extends Command
         }
         $context['layerName'] = $layer->getLayerName();
         $layerGeometryName = null;
-        $geometryBannedFleets = null;
+        $geometrySupportingLayerTypes = null;
         if ($layer->getLayerGeoType() !== LayerGeoType::RASTER) {
             if (null === $layerGeometryName = $this->askLayerGeometryName(
                 $gameSessionId,
@@ -128,7 +125,8 @@ class CreatePolicyPlanCommand extends Command
                 $io->error('No geometry found for the layer: '.$layerShort);
                 return Command::FAILURE;
             }
-            $geometryBannedFleets = $this->askBannedFleets($io, $context, true);
+            $context = array_merge($context, ['layerGeometryName' => $layerGeometryName]);
+            $geometrySupportingLayerTypes = $this->askGeometrySupportingLayerTypes($io, $context, true);
         }
         // assuming the display name to be unique
         $policyTypeName = $this->askPolicyTypeName($io);
@@ -139,7 +137,7 @@ class CreatePolicyPlanCommand extends Command
                 $planGameTime,
                 $layer,
                 $layerGeometryName,
-                $geometryBannedFleets,
+                $geometrySupportingLayerTypes,
                 $policyTypeName,
                 $policyData,
                 PolicyDataFactory::getPolicyDataSchemaByType($policyTypeName)
@@ -226,34 +224,16 @@ class CreatePolicyPlanCommand extends Command
 
     /**
      * @throws \Exception
+     *
+     * @return int[]
      */
-    public function askBannedFleets(SymfonyStyle $io, array $context, bool $canBeNone = false): int
-    {
-        return $this->askLayerType($io, 'Choose banned fleets', $context, $canBeNone);
-    }
-
-    public static function generatePermutations(int $n, bool $oneBased = false): array
-    {
-        $permutations = [];
-        for ($i = 1; $i < (1 << $n); $i++) {
-            $permutation = [];
-            for ($j = 0; $j < $n; $j++) {
-                if ($i & (1 << $j)) {
-                    $permutation[] = $j + ($oneBased ? 1 : 0);
-                }
-            }
-            $permutations[] = $permutation;
-        }
-        return $permutations;
-    }
-
-    public function askLayerType(SymfonyStyle $io, string $question, array $context, bool $canBeNone = false): int
+    public function askGeometrySupportingLayerTypes(SymfonyStyle $io, array $context): array
     {
         if (!array_key_exists('layerName', $context)) {
-            throw new \Exception('Layer name not found in the context of question: '.$question);
+            throw new \Exception('Layer name not found');
         }
         if (!array_key_exists('gameSessionId', $context)) {
-            throw new \Exception('Game session ID not found in the context of question:'.$question);
+            throw new \Exception('Game session ID not found');
         }
         $dataModel = $this->getDataModel($context['gameSessionId']);
         if (null === $layerConfig = collect($dataModel['meta'])
@@ -265,23 +245,21 @@ class CreatePolicyPlanCommand extends Command
                 $context['layerName']);
         }
 
-        if ($canBeNone) {
-            $choices[0] = $layerConfig['layer_type'][0]['displayName'];
-        }
-        $permutations = self::generatePermutations(count($layerConfig['layer_type'])-1, true);
-        foreach ($permutations as $permutation) {
-            $displayName = '';
-            $key = 0;
-            foreach ($permutation as $index) {
-                $key |= (2 ** ($index-1));
-                $displayName .= $layerConfig['layer_type'][$index]['displayName'] . ' + ';
+        $result = [];
+        $choices = collect($layerConfig['layer_type'])->map(fn($l) => $l['displayName'])->toArray();
+        while (1) {
+            $result[] = self::ioChoice(
+                $io,
+                'Choose a layer type to add to '.$context['layerGeometryName'],
+                $choices,
+                current($choices)
+            );
+            $io->writeln(json_encode($result));
+            if (!$io->confirm('Add more layer types to '.$context['layerGeometryName'].'?', false)) {
+                break;
             }
-            // Remove the trailing ' + ' from the display name
-            $displayName = rtrim($displayName, ' + ');
-            $choices[$key] = $displayName;
         }
-        assert(!empty($choices));
-        return self::ioChoice($io, $question, $choices, current($choices));
+        return $result;
     }
 
     /**
@@ -396,38 +374,22 @@ class CreatePolicyPlanCommand extends Command
     /**
      * @throws \Exception
      */
-    private function showLayerTypes(SymfonyStyle $io, array $context): void
-    {
-        if (!array_key_exists('layerName', $context)) {
-            throw new \Exception('Layer name not found in the current context');
-        }
-        if (!array_key_exists('gameSessionId', $context)) {
-            throw new \Exception('Game session ID not found in the current context of question');
-        }
-        $dataModel = $this->getDataModel($context['gameSessionId']);
-        if (null === $layerConfig = collect($dataModel['meta'])
-            ->filter(fn($l) => $l['layer_name'] == $context['layerName'])->first()) {
-            throw new \Exception('Layer not found in the game config: '. $context['layerName']);
-        }
-        if (!isset($layerConfig['layer_type'][0]['displayName'])) {
-            throw new \Exception('Layer does not have any required types, or expected field displayName: '.
-                $context['layerName']);
-        }
-        foreach ($layerConfig['layer_type'] as $key => $layerType) {
-            $io->writeln($key.': '.$layerType['displayName']);
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
     private function askJsonSchemeProperty($io, string $propName, Schema $prop, array $context): mixed
     {
         if (null !== $description = $prop->getMeta(PolicyDataSchemaMetaName::FIELD_ON_INPUT_DESCRIPTION->value)) {
             $io->writeln(PHP_EOL.$description);
         }
-        if ($prop->getMeta(PolicyDataSchemaMetaName::FIELD_ON_INPUT_SHOW_LAYER_TYPES->value)) {
-            $this->showLayerTypes($io, $context);
+        if (null !== $choices = $prop->getMeta(PolicyDataSchemaMetaName::FIELD_ON_INPUT_CHOICES->value)) {
+            if (is_callable($choices)) {
+                $choices = $choices($context['gameSessionId']);
+            }
+            if (!is_array($choices) or empty($choices)) {
+                $io->warning('No choices available although FIELD_ON_INPUT_CHOICES is set for '.$propName);
+                $choices = [];
+            }
+            foreach ($choices as $key => $choice) {
+                $io->writeln($key.': '.$choice);
+            }
         }
         $propValue = null;
         switch ($prop->type) {
@@ -441,7 +403,7 @@ class CreatePolicyPlanCommand extends Command
                 while ($again) {
                     if (null === $v = $this->askJsonSchemeProperty(
                         $io,
-                        "add to $propName",
+                        $propName,
                         $prop->items,
                         $context
                     )) {
@@ -486,8 +448,7 @@ class CreatePolicyPlanCommand extends Command
                 while ($again) {
                     $value = $this->askJsonSchemaPrimitive(
                         $io,
-                        $bitwiseHandling ?
-                            "Add to $propName ($prop->type)" : "Enter $propName ($prop->type)",
+                        "Add to $propName ($prop->type)",
                         $prop->type,
                         $prop->default ?? null
                     );
@@ -705,7 +666,7 @@ class CreatePolicyPlanCommand extends Command
      * @param int $planGameTime
      * @param Layer $layer
      * @param string|null $layerGeometryName
-     * @param int|null $geometryBannedFleets
+     * @param array $geometrySupportingLayerTypes
      * @param PolicyTypeName $policyTypeName
      * @param array $policyData
      * @param PolicyTarget $policyTarget
@@ -718,7 +679,7 @@ class CreatePolicyPlanCommand extends Command
         int            $planGameTime,
         Layer          $layer,
         ?string        $layerGeometryName,
-        ?int           $geometryBannedFleets,
+        array          $geometrySupportingLayerTypes,
         PolicyTypeName $policyTypeName,
         array          $policyData,
         PolicyTarget   $policyTarget
@@ -742,7 +703,7 @@ class CreatePolicyPlanCommand extends Command
             $layer,
             $planGameTime,
             $geometry,
-            $geometryBannedFleets,
+            $geometrySupportingLayerTypes,
             $policyTypeName,
             $policyData,
             $policyTarget,
@@ -807,11 +768,8 @@ class CreatePolicyPlanCommand extends Command
                 ->setGeometryActive(1)
                 ->setGeometryToSubtractFrom(null)
                 ->setGeometryDeleted(0)
-                ->setGeometryMspid(null);
-            if (null !== $geometryBannedFleets && $geometryBannedFleets !== 0) {
-                $geometryEntity
-                    ->setGeometryType($this->convertBannedFleetFlagsToCommaSeparatedString($geometryBannedFleets));
-            }
+                ->setGeometryMspid(null)
+                ->setGeometryType(implode(',', $geometrySupportingLayerTypes));
             $em->persist($geometryEntity);
             $planLayer = new PlanLayer();
             $planLayer->setLayer($layerEntity)->setPlan($plan)->setPlanLayerState(PlanLayerState::ACTIVE);
