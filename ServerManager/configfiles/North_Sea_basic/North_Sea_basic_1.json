@@ -22123,7 +22123,7 @@
         },
         {
           "name": "Protection Bottom Trawl",
-          "policy_filters" : {
+          "policy_filters": {
             "fleets": [0]
           },
           "layers": [
@@ -22353,20 +22353,27 @@
       ],
       "fishing_policy_settings": {
         "all_country_approval": true,
-        "fleet_info": [
-          {
-            "gear_type": 0,
-            "country_id": 0
-          },
-          {
-            "gear_type": 1,
-            "country_id": 0
-          },
-          {
-            "gear_type": 2,
-            "country_id": 0
-          }
-        ]
+        "fleet_info": {
+          "gear_types": [
+            "Bottom Trawl",
+            "Industrial and Pelagic Trawl",
+            "Drift and Fixed Nets"
+          ],
+          "fleets": [
+            {
+              "gear_type": 0,
+              "country_id": 0
+            },
+            {
+              "gear_type": 1,
+              "country_id": 0
+            },
+            {
+              "gear_type": 2,
+              "country_id": 0
+            }
+          ]
+        }
       },
       "fishing": [
         {
@@ -22479,6 +22486,14 @@
               "weight": 1255.0
             }
           ]
+        }
+      ],
+      "eco" : [
+        {
+          "name": "Eco Bottom Trawl",
+          "policy_filters": {
+            "fleets": [0]
+          }
         }
       ],
       "outcomes": [

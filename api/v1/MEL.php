@@ -28,6 +28,7 @@ class MEL extends Base
         "TickDone",
         "GetFishing",
         "GeometryExportName",
+        "GetEcoGearFleets",
         "InitialFishing"
     );
 
@@ -263,6 +264,16 @@ class MEL extends Base
             "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)) WHERE layer_name=?",
             array($layer_name)
         );
+    }
+
+    /**
+     * @return int[]
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function GetEcoGearFleets(): array
+    {
+        return []; // @todo
     }
 
     /**

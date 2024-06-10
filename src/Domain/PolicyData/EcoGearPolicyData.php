@@ -23,6 +23,7 @@ class EcoGearPolicyData extends PolicyBasePolicyData
         $schema = Schema::object();
         $schema->properties ??= new Properties();
         $schema->properties->enabled = Schema::boolean();
+        $schema->required = ['enabled'];
         $schema->allOf = [
             // define the allowed filters here
             FleetFilterPolicyData::schema()

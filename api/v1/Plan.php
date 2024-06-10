@@ -4,6 +4,10 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\ToPromiseFunction;
+use App\Domain\PolicyData\PolicyDataFactory;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\PlanPolicy;
+use App\Entity\Policy;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -45,7 +49,8 @@ class Plan extends Base
         "Vote",
         "DeleteApproval",
         "SetEnergyDistribution",
-        "SetPolicy"
+        "SetPolicy",
+        "SetGeneralPolicyData"
     );
 
     public function __construct(string $method = '')
@@ -2482,6 +2487,7 @@ class Plan extends Base
             $qb
                 ->update('plan')
                 ->set('plan_alters_energy_distribution', $qb->createPositionalParameter($alters_energy_distribution))
+                ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
         )
         ->then(function (/* Result $result */) {
@@ -2613,5 +2619,54 @@ class Plan extends Base
         }
         await($promise);
         return null;
+    }
+
+    /**
+     * @apiGroup Plan
+     * @throws Exception
+     * @api {POST} /plan/SetGeneralPolicyData Set a general policy to a plan
+     * @apiParam {int} id plan id
+     * @apiParam {string} policy type, should match PolicyTypeName enum
+     * @apiDescription (De)activate a plan policy
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function SetGeneralPolicyData(int $plan_id, string $policy_data): void
+    {
+        $policyData = PolicyDataFactory::createPolicyDataByJsonObject(json_decode($policy_data));
+        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
+        if (null === $plan = $em->getRepository(\App\Entity\Plan::class)->createQueryBuilder('pl')
+            ->select('pl', 'pp', 'po')
+            ->join('pl.planPolicies', 'pp')
+            ->join('pp.policy', 'po')
+            ->where('pl.planId = :id')
+            ->setParameter('id', $plan_id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ) {
+            throw new Exception('Plan not found');
+        }
+
+        $planPolicies = collect($plan->getPlanPolicies())->keyBy(
+            fn(PlanPolicy $pp) => $pp->getPolicy()->getType()->value
+        )->toArray();
+        if (array_key_exists($policyData->getPolicyTypeName()->value, $planPolicies)) {
+            $planPolicy = $planPolicies[$policyData->getPolicyTypeName()->value];
+            $policy = $planPolicy->getPolicy();
+            $policy->setData($policyData->jsonSerialize());
+            $em->persist($policy);
+        } else {
+            $policy = new Policy();
+            $policy
+                ->setType($policyData->getPolicyTypeName())
+                ->setData($policyData->jsonSerialize());
+            $em->persist($policy);
+            $planPolicy = new PlanPolicy();
+            $planPolicy
+                ->setPlan($plan) // this will also add the plan policy to the plan
+                ->setPolicy($policy); // this will also add the plan policy to the policy
+        }
+        $plan->setPlanLastUpdate(sprintf("%.6f", microtime(true)));
+        $em->persist($plan);
+        $em->flush();
     }
 }

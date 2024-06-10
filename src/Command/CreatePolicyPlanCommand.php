@@ -760,7 +760,7 @@ class CreatePolicyPlanCommand extends Command
                 $policy = new Policy();
                 $policy
                     ->setType($policyTypeName)
-                    ->setData(json_decode(json_encode($policyData))); // todo: more efficient way ?
+                    ->setData($policyData->jsonSerialize());
                 $em->persist($policy);
                 // no need to persist, it's cascaded
                 $planPolicy = new PlanPolicy();

@@ -49,8 +49,8 @@ class FleetFilterPolicyData extends FilterBasePolicyData
                 $game = new Game();
                 $game->setGameSessionId($gameSessionId);
                 $dataModel = $game->getGameConfigValues();
-                $gearTypes = collect($dataModel['MEL']['fishing'])->map(fn($gear) => $gear['name'])->toArray();
-                return collect($dataModel['MEL']['fishing_policy_settings']['fleet_info'])
+                $gearTypes = $dataModel['MEL']['fishing_policy_settings']['fleet_info']['gear_types'] ?? [];
+                return collect($dataModel['MEL']['fishing_policy_settings']['fleet_info']['fleets'] ?? [])
                     ->map(fn($f) => $gearTypes[$f['gear_type']].' fleets')->toArray();
             }, PolicyDataSchemaMetaName::FIELD_ON_INPUT_CHOICES->value)
             ->addMeta(
