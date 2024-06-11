@@ -273,7 +273,61 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetEcoGearFleets(): array
     {
-        return []; // @todo
+        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $result = $connection->executeQuery(
+            <<<'SQL'
+            WITH EcoGearPolicies AS (
+                SELECT
+                    p.plan_id,
+                    p.plan_lastupdate,
+                    JSON_UNQUOTE(JSON_EXTRACT(item, '$.enabled')) AS enabled,
+                    JSON_UNQUOTE(JSON_EXTRACT(item, '$.fleets')) AS fleets
+                FROM
+                    plan p
+                INNER JOIN
+                    plan_policy pp ON p.plan_id = pp.plan_id
+                INNER JOIN
+                    policy po ON pp.policy_id = po.id
+                CROSS JOIN
+                    JSON_TABLE(po.data, '$.items[*]' COLUMNS (
+                        item JSON PATH '$'
+                    )) jt
+                WHERE
+                    po.type = 'eco_gear'
+            ),
+            EnabledFleets AS (
+                SELECT
+                    e.plan_id,
+                    e.plan_lastupdate,
+                    JSON_UNQUOTE(JSON_EXTRACT(fleet.value, '$')) AS fleet_id,
+                    e.enabled
+                FROM
+                    EcoGearPolicies e
+                CROSS JOIN
+                    JSON_TABLE(e.fleets, '$[*]' COLUMNS (
+                        value JSON PATH '$'
+                    )) fleet
+            ),
+            LatestFleetStatus AS (
+                SELECT
+                    fleet_id,
+                    plan_id,
+                    enabled,
+                    ROW_NUMBER() OVER (PARTITION BY fleet_id ORDER BY plan_lastupdate DESC) AS rn
+                FROM
+                    EnabledFleets
+            )
+            SELECT
+                fleet_id
+            FROM
+                LatestFleetStatus
+            WHERE
+                rn = 1
+            AND
+                enabled = 'true';            
+            SQL
+        );
+        return array_map('intval', $result->fetchFirstColumn());
     }
 
     /**
