@@ -497,12 +497,14 @@ class GameLatest extends CommonBase
             inner join plan_policies pp on pp.plan_id=p.plan_id and p.plan_lastupdate >= 0
             SQL
         )
-        ->then(function(Result $result) {
-            return [
-                'current' => (substr(time(), -2)[0] + 1) * 0.1,
-                'reference' => 1.0 - (substr(time(), -2)[0] + 1) * 0.1,
-                'implementations' => $result->fetchAllRows()
-            ];
-        });
+        ->then(
+            function (Result $result) {
+                return [
+                    'current' => (substr(time(), -2)[0] + 1) * 0.1,
+                    'reference' => 1.0 - (substr(time(), -2)[0] + 1) * 0.1,
+                    'implementations' => $result->fetchAllRows()
+                ];
+            }
+        );
     }
 }
