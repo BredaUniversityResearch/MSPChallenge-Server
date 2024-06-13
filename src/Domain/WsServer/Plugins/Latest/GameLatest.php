@@ -5,6 +5,8 @@ namespace App\Domain\WsServer\Plugins\Latest;
 use App\Domain\API\v1\Game;
 use App\Domain\Common\CommonBase;
 use App\Domain\Common\ToPromiseFunction;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\PlanPolicy;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -89,6 +91,10 @@ class GameLatest extends CommonBase
                     unset($p);
                 });
             });
+        $latestStakeholderPressure = $this->getLatestStakeholderPressure($context)
+            ->then(function (array $result) use (&$data) {
+                $data['stakeholder_pressure'] = $result;
+            });
         return [
             tpf(fn() => $latestPlan),
             tpf(fn() => $latestMessages),
@@ -96,7 +102,8 @@ class GameLatest extends CommonBase
             tpf(fn() => $latestEnergy),
             tpf(fn() => $latestKpi),
             tpf(fn() => $latestWarning),
-            tpf(fn() => $latestObjective)
+            tpf(fn() => $latestObjective),
+            tpf(fn() => $latestStakeholderPressure)
         ];
     }
 
@@ -453,5 +460,49 @@ class GameLatest extends CommonBase
                 }
                 return $result;
             });
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    private function getLatestStakeholderPressure(array $context): PromiseInterface
+    {
+        return $this->getAsyncDatabase()->queryBySQL(
+            <<<'SQL'
+            with
+              plan_layer_with_geo_policies as (
+                select JSON_UNQUOTE(jt.`type`) as policy_type, pl.plan_layer_plan_id as plan_id
+                from plan_layer pl
+                inner join layer l on l.layer_id = pl.plan_layer_layer_id
+                inner join geometry g on g.geometry_layer_id = l.layer_id and
+                  JSON_CONTAINS_PATH(g.geometry_data, 'one', '$.policies[*].type')
+                inner join JSON_TABLE(g.geometry_data, '$.policies[*]'
+                  COLUMNS (
+                     type JSON PATH '$.type'
+                  )
+                ) jt ON TRUE
+              ),
+              plan_policies as (
+                select po.type as policy_type, pp.plan_id
+                from plan_policy pp
+                inner join policy po on pp.policy_id = po.id
+              )
+            select pl.policy_type, p.plan_id
+            from plan p
+            inner join plan_layer_with_geo_policies pl on pl.plan_id=p.plan_id and p.plan_lastupdate >= 0
+            union all
+            select pp.policy_type, p.plan_id
+            from plan p
+            inner join plan_policies pp on pp.plan_id=p.plan_id and p.plan_lastupdate >= 0
+            SQL
+        )
+        ->then(function(Result $result) {
+            return [
+                'current' => (substr(time(), -2)[0] + 1) * 0.1,
+                'reference' => 1.0 - (substr(time(), -2)[0] + 1) * 0.1,
+                'implementations' => $result->fetchAllRows()
+            ];
+        });
     }
 }
