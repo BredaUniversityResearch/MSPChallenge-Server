@@ -500,8 +500,8 @@ class GameLatest extends CommonBase
         ->then(
             function (Result $result) {
                 return [
-                    'current' => (substr(time(), -2)[0] + 1) * 0.1,
-                    'reference' => 1.0 - (substr(time(), -2)[0] + 1) * 0.1,
+                    'current' => ((int)substr((string)time(), -2)[0] + 1) * 0.1,
+                    'reference' => 1.0 - ((int)substr((string)time(), -2)[0] + 1) * 0.1,
                     'implementations' => $result->fetchAllRows()
                 ];
             }
