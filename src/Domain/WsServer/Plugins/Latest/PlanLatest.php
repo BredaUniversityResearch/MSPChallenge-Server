@@ -2,7 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\PolicyType;
+use App\Domain\API\v1\GeneralPolicyType;
 use App\Domain\Common\CommonBase;
 use Drift\DBAL\Result;
 use Exception;
@@ -48,7 +48,7 @@ class PlanLatest extends CommonBase
                 ->andWhere('plan_active = ' . $qb->createPositionalParameter(1))
         )
         ->then(function (Result $result) {
-            $plans = $result->fetchAllRows();
+            $plans = ($result->fetchAllRows() ?? []) ?: [];
             $toPromiseFunctions = [];
             foreach ($plans as $key => &$d) {
                 //all layers, this is needed to merge them with geometry later
@@ -145,8 +145,8 @@ class PlanLatest extends CommonBase
                     /** @var Result[] $results */
                     $toPromiseFunctions = [];
                     foreach ($plans as $pKey => &$d) {
-                        $d['layers'] = $results['layers' . $pKey]->fetchAllRows();
-                        $d['grids'] = collect($results['grids' . $pKey]->fetchAllRows())
+                        $d['layers'] = ($results['layers' . $pKey]->fetchAllRows() ?? []) ?: [];
+                        $d['grids'] = collect(($results['grids' . $pKey]->fetchAllRows() ?? []) ?: [])
                             // fail-safe. grid persistent field should be int. If not, remove the grid.
                             ->filter(function ($value, $key) {
                                 return ctype_digit((string)$value['persistent']);
@@ -190,19 +190,20 @@ class PlanLatest extends CommonBase
                         }
                         unset($g);
 
-                        $deleted = $results['deleted' . $pKey]->fetchAllRows();
+                        $deleted = ($results['deleted' . $pKey]->fetchAllRows() ?? []) ?: [];
                         $d['deleted_grids'] = array();
                         foreach ($deleted as $del) {
                             $d['deleted_grids'][] = $del['grid_persistent'];
                         }
 
-                        $fishingValues = $results['fishing' . $pKey]->fetchAllRows();
+                        $fishingValues = ($results['fishing' . $pKey]->fetchAllRows() ?? []) ?: [];
                         if (count($fishingValues) > 0) {
                             $d['fishing'] = $fishingValues;
                         }
 
-                        $d['votes'] = $results['votes' . $pKey]->fetchAllRows();
-                        $d['restriction_settings'] = $results['restriction_settings' . $pKey]->fetchAllRows();
+                        $d['votes'] = ($results['votes' . $pKey]->fetchAllRows() ?? []) ?: [];
+                        $d['restriction_settings'] =
+                            ($results['restriction_settings' . $pKey]->fetchAllRows() ?? []) ?: [];
                     }
                     unset($d);
                     return parallel($toPromiseFunctions)
@@ -239,7 +240,7 @@ class PlanLatest extends CommonBase
                 unset($plan['type']);
 
                 // PolicyUpdateEnergyPlan
-                if (($type & PolicyType::ENERGY) === PolicyType::ENERGY) {
+                if (($type & GeneralPolicyType::ENERGY) === GeneralPolicyType::ENERGY) {
                     $policy['policy_type'] = 'energy';
                     $policy['alters_energy_distribution'] = $plan['alters_energy_distribution'];
                     if (!empty($plan['grids'])) {
@@ -262,7 +263,7 @@ class PlanLatest extends CommonBase
                 );
 
                 // PolicyUpdateFishingPlan
-                if (($type & PolicyType::FISHING) === PolicyType::FISHING) {
+                if (($type & GeneralPolicyType::FISHING) === GeneralPolicyType::FISHING) {
                     $policy['policy_type'] = 'fishing';
                     if (!empty($plan['fishing'])) {
                         $policy['fishing'] = $plan['fishing'];
@@ -272,7 +273,7 @@ class PlanLatest extends CommonBase
                 unset($policy, $plan['fishing']);
 
                 // PolicyUpdateShippingPlan
-                if (($type & PolicyType::SHIPPING) === PolicyType::SHIPPING) {
+                if (($type & GeneralPolicyType::SHIPPING) === GeneralPolicyType::SHIPPING) {
                     $policy['policy_type'] = 'shipping';
                     if (!empty($plan['restriction_settings'])) {
                         $policy['restriction_settings'] = $plan['restriction_settings'];

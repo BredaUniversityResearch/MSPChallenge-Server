@@ -5,7 +5,7 @@ namespace App\Domain\PolicyData;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
 use Swaggest\JsonSchema\Schema;
 
-class BufferZonePolicyData extends PolicyBasePolicyData
+class BufferZonePolicyData extends PolicyDataBase
 {
     const DEFAULT_VALUE_RADIUS = 40000.0;
 

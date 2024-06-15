@@ -6,7 +6,7 @@ use App\Domain\Common\EntityEnums\PolicyTypeName;
 use Swaggest\JsonSchema\Constraint\Properties;
 use Swaggest\JsonSchema\Schema;
 
-class EcoGearPolicyData extends PolicyBasePolicyData
+class EcoGearPolicyData extends PolicyDataBase
 {
     public function __construct()
     {

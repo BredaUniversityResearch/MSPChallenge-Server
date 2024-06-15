@@ -9,6 +9,12 @@ enum PolicyTypeName: string
 {
     use GetAttributesTrait;
 
+    #[Description('Energy Distribution')]
+    case ENERGY_DISTRIBUTION = 'energy';
+    #[Description('Fishing Effort')]
+    case FISHING_EFFORT = 'fishing';
+    #[Description('Shipping Safety Zones')]
+    case SHIPPING_SAFETY_ZONES = 'shipping';
     #[Description('Buffer zone')]
     case BUFFER_ZONE = 'buffer_zone';
     #[Description('Seasonal closure')]

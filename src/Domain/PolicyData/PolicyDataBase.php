@@ -6,29 +6,23 @@ use App\Domain\Common\EntityEnums\PolicyTypeName;
 use App\Domain\Helper\Util;
 use App\Domain\Log\LogContainerInterface;
 use App\Domain\Log\LogContainerTrait;
+use ReflectionException;
 use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\Structure\ClassStructure;
 
-abstract class PolicyBasePolicyData extends ClassStructure implements LogContainerInterface
+abstract class PolicyDataBase extends EmptyPolicyDataBase
 {
-    use LogContainerTrait;
-
-    public string $type;
-
     /** @var object[] */
     public array $items;
 
-    abstract public function getPolicyTypeName(): PolicyTypeName;
     abstract public function getItemSchema(): Schema;
-
-    abstract public function __construct(); // enforce the constructor to have no arguments
 
     /**
      * @return array
      */
-    public function getRequiredFilterClassNames(): array
+    private function getRequiredFilterClassNames(): array
     {
         $policyFilterClassNames = [];
         foreach ($this->getItemSchema()->allOf as $filterSchema) {
@@ -92,26 +86,17 @@ abstract class PolicyBasePolicyData extends ClassStructure implements LogContain
 
     /**
      * @inheritdoc
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public static function setUpProperties($properties, Schema $ownerSchema): void
     {
-        $ownerSchema->addMeta(PolicyGroup::POLICY, PolicyDataSchemaMetaName::POLICY_GROUP->value);
-        $ownerSchema->type = 'object';
-        // by default, we require all properties including the ones from the child classes
-        $ownerSchema->required = Util::getClassPropertyNames(
-            get_called_class(),
-            \ReflectionProperty::IS_PUBLIC,
-            __CLASS__
-        );
-        $ownerSchema->additionalProperties = true; // we allow additional properties
+        parent::setUpProperties($properties, $ownerSchema);
         $itemsSchema = Schema::arr();
         $itemsSchema->items = Schema::object()
             ->addMeta(
                 fn() => (new static())->getItemSchema(),
                 PolicyDataSchemaMetaName::FIELD_OBJECT_SCHEMA_CALLABLE->value
             );
-        $properties->type = Schema::string();
         $properties->items = $itemsSchema;
     }
 }

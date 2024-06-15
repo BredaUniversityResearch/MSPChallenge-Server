@@ -11,6 +11,7 @@ use App\Entity\Policy;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
+use React\Promise\ExtendedPromiseInterface;
 use React\Promise\PromiseInterface;
 use function App\parallel;
 use function App\resolveOnFutureTick;
@@ -49,7 +50,7 @@ class Plan extends Base
         "Vote",
         "DeleteApproval",
         "SetEnergyDistribution",
-        "SetPolicy",
+        "DeleteGeneralPolicy",
         "SetGeneralPolicyData"
     );
 
@@ -69,7 +70,7 @@ class Plan extends Base
                 if ($item === '0') {
                     return;
                 }
-                $newPlanType |= array_values(PolicyType::getConstants())[$key];
+                $newPlanType |= array_values(GeneralPolicyType::getConstants())[$key];
             });
             return $newPlanType;
         }
@@ -87,7 +88,7 @@ class Plan extends Base
                 if ($item == 'ecology') {
                     $item = 'fishing';
                 }
-                $newPlanType |= PolicyType::getConstants()[strtoupper($item)];
+                $newPlanType |= GeneralPolicyType::getConstants()[strtoupper($item)];
             });
             return $newPlanType;
         }
@@ -255,7 +256,7 @@ class Plan extends Base
                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($plan)))
         )
         ->then(function (Result $result) use ($plan) {
-            $planData = $result->fetchAllRows() ?: [];
+            $planData = ($result->fetchAllRows() ?? []) ?: [];
             return $this->setAllDependentEnergyPlansToError($plan, $planData[0]["plan_name"]);
         })
         ->then(function (/* array $results */) use ($plan) {
@@ -329,7 +330,7 @@ class Plan extends Base
                 ->leftJoin('l1', 'layer', 'l2', 'l1.layer_original_id=l2.layer_id')
                 ->where($qb->expr()->eq('plan_layer.plan_layer_plan_id', $qb->createPositionalParameter($planId)))
         )->then(function (Result $result) use ($planId) {
-            $planLayers = $result->fetchAllRows() ?? [];
+            $planLayers = ($result->fetchAllRows() ?? []) ?: [];
             $highest = 0;
             foreach ($planLayers as $pl) {
                 $json = json_decode($pl['layer_states'], true);
@@ -443,7 +444,7 @@ class Plan extends Base
                 ->andWhere($qb->expr()->eq('plan_lock_user_id', $qb->createPositionalParameter($user)))
         )
         ->then(function (Result $result) use ($id, $state, $user) {
-            $currentPlanData = $result->fetchAllRows() ?: [];
+            $currentPlanData = ($result->fetchAllRows() ?? []) ?: [];
             if (count($currentPlanData) == 0) {
                 throw new Exception('Trying to set plan state of plan '.$id.' without user '.$user.' having it locked');
             }
@@ -469,7 +470,7 @@ class Plan extends Base
             return parallel($toPromiseFunctions)
                 ->then(function (/*array $results*/) use ($id, $state, &$currentPlanData) {
                     $previousState = $currentPlanData[0]['plan_state'];
-                    $isEnergyPlan = $currentPlanData[0]['plan_type'] == PolicyType::ENERGY;
+                    $isEnergyPlan = $currentPlanData[0]['plan_type'] == GeneralPolicyType::ENERGY;
                     if (!$isEnergyPlan) {
                         return null;
                     }
@@ -564,7 +565,7 @@ class Plan extends Base
                 );
             })
             ->then(function (Result $result) use ($currentGameTime) {
-                $plansToUpdate = $result->fetchAllRows();
+                $plansToUpdate = ($result->fetchAllRows() ?? []) ?: [];
                 $toPromiseFunctions = [];
                 foreach ($plansToUpdate as $plan) {
                     $toPromiseFunctions[] = tpf(function () use ($currentGameTime, $plan) {
@@ -909,7 +910,7 @@ class Plan extends Base
                 ->andWhere('p.plan_constructionstart <= ' . $qb->createPositionalParameter($currentGameTime))
         )
         ->then(function (Result $result) use ($currentGameTime) {
-            $planLayers = $result->fetchAllRows();
+            $planLayers = ($result->fetchAllRows() ?? []) ?: [];
             $toPromiseFunctions = [];
             foreach ($planLayers as $planLayer) {
                 if (null === $toPromiseFunction = $this->updatePlanLayerState($planLayer, $currentGameTime)) {
@@ -981,7 +982,7 @@ class Plan extends Base
                 )
         )
         ->then(function (Result $result) {
-            $idsToDisable = collect($result->fetchAllRows() ?? [])->flatten()->all();
+            $idsToDisable = collect(($result->fetchAllRows() ?? []) ?: [])->flatten()->all();
             if (empty($idsToDisable)) {
                 return new Result([], null, 0);
             }
@@ -1012,7 +1013,7 @@ class Plan extends Base
                 ->where('fishing_plan_id = ' . $qb->createPositionalParameter($planId))
         )
         ->then(function (Result $result) use ($planId) {
-            $fishing = $result->fetchAllRows();
+            $fishing = ($result->fetchAllRows() ?? []) ?: [];
             $toPromiseFunctions = [];
             foreach ($fishing as $fish) {
                 $toPromiseFunctions[] = tpf(function () use ($fish) {
@@ -2595,30 +2596,62 @@ class Plan extends Base
     /**
      * @apiGroup Plan
      * @throws Exception
-     * @api {POST} /plan/SetPolicy (De)activate a plan policy
+     * @api {POST} /plan/DeleteGeneralPolicy Delete a general plan policy
      * @apiParam {int} id plan id
      * @apiParam {string} policy_type [energy|fishing|shipping]
-     * @apiDescription (De)activate a plan policy
+     * @apiDescription Delete a general plan policy
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetPolicy(int $plan_id, string $policy_type, bool $active): ?PromiseInterface
+    public function DeleteGeneralPolicy(int $plan_id, string $policy_type): ?PromiseInterface
     {
-        $policyTypes = PolicyType::getConstants();
-        $policyTypeKey = strtoupper($policy_type);
-        if (!array_key_exists($policyTypeKey, $policyTypes)) {
-            throw new Exception('Encountered invalid policy type: ' . $policy_type);
-        }
-        $policyTypeValue = $policyTypes[$policyTypeKey];
-        $bitWiseOperation = $active ? '|' : '&~';
-        $promise = $this->getAsyncDatabase()->queryBySQL(
-            'UPDATE plan SET plan_type = plan_type ' . $bitWiseOperation . ' ? WHERE plan_id = ?',
-            [$policyTypeValue, $plan_id]
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $promise = $this->getAsyncDatabase()->query(
+            $qb
+                ->select('pp.policy_id')
+                ->from('plan_policy', 'pp')
+                ->innerJoin('pp', 'policy', 'po', 'po.id = pp.policy_id and pp.plan_id= ? AND po.type = ?')
+                ->setParameters([$plan_id, $policy_type])
+        )->then(
+            function (Result $result) {
+                $ids = collect(
+                    ($result->fetchAllRows() ?? []) ?: []
+                )->map(fn($row) => (int)$row['policy_id'])->toArray();
+                $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                return $this->getAsyncDatabase()->query(
+                    $qb
+                        ->delete('policy')
+                        ->where($qb->expr()->in('id', $ids ?: [0]))
+                );
+            }
         );
+
+        $promise = parallel([
+            tpf(fn() => $promise),
+            // backwards compatibility: for policies energy, fishing, shipping, we also need to update the plan type
+            //   todo: https://jira.cradle.buas.nl/browse/MSP-5146
+            tpf(fn() => $this->setGeneralPolicyEnabled($plan_id, $policy_type, false))
+        ]);
+
         if ($this->isAsync()) {
             return $promise;
         }
         await($promise);
         return null;
+    }
+
+    private function setGeneralPolicyEnabled(int $planId, string $policyType, bool $enabled): PromiseInterface
+    {
+        $policyTypes = GeneralPolicyType::getConstants();
+        $policyTypeKey = strtoupper($policyType);
+        if (!array_key_exists($policyTypeKey, $policyTypes)) {
+            throw new Exception('Encountered invalid general policy type: ' . $policyType);
+        }
+        $policyTypeValue = $policyTypes[$policyTypeKey];
+        $bitWiseOperation = $enabled ? '|' : '&~';
+        return $this->getAsyncDatabase()->queryBySQL(
+            'UPDATE plan SET plan_type = plan_type ' . $bitWiseOperation . ' ? WHERE plan_id = ?',
+            [$policyTypeValue, $planId]
+        );
     }
 
     /**
@@ -2636,8 +2669,8 @@ class Plan extends Base
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
         if (null === $plan = $em->getRepository(\App\Entity\Plan::class)->createQueryBuilder('pl')
             ->select('pl', 'pp', 'po')
-            ->join('pl.planPolicies', 'pp')
-            ->join('pp.policy', 'po')
+            ->leftJoin('pl.planPolicies', 'pp')
+            ->leftJoin('pp.policy', 'po')
             ->where('pl.planId = :id')
             ->setParameter('id', $plan_id)
             ->getQuery()
@@ -2668,5 +2701,9 @@ class Plan extends Base
         $plan->setPlanLastUpdate(sprintf("%.6f", microtime(true)));
         $em->persist($plan);
         $em->flush();
+
+        // backwards compatibility: for policies energy, fishing, shipping, we also need to update the plan type
+        //   todo: https://jira.cradle.buas.nl/browse/MSP-5146
+        await($this->setGeneralPolicyEnabled($plan_id, $policyData->getPolicyTypeName()->value, true));
     }
 }

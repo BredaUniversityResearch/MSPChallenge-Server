@@ -5,7 +5,7 @@ namespace App\Domain\PolicyData;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
 use Swaggest\JsonSchema\Schema;
 
-class SeasonalClosurePolicyData extends PolicyBasePolicyData
+class SeasonalClosurePolicyData extends PolicyDataBase
 {
     public function __construct()
     {

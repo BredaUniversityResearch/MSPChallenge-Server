@@ -6,7 +6,8 @@ use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\PolicyData\BufferZonePolicyData;
-use App\Domain\PolicyData\PolicyBasePolicyData;
+use App\Domain\PolicyData\EmptyPolicyDataBase;
+use App\Domain\PolicyData\PolicyDataBase;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Domain\Services\ConnectionManager;
@@ -185,7 +186,7 @@ class MEL extends Base
     {
         $existingPlans = $this->getDatabase()->query(
             "SELECT plan.plan_id FROM plan WHERE plan.plan_gametime = -1 AND (plan.plan_type & ? = ?)",
-            [PolicyType::FISHING, PolicyType::FISHING]
+            [GeneralPolicyType::FISHING, GeneralPolicyType::FISHING]
         );
         if (count($existingPlans) > 0) {
             // In this case we already have something in the database that is a fishing plan, might be of a previous
@@ -203,7 +204,7 @@ class MEL extends Base
                 plan_name, plan_country_id, plan_gametime, plan_state, plan_type) VALUES (?, ?, ?, ?, ?
             )
             ",
-            array("", 1, -1, "IMPLEMENTED", PolicyType::FISHING),
+            array("", 1, -1, "IMPLEMENTED", GeneralPolicyType::FISHING),
             true
         );
 
@@ -564,17 +565,17 @@ SUBQUERY
 
     /**
      * @param Geometry $geometry
-     * @param PolicyBasePolicyData $policyData
+     * @param EmptyPolicyDataBase|PolicyDataBase $policyData
      * @param bool $addGeometryToResult if the caller should add the geometry to the result.
      *  If not, the policy prevents it
      * @param int|null $geometryTypeFilter
      * @return array|null
      */
     private function applyGeometryPolicy(
-        Geometry $geometry,
-        PolicyBasePolicyData $policyData,
-        bool &$addGeometryToResult,
-        ?int $geometryTypeFilter = null
+        Geometry       $geometry,
+        EmptyPolicyDataBase|PolicyDataBase $policyData,
+        bool           &$addGeometryToResult,
+        ?int           $geometryTypeFilter = null
     ): ?array {
         if ($policyData instanceof BufferZonePolicyData) {
             return $this->applyGeometryBufferZonePolicy(

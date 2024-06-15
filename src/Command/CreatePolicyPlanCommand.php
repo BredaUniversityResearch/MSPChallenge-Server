@@ -7,8 +7,9 @@ use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
+use App\Domain\PolicyData\EmptyPolicyDataBase;
 use App\Domain\PolicyData\FilterBasePolicyData;
-use App\Domain\PolicyData\PolicyBasePolicyData;
+use App\Domain\PolicyData\PolicyDataBase;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\PolicyDataSchemaMetaName;
 use App\Domain\PolicyData\PolicyTarget;
@@ -779,7 +780,7 @@ class CreatePolicyPlanCommand extends Command
     private function createPolicyData(
         PolicyTypeName $policyTypeName,
         array $policyData
-    ): PolicyBasePolicyData {
+    ): EmptyPolicyDataBase|PolicyDataBase {
         $jsonObj = new \stdClass();
         foreach ($policyData as $key => $value) {
             $jsonObj->$key = $value;

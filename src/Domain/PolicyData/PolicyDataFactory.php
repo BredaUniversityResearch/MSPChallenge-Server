@@ -14,17 +14,22 @@ class PolicyDataFactory
         return match ($typeName) {
             PolicyTypeName::BUFFER_ZONE => BufferZonePolicyData::schema(),
             PolicyTypeName::SEASONAL_CLOSURE => SeasonalClosurePolicyData::schema(),
-            PolicyTypeName::ECO_GEAR => EcoGearPolicyData::schema()
+            PolicyTypeName::ECO_GEAR => EcoGearPolicyData::schema(),
+            PolicyTypeName::ENERGY_DISTRIBUTION => EnergyDistributionPolicyData::schema(),
+            PolicyTypeName::SHIPPING_SAFETY_ZONES => ShippingSafetyZonesPolicyData::schema(),
+            PolicyTypeName::FISHING_EFFORT => FishingEffortPolicyData::schema()
         };
     }
 
-    public static function createPolicyDataByType(
-        PolicyTypeName $policyTypeName
-    ): PolicyBasePolicyData|BufferZonePolicyData|SeasonalClosurePolicyData|EcoGearPolicyData {
+    public static function createPolicyDataByType(PolicyTypeName $policyTypeName): EmptyPolicyDataBase|PolicyDataBase
+    {
         return match ($policyTypeName) {
             PolicyTypeName::BUFFER_ZONE => new BufferZonePolicyData(),
             PolicyTypeName::SEASONAL_CLOSURE => new SeasonalClosurePolicyData(),
-            PolicyTypeName::ECO_GEAR => new EcoGearPolicyData()
+            PolicyTypeName::ECO_GEAR => new EcoGearPolicyData(),
+            PolicyTypeName::ENERGY_DISTRIBUTION => new EnergyDistributionPolicyData(),
+            PolicyTypeName::SHIPPING_SAFETY_ZONES => new ShippingSafetyZonesPolicyData(),
+            PolicyTypeName::FISHING_EFFORT => new FishingEffortPolicyData()
         };
     }
 
@@ -32,16 +37,18 @@ class PolicyDataFactory
      * @throws Exception
      * @throws InvalidValue
      */
-    public static function createPolicyDataByJsonObject(
-        object $json
-    ): PolicyBasePolicyData|BufferZonePolicyData|SeasonalClosurePolicyData|EcoGearPolicyData {
+    public static function createPolicyDataByJsonObject(object $json): EmptyPolicyDataBase|PolicyDataBase
+    {
         if (!property_exists($json, 'type')) {
             throw new InvalidValue('Policy type is missing');
         }
         return match (PolicyTypeName::from($json->type)) {
             PolicyTypeName::BUFFER_ZONE => BufferZonePolicyData::import($json),
             PolicyTypeName::SEASONAL_CLOSURE => SeasonalClosurePolicyData::import($json),
-            PolicyTypeName::ECO_GEAR => EcoGearPolicyData::import($json)
+            PolicyTypeName::ECO_GEAR => EcoGearPolicyData::import($json),
+            PolicyTypeName::ENERGY_DISTRIBUTION => EnergyDistributionPolicyData::import($json),
+            PolicyTypeName::SHIPPING_SAFETY_ZONES => ShippingSafetyZonesPolicyData::import($json),
+            PolicyTypeName::FISHING_EFFORT => FishingEffortPolicyData::import($json)
         };
     }
 }

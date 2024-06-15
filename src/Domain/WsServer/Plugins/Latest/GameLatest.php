@@ -51,7 +51,7 @@ class GameLatest extends CommonBase
             ->then(function (Result $result) use (&$data) {
                 $data['raster'] = $result->fetchAllRows();
             });
-        $latestEnergy = $this->getLatestEnergy($context)
+        $latestEnergyPolicy = $this->getLatestEnergy($context)
             ->then(function (array $energyData) use (&$data) {
                 $data['policy_updates'][] = array_merge([
                     'policy_type' => 'energy',
@@ -99,7 +99,7 @@ class GameLatest extends CommonBase
             tpf(fn() => $latestPlan),
             tpf(fn() => $latestMessages),
             tpf(fn() => $latestRaster),
-            tpf(fn() => $latestEnergy),
+            tpf(fn() => $latestEnergyPolicy),
             tpf(fn() => $latestKpi),
             tpf(fn() => $latestWarning),
             tpf(fn() => $latestObjective),
@@ -189,7 +189,7 @@ class GameLatest extends CommonBase
                     ->where($qb->expr()->gt('api_batch_lastupdate', $qb->createPositionalParameter($lastUpdateTime)))
             )
             ->then(function (Result $result) use (&$data) {
-                $data['debug']['batches'] = $result->fetchAllRows() ?: [];
+                $data['debug']['batches'] = ($result->fetchAllRows() ?? []) ?: [];
                 return $data;
             });
         });
