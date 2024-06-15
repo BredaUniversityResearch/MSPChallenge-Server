@@ -249,9 +249,6 @@ class PlanLatest extends CommonBase
         return $this->isAsync() ? $promise : await($promise);
     }
 
-    /**
-     * @throws \Swaggest\JsonSchema\Exception
-     */
     private function formatByPolicyType(array &$plan, PolicyTypeName $policyType): void
     {
         $policy['policy_type'] = $policyType->value;
