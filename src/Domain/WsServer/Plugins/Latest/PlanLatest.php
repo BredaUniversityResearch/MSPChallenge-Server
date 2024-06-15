@@ -287,7 +287,6 @@ class PlanLatest extends CommonBase
 
         unset(
             $plan[$policyType->value.'_data'],
-
             // PolicyUpdateEnergyPlan
             $plan['alters_energy_distribution'],
             $plan['grids'],
