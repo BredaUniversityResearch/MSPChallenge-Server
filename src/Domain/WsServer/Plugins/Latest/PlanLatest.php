@@ -45,27 +45,29 @@ class PlanLatest extends CommonBase
                 'pl.plan_energy_error as energy_error',
                 'pl.plan_alters_energy_distribution as alters_energy_distribution'
             )
-            ->from('plan', 'pl')
-            ->where('pl.plan_lastupdate >= ' . $qb->createPositionalParameter($lastupdate))
-            ->andWhere('pl.plan_active = ' . $qb->createPositionalParameter(1))
-            ->leftJoin('pl', 'plan_policy', 'pp', 'pl.plan_id = pp.plan_id')
-            ->groupBy('pl.plan_id');
+            ->from('plan', 'pl');
         // query general policies of plan, one per column
         $generalPolicyTypes = GeneralPolicyType::getConstants();
         foreach (PolicyTypeName::cases() as $policyTypeName) {
             if (!array_key_exists(strtoupper($policyTypeName->value), $generalPolicyTypes)) {
                 continue;
             }
+            $po = 'po_'.$policyTypeName->value; // intermediate policy table name
             // this assumes no duplicate policy types per plan
             $qb
                 ->leftJoin(
                     'pp',
                     'policy',
-                    'po_'.$policyTypeName->value,
-                    'pp.policy_id = po.id and po.type = '.$qb->createPositionalParameter($policyTypeName->value)
+                    $po,
+                    "pp.policy_id = $po.id and $po.type = ".$qb->createPositionalParameter($policyTypeName->value)
                 )
-                ->addSelect('po_'.$policyTypeName->value.'.data as ' . $policyTypeName->value.'_data');
+                ->addSelect($po.'.data as ' . $policyTypeName->value.'_data');
         }
+        $qb
+            ->where('pl.plan_lastupdate >= ' . $qb->createPositionalParameter($lastupdate))
+            ->andWhere('pl.plan_active = ' . $qb->createPositionalParameter(1))
+            ->leftJoin('pl', 'plan_policy', 'pp', 'pl.plan_id = pp.plan_id')
+            ->groupBy('pl.plan_id');
         //get all plans that have changed
         $promise = $this->getAsyncDatabase()->query(
             $qb
@@ -276,7 +278,7 @@ class PlanLatest extends CommonBase
                 }
                 break;
             default:
-                $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data']));
+                $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'], true));
                 break;
         }
 
