@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<EwEModel Name="Small_model" DBVersion="6.700014" EwEVersion="6.7.0.18858">
+<EwEModel Name="Small_model_test" DBVersion="6.700014" EwEVersion="6.7.0.18858">
   <Table Name="Auxillary" Columns="DBID:System.Int64,Remark:System.String,Settings:System.String,ValueID:System.String,VisualStyle:System.String" Num="95">
     <Row>1,,,EcospaceLayerPort:1:Name,AAEAAAD/////AQAAAAAAAAAMAgAAAE5Fd0VDb3JlLCBWZXJzaW9uPTYuNy4wLjE4ODU4LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTFkODc1MzkzYjNlYmNhZDAMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAAB5Fd0VDb3JlLkF1eGlsaWFyeS5jVmlzdWFsU3R5bGULAAAADG1faGF0Y2hTdHlsZQltX2NsckZvcmUJbV9jbHJCYWNrBW1faW1nDW1fc3RyRm9udE5hbWULbV9zRm9udFNpemULbV9mb250c3R5bGUMbV9ncmFkaWVudElEEG1fZ3JhZGllbnRDb2xvcnMQbV9ncmFkaWVudEJyZWFrcw5tX2dyYWRpZW50TmFtZQQEBAQBAAQABAcBI1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkltYWdlAwAAAAsYU3lzdGVtLkRyYXdpbmcuRm9udFN0eWxlAwAAAAgWU3lzdGVtLkRyYXdpbmcuQ29sb3JbXQMAAAAGAgAAAAX8////I1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAQAAAAd2YWx1ZV9fAAgDAAAABQAAAAX7////FFN5c3RlbS5EcmF3aW5nLkNvbG9yBAAAAARuYW1lBXZhbHVlCmtub3duQ29sb3IFc3RhdGUBAAAACQcHAwAAAAoAAAAAAAAAACMAAQAB+v////v///8KAAAAAAAAAAAbAAEACgYHAAAABUFyaWFsAAAAQQX4////GFN5c3RlbS5EcmF3aW5nLkZvbnRTdHlsZQEAAAAHdmFsdWVfXwAIAwAAAAAAAADx2P//CgoGCQAAAAAL</Row>
     <Row>2,,,EcospaceLayerSail:1:Name,AAEAAAD/////AQAAAAAAAAAMAgAAAE5Fd0VDb3JlLCBWZXJzaW9uPTYuNy4wLjE4ODU4LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTFkODc1MzkzYjNlYmNhZDAMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAAB5Fd0VDb3JlLkF1eGlsaWFyeS5jVmlzdWFsU3R5bGULAAAADG1faGF0Y2hTdHlsZQltX2NsckZvcmUJbV9jbHJCYWNrBW1faW1nDW1fc3RyRm9udE5hbWULbV9zRm9udFNpemULbV9mb250c3R5bGUMbV9ncmFkaWVudElEEG1fZ3JhZGllbnRDb2xvcnMQbV9ncmFkaWVudEJyZWFrcw5tX2dyYWRpZW50TmFtZQQEBAQBAAQABAcBI1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkltYWdlAwAAAAsYU3lzdGVtLkRyYXdpbmcuRm9udFN0eWxlAwAAAAgWU3lzdGVtLkRyYXdpbmcuQ29sb3JbXQMAAAAGAgAAAAX8////I1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAQAAAAd2YWx1ZV9fAAgDAAAABQAAAAX7////FFN5c3RlbS5EcmF3aW5nLkNvbG9yBAAAAARuYW1lBXZhbHVlCmtub3duQ29sb3IFc3RhdGUBAAAACQcHAwAAAAoAAAAAAAAAACMAAQAB+v////v///8KAAAAAAAAAAAbAAEACgYHAAAABUFyaWFsAAAAQQX4////GFN5c3RlbS5EcmF3aW5nLkZvbnRTdHlsZQEAAAAHdmFsdWVfXwAIAwAAAAAAAADx2P//CgoGCQAAAAAL</Row>
@@ -102,11 +102,11 @@
   </Table>
   <Table Name="EcopathCatch" Columns="DiscardMortality:System.Single,Discards:System.Single,FleetID:System.Int64,GroupID:System.Int64,Landing:System.Single,Price:System.Single" Num="5994">
     <Row>1,0,1,2,0,1</Row>
-    <Row>1,0.0001,1,3,0.0001,1</Row>
+    <Row>1,0.0001,1,3,0.0001,0</Row>
     <Row>1,0,1,4,0,1</Row>
     <Row>1,0,1,5,0,1</Row>
     <Row>1,1.14297E-05,1,6,0.000114297,1</Row>
-    <Row>1,3.06168E-05,1,7,0.000306168,1</Row>
+    <Row>1,3.06168E-05,1,7,0.000306168,0</Row>
     <Row>1,2.089E-05,1,8,0.0002089,1</Row>
     <Row>1,3.62483E-05,1,9,0.000362483,1</Row>
     <Row>1,0.000112757,1,10,0.001127574,1</Row>
@@ -139,7 +139,7 @@
     <Row>1,0,1,37,0,1</Row>
     <Row>1,0,1,1,0,1</Row>
     <Row>1,0,2,2,0,1</Row>
-    <Row>1,0,2,3,0.0001,1</Row>
+    <Row>1,0,2,3,0.0001,0</Row>
     <Row>1,0,2,4,0,1</Row>
     <Row>1,0,2,5,0,1</Row>
     <Row>1,1.14297E-05,2,6,0.000114297,1</Row>
@@ -381,6 +381,146 @@
     <Row>1,0,8,20,0,1</Row>
     <Row>1,1.81736E-06,8,21,1.81736E-05,1</Row>
     <Row>1,1.87901E-06,8,22,1.87901E-05,1</Row>
+    <Row>1,0,19,36,0,1</Row>
+    <Row>1,0,19,37,0,1</Row>
+    <Row>1,0,19,1,0,1</Row>
+    <Row>1,0,20,2,0,1</Row>
+    <Row>1,0,20,3,0,1</Row>
+    <Row>1,0,20,4,0,1</Row>
+    <Row>1,0,20,5,0,1</Row>
+    <Row>1,1.14297E-05,20,6,0.000114297,1</Row>
+    <Row>1,3.06168E-05,20,7,0.000306168,1</Row>
+    <Row>1,2.089E-05,20,8,0.0002089,1</Row>
+    <Row>1,3.62483E-05,20,9,0.000362483,1</Row>
+    <Row>1,0.000112757,20,10,0.001127574,1</Row>
+    <Row>1,3.51042E-05,20,11,0.000351042,1</Row>
+    <Row>1,6.8113E-06,20,12,6.8113E-05,1</Row>
+    <Row>1,0,20,13,0,1</Row>
+    <Row>1,5.75719E-06,20,14,5.75719E-05,1</Row>
+    <Row>1,4.73708E-06,20,15,4.73708E-05,1</Row>
+    <Row>1,9.60447E-05,20,16,0.000960447,1</Row>
+    <Row>1,5.09203E-06,20,17,5.09203E-05,1</Row>
+    <Row>1,1.64017E-05,20,18,0.000164017,1</Row>
+    <Row>1,1.26288E-05,20,19,0.000126288,1</Row>
+    <Row>1,0,20,20,0,1</Row>
+    <Row>1,1.81736E-06,20,21,1.81736E-05,1</Row>
+    <Row>1,1.87901E-06,20,22,1.87901E-05,1</Row>
+    <Row>1,1.05926E-06,20,23,1.05926E-05,1</Row>
+    <Row>1,5.2963E-07,20,24,5.2963E-06,1</Row>
+    <Row>1,1.74767E-05,20,25,0.000174767,1</Row>
+    <Row>1,0,20,26,0,1</Row>
+    <Row>1,8.45378E-07,20,27,8.45378E-06,1</Row>
+    <Row>1,7.92995E-06,20,28,7.92995E-05,1</Row>
+    <Row>1,5.25529E-06,20,29,5.25529E-05,1</Row>
+    <Row>1,2.67407E-08,20,30,2.67407E-07,1</Row>
+    <Row>1,1.51167E-07,20,31,1.51167E-06,1</Row>
+    <Row>1,0,20,32,0,1</Row>
+    <Row>1,1.81411E-09,20,33,1.81411E-08,1</Row>
+    <Row>1,0,20,34,0,1</Row>
+    <Row>1,0,20,35,0,1</Row>
+    <Row>1,0,20,36,0,1</Row>
+    <Row>1,0,20,37,0,1</Row>
+    <Row>1,0,20,1,0,1</Row>
+    <Row>1,0,21,2,0,1</Row>
+    <Row>1,0,21,3,0,1</Row>
+    <Row>1,0,21,4,0,1</Row>
+    <Row>1,0,21,5,0,1</Row>
+    <Row>1,1.14297E-05,21,6,0.000114297,1</Row>
+    <Row>1,3.06168E-05,21,7,0.000306168,1</Row>
+    <Row>1,2.089E-05,21,8,0.0002089,1</Row>
+    <Row>1,3.62483E-05,21,9,0.000362483,1</Row>
+    <Row>1,0.000112757,21,10,0.001127574,1</Row>
+    <Row>1,3.51042E-05,21,11,0.000351042,1</Row>
+    <Row>1,6.8113E-06,21,12,6.8113E-05,1</Row>
+    <Row>1,0,21,13,0,1</Row>
+    <Row>1,5.75719E-06,21,14,5.75719E-05,1</Row>
+    <Row>1,4.73708E-06,21,15,4.73708E-05,1</Row>
+    <Row>1,9.60447E-05,21,16,0.000960447,1</Row>
+    <Row>1,5.09203E-06,21,17,5.09203E-05,1</Row>
+    <Row>1,1.64017E-05,21,18,0.000164017,1</Row>
+    <Row>1,1.26288E-05,21,19,0.000126288,1</Row>
+    <Row>1,0,21,20,0,1</Row>
+    <Row>1,1.81736E-06,21,21,1.81736E-05,1</Row>
+    <Row>1,1.87901E-06,21,22,1.87901E-05,1</Row>
+    <Row>1,1.05926E-06,21,23,1.05926E-05,1</Row>
+    <Row>1,5.2963E-07,21,24,5.2963E-06,1</Row>
+    <Row>1,1.74767E-05,21,25,0.000174767,1</Row>
+    <Row>1,0,21,26,0,1</Row>
+    <Row>1,8.45378E-07,21,27,8.45378E-06,1</Row>
+    <Row>1,7.92995E-06,21,28,7.92995E-05,1</Row>
+    <Row>1,5.25529E-06,21,29,5.25529E-05,1</Row>
+    <Row>1,2.67407E-08,21,30,2.67407E-07,1</Row>
+    <Row>1,1.51167E-07,21,31,1.51167E-06,1</Row>
+    <Row>1,0,21,32,0,1</Row>
+    <Row>1,1.81411E-09,21,33,1.81411E-08,1</Row>
+    <Row>1,0,21,34,0,1</Row>
+    <Row>1,0,21,35,0,1</Row>
+    <Row>1,0,21,36,0,1</Row>
+    <Row>1,0,21,37,0,1</Row>
+    <Row>1,0,21,1,0,1</Row>
+    <Row>1,0,22,2,0,1</Row>
+    <Row>1,0,22,3,0,1</Row>
+    <Row>1,0,22,4,0,1</Row>
+    <Row>1,0,22,5,0,1</Row>
+    <Row>1,1.14297E-05,22,6,0.000114297,1</Row>
+    <Row>1,3.06168E-05,22,7,0.000306168,1</Row>
+    <Row>1,2.089E-05,22,8,0.0002089,1</Row>
+    <Row>1,3.62483E-05,22,9,0.000362483,1</Row>
+    <Row>1,0.000112757,22,10,0.001127574,1</Row>
+    <Row>1,3.51042E-05,22,11,0.000351042,1</Row>
+    <Row>1,6.8113E-06,22,12,6.8113E-05,1</Row>
+    <Row>1,0,22,13,0,1</Row>
+    <Row>1,5.75719E-06,22,14,5.75719E-05,1</Row>
+    <Row>1,4.73708E-06,22,15,4.73708E-05,1</Row>
+    <Row>1,9.60447E-05,22,16,0.000960447,1</Row>
+    <Row>1,5.09203E-06,22,17,5.09203E-05,1</Row>
+    <Row>1,1.64017E-05,22,18,0.000164017,1</Row>
+    <Row>1,1.26288E-05,22,19,0.000126288,1</Row>
+    <Row>1,0,22,20,0,1</Row>
+    <Row>1,1.81736E-06,22,21,1.81736E-05,1</Row>
+    <Row>1,1.87901E-06,22,22,1.87901E-05,1</Row>
+    <Row>1,1.05926E-06,22,23,1.05926E-05,1</Row>
+    <Row>1,5.2963E-07,22,24,5.2963E-06,1</Row>
+    <Row>1,1.74767E-05,22,25,0.000174767,1</Row>
+    <Row>1,0,22,26,0,1</Row>
+    <Row>1,8.45378E-07,22,27,8.45378E-06,1</Row>
+    <Row>1,7.92995E-06,22,28,7.92995E-05,1</Row>
+    <Row>1,5.25529E-06,22,29,5.25529E-05,1</Row>
+    <Row>1,2.67407E-08,22,30,2.67407E-07,1</Row>
+    <Row>1,1.51167E-07,22,31,1.51167E-06,1</Row>
+    <Row>1,0,22,32,0,1</Row>
+    <Row>1,1.81411E-09,22,33,1.81411E-08,1</Row>
+    <Row>1,0,22,34,0,1</Row>
+    <Row>1,0,22,35,0,1</Row>
+    <Row>1,0,22,36,0,1</Row>
+    <Row>1,0,22,37,0,1</Row>
+    <Row>1,0,22,1,0,1</Row>
+    <Row>1,0,23,2,0,1</Row>
+    <Row>1,0,23,3,0,1</Row>
+    <Row>1,0,23,4,0,1</Row>
+    <Row>1,0,23,5,0,1</Row>
+    <Row>1,1.14297E-05,23,6,0.000114297,1</Row>
+    <Row>1,3.06168E-05,23,7,0.000306168,1</Row>
+    <Row>1,2.089E-05,23,8,0.0002089,1</Row>
+    <Row>1,3.62483E-05,23,9,0.000362483,1</Row>
+    <Row>1,0.000112757,23,10,0.001127574,1</Row>
+    <Row>1,3.51042E-05,23,11,0.000351042,1</Row>
+    <Row>1,6.8113E-06,23,12,6.8113E-05,1</Row>
+    <Row>1,0,23,13,0,1</Row>
+    <Row>1,5.75719E-06,23,14,5.75719E-05,1</Row>
+    <Row>1,4.73708E-06,23,15,4.73708E-05,1</Row>
+    <Row>1,9.60447E-05,23,16,0.000960447,1</Row>
+    <Row>1,5.09203E-06,23,17,5.09203E-05,1</Row>
+    <Row>1,1.64017E-05,23,18,0.000164017,1</Row>
+    <Row>1,1.26288E-05,23,19,0.000126288,1</Row>
+    <Row>1,0,23,20,0,1</Row>
+    <Row>1,1.81736E-06,23,21,1.81736E-05,1</Row>
+    <Row>1,1.87901E-06,23,22,1.87901E-05,1</Row>
+    <Row>1,1.05926E-06,23,23,1.05926E-05,1</Row>
+    <Row>1,5.2963E-07,23,24,5.2963E-06,1</Row>
+    <Row>1,1.74767E-05,23,25,0.000174767,1</Row>
+    <Row>1,0,23,26,0,1</Row>
+    <Row>1,8.45378E-07,23,27,8.45378E-06,1</Row>
     <Row>1,1.05926E-06,8,23,1.05926E-05,1</Row>
     <Row>1,5.2963E-07,8,24,5.2963E-06,1</Row>
     <Row>1,1.74767E-05,8,25,0.000174767,1</Row>
@@ -801,146 +941,6 @@
     <Row>1,1.81411E-09,19,33,1.81411E-08,1</Row>
     <Row>1,0,19,34,0,1</Row>
     <Row>1,0,19,35,0,1</Row>
-    <Row>1,0,19,36,0,1</Row>
-    <Row>1,0,19,37,0,1</Row>
-    <Row>1,0,19,1,0,1</Row>
-    <Row>1,0,20,2,0,1</Row>
-    <Row>1,0,20,3,0,1</Row>
-    <Row>1,0,20,4,0,1</Row>
-    <Row>1,0,20,5,0,1</Row>
-    <Row>1,1.14297E-05,20,6,0.000114297,1</Row>
-    <Row>1,3.06168E-05,20,7,0.000306168,1</Row>
-    <Row>1,2.089E-05,20,8,0.0002089,1</Row>
-    <Row>1,3.62483E-05,20,9,0.000362483,1</Row>
-    <Row>1,0.000112757,20,10,0.001127574,1</Row>
-    <Row>1,3.51042E-05,20,11,0.000351042,1</Row>
-    <Row>1,6.8113E-06,20,12,6.8113E-05,1</Row>
-    <Row>1,0,20,13,0,1</Row>
-    <Row>1,5.75719E-06,20,14,5.75719E-05,1</Row>
-    <Row>1,4.73708E-06,20,15,4.73708E-05,1</Row>
-    <Row>1,9.60447E-05,20,16,0.000960447,1</Row>
-    <Row>1,5.09203E-06,20,17,5.09203E-05,1</Row>
-    <Row>1,1.64017E-05,20,18,0.000164017,1</Row>
-    <Row>1,1.26288E-05,20,19,0.000126288,1</Row>
-    <Row>1,0,20,20,0,1</Row>
-    <Row>1,1.81736E-06,20,21,1.81736E-05,1</Row>
-    <Row>1,1.87901E-06,20,22,1.87901E-05,1</Row>
-    <Row>1,1.05926E-06,20,23,1.05926E-05,1</Row>
-    <Row>1,5.2963E-07,20,24,5.2963E-06,1</Row>
-    <Row>1,1.74767E-05,20,25,0.000174767,1</Row>
-    <Row>1,0,20,26,0,1</Row>
-    <Row>1,8.45378E-07,20,27,8.45378E-06,1</Row>
-    <Row>1,7.92995E-06,20,28,7.92995E-05,1</Row>
-    <Row>1,5.25529E-06,20,29,5.25529E-05,1</Row>
-    <Row>1,2.67407E-08,20,30,2.67407E-07,1</Row>
-    <Row>1,1.51167E-07,20,31,1.51167E-06,1</Row>
-    <Row>1,0,20,32,0,1</Row>
-    <Row>1,1.81411E-09,20,33,1.81411E-08,1</Row>
-    <Row>1,0,20,34,0,1</Row>
-    <Row>1,0,20,35,0,1</Row>
-    <Row>1,0,20,36,0,1</Row>
-    <Row>1,0,20,37,0,1</Row>
-    <Row>1,0,20,1,0,1</Row>
-    <Row>1,0,21,2,0,1</Row>
-    <Row>1,0,21,3,0,1</Row>
-    <Row>1,0,21,4,0,1</Row>
-    <Row>1,0,21,5,0,1</Row>
-    <Row>1,1.14297E-05,21,6,0.000114297,1</Row>
-    <Row>1,3.06168E-05,21,7,0.000306168,1</Row>
-    <Row>1,2.089E-05,21,8,0.0002089,1</Row>
-    <Row>1,3.62483E-05,21,9,0.000362483,1</Row>
-    <Row>1,0.000112757,21,10,0.001127574,1</Row>
-    <Row>1,3.51042E-05,21,11,0.000351042,1</Row>
-    <Row>1,6.8113E-06,21,12,6.8113E-05,1</Row>
-    <Row>1,0,21,13,0,1</Row>
-    <Row>1,5.75719E-06,21,14,5.75719E-05,1</Row>
-    <Row>1,4.73708E-06,21,15,4.73708E-05,1</Row>
-    <Row>1,9.60447E-05,21,16,0.000960447,1</Row>
-    <Row>1,5.09203E-06,21,17,5.09203E-05,1</Row>
-    <Row>1,1.64017E-05,21,18,0.000164017,1</Row>
-    <Row>1,1.26288E-05,21,19,0.000126288,1</Row>
-    <Row>1,0,21,20,0,1</Row>
-    <Row>1,1.81736E-06,21,21,1.81736E-05,1</Row>
-    <Row>1,1.87901E-06,21,22,1.87901E-05,1</Row>
-    <Row>1,1.05926E-06,21,23,1.05926E-05,1</Row>
-    <Row>1,5.2963E-07,21,24,5.2963E-06,1</Row>
-    <Row>1,1.74767E-05,21,25,0.000174767,1</Row>
-    <Row>1,0,21,26,0,1</Row>
-    <Row>1,8.45378E-07,21,27,8.45378E-06,1</Row>
-    <Row>1,7.92995E-06,21,28,7.92995E-05,1</Row>
-    <Row>1,5.25529E-06,21,29,5.25529E-05,1</Row>
-    <Row>1,2.67407E-08,21,30,2.67407E-07,1</Row>
-    <Row>1,1.51167E-07,21,31,1.51167E-06,1</Row>
-    <Row>1,0,21,32,0,1</Row>
-    <Row>1,1.81411E-09,21,33,1.81411E-08,1</Row>
-    <Row>1,0,21,34,0,1</Row>
-    <Row>1,0,21,35,0,1</Row>
-    <Row>1,0,21,36,0,1</Row>
-    <Row>1,0,21,37,0,1</Row>
-    <Row>1,0,21,1,0,1</Row>
-    <Row>1,0,22,2,0,1</Row>
-    <Row>1,0,22,3,0,1</Row>
-    <Row>1,0,22,4,0,1</Row>
-    <Row>1,0,22,5,0,1</Row>
-    <Row>1,1.14297E-05,22,6,0.000114297,1</Row>
-    <Row>1,3.06168E-05,22,7,0.000306168,1</Row>
-    <Row>1,2.089E-05,22,8,0.0002089,1</Row>
-    <Row>1,3.62483E-05,22,9,0.000362483,1</Row>
-    <Row>1,0.000112757,22,10,0.001127574,1</Row>
-    <Row>1,3.51042E-05,22,11,0.000351042,1</Row>
-    <Row>1,6.8113E-06,22,12,6.8113E-05,1</Row>
-    <Row>1,0,22,13,0,1</Row>
-    <Row>1,5.75719E-06,22,14,5.75719E-05,1</Row>
-    <Row>1,4.73708E-06,22,15,4.73708E-05,1</Row>
-    <Row>1,9.60447E-05,22,16,0.000960447,1</Row>
-    <Row>1,5.09203E-06,22,17,5.09203E-05,1</Row>
-    <Row>1,1.64017E-05,22,18,0.000164017,1</Row>
-    <Row>1,1.26288E-05,22,19,0.000126288,1</Row>
-    <Row>1,0,22,20,0,1</Row>
-    <Row>1,1.81736E-06,22,21,1.81736E-05,1</Row>
-    <Row>1,1.87901E-06,22,22,1.87901E-05,1</Row>
-    <Row>1,1.05926E-06,22,23,1.05926E-05,1</Row>
-    <Row>1,5.2963E-07,22,24,5.2963E-06,1</Row>
-    <Row>1,1.74767E-05,22,25,0.000174767,1</Row>
-    <Row>1,0,22,26,0,1</Row>
-    <Row>1,8.45378E-07,22,27,8.45378E-06,1</Row>
-    <Row>1,7.92995E-06,22,28,7.92995E-05,1</Row>
-    <Row>1,5.25529E-06,22,29,5.25529E-05,1</Row>
-    <Row>1,2.67407E-08,22,30,2.67407E-07,1</Row>
-    <Row>1,1.51167E-07,22,31,1.51167E-06,1</Row>
-    <Row>1,0,22,32,0,1</Row>
-    <Row>1,1.81411E-09,22,33,1.81411E-08,1</Row>
-    <Row>1,0,22,34,0,1</Row>
-    <Row>1,0,22,35,0,1</Row>
-    <Row>1,0,22,36,0,1</Row>
-    <Row>1,0,22,37,0,1</Row>
-    <Row>1,0,22,1,0,1</Row>
-    <Row>1,0,23,2,0,1</Row>
-    <Row>1,0,23,3,0,1</Row>
-    <Row>1,0,23,4,0,1</Row>
-    <Row>1,0,23,5,0,1</Row>
-    <Row>1,1.14297E-05,23,6,0.000114297,1</Row>
-    <Row>1,3.06168E-05,23,7,0.000306168,1</Row>
-    <Row>1,2.089E-05,23,8,0.0002089,1</Row>
-    <Row>1,3.62483E-05,23,9,0.000362483,1</Row>
-    <Row>1,0.000112757,23,10,0.001127574,1</Row>
-    <Row>1,3.51042E-05,23,11,0.000351042,1</Row>
-    <Row>1,6.8113E-06,23,12,6.8113E-05,1</Row>
-    <Row>1,0,23,13,0,1</Row>
-    <Row>1,5.75719E-06,23,14,5.75719E-05,1</Row>
-    <Row>1,4.73708E-06,23,15,4.73708E-05,1</Row>
-    <Row>1,9.60447E-05,23,16,0.000960447,1</Row>
-    <Row>1,5.09203E-06,23,17,5.09203E-05,1</Row>
-    <Row>1,1.64017E-05,23,18,0.000164017,1</Row>
-    <Row>1,1.26288E-05,23,19,0.000126288,1</Row>
-    <Row>1,0,23,20,0,1</Row>
-    <Row>1,1.81736E-06,23,21,1.81736E-05,1</Row>
-    <Row>1,1.87901E-06,23,22,1.87901E-05,1</Row>
-    <Row>1,1.05926E-06,23,23,1.05926E-05,1</Row>
-    <Row>1,5.2963E-07,23,24,5.2963E-06,1</Row>
-    <Row>1,1.74767E-05,23,25,0.000174767,1</Row>
-    <Row>1,0,23,26,0,1</Row>
-    <Row>1,8.45378E-07,23,27,8.45378E-06,1</Row>
     <Row>1,7.92995E-06,23,28,7.92995E-05,1</Row>
     <Row>1,5.25529E-06,23,29,5.25529E-05,1</Row>
     <Row>1,2.67407E-08,23,30,2.67407E-07,1</Row>
@@ -2603,7 +2603,7 @@
   <Table Name="EcopathGroupSample" Columns="BiomAcc:System.Single,BiomAccRate:System.Single,Biomass:System.Single,ConsBiom:System.Single,EcoEfficiency:System.Single,GroupID:System.Int64,ImpVar:System.Single,ProdBiom:System.Single,SampleID:System.Int64" Num="0" />
   <Table Name="EcopathGroupTaxon" Columns="EcopathGroupID:System.Int64,PropCatch:System.Single,Proportion:System.Single,TaxonID:System.Int64" Num="0" />
   <Table Name="EcopathModel" Columns="Area:System.Single,Author:System.String,CodeEcobase:System.String,Contact:System.String,Country:System.String,Description:System.String,EcosystemType:System.String,FirstYear:System.Int64,GroupDigits:System.Byte,LastSaved:System.Single,LastSavedVersion:System.String,MaxLat:System.Single,MaxLon:System.Single,MinLat:System.Single,MinLon:System.Single,ModelID:System.Int64,MonetaryUnit:System.String,Name:System.String,NumDigits:System.Int32,NumYears:System.Single,PublicationDOI:System.String,PublicationRef:System.String,PublicationURI:System.String,UnitCurrency:System.Int64,UnitCurrencyCustom:System.String,UnitMonetary:System.String,UnitTime:System.Int64,UnitTimeCustom:System.String" Num="28">
-    <Row>1,Eyal,,,,,,0,0,45460.43,6.7.0.18858,0,0,0,0,1,,Esat Med For MSP 03 2024,3,1,,,,5,,1,1,</Row>
+    <Row>1,Eyal,,,,,,0,0,45460.54,6.7.0.18858,0,0,0,0,1,,Esat Med For MSP 03 2024,3,1,,,,5,,1,1,</Row>
   </Table>
   <Table Name="EcopathPSD" Columns="ClimateType:System.Int32,FirstWeightClass:System.Single,ModelID:System.Int64,MortalityType:System.Int64,NumAgeSteps:System.Int64,NumWeightClasses:System.Int64" Num="6">
     <Row>0,0.125,1,0,101,25</Row>
