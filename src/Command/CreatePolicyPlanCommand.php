@@ -7,9 +7,9 @@ use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
-use App\Domain\PolicyData\EmptyPolicyDataBase;
-use App\Domain\PolicyData\FilterBasePolicyData;
 use App\Domain\PolicyData\PolicyDataBase;
+use App\Domain\PolicyData\FilterBasePolicyData;
+use App\Domain\PolicyData\ItemsPolicyDataBase;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\PolicyDataSchemaMetaName;
 use App\Domain\PolicyData\PolicyTarget;
@@ -463,6 +463,34 @@ class CreatePolicyPlanCommand extends Command
                     $again = $bitwiseHandling && $io->confirm("Add more to $propName?", false);
                 }
                 break;
+            case JsonSchema::NUMBER:
+                $desc = "Enter $propName ($prop->type)";
+                if (($prop->minimum ?? $prop->maximum) !== null) {
+                    $desc .= ' ('.$prop->minimum.'..'.$prop->maximum.')';
+                }
+                $again = true;
+                while ($again) {
+                    $propValue = $this->askJsonSchemaPrimitive(
+                        $io,
+                        $desc,
+                        $prop->type,
+                        $prop->default ?? null
+                    );
+                    if ($prop->minimum !== null) {
+                        if ($propValue < $prop->minimum) {
+                            $io->error('Value must be greater than or equal to '.$prop->minimum);
+                            continue;
+                        }
+                    }
+                    if ($prop->maximum !== null) {
+                        if ($propValue > $prop->maximum) {
+                            $io->error('Value must be less than or equal to '.$prop->maximum);
+                            continue;
+                        }
+                    }
+                    $again = false;
+                }
+                break;
             default:
                 $propValue = $this->askJsonSchemaPrimitive(
                     $io,
@@ -780,7 +808,7 @@ class CreatePolicyPlanCommand extends Command
     private function createPolicyData(
         PolicyTypeName $policyTypeName,
         array $policyData
-    ): EmptyPolicyDataBase|PolicyDataBase {
+    ): PolicyDataBase|ItemsPolicyDataBase {
         $jsonObj = new \stdClass();
         foreach ($policyData as $key => $value) {
             $jsonObj->$key = $value;

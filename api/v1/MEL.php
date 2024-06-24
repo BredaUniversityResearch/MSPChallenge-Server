@@ -6,8 +6,8 @@ use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\PolicyData\BufferZonePolicyData;
-use App\Domain\PolicyData\EmptyPolicyDataBase;
 use App\Domain\PolicyData\PolicyDataBase;
+use App\Domain\PolicyData\ItemsPolicyDataBase;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Domain\Services\ConnectionManager;
@@ -50,8 +50,8 @@ class MEL extends Base
 
     public function getFishingPolicySettings(): array
     {
-        $mel = $this->Config();
-        return $mel['fishing_policy_settings'] ?? [];
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        return $gameConfigValues['policy_settings']['fishing'] ?? [];
     }
 
     /**
@@ -565,17 +565,17 @@ SUBQUERY
 
     /**
      * @param Geometry $geometry
-     * @param EmptyPolicyDataBase|PolicyDataBase $policyData
+     * @param PolicyDataBase|ItemsPolicyDataBase $policyData
      * @param bool $addGeometryToResult if the caller should add the geometry to the result.
      *  If not, the policy prevents it
      * @param int|null $geometryTypeFilter
      * @return array|null
      */
     private function applyGeometryPolicy(
-        Geometry       $geometry,
-        EmptyPolicyDataBase|PolicyDataBase $policyData,
-        bool           &$addGeometryToResult,
-        ?int           $geometryTypeFilter = null
+        Geometry                           $geometry,
+        PolicyDataBase|ItemsPolicyDataBase $policyData,
+        bool                               &$addGeometryToResult,
+        ?int                               $geometryTypeFilter = null
     ): ?array {
         if ($policyData instanceof BufferZonePolicyData) {
             return $this->applyGeometryBufferZonePolicy(
@@ -589,10 +589,10 @@ SUBQUERY
     }
 
     public function applyGeometryBufferZonePolicy(
-        Geometry $geom,
+        Geometry             $geom,
         BufferZonePolicyData $policyData,
-        bool &$addGeomToResult,
-        ?int $geometryTypeFilter = null
+        bool                 &$addGeomToResult,
+        ?int                 $geometryTypeFilter = null
     ): ?array {
         if ($geometryTypeFilter === null) {
             return null; // mpa should always have a geometry type filter

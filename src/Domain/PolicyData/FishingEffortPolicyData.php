@@ -5,7 +5,7 @@ namespace App\Domain\PolicyData;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
 use Swaggest\JsonSchema\Schema;
 
-class FishingEffortPolicyData extends EmptyPolicyDataBase
+class FishingEffortPolicyData extends PolicyDataBase
 {
     public function __construct()
     {

@@ -21,7 +21,7 @@ class PolicyDataFactory
         };
     }
 
-    public static function createPolicyDataByType(PolicyTypeName $policyTypeName): EmptyPolicyDataBase|PolicyDataBase
+    public static function createPolicyDataByType(PolicyTypeName $policyTypeName): PolicyDataBase|ItemsPolicyDataBase
     {
         return match ($policyTypeName) {
             PolicyTypeName::BUFFER_ZONE => new BufferZonePolicyData(),
@@ -37,7 +37,7 @@ class PolicyDataFactory
      * @throws Exception
      * @throws InvalidValue
      */
-    public static function createPolicyDataByJsonObject(object $json): EmptyPolicyDataBase|PolicyDataBase
+    public static function createPolicyDataByJsonObject(object $json): PolicyDataBase|ItemsPolicyDataBase
     {
         if (!property_exists($json, 'type')) {
             throw new InvalidValue('Policy type is missing');
