@@ -15064,6 +15064,7 @@
     "policy_settings" : {
       "fishing": {
         "all_country_approval": true,
+        "stakeholder_pressure_cool_down": 0.1,
         "fleet_info": {
           "gear_types": [
             "Bottom Trawl",
@@ -15086,9 +15087,6 @@
           ]
         }
       }
-    },
-    "stakeholder_pressure_settings" : {
-      "cool_down_per_month": 0.1
     },
     "dependencies": {
       "groups": [

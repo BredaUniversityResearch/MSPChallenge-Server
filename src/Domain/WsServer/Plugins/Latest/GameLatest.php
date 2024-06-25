@@ -91,10 +91,6 @@ class GameLatest extends CommonBase
                     unset($p);
                 });
             });
-        $latestStakeholderPressure = $this->getLatestStakeholderPressure($context)
-            ->then(function (array $result) use (&$data) {
-                $data['stakeholder_pressure'] = $result;
-            });
         return [
             tpf(fn() => $latestPlan),
             tpf(fn() => $latestMessages),
@@ -102,8 +98,7 @@ class GameLatest extends CommonBase
             tpf(fn() => $latestEnergyPolicy),
             tpf(fn() => $latestKpi),
             tpf(fn() => $latestWarning),
-            tpf(fn() => $latestObjective),
-            tpf(fn() => $latestStakeholderPressure)
+            tpf(fn() => $latestObjective)
         ];
     }
 
@@ -460,64 +455,5 @@ class GameLatest extends CommonBase
                 }
                 return $result;
             });
-    }
-
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     * @throws Exception
-     */
-    private function getLatestStakeholderPressure(array $context): PromiseInterface
-    {
-        return $this->getAsyncDatabase()->queryBySQL(
-            <<<'SQL'
-            with
-              plan_layer_with_geo_policies as (
-                select JSON_UNQUOTE(jt.type) as policy_type, jt.pressure, pl.plan_layer_plan_id as plan_id
-                from plan_layer pl
-                inner join layer l on l.layer_id = pl.plan_layer_layer_id
-                inner join geometry g on g.geometry_layer_id = l.layer_id and
-                  JSON_CONTAINS_PATH(g.geometry_data, 'one', '$.policies[*].type')
-                inner join JSON_TABLE(g.geometry_data, '$.policies[*]'
-                  COLUMNS (
-                     type JSON PATH '$.type',
-                     pressure JSON PATH '$.pressure'
-                  )
-                ) jt ON TRUE
-              ),
-              plan_policies as (
-                select JSON_UNQUOTE(jt.`type`) as policy_type, jt.pressure, pp.plan_id
-                from plan_policy pp
-                inner join policy po on pp.policy_id = po.id
-                inner join JSON_TABLE(po.data, '$'
-                  COLUMNS (
-                     type JSON PATH '$.type',
-                     pressure JSON PATH '$.pressure'
-                  )
-                ) jt ON TRUE
-              )
-            select pl.policy_type, pl.pressure, p.plan_id, p.plan_lastupdate
-            from plan p
-            inner join plan_layer_with_geo_policies pl on pl.plan_id=p.plan_id and p.plan_lastupdate >= ?
-            union all
-            select pp.policy_type, pp.pressure, p.plan_id, p.plan_lastupdate
-            from plan p
-            inner join plan_policies pp on pp.plan_id=p.plan_id and p.plan_lastupdate >= ?
-            SQL,
-            [
-                (int)$context[self::CONTEXT_PARAM_LAST_UPDATE_TIME],
-                (int)$context[self::CONTEXT_PARAM_LAST_UPDATE_TIME]
-            ]
-        )
-        ->then(
-            function (Result $result) {
-                // sum up the policy pressures for all implemented plans since "last update"
-                $current = collect(($result->fetchAllRows() ?? []) ?: [])
-                    ->reduce(fn ($carry, $row) => $carry + $row['pressure'], 0.0);
-                return [
-                    'current' => $current,
-                    'implementations' => $result->fetchAllRows()
-                ];
-            }
-        );
     }
 }

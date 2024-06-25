@@ -463,6 +463,12 @@ class Game extends Base
         await($this->onGameStateUpdated($state));
     }
 
+    private function getFishingPolicySettings(): array
+    {
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        return $gameConfigValues['policy_settings']['fishing'] ?? [];
+    }
+
     /**
      * @apiGroup Game
      * @throws Exception
@@ -479,12 +485,12 @@ class Game extends Base
             [ 'policy_type' => 'shipping' ], // key 1
             [ 'policy_type' => 'energy' ] // key 2
         ];
+        $policySettings[0] += $this->getFishingPolicySettings();
         $simulationSettings = [];
 
         $data = $this->GetGameConfigValues();
         if (isset($data['MEL'])) {
             $mel = new MEL();
-            $policySettings[0] += $mel->getFishingPolicySettings();
             $simulationSettings[] = [
                 'simulation_type' => 'MEL',
                 'content' => $mel->Config()

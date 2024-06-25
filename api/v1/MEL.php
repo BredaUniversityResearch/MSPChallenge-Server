@@ -48,12 +48,6 @@ class MEL extends Base
         return $gameConfigValues['MEL'] ?? null;
     }
 
-    public function getFishingPolicySettings(): array
-    {
-        $gameConfigValues = (new Game())->GetGameConfigValues();
-        return $gameConfigValues['policy_settings']['fishing'] ?? [];
-    }
-
     /**
      * @throws Exception
      */
