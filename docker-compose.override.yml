@@ -71,6 +71,9 @@ services:
       - /app/vendor
     networks:
       - mitmproxy
+      - database
+      - php
+      - redis
     environment:
       # this forces non-ssl
       SERVER_NAME: :80

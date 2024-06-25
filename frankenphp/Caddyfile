@@ -16,6 +16,13 @@
 {$CADDY_EXTRA_CONFIG}
 
 {$SERVER_NAME:localhost} {
+    @blockApi {
+        path /api/getandaddpdutoList
+    }
+    respond @blockApi 403 {
+        close
+    }
+
     @phpFile {
         path /ServerManager/*.php*
     }

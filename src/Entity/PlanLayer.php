@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\PlanLayerState;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,15 +15,15 @@ class PlanLayer
     private ?int $planLayerId;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planLayer')]
-    #[ORM\JoinColumn(name: 'plan_layer_plan_id', referencedColumnName: 'plan_id')]
+    #[ORM\JoinColumn(name: 'plan_layer_plan_id', referencedColumnName: 'plan_id', onDelete: 'CASCADE')]
     private ?Plan $plan;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planLayer')]
     #[ORM\JoinColumn(name: 'plan_layer_layer_id', referencedColumnName: 'layer_id')]
     private ?Layer $layer;
 
-    #[ORM\Column(type: Types::STRING, length: 50, nullable: true, options: ['default' => 'WAIT'])]
-    private ?string $planLayerState = 'WAIT';
+    #[ORM\Column(length: 50, enumType: PlanLayerState::class)]
+    private PlanLayerState $planLayerState = PlanLayerState::WAIT;
 
     public function getPlanLayerId(): ?int
     {
@@ -59,12 +60,12 @@ class PlanLayer
         return $this;
     }
 
-    public function getPlanLayerState(): ?string
+    public function getPlanLayerState(): PlanLayerState
     {
         return $this->planLayerState;
     }
 
-    public function setPlanLayerState(?string $planLayerState): PlanLayer
+    public function setPlanLayerState(PlanLayerState $planLayerState): PlanLayer
     {
         $this->planLayerState = $planLayerState;
         return $this;

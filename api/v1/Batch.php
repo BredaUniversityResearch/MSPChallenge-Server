@@ -251,7 +251,7 @@ class Batch extends Base
             return $deferred->promise();
         })
         ->then(function (Result $result) use ($batchGuid) {
-            $groupToBatchTasks = collect($result->fetchAllRows() ?: [])
+            $groupToBatchTasks = collect(($result->fetchAllRows() ?? []) ?: [])
                 ->groupBy('api_batch_task_group')
                 ->sortKeys()
                 ->all();

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DoctrineMigrations;
 
 use App\Domain\API\v1\Plan;
-use App\Domain\API\v1\PolicyType;
+use App\Domain\API\v1\GeneralPolicyType;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\SchemaException;
@@ -79,9 +79,10 @@ final class Version20230202092830 extends MSPMigration
         );
         // now set the right string based on the int values
         foreach ($planTypes as $planId => $planType) {
-            $oldPLanType = (($planType & PolicyType::ENERGY) === PolicyType::ENERGY) ? '1' : '0';
-            $oldPLanType .= ','.((($planType & PolicyType::FISHING) === PolicyType::FISHING) ? '1' : '0');
-            $oldPLanType .= ','.((($planType & PolicyType::SHIPPING) === PolicyType::SHIPPING) ? '1' : '0');
+            $oldPLanType = (($planType & GeneralPolicyType::ENERGY) === GeneralPolicyType::ENERGY) ? '1' : '0';
+            $oldPLanType .= ','.((($planType & GeneralPolicyType::FISHING) === GeneralPolicyType::FISHING) ? '1' : '0');
+            $oldPLanType .= ','.
+                ((($planType & GeneralPolicyType::SHIPPING) === GeneralPolicyType::SHIPPING) ? '1' : '0');
             $this->addSql('UPDATE plan SET plan_type=? WHERE plan_id=?', [$oldPLanType, $planId]);
         }
     }

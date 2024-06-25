@@ -318,7 +318,7 @@ class Energy extends Base
                      )
             )
             ->then(function (Result $result) {
-                $planIds = collect($result->fetchAllRows() ?? [])
+                $planIds = collect(($result->fetchAllRows() ?? []) ?: [])
                     ->keyBy('plan_id')
                     ->map(function ($row) {
                         return $row['plan_id'];
@@ -633,7 +633,7 @@ class Energy extends Base
                 ->where($qb->expr()->eq('geometry_layer_id', $qb->createPositionalParameter($layerId)))
         )
         ->then(function (Result $result) {
-            $geometryToDelete = $result->fetchAllRows() ?? [];
+            $geometryToDelete = ($result->fetchAllRows() ?? []) ?: [];
             $toPromiseFunctions = [];
             foreach ($geometryToDelete as $geometry) {
                 $geometryId = $geometry['geometry_id'];
@@ -830,7 +830,7 @@ class Energy extends Base
                     )
             )
             ->then(function (Result $queryResult) use (&$result, $planId, $referencePlanData) {
-                $planChangingReferencedGrids = $queryResult->fetchAllRows();
+                $planChangingReferencedGrids = ($queryResult->fetchAllRows() ?? []) ?: [];
                 $planIdsDependentOnThisPlan = [];
                 foreach ($planChangingReferencedGrids as $plan) {
                     if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) &&
@@ -881,7 +881,7 @@ class Energy extends Base
                     $referencePlanData,
                     $planIdsDependentOnThisPlan
                 ) {
-                    $plansReferencingDeletedGrids = $queryResult->fetchAllRows();
+                    $plansReferencingDeletedGrids = ($queryResult->fetchAllRows() ?? []) ?: [];
                     foreach ($plansReferencingDeletedGrids as $plan) {
                         if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) &&
                             !in_array($plan['plan_id'], $result)) {
@@ -975,7 +975,7 @@ class Energy extends Base
                         &$result,
                         $planIdsDependentOnThisPlan
                     ) {
-                        $plansWithCablesReferencingGeometry = $queryResult->fetchAllRows();
+                        $plansWithCablesReferencingGeometry = ($queryResult->fetchAllRows() ?? []) ?: [];
                         foreach ($plansWithCablesReferencingGeometry as $plan) {
                             if (!in_array($plan['plan_id'], $planIdsDependentOnThisPlan) &&
                                 !in_array($plan['plan_id'], $result)) {
@@ -1041,7 +1041,7 @@ class Energy extends Base
             [$planId, $planId]
         )
         ->then(function (Result $qResult) use ($planId, &$result) {
-            $removedGridIds = $qResult->fetchAllRows() ?: [];
+            $removedGridIds = ($qResult->fetchAllRows() ?? []) ?: [];
             $toPromiseFunctions = [];
             foreach ($removedGridIds as $removedGridId) {
                 $toPromiseFunctions[] = tpf(function () use ($removedGridId, $planId, &$result) {
@@ -1063,7 +1063,7 @@ class Energy extends Base
                         ]
                     )
                     ->then(function (Result $qResult) use (&$result) {
-                        $futureReferencedGrids = $qResult->fetchAllRows() ?: [];
+                        $futureReferencedGrids = ($qResult->fetchAllRows() ?? []) ?: [];
                         foreach ($futureReferencedGrids as $futureGrid) {
                             $result[] = $futureGrid['plan_id'];
                         }
@@ -1086,7 +1086,7 @@ class Energy extends Base
                         ]
                     )
                     ->then(function (Result $qResult) use (&$result) {
-                        $futureDeletedGrids = $qResult->fetchAllRows() ?: [];
+                        $futureDeletedGrids = ($qResult->fetchAllRows() ?? []) ?: [];
                         foreach ($futureDeletedGrids as $futureDeletedGrid) {
                             $result[] = $futureDeletedGrid['plan_id'];
                         }

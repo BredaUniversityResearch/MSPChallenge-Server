@@ -92,7 +92,7 @@ class CEL extends Base
             SELECT plan_type FROM plan
             WHERE plan_gametime = ? AND plan_state = 'IMPLEMENTED' AND (plan_type & ? = ?)
             ",
-            array($time['game_currentmonth'], PolicyType::ENERGY, PolicyType::ENERGY)
+            array($time['game_currentmonth'], GeneralPolicyType::ENERGY, GeneralPolicyType::ENERGY)
         );
         return (count($implementedPlans) > 0);
     }

@@ -194,6 +194,19 @@ abstract class MSPMigration extends AbstractMigration
         $this->dropColumn($table, $columnName);
     }
 
+    protected function addSql(
+        string $sql,
+        array $params = [],
+        array $types = [],
+    ): void {
+        // It is generally safer to separate each SQL statement into individual addSql calls.
+        //   This approach ensures better transactional integrity and more precise error reporting.
+        $sqls = array_filter(explode(';', $sql));
+        foreach ($sqls as $sql) {
+            parent::addSql($sql, $params, $types);
+        }
+    }
+
     abstract protected function getDatabaseType(): ?MSPDatabaseType;
     abstract protected function onUp(Schema $schema): void;
     abstract protected function onDown(Schema $schema): void;

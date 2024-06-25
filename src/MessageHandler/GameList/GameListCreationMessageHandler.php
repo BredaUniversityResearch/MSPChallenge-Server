@@ -44,6 +44,9 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
+use Swaggest\JsonSchema\Exception\Error;
+use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\Schema;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -1189,21 +1192,17 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     private function validateGameConfigComplete(): void
     {
         $gameConfigContents = json_decode($this->gameSession->getGameConfigVersion()->getGameConfigCompleteRaw());
-        $validator = new Validator();
-        $validator->validate(
-            $gameConfigContents,
-            json_decode(
-                file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
-            )
-        );
-        if (!$validator->isValid()) {
+        $schema = Schema::import(json_decode(
+            file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
+        ));
+        try {
+            $schema->in($gameConfigContents);
+        } catch (InvalidValue $e) {
             $this->error(
                 "Session config file {$this->gameSession->getGameConfigVersion()->getGameConfigFile()->getFilename()} ".
                 "v{$this->gameSession->getGameConfigVersion()->getVersion()} failed to pass validation:"
             );
-            foreach ($validator->getErrors() as $error) {
-                $this->error(sprintf("[%s] %s", $error['property'], $error['message']));
-            }
+            $this->error($e->getMessage());
             throw new \Exception('Session config file invalid, so not continuing.');
         }
         $this->info(

@@ -141,6 +141,8 @@ class BlackfireWsServerPlugin extends Plugin implements EventSubscriberInterface
     private function startStateSetup(): void
     {
         $this->addOutput('Awaiting signals to setup profiling');
+        $this->addOutput('Run "kill -SIGUSR1 '.getmypid().'" to select next plugin to profile');
+        $this->addOutput('Run "kill -SIGUSR2 '.getmypid().'" to enable profiling after selecting plugin');
         $this->state = self::STATE_SETUP;
     }
 

@@ -212,6 +212,8 @@ class LatestWsServerPlugin extends Plugin
             $p2['tick']['era_timeleft'],
             $p2['debug'],
         );
+        ksort($p1);
+        ksort($p2);
         if (0 != strcmp(json_encode($p1), json_encode($p2))) {
             return new EPayloadDifferenceType(EPayloadDifferenceType::ESSENTIAL_DIFFERENCES);
         }

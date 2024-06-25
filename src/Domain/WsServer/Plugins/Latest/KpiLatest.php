@@ -86,7 +86,7 @@ class KpiLatest extends CommonBase
             $qb = $this->createQueryBuilderKpiBase($country, $kpiType);
             return $this->getAsyncDatabase()->query($qb)
                 ->then(function (Result $result) use ($time, $country, $kpiType) {
-                    $kpiMinLastUpdate = collect($result->fetchAllRows() ?: [])
+                    $kpiMinLastUpdate = collect(($result->fetchAllRows() ?? []) ?: [])
                         ->reduce(fn($carry, $item) => min($carry, $item['lastupdate']), $time);
                     if ($time <= $kpiMinLastUpdate) { // oh, we need to retrieve more that just the current month
                         $qb = $this->createQueryBuilderKpiBase($country, $kpiType, false); // fetch all
@@ -103,7 +103,7 @@ class KpiLatest extends CommonBase
             $qb = $this->createQueryBuilderEnergyKpiBase();
             return $this->getAsyncDatabase()->query($qb)
                 ->then(function (Result $result) use ($time) {
-                    $kpiMinLastUpdate = collect($result->fetchAllRows() ?: [])
+                    $kpiMinLastUpdate = collect(($result->fetchAllRows() ?? []) ?: [])
                         ->reduce(fn($carry, $item) => min($carry, $item['energy_kpi_lastupdate']), $time);
                     if ($time <= $kpiMinLastUpdate) { // oh, we need to retrieve more that just the current month
                         $qb = $this->createQueryBuilderEnergyKpiBase(false); // fetch all

@@ -29,7 +29,7 @@ class TicksHandlerWsServerPlugin extends Plugin
         return tpf(function () {
             return $this->getServerManager()->getGameSessionIds(true)
                 ->then(function (Result $result) {
-                    $gameSessionIds = collect($result->fetchAllRows() ?? [])
+                    $gameSessionIds = collect(($result->fetchAllRows() ?? []) ?: [])
                         ->keyBy('id')
                         ->map(function ($row) {
                             return $row['id'];

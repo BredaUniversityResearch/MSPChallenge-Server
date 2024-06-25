@@ -2,7 +2,7 @@
 
 # to enable git-for-windows symlinks, see here: https://github.com/git-for-windows/git/pull/156
 export MSYS=winsymlinks:nativestrict
-SYMFONY_VERSION_DEFAULT="5.4"
+SYMFONY_VERSION_DEFAULT="6.4"
 
 setSymfonyVersion() {
   [[ -z "${SYMFONY_VERSION}" ]] && SYMFONY_VERSION=$1
