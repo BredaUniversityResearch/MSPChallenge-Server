@@ -98,7 +98,14 @@
                 "type": "number"
               },
               "plan_type": {
-                "type": "string"
+                "oneOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "plan_alters_energy_distribution": {
                 "type": "number"
