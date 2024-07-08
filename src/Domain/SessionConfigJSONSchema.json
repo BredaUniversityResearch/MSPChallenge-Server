@@ -103,7 +103,8 @@
                     "type": "integer"
                   },
                   {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^(0|1),(0|1),(0|1)$"
                   }
                 ]
               },
