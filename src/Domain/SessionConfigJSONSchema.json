@@ -100,7 +100,12 @@
               "plan_type": {
                 "oneOf": [
                   {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^\\d+$"
                   },
                   {
                     "type": "string",
@@ -552,19 +557,25 @@
                           "properties": {
                             "gear_type": {
                               "oneOf": [
-                                { "type": "integer" },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
                                 {
                                   "type": "string",
-                                  "pattern": "^-?\\d+$"
+                                  "pattern": "^\\d+$"
                                 }
                               ]
                             },
                             "country_id": {
                               "oneOf": [
-                                { "type": "integer" },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
                                 {
                                   "type": "string",
-                                  "pattern": "^-?\\d+$"
+                                  "pattern": "^\\d+$"
                                 }
                               ]
                             }
@@ -1267,10 +1278,13 @@
                   },
                   "gear_type": {
                     "oneOf": [
-                      { "type": "integer" },
+                      {
+                        "type": "integer",
+                        "minimum": 0
+                      },
                       {
                         "type": "string",
-                        "pattern": "^-?\\d+$"
+                        "pattern": "^\\d+$"
                       }
                     ]
                   },
@@ -1282,10 +1296,13 @@
                         "items": [
                           {
                             "oneOf": [
-                              { "type": "integer" },
+                              {
+                                "type": "integer",
+                                "minimum": 0
+                              },
                               {
                                 "type": "string",
-                                "pattern": "^-?\\d+$"
+                                "pattern": "^\\d+$"
                               }
                             ]
                           }
