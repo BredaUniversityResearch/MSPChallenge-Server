@@ -543,10 +543,22 @@
                           "type": "object",
                           "properties": {
                             "gear_type": {
-                              "type": "integer"
+                              "oneOf": [
+                                { "type": "integer" },
+                                {
+                                  "type": "string",
+                                  "pattern": "^-?\\d+$"
+                                }
+                              ]
                             },
                             "country_id": {
-                              "type": "integer"
+                              "oneOf": [
+                                { "type": "integer" },
+                                {
+                                  "type": "string",
+                                  "pattern": "^-?\\d+$"
+                                }
+                              ]
                             }
                           },
                           "required": [
@@ -1236,6 +1248,53 @@
                   "valueDefinitions"
                 ]
               }
+            },
+            "eco": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "gear_type": {
+                    "oneOf": [
+                      { "type": "integer" },
+                      {
+                        "type": "string",
+                        "pattern": "^-?\\d+$"
+                      }
+                    ]
+                  },
+                  "policy_filters": {
+                    "type": "object",
+                    "properties": {
+                      "fleets": {
+                        "type": "array",
+                        "items": [
+                          {
+                            "oneOf": [
+                              { "type": "integer" },
+                              {
+                                "type": "string",
+                                "pattern": "^-?\\d+$"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "fleets"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "gear_type",
+                  "policy_filters"
+                ]
+              }
             }
           },
           "required": [
@@ -1253,7 +1312,8 @@
             "pressures",
             "fishing",
             "outcomes",
-            "ecologyCategories"
+            "ecologyCategories",
+            "eco"
           ]
         },
         "meta": {
