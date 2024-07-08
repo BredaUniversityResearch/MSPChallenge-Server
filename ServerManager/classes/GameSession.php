@@ -652,6 +652,11 @@ class GameSession extends Base
         $gameconfig->get();
         $configFileDecoded = $gameconfig->getContents();
         if (isset($configFileDecoded['datamodel'])) {
+            // force an object from meta layer type array
+            $configFileDecoded['datamodel']['meta'] = array_map(function ($el) {
+                $el['layer_type'] = (object)$el['layer_type'];
+                return $el;
+            }, $configFileDecoded['datamodel']['meta']);
             $configFileDecoded['datamodel']['plans'] = $server_call['payload'];
         } else {
             $configFileDecoded['plans'] = $server_call['payload'];

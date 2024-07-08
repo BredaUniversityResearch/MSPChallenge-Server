@@ -1165,16 +1165,16 @@ class Plan extends Base
         $baseInfo["geometry_id"] = $geometryId;
 
         $baseInfoQuery = $this->getDatabase()->query(
-            "SELECT geometry_id, geometry_persistent, geometry_mspid FROM geometry WHERE geometry_id = ?",
+            "SELECT geometry_id, geometry_persistent FROM geometry WHERE geometry_id = ?",
             array($geometryId)
         );
         $persistentId = $baseInfoQuery[0]["geometry_persistent"];
         $mspIdQuery = $this->getDatabase()->query(
-            "SELECT geometry_mspid FROM geometry WHERE geometry_persistent = ? AND geometry_mspid IS NOT NULL",
+            "SELECT IFNULL(geometry_mspid,0) as geometry_mspid FROM geometry WHERE geometry_persistent = ?",
             array($persistentId)
         );
         if (count($mspIdQuery) > 0) {
-            $baseInfo["geometry_mspid"] = $mspIdQuery[0]["geometry_mspid"];
+            $baseInfo["geometry_mspid"] = (int)$mspIdQuery[0]["geometry_mspid"];
         }
 
         if (array_key_exists($persistentId, $remappedPersistentGeometryIds)) {
@@ -1286,7 +1286,7 @@ class Plan extends Base
 
                 $l['deleted'] = $this->getDatabase()->query(
                     "
-                    SELECT geometry_id
+                    SELECT geometry_id, 0 as geometry_mspid
                     FROM plan_delete
                     LEFT JOIN geometry ON geometry.geometry_id=plan_delete.plan_delete_geometry_persistent
                     WHERE plan_delete_layer_id=?
@@ -1347,6 +1347,10 @@ class Plan extends Base
 						",
                         array($geom['geometry_id'])
                     );
+                    $energyOutput = array_map(function ($el) {
+                        $el['maxcapacity'] = intval($el['maxcapacity']);
+                        return $el;
+                    }, $energyOutput);
                     if (!empty($energyOutput)) {
                         $geom['energy_output'] = $energyOutput;
                     } elseif (in_array($l['layer_editing_type'], array(
@@ -1367,7 +1371,10 @@ class Plan extends Base
                     ",
                     array($grid['grid_id'])
                 );
-
+                $grid['energy'] = array_map(function ($el) {
+                    $el['expected'] = intval($el['expected']);
+                    return $el;
+                }, $grid['energy']);
                 $grid['removed'] = $this->getDatabase()->query(
                     "
                     SELECT grid_removed_grid_persistent as grid_persistent
