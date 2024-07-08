@@ -1340,7 +1340,7 @@ class Plan extends Base
 						",
                         array($geom['geometry_id'])
                     );
-                    $energyOutput = array_map(function($el) {
+                    $energyOutput = array_map(function ($el) {
                         $el['maxcapacity'] = intval($el['maxcapacity']);
                         return $el;
                     }, $energyOutput);
@@ -1364,7 +1364,7 @@ class Plan extends Base
                     ",
                     array($grid['grid_id'])
                 );
-                $grid['energy'] = array_map(function($el) {
+                $grid['energy'] = array_map(function ($el) {
                     $el['expected'] = intval($el['expected']);
                     return $el;
                 }, $grid['energy']);
