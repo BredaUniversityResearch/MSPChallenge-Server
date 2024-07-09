@@ -540,6 +540,9 @@
                 "all_country_approval": {
                   "type": "boolean"
                 },
+                "stakeholder_pressure_cool_down": {
+                  "type": "number"
+                },
                 "fleet_info": {
                   "type": "object",
                   "properties": {
@@ -595,7 +598,9 @@
                 }
               },
               "required": [
-                "all_country_approval"
+                "all_country_approval",
+                "stakeholder_pressure_cool_down",
+                "fleet_info"
               ]
             }
           },
@@ -1276,18 +1281,6 @@
                   "name": {
                     "type": "string"
                   },
-                  "gear_type": {
-                    "oneOf": [
-                      {
-                        "type": "integer",
-                        "minimum": 0
-                      },
-                      {
-                        "type": "string",
-                        "pattern": "^\\d+$"
-                      }
-                    ]
-                  },
                   "policy_filters": {
                     "type": "object",
                     "properties": {
@@ -1316,7 +1309,6 @@
                 },
                 "required": [
                   "name",
-                  "gear_type",
                   "policy_filters"
                 ]
               }
@@ -1337,8 +1329,7 @@
             "pressures",
             "fishing",
             "outcomes",
-            "ecologyCategories",
-            "eco"
+            "ecologyCategories"
           ]
         },
         "meta": {
