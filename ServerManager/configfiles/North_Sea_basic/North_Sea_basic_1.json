@@ -15061,33 +15061,6 @@
         "restriction_settings": []
       }
     ],
-    "policy_settings" : {
-      "fishing": {
-        "all_country_approval": true,
-        "stakeholder_pressure_cool_down": 0.1,
-        "fleet_info": {
-          "gear_types": [
-            "Bottom Trawl",
-            "Industrial and Pelagic Trawl",
-            "Drift and Fixed Nets"
-          ],
-          "fleets": [
-            {
-              "gear_type": 0,
-              "country_id": 0
-            },
-            {
-              "gear_type": 1,
-              "country_id": 0
-            },
-            {
-              "gear_type": 2,
-              "country_id": 0
-            }
-          ]
-        }
-      }
-    },
     "dependencies": {
       "groups": [
         {
@@ -22150,9 +22123,6 @@
         },
         {
           "name": "Protection Bottom Trawl",
-          "policy_filters": {
-            "fleets": [0]
-          },
           "layers": [
             {
               "name": "NS_Oil_Gas_Offshore_Instalations",
@@ -22238,9 +22208,6 @@
         },
         {
           "name": "Protection Industrial Trawl",
-          "policy_filters" : {
-            "fleets": [1]
-          },
           "layers": [
             {
               "name": "NS_Oil_Gas_Offshore_Instalations",
@@ -22311,9 +22278,6 @@
         },
         {
           "name": "Protection Nets",
-          "policy_filters" : {
-            "fleets": [2]
-          },
           "layers": [
             {
               "name": "NS_Pipelines",
@@ -22378,6 +22342,9 @@
           ]
         }
       ],
+      "fishing_policy_settings": {
+        "all_country_approval": true
+      },
       "fishing": [
         {
           "name": "Bottom Trawl",
@@ -22489,14 +22456,6 @@
               "weight": 1255.0
             }
           ]
-        }
-      ],
-      "eco" : [
-        {
-          "name": "Eco Bottom Trawl",
-          "policy_filters": {
-            "fleets": [0]
-          }
         }
       ],
       "outcomes": [
