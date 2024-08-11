@@ -30,10 +30,7 @@ class SymfonyToLegacyHelper
     private Kernel $kernel;
     private TranslatorInterface $translator;
     private ?Closure $fnControllerForwarder = null;
-<<<<<<< HEAD
 
-=======
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
     private MessageBusInterface $messageBus;
     private EntityManagerInterface $em;
 
@@ -54,13 +51,10 @@ class SymfonyToLegacyHelper
         TranslatorInterface $translator,
         EntityManagerInterface $em,
         MessageBusInterface $messageBus,
-<<<<<<< HEAD
-=======
         VersionsProvider $provider,
         MessageBusInterface $analyticsMessageBus,
         LoggerInterface $analyticsLogger,
         WatchdogCommunicator $watchdogCommunicator,
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
         ConnectionManager $connectionManager,
@@ -74,14 +68,11 @@ class SymfonyToLegacyHelper
         $this->translator = $translator;
         $this->em = $em;
         $this->messageBus = $messageBus;
-<<<<<<< HEAD
-=======
         $this->provider = $provider;
         $this->analyticsMessageBus = $analyticsMessageBus;
         $this->analyticsLogger = $analyticsLogger;
         $this->watchdogCommunicator = $watchdogCommunicator;
         $this->authenticationSuccessHandler = $authenticationSuccessHandler;
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         self::$instance = $this;
     }
 

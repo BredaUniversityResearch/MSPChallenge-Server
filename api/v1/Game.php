@@ -134,30 +134,11 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function LoadConfigFile(string $filename = ''): string
     {
-<<<<<<< HEAD
-        if (empty($this->getProjectDir())) {
-            $this->setProjectDir(SymfonyToLegacyHelper::getInstance()->getProjectDir());
-        }
-        if ($filename == "") {    //if there's no file given, use the one in the database
-            /*$data = $this->selectRowsFromTable('game', []);
-            if ($this->isAsync()) {
-                $data = await($data);
-            }
-            $path = GameSession::getConfigDirectory() . ($data['game_configfile']
-                ?? 'session_config_'.$this->getGameSessionId().'.json');*/
-            // storing the path in the session database's game table is rather nonsensical.
-            // we still do it during session creation, for backwards compatibility
-            $path = $this->getProjectDir(). '/' .GameSession::CONFIG_DIRECTORY
-                . 'session_config_'.$this->getGameSessionId().'.json';
-        } else {
-            $path = $this->getProjectDir(). '/' .GameSession::CONFIG_DIRECTORY . $filename;
-=======
         $path = SymfonyToLegacyHelper::getInstance()->getProjectDir().$_ENV['SESSION_CONFIG_PATH'];
         if ($filename == "") {    //if there's no file given, use the one in the database
             $path .= sprintf($_ENV['SESSION_CONFIG_FILE'], $this->getGameSessionId());
         } else {
             $path .= $filename;
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         }
 
         // 5 min cache. why 5min? Such that the websocket server will refresh the config once in a while
@@ -663,47 +644,6 @@ class Game extends Base
     }
 
     /**
-<<<<<<< HEAD
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetWatchdogAddress(): string
-    {
-        $this->watchdog_address ??= ($_ENV['WATCHDOG_ADDRESS'] ?? $this->getWatchdogAddressFromDb());
-        if (null === $this->watchdog_address) {
-            return '';
-        }
-        /** @noinspection HttpUrlsUsage */
-        $this->watchdog_address = 'http://'.preg_replace('~^https?://~', '', $this->watchdog_address);
-        return $this->watchdog_address.':'.($_ENV['WATCHDOG_PORT'] ?? self::DEFAULT_WATCHDOG_PORT);
-    }
-
-    private function getWatchdogAddressFromDb(): ?string
-    {
-        return $this->selectRowsFromTable('game_session', [])['game_session_watchdog_address']
-            ?? null;
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function getWatchdogSessionUniqueToken(): PromiseInterface
-    {
-        return $this->getAsyncDatabase()->query(
-            $this->getAsyncDatabase()->createQueryBuilder()
-                ->select('game_session_watchdog_token')
-                ->from('game_session')
-                ->setMaxResults(1)
-        )
-        ->then(function (Result $result) {
-            $row = $result->fetchFirstRow();
-            return $row['game_session_watchdog_token'] ?? '0';
-        });
-    }
-
-    /**
-=======
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
      * @ForceNoTransaction
      * @noinspection PhpUnused
      * @throws Exception
@@ -869,11 +809,7 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
-<<<<<<< HEAD
-                return $this->getRequestApiRootAsync();
-=======
                 return GameSession::getRequestApiRootAsync(getenv('DOCKER') !== false);
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
                 $simulationsHelper = new Simulations();
@@ -971,18 +907,10 @@ class Game extends Base
                     sum(
                         IF(UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0, 1, 0)
                     ) active_last_minute'
-<<<<<<< HEAD
-            )
-            ->from('game', 'g')
-            ->leftJoin('g', 'user', 'u', '1=1');
-        $promise = $this->getAsyncDatabase()->query($query)->then(function (Result $result) {
-=======
                 )
                 ->from('game', 'g')
                 ->leftJoin('g', 'user', 'u', '1=1')
-        )
         ->then(function (Result $result) {
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
             if (null === $state = $result->fetchFirstRow()) {
                 return [];
             }

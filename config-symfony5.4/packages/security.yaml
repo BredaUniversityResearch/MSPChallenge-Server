@@ -1,25 +1,11 @@
 security:
     enable_authenticator_manager: true
-<<<<<<< HEAD
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
         local_users:
             entity:
                 class: 'App\Entity\ServerManager\User'
                 property: 'username'
-    firewalls:
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
-        main:
-            pattern: ^/manager
-            provider: local_users
-            lazy: true
-            custom_authenticators:
-                - App\Security\MSPAuth2Authenticator
-=======
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
-    providers:
         jwt:
             lexik_jwt:
                 class: App\Domain\API\v1\User
@@ -34,13 +20,19 @@ security:
             stateless: true
             json_login:
                 check_path: session_api_user_controller
-        main:
+            provider: jwt
+        api:
             pattern: ^/\d+/api/\w+/\w+
             stateless: true
             jwt: ~
             provider: jwt
+        manager:
+            pattern: ^/manager
+            provider: local_users
+            lazy: true
+            custom_authenticators:
+                - App\Security\MSPAuth2Authenticator
 
     access_control:
         - { path: ^/\d+/api/(User/RequestToken|User/RequestSession|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName|Game/CreatePOVConfig), roles: PUBLIC_ACCESS }
         - { path: ^/\d+/api/\w+/\w+$, roles: IS_AUTHENTICATED_FULLY }
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4

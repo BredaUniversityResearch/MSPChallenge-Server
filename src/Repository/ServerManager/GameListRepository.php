@@ -2,9 +2,6 @@
 
 namespace App\Repository\ServerManager;
 
-<<<<<<< HEAD
-use App\Domain\Common\EntityEnums\GameSessionStateValue;
-=======
 use App\Domain\API\v1\Game;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
@@ -12,7 +9,6 @@ use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Domain\Common\NormalizerContextBuilder;
 use App\Domain\WsServer\WsServer;
 use App\Entity\ServerManager\GameConfigVersion;
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
@@ -56,24 +52,6 @@ class GameListRepository extends EntityRepository
 
     /**
      * @return GameList[] Returns an array of GameList objects by session state, archived or not archived (active)
-<<<<<<< HEAD
-     */
-    public function findBySessionState(string $value): array
-    {
-        $qb = $this->createQueryBuilder('g');
-        if ($value == 'archived') {
-            $qb->andWhere($qb->expr()->eq('g.sessionState', ':val'))
-                ->setParameter('val', new GameSessionStateValue('archived'));
-        } else {
-            $qb->andWhere($qb->expr()->neq('g.sessionState', ':val'))
-                ->setParameter('val', new GameSessionStateValue('archived'));
-        }
-        return $qb->orderBy('g.id', 'ASC')
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-=======
      * @throws \Exception
      */
     public function findBySessionState(string $value): array
@@ -97,7 +75,6 @@ class GameListRepository extends EntityRepository
             ->leftJoin('gcv.gameConfigFile', 'gcf')
             ->leftJoin('g.gameGeoServer', 'ggs')
             ->leftJoin('g.gameSave', 'gsa');
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
 
         if ($value == 'archived') {
             $qb->andWhere($qb->expr()->eq('g.sessionState', ':val'))

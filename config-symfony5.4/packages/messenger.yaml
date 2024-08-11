@@ -4,26 +4,6 @@ framework:
         reset_on_message: true
 
         # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-<<<<<<< HEAD
-        # failure_transport: failed
-
-        transports:
-            # https://symfony.com/doc/current/messenger.html#transport-configuration
-            async: '%env(MESSENGER_TRANSPORT_DSN)%'
-            # failed: 'doctrine://default?queue_name=failed'
-
-        routing:
-            # Route your messages to the transports
-            'App\Messages\GameListSessionCreate': async
-
-when@test:
-    framework:
-        messenger:
-            transports:
-                async_test: 'in-memory://'
-            routing:
-                'App\Entity\ServerManager\GameList': [async, async_test]
-=======
         failure_transport: failed
 
         transports:
@@ -52,4 +32,3 @@ when@test:
             'App\Message\GameList\GameListArchiveMessage': async
             'App\Message\GameSave\GameSaveCreationMessage': async
             'App\Message\GameSave\GameSaveLoadMessage': async
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4

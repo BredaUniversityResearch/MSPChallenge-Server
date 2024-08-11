@@ -2,7 +2,6 @@
 
 namespace App\Controller\ServerManager;
 
-<<<<<<< HEAD
 use App\Domain\API\v1\Game;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
@@ -12,7 +11,6 @@ use App\Form\GameListAddFormType;
 use App\Form\GameListEditFormType;
 use App\Messages\GameListSessionCreate;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -21,8 +19,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use App\VersionsProvider;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\IncompatibleClientException;
+use App\Controller\BaseController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Version\Exception\InvalidVersionString;
+use App\Entity\ServerManager\Setting;
 
-class GameListController extends AbstractController
+class GameListController extends BaseController
 {
 
     #[Route('/manager', name: 'manager')]
@@ -31,19 +36,47 @@ class GameListController extends AbstractController
         return $this->render('manager/gamelist_page.html.twig');
     }
 
-    #[Route('/manager/gamelist/{sessionState}', name: 'manager_gamelist', requirements: ['sessionState' => '\w+'])]
+    #[Route(
+        '/manager/gamelist/{sessionState}',
+        name: 'manager_gamelist',
+        requirements: ['sessionState' => '\w+']
+    )]
     public function gameList(
         EntityManagerInterface $entityManager,
+        VersionsProvider $provider,
         Request $request,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         string $sessionState = 'public'
     ): Response {
-        if (is_null($request->headers->get('Turbo-Frame'))) {
-            return $this->redirectToRoute('manager');
+        try {
+            $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
+        } catch (IncompatibleClientException $e) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(
+                    [
+                        'clients_url' => $this->getParameter('app.clients_url'),
+                        'server_version' => $provider->getVersion()
+                    ],
+                    $e->getMessage()
+                ),
+                403
+            );
+        } catch (InvalidVersionString $e) {
+            return new JsonResponse(self::wrapPayloadForResponse([], $e->getMessage()), 400);
         }
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
-        return $this->render('manager/GameList/gamelist.html.twig', [
-            'gameList' => $gameList
-        ]);
+        $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
+        return is_null($request->headers->get('Turbo-Frame')) ?
+            $this->json(self::wrapPayloadForResponse([
+                'sessionslist' => $gameList,
+                'server_description' => $serverDesc->getValue(),
+                'clients_url' => $this->getParameter('app.clients_url'),
+                'server_version' => $provider->getVersion(),
+                'server_components_versions' => $provider->getComponentsVersions()
+            ])) :
+            $this->render('manager/GameList/gamelist.html.twig', [
+                'gameList' => $gameList
+            ]);
     }
 
     #[Route('/manager/game/{id}', name: 'manager_game_form', requirements: ['id' => '\d+'])]
@@ -244,61 +277,5 @@ class GameListController extends AbstractController
         $entityManager->persist($gameSession);
         $entityManager->flush();
         return new Response(null, 204);
-=======
-use App\Controller\BaseController;
-use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Entity\ServerManager\GameList;
-use App\Entity\ServerManager\Setting;
-use App\IncompatibleClientException;
-use App\VersionsProvider;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Version\Exception\InvalidVersionString;
-
-class GameListController extends BaseController
-{
-    #[Route(
-        '/manager/gamelist/{sessionState}',
-        name: 'manager_gamelist',
-        requirements: ['sessionState' => '\w+']
-    )]
-    public function gameList(
-        EntityManagerInterface $entityManager,
-        VersionsProvider $provider,
-        Request $request,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper,
-        string $sessionState = 'public'
-    ): Response {
-        try {
-            $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
-        } catch (IncompatibleClientException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(
-                    [
-                        'clients_url' => $this->getParameter('app.clients_url'),
-                        'server_version' => $provider->getVersion()
-                    ],
-                    $e->getMessage()
-                ),
-                403
-            );
-        } catch (InvalidVersionString $e) {
-            return new JsonResponse(self::wrapPayloadForResponse([], $e->getMessage()), 400);
-        }
-        $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
-        $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
-        return is_null($request->headers->get('Turbo-Frame')) ?
-            $this->json(self::wrapPayloadForResponse([
-                'sessionslist' => $gameList,
-                'server_description' => $serverDesc->getValue(),
-                'clients_url' => $this->getParameter('app.clients_url'),
-                'server_version' => $provider->getVersion(),
-                'server_components_versions' => $provider->getComponentsVersions()
-            ])) :
-            new Response('', 500); // for later! MSP-3820
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
     }
 }

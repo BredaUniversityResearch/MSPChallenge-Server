@@ -385,11 +385,7 @@ class GameList
         return $this;
     }
 
-<<<<<<< HEAD
-    private function checkPasswordFormat(string $adminorplayer, string $string): bool|string
-=======
     public function checkPasswordFormat(string $adminorplayer, string $string): bool|string
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
     {
         if (is_object(json_decode($string))) {
             // backwards compatibility

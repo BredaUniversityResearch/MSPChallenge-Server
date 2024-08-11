@@ -112,14 +112,6 @@ services:
         arguments:
             - App\Entity\ServerManager\GameList
 
-    App\MessageHandler\GameListSessionCreateHandler:
-        arguments:
-            $mspServerManagerEntityManager: '@Doctrine\ORM\EntityManagerInterface'
-            $gameListRepository: '@App\Repository\ServerManager\GameListRepository'
-            $kernel: '@Symfony\Component\HttpKernel\KernelInterface'
-            $gameSessionChannelLogger: '@monolog.logger.game_session_channel'
-            $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
-
     app.menu_builder:
         class: App\Menu\Builder
         arguments: [ "@knp_menu.factory" ]
