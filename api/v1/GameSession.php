@@ -16,6 +16,7 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 use ZipArchive;
@@ -63,14 +64,77 @@ class GameSession extends Base
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * used to communicate "game_session_api" URL to the watchdog
+     *
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public static function getRequestApiRootAsync(bool $forDocker = false): PromiseInterface
+    {
+        if (isset($GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0])) {
+            $deferred = new Deferred();
+            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0])->promise();
+        }
+        $apiRoot = preg_replace('/(.*)\/(api|_profiler)\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
+        $apiRoot = str_replace("//", "/", $apiRoot);
+
+
+        if ($forDocker) {
+            $deferred = new Deferred();
+            // this is always called from inside the docker environment,so just use http://caddy:80/ or
+            //   http://mitmproxy:8080/
+            $GLOBALS['RequestApiRoot'][1] = 'http://'.
+                ($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiRoot;
+            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][1])->promise();
+        }
+
+        $_SERVER['HTTPS'] ??= 'off';
+        /** @noinspection HttpUrlsUsage */
+        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
+
+        $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
+        return $connection->query(
+            $connection->createQueryBuilder()
+                ->select('address')
+                ->from('game_servers')
+                ->setMaxResults(1)
+        )
+        ->then(
+            function (Result $result) use ($protocol, $apiRoot) {
+                $row = $result->fetchFirstRow() ?? [];
+                $serverName = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $row['address'] ?? $_SERVER["SERVER_NAME"] ??
+                    gethostname();
+                $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+                $apiRoot = $protocol.$serverName.$port.$apiRoot;
+                $GLOBALS['RequestApiRoot'][0] = $apiRoot;
+                return $apiRoot;
+            }
+        );
+    }
+
+    /**
+     * returns the base API endpoint. e.g. http://localhost/1/
+     *
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public static function GetRequestApiRoot(): string
+    {
+        return await(self::getRequestApiRootAsync());
+    }
+
+    /**
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
      * Used by GameTick to generate a server manager URL towards editGameSession.php
      *
      * @return string
      */
-    public static function getServerManagerApiRoot(): string
+    public static function getServerManagerApiRoot(bool $forDocker = false): string
     {
-        if (isset($GLOBALS['ServerManagerApiRoot'])) {
-            return $GLOBALS['ServerManagerApiRoot'];
+        if (isset($GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0])) {
+            return $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0];
         }
 
         $serverName = $_SERVER["SERVER_NAME"] ?? gethostname();
@@ -78,6 +142,15 @@ class GameSession extends Base
         /** @noinspection HttpUrlsUsage */
         $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
         $apiFolder = "/ServerManager/api/";
+
+        if ($forDocker) {
+            // this is always called from inside the docker environment,so just use http://caddy:80/ or
+            //   http://mitmproxy:8080/
+            $GLOBALS['ServerManagerApiRoot'][1] = 'http://'.
+                ($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiFolder;
+            return $GLOBALS['ServerManagerApiRoot'][1];
+        }
+
         $dbConfig = Config::GetInstance()->DatabaseConfig();
         $temporaryConnection = Database::CreateTemporaryDBConnection(
             $dbConfig["host"],
@@ -86,12 +159,13 @@ class GameSession extends Base
             $dbConfig["database"]
         );
         $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+        $apiRoot = $protocol.$serverName.$port.$apiFolder;
         foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
-            $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row["address"];
-            //if ($serverName == "localhost") $serverName = getHostByName(getHostName());
-            $GLOBALS['ServerManagerApiRoot'] = $protocol.$serverName.$port.$apiFolder;
+            $serverName = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $row["address"];
+            $apiRoot = $protocol.$serverName.$port.$apiFolder;
         }
-        return $protocol.$serverName.$port.$apiFolder;
+        $GLOBALS['ServerManagerApiRoot'][0] = $apiRoot;
+        return $apiRoot;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -508,16 +582,18 @@ class GameSession extends Base
                 $zip->addFile($file, pathinfo($file, PATHINFO_BASENAME));
             }
         }
-        foreach (Store::GetRasterStoreFolderContents($this->getGameSessionId()) as $rasterfile) {
-            if (is_readable($rasterfile)) {
-                $pathName = pathinfo($rasterfile, PATHINFO_DIRNAME);
-                if (stripos($pathName, "archive") !== false) {
-                    $zipFolder = "raster/archive/";
-                } else {
-                    $zipFolder = "raster/";
-                }
-                $zip->addFile($rasterfile, $zipFolder.pathinfo($rasterfile, PATHINFO_BASENAME));
+        $finder = new Finder();
+        $finder->files()->in(Store::GetRasterStoreFolder($this->getGameSessionId()));
+        foreach ($finder as $rasterfile) {
+            if (stripos($rasterfile->getPathname(), "archive") !== false) {
+                $zipFolder = "raster/archive/";
+            } else {
+                $zipFolder = "raster/";
             }
+            $zip->addFile(
+                $rasterfile->getRealPath(),
+                $zipFolder.$rasterfile->getFilename()
+            );
         }
         $zip->close();
         unlink($sqlDumpPath);
@@ -649,6 +725,7 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function RemoveDirectory(string $dir): void
     {
+        // todo: use Util::removeDirectory() instead ??
         try {
             $it = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
             $files = new RecursiveIteratorIterator(
@@ -683,7 +760,7 @@ class GameSession extends Base
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $requestHeader = apache_request_headers();
+        $requestHeader = \getallheaders();
         $headers = array();
         if (isset($requestHeader[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
             $headers[] = ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.

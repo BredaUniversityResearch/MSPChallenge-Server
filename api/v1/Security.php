@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\ClientHeaderKeys;
 use Drift\DBAL\Result;
 use Exception;
@@ -288,13 +289,13 @@ class Security extends Base
 
     public static function findAuthenticationHeaderValue(): ?string
     {
-        $requestHeaders = [];
-        // is only available in the Apache, FastCGI, CLI, and FPM webservers.
-        if (function_exists('apache_request_headers')) {
-            $requestHeaders = apache_request_headers();
-        }
+        $requestHeaders = \getallheaders();
         if (isset($requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
             return $requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN];
+        }
+        $request = SymfonyToLegacyHelper::getInstance()->getRequest();
+        if (!is_null($request)) {
+            return $request->headers->get(ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN);
         }
         return null;
     }

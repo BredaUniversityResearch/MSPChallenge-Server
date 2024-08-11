@@ -22,8 +22,6 @@ use function App\parallel;
 
 class Game extends Base
 {
-    private ?string $watchdog_address = null;
-    const DEFAULT_WATCHDOG_PORT = 45000;
     const MIN_GAME_ERATIME = 12;
 
     private const ALLOWED = array(
@@ -136,6 +134,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function LoadConfigFile(string $filename = ''): string
     {
+<<<<<<< HEAD
         if (empty($this->getProjectDir())) {
             $this->setProjectDir(SymfonyToLegacyHelper::getInstance()->getProjectDir());
         }
@@ -152,6 +151,13 @@ class Game extends Base
                 . 'session_config_'.$this->getGameSessionId().'.json';
         } else {
             $path = $this->getProjectDir(). '/' .GameSession::CONFIG_DIRECTORY . $filename;
+=======
+        $path = SymfonyToLegacyHelper::getInstance()->getProjectDir().$_ENV['SESSION_CONFIG_PATH'];
+        if ($filename == "") {    //if there's no file given, use the one in the database
+            $path .= sprintf($_ENV['SESSION_CONFIG_FILE'], $this->getGameSessionId());
+        } else {
+            $path .= $filename;
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         }
 
         // 5 min cache. why 5min? Such that the websocket server will refresh the config once in a while
@@ -162,6 +168,9 @@ class Game extends Base
             return $cache[$path];
         }
         $cacheTime = time();
+        if (!file_exists($path)) {
+            return '';
+        }
         $cache[$path] = file_get_contents($path);
         return $cache[$path];
     }
@@ -170,7 +179,7 @@ class Game extends Base
      * @throws Exception
      * @todo: use https://github.com/karriereat/json-decoder "to convert your JSON data into an actual php class"
      * phpcs:ignore Generic.Files.LineLength.TooLong
-     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing_policy_settings: array}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
+     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing_policy_settings: array}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, projection: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameConfigValues(string $overrideFileName = ''): array
@@ -654,6 +663,7 @@ class Game extends Base
     }
 
     /**
+<<<<<<< HEAD
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -692,6 +702,8 @@ class Game extends Base
     }
 
     /**
+=======
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
      * @ForceNoTransaction
      * @noinspection PhpUnused
      * @throws Exception
@@ -700,7 +712,7 @@ class Game extends Base
     public function StartWatchdog(): void
     {
         // no need to startup watchdog in docker, handled by supervisor.
-        if (getenv('DOCKER')) {
+        if (getenv('DOCKER') !== false) {
             return;
         }
         // below code is only necessary for Windows
@@ -857,94 +869,57 @@ class Game extends Base
         }
         return $promise
             ->then(function () {
+<<<<<<< HEAD
                 return $this->getRequestApiRootAsync();
+=======
+                return GameSession::getRequestApiRootAsync(getenv('DOCKER') !== false);
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
                 $simulationsHelper = new Simulations();
                 $this->asyncDataTransferTo($simulationsHelper);
                 $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
-                $security = new Security();
-                $this->asyncDataTransferTo($security);
-                $security->setAsync(true); // force async
-                return $security->generateToken()
-                    ->then(function (array $result) use (
-                        $security,
+                $tokens = $simulationsHelper->GetTokensForWatchdog();
+                $newAccessToken = json_encode([
+                    'token' => $tokens['token'],
+                    'valid_until' => (new \DateTime('+1 hour'))->format('Y-m-d H:i:s')
+                ]);
+                $recoveryToken = json_encode([
+                    'token' => $tokens['api_refresh_token'],
+                    'valid_until' => \DateTime::createFromFormat('U', $tokens['exp'])->format('Y-m-d H:i:s')
+                ]);
+                return $this->getWatchdogSessionUniqueToken()
+                    ->then(function (string $watchdogSessionUniqueToken) use (
                         $simulations,
                         $apiRoot,
-                        $newWatchdogGameState
+                        $newWatchdogGameState,
+                        $newAccessToken,
+                        $recoveryToken
                     ) {
-                        $newAccessToken = json_encode($result);
-                        return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN)
-                            ->then(function (string $token) use (
-                                $simulations,
-                                $apiRoot,
-                                $newWatchdogGameState,
-                                $newAccessToken
-                            ) {
-                                $recoveryToken = json_encode(['token' => $token]);
-                                return $this->getWatchdogSessionUniqueToken()
-                                    ->then(function (string $watchdogSessionUniqueToken) use (
-                                        $simulations,
-                                        $apiRoot,
-                                        $newWatchdogGameState,
-                                        $newAccessToken,
-                                        $recoveryToken
-                                    ) {
-                                        // note(MH): GetWatchdogAddress is not async, but it is cached once it
-                                        //   has been retrieved once, so that's "fine"
-                                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
-                                        $browser = MSPBrowserFactory::create($url);
-                                        $postValues = [
-                                            'game_session_api' => $apiRoot,
-                                            'game_session_token' => $watchdogSessionUniqueToken,
-                                            'game_state' => $newWatchdogGameState,
-                                            'required_simulations' => $simulations,
-                                            'api_access_token' => $newAccessToken,
-                                            'api_access_renew_token' => $recoveryToken
-                                        ];
-                                        return $browser->post(
-                                            $url,
-                                            [
-                                                'Content-Type' => 'application/x-www-form-urlencoded'
-                                            ],
-                                            http_build_query($postValues)
-                                        );
-                                    });
-                            });
+                        // note(MH): GetWatchdogAddress is not async, but it is cached once it
+                        //   has been retrieved once, so that's "fine"
+                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
+                        $browser = MSPBrowserFactory::create($url);
+                        $postValues = [
+                            'game_session_api' => $apiRoot,
+                            'game_session_token' => $watchdogSessionUniqueToken,
+                            'game_state' => $newWatchdogGameState,
+                            'required_simulations' => $simulations,
+                            'api_access_token' => $newAccessToken,
+                            'api_access_renew_token' => $recoveryToken,
+                            'month' => $this->GetCurrentMonthAsId()
+                        ];
+                        return $browser->post(
+                            $url,
+                            [
+                                'Content-Type' => 'application/x-www-form-urlencoded'
+                            ],
+                            http_build_query($postValues)
+                        );
                     });
             })
             ->then(function (ResponseInterface $response) {
-                $log = new Log();
-                $this->asyncDataTransferTo($log);
-                $log->setAsync(true); // force async in this context
-
-                $responseContent = $response->getBody()->getContents();
-                $decodedResponse = json_decode($responseContent, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    $funcArgs = [
-                        "Watchdog",
-                        Log::ERROR,
-                        "Received invalid response from watchdog. Response: \"".$responseContent."\"",
-                        "changeWatchdogState()"
-                    ];
-                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
-                        return $funcArgs;
-                    });
-                }
-
-                if ($decodedResponse["success"] != 1) {
-                    $funcArgs = [
-                        "Watchdog",
-                        Log::ERROR,
-                        "Watchdog responded with failure to change game state request. Response: \"".
-                        $decodedResponse["message"]."\"",
-                        "changeWatchdogState()"
-                    ];
-                    return $log->postEvent(...$funcArgs)->then(function () use ($funcArgs) {
-                        return $funcArgs;
-                    });
-                }
-                return resolveOnFutureTick(new Deferred(), $decodedResponse)->promise();
+                return $this->logWatchdogResponse("/Watchdog/UpdateState", $response);
             });
     }
 
@@ -996,10 +971,18 @@ class Game extends Base
                     sum(
                         IF(UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0, 1, 0)
                     ) active_last_minute'
+<<<<<<< HEAD
             )
             ->from('game', 'g')
             ->leftJoin('g', 'user', 'u', '1=1');
         $promise = $this->getAsyncDatabase()->query($query)->then(function (Result $result) {
+=======
+                )
+                ->from('game', 'g')
+                ->leftJoin('g', 'user', 'u', '1=1')
+        )
+        ->then(function (Result $result) {
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
             if (null === $state = $result->fetchFirstRow()) {
                 return [];
             }

@@ -82,7 +82,7 @@ function submitNewGeoServer()
     var password = $('#newGeoServerPassword').val();
 
     if ([name, address, username, password].every(Boolean)) {
-        var url = 'api/addGeoServer.php';
+        var url = 'api/addGeoServer_php';
         var data =  {
             name: name,
             address: address,
@@ -105,7 +105,7 @@ function submitNewGeoServer()
 
 function GeoServerList()
 {
-    var url = "api/browseGeoServer.php";
+    var url = "api/browseGeoServer_php";
     $.when(CallAPI(url)).done(function (results) {
         $('#GeoServerBody').empty();
         $.each(results.geoserverslist, function (row, geoserver) {
@@ -134,7 +134,7 @@ function setGeoServerList(geoserver)
 
 function GeoServerToggleAvailability(geoserver_id)
 {
-    var url = "api/deleteGeoServer.php";
+    var url = "api/deleteGeoServer_php";
     var data = {
         geoserver_id: geoserver_id
     }
@@ -155,7 +155,7 @@ function GeoServerToggleAvailability(geoserver_id)
 
 function GeoServerEdit(geoserver_id)
 {
-    var url = "api/readGeoServer.php";
+    var url = "api/readGeoServer_php";
     var data = {
         geoserver_id: geoserver_id
     }
@@ -175,7 +175,7 @@ function GeoServerEdit(geoserver_id)
 
 function submitGeoServerEdit()
 {
-    var url = "api/editGeoServer.php";
+    var url = "api/editGeoServer_php";
     var data = {
         geoserver_id: $('#editGeoserverID').val(),
         name: $('#newGeoServerName').val(),
@@ -205,7 +205,7 @@ function watchdogListToOptions()
 {
     $('#newWatchdog').empty();
     $('#newWatchdogLoadSave').empty();
-    var url = "api/browseWatchdog.php";
+    var url = "api/browseWatchdog_php";
     $.when(CallAPI(url)).done(function (results) {
         $.each(results.watchdogslist, function (i, watchdog) {
             if (watchdog.available == 1) {
@@ -218,7 +218,7 @@ function watchdogListToOptions()
 
 function WatchdogServerList()
 {
-    var url = "api/browseWatchdog.php";
+    var url = "api/browseWatchdog_php";
     $.when(CallAPI(url)).done(function (results) {
         $('#watchdogServerBody').empty();
         $.each(results.watchdogslist, function (i, watchdog) {
@@ -251,7 +251,7 @@ function submitNewWatchdogServer()
     var address = $('#newWatchdogServerAddress').val();
 
     if ([name, address].every(Boolean)) {
-        var url = "api/addWatchdog.php";
+        var url = "api/addWatchdog_php";
         var data = {
             name: name,
             address: address,
@@ -272,7 +272,7 @@ function submitNewWatchdogServer()
 
 function WatchdogEdit(watchdog_id)
 {
-    var url = "api/readWatchdog.php";
+    var url = "api/readWatchdog_php";
     var data = {
         watchdog_id: watchdog_id
     }
@@ -292,7 +292,7 @@ function WatchdogEdit(watchdog_id)
 
 function submitWatchdogEdit()
 {
-    var url = "api/editWatchdog.php";
+    var url = "api/editWatchdog_php";
     var data = {
         watchdog_id: $('#editWatchdogID').val(),
         name: $('#newWatchdogServerName').val(),
@@ -314,7 +314,7 @@ function submitWatchdogEdit()
 
 function WatchdogToggleAvailability(watchdog_id)
 {
-    var url = "api/deleteWatchdog.php";
+    var url = "api/deleteWatchdog_php";
     var data = {
         watchdog_id: watchdog_id
     }
@@ -335,7 +335,7 @@ function WatchdogToggleAvailability(watchdog_id)
 
 function GetServerAddr()
 {
-    var url = "api/readServerManager.php";
+    var url = "api/readServerManager_php";
     $.when(CallAPI(url)).done(function (results) {
         $('#ServerName').val(results.servermanager.serverName);
         $('#ServerDescription').val(results.servermanager.serverDescription);
@@ -349,7 +349,7 @@ function editServerManager()
     var address = $('#ServerAddress').val();
     var description = $('#ServerDescription').val();
     if ([name, address, description].every(Boolean)) {
-        var url = "api/editServerManager.php";
+        var url = "api/editServerManager_php";
         var data = {
             serverName: name,
             serverAddress: address,

@@ -1,0 +1,5 @@
+worker {
+	file ./public/index.php
+	# num <num> # Sets the number of PHP threads to start, defaults to 2x the number of available CPUs.
+	env APP_RUNTIME Runtime\FrankenPhpSymfony\Runtime
+}

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -32,6 +31,6 @@ final class Version20230202120117 extends MSPMigration
 
     protected function onDown(Schema $schema): void
     {
-        $this->addSql('ALTER TABLE `plan_layer` DROP INDEX `plan_layer_plan_id_plan_layer_layer_id`');
+        $this->addSql('ALTER TABLE `plan_layer` DROP INDEX IF EXISTS `plan_layer_plan_id_plan_layer_layer_id`');
     }
 }

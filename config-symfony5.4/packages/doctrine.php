@@ -17,7 +17,9 @@ return static function (DoctrineConfig $doctrineConfig) {
     }
     $dbalConfig = new DbalConfig();
     $dbalConfig->defaultConnection($connectionManager->getServerManagerDbName());
-    $ormConfig = new OrmConfig();
+    $ormConfig = new OrmConfig([
+        'enable_lazy_ghost_objects' => false
+    ]);
     $ormConfig
         ->defaultEntityManager($connectionManager->getServerManagerDbName());
     foreach ($dbNames as $dbName) {
@@ -30,11 +32,6 @@ return static function (DoctrineConfig $doctrineConfig) {
         return;
     }
     $ormConfig
-        ->autoGenerateProxyClasses(false);
+        ->autoGenerateProxyClasses(false)
+        ->proxyDir('%kernel.build_dir%/doctrine/orm/Proxies');
 };
-
-//custom_mapping:
-//                    type: annotation
-//                    prefix: Client\IntranetBundle\LDAP\
-//                    dir: "%kernel.root_dir%/src/Client/IntranetBundle/LDAP/"
-//                    is_bundle: false

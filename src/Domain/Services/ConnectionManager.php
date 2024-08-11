@@ -6,6 +6,8 @@ use App\Domain\Common\DatabaseDefaults;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Drift\DBAL\Connection as DriftConnection;
 use Drift\DBAL\ConnectionOptions;
 use Drift\DBAL\ConnectionPool;
@@ -18,6 +20,8 @@ use React\EventLoop\LoopInterface;
 
 class ConnectionManager extends DatabaseDefaults
 {
+    const ERROR_CODE_SET_DOCTRINE_NOT_CALLED = 1;
+
     private static ?ConnectionManager $instance = null;
 
     /**
@@ -29,20 +33,55 @@ class ConnectionManager extends DatabaseDefaults
      */
     private array $asyncDbConnections = [];
 
-    public function __construct()
-    {
+    public function __construct(
+        private ?ManagerRegistry $doctrine = null
+    ) {
         self::$instance = $this;
     }
 
-    /**
-     * @throws Exception
-     */
     public static function getInstance(): self
     {
         if (null === self::$instance) {
             self::$instance = new self();
         }
         return self::$instance;
+    }
+
+    public function getDoctrine(): ?ManagerRegistry
+    {
+        return $this->doctrine;
+    }
+
+    public function setDoctrine(ManagerRegistry $doctrine): self
+    {
+        $this->doctrine = $doctrine;
+        return $this;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getServerManagerEntityManager(): EntityManagerInterface
+    {
+        if (!$this->doctrine) {
+            throw new Exception('setDoctrine() needs to be called', self::ERROR_CODE_SET_DOCTRINE_NOT_CALLED);
+        }
+        /** @var EntityManagerInterface $manager */
+        $manager = $this->doctrine->getManager($this->getServerManagerDbName());
+        return $manager;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getGameSessionEntityManager(int $gameSessionId): EntityManagerInterface
+    {
+        if (!$this->doctrine) {
+            throw new Exception('setDoctrine() needs to be called', self::ERROR_CODE_SET_DOCTRINE_NOT_CALLED);
+        }
+        /** @var EntityManagerInterface $manager */
+        $manager = $this->doctrine->getManager($this->getGameSessionDbName($gameSessionId));
+        return $manager;
     }
 
     /**
@@ -83,6 +122,7 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getEntityManagerConfig(string $dbName): array
     {
+        $config['report_fields_where_declared'] = true;
         // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
         $config['connection'] = $dbName;
         $config['mappings']['App'] = [
@@ -91,8 +131,11 @@ class ConnectionManager extends DatabaseDefaults
             'prefix' => 'App\Entity',
             'alias' => 'App'
         ];
-        // @todo change default? In 6.2: doctrine.orm.naming_strategy.underscore_number_aware
-        $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore';
+        $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';
+        $config['metadata_cache_driver'] = [
+            'type' => 'pool',
+            'pool' => 'doctrine.meta_cache_pool'
+        ];
         if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
             return $config;
         }

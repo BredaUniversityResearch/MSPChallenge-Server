@@ -1,12 +1,15 @@
-function getSessionInfo(session_id)
+function getSessionInfo(session_id, show_modal = false)
 {
-    const url = 'api/readGameSession.php';
+    const url = 'api/readGameSession_php';
     const data = {
         session_id: session_id
     };
     $.when(CallAPI(url, data)).done(function (results) {
         if (results.success) {
             updateSessionInfoList(results);
+            if (show_modal) {
+                $('#sessionInfo').modal('show');
+            }
         } else {
             updateInfobox(MessageType.ERROR, results.message);
             console.log('getSessionInfo (API)', results.message);
@@ -117,16 +120,6 @@ function handleArchiveButton(gamesession)
     ) {
         $('#sessionInfoButtonArchiveDownload').html('<i class="fa fa-archive" title="Archive Session"></i> Archive Session');
         $('#sessionInfoButtonArchiveDownload').attr('onclick', 'archiveSession('+gamesession.id+')');
-        $('#sessionInfoButtonArchiveDownload').show();
-    } else if (gamesession.session_state == 'archived') {
-        if (!gamesession.gamearchive) {
-            $('#sessionInfoButtonArchiveDownload').html('<i class="fa fa-download" title="Archive being created"></i> Archive being created...');
-            $('#sessionInfoButtonArchiveDownload').prop('disabled', true);
-        } else {
-            $('#sessionInfoButtonArchiveDownload').html('<i class="fa fa-download" title="Download archive"></i> Download archive');
-            $('#sessionInfoButtonArchiveDownload').attr('onclick', 'downloadArchive('+gamesession.id+')');
-            $('#sessionInfoButtonArchiveDownload').removeAttr('disabled');
-        }
         $('#sessionInfoButtonArchiveDownload').show();
     } else {
         $('#sessionInfoButtonArchiveDownload').hide();
@@ -271,7 +264,7 @@ function toggleSessionInfoLog()
 
 function callUpgrade(session_id)
 {
-    var url = 'api/editGameSession.php';
+    var url = 'api/editGameSession_php';
     var data = {
         session_id: session_id,
         action: 'upgrade'
@@ -289,7 +282,7 @@ function callUpgrade(session_id)
 
 function editSessionName(session_id)
 {
-    const url = 'api/editGameSession.php';
+    const url = 'api/editGameSession_php';
     const data = {
         session_id: session_id,
         name: $('#sessionModalCenterTitle').val()
@@ -309,7 +302,7 @@ function submitNewSession()
 {
     if (isFormValid($('#formNewSession'))) {
         showToast(MessageType.INFO, 'Please wait...');
-        var url = 'api/addGameSession.php';
+        var url = 'api/addGameSession_php';
         var data = {
             name: $('#newSessionName').val(),
             game_config_version_id: $('#newConfigVersion').val(),
@@ -339,7 +332,7 @@ function RecreateSession(sessionId)
 {
     if (confirm('This will delete and recreate the session. All existing data will be lost. Are you sure?')) {
         showToast(MessageType.INFO, 'Please wait...');
-        const url = 'api/editGameSession.php';
+        const url = 'api/editGameSession_php';
         const data = {
             jwt: currentToken,
             session_id: sessionId,
@@ -369,7 +362,7 @@ function showUserAccessManagement(sessionId)
     $('#playerPasswordExtraFields').empty();
     $('#playerUserExtraFields').empty();
 
-    const url = 'api/readGameSession.php';
+    const url = 'api/readGameSession_php';
     const data = {
         session_id: sessionId
     };
@@ -389,6 +382,7 @@ function showUserAccessManagement(sessionId)
         });
 
         setAllUserAccessFieldValues(sessiondetails);
+        $('#sessionUsers').modal('show');
     });
 }
 
@@ -540,7 +534,7 @@ function addPasswordFields(type, country)
     let html = '<div class="input-group mb-3">';
     html += '	<input type="text" class="form-control" placeholder="Leave empty for immediate access." id="'+id+'" name="'+id+'">';
     html += '	<div class="input-group-append">';
-    html += '		<span class="input-group-text" style="-webkit-text-stroke: 0.1px white; color: black; font-weight: 1000; opacity: 0.7; background-color: '+country['country_colour']+';">'+country['country_name']+'</span>';
+    html += '		<span class="input-group-text" style="color: black; font-weight: bolder; opacity: 0.5; background-color: '+country['country_colour']+';">'+country['country_name']+'</span>';
     html += '	</div>';
     html += '</div>';
     return html;
@@ -553,7 +547,7 @@ function addUserFields(type, country)
     let html = '<div class="input-group mb-3">';
     html += '	<div contenteditable="true" class="form-control" style="height: auto !important;" id="'+id+'"></div>';
     html += '	<div class="input-group-append">';
-    html += '		<span class="input-group-text" style="-webkit-text-stroke: 0.1px white; color: black; font-weight: 1000; opacity: 0.7; background-color: '+country['country_colour']+';">'+country['country_name']+'</span>';
+    html += '		<span class="input-group-text" style="color: black; font-weight: bolder; opacity: 0.5; background-color: '+country['country_colour']+';">'+country['country_name']+'</span>';
     html += '	</div>';
     html += '	<div class="input-group-append">';
     html += '		<button class="btn btn-outline-secondary" type="button" id="button-find-'+id+'" onclick="findUsersAtProvider(\''+jid+'\', $(\'#provider_player_external\').val());">Find</button>';
@@ -564,7 +558,7 @@ function addUserFields(type, country)
 
 function saveUserAccess()
 {
-    const url = 'api/editGameSession.php';
+    const url = 'api/editGameSession_php';
     const data = {
         session_id: $('#sessionInfoID').html(),
         password_admin: JSON.stringify(getPasswordAdmin()),
@@ -689,7 +683,7 @@ function unWrapWords(str, tmpl1, tmpl2)
 
 function setServerAuthProviders(sessionId)
 {
-    const url = 'api/user/getProviders';
+    const url = 'api/User/getProviders';
     $.when(CallServerAPI(url, {}, sessionId, '0')).done(function (results) {
         if (results.success && results.payload) {
             $.each(results.payload, function (count, provider) {
@@ -707,14 +701,14 @@ function findUsersAtProvider(div, provider)
     div = div.replace("[", "\\[");
     div = div.replace("]", "\\]");
     const userTextInput = unWrapWords($(div).html());
-    const url = 'api/readGameSession.php';
+    const url = 'api/readGameSession_php';
     const session_id = $('#sessionInfoID').html();
     const data = {
         session_id: session_id
     };
     $.when(CallAPI(url, data)).done(function (results) {
         if (results.success) {
-            const url2 = "api/user/checkExists";
+            const url2 = "api/User/checkExists";
             const data2 = {
                 provider: provider,
                 users: userTextInput
@@ -738,7 +732,7 @@ function findUsersAtProvider(div, provider)
 function GeoServerListToOptions()
 {
     $('#newGeoServer').empty();
-    const url = 'api/browseGeoServer.php';
+    const url = 'api/browseGeoServer_php';
     const data = {
         jwt: currentToken
     };
@@ -755,7 +749,7 @@ function changeGameState(newState, sessionId)
 {
     $('#sessionInfoButtonStartPause').prop('disabled', 1);
     showToast(MessageType.INFO, 'Please wait...');
-    const url = 'api/editGameSession.php';
+    const url = 'api/editGameSession_php';
     const data = {
         session_id: sessionId,
         game_state: newState,
@@ -781,7 +775,7 @@ function toggleDemoSession(toggle, sessionId)
         text = 'By disabling demo mode, the simulation will remain running (until you change the simulation state again), but it will not be recreated automatically anymore. Are you sure you want to disable demo mode?';
     }
     if (confirm(text)) {
-        const url = 'api/editGameSession.php';
+        const url = 'api/editGameSession_php';
         const data = {
             session_id: sessionId,
             demo_session: toggle,
@@ -801,18 +795,18 @@ function toggleDemoSession(toggle, sessionId)
 
 function downloadArchive(sessionId)
 {
-    window.location = "api/downloader.php?id="+sessionId+"&request=GameSession/getArchive";
+    window.location = "api/downloader_php?id="+sessionId+"&request=GameSession/getArchive";
 }
 
 function downloadExportedPlansWithConfig(sessionId)
 {
-    window.location = "api/downloader.php?id="+sessionId+"&request=GameSession/getConfigWithPlans";
+    window.location = "api/downloader_php?id="+sessionId+"&request=GameSession/getConfigWithPlans";
 }
 
 function archiveSession(sessionId)
 {
-    if (confirm('This will permanently archive the session. It will subsequently no longer be usable by end users. You will be able to download an archive file purely as a backup. Are you sure?')) {
-        const url = 'api/deleteGameSession.php';
+    if (confirm('This will permanently archive the session. It will subsequently no longer be usable by end users. If you want a backup, then *first* save this session, *before* continuing! Are you sure you want to archive this session?')) {
+        const url = 'api/deleteGameSession_php';
         const data = {
             session_id: sessionId
         };
@@ -833,7 +827,7 @@ function archiveSession(sessionId)
 function updateSessionsTable(visibility)
 {
     $("#buttonRefreshSessionsListIcon").addClass("fa-spin");
-    const url = 'api/browseGameSession.php';
+    const url = 'api/browseGameSession_php';
     const data = {
         session_state: visibility
     };
@@ -876,7 +870,7 @@ function sessionsListToTable(sessionsList)
             save_icon = '<button class="btn btn-secondary btn-sm" disabled><i class="fa fa-save" title="Save Session unavailable"></i></button>';
         }
 
-        let info_icon = '<button class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#sessionInfo" onClick="getSessionInfo(' + v.id + ');"><i class="fa fa-info-circle" title="Info" ></i></button>';
+        let info_icon = '<button class="btn btn-secondary btn-sm" onClick="getSessionInfo(' + v.id + ', true);"><i class="fa fa-info-circle" title="Info" ></i></button>';
         if (v.game_start_year === '0') {
             v.current_month_formatted = ''; }
         if (v.game_start_year === '0') {

@@ -3,13 +3,14 @@
 namespace App\Domain\WsServer\Plugins\Tick;
 
 use App\Domain\API\v1\Game;
-use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Plan;
-use App\Domain\API\v1\Security;
 use App\Domain\Common\MSPBrowserFactory;
+use App\Domain\Services\ConnectionManager;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
+use Psr\Http\Message\ResponseInterface;
+use React\EventLoop\Loop;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -35,12 +36,12 @@ class GameTick extends TickBase
                             ->then(function () {
                                 // only activate this after the Tick call has moved out of the client and into the
                                 //   Watchdog
-                                return $this->UpdateGameDetailsAtServerManager();
+                                return $this->updateGameDetailsAtServerManager();
                             });
                     }
                 }
                 // only activate this after the Tick call has moved out of the client and into the Watchdog
-                return $this->UpdateGameDetailsAtServerManager();
+                return $this->updateGameDetailsAtServerManager();
             });
     }
 
@@ -97,7 +98,6 @@ class GameTick extends TickBase
             wdo("Trying to tick the server", OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
 
-
         $game = new Game();
         $this->asyncDataTransferTo($game);
         if (!$game->areSimulationsUpToDate($tickData)) {
@@ -106,7 +106,6 @@ class GameTick extends TickBase
             }
             return null;
         }
-
 
         return $this->serverTickInternal($showDebug)
             ->otherwise(function (SilentFailException $e) {
@@ -118,31 +117,20 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function UpdateGameDetailsAtServerManager(): PromiseInterface
+    private function updateGameDetailsAtServerManager(): PromiseInterface
     {
         $game = new Game();
         $this->asyncDataTransferTo($game);
         return $game->getGameDetails()
-            ->then(function (array $postValues) {
-                $security = new Security();
-                $this->asyncDataTransferTo($security);
-                return $security->getSpecialToken(Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER)
-                    ->then(function (string $token) use ($postValues) {
-                        $postValues['token'] = $token;
-                        $postValues['session_id'] = $this->getGameSessionId();
-                        $postValues['action'] = 'demoCheck';
-                        $url = GameSession::getServerManagerApiRoot().'editGameSession.php';
-                        $browser = MSPBrowserFactory::create($url);
-                        return $browser
-                            ->post(
-                                $url,
-                                [
-                                'Content-Type' => 'application/x-www-form-urlencoded'
-                                ],
-                                http_build_query($postValues)
-                            );
-                    });
+            ->then(function (array $postValues) use ($game) {
+                $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
+                $qb = $connection->createQueryBuilder();
+                $qb->update('game_list');
+                foreach ($postValues as $column => $value) {
+                    $qb->set($column, $qb->createPositionalParameter($value));
+                }
+                $qb->where($qb->expr()->eq('id', $game->getGameSessionId()));
+                return $connection->query($qb);
             });
     }
 
@@ -183,6 +171,29 @@ class GameTick extends TickBase
             return $plan->updateLayerState($currentMonth)
                 ->then(function (/* array $results */) use ($currentMonth, $monthsDone, $state, $tick) {
                     return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
+                })
+                ->then(function () use ($currentMonth) {
+                    // no return! so we don't wait for the response
+                    $this->getWatchdogSessionUniqueToken()->then(
+                        function (string $watchdogSessionUniqueToken) use ($currentMonth) {
+                            // note(MH): GetWatchdogAddress is not async, but it is cached once it
+                            //   has been retrieved once, so that's "fine"
+                            $url = $this->GetWatchdogAddress()."/Watchdog/SetMonth";
+                            MSPBrowserFactory::create($url)->post(
+                                $url,
+                                [
+                                    'Content-Type' => 'application/x-www-form-urlencoded'
+                                ],
+                                http_build_query([
+                                    'game_session_token' => $watchdogSessionUniqueToken,
+                                    'month' => $currentMonth
+                                ])
+                            )
+                            ->then(function (ResponseInterface $response) use ($url) {
+                                return $this->logWatchdogResponse($url, $response);
+                            });
+                        }
+                    );
                 })
                 ->then(function () use ($tick) {
                     if (($tick['month'] % $tick['autosave_interval_months']) == 0) {

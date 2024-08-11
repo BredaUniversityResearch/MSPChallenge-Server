@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
+use ServerManager\ServerManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,7 +13,8 @@ class LegacyController extends MSPControllerBase
 {
     public function __construct(
         // below is required by legacy to be auto-wire, has its own ::getInstance()
-        SymfonyToLegacyHelper $helper
+        SymfonyToLegacyHelper $helper,
+        ServerManager $serverManager
     ) {
         set_include_path(get_include_path() . PATH_SEPARATOR . $helper->getProjectDir());
         parent::__construct();

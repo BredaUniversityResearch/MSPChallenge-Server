@@ -1,18 +1,32 @@
-version: '3.7'
-
 services:
+  redis:
+    image: 'mspserver-redis'
+    build:
+      context: .
+      target: redis_base
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
+    networks:
+      - redis
+    logging:
+      driver: "local"
+
   database:
     # check https://hub.docker.com/_/mariadb for info.
-    image: 'mariadb:10.4.25'
+    image: 'mspserver-mariadb'
+    build:
+      context: .
+      target: mariadb_base
     restart: unless-stopped
     environment:
-      DATABASE_PORT: ${DATABASE_PORT:-3306}
       MYSQL_ALLOW_EMPTY_PASSWORD: yes
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
       MYSQL_DATABASE: msp_server_manager
+      MYSQL_TCP_PORT: ${DATABASE_PORT:-3306}
     ports:
-    # exposed to port 3307, such it cannot conflict with xampp 3306
-      - "3307:${DATABASE_PORT:-3306}"
+    # exposed to port 3307 by default, such it cannot conflict with xampp 3306
+      - "${DATABASE_PORT:-3307}:${DATABASE_PORT:-3306}"
     # Run below command in your terminal to see all possible variables and their default values:
     #   mysqld --help --verbose | grep -A 9999 'Variables (--variable-name=value)'
     command: [
@@ -31,51 +45,55 @@ services:
       - database
     volumes:
       - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
+    logging:
+      driver: "local"
 
   php:
-    build:
-      context: .
-      target: app_php
-      args:
-        SYMFONY_VERSION: ${SYMFONY_VERSION:-}
-        STABILITY: ${STABILITY:-stable}
+    image: 'mspserver-php'
+    depends_on:
+      - database
+      - redis
     restart: unless-stopped
     volumes:
-      - php_socket:/var/run/php
-      - ./public/:/srv/app/public/:ro
+      - caddy_data:/data
+      - caddy_config:/config
     networks:
       - database
       - php
-      - caddy
-    healthcheck:
-      interval: 10s
-      timeout: 3s
-      retries: 3
-      start_period: 30s
+      - redis
     environment:
+      SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
+      TRUSTED_HOSTS: ^${SERVER_NAME:-localhost}|php$$
       DOCKER: 1
       DATABASE_HOST: database
+
       # Run "composer require symfony/mercure-bundle" to install and configure the Mercure integration
-      MERCURE_URL: ${CADDY_MERCURE_URL:-http://caddy/.well-known/mercure}
-      MERCURE_PUBLIC_URL: https://localhost/.well-known/mercure
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
+      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       # Exposes BLACKFIRE_CLIENT_* environment variables allowing the client to communicate with Blackfire's API:
+      BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED:-0}
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
       APP_ENV: ${APP_ENV:-dev}
+      SYMFONY_VERSION: ${SYMFONY_VERSION:-5.4}
+      FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
 
       # web server
-      WEB_SERVER_HOST: ${WEB_SERVER_HOST:-caddy}
+      WEB_SERVER_HOST: ${WEB_SERVER_HOST:-php}
       WEB_SERVER_PORT: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
       # web socket server
       WS_SERVER_HOST: ${WS_SERVER_HOST:-localhost}
       WS_SERVER_PORT: ${WS_SERVER_PORT:-45001}
       # URL settings
       URL_WEB_SERVER_SCHEME: ${URL_WEB_SERVER_SCHEME:-http://}
-      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-${WEB_SERVER_HOST:-caddy}}
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-}
       URL_WEB_SERVER_PORT: ${URL_WEB_SERVER_PORT:-${WEB_SERVER_PORT:-${HTTP_PORT:-80}}}
       URL_WS_SERVER_SCHEME: ${URL_WS_SERVER_SCHEME:-ws://}
-      URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-localhost}
+      URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-}
       URL_WS_SERVER_PORT: ${URL_WS_SERVER_PORT:-${WS_SERVER_PORT:-45001}}
       URL_WS_SERVER_URI: ${URL_WS_SERVER_URI:-/ws/}
       URL_WS_SERVER_ADDRESS_MODIFICATION: ${URL_WS_SERVER_ADDRESS_MODIFICATION:-none}
@@ -87,9 +105,23 @@ services:
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
+      # HTTP needs to be defined in the override/prod/staging/... yml files
+      # HTTPS
+      - target: 443
+        published: ${HTTPS_PORT:-443}
+        protocol: tcp
+      # HTTP/3
+      - target: 443
+        published: ${HTTP3_PORT:-443}
+        protocol: udp
+    logging:
+      driver: "local"
 
   blackfire:
-    image: blackfire/blackfire:2
+    image: 'mspserver-blackfire'
+    build:
+      context: .
+      target: blackfire_base
     ports: ["8307"]
     environment:
         # Define Blackfire Agent log vebosity level
@@ -105,48 +137,12 @@ services:
         BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
     networks:
       - php
-
-  caddy:
-    build:
-      context: .
-      target: app_caddy
-    depends_on:
-      - php
-    environment:
-      WEB_SERVER_PORT: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
-      WS_SERVER_PORT: ${WS_SERVER_PORT:-45001}
-      URL_WS_SERVER_URI: ${URL_WS_SERVER_URI:-/ws/}
-      HTTP_PORT: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
-      SERVER_NAME: ${SERVER_NAME:-localhost, caddy:80}
-      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-    restart: unless-stopped
-    volumes:
-      - php_socket:/var/run/php
-      - caddy_data:/data
-      - caddy_config:/config
-      - ./public/:/srv/app/public/:ro
-    ports:
-      # HTTP
-      - target: 80
-        published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
-        protocol: tcp
-      # HTTPS
-      - target: 443
-        published: ${HTTPS_PORT:-443}
-        protocol: tcp
-      # HTTP/3
-      - target: 443
-        published: ${HTTP3_PORT:-443}
-        protocol: udp
-    networks:
-      - database
-      - php
+    logging:
+      driver: "local"
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 
 volumes:
-  php_socket:
   caddy_data:
   caddy_config:
 
@@ -157,4 +153,4 @@ volumes:
 networks:
   database:
   php:
-  caddy:
+  redis:

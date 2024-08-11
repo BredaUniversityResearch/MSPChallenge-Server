@@ -2,8 +2,18 @@
 
 namespace App\Domain\API\v1;
 
+<<<<<<< HEAD
 use Drift\DBAL\Result;
 use function App\await;
+=======
+use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\EntityEnums\PolicyTypeDataType;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\PlanLayer;
+use App\Entity\PlanPolicy;
+use App\Entity\Policy;
+use Doctrine\ORM\AbstractQuery;
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
 use Exception;
 
 class MEL extends Base
@@ -19,7 +29,7 @@ class MEL extends Base
         "GeometryExportName",
         "InitialFishing"
     );
-        
+
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
@@ -31,8 +41,8 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Config(): ?array
     {
-        $game = (new Game())->GetGameConfigValues();
-        return $game['MEL'] ?? null;
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        return $gameConfigValues['MEL'] ?? null;
     }
 
     public function getFishingPolicySettings(): array
@@ -89,7 +99,7 @@ class MEL extends Base
                     );
                     if (!empty($layerid)) {
                         $layerid = $layerid[0]['layer_id'];
-                            
+
                         $mellayer = $db->query(
                             "
                             SELECT mel_layer_id FROM mel_layer WHERE mel_layer_pressurelayer=? AND mel_layer_layer_id=?
@@ -185,6 +195,7 @@ class MEL extends Base
     private function SetupMELLayer(string $melLayerName, array $config): int
     {
         $layerName = "mel_" . str_replace(" ", "_", $melLayerName);
+<<<<<<< HEAD
         $layer = new Layer();
         $layer->setGameSessionId($this->getGameSessionId());
         $layerRow = $layer->selectRowsFromTable('layer', ['layer_name' => $layerName]);
@@ -202,6 +213,50 @@ class MEL extends Base
         $rasterProperties = array_merge($existingRasterProperties ?? [], $rasterProperties);
         $rasterFormat = json_encode($rasterProperties);
         $layer->updateRowInTable('layer', ['layer_raster' => $rasterFormat], ['layer_id' => $layerId]);
+=======
+        $data = $this->getDatabase()->query(
+            "SELECT layer_id, layer_raster FROM layer WHERE layer_name=?",
+            array($layerName)
+        );
+
+        $game = new Game();
+        $globalConfig = $game->GetGameConfigValues();
+        $layerMeta = current(array_filter($globalConfig['meta'], function ($meta) use ($layerName) {
+            return strcasecmp($meta['layer_name'], $layerName) === 0;
+        }));
+        // take the config's layer name since the case of the characters can be different from MEL's layer name.
+        $layerName = $layerMeta['layer_name'] ?? $layerName;
+        $rasterProperties = array(
+            "url" => "$layerName.tif",
+            "boundingbox" => array(
+                array($config["x_min"], $config["y_min"]), array($config["x_max"], $config["y_max"])
+            )
+        );
+
+        if (empty($data)) {
+            //create new layer
+            Log::LogDebug("Note: found reference to MEL layer {$layerName}. Please check its existence under 'meta'.");
+            $rasterFormat = json_encode($rasterProperties);
+            $layerId = $this->getDatabase()->query(
+                "
+                INSERT INTO layer (
+                    layer_name, layer_short, layer_geotype, layer_group, layer_category, layer_subcategory, layer_raster
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                ",
+                [$layerName, $melLayerName, "raster", $globalConfig['region'], "Ecology", "pressure", $rasterFormat],
+                true
+            );
+        } else {
+            $layerId = $data[0]['layer_id'];
+            $existingRasterProperties = json_decode($data[0]['layer_raster'], true);
+            $rasterProperties = array_merge($existingRasterProperties ?? array(), $rasterProperties);
+            $rasterFormat = json_encode($rasterProperties);
+            $this->getDatabase()->query(
+                "UPDATE layer SET layer_raster=? WHERE layer_id = ?",
+                array($rasterFormat, $layerId)
+            );
+        }
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         return $layerId;
     }
 
@@ -244,7 +299,7 @@ class MEL extends Base
 
                 if (isset($fishingFleet["initialFishingDistribution"])) {
                     $fishingValues = $fishingFleet["initialFishingDistribution"];
-                    
+
                     //We need to average the weights over the available countries
                     $sum = 0.0;
                     foreach ($fishingValues as $val) {
@@ -253,7 +308,7 @@ class MEL extends Base
                             $weightsByCountry[$val["country_id"]] = $val["weight"];
                         }
                     }
-                    
+
                     $weightMultiplier = ($sum > 0)? 1.0 / $sum : 1.0 / $numCountries;
                     foreach ($weightsByCountry as &$countryWeight) {
                         $countryWeight *= $weightMultiplier;
@@ -269,7 +324,7 @@ class MEL extends Base
 
             foreach ($countries as $country) {
                 $countryId = $country["country_id"];
-                $weight = $weightsByFleet[$name][$countryId] ?? 0.1;
+                $weight = $weightsByFleet[$name][$countryId] ?? 1;
                 $this->getDatabase()->query(
                     "
                     INSERT INTO fishing (
@@ -304,7 +359,7 @@ class MEL extends Base
             "SELECT layer_name, layer_melupdate_construction FROM layer WHERE layer_melupdate=?",
             array(1)
         );
-            
+
         $layers = [];
         foreach ($r as $l) {
             // if($l['layer_melupdate_construction'] == 1){
@@ -368,7 +423,7 @@ class MEL extends Base
 									GROUP BY fishing_type",
             array($game_month)
         );
-                
+
         //Make sure fishing scalars never exceed 1.0
         foreach ($data as &$fishingValues) {
             if (floatval($fishingValues['scalar']) > 1.0) {
@@ -398,14 +453,14 @@ class MEL extends Base
         );
 
         $result = array("geotype" => "");
-            
+
         if (empty($id)) {
             return null;
         }
 
         $original = $id[0]['layer_id'];
 
-        if ($id[0]['layer_geotype'] == "raster") {
+        if ($id[0]['layer_geotype'] == LayerGeoType::RASTER) {
             $rasterJson = json_decode($id[0]['layer_raster']);
 
             $result["geotype"] = $id[0]['layer_geotype'];

@@ -8,8 +8,9 @@ use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\PolicyType;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\SchemaException;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -85,6 +86,10 @@ final class Version20230202092830 extends MSPMigration
         }
     }
 
+    /**
+     * @throws SchemaException
+     * @throws Exception
+     */
     private function checkPreRequisites(Schema $schema, string $typeName): bool
     {
         if (!$schema->hasTable('plan')) {
@@ -93,7 +98,7 @@ final class Version20230202092830 extends MSPMigration
         if (!$schema->getTable('plan')->hasColumn('plan_type')) {
             return false;
         }
-        if ($schema->getTable('plan')->getColumn('plan_type')->getType()->getName() != $typeName) {
+        if (Type::lookupName($schema->getTable('plan')->getColumn('plan_type')->getType()) != $typeName) {
             return false;
         }
         return true;

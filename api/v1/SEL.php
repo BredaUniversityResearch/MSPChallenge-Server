@@ -2,6 +2,8 @@
 
 namespace App\Domain\API\v1;
 
+use App\Controller\SessionAPI\SELController;
+use App\Domain\Services\ConnectionManager;
 use Exception;
 use InvalidArgumentException;
 use stdClass;
@@ -38,9 +40,10 @@ class SEL extends Base
 
     //SEL Input Queries
     /**
-    * @apiGroup SEL
-    * @api {POST} /sel/GetPlayableAreaGeometry GetPlayableAreaGeometry
-    * @apiDescription Gets the geometry associated with the playable area layer
+     * @apiGroup SEL
+     * @throws Exception
+     * @api {POST} /sel/GetAreaOutputConfiguration GetAreaOutputConfiguration
+     * @apiDescription Gets the geometry associated with the playable area layer
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -49,7 +52,13 @@ class SEL extends Base
         $game = new Game();
         $config = $game->GetGameConfigValues();
 
-        $result = array("simulation_area" => $this->CalculateAlignedSimulationBounds($config));
+        $boundsConfig = SELController::calculateAlignedSimulationBounds(
+            $config,
+            SELController::getLargestPlayAreaGeometryFromDb(
+                ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            )
+        );
+        $result = array("simulation_area" => $boundsConfig);
 
         if (isset($config["MEL"])) {
             $melConfig = &$config["MEL"];
@@ -65,10 +74,11 @@ class SEL extends Base
         if (isset($config["SEL"]["output_configuration"])) {
             $result = array_merge($result, $config["SEL"]["output_configuration"]);
         }
-        
+
         return $result; //Base::JSON($result);
     }
 
+<<<<<<< HEAD
     // Returns the aligned simulation bounds as defined by the playarea. Bounds are aligned to the MEL area so the
     //   pixels in the raster should line up.
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -139,6 +149,8 @@ class SEL extends Base
         return $result;
     }
 
+=======
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
     /**
     * @apiGroup SEL
     * @api {POST} /sel/GetConfiguredRouteIntensities GetConfiguredRouteIntensities
@@ -647,14 +659,16 @@ class SEL extends Base
         $riskMapSettings = $configValues["risk_heatmap_settings"];
 
         $restrictionLayerExceptions = array();
-        foreach ($riskMapSettings["restriction_layer_exceptions"] as $data) {
-            $layerData = $this->getDatabase()->query(
-                "SELECT layer_id FROM layer WHERE layer_name = ?",
-                array($data)
-            );
-            if (count($layerData) > 0) {
-                $restrictionLayerExceptions[] = $layerData[0]["layer_id"];
-            } else {
+        if (!empty($riskMapSettings["restriction_layer_exceptions"])) {
+            foreach ($riskMapSettings["restriction_layer_exceptions"] as $data) {
+                $layerData = $this->getDatabase()->query(
+                    "SELECT layer_id FROM layer WHERE layer_name = ?",
+                    array($data)
+                );
+                if (count($layerData) > 0) {
+                    $restrictionLayerExceptions[] = $layerData[0]["layer_id"];
+                    continue;
+                }
                 $this->getLogger()->serverEvent(
                     "SEL_API",
                     Log::WARNING,
@@ -727,6 +741,7 @@ class SEL extends Base
 
     /**
      * @apiGroup SEL
+     * @throws Exception
      * @api {POST} /sel/ReimportShippingLayers ReimportShippingLayers
      * @apiDescription Creates the raster layers required for shipping.
      */
@@ -754,7 +769,13 @@ class SEL extends Base
         
         $region = $globalConfig["region"];
         $config = $globalConfig["SEL"];
-        $boundsConfig = $this->CalculateAlignedSimulationBounds($globalConfig);
+
+        $boundsConfig = SELController::calculateAlignedSimulationBounds(
+            $globalConfig,
+            SELController::getLargestPlayAreaGeometryFromDb(
+                ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            )
+        );
 
         foreach ($config["heatmap_settings"] as $heatmap) {
             $existingLayer = $this->getDatabase()->query(

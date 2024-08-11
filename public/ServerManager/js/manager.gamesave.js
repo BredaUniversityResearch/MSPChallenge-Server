@@ -10,7 +10,7 @@ function newSessionChoice()
 function submitLoadSave()
 {
     if (isFormValid($('#formLoadSave'))) {
-        var url = 'api/readGameSave.php';
+        var url = 'api/readGameSave_php';
         var data = {
             save_id: $("#SaveFileSelector").val(),
             name: $("#newServerName").val(),
@@ -41,7 +41,7 @@ function UploadSave()
     var uploadedSaveFile = $("#uploadedSaveFile").val();
     if (uploadedSaveFile) {
         showToast(MessageType.INFO, 'Please wait...');
-        var url = 'api/addGameSave.php';
+        var url = 'api/addGameSave_php';
         var data = new FormData();
         data.append("uploadedSaveFile", $("#uploadedSaveFile")[0].files[0]);
         $.when(CallAPIWithFileUpload(url, data)).done(function (results) {
@@ -60,7 +60,7 @@ function UploadSave()
 function saveSession(sessionId, saveType)
 {
     showToast(MessageType.INFO, 'Please wait...');
-    var url = 'api/addGameSave.php';
+    var url = 'api/addGameSave_php';
     var data = {
         session_id: sessionId,
         save_type: saveType
@@ -78,7 +78,7 @@ function saveSession(sessionId, saveType)
 
 function SaveNotes()
 {
-    var url = 'api/editGameSave.php';
+    var url = 'api/editGameSave_php';
     var data = {
         save_id: $("#SaveInfoId").val(),
         save_notes: $("#SaveInfoNotes").val()
@@ -95,7 +95,7 @@ function SaveNotes()
 function setNewServerNameInForm(saveId, append=" ")
 {
     if (saveId > 0) {
-        var url = 'api/readGameSave.php';
+        var url = 'api/readGameSave_php';
         var data = {
             save_id: saveId
         }
@@ -120,12 +120,12 @@ function showLoadSaveModal(SaveId)
 
 function downloadSave(id)
 {
-    window.location = "api/downloader.php?id="+id+"&request=GameSave/getFullZipPath";
+    window.location = "api/downloader_php?id="+id+"&request=GameSave/getFullZipPath";
 }
 
 function getSaveInfo(saveId)
 {
-    var url = 'api/readGameSave.php';
+    var url = 'api/readGameSave_php';
     var data = {
         save_id: saveId
     }
@@ -167,7 +167,7 @@ function updateSaveInfoList(data)
 function updateSavesTable(visibility)
 {
     $("#buttonRefreshSavesListIcon").addClass("fa-spin");
-    var url = 'api/browseGameSave.php';
+    var url = 'api/browseGameSave_php';
     var data = {
         visibility: visibility
     }
@@ -179,7 +179,7 @@ function updateSavesTable(visibility)
 
 function SavesListToOptions(SaveId=0)
 {
-    var url = 'api/browseGameSave.php';
+    var url = 'api/browseGameSave_php';
     var data = {
         save_type: 'full'
     }
@@ -242,7 +242,7 @@ function savesListToTable(saveslist)
 
 function setSaveArchived(saveId)
 {
-    var url = 'api/deleteGameSave.php';
+    var url = 'api/deleteGameSave_php';
     var data = {
         save_id: saveId
     }

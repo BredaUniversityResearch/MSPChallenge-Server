@@ -3,10 +3,14 @@
 namespace App\Domain\Services;
 
 use App\Domain\API\APIHelper;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Kernel;
+use App\VersionsProvider;
 use Closure;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -26,9 +30,20 @@ class SymfonyToLegacyHelper
     private Kernel $kernel;
     private TranslatorInterface $translator;
     private ?Closure $fnControllerForwarder = null;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
     private MessageBusInterface $messageBus;
     private EntityManagerInterface $em;
+
+    private VersionsProvider $provider;
+    private MessageBusInterface $analyticsMessageBus;
+    private LoggerInterface $analyticsLogger;
+
+    private WatchdogCommunicator $watchdogCommunicator;
+
+    private AuthenticationSuccessHandler $authenticationSuccessHandler;
 
     public function __construct(
         string $projectDir,
@@ -39,9 +54,17 @@ class SymfonyToLegacyHelper
         TranslatorInterface $translator,
         EntityManagerInterface $em,
         MessageBusInterface $messageBus,
+<<<<<<< HEAD
+=======
+        VersionsProvider $provider,
+        MessageBusInterface $analyticsMessageBus,
+        LoggerInterface $analyticsLogger,
+        WatchdogCommunicator $watchdogCommunicator,
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         APIHelper $apiHelper,
-        ConnectionManager $connectionManager
+        ConnectionManager $connectionManager,
+        AuthenticationSuccessHandler $authenticationSuccessHandler
     ) {
         $this->projectDir = $projectDir;
         $this->urlGenerator = $urlGenerator;
@@ -51,7 +74,23 @@ class SymfonyToLegacyHelper
         $this->translator = $translator;
         $this->em = $em;
         $this->messageBus = $messageBus;
+<<<<<<< HEAD
+=======
+        $this->provider = $provider;
+        $this->analyticsMessageBus = $analyticsMessageBus;
+        $this->analyticsLogger = $analyticsLogger;
+        $this->watchdogCommunicator = $watchdogCommunicator;
+        $this->authenticationSuccessHandler = $authenticationSuccessHandler;
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         self::$instance = $this;
+    }
+
+    /**
+     * @return AuthenticationSuccessHandler
+     */
+    public function getAuthenticationSuccessHandler(): AuthenticationSuccessHandler
+    {
+        return $this->authenticationSuccessHandler;
     }
 
     public function getProjectDir(): string
@@ -80,6 +119,26 @@ class SymfonyToLegacyHelper
     public function getEntityManager(): EntityManagerInterface
     {
         return $this->em;
+    }
+
+    public function getProvider(): VersionsProvider
+    {
+        return $this->provider;
+    }
+
+    public function getAnalyticsMessageBus(): MessageBusInterface
+    {
+        return $this->analyticsMessageBus;
+    }
+
+    public function getAnalyticsLogger(): LoggerInterface
+    {
+        return $this->analyticsLogger;
+    }
+
+    public function getWatchdogCommunicator(): WatchdogCommunicator
+    {
+        return $this->watchdogCommunicator;
     }
 
     /**

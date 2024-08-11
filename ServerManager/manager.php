@@ -33,9 +33,9 @@ require 'init.php';
 $user = new User();
 if (!$user->isAuthorised()) {
     if ($user->isLoggedIn()) {
-        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'logout.php');
+        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'logout_php');
     } else {
-        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'index.php');
+        Redirect::to(ServerManager::getInstance()->getAbsolutePathBase().'index_php');
     }
 }
 
@@ -347,7 +347,7 @@ require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/h
                                         <button id="sessionInfoButtonSaveLayers" class="btn btn-secondary btn-sm" onclick=""></button>
                                     </td>
                                     <td colspan="2" class="text-right">
-                                        <button id="sessionInfoButtonUserAccess" data-toggle="modal" data-target="#sessionUsers" class="btn btn-secondary btn-sm" onclick=""></button>
+                                        <button id="sessionInfoButtonUserAccess" class="btn btn-secondary btn-sm" onclick=""></button>
                                         <button id="sessionInfoButtonExportPlans" class="btn btn-secondary btn-sm" onclick=""></button>
                                     </td>
                                 </tr>

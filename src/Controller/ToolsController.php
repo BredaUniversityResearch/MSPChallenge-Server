@@ -8,6 +8,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Types\Type;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -21,6 +22,39 @@ class ToolsController extends AbstractController
     public function __invoke(): Response
     {
         return $this->render('tools/index.html.twig');
+    }
+
+    public function apcu(string $projectDir): Response
+    {
+        $apcRelativePath = 'var/tools/apc.php';
+        $apcFilePath = $projectDir . '/' . $apcRelativePath;
+        // Check if the file exists
+        if (!file_exists($apcFilePath)) {
+            throw new \RuntimeException($apcRelativePath . ' not found. Please call: bash install-tools.sh');
+        }
+
+
+        // Include the apc.php file
+        ob_start();
+        // setup apc.php
+        define('USE_AUTHENTICATION', 0);
+        // make global variables required by apc.php available
+        global $time;
+        global $col_black;
+        global $MYREQUEST, $MY_SELF_WO_SORT;
+        global $MYREQUEST,$MY_SELF;
+        global $MY_SELF,$MYREQUEST,$AUTHENTICATED;
+        $_SERVER['PHP_SELF'] = $this->generateUrl('_tools_apcu');
+        // Temporarily suppress warnings
+        $previousErrorReporting = error_reporting();
+        error_reporting($previousErrorReporting & ~E_WARNING);
+        require $apcFilePath;
+        // Restore previous error reporting level
+        error_reporting($previousErrorReporting);
+        $content = ob_get_clean();
+
+        // Return the response
+        return new Response($content);
     }
 
     /**
@@ -150,7 +184,7 @@ class ToolsController extends AbstractController
                 }
                 unset($pregMatches);
                 if (!empty($data['regexp_type']) &&
-                    preg_match($data['regexp_type'], $column->getType()->getName(), $pregMatches) !== 1
+                    preg_match($data['regexp_type'], Type::lookupName($column->getType()), $pregMatches) !== 1
                 ) {
                     continue;
                 }
@@ -211,7 +245,7 @@ class ToolsController extends AbstractController
 
                 $missingIndices[$tableName][$column->getName()] = $column->getName();
                 $messages[] = '<span style="color: red;">Missing index for table ' . $tableName . ' and field ' .
-                    $column->getName() . ' of type ' . $column->getType()->getName() . '</span>...';
+                    $column->getName() . ' of type ' . Type::lookupName($column->getType()) . '</span>...';
             }
         }
 

@@ -36,7 +36,7 @@ ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `user`
--- -----------------------------------------------------
+    -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `user` (
   `user_id` INT NOT NULL AUTO_INCREMENT,
   `user_name` VARCHAR(45) NULL,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `geometry` (
   `geometry_data` TEXT CHARACTER SET 'latin1' NULL COMMENT 'is this format long enough?',
   `geometry_country_id` INT NULL,
   `geometry_active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Is this geometry active or still valid to become active. This is set to 0 when it is replaced by a new geometry with the same persistent ID when plans are implemented.',
-  `geometry_subtractive` INT(11) NOT NULL DEFAULT 0,
+  `geometry_subtractive` INT(11) NULL,
   `geometry_type` VARCHAR(75) NOT NULL DEFAULT 0,
   `geometry_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Has this geometry been deleted by a user? This only applies to geometry inside a plan that hasn\'t become active. E.g. geometry is created in plan, plan is submitted to server, user deletes geometry from said plan, geometry_deleted = 1.',
   `geometry_mspid` VARCHAR(16) NULL,
@@ -153,6 +153,7 @@ CREATE TABLE IF NOT EXISTS `geometry` (
   INDEX `fk_gis_layer1_idx` (`geometry_layer_id` ASC),
   INDEX `geometry_persistent` (`geometry_persistent` ASC),
   INDEX `fk_geometry_country1_idx` (`geometry_country_id` ASC),
+  UNIQUE `uq_geometry_data`(`geometry_geometry`, `geometry_data`, `geometry_layer_id`),
   CONSTRAINT `fk_gis_layer1`
     FOREIGN KEY (`geometry_layer_id`)
     REFERENCES `layer` (`layer_id`)
@@ -786,6 +787,7 @@ SQL;
 
     protected function onDown(Schema $schema): void
     {
+        $this->addSql('SET FOREIGN_KEY_CHECKS=0');
         $this->addSql('DROP TABLE IF EXISTS `api_batch`');
         $this->addSql('DROP TABLE IF EXISTS `api_batch_task`');
         $this->addSql('DROP TABLE IF EXISTS `api_token`');

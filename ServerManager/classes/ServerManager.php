@@ -3,6 +3,7 @@
 namespace ServerManager;
 
 use App\Domain\Helper\Config;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\WsServer;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\Setting;
@@ -54,6 +55,12 @@ class ServerManager extends Base
           '4.0-rc2' => '2023-02-02 00:00:00Z',
           '4.0-rc3' => '2023-07-10 00:00:00Z'
         ];
+        $versionProvider = SymfonyToLegacyHelper::getInstance()->getProvider();
+        $this->serverVersions[] = $versionProvider->getVersion();
+        $this->serverAcceptedClients[$versionProvider->getVersion()] = date(
+            "Y-m-d H:i:s",
+            filemtime(SymfonyToLegacyHelper::getInstance()->getProjectDir().DIRECTORY_SEPARATOR.'version.txt')
+        );
         $this->serverCurrentVersion = end($this->serverVersions);
         $this->serverUpgrades = [ // make sure these functions exist in server API update class and is actually
             // callable - just letters and numbers of course
@@ -280,15 +287,17 @@ class ServerManager extends Base
         return $this->serverDescription;
     }
 
-    public function getServerURLBySessionId($sessionId = ''): string
+    public function getServerURLBySessionId($sessionId = '', bool $forDocker = false): string
     {
         // e.g. http://localhost/1
         // use this one if you just want the full URL of a Server's session
-        $url = Config::get('msp_server_protocol').$this->getTranslatedServerURL().Config::get('code_branch');
+        $url = $forDocker ? // in-case of docker, use http://caddy:80/ or http://mitmproxy:8080/
+            'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).
+            Config::get('code_branch') :
+            Config::get('msp_server_protocol').$this->getTranslatedServerURL().Config::get('code_branch');
         if (!empty($sessionId)) {
             $url = rtrim($url, '/').'/'.$sessionId;
         }
-
         return $url;
     }
 
@@ -315,7 +324,7 @@ class ServerManager extends Base
     public function getTranslatedServerURL(): string
     {
         $port = $_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80;
-        if (($_ENV['URL_WEB_SERVER_HOST'] ?? null) !== null) {
+        if (($_ENV['URL_WEB_SERVER_HOST'] ?? '') !== '') {
             return $_ENV['URL_WEB_SERVER_HOST'].':'.$port;
         }
 

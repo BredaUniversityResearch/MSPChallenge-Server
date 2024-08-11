@@ -233,10 +233,11 @@ class Layer extends Base
             throw new Exception("Could not find layer with name " . $layer_name . " to request the raster image for");
         }
 
-        $rasterData = json_decode($layerData[0]['layer_raster'], true);
-        $rasterDataOriginal = $rasterData;
-        $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
-
+        $filePath = $rasterDataOriginal = null;
+        if (null !== $rasterData = json_decode($layerData[0]['layer_raster'], true)) {
+            $rasterDataOriginal = $rasterData;
+            $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
+        }
         if ($month >= 0) {
             $path_parts = pathinfo($rasterData['url']);
             $fileext = $path_parts['extension'];
@@ -250,7 +251,7 @@ class Layer extends Base
             }
         }
             
-        if (!file_exists($filePath)) {
+        if ($filePath === null || !file_exists($filePath)) {
             // final try.... if $month = 0 and you couldn't find the file so far, just return the very original
             if ($month == 0) {
                 $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterDataOriginal['url'];

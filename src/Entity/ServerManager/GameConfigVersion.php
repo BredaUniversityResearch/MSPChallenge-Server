@@ -16,7 +16,7 @@ class GameConfigVersion
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'game_config_files_id', nullable: false)]
     private ?GameConfigFile $gameConfigFile = null;
 
@@ -63,6 +63,14 @@ class GameConfigVersion
     private ?string $clientVersions = null;
 
     /**
+<<<<<<< HEAD
+=======
+     * @param array $gameConfigCompleteRaw
+     */
+    private ?string $gameConfigCompleteRaw = null;
+
+    /**
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
      * @param array $gameConfigComplete
      */
     private ?array $gameConfigComplete = null;
@@ -213,4 +221,18 @@ class GameConfigVersion
 
         return $this;
     }
+<<<<<<< HEAD
+=======
+
+    public function getGameConfigCompleteRaw(): ?string
+    {
+        return $this->gameConfigCompleteRaw;
+    }
+
+    public function setGameConfigCompleteRaw(?string $gameConfigCompleteRaw): GameConfigVersion
+    {
+        $this->gameConfigCompleteRaw = $gameConfigCompleteRaw;
+        return $this;
+    }
+>>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
 }

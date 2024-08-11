@@ -1,5 +1,13 @@
 <?php
 
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\GameList;
+use App\Entity\ServerManager\GameSave as GameSaveNew;
+use App\Entity\ServerManager\GameWatchdogServer;
+use App\Message\GameSave\GameSaveLoadMessage;
+use App\Repository\ServerManager\GameListRepository;
+use App\Repository\ServerManager\GameSaveRepository;
 use ServerManager\API;
 use ServerManager\GameSave;
 use ServerManager\GameSession;
@@ -19,12 +27,32 @@ $gamesave->id = $_POST["save_id"] ?? "";
 $gamesave->get();
 
 //  then perform any allowed and existing object action requested
-$allowed_actions = array(
+/*$allowed_actions = array(
     "load", // called in JS function submitLoadSave
 );
-$action = $_POST["action"] ?? "";
 if (method_exists($gamesave, $action) && in_array($action, $allowed_actions)) {
     $api->setPayload([$action => $gamesave->$action()]);
+}*/
+$action = $_POST["action"] ?? "";
+if ($action == 'load') {
+    $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
+    /** @var GameSaveRepository $gameSaveRepo */
+    $gameSaveRepo = $em->getRepository(GameSave::class);
+    $gameSave = $gameSaveRepo->find($gamesave->id);
+    /** @var GameListRepository $gameListRepo */
+    $gameListRepo = $em->getRepository(GameList::class);
+    $newGameSessionFromLoad = $gameListRepo->createGameListFromData($gameSaveRepo->createDataFromGameSave($gameSave));
+    $newGameSessionFromLoad->setGameSave($gameSave);
+    $newGameSessionFromLoad->setName($_POST['name']);
+    $newGameSessionFromLoad->setGameWatchdogServer(
+        $em->getRepository(GameWatchdogServer::class)->find($_POST['watchdog_server_id'] ?? 1)
+    );
+    $newGameSessionFromLoad->setSessionState(new GameSessionStateValue('request'));
+    $em->persist($newGameSessionFromLoad);
+    $em->flush();
+    SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(
+        new GameSaveLoadMessage($newGameSessionFromLoad->getId(), $gameSave->getId())
+    );
 }
 
 // now see which associated GameSessions can be obtained

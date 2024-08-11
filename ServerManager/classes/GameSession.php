@@ -2,8 +2,16 @@
 
 namespace ServerManager;
 
+use App\Domain\API\v1\Game;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\GameConfigVersion;
+use App\Message\Analytics\SessionCreatedMessage;
+use App\Message\GameList\GameListCreationMessage;
 use DateInterval;
 use DateTime;
+use DateTimeImmutable;
+use Exception;
+use Symfony\Component\Uid\Uuid;
 
 class GameSession extends Base
 {
@@ -112,7 +120,7 @@ class GameSession extends Base
             if (false === $log_contents) {
                 $this->log = 'Session log does not exist (yet).';
             } else {
-                $this->log = explode(PHP_EOL, rtrim($log_contents));
+                $this->log = explode("\n", rtrim($log_contents));
             }
         }
         $this->old = clone $this;
@@ -156,6 +164,8 @@ class GameSession extends Base
             throw new ServerManagerAPIException($this->db->errorString());
         }
         $this->id = $this->db->lastId();
+
+        $this->logSessionCreation();
     }
 
     public function sendLoadRequest($allow_recreate = 0)
@@ -173,7 +183,7 @@ class GameSession extends Base
                 'save_path' => $gamesave->getFullZipPath(),
                 'watchdog_address' => $watchdog->address,
                 'game_id' => $this->id,
-                'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php',
+                'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession_php',
                 'allow_recreate' => $allow_recreate,
             ]
         );
@@ -206,7 +216,7 @@ class GameSession extends Base
             'password_player' => base64_encode($this->password_player),
             'watchdog_address' => $watchdog->address,
             'allow_recreate' => $allow_recreate,
-            'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php',
+            'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession_php',
         ];
         $server_call = self::callServer(
             'GameSession/CreateGameSession',
@@ -235,6 +245,10 @@ class GameSession extends Base
 
     public function recreate(): bool
     {
+        if ($this->game_state != 'end') {
+            $this->game_state = 'end';
+            $this->changeGameState();
+        }
         if ($this->save_id > 0) {
             return $this->reload();
         }
@@ -242,6 +256,7 @@ class GameSession extends Base
         // after a server upgrade the version might have changed since session was first created
         $this->server_version = ServerManager::getInstance()->getCurrentVersion();
         $this->sendCreateRequest(1);
+        // alternative to the above is in editGameSession.php
         $this->setToLoading();
 
         return true;
@@ -456,7 +471,7 @@ class GameSession extends Base
     public function setUserAccess(): bool
     {
         $server_call = self::callServer(
-            'gamesession/SetUserAccess',
+            'GameSession/SetUserAccess',
             [
                 'password_admin' => base64_encode($this->password_admin),
                 'password_player' => base64_encode($this->password_player),
@@ -614,15 +629,6 @@ class GameSession extends Base
         if ('simulation' == $this->game_state) {
             throw new ServerManagerAPIException('The session is simulating, so cannot archive it at this time.');
         }
-        $server_call = self::callServer(
-            'gamesession/ArchiveGameSession',
-            ['response_url' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php'],
-            $this->id,
-            $this->api_access_token
-        );
-        if (!$server_call['success']) {
-            throw new ServerManagerAPIException($server_call['message'] ?? 'unknown error');
-        }
         $this->session_state = 'archived';
         $this->edit();
 
@@ -632,7 +638,7 @@ class GameSession extends Base
     public function getConfigWithPlans(): array
     {
         $server_call = self::callServer(
-            'plan/ExportPlansToJson',
+            'Plan/ExportPlansToJson',
             [],
             $this->id,
             $this->api_access_token
@@ -646,6 +652,11 @@ class GameSession extends Base
         $gameconfig->get();
         $configFileDecoded = $gameconfig->getContents();
         if (isset($configFileDecoded['datamodel'])) {
+            // force an object from meta layer type array
+            $configFileDecoded['datamodel']['meta'] = array_map(function ($el) {
+                $el['layer_type'] = (object)$el['layer_type'];
+                return $el;
+            }, $configFileDecoded['datamodel']['meta']);
             $configFileDecoded['datamodel']['plans'] = $server_call['payload'];
         } else {
             $configFileDecoded['plans'] = $server_call['payload'];
@@ -686,7 +697,7 @@ class GameSession extends Base
                 );
         }
         $server_call = self::callServer(
-            'game/State',
+            'Game/State',
             ['state' => $this->game_state],
             $this->id,
             $this->api_access_token
@@ -696,5 +707,60 @@ class GameSession extends Base
         }
 
         return true;
+    }
+
+    private function logSessionCreation(): void
+    {
+        $legacyHelper = SymfonyToLegacyHelper::getInstance();
+        $analyticsLogger = $legacyHelper->getAnalyticsLogger();
+
+        $gameConfig = new GameConfig();
+        $gameConfig->id = $this->game_config_version_id;
+        $gameConfig->get();
+        $gameConfigContents = $gameConfig->getContents();
+        $gameStartYear = -1;
+        $gameEndMonth = -1;
+        if (isset($gameConfigContents["datamodel"])) {
+            $gameStartYear = $gameConfigContents["datamodel"]["start"] ?? -1;
+            $endYear = $gameConfigContents["datamodel"]["end"] ?? -1;
+            $validStartAndEnd = $gameStartYear > 0 && $endYear > 0 && $endYear > $gameStartYear;
+            $gameEndMonth =  $validStartAndEnd ? ($endYear - $gameStartYear) * 12 : -1;
+        }
+
+        $tempImmutableDateTime = new DateTimeImmutable();
+        $gameCreationTimeStamp = $this->game_creation_time ? intval($this->game_creation_time) : 0;
+        $gameCreationTime = $tempImmutableDateTime->setTimestamp($gameCreationTimeStamp);
+
+        $serverManager = ServerManager::getInstance();
+        $serverManagerId = Uuid::fromString($serverManager->getServerUuid());
+
+        $userId = $_SESSION['user'];
+        $userData = is_null($userId) ? null : (new User($userId))->data();
+
+        $analyticsMessage = new SessionCreatedMessage(
+            new DateTimeImmutable(),
+            $serverManagerId,
+            $userData?->username ?? '',
+            $userData?->account_id ?? -1,
+            $this->id,
+            $this->name,
+            $gameCreationTime,
+            $gameStartYear,
+            $gameEndMonth,
+            $gameConfig->filename,
+            $gameConfig->version,
+            $gameConfig->version_message,
+            $gameConfig->region,
+            $gameConfig->description
+        );
+
+        try {
+            $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
+        } catch (Exception $e) {
+            $analyticsLogger->error(
+                "Exception occurred while dispatching game session creation message: ".
+                $e->getMessage()
+            );
+        }
     }
 }
