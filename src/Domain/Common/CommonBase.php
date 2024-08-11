@@ -7,7 +7,6 @@ use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Log;
 use App\Domain\API\v1\Security;
 use App\Domain\Services\ConnectionManager;
-use Doctrine\DBAL\ParameterType;
 use Drift\DBAL\Connection;
 use Drift\DBAL\Result;
 use Exception;
@@ -17,6 +16,8 @@ use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\await;
 use function App\resolveOnFutureTick;
+
+
 
 abstract class CommonBase
 {

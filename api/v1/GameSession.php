@@ -64,14 +64,12 @@ class GameSession extends Base
     }
 
     /**
-<<<<<<< HEAD
-=======
      * used to communicate "game_session_api" URL to the watchdog
      *
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public static function getRequestApiRootAsync(bool $forDocker = false): PromiseInterface
+    public function getRequestApiRootAsync(bool $forDocker = false): PromiseInterface
     {
         if (isset($GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0])) {
             $deferred = new Deferred();
@@ -120,13 +118,12 @@ class GameSession extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetRequestApiRoot(): string
+    public function GetRequestApiRoot(): string
     {
         return await(self::getRequestApiRootAsync());
     }
 
     /**
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
      * Used by GameTick to generate a server manager URL towards editGameSession.php
      *
      * @return string
