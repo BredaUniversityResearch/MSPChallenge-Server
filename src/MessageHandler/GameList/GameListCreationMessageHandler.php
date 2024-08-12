@@ -116,6 +116,8 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $state = 'failed';
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
+        // not sure why this is necessary, but so far, it has been
+        $this->mspServerManagerEntityManager->persist($this->gameSession);
         $this->mspServerManagerEntityManager->flush();
     }
 

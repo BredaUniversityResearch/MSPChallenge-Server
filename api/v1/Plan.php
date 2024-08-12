@@ -192,11 +192,7 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function All(): array
     {
-<<<<<<< HEAD
-        /** @var array{plan_id: mixed} $data */
-=======
         /** @var array{array{plan_id: int}} $data */
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         $data = $this->getDatabase()->query("SELECT * FROM plan WHERE plan_active=?", array(1));
 
         self::Debug($data);

@@ -2,10 +2,6 @@
 
 namespace App\Domain\API\v1;
 
-<<<<<<< HEAD
-use Drift\DBAL\Result;
-use function App\await;
-=======
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PolicyTypeDataType;
 use App\Domain\Services\ConnectionManager;
@@ -13,7 +9,6 @@ use App\Entity\PlanLayer;
 use App\Entity\PlanPolicy;
 use App\Entity\Policy;
 use Doctrine\ORM\AbstractQuery;
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
 use Exception;
 
 class MEL extends Base
@@ -195,25 +190,6 @@ class MEL extends Base
     private function SetupMELLayer(string $melLayerName, array $config): int
     {
         $layerName = "mel_" . str_replace(" ", "_", $melLayerName);
-<<<<<<< HEAD
-        $layer = new Layer();
-        $layer->setGameSessionId($this->getGameSessionId());
-        $layerRow = $layer->selectRowsFromTable('layer', ['layer_name' => $layerName]);
-        $layerId = $layerRow['layer_id']
-            ?? throw new \Exception(
-                'Could not set up MEL layer metadata because the layer does not exist: '.$layerName
-            );
-        $rasterProperties = [
-            "url" => "$layerName.tif",
-            "boundingbox" => [
-                [$config["x_min"], $config["y_min"]], [$config["x_max"], $config["y_max"]]
-            ]
-        ];
-        $existingRasterProperties = json_decode($layerRow['layer_raster'], true);
-        $rasterProperties = array_merge($existingRasterProperties ?? [], $rasterProperties);
-        $rasterFormat = json_encode($rasterProperties);
-        $layer->updateRowInTable('layer', ['layer_raster' => $rasterFormat], ['layer_id' => $layerId]);
-=======
         $data = $this->getDatabase()->query(
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name=?",
             array($layerName)
@@ -256,7 +232,6 @@ class MEL extends Base
                 array($rasterFormat, $layerId)
             );
         }
->>>>>>> 2ca4529ec25818827b8b6b61ac68c5f4c0a715e4
         return $layerId;
     }
 
