@@ -26,6 +26,9 @@ security:
             stateless: true
             jwt: ~
             provider: jwt
+        manager_gamelist:
+            pattern: ^/manager/gamelist
+            security: false
         manager:
             pattern: ^/manager
             provider: local_users
