@@ -13,7 +13,6 @@ use Symfony\Component\Uid\Uuid;
 class User implements UserInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 

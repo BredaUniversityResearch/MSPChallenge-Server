@@ -24,8 +24,8 @@ class StoreUserUponLogin implements EventSubscriberInterface
         if ($user instanceof User) {
             $storedUser = $this->mspServerManagerEntityManager->getRepository(User::class)->find($user->getId());
             if (is_null($storedUser)) {
-                $user->setToken('temp');
-                $user->setRefreshToken('temp');
+                $user->setToken('unused');
+                $user->setRefreshToken('unused');
                 $user->setRefreshTokenExpiration(new \DateTimeImmutable());
                 $this->mspServerManagerEntityManager->persist($user);
                 $this->mspServerManagerEntityManager->flush();
