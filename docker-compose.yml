@@ -11,7 +11,7 @@ services:
       - "8081"
     ports: # use if it is necessary to expose the container to the host machine
       - "8008:8008"
-    command: bash -c "yarn add -D \"sass-loader@^13.0.0\" sass webpack && yarn install && yarn encore dev"
+    command: "yarn encore dev"
 
   redis:
     image: 'mspserver-redis'
