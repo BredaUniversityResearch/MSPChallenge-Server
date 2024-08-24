@@ -3,9 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title">{{ modalTitle }}</h1>
-                <button type="button" class="btn btn-danger" data-action="modal-default#closeModal">
-                    <i class="fa fa-remove"></i>
-                </button>
+                <button type="button" class="btn-close" data-action="modal-default#closeModal"></button>
             </div>
             {% set src = path(modalTurboFrameSrcRoute) %}
             <turbo-frame id="{{ modalTurboFrameId }}" src="{{ src }}">

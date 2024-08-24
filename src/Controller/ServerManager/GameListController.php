@@ -9,7 +9,6 @@ use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
 use App\Form\GameListAddFormType;
 use App\Form\GameListEditFormType;
-use App\Messages\GameListSessionCreate;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -26,6 +25,8 @@ use App\Controller\BaseController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Version\Exception\InvalidVersionString;
 use App\Entity\ServerManager\Setting;
+use App\Message\GameList\GameListCreationMessage;
+use App\Message\GameSave\GameSaveLoadMessage;
 
 class GameListController extends BaseController
 {
@@ -48,6 +49,19 @@ class GameListController extends BaseController
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
         string $sessionState = 'public'
     ): Response {
+        if (is_null($request->headers->get('Turbo-Frame'))) {
+            return $this->gameListJson($entityManager, $provider, $request, $sessionState);
+        }
+        $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
+        return $this->render('manager/GameList/gamelist.html.twig', ['sessionslist' => $gameList]);
+    }
+
+    private function gameListJson(
+        EntityManagerInterface $entityManager,
+        VersionsProvider $provider,
+        Request $request,
+        string $sessionState
+    ): Response {
         try {
             $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
         } catch (IncompatibleClientException $e) {
@@ -66,17 +80,13 @@ class GameListController extends BaseController
         }
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
-        return is_null($request->headers->get('Turbo-Frame')) ?
-            $this->json(self::wrapPayloadForResponse([
+        return $this->json(self::wrapPayloadForResponse([
                 'sessionslist' => $gameList,
                 'server_description' => $serverDesc->getValue(),
                 'clients_url' => $this->getParameter('app.clients_url'),
                 'server_version' => $provider->getVersion(),
                 'server_components_versions' => $provider->getComponentsVersions()
-            ])) :
-            $this->render('manager/GameList/gamelist.html.twig', [
-                'gameList' => $gameList
-            ]);
+            ]));        
     }
 
     #[Route('/manager/game/{id}', name: 'manager_game_form', requirements: ['id' => '\d+'])]
@@ -104,7 +114,7 @@ class GameListController extends BaseController
             $entityManager->flush();
             if ($id == 0) {
                 if (!is_null($gameSession->getGameConfigVersion())) {
-                    $messageBus->dispatch(new GameListSessionCreate($gameSession->getId()));
+                    $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
                     return new Response($gameSession->getId(), 200);
                 }
                 if (!is_null($gameSession->getGameSave())) {
@@ -174,11 +184,11 @@ class GameListController extends BaseController
             return new Response(null, 422);
         }
         if (!is_null($gameSession->getGameConfigVersion())) {
-            $messageBus->dispatch(new GameListSessionCreate($gameSession->getId()));
+            $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
             return new Response($gameSession->getId(), 200);
         }
         if (!is_null($gameSession->getGameSave())) {
-            //$messageBus->dispatch(new GameListSessionLoad($gameSession->getId()));
+            $messageBus->dispatch(new GameSaveLoadMessage($gameSession->getId(), $gameSession->getGameSave()->getId()));
             return new Response($gameSession->getId(), 200);
         }
         return new Response(null, 422);
