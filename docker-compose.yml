@@ -11,7 +11,7 @@ services:
       - "8081"
     ports: # use if it is necessary to expose the container to the host machine
       - "8008:8008"
-    command: "yarn encore dev"
+    command: bash -c "yarn install && yarn encore dev"
 
   redis:
     image: 'mspserver-redis'
