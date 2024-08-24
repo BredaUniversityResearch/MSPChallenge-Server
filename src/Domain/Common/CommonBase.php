@@ -168,7 +168,6 @@ abstract class CommonBase
         $other->setAsyncDatabase($this->getAsyncDatabase());
         $other->setToken($this->getToken());
         $other->setAsync($this->isAsync());
-        $other->setProjectDir($this->getProjectDir());
     }
 
     /**
