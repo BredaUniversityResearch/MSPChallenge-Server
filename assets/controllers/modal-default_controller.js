@@ -29,6 +29,7 @@ export default class extends Controller {
         let successMessage = 'Successfully added a new session. Please wait for it to be finalised...';
         await this.submitFormGeneric(event, successMessage);
     }
+    
     async submitFormGeneric(event, successMessage)
     {
         event.preventDefault();
