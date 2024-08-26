@@ -36,18 +36,6 @@ abstract class UserBase extends Base implements JWTUserInterface
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function setupUser(): void
-    {
-        // I think this is only necessary for user activity & counting purposes when synchronising with ServerManager db
-        $this->insertRowIntoTable(
-            'user',
-            ['user_lastupdate' => 0, 'user_country_id' => 1]
-        );
-    }
-
-    /**
      * @apiGroup User
      * @apiDescription Creates a new session for the desired country id.
      * @throws Exception
