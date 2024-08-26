@@ -69,7 +69,7 @@ class GameSession extends Base
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public function getRequestApiRootAsync(bool $forDocker = false): PromiseInterface
+    public static function getRequestApiRootAsync(bool $forDocker = false): PromiseInterface
     {
         if (isset($GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0])) {
             $deferred = new Deferred();

@@ -86,7 +86,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         // UserBadge parameters are purely to get Symfony to continue
         // first is a user identifier, second is the UserInterface object with which user is actually identified
         return new SelfValidatingPassport(
-            new UserBadge($user->getUsername(), fn() => $user),
+            new UserBadge($user->getUserIdentifier(), fn() => $user),
             [new PreAuthenticatedUserBadge()]
         );
     }
@@ -108,7 +108,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                     )
                 ))->pull('hydra:member')
             )->filter(function ($value) use ($user) {
-                return $value['user']['username'] === $user->getUsername();
+                return $value['user']['username'] === $user->getUserIdentifier();
             });
             return !$response->isEmpty();
         } catch (\Exception $e) {
@@ -119,7 +119,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
     private function register(User $user, Request $request): Setting
     {
         $serverId = new Setting('server_id', uniqid('', true));
-        $serverName = new Setting('server_name', $user->getUsername().'_'.date('Ymd'));
+        $serverName = new Setting('server_name', $user->getUserIdentifier().'_'.date('Ymd'));
         $serverDescription = new Setting(
             'server_description',
             'This is a new MSP Challenge server installation. The administrator has not '.
@@ -153,7 +153,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         // @phpstan-ignore-next-line "Call to an undefined method"
         $request->getSession()->getFlashBag()->add(
             'notice',
-            'You, '.$user->getUsername().', are now the primary user of this Server Manager. '.
+            'You, '.$user->getUserIdentifier().', are now the primary user of this Server Manager. '.
             'This means that you can use this application, and optionally add other users to it through '.
             '"Settings" - "User Access". Set up your first MSP Challenge session through the "New Session" button.'
         );

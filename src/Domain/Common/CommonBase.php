@@ -73,60 +73,6 @@ abstract class CommonBase
         return GameSession::GetGameSessionIdForCurrentRequest();
     }
 
-    /**
-     * returns the base API endpoint. e.g. http://localhost/1/
-     * moved from GameSession class, since that class will be deprecated
-     * and this function makes more sense in CommonBase anyway
-     *
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetRequestApiRoot(): string
-    {
-        return await($this->getRequestApiRootAsync());
-    }
-
-    /**
-     * used to communicate "game_session_api" URL to the watchdog
-     * and see previous function GetRequestApiRoot
-     *
-     * @throws \Doctrine\DBAL\Exception
-     * @throws Exception
-     */
-    public function getRequestApiRootAsync(): PromiseInterface
-    {
-        if (isset($GLOBALS['RequestApiRoot'])) {
-            $deferred = new Deferred();
-            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'])->promise();
-        }
-        /*$apiRoot = preg_replace('/(.*)\/(api|_profiler)\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
-        $apiRoot = str_replace("//", "/", $apiRoot);*/
-        // this can be so much simpler...
-        $apiRoot = '/'.$this->getGameSessionId().'/';
-
-        $_SERVER['HTTPS'] ??= 'off';
-        /** @noinspection HttpUrlsUsage */
-        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
-
-        $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
-        return $connection->query(
-            $connection->createQueryBuilder()
-                ->select('address')
-                ->from('game_servers')
-                ->setMaxResults(1)
-        )
-            ->then(
-                function (Result $result) use ($protocol, $apiRoot) {
-                    $row = $result->fetchFirstRow() ?? [];
-                    $serverName = $_ENV['URL_WEB_SERVER_HOST'] ?? $row['address'] ?? $_SERVER["SERVER_NAME"] ??
-                        gethostname();
-                    $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
-                    $GLOBALS['RequestApiRoot'] = $protocol.$serverName.$port.$apiRoot;
-                    return $GLOBALS['RequestApiRoot'];
-                }
-            );
-    }
-
     public function setGameSessionId(?int $gameSessionId): void
     {
         $this->gameSessionId = $gameSessionId;

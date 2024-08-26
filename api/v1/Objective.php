@@ -167,23 +167,4 @@ class Objective extends Base
             );
         }
     }
-
-    public function setupObjectives($dataModel): void
-    {
-        if (!isset($dataModel['objectives'])) {
-            return;
-        }
-        foreach ($dataModel['objectives'] as $objective) {
-            $this->insertRowIntoTable(
-                'objective',
-                [
-                    'objective_country_id' => $objective['country_id'],
-                    'objective_title' => $objective['title'],
-                    'objective_description' => $objective['description'],
-                    'objective_deadline' => $objective['deadline'],
-                    'objective_lastupdate' => true
-                ]
-            );
-        }
-    }
 }

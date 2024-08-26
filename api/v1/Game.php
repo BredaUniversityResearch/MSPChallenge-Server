@@ -257,72 +257,6 @@ class Game extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function setupGameCountries(array $configData): void
-    {
-        $adminColor = "#FF00FFFF";
-        if (array_key_exists("user_admin_color", $configData)) {
-            $adminColor = $configData["user_admin_color"];
-        }
-        $regionManagerColor = "#00FFFFFF";
-        if (array_key_exists("user_region_manager_color", $configData)) {
-            $regionManagerColor = $configData["user_region_manager_color"];
-        }
-        $this->setAsync(true);
-        $deferred = new Deferred();
-        //Admin country.
-        $toPromiseFunctions[] = tpf(function () use ($adminColor) {
-            return $this->insertRowIntoTable(
-                'country',
-                [
-                    'country_id' => 1,
-                    'country_colour' => $adminColor,
-                    'country_is_manager' => 1
-                ]
-            );
-        });
-        //Region manager country.
-        $toPromiseFunctions[] = tpf(function () use ($regionManagerColor) {
-            return $this->insertRowIntoTable(
-                'country',
-                [
-                    'country_id' => 2,
-                    'country_colour' => $regionManagerColor,
-                    'country_is_manager' => 1
-                ]
-            );
-        });
-        foreach ($configData['meta'] as $layerMeta) {
-            if ($layerMeta['layer_name'] == $configData['countries']) {
-                foreach ($layerMeta['layer_type'] as $country) {
-                    $toPromiseFunctions[] = tpf(function () use ($country) {
-                        return $this->insertRowIntoTable(
-                            'country',
-                            [
-                                'country_id' => $country['value'],
-                                'country_name' => $country['displayName'],
-                                'country_colour' => $country['polygonColor'],
-                                'country_is_manager' => 0
-                            ]
-                        );
-                    });
-                }
-            }
-        }
-        parallel($toPromiseFunctions)->done(
-            function (/* ?Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
-            },
-            function ($reason) use ($deferred) {
-                $deferred->reject($reason);
-            }
-        );
-        await($deferred->promise());
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetupGameTime(array $data): void
     {
         $this->SetStartDate($data['start']);
@@ -342,34 +276,6 @@ class Game extends Base
                 $str,
                 max($data['era_total_months'], self::MIN_GAME_ERATIME)
             )
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function setupGame(array $data): void
-    {
-        if (!isset($data['start']) || !isset($data['era_planning_months']) ||
-            !isset($data['era_planning_realtime']) || !isset($data['era_total_months'])) {
-            return;
-        }
-        $eraRealtimeString = "";
-        $totalEras = 4;
-        $eraRealtimeString .= str_repeat($data['era_planning_realtime'] . ",", $totalEras);
-        $eraRealtimeString = substr($eraRealtimeString, 0, -1);
-        $this->insertRowIntoTable(
-            'game',
-            [
-                'game_start' => $data['start'],
-                'game_planning_gametime' => $data['era_planning_months'],
-                'game_planning_realtime' => $data['era_planning_realtime'],
-                'game_planning_era_realtime' => $eraRealtimeString,
-                'game_eratime' => max($data['era_total_months'], self::MIN_GAME_ERATIME),
-                'game_configfile' => 'session_config_'.$this->getGameSessionId().'.json',
-                'game_autosave_month_interval' => $_ENV['GAME_AUTOSAVE_INTERVAL'] ?? 120
-            ]
         );
     }
 
@@ -553,14 +459,14 @@ class Game extends Base
     public function State(string $state): void
     {
         $state = strtoupper($state);
-        $currentState = $this->selectRowsFromTable('game');
-        //$this->getDatabase()->query("SELECT game_state FROM game")[0];
+        $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
         if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
             throw new Exception("Invalid current state of ".$currentState["game_state"]);
         }
 
         // prepare update query using builder
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
+            ->createQueryBuilder();
         $qb
             ->update('game')
             ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
@@ -568,7 +474,6 @@ class Game extends Base
         if ($currentState["game_state"] == "SETUP") {
             //Starting plans should be implemented when we any state "PLAY"
             $plan = new Plan();
-            $plan->setGameSessionId($this->getGameSessionId());
             await($plan->updateLayerState(0));
 
             if ($state == "PAUSE") {
@@ -659,12 +564,9 @@ class Game extends Base
         if (!str_starts_with(php_uname(), "Windows")) {
             return;
         }
-        if (empty($this->getProjectDir())) {
-            $this->setProjectDir(SymfonyToLegacyHelper::getInstance()->getProjectDir());
-        }
-        $this->StartSimulationExe([
+        self::StartSimulationExe([
             'exe' => 'MSW.exe',
-            'working_directory' => $this->getProjectDir().'/'.(
+            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/'.(
                 $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
             )
         ]);

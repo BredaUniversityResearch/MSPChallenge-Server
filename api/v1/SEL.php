@@ -776,68 +776,6 @@ class SEL extends Base
         }
     }
 
-    /**
-     * @apiGroup SEL
-     * @api {POST} /sel/onSessionSetup onSessionSetup
-     * @apiDescription Creates the raster layers required for shipping.
-     */
-    public function onSessionSetup($dataModel): bool|array
-    {
-        $config = $dataModel["SEL"] ?? throw new Exception('Cannot continue without SEL config.');
-        $boundsConfig = $this->CalculateAlignedSimulationBounds($dataModel);
-
-        $layer = new Layer();
-        $layer->setGameSessionId($this->getGameSessionId());
-        foreach ($config["heatmap_settings"] as $heatmap) {
-            $existingLayer = $layer->selectRowsFromTable('layer', ['layer_name' => $heatmap['layer_name']]);
-            if (is_null($existingLayer)) {
-                throw new Exception(
-                    'The layer '.$heatmap['layer_name'].' referenced in the heatmap settings has not been 
-                    found in the database, so cannot continue. Are you sure it has been defined separately as an 
-                    actual layer in the configuration file?'
-                );
-            }
-            $rasterData = json_decode($existingLayer["layer_raster"], true);
-            $rasterData["url"] = $heatmap["layer_name"].".png";
-            $rasterData["layer_download_from_geoserver"] = false;
-
-            if (isset($heatmap["output_for_mel"]) && $heatmap["output_for_mel"] === true) {
-                if (empty($dataModel["MEL"])) {
-                    $return[] = "SEL has a layer \"".$heatmap["layer_name"].
-                        "\" that is marked for use by MEL. However the MEL configuration is not found, in the current ".
-                        "config file.";
-                } else {
-                    if (!array_key_exists("x_min", $dataModel["MEL"])
-                        || !array_key_exists("y_min", $dataModel["MEL"])
-                        || !array_key_exists("x_max", $dataModel["MEL"])
-                        || !array_key_exists("y_max", $dataModel["MEL"])
-                    ) {
-                        throw new \Exception("SEL has layer " . $heatmap["layer_name"] .
-                            " that is marked for use by MEL. However the bounding box configuration in the MEL " .
-                            "section is incomplete.");
-                    }
-                    $rasterData["boundingbox"] =
-                        [
-                            [$dataModel["MEL"]['x_min'], $dataModel["MEL"]['y_min']],
-                            [$dataModel["MEL"]['x_max'], $dataModel["MEL"]['y_max']]
-                        ];
-                }
-            } else {
-                $rasterData["boundingbox"] =
-                    [
-                        [$boundsConfig['x_min'], $boundsConfig['y_min']],
-                        [$boundsConfig['x_max'], $boundsConfig['y_max']]
-                    ];
-            }
-            $layer->updateRowInTable(
-                'layer',
-                ['layer_raster' => json_encode($rasterData)],
-                ['layer_id' => $existingLayer['layer_id']]
-            );
-        }
-        return $return ?? true;
-    }
-
     /** @noinspection PhpUnused */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetKPIDefinition(): array
