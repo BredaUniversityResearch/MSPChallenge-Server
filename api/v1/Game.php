@@ -907,7 +907,7 @@ class Game extends Base
                     sum(
                         IF(UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0, 1, 0)
                     ) active_last_minute'
-                )
+            )
                 ->from('game', 'g')
                 ->leftJoin('g', 'user', 'u', '1=1')
         ->then(function (Result $result) {

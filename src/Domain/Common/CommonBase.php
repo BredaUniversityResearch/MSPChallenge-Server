@@ -17,8 +17,6 @@ use React\Promise\PromiseInterface;
 use function App\await;
 use function App\resolveOnFutureTick;
 
-
-
 abstract class CommonBase
 {
     private ?string $watchdog_address = null;

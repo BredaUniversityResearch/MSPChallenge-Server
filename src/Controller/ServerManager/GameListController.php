@@ -86,7 +86,7 @@ class GameListController extends BaseController
                 'clients_url' => $this->getParameter('app.clients_url'),
                 'server_version' => $provider->getVersion(),
                 'server_components_versions' => $provider->getComponentsVersions()
-            ]));        
+            ]));
     }
 
     #[Route('/manager/game/{id}', name: 'manager_game_form', requirements: ['id' => '\d+'])]
