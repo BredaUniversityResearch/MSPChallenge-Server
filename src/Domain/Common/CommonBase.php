@@ -27,7 +27,6 @@ abstract class CommonBase
     private ?string $token = null;
     private bool $async = false;
     private ?Log $logger = null;
-    private ?string $projectDir = null;
 
     protected function getDatabase(): Database
     {

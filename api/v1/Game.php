@@ -18,7 +18,6 @@ use function App\assertFulfilled;
 use function App\resolveOnFutureTick;
 use function App\await;
 use function App\tpf;
-use function App\parallel;
 
 class Game extends Base
 {
@@ -384,15 +383,8 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Planning(int $months): void
     {
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        await(
-            $this->getAsyncDatabase()->query(
-                $qb->update('game')
-                   ->set('game_planning_gametime', $qb->createPositionalParameter($months))
-            )->then(function (Result $result) {
-                return ($result->getAffectedRows() === 1);
-            })
-        );
+        /** @noinspection SqlWithoutWhere */
+        $this->getDatabase()->query("UPDATE game SET game_planning_gametime=?", array($months));
     }
 
     /**
@@ -405,15 +397,8 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Realtime(int $realtime): void
     {
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        await(
-            $this->getAsyncDatabase()->query(
-                $qb->update('game')
-                    ->set('game_planning_realtime', $qb->createPositionalParameter($realtime))
-            )->then(function (Result $result) {
-                    return ($result->getAffectedRows() === 1);
-            })
-        );
+        /** @noinspection SqlWithoutWhere */
+        $this->getDatabase()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
     }
 
     /**
@@ -422,15 +407,8 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function SetStartDate(int $a_startYear): void
     {
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        await(
-            $this->getAsyncDatabase()->query(
-                $qb->update('game')
-                   ->set('game_start', $qb->createPositionalParameter($a_startYear))
-            )->then(function (Result $result) {
-                return ($result->getAffectedRows() === 1);
-            })
-        );
+        /** @noinspection SqlWithoutWhere */
+        $this->getDatabase()->query("UPDATE game SET game_start=?", array($a_startYear));
     }
 
     /**
@@ -576,14 +554,14 @@ class Game extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function StartSimulationExe(array $params): void
+    private static function StartSimulationExe(array $params): void
     {
         // below code is only necessary for Windows
         if (!str_starts_with(php_uname(), "Windows")) {
             return;
         }
         $args = isset($params["args"])? $params["args"]." " : "";
-        $args = $args."APIEndpoint=".$this->GetRequestApiRoot();
+        $args = $args."APIEndpoint=".GameSession::GetRequestApiRoot();
         $workingDirectory = "";
         if (isset($params["working_directory"])) {
             $workingDirectory = "cd ".$params["working_directory"]." & ";
@@ -790,28 +768,30 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameDetails(): array|PromiseInterface
     {
-        $query = $this->getAsyncDatabase()->createQueryBuilder()
-            ->select(
-                'g.game_start',
-                'g.game_eratime',
-                'g.game_currentmonth',
-                'g.game_state',
-                'g.game_planning_realtime',
-                'g.game_planning_era_realtime',
-                'g.game_planning_gametime',
-                'g.game_planning_monthsdone',
-                'COUNT(u.user_id) total',
-                '
+        $promise = $this->getAsyncDatabase()->query(
+            $this->getAsyncDatabase()->createQueryBuilder()
+                ->select(
+                    'g.game_start',
+                    'g.game_eratime',
+                    'g.game_currentmonth',
+                    'g.game_state',
+                    'g.game_planning_realtime',
+                    'g.game_planning_era_realtime',
+                    'g.game_planning_gametime',
+                    'g.game_planning_monthsdone',
+                    'COUNT(u.user_id) total',
+                    '
                     sum(
                         IF(UNIX_TIMESTAMP() - u.user_lastupdate < 3600 and u.user_loggedoff = 0, 1, 0)
                     ) active_last_hour',
-                '
+                    '
                     sum(
                         IF(UNIX_TIMESTAMP() - u.user_lastupdate < 60 and u.user_loggedoff = 0, 1, 0)
                     ) active_last_minute'
-            )
+                )
                 ->from('game', 'g')
                 ->leftJoin('g', 'user', 'u', '1=1')
+        )
         ->then(function (Result $result) {
             if (null === $state = $result->fetchFirstRow()) {
                 return [];
@@ -849,16 +829,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCountries(): array
     {
-        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return await(
-            $this->getAsyncDatabase()->query(
-                $qb->select('c.*')
-                   ->from('country', 'c')
-                   ->where('country_name IS NOT NULL')
-            )->then(function (Result $result) {
-                return $result->fetchAllRows();
-            })
-        );
+        return $this->getDatabase()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
     }
 
     /**

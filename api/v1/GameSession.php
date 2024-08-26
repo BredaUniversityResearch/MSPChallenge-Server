@@ -118,7 +118,7 @@ class GameSession extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetRequestApiRoot(): string
+    public static function GetRequestApiRoot(): string
     {
         return await(self::getRequestApiRootAsync());
     }
