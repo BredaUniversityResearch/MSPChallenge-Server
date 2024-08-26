@@ -403,7 +403,7 @@ class Layer extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function ImportMetaForLayer(array $layerData, int $dbLayerId)
+    private function ImportMetaForLayer(array $layerData, int $dbLayerId)
     {
         //these meta vars are to be ignored in the importer
         $ignoreList = array(
