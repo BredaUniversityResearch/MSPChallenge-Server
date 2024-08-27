@@ -46,7 +46,7 @@ class GameController extends BaseController
             throw new \Exception("Invalid current state of ".$currentState);
         }
         if ($currentState == GameStateValue::SETUP) {
-            //Starting plans should be implemented when we finish the SETUP phase (with PAUSE, PLAY, FASTFORWARD request)
+            //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
             $plan = new Plan();
             $plan->setGameSessionId($sessionId);
             await($plan->updateLayerState(0));

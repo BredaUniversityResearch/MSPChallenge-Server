@@ -47,7 +47,8 @@ class WatchdogCommunicator extends AbstractCommunicator
         if ($_ENV['APP_ENV'] === 'test') {
             return [];
         }
-        $this->gameList = ConnectionManager::getInstance()->getServerManagerEntityManager()->getRepository(GameList::class)->find($sessionId);
+        $this->gameList = ConnectionManager::getInstance()->getServerManagerEntityManager()
+            ->getRepository(GameList::class)->find($sessionId);
         $this->ensureWatchDogAlive();
         $tokens = $this->getAPITokens();
         $this->lastCompleteURLCalled = $this->getWatchdogUrl();
@@ -66,8 +67,8 @@ class WatchdogCommunicator extends AbstractCommunicator
                 'token' => $tokens['api_refresh_token'],
                 'valid_until' => \DateTime::createFromFormat('U', $tokens['exp'])->format('Y-m-d H:i:s')
             ]),
-            'month' => ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId)->getRepository(Game::class)->retrieve()
-                ->getGameCurrentmonth()
+            'month' => ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId)
+                ->getRepository(Game::class)->retrieve()->getGameCurrentmonth()
         ];
         $response = $this->client->request("POST", $this->lastCompleteURLCalled, [
             'body' => http_build_query($postValues)

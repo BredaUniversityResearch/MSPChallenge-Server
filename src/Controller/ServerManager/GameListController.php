@@ -176,7 +176,8 @@ class GameListController extends BaseController
         WatchdogCommunicator $watchdogCommunicator,
         SymfonyToLegacyHelper $symfonyToLegacyHelper
     ): Response {
-        (new GameController($this->projectDir))->state($sessionId, $state, $watchdogCommunicator, $symfonyToLegacyHelper);
+        (new GameController($this->projectDir))
+            ->state($sessionId, $state, $watchdogCommunicator, $symfonyToLegacyHelper);
         return new Response(null, 204);
     }
 
