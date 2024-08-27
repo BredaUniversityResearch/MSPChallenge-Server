@@ -33,7 +33,7 @@ class GameController extends BaseController
 
     // not a route yet, should replace /[sessionId]/api/Game/State one day
     public function state(
-        int $sessionId, 
+        int $sessionId,
         string $state,
         WatchdogCommunicator $watchdogCommunicator,
         SymfonyToLegacyHelper $symfonyToLegacyHelper
@@ -54,7 +54,7 @@ class GameController extends BaseController
                 $game->setGameCurrentMonth(0);
             }
         }
-        $game->setGameLastUpdate(microtime(TRUE)); // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
+        $game->setGameLastUpdate(microtime(true)); // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
         $game->setGameState($state);
         $em->flush();
         $watchdogCommunicator->changeState($sessionId, $state);

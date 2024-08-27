@@ -151,8 +151,8 @@ class GameListController extends BaseController
         }
         $rawLogContents = file_get_contents($logPath);
         $rawLogContents = preg_replace(
-            ['/\[[0-9\-\s:+.T]+\]/', '/game\_session\./', '/\{["\w:,]+\} \[\]/', '/\[\]/'], 
-            [ '', '', '', ''], 
+            ['/\[[0-9\-\s:+.T]+\]/', '/game\_session\./', '/\{["\w:,]+\} \[\]/', '/\[\]/'],
+            [ '', '', '', ''],
             $rawLogContents
         );
         $logArray = explode('<br />', nl2br(trim($rawLogContents)));
@@ -171,7 +171,7 @@ class GameListController extends BaseController
         requirements: ['sessionId' => '\d+', 'state' => '\w+']
     )]
     public function gameSessionState(
-        int $sessionId, 
+        int $sessionId,
         string $state,
         WatchdogCommunicator $watchdogCommunicator,
         SymfonyToLegacyHelper $symfonyToLegacyHelper

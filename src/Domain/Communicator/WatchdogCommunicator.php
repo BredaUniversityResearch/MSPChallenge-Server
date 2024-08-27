@@ -42,7 +42,8 @@ class WatchdogCommunicator extends AbstractCommunicator
      * @throws Exception
      * @throws \Exception
      */
-    public function changeState(int $sessionId, GameStateValue $newWatchdogState): array {
+    public function changeState(int $sessionId, GameStateValue $newWatchdogState): array
+    {
         if ($_ENV['APP_ENV'] === 'test') {
             return [];
         }
