@@ -112,8 +112,7 @@ class CreatePolicyPlanCommand extends Command
             return Command::FAILURE;
         }
         $context['layerName'] = $layer->getLayerName();
-        $layerGeometryName = null;
-        $geometrySupportingLayerTypes = null;
+        $geometry = false;
         if ($layer->getLayerGeoType() !== LayerGeoType::RASTER) {
             if (null === $layerGeometryName = $this->askLayerGeometryName(
                 $gameSessionId,
@@ -123,20 +122,43 @@ class CreatePolicyPlanCommand extends Command
                 $io,
                 'Friese Front'
             )) {
-                $io->error('No geometry found for the layer: '.$layerShort);
-                return Command::FAILURE;
+                $gid = (int)$io->ask('Enter geometry id', 0, fn($s) => ctype_digit($s) ? $s :
+                    throw new \RuntimeException('Please enter an integer'));
+                $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
+                    ->executeQuery(
+                        <<< 'SQL'
+                        SELECT * FROM geometry
+                         WHERE geometry_id =:gid
+                        SQL,
+                        ['gid' => $gid]
+                    )->fetchAssociative();
+            } else {
+                $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
+                    ->executeQuery(
+                        <<< 'SQL'
+                        SELECT * FROM geometry
+                         WHERE JSON_EXTRACT(geometry_data, '$.NAME') = :geometryName OR
+                          JSON_EXTRACT(geometry_data, '$.name') = :geometryName OR
+                          JSON_EXTRACT(geometry_data, '$.Name') = :geometryName
+                        SQL,
+                        ['geometryName' => $layerGeometryName]
+                    )->fetchAssociative();
             }
             $context = array_merge($context, ['layerGeometryName' => $layerGeometryName]);
         }
+        if ($geometry === false) {
+            $io->error('No geometry found for the layer: '.$layerShort);
+            return Command::FAILURE;
+        }
+
         // assuming the display name to be unique
         $policyTypeName = $this->askPolicyTypeName($io);
         $policyData = $this->askPolicyData($io, $policyTypeName, $context);
         try {
             $plan = $this->createPlan(
-                $gameSessionId,
                 $planGameTime,
                 $layer,
-                $layerGeometryName,
+                $geometry,
                 $policyTypeName,
                 $policyData,
                 PolicyDataFactory::getPolicyDataSchemaByType($policyTypeName)
@@ -671,40 +693,24 @@ class CreatePolicyPlanCommand extends Command
      * array<PolicyType> $policyTypes
      * array<PolicyFilterType> $policyFilterTypes
      *
-     * @param int $gameSessionId
      * @param int $planGameTime
      * @param Layer $layer
-     * @param string|null $layerGeometryName
+     * @param array $geometry
      * @param PolicyTypeName $policyTypeName
      * @param array $policyData
      * @param PolicyTarget $policyTarget
      * @return Plan
-     * @throws Exception
      * @throws \Exception
      */
     private function createPlan(
-        int            $gameSessionId,
         int            $planGameTime,
         Layer          $layer,
-        ?string        $layerGeometryName,
+        array          $geometry,
         PolicyTypeName $policyTypeName,
         array          $policyData,
         PolicyTarget   $policyTarget
     ): Plan {
         $this->cleanUpPreviousPlan();
-        $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
-            ->executeQuery(
-                <<< 'SQL'
-                SELECT * FROM geometry
-                 WHERE JSON_EXTRACT(geometry_data, '$.NAME') = :geometryName OR
-                  JSON_EXTRACT(geometry_data, '$.name') = :geometryName OR
-                  JSON_EXTRACT(geometry_data, '$.Name') = :geometryName
-                SQL,
-                ['geometryName' => $layerGeometryName]
-            )->fetchAssociative();
-        if ($geometry === false) {
-            throw new \Exception('MPA not found');
-        }
         $plan = new Plan();
         $this->getGameSessionEntityManager()->wrapInTransaction(function () use (
             $layer,
