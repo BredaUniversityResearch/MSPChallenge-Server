@@ -4,12 +4,12 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanLayerState;
-use App\Domain\Common\EntityEnums\PolicyFilterTypeName;
 use App\Domain\PolicyData\BufferZonePolicyData;
 use App\Domain\PolicyData\PolicyDataBase;
 use App\Domain\PolicyData\ItemsPolicyDataBase;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\ScheduleFilterPolicyData;
+use App\Domain\PolicyData\SeasonalClosurePolicyData;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Geometry;
 use Doctrine\ORM\AbstractQuery;
@@ -350,7 +350,7 @@ class MEL extends Base
                         SELECT g.geometry_layer_id, jt.months
                         FROM
                             geometry g 
-                            JOIN JSON_TABLE(g.geometry_data, '$.policies[*]'
+                            JOIN JSON_TABLE(g.geometry_data, '$.policies[*].items[*]'
                                 COLUMNS (
                                     months JSON PATH '$.months'
                                 )
@@ -370,7 +370,6 @@ class MEL extends Base
                )
 SUBQUERY
             ))
-            ->setParameter('pftName', PolicyFilterTypeName::SCHEDULE->value)
             ->setParameter('month', ($currentMonth % 12) + 1)
             ->setParameter('prevMonth', (($currentMonth-1) % 12) + 1);
         $r = $qb->executeQuery()->fetchAllAssociative();
@@ -455,14 +454,15 @@ SUBQUERY
      * @throws Exception
      * @api {POST} /mel/GeometryExportName Geometry Export Name
      * @apiParam {string} layer name to return the geometry data for
-     * @apiParam {int} layer_type type within the layer to return. -1 for all types.
+     * @apiParam {int} layer_type type within the layer to return. -1 for all types. @deprecated not used anymore
      * @apiParam {bool} construction_only whether to return data only if it's being constructed.
+     * @apiParam {string} policy_filters JSON object with the policy filters to apply
      * @apiSuccess {string} JSON Object
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GeometryExportName(
         string $name,
-        int $layer_type = -1,
+        int $layer_type = -1, // @deprecated not used anymore, instead we use the policy_filters
         bool $construction_only = false,
         ?string $policy_filters = null
     ): ?array {
@@ -471,7 +471,6 @@ SUBQUERY
         }
         return $this->exportAllGeometryFromLayer(
             $name,
-            $layer_type == -1 ? null : $layer_type,
             $construction_only,
             $policy_filters
         );
@@ -479,7 +478,6 @@ SUBQUERY
 
     /**
      * @param string $name
-     * @param int|null $geometryFilterTpe
      * @param bool $constructionOnly
      * @param object|null $policyFilters
      *
@@ -489,7 +487,6 @@ SUBQUERY
      */
     private function exportAllGeometryFromLayer(
         string $name,
-        ?int $geometryFilterTpe = null,
         bool $constructionOnly = false,
         ?object $policyFilters = null
     ): ?array {
@@ -543,68 +540,31 @@ SUBQUERY
         $q = $qb->getQuery();
         /** @var \App\Entity\Layer[] $layers */
         $layers = $q->getResult();
-        $geometryTypeFilter = $geometryFilterTpe === -1 ? null : $geometryFilterTpe;
         $result["geotype"] = $layerGeoType ?->value ?? ''; // enum to string;
         $result["geometry"] = [];
         foreach ($layers as $l) {
             // export each geometry linked to the layer
             foreach ($l->getGeometry() as $geom) {
-                $this->exportGeometryTo($geom, $geometryTypeFilter, $policyFilters, $result["geometry"]);
+                $this->exportGeometryTo($geom, $policyFilters, $result["geometry"]);
             }
         }
         $result['logs'] = json_encode($this->getLogMessages());
         return $result;
     }
 
-
-    /**
-     * @param Geometry $geometry
-     * @param PolicyDataBase|ItemsPolicyDataBase $policyData
-     * @param bool $addGeometryToResult if the caller should add the geometry to the result.
-     *  If not, the policy prevents it
-     * @param int|null $geometryTypeFilter
-     * @return array|null
-     */
-    private function applyGeometryPolicy(
-        Geometry                           $geometry,
-        PolicyDataBase|ItemsPolicyDataBase $policyData,
-        bool                               &$addGeometryToResult,
-        ?int                               $geometryTypeFilter = null
-    ): ?array {
-        if ($policyData instanceof BufferZonePolicyData) {
-            return $this->applyGeometryBufferZonePolicy(
-                $geometry,
-                $policyData,
-                $addGeometryToResult,
-                $geometryTypeFilter
-            );
-        }
-        return null;
-    }
-
     public function applyGeometryBufferZonePolicy(
-        Geometry             $geom,
+        Geometry $geom,
         BufferZonePolicyData $policyData,
-        bool                 &$addGeomToResult,
-        ?int                 $geometryTypeFilter = null
+        array $options
     ): ?array {
-        if ($geometryTypeFilter === null) {
-            return null; // mpa should always have a geometry type filter
-        }
         $this->log('applied policy '.$policyData->getPolicyTypeName()->value.' with : '.$policyData->radius.'.');
 
         // todo(MH) there is probably a way to get it working with
         //   ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->getNativeConnection()
         $this->pdo ??= new \PDO("mysql:host=$_ENV[DATABASE_HOST];port=$_ENV[DATABASE_PORT]", 'root', '');
-        $geomTypeMatch = array_reduce(
-            $geom->getGeometryTypes(),
-            fn($carry, $item) => $carry || ($item & $geometryTypeFilter),
-            false
-        );
         // convert our geometry using mariadb's GIS features
         try {
-            if ($geomTypeMatch) {
-                $addGeomToResult = false;
+            if ($options['include_original_polygon'] ?? false) {
                 // buffer including the original polygon
                 $st = $this->pdo->prepare(
                     <<< 'SQL'
@@ -654,18 +614,18 @@ SUBQUERY
 
     /**
      * @param Geometry $geometry
-     * @param int|null $geometryTypeFilter
      * @param object|null $policyFilters
      * @param array $exportResult
      * @throws Exception
      */
     private function exportGeometryTo(
         Geometry $geometry,
-        ?int $geometryTypeFilter,
         ?object $policyFilters,
         array &$exportResult,
     ): void {
         $data = $geometry->getGeometryDataAsJsonDecoded();
+        /** @var PolicyDataBase|ItemsPolicyDataBase[] $policiesToApply */
+        $policiesToApply = [];
         foreach (($data->policies ?? []) as $policyData) {
             $this->log('Encountered policies for geometry: '.($geometry->getName() ?? 'unnamed'));
             if (!is_object($policyData)) {
@@ -692,32 +652,34 @@ SUBQUERY
                 $this->log('Skipping policy');
                 continue;
             }
-            $addGeomToResult = true;
-            if (null !== $geometryResult = $this->applyGeometryPolicy(
+            $policiesToApply[] = $policyData;
+        }
+        if (empty($policiesToApply)) {
+            return;
+        }
+        $this->log(
+            'Applying policies of type: '.
+                implode(', ', array_map(fn($p) => $p->getPolicyTypeName()->value, $policiesToApply))
+        );
+        if (!empty(array_filter($policiesToApply, fn($p) => $p instanceof BufferZonePolicyData))) {
+            $includeOriginalPolygon =
+                !empty(array_filter($policiesToApply, fn($p) => $p instanceof SeasonalClosurePolicyData));
+            // apply buffer zone policy, and seasonal closure policy if it exists
+            $exportResult[] = $this->applyGeometryBufferZonePolicy(
                 $geometry,
                 $policyData,
-                $addGeomToResult,
-                $geometryTypeFilter
-            )) {
-                $exportResult[] = $geometryResult;
-            }
-            if (!$addGeomToResult) {
-                $this->log('Policy does not allow this geometry to be added to the result');
-                return;
-            }
+                [ 'include_original_polygon' => $includeOriginalPolygon ],
+            );
+            return; // all types are handled
         }
-        $this->addGeometryToResult($geometry, $exportResult, $geometryTypeFilter);
+        // just a seasonal closure policy
+        $this->addGeometryToResult($geometry, $exportResult);
     }
 
     private function addGeometryToResult(
         Geometry $geom,
-        array    &$result,
-        ?int     $geometryTypeFilter = null
+        array    &$result
     ): void {
-        // this geometry is not matching the type requested, so skip it
-        if ($geometryTypeFilter !== null && !in_array($geometryTypeFilter, $geom->getGeometryTypes())) {
-            return;
-        }
         $geometryPoints = $geom->getGeometryGeometry();
         if (empty($geometryPoints)) {
             return;

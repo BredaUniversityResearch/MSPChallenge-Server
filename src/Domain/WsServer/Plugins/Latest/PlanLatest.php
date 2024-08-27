@@ -38,7 +38,6 @@ class PlanLatest extends CommonBase
                 'pl.plan_state as state',
                 'pl.plan_previousstate as previousstate',
                 'pl.plan_lastupdate as lastupdate',
-                'pl.plan_country_id as country',
                 'pl.plan_lock_user_id as locked',
                 'pl.plan_active as active',
                 'pl.plan_type as type',
@@ -266,16 +265,19 @@ class PlanLatest extends CommonBase
                 if (!empty($plan['energy_error'])) {
                     $policy['energy_error'] = $plan['energy_error'];
                 }
+                unset($plan['grids'], $plan['deleted_grids'], $plan['energy_error']);
                 break;
             case PolicyTypeName::FISHING_EFFORT: // PolicyUpdateFishingPlan
                 if (!empty($plan['fishing'])) {
                     $policy['fishing'] = $plan['fishing'];
                 }
+                unset($plan['fishing']);
                 break;
             case PolicyTypeName::SHIPPING_SAFETY_ZONES: // PolicyUpdateShippingPlan
                 if (!empty($plan['restriction_settings'])) {
                     $policy['restriction_settings'] = $plan['restriction_settings'];
                 }
+                unset($plan['restriction_settings']);
                 break;
             default:
                 $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'], true));

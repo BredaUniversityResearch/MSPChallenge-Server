@@ -127,7 +127,6 @@ class CreatePolicyPlanCommand extends Command
                 return Command::FAILURE;
             }
             $context = array_merge($context, ['layerGeometryName' => $layerGeometryName]);
-            $geometrySupportingLayerTypes = $this->askGeometrySupportingLayerTypes($io, $context);
         }
         // assuming the display name to be unique
         $policyTypeName = $this->askPolicyTypeName($io);
@@ -138,7 +137,6 @@ class CreatePolicyPlanCommand extends Command
                 $planGameTime,
                 $layer,
                 $layerGeometryName,
-                $geometrySupportingLayerTypes,
                 $policyTypeName,
                 $policyData,
                 PolicyDataFactory::getPolicyDataSchemaByType($policyTypeName)
@@ -677,7 +675,6 @@ class CreatePolicyPlanCommand extends Command
      * @param int $planGameTime
      * @param Layer $layer
      * @param string|null $layerGeometryName
-     * @param array $geometrySupportingLayerTypes
      * @param PolicyTypeName $policyTypeName
      * @param array $policyData
      * @param PolicyTarget $policyTarget
@@ -690,7 +687,6 @@ class CreatePolicyPlanCommand extends Command
         int            $planGameTime,
         Layer          $layer,
         ?string        $layerGeometryName,
-        array          $geometrySupportingLayerTypes,
         PolicyTypeName $policyTypeName,
         array          $policyData,
         PolicyTarget   $policyTarget
@@ -714,7 +710,6 @@ class CreatePolicyPlanCommand extends Command
             $layer,
             $planGameTime,
             $geometry,
-            $geometrySupportingLayerTypes,
             $policyTypeName,
             $policyData,
             $policyTarget,
@@ -780,7 +775,7 @@ class CreatePolicyPlanCommand extends Command
                 ->setGeometryToSubtractFrom(null)
                 ->setGeometryDeleted(0)
                 ->setGeometryMspid(null)
-                ->setGeometryType(implode(',', $geometrySupportingLayerTypes));
+                ;
             $em->persist($geometryEntity);
             $planLayer = new PlanLayer();
             $planLayer->setLayer($layerEntity)->setPlan($plan)->setPlanLayerState(PlanLayerState::ACTIVE);
