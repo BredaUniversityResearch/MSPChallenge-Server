@@ -22,14 +22,21 @@ use App\VersionsProvider;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\IncompatibleClientException;
 use App\Controller\BaseController;
+use App\Controller\SessionAPI\GameController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Version\Exception\InvalidVersionString;
 use App\Entity\ServerManager\Setting;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
+use App\Domain\Communicator\WatchdogCommunicator;
 
 class GameListController extends BaseController
 {
+
+    public function __construct(
+        private readonly string $projectDir
+    ) {
+    }
 
     #[Route('/manager', name: 'manager')]
     public function index(): Response
@@ -89,17 +96,17 @@ class GameListController extends BaseController
             ]));
     }
 
-    #[Route('/manager/game/{id}', name: 'manager_game_form', requirements: ['id' => '\d+'])]
+    #[Route('/manager/game/{sessionId}', name: 'manager_game_form', requirements: ['sessionId' => '\d+'])]
     public function gameSessionForm(
         Request $request,
         EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
-        int $id = 0
+        int $sessionId = 0
     ): Response {
-        if ($id > 0) {
-            $gameSession = $entityManager->getRepository(GameList::class)->find($id);
+        if ($sessionId > 0) {
+            $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
             $form = $this->createForm(GameListEditFormType::class, $gameSession, [
-                'action' => $this->generateUrl('manager_game_form', ['id' => $id])
+                'action' => $this->generateUrl('manager_game_form', ['id' => $sessionId])
             ]);
         } else {
             $form = $this->createForm(GameListAddFormType::class, new GameList(), [
@@ -112,7 +119,7 @@ class GameListController extends BaseController
             $gameSession = $form->getData();
             $entityManager->persist($gameSession);
             $entityManager->flush();
-            if ($id == 0) {
+            if ($sessionId == 0) {
                 if (!is_null($gameSession->getGameConfigVersion())) {
                     $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
                     return new Response($gameSession->getId(), 200);
@@ -125,24 +132,30 @@ class GameListController extends BaseController
             return new Response(null, 204);
         }
         return $this->render(
-            $id == 0 ? 'manager/GameList/new_game.html.twig': 'manager/GameList/existing_game.html.twig',
+            $sessionId == 0 ? 'manager/GameList/new_game.html.twig': 'manager/GameList/existing_game.html.twig',
             ['gameSessionForm' => $form->createView()],
             new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
         );
     }
 
-    #[Route('/manager/game/{id}/log', name: 'manager_game_log', requirements: ['id' => '\d+'])]
-    public function gameSessionLog(KernelInterface $kernel, Request $request, int $id): Response
+    #[Route('/manager/game/{sessionId}/log', name: 'manager_game_log', requirements: ['sessionId' => '\d+'])]
+    public function gameSessionLog(KernelInterface $kernel, Request $request, int $sessionId): Response
     {
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->redirectToRoute('manager');
         }
         $fileSystem = new FileSystem();
-        $logPath = $kernel->getProjectDir() . "/ServerManager/log/log_session_{$id}.log";
+        $logPath = $kernel->getProjectDir() . "/ServerManager/log/log_session_{$sessionId}.log";
         if (!$fileSystem->exists($logPath)) {
             return new Response(null, 422);
         }
-        $logArray = explode('<br />', nl2br(trim(file_get_contents($logPath))));
+        $rawLogContents = file_get_contents($logPath);
+        $rawLogContents = preg_replace(
+            ['/\[[0-9\-\s:+.T]+\]/', '/game\_session\./', '/\{["\w:,]+\} \[\]/', '/\[\]/'], 
+            [ '', '', '', ''], 
+            $rawLogContents
+        );
+        $logArray = explode('<br />', nl2br(trim($rawLogContents)));
         $logArray = array_slice($logArray, -5);
         return $this->render('manager/GameList/game_log.html.twig', [
             'logToastBody' => $logArray
@@ -153,23 +166,17 @@ class GameListController extends BaseController
      * @throws \Exception
      */
     #[Route(
-        '/manager/game/{id}/state/{state}',
+        '/manager/game/{sessionId}/state/{state}',
         name: 'manager_game_state',
-        requirements: ['id' => '\d+', 'state' => '\w+']
+        requirements: ['sessionId' => '\d+', 'state' => '\w+']
     )]
-    public function gameSessionState(EntityManagerInterface $entityManager, int $id, string $state): Response
-    {
-        $gameSession = $entityManager->getRepository(GameList::class)->find($id);
-        if (is_null($gameSession) ||
-            $gameSession->getGameState() == $state ||
-            !in_array($state, GameStateValue::getConstants())
-        ) {
-            return new Response(null, 422);
-        }
-        // note: not persisting GameList object, because the websocket service takes care of that
-        $game = new Game();
-        $game->setGameSessionId($gameSession->getId());
-        $game->State($state);
+    public function gameSessionState(
+        int $sessionId, 
+        string $state,
+        WatchdogCommunicator $watchdogCommunicator,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
+    ): Response {
+        (new GameController($this->projectDir))->state($sessionId, $state, $watchdogCommunicator, $symfonyToLegacyHelper);
         return new Response(null, 204);
     }
 

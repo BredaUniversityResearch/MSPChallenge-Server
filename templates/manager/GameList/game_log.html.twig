@@ -1,5 +1,16 @@
 <turbo-frame id="logToastBodyTurboFrame">
     {% for logLines in logToastBody %}
-        <div>{{ logLines }}</div>
+        <div>
+        {{ logLines | replace(
+            {
+                'INFO:': '<div style="color: green;">',
+                'NOTICE:': '<div style="color: green;">',
+                'ERROR:': '<div style="color: red;">',
+                'WARNING:': '<div style="color: navy;">',
+                'DEBUG:': '<div style="color: grey;">',
+            }
+        ) | raw}}
+            </div>
+        </div>
     {% endfor %}
 </turbo-frame>

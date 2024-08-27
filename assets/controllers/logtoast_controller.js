@@ -7,7 +7,7 @@ export default class extends Controller {
 
     showToast()
     {
-        $('#logToastTitle').html('Creating session ' + this.element.dataset.session);
+        $('#logToastTitle').html('Log of session #' + this.element.dataset.session);
         $('#logToastBodyTurboFrame').attr('src', '/manager/game/' + this.element.dataset.session +'/log');
         $('#logToast').show();
         this.timeout = setInterval(function () {
@@ -20,5 +20,4 @@ export default class extends Controller {
         $('#logToast').hide();
         clearInterval(this.timeout);
     }
-
 }

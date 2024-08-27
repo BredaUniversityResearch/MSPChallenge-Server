@@ -51,7 +51,7 @@ class GameListArchiveMessageHandler extends CommonSessionHandler
     public function __invoke(GameListArchiveMessage $gameList): void
     {
         $this->setGameSessionAndDatabase($gameList);
-        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+        $this->watchdogCommunicator->changeState($this->gameSession->getId(), new GameStateValue('end'));
         $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
         $this->info('Session archived.');
         $this->removeSessionRasterStore();

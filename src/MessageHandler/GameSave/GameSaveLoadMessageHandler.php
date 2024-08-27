@@ -111,7 +111,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
         $game->setGameConfigfile(sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
         $this->entityManager->flush();
 
-        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('pause'));
+        $this->watchdogCommunicator->changeState($this->gameSession->getId(), new GameStateValue('pause'));
         if ($_ENV['APP_ENV'] !== 'test') {
             $this->info("Watchdog called successfully at {$this->watchdogCommunicator->getLastCompleteURLCalled()}");
         } else {
@@ -193,7 +193,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
     {
         if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
             $this->notice('This is a save reload into an existing session.');
-            $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+            $this->watchdogCommunicator->changeState($this->gameSession->getId(), new GameStateValue('end'));
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->mspServerManagerEntityManager->flush();
             $this->resetSessionDatabase();

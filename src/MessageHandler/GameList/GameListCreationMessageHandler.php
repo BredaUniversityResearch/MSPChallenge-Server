@@ -132,7 +132,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
             $this->notice('Resetting the session database, as this is a session recreate.');
             if ($this->gameSession->getSessionState() != GameSessionStateValue::FAILED) {
-                $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+                $this->watchdogCommunicator->changeState($this->gameSession->getId(), new GameStateValue('end'));
             }
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->gameSession->setGameState(new GameStateValue('setup'));
@@ -1175,7 +1175,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             )
             ->executeStatement();
         // end of backward compatibility code
-        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('setup'));
+        $this->watchdogCommunicator->changeState($this->gameSession->getId(), new GameStateValue('setup'));
         if ($_ENV['APP_ENV'] !== 'test') {
             $this->info("Watchdog called successfully at {$this->watchdogCommunicator->getLastCompleteURLCalled()}");
         } else {
