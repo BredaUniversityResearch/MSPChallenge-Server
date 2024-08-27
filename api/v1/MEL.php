@@ -624,7 +624,7 @@ SUBQUERY
         array &$exportResult,
     ): void {
         $data = $geometry->getGeometryDataAsJsonDecoded();
-        /** @var PolicyDataBase|ItemsPolicyDataBase[] $policiesToApply */
+        /** @var PolicyDataBase[]|ItemsPolicyDataBase[] $policiesToApply */
         $policiesToApply = [];
         foreach (($data->policies ?? []) as $policyData) {
             $this->log('Encountered policies for geometry: '.($geometry->getName() ?? 'unnamed'));
@@ -661,13 +661,15 @@ SUBQUERY
             'Applying policies of type: '.
                 implode(', ', array_map(fn($p) => $p->getPolicyTypeName()->value, $policiesToApply))
         );
-        if (!empty(array_filter($policiesToApply, fn($p) => $p instanceof BufferZonePolicyData))) {
+        /** @var BufferZonePolicyData[] $bufferZonePolicyDataContainer */
+        $bufferZonePolicyDataContainer = array_filter($policiesToApply, fn($p) => $p instanceof BufferZonePolicyData);
+        if (!empty($bufferZonePolicyDataContainer)) {
             $includeOriginalPolygon =
                 !empty(array_filter($policiesToApply, fn($p) => $p instanceof SeasonalClosurePolicyData));
             // apply buffer zone policy, and seasonal closure policy if it exists
             $exportResult[] = $this->applyGeometryBufferZonePolicy(
                 $geometry,
-                $policyData,
+                current($bufferZonePolicyDataContainer),
                 [ 'include_original_polygon' => $includeOriginalPolygon ],
             );
             return; // all types are handled
