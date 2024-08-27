@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "02/10/2023",
-    "data_model_hash": "8CC02AE01743314AF06BAF64BCE6BD3750FFB6BD9B712BE6A12B66397F10F9A1",
+    "date_modified": "5/16/2024",
+    "data_model_hash": "DC69C162BC0CE0FA77F206800CD1A1A6F3B00E410FBE3DD3F187A6F708AEA802",
     "errors": 0,
     "editor_version": "1.0.0",
     "config_version": "1.0.0"
@@ -56,9 +56,9 @@
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "AS_IMO_Routes",
-          "starttype": null,
+          "starttype": "",
           "endlayer": "AS_Bathymetry_0_40m",
-          "endtype": null,
+          "endtype": "",
           "sort": "Inclusion"
         }
       ],
@@ -68,9 +68,9 @@
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "AS_IMO_Routes",
-          "starttype": null,
+          "starttype": "",
           "endlayer": "AS_Bathymetry_0_20m",
-          "endtype": null,
+          "endtype": "",
           "sort": "Inclusion"
         }
       ],
@@ -80,9 +80,9 @@
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "AS_IMO_Routes",
-          "starttype": null,
+          "starttype": "",
           "endlayer": "AS_Countries",
-          "endtype": null,
+          "endtype": "",
           "sort": "Inclusion"
         }
       ],
@@ -33300,6 +33300,24 @@
         }
       ]
     },
+    "policy_settings": {
+      "fishing": {
+        "all_country_approval": true,
+        "stakeholder_pressure_cool_down": 0.1,
+        "fleet_info": {
+          "gear_types": [
+            "default"
+          ],
+          "fleets": [
+            {
+              "//comment": "0 default fishing fleet",
+              "gear_type": "0",
+              "country_id": "-1"
+            }
+          ]
+        }
+      }
+    },    
     "MEL": null,
     "meta": [
       {
@@ -40876,9 +40894,9 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#ABD9E9B4",
+            "pointColor": "#2C7BB6B4",
             "pointSize": 0.3,
-            "pointSpriteName": "None",
+            "pointSpriteName": "Bathing",
             "description": null,
             "capacity": 0,
             "investmentCost": 0.0,
@@ -40904,9 +40922,9 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#2C7BB6B4",
+            "pointColor": "#2035C0D6",
             "pointSize": 0.3,
-            "pointSpriteName": "None",
+            "pointSpriteName": "Bathing",
             "description": null,
             "capacity": 0,
             "investmentCost": 0.0,
@@ -41279,40 +41297,12 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No Protection Defined",
+            "displayName": "default",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#3A8745FF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00000000",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": ""
-          },
-          "1": {
-            "displayName": "Protection Against Fishing",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
             "polygonPatternName": "25",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -42828,7 +42818,7 @@
             "value": 167,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#F1EEF6FF",
+            "polygonColor": "#C6FFFFC9",
             "polygonPatternName": null,
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -42856,7 +42846,7 @@
             "value": 333,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#ABC9E2FF",
+            "polygonColor": "#15A7DEC9",
             "polygonPatternName": null,
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -42884,7 +42874,7 @@
             "value": 500,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#85B5D7FF",
+            "polygonColor": "#06EA5AC9",
             "polygonPatternName": null,
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -42912,7 +42902,7 @@
             "value": 667,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#5FA2CDFF",
+            "polygonColor": "#C5D245C9",
             "polygonPatternName": null,
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -42940,7 +42930,7 @@
             "value": 883,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#398EC2FF",
+            "polygonColor": "#EC9761C9",
             "polygonPatternName": null,
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -42968,7 +42958,7 @@
             "value": 1000,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#137AB7FF",
+            "polygonColor": "#E1302BC9",
             "polygonPatternName": null,
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -43888,7 +43878,7 @@
     "edition_colour": "#5C67B0FF",
     "edition_letter": "A",
     "region": "adriatic",
-    "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
+	"projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2020,
     "end": 2060,
     "era_total_months": 120,
