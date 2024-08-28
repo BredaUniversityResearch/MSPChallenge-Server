@@ -281,7 +281,8 @@ class MEL extends Base
                     plan p
                 INNER JOIN
                     plan_policy pp ON p.plan_id = pp.plan_id AND
-                                      (p.plan_state = 'APPROVED' OR p.plan_state = 'IMPLEMENTED') AND p.plan_gametime <= :currentMonth
+                        (p.plan_state = 'APPROVED' OR p.plan_state = 'IMPLEMENTED') AND
+                        p.plan_gametime <= :currentMonth
                 INNER JOIN
                     policy po ON pp.policy_id = po.id
                 CROSS JOIN
