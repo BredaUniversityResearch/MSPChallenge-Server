@@ -280,7 +280,7 @@ class MEL extends Base
                 FROM
                     plan p
                 INNER JOIN
-                    plan_policy pp ON p.plan_id = pp.plan_id
+                    plan_policy pp ON p.plan_id = pp.plan_id AND (p.plan_state = 'APPROVED' OR p.plan_state = 'IMPLEMENTED') AND p.plan_gametime <= :currentMonth
                 INNER JOIN
                     policy po ON pp.policy_id = po.id
                 CROSS JOIN
@@ -320,7 +320,8 @@ class MEL extends Base
                 rn = 1
             AND
                 enabled = 'true';            
-            SQL
+            SQL,
+            ['currentMonth' => (new Game())->GetCurrentMonthAsId()]
         );
         return array_map('intval', $result->fetchFirstColumn());
     }
