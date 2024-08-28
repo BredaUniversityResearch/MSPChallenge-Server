@@ -122,7 +122,7 @@ class CreatePolicyPlanCommand extends Command
                 $io,
                 'Friese Front'
             )) {
-                $gid = (int)$io->ask('Enter geometry id', 0, fn($s) => ctype_digit($s) ? $s :
+                $gid = (int)$io->ask('Enter geometry id', '0', fn($s) => ctype_digit($s) ? $s :
                     throw new \RuntimeException('Please enter an integer'));
                 $geometry = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId)
                     ->executeQuery(
