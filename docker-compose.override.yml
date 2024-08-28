@@ -85,6 +85,7 @@ services:
       WEB_SERVER_PORT: 8080
       URL_WEB_SERVER_PORT: 8080
       URL_WS_SERVER_PORT: 8080
+      MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
 
       # See https://xdebug.org/docs/all_settings#mode
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"

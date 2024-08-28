@@ -9,7 +9,7 @@ class ShippingSafetyZonesPolicyData extends PolicyDataBase
 {
     public function __construct()
     {
-        $this->type = PolicyTypeName::SHIPPING_SAFETY_ZONES->value;
+        $this->policy_type = PolicyTypeName::SHIPPING_SAFETY_ZONES->value;
     }
 
     public function getPolicyTypeName(): PolicyTypeName

@@ -9,7 +9,7 @@ class FishingEffortPolicyData extends PolicyDataBase
 {
     public function __construct()
     {
-        $this->type = PolicyTypeName::FISHING_EFFORT->value;
+        $this->policy_type = PolicyTypeName::FISHING_EFFORT->value;
     }
 
     public function getPolicyTypeName(): PolicyTypeName

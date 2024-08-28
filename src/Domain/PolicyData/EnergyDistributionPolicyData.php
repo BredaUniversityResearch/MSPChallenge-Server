@@ -9,7 +9,7 @@ class EnergyDistributionPolicyData extends PolicyDataBase
 {
     public function __construct()
     {
-        $this->type = PolicyTypeName::ENERGY_DISTRIBUTION->value;
+        $this->policy_type = PolicyTypeName::ENERGY_DISTRIBUTION->value;
     }
 
     public function getPolicyTypeName(): PolicyTypeName

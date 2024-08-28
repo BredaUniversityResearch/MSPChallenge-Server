@@ -9,7 +9,7 @@ class SeasonalClosurePolicyData extends ItemsPolicyDataBase
 {
     public function __construct()
     {
-        $this->type = PolicyTypeName::SEASONAL_CLOSURE->value;
+        $this->policy_type = PolicyTypeName::SEASONAL_CLOSURE->value;
     }
 
     public function getPolicyTypeName(): PolicyTypeName

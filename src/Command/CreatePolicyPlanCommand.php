@@ -579,9 +579,9 @@ class CreatePolicyPlanCommand extends Command
     {
         $policyTypeDisplayName = PolicyTypeName::getDescription($policyTypeName);
         $schema = PolicyDataFactory::getPolicyDataSchemaByType($policyTypeName);
-        $result = ['type' => $policyTypeName->value];
+        $result = ['policy_type' => $policyTypeName->value];
         foreach ($schema->getProperties() as $propertyName => $property) {
-            if ($propertyName == 'type') { // this is the policy type which we already know.
+            if ($propertyName == 'policy_type') { // this is the policy type which we already know.
                 continue;
             }
             $result[$propertyName] = $this->askJsonSchemeProperty(

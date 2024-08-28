@@ -13,7 +13,7 @@ class BufferZonePolicyData extends ItemsPolicyDataBase
 
     public function __construct()
     {
-        $this->type = PolicyTypeName::BUFFER_ZONE->value;
+        $this->policy_type = PolicyTypeName::BUFFER_ZONE->value;
     }
 
     public function getRadius(): float
