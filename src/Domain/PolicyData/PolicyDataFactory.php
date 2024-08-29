@@ -39,10 +39,10 @@ class PolicyDataFactory
      */
     public static function createPolicyDataByJsonObject(object $json): PolicyDataBase|ItemsPolicyDataBase
     {
-        if (!property_exists($json, 'type')) {
+        if (!property_exists($json, 'policy_type')) {
             throw new InvalidValue('Policy type is missing');
         }
-        return match (PolicyTypeName::from($json->type)) {
+        return match (PolicyTypeName::from($json->policy_type)) {
             PolicyTypeName::BUFFER_ZONE => BufferZonePolicyData::import($json),
             PolicyTypeName::SEASONAL_CLOSURE => SeasonalClosurePolicyData::import($json),
             PolicyTypeName::ECO_GEAR => EcoGearPolicyData::import($json),

@@ -172,6 +172,30 @@ class Game extends Base
     }
 
     /**
+     * Returns an array of all layer properties that have a policy_type field.
+     *
+     * @return array{property_name: string, policy_type: string}
+     * @throws Exception
+     */
+    public function getPolicyLayerPropertiesFromConfig(): array
+    {
+        static $result = null;
+        if ($result !== null) {
+            return $result;
+        }
+        $result = [];
+        $dataModel = $this->GetGameConfigValues();
+        foreach ($dataModel['meta'] ?? [] as $layer) {
+            foreach ($layer['layer_info_properties'] ?? [] as $layerProp) {
+                if (array_key_exists('policy_type', $layerProp)) {
+                    $result[] = $layerProp;
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
      * @apiGroup Game
      * @throws Exception
      * @api {POST} /game/GetCurrentMonth GetCurrentMonth

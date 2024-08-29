@@ -334,47 +334,55 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Update(): array
     {
-        $currentMonth = (new Game())->GetCurrentMonthAsId();
+        $game = new Game();
+        $policyLayerProps = collect($game->getPolicyLayerPropertiesFromConfig())->keyBy('property_name')->all();
+        $currentMonth = $game->GetCurrentMonthAsId();
         $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $qb = $conn->createQueryBuilder();
         $qb
             ->select('l.layer_name')
             ->from('layer', 'l')
             // layers that have a melupdate flag set
-            ->where($qb->expr()->eq('l.layer_melupdate', 1))
+            ->where($qb->expr()->eq('l.layer_melupdate', 1));
+        foreach ($policyLayerProps as $layerProp) {
             // or, any layer with a schedule policy filter matching one of these criteria:
             // * the previous month was not listed but the current month is
             // * the current month is listed, but the previous month is not
-            ->orWhere($qb->expr()->in(
+            $qb->orWhere($qb->expr()->in(
                 'l.layer_id',
-                <<< 'SUBQUERY'
-                WITH
-                    geometry_with_months AS (
-                        SELECT g.geometry_layer_id, jt.months
-                        FROM
-                            geometry g 
-                            JOIN JSON_TABLE(g.geometry_data, '$.policies[*].items[*]'
-                                COLUMNS (
-                                    months JSON PATH '$.months'
-                                )
-                            ) jt ON TRUE
-                    )
-                SELECT DISTINCT l.layer_original_id
-                FROM layer l
-                JOIN geometry_with_months g ON g.geometry_layer_id=l.layer_id
-                AND (
-                    (
-                        JSON_CONTAINS(g.months, :prevMonth, '$')=1
-                        AND JSON_CONTAINS(g.months, :month, '$')=0
-                    ) OR (
-                        JSON_CONTAINS(g.months, :prevMonth, '$')=0
-                        AND JSON_CONTAINS(g.months, :month, '$')=1
-                    )
-               )
-SUBQUERY
+                sprintf(
+                    <<< 'SUBQUERY'
+                    WITH
+                        geometry_with_months AS (
+                            SELECT g.geometry_layer_id, jt.months
+                            FROM
+                                geometry g 
+                                JOIN JSON_TABLE(JSON_UNQUOTE(JSON_EXTRACT(g.geometry_data, '$.%s')), '$.items[*]'
+                                    COLUMNS (
+                                        months JSON PATH '$.months'
+                                    )
+                                ) jt ON TRUE
+                        )
+                    SELECT DISTINCT l.layer_original_id
+                    FROM layer l
+                    JOIN geometry_with_months g ON g.geometry_layer_id=l.layer_id
+                    AND (
+                        (
+                            g.months & :prevMonth != :prevMonth
+                            AND g.months & :month = :month
+                        ) OR (
+                            g.months & :prevMonth = :prevMonth
+                            AND g.months & :month != :month
+                        )
+                   )
+SUBQUERY,
+                    $layerProp['property_name']
+                )
             ))
-            ->setParameter('month', ($currentMonth % 12) + 1)
-            ->setParameter('prevMonth', (($currentMonth-1) % 12) + 1);
+            ->setParameter('month', pow(2, $currentMonth % 12))
+            ->setParameter('prevMonth', pow(2, (($currentMonth-1) % 12)));
+        }
+
         $r = $qb->executeQuery()->fetchAllAssociative();
 
         /** @noinspection SqlWithoutWhere */
@@ -626,16 +634,20 @@ SUBQUERY
         ?object $policyFilters,
         array &$exportResult,
     ): void {
-        // filter all geometry data properties that:
-        //  * seems to be json object (starts with '{')
-        $data = array_filter($geometry->getGeometryDataAsJsonDecoded(true), fn($s) => ($s[0] ?? '') == '{');
-        //  * are objects with a property 'policy_type'
-        $data = array_map(fn($s) => json_decode($s), $data); // convert json strings to objects
-        $data = array_filter($data, fn($o) => is_object($o) && property_exists($o, 'policy_type'));
+        $policyLayerProps = collect((new Game())->getPolicyLayerPropertiesFromConfig())->keyBy('property_name')->all();
+        // filter all policy geometry data properties and convert them to json objects
+        $geomDataProperties = array_map(
+            fn($s) => json_decode($s),
+            array_filter(
+                $geometry->getGeometryDataAsJsonDecoded(true) ?? [],
+                fn($k) => array_key_exists($k, $policyLayerProps),
+                ARRAY_FILTER_USE_KEY
+            )
+        );
 
         /** @var PolicyDataBase[]|ItemsPolicyDataBase[] $policiesToApply */
         $policiesToApply = [];
-        foreach ($data as $policyData) {
+        foreach ($geomDataProperties as $policyData) {
             $this->log('Encountered policies for geometry: '.($geometry->getName() ?? 'unnamed'));
             if (!is_object($policyData)) {
                 $this->log('Policy data is not a json object: '.json_encode($policyData), self::LOG_LEVEL_WARNING);

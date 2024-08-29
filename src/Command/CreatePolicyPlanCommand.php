@@ -162,7 +162,8 @@ class CreatePolicyPlanCommand extends Command
                 $policyTypeName,
                 $policyData,
                 PolicyDataFactory::getPolicyDataSchemaByType($policyTypeName)
-                    ->getMeta(PolicyDataSchemaMetaName::POLICY_TARGET->value) ?? PolicyTarget::PLAN
+                    ->getMeta(PolicyDataSchemaMetaName::POLICY_TARGET->value) ?? PolicyTarget::PLAN,
+                $context
             );
         } catch (\Exception $e) {
             $io->error('Failed to create plan: '.$e->getMessage());
@@ -699,6 +700,7 @@ class CreatePolicyPlanCommand extends Command
      * @param PolicyTypeName $policyTypeName
      * @param array $policyData
      * @param PolicyTarget $policyTarget
+     * @param array $context
      * @return Plan
      * @throws \Exception
      */
@@ -708,10 +710,13 @@ class CreatePolicyPlanCommand extends Command
         array          $geometry,
         PolicyTypeName $policyTypeName,
         array          $policyData,
-        PolicyTarget   $policyTarget
+        PolicyTarget   $policyTarget,
+        array          $context
     ): Plan {
         $this->cleanUpPreviousPlan();
         $plan = new Plan();
+        $game = new \App\Domain\API\v1\Game();
+        $game->setGameSessionId($context['gameSessionId']);
         $this->getGameSessionEntityManager()->wrapInTransaction(function () use (
             $layer,
             $planGameTime,
@@ -719,7 +724,8 @@ class CreatePolicyPlanCommand extends Command
             $policyTypeName,
             $policyData,
             $policyTarget,
-            $plan
+            $plan,
+            $game
         ) {
             // create policy data object from array
             $policyData = $this->createPolicyData($policyTypeName, $policyData);
@@ -767,7 +773,11 @@ class CreatePolicyPlanCommand extends Command
             $geometryEntity = new Geometry();
             $geometryData = json_decode($geometry['geometry_data'], true);
             if ($policyTarget === PolicyTarget::GEOMETRY) {
-                $geometryData[uniqid()] = json_encode($policyData);
+                $props = collect($game->getPolicyLayerPropertiesFromConfig())->keyBy('policy_type')->all();
+                if (!array_key_exists($policyTypeName->value, $props)) {
+                    throw new \Exception('No layer property found with policy type: '.$policyTypeName->value);
+                }
+                $geometryData[$props[$policyTypeName->value]['property_name']] = json_encode($policyData);
             }
             $geometryEntity
                 ->setLayer($layerEntity)
