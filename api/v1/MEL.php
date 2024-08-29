@@ -626,10 +626,16 @@ SUBQUERY
         ?object $policyFilters,
         array &$exportResult,
     ): void {
-        $data = $geometry->getGeometryDataAsJsonDecoded();
+        // filter all geometry data properties that:
+        //  * seems to be json object (starts with '{')
+        $data = array_filter($geometry->getGeometryDataAsJsonDecoded(true), fn($s) => ($s[0] ?? '') == '{');
+        //  * are objects with a property 'policy_type'
+        $data = array_map(fn($s) => json_decode($s), $data); // convert json strings to objects
+        $data = array_filter($data, fn($o) => is_object($o) && property_exists($o, 'policy_type'));
+
         /** @var PolicyDataBase[]|ItemsPolicyDataBase[] $policiesToApply */
         $policiesToApply = [];
-        foreach (($data->policies ?? []) as $policyData) {
+        foreach ($data as $policyData) {
             $this->log('Encountered policies for geometry: '.($geometry->getName() ?? 'unnamed'));
             if (!is_object($policyData)) {
                 $this->log('Policy data is not a json object: '.json_encode($policyData), self::LOG_LEVEL_WARNING);

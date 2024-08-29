@@ -36788,6 +36788,21 @@
             "content_validation": 0,
             "unit": null,
             "default_value": null
+          },
+          {
+            "property_name": "POLICY_BUFFER_ZONE",
+            "policy_type": "buffer_zone",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Buffer zone policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
           }
         ],
         "layer_tags": [

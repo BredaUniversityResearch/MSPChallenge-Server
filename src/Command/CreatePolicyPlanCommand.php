@@ -767,8 +767,7 @@ class CreatePolicyPlanCommand extends Command
             $geometryEntity = new Geometry();
             $geometryData = json_decode($geometry['geometry_data'], true);
             if ($policyTarget === PolicyTarget::GEOMETRY) {
-                $geometryData['policies'] ??= [];
-                $geometryData['policies'][] = $policyData;
+                $geometryData[uniqid()] = json_encode($policyData);
             }
             $geometryEntity
                 ->setLayer($layerEntity)
