@@ -9,12 +9,9 @@ use Symfony\Component\Security\Http\Event\CheckPassportEvent;
 
 class StoreUserUponLogin implements EventSubscriberInterface
 {
-    private EntityManagerInterface $mspServerManagerEntityManager;
-
     public function __construct(
-        EntityManagerInterface $mspServerManagerEntityManager,
+        private EntityManagerInterface $mspServerManagerEntityManager
     ) {
-        $this->mspServerManagerEntityManager = $mspServerManagerEntityManager;
     }
 
     public function onCheckPassport(CheckPassportEvent $event): void

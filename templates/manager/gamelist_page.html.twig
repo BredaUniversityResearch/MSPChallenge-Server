@@ -3,7 +3,7 @@
 {% block title %}New Server Manager{% endblock %}
 
 {% block body %}
-    <div class="py-1" {{ stimulus_controller('modal-default') }} data-turboframe="sessionsAddForm">
+    <div class="py-1" {{ stimulus_controller('modal-default') }} data-turboframe="gameForm">
         <button type="button" id="modalNewSession" class="btn btn-primary" data-action="modal-default#openModal">
             <i class="fa fa-plus-circle" title="Create new session"></i>
             New Session
@@ -11,7 +11,7 @@
         {{ include('manager/modal_default.html.twig',
             {
                 'modalTitle': 'Create New Session',
-                'modalTurboFrameId': 'sessionsAddForm',
+                'modalTurboFrameId': 'gameForm',
                 'modalTurboFrameSrcRoute': 'manager_game_form'
             }
         )}}
@@ -42,108 +42,12 @@
             </turbo-frame>
         </div>
     </div>
+    
 
 
 
 
-
-            <!-- Modal Session info -->
-            <div class="modal fade" id="sessionInfo" tabindex="-1" role="dialog" aria-labelledby="sessionModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-wide" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <input type="text" id="sessionModalCenterTitle" class="form-control modal-title" style="font-size: 1.25rem;" onchange="" />
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover table-border-left" id="sessionInfoTable">
-                                    <tr>
-                                        <th scope="col">ID</th>
-                                        <td class="text-right" id="sessionInfoID"></td>
-                                        <th scope="col">Visibility</th>
-                                        <td class="text-right" id="sessionInfoVisibility"></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="col">Simulation state</th>
-                                        <td class="text-right" id="sessionInfoGameState"></td>
-                                        <th scope="col">Session state</th>
-                                        <td class="text-right" id="sessionInfoSessionState"></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="col">Current Month</th>
-                                        <td class="text-right" id="sessionInfoCurrentMonth"></td>
-                                        <th scope="col">Ending Month</th>
-                                        <td class="text-right" id="sessionInfoEndMonth"></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="col">Setup Time</th>
-                                        <td class="text-right" id="sessionInfoGameCreationTime"></td>
-                                        <th scope="col" >Time Until End</th>
-                                        <td class="text-right" id="sessionInfoGameRunningTilTime"></td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="col">Config File</th>
-                                        <td class="text-right">
-                                            <div id="sessionInfoConfigFilename"></div>
-                                            <div id="sessionInfoConfigVersion"></div>
-                                        </td>
-                                        <th scope="col">Simulation Server</th>
-                                        <td class="text-right">
-                                            <div id="sessionInfoWatchdogName"></div>
-                                            <div id="sessionInfoWatchdogAddress"></div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="col">GeoServer</th>
-                                        <td class="text-right" id="sessionInfoGeoServer"></td>
-                                        <th scop="col">Active Players</th>
-                                        <td class="text-right" id="sessionInfoActivePlayers"></td>
-                                    </tr>
-                                    <tr class="table-info">
-                                        <td colspan="2">
-                                            <button id="sessionInfoButtonStartPause" class="btn btn-success btn-sm" onclick=""></button>
-                                            <button id="sessionInfoButtonFastForward" class="btn btn-success btn-sm" onclick=""></button>
-                                            <button id="sessionInfoButtonDemoToggle" class="btn btn-info btn-sm" onclick=""></button>
-                                        </td>
-                                        <td colspan="2" class="text-right">
-                                            <button id="sessionInfoButtonRecreateSession" class="btn btn-warning btn-sm" onclick=""></button>
-                                            <button id="sessionInfoButtonArchiveDownload" class="btn btn-warning btn-sm" onclick=""></button>
-                                            <button id="sessionInfoButtonUpgrade" class="btn btn-warning btn-sm" onclick=""></button>
-                                        </td>
-                                    </tr>
-                                    <tr class="table-info">
-                                        <td colspan="2">
-                                            <button id="sessionInfoButtonSaveFull" class="btn btn-secondary btn-sm" onclick=""></button>
-                                            <button id="sessionInfoButtonSaveLayers" class="btn btn-secondary btn-sm" onclick=""></button>
-                                        </td>
-                                        <td colspan="2" class="text-right">
-                                            <button id="sessionInfoButtonUserAccess" data-toggle="modal" data-target="#sessionUsers" class="btn btn-secondary btn-sm" onclick=""></button>
-                                            <button id="sessionInfoButtonExportPlans" class="btn btn-secondary btn-sm" onclick=""></button>
-                                        </td>
-                                    </tr>
-                                    <tr class="table-info">
-                                        <td colspan="4" class="text-left">
-                                            <button id="sessionInfoButtonServerLog" onclick="" class="btn btn-secondary btn-sm"><i class="fa fa-bars" aria-hidden="true"></i></i> Show/Hide Session Creation Log</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="4" class="text-center p-0">
-                                            <div id="sessionInfoLog" style="width: 100%; height: 115px; overflow-y:auto; font-size:14px; background-color: #e9ecef; text-align: left; resize: both; display: none;">
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
 
 
 

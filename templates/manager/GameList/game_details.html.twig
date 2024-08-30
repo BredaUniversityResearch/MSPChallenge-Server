@@ -1,0 +1,83 @@
+<turbo-frame id="gameDetails">
+    <div data-modal-default-target="modalBody">
+        <div class="table-responsive">
+            <table class="table table-hover table-border-left" id="sessionInfoTable">
+                <tr>
+                    <th scope="col">ID</th>
+                    <td class="text-right" id="sessionInfoID"></td>
+                    <th scope="col">Visibility</th>
+                    <td class="text-right" id="sessionInfoVisibility"></td>
+                </tr>
+                <tr>
+                    <th scope="col">Simulation state</th>
+                    <td class="text-right" id="sessionInfoGameState"></td>
+                    <th scope="col">Session state</th>
+                    <td class="text-right" id="sessionInfoSessionState"></td>
+                </tr>
+                <tr>
+                    <th scope="col">Current Month</th>
+                    <td class="text-right" id="sessionInfoCurrentMonth"></td>
+                    <th scope="col">Ending Month</th>
+                    <td class="text-right" id="sessionInfoEndMonth"></td>
+                </tr>
+                <tr>
+                    <th scope="col">Setup Time</th>
+                    <td class="text-right" id="sessionInfoGameCreationTime"></td>
+                    <th scope="col" >Time Until End</th>
+                    <td class="text-right" id="sessionInfoGameRunningTilTime"></td>
+                </tr>
+                <tr>
+                    <th scope="col">Config File</th>
+                    <td class="text-right">
+                        <div id="sessionInfoConfigFilename"></div>
+                        <div id="sessionInfoConfigVersion"></div>
+                    </td>
+                    <th scope="col">Simulation Server</th>
+                    <td class="text-right">
+                        <div id="sessionInfoWatchdogName"></div>
+                        <div id="sessionInfoWatchdogAddress"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="col">GeoServer</th>
+                    <td class="text-right" id="sessionInfoGeoServer"></td>
+                    <th scop="col">Active Players</th>
+                    <td class="text-right" id="sessionInfoActivePlayers"></td>
+                </tr>
+                <tr class="table-info">
+                    <td colspan="2">
+                        <button id="sessionInfoButtonStartPause" class="btn btn-success btn-sm" onclick=""></button>
+                        <button id="sessionInfoButtonFastForward" class="btn btn-success btn-sm" onclick=""></button>
+                        <button id="sessionInfoButtonDemoToggle" class="btn btn-info btn-sm" onclick=""></button>
+                    </td>
+                    <td colspan="2" class="text-right">
+                        <button id="sessionInfoButtonRecreateSession" class="btn btn-warning btn-sm" onclick=""></button>
+                        <button id="sessionInfoButtonArchiveDownload" class="btn btn-warning btn-sm" onclick=""></button>
+                        <button id="sessionInfoButtonUpgrade" class="btn btn-warning btn-sm" onclick=""></button>
+                    </td>
+                </tr>
+                <tr class="table-info">
+                    <td colspan="2">
+                        <button id="sessionInfoButtonSaveFull" class="btn btn-secondary btn-sm" onclick=""></button>
+                        <button id="sessionInfoButtonSaveLayers" class="btn btn-secondary btn-sm" onclick=""></button>
+                    </td>
+                    <td colspan="2" class="text-right">
+                        <button id="sessionInfoButtonUserAccess" data-toggle="modal" data-target="#sessionUsers" class="btn btn-secondary btn-sm" onclick=""></button>
+                        <button id="sessionInfoButtonExportPlans" class="btn btn-secondary btn-sm" onclick=""></button>
+                    </td>
+                </tr>
+                <tr class="table-info">
+                    <td colspan="4" class="text-left">
+                        <button id="sessionInfoButtonServerLog" onclick="" class="btn btn-secondary btn-sm"><i class="fa fa-bars" aria-hidden="true"></i></i> Show/Hide Session Creation Log</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-center p-0">
+                        <div id="sessionInfoLog" style="width: 100%; height: 115px; overflow-y:auto; font-size:14px; background-color: #e9ecef; text-align: left; resize: both; display: none;">
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

@@ -102,39 +102,51 @@ class GameListController extends BaseController
             ]));
     }
 
-    #[Route('/manager/game/{sessionId}', name: 'manager_game_form', requirements: ['sessionId' => '\d+'])]
+    #[Route('/manager/game/form/{sessionId}', name: 'manager_game_form', requirements: ['sessionId' => '\d+'])]
     public function gameSessionForm(
         Request $request,
         EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
         int $sessionId = 0
     ): Response {
-        if ($sessionId > 0) {
-            $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
-            $form = $this->createForm(GameListEditFormType::class, $gameSession, [
-                'action' => $this->generateUrl('manager_game_form', ['id' => $sessionId])
-            ]);
-        } else {
+        if ($sessionId == 0) {
             $form = $this->createForm(GameListAddFormType::class, new GameList(), [
                 'entity_manager' => $entityManager,
                 'action' => $this->generateUrl('manager_game_form')
+            ]);
+        } else {
+            $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+            $form = $this->createForm(GameListEditFormType::class, $gameSession, [
+                'action' => $this->generateUrl('manager_game_form', ['id' => $sessionId])
             ]);
         }
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $gameSession = $form->getData();
-            $entityManager->persist($gameSession);
-            $entityManager->flush();
             if ($sessionId == 0) {
+                $entityManager->persist($gameSession);
+                $entityManager->flush();
                 $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
                 return new Response($gameSession->getId(), 200);
             }
+            $entityManager->flush();
             return new Response(null, 204);
         }
         return $this->render(
-            $sessionId == 0 ? 'manager/GameList/new_game.html.twig': 'manager/GameList/existing_game.html.twig',
+            'manager/GameList/game_form.html.twig',
             ['gameSessionForm' => $form->createView()],
             new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
+        );
+    }
+
+    #[Route('/manager/game/details/{sessionId}', name: 'manager_game_details', requirements: ['sessionId' => '\d+'])]
+    public function gameSessionDetails(
+        EntityManagerInterface $entityManager,
+        int $sessionId = 0
+    ): Response {
+        return $this->render(
+            'manager/GameList/game_details.html.twig',
+            ['gameSession' => []]
         );
     }
 

@@ -3,14 +3,13 @@
         <div>
         {{ logLines | replace(
             {
-                'INFO:': '<div style="color: green;">',
-                'NOTICE:': '<div style="color: green;">',
-                'ERROR:': '<div style="color: red;">',
-                'WARNING:': '<div style="color: navy;">',
-                'DEBUG:': '<div style="color: grey;">',
+                'INFO:': '<span style="color: green;">INFO:</span>',
+                'NOTICE:': '<span style="color: green;">NOTICE:</span>',
+                'ERROR:': '<span style="color: red;">ERROR:</span>',
+                'WARNING:': '<span style="color: navy;">WARNING:</span>',
+                'DEBUG:': '<span style="color: grey;">DEBUG:</span>',
             }
         ) | raw}}
-            </div>
         </div>
     {% endfor %}
 </turbo-frame>
