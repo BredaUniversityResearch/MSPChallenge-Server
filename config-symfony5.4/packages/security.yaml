@@ -15,20 +15,14 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        login:
-            pattern: ^/\d+/api/User/RequestSession$
-            stateless: true
-            json_login:
-                check_path: session_api_user_controller
-            provider: jwt
+        open:
+            pattern: ^/(manager/gamelist|\d+/api/User/RequestSession)
+            security: false
         api:
             pattern: ^/\d+/api/\w+/\w+
             stateless: true
             jwt: ~
             provider: jwt
-        manager_gamelist:
-            pattern: ^/manager/gamelist
-            security: false
         manager:
             pattern: ^/manager
             provider: local_users

@@ -9,6 +9,7 @@ use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use function App\isBase64Encoded;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
 class GameList
@@ -258,6 +259,31 @@ class GameList
     public function getPasswordPlayer(): ?string
     {
         return $this->passwordPlayer;
+    }
+
+    
+    public function encodePasswords(): self
+    {
+        if (!isBase64Encoded($this->passwordAdmin)) {
+            $this->passwordAdmin = base64_encode($this->passwordAdmin);
+        }
+        if (!isBase64Encoded($this->passwordPlayer)) {
+            $this->passwordPlayer = base64_encode($this->passwordPlayer);
+        }
+
+        return $this;
+    }
+    
+    public function decodePasswords(): self
+    {
+        if (isBase64Encoded($this->passwordAdmin)) {
+            $this->passwordAdmin = base64_decode($this->passwordAdmin);
+        }
+        if (isBase64Encoded($this->passwordPlayer)) {
+            $this->passwordPlayer = base64_decode($this->passwordPlayer);
+        }
+        
+        return $this;
     }
 
     public function setPasswordPlayer(?string $passwordPlayer): self

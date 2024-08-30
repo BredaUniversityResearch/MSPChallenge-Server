@@ -1160,6 +1160,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     {
         // not turning game_session into a Doctrine Entity as the whole table will be deprecated
         // as soon as the session API has been ported to Symfony, so this is just for backward compatibility
+        $this->gameSession->encodePasswords();
         $qb = $this->entityManager->getConnection()->createQueryBuilder();
         $qb->insert('game_session')
             ->values(

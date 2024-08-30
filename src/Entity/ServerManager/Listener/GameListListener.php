@@ -9,10 +9,25 @@ use App\Entity\ServerManager\GameGeoServer;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\ServerManager\GameList;
+use Doctrine\ORM\Event\PostLoadEventArgs;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 
 class GameListListener
 {
+
+    public function preFlush(GameList $gameSession, PreFlushEventArgs $event): void
+    {
+        if (is_null($gameSession->getPasswordPlayer())) {
+            $gameSession->setPasswordPlayer('');
+        }
+        $gameSession->encodePasswords();
+    }
+
+    public function postLoad(GameList $gameSession, PostLoadEventArgs $event): void
+    {
+        $gameSession->decodePasswords();
+    }
 
     public function prePersist(GameList $gameSession, PrePersistEventArgs $event): void
     {

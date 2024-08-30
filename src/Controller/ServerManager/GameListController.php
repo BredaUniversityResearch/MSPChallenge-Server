@@ -87,6 +87,11 @@ class GameListController extends BaseController
         }
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
+        if (is_null($serverDesc)) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse([], 'This server is not configured yet. Please log in to the Server Manager first.', 500)
+            );
+        }
         return $this->json(self::wrapPayloadForResponse([
                 'sessionslist' => $gameList,
                 'server_description' => $serverDesc->getValue(),
@@ -120,14 +125,8 @@ class GameListController extends BaseController
             $entityManager->persist($gameSession);
             $entityManager->flush();
             if ($sessionId == 0) {
-                if (!is_null($gameSession->getGameConfigVersion())) {
-                    $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
-                    return new Response($gameSession->getId(), 200);
-                }
-                if (!is_null($gameSession->getGameSave())) {
-                    //$messageBus->dispatch(new GameListSessionLoading($gameSession->getId()));
-                    return new Response($gameSession->getId(), 200);
-                }
+                $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
+                return new Response($gameSession->getId(), 200);
             }
             return new Response(null, 204);
         }
