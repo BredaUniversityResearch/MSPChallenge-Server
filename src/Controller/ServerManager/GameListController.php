@@ -89,7 +89,7 @@ class GameListController extends BaseController
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         if (is_null($serverDesc)) {
             return new JsonResponse(
-                self::wrapPayloadForResponse([], 'Please log in to the Server Manager for the first time.'), 
+                self::wrapPayloadForResponse([], 'Please log in to the Server Manager for the first time.'),
                 500
             );
         }
