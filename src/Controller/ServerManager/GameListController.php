@@ -142,11 +142,12 @@ class GameListController extends BaseController
     #[Route('/manager/game/details/{sessionId}', name: 'manager_game_details', requirements: ['sessionId' => '\d+'])]
     public function gameSessionDetails(
         EntityManagerInterface $entityManager,
-        int $sessionId = 0
+        int $sessionId = 1
     ): Response {
+        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         return $this->render(
             'manager/GameList/game_details.html.twig',
-            ['gameSession' => []]
+            ['gameSession' => $gameSession]
         );
     }
 

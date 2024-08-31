@@ -35,12 +35,19 @@
             Here you can create a new MSP Challenge session, and administer existing ones.
         </div>
     </div>
-    <div class="col-md-12">
+    <div class="col-md-12" {{ stimulus_controller('modal-default') }} data-turboframe="gameDetails">
         <div class="table-responsive">
             <turbo-frame id="sessionsTable" src="{{ path('manager_gamelist') }}"
                 {{ stimulus_controller('gamelist') }}>
             </turbo-frame>
         </div>
+        {{ include('manager/modal_default.html.twig',
+            {
+                'modalTitle': 'Session Details',
+                'modalTurboFrameId': 'gameDetails',
+                'modalTurboFrameSrcRoute': 'manager_game_details'
+            }
+        )}}
     </div>
     
 

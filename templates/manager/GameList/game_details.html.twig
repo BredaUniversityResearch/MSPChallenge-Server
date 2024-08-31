@@ -1,10 +1,10 @@
 <turbo-frame id="gameDetails">
-    <div data-modal-default-target="modalBody">
+    <div class="modal-body">
         <div class="table-responsive">
             <table class="table table-hover table-border-left" id="sessionInfoTable">
                 <tr>
                     <th scope="col">ID</th>
-                    <td class="text-right" id="sessionInfoID"></td>
+                    <td class="text-right" id="sessionInfoID">{{ gameSession.id }}</td>
                     <th scope="col">Visibility</th>
                     <td class="text-right" id="sessionInfoVisibility"></td>
                 </tr>
@@ -80,4 +80,4 @@
             </table>
         </div>
     </div>
-</div>
+</turbo-frame>

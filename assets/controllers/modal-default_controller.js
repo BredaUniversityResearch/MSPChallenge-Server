@@ -14,6 +14,14 @@ export default class extends Controller {
         this.modal.show();
     }
 
+    openDetailsModal({ params: { sessionid } })
+    {
+        let frame = document.querySelector('turbo-frame#' + this.element.dataset.turboframe);
+        frame.innerHTML = '<div class="modal-body"><h3>Loading...</h3></div>';
+        frame.src = '/manager/game/details/' + sessionid;
+        this.modal.show();
+    }
+
     closeModal(event)
     {
         this.modal.hide();
