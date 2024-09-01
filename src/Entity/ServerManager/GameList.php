@@ -168,6 +168,11 @@ class GameList
         return $this->gameCreationTime;
     }
 
+    public function getGameCreationTimePretty(): string
+    {
+        return $this->makeTimePretty($this->gameCreationTime);
+    }
+
     public function setGameCreationTime(int $gameCreationTime): self
     {
         $this->gameCreationTime = $gameCreationTime;
@@ -218,11 +223,17 @@ class GameList
         return $this->makeDatePretty($this->gameCurrentMonth);
     }
 
-    private function makeDatePretty($month): string
+    private function makeDatePretty(int $month): string
     {
         return \DateTimeImmutable::createFromFormat('m Y', '1 '.$this->gameStartYear)
             ->add(\DateInterval::createFromDateString($month.' month'))
             ->format('M Y');
+    }
+
+    private function makeTimePretty(int $unixTimeStamp): string
+    {
+        return \DateTimeImmutable::createFromFormat('U', $unixTimeStamp)
+            ->format('j M Y G:i');
     }
 
     public function setGameCurrentMonth(int $gameCurrentMonth): self
@@ -235,6 +246,11 @@ class GameList
     public function getGameRunningTilTime(): ?int
     {
         return $this->gameRunningTilTime;
+    }
+
+    public function getGameRunningTilTimePretty(): string
+    {
+        return $this->makeTimePretty($this->gameRunningTilTime);
     }
 
     public function setGameRunningTilTime(int $gameRunningTilTime): self

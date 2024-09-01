@@ -46,17 +46,28 @@ export default class extends Controller {
                 }
             }
         );
+        this.modal.hide();
+    }
+
+    async submitFormEditSession(event)
+    {
+        let successMessage = 'Successfully changed the session name.';
+        await this.submitFormGeneric(
+            event,
+            successMessage
+        );
     }
     
-    async submitFormGeneric(event, successMessage, successCallback)
+    async submitFormGeneric(event, successMessage, successCallback = null)
     {
         event.preventDefault();
-        let button = $('button[type=submit]');
+        const $form = $(this.modalBodyTarget).find('form');
+        let button = $form.find('button[type=submit]');
         if (button) {
+            var oldHtml = button.html();
             button.html('<i class="fa fa-refresh fa-spin"></i>');
             button.prop('disabled', true);
         }
-        const $form = $(this.modalBodyTarget).find('form');
         try {
             await $.ajax({
                 url: $form.prop('action'),
@@ -66,9 +77,12 @@ export default class extends Controller {
                 success: successCallback
             });
             success('Success', successMessage, { position: 'mm', duration: 10000 });
-            this.modal.hide();
         } catch (e) {
             this.modalBodyTarget.innerHTML = e.responseText;
+        }
+        if (button) {
+            button.html(oldHtml);
+            button.prop('disabled', false);
         }
     }
 }

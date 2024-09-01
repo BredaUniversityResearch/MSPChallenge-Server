@@ -5,11 +5,7 @@
                 <h1 class="modal-title">{{ modalTitle }}</h1>
                 <button type="button" class="btn-close" data-action="modal-default#closeModal"></button>
             </div>
-            {% if sessionId is defined %}
-                {% set src = path(modalTurboFraeSrcRoute, { sessionId: sessionId }) %}
-            {% else %}
-                {% set src = path(modalTurboFrameSrcRoute) %}
-            {% endif %}
+            {% set src = path(modalTurboFrameSrcRoute) %}
             <turbo-frame id="{{ modalTurboFrameId }}" src="{{ src }}">
             </turbo-frame>
         </div>

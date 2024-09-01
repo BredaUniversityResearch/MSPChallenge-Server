@@ -9,7 +9,7 @@
             <th>State</th>
             <th>Current Month</th>
             <th>Ending Month</th>
-            <th class="text-center">Quick Actions</th>
+            <th>Quick Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -39,7 +39,12 @@
                 </td>
                 <td>{{ game.current_month_formatted }} </td>
                 <td>{{ game.end_month_formatted }}</td>
-                <td class="text-center">
+                <td class="text-left">
+                    <button class="btn btn-secondary btn-sm" 
+                        data-modal-default-sessionid-param="{{ game.id }}" 
+                        data-action="modal-default#openDetailsModal">
+                        <i class="fa fa-info-circle" title= "Session details"></i>
+                    </button>
                     {% if game.session_state == 'failed' %}
                         <button class="btn btn-secondary btn-sm"
                                 {{ stimulus_controller('game', { id: game.id }) }}
@@ -77,23 +82,23 @@
                                     data-action="game#sessionState">
                                 <i class="fa fa-pause" title="Pause"></i>
                             </button>
+                            {% if game.game_state == 'setup' %}
+                            <button class="btn btn-secondary btn-sm"
+                                    {{ stimulus_controller('game', { id: game.id, type: 'full' }) }}
+                                    data-action="game#sessionSave">
+                                <i class="fa fa-save" title="Save"></i>
+                            </button>
+                            {% else %}
                             <button class="btn btn-secondary btn-sm" disabled>
                                 <i class="fa fa-save" title="Pause before you can save"></i>
                             </button>
+                            {% endif %}
                         {% else %}
                             <button class="btn btn-secondary btn-sm" disabled>
                                 <i class="fa fa-ban" title="State change not available in this state"></i>
                             </button>
-                            <button class="btn btn-secondary btn-sm" disabled>
-                                <i class="fa fa-ban" title="Save not available in this state"></i>
-                            </button>
                         {% endif %}
                     {% endif %}
-                    <button class="btn btn-primary" 
-                        data-modal-default-sessionid-param="{{ game.id }}" 
-                        data-action="modal-default#openDetailsModal">
-                        <i class="fa fa-info-circle" title= "Session details"></i>
-                    </button>
                 </td>
             </tr>
         {% endfor %}

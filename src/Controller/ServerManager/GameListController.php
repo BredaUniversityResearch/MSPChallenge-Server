@@ -117,7 +117,7 @@ class GameListController extends BaseController
         } else {
             $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
             $form = $this->createForm(GameListEditFormType::class, $gameSession, [
-                'action' => $this->generateUrl('manager_game_form', ['id' => $sessionId])
+                'action' => $this->generateUrl('manager_game_form', ['sessionId' => $sessionId])
             ]);
         }
         $form->handleRequest($request);
@@ -145,9 +145,12 @@ class GameListController extends BaseController
         int $sessionId = 1
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        $form = $this->createForm(GameListEditFormType::class, $gameSession, [
+            'action' => $this->generateUrl('manager_game_form', ['sessionId' => $sessionId])
+        ]);
         return $this->render(
             'manager/GameList/game_details.html.twig',
-            ['gameSession' => $gameSession]
+            ['gameSession' => $gameSession, 'gameSessionForm' => $form->createView()]
         );
     }
 
