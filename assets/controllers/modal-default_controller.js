@@ -1,23 +1,28 @@
 import { Controller } from 'stimulus';
 import { Modal } from 'bootstrap';
 import $ from 'jquery';
-import { success, error } from 'tata-js';
+import { success } from 'tata-js';
 
 export default class extends Controller {
     static targets = ['modal', 'modalBody'];
 
-    openModal(event)
+    prepModal()
     {
         let frame = document.querySelector('turbo-frame#' + this.element.dataset.turboframe);
         frame.innerHTML = '<div class="modal-body"><h3>Loading...</h3></div>';
+        return frame;
+    }
+
+    openModal(event)
+    {
+        let frame = this.prepModal();
         frame.reload();
         this.modal.show();
     }
 
     openDetailsModal({ params: { sessionid } })
     {
-        let frame = document.querySelector('turbo-frame#' + this.element.dataset.turboframe);
-        frame.innerHTML = '<div class="modal-body"><h3>Loading...</h3></div>';
+        let frame = this.prepModal();
         frame.src = '/manager/game/details/' + sessionid;
         this.modal.show();
     }

@@ -45,6 +45,12 @@
                         data-action="modal-default#openDetailsModal">
                         <i class="fa fa-info-circle" title= "Session details"></i>
                     </button>
+                    <span>
+                     {% if gameButton('play', game) %}
+                     boe
+                     {% endif %}
+                    </span>
+                        
                     {% if game.session_state == 'failed' %}
                         <button class="btn btn-secondary btn-sm"
                                 {{ stimulus_controller('game', { id: game.id }) }}

@@ -1,7 +1,6 @@
 import { Controller } from 'stimulus';
 import { success, error } from 'tata-js';
 import $ from "jquery";
-import modalDefault_controller from './modal-default_controller';
 
 export default class extends Controller {
     static values = {
@@ -97,12 +96,12 @@ export default class extends Controller {
         }
     }
 
-    async sessionExport()
+    sessionExport()
     {
         window.location = `/manager/game/${this.idValue}/export`;
     }
 
-    async sessionDownload()
+    sessionDownload()
     {
         window.location = `/manager/game/${this.idValue}/download`;
     }

@@ -59,6 +59,9 @@
                     </tr>
                     <tr class="table-info">
                         <td colspan="2">
+                        {% if gameButton('play', gameSession) %}
+                        boo!
+                        {% endif %}
                             <button id="sessionInfoButtonStartPause" class="btn btn-success btn-sm" onclick=""></button>
                             <button id="sessionInfoButtonFastForward" class="btn btn-success btn-sm" onclick=""></button>
                             <button id="sessionInfoButtonDemoToggle" class="btn btn-info btn-sm" onclick=""></button>
