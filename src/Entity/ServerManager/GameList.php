@@ -232,7 +232,7 @@ class GameList
 
     private function makeTimePretty(int $unixTimeStamp): string
     {
-        return \DateTimeImmutable::createFromFormat('U', $unixTimeStamp)
+        return \DateTimeImmutable::createFromFormat('U', (string) $unixTimeStamp)
             ->format('j M Y G:i');
     }
 
