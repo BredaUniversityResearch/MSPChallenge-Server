@@ -45,66 +45,31 @@
                         data-action="modal-default#openDetailsModal">
                         <i class="fa fa-info-circle" title= "Session details"></i>
                     </button>
-                    <span>
-                     {% if gameButton('play', game) %}
-                     boe
-                     {% endif %}
-                    </span>
-                        
-                    {% if game.session_state == 'failed' %}
-                        <button class="btn btn-secondary btn-sm"
-                                {{ stimulus_controller('game', { id: game.id }) }}
-                                data-action="game#sessionRecreate">
-                            <i class="fa fa-repeat" title="Retry session creation"></i>
-                        </button>
-                        <button class="btn btn-secondary btn-sm"
-                                {{ stimulus_controller('game', { id: game.id }) }}
-                                data-action="game#sessionArchive">
-                            <i class="fa fa-archive" title="Archive"></i>
-                        </button>
-                    {% elseif game.session_state == 'archived' %}
-                        <button class="btn btn-secondary btn-sm"
-                                {{ stimulus_controller('game', { id: game.id }) }}
-                                data-action="game#sessionDownload">
-                            <i class="fa fa-download" title="Download"></i>
-                        </button>
-                    {% elseif game.session_state == 'healthy' %}
-                        {% if game.game_state == 'pause' %}
-                            <button class="btn btn-secondary btn-sm"
-                                    {{ stimulus_controller('game', { id: game.id, state: 'play' }) }}
-                                    data-action="game#sessionState">
-                                <i class="fa fa-play" title="Play"></i>
-                            </button>
-                            <button class="btn btn-secondary btn-sm"
-                                    {{ stimulus_controller('game', { id: game.id, type: 'full' }) }}
-                                    data-action="game#sessionSave">
-                                <i class="fa fa-save" title="Save"></i>
-                            </button>
-                        {% elseif game.game_state == 'play' 
-                                or game.game_state == 'fastforward' 
-                                or game.game_state == 'setup' %}
-                            <button class="btn btn-secondary btn-sm"
-                                    {{ stimulus_controller('game', { id: game.id, state: 'pause' }) }}
-                                    data-action="game#sessionState">
-                                <i class="fa fa-pause" title="Pause"></i>
-                            </button>
-                            {% if game.game_state == 'setup' %}
-                            <button class="btn btn-secondary btn-sm"
-                                    {{ stimulus_controller('game', { id: game.id, type: 'full' }) }}
-                                    data-action="game#sessionSave">
-                                <i class="fa fa-save" title="Save"></i>
-                            </button>
-                            {% else %}
-                            <button class="btn btn-secondary btn-sm" disabled>
-                                <i class="fa fa-save" title="Pause before you can save"></i>
-                            </button>
-                            {% endif %}
-                        {% else %}
-                            <button class="btn btn-secondary btn-sm" disabled>
-                                <i class="fa fa-ban" title="State change not available in this state"></i>
-                            </button>
-                        {% endif %}
-                    {% endif %}
+                {% if gameButton('play', game) %}
+                    <button class="btn btn-secondary btn-sm"
+                            {{ stimulus_controller('game', { id: game.id, state: 'play' }) }}
+                            data-action="game#sessionState">
+                        <i class="fa fa-play" title="Play"></i>
+                    </button>
+                {% endif %}
+                {% if gameButton('pause', game) %}
+                    <button class="btn btn-secondary btn-sm"
+                            {{ stimulus_controller('game', { id: game.id, state: 'pause' }) }}
+                            data-action="game#sessionState">
+                        <i class="fa fa-pause" title="Pause"></i>
+                    </button>
+                {% endif %}
+                {% if gameButton('save', game) %}
+                    <button class="btn btn-secondary btn-sm"
+                            {{ stimulus_controller('game', { id: game.id, type: 'full' }) }}
+                            data-action="game#sessionSave">
+                        <i class="fa fa-save" title="Save"></i>
+                    </button>
+                {% else %}
+                    <button class="btn btn-secondary btn-sm" disabled>
+                        <i class="fa fa-save" title="Pause before you can save"></i>
+                    </button>
+                {% endif %}
                 </td>
             </tr>
         {% endfor %}
