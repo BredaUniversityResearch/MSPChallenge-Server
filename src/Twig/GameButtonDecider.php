@@ -10,8 +10,7 @@ class GameButtonDecider extends AbstractExtension
 {
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager
-    )
-    {
+    ) {
     }
 
     public function getFunctions()
