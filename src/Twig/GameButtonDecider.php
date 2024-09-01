@@ -35,25 +35,24 @@ class GameButtonDecider extends AbstractExtension
                 }
                 break;
             case 'play':
-                if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY && $gameSession->getGameState() == GameStateValue::PAUSE) {
+                if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY
+                    && $gameSession->getGameState() == GameStateValue::PAUSE) {
                     return true;
                 }
                 break;
             case 'pause':
-                if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY 
+                if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY
                     && ($gameSession->getGameState() == GameStateValue::PLAY
                         || $gameSession->getGameState() == GameStateValue::FASTFORWARD
-                        || $gameSession->getGameState() == GameStateValue::SETUP))
-                {
+                        || $gameSession->getGameState() == GameStateValue::SETUP)) {
                     return true;
                 }
                 break;
             case 'save':
             case 'archive':
-                if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY 
+                if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY
                     && ($gameSession->getGameState() == GameStateValue::PAUSE
-                        || $gameSession->getGameState() == GameStateValue::SETUP))
-                {
+                        || $gameSession->getGameState() == GameStateValue::SETUP)) {
                     return true;
                 }
                 break;
