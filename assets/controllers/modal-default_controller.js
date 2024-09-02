@@ -6,7 +6,7 @@ import { success } from 'tata-js';
 export default class extends Controller {
     static targets = ['modal', 'modalBody'];
 
-    prepModal()
+    prepAndGetTurboFrame()
     {
         let frame = document.querySelector('turbo-frame#' + this.element.dataset.turboframe);
         frame.innerHTML = '<div class="modal-body"><h3>Loading...</h3></div>';
@@ -15,15 +15,22 @@ export default class extends Controller {
 
     openModal(event)
     {
-        let frame = this.prepModal();
+        let frame = this.prepAndGetTurboFrame();
         frame.reload();
         this.modal.show();
     }
 
     openDetailsModal({ params: { sessionid } })
     {
-        let frame = this.prepModal();
+        let frame = this.prepAndGetTurboFrame();
         frame.src = '/manager/game/details/' + sessionid;
+        this.modal.show();
+    }
+
+    openAccessModal({ params: { sessionid } })
+    {
+        let frame = this.prepAndGetTurboFrame();
+        frame.src = '/manager/game/access/' + sessionid;
         this.modal.show();
     }
 

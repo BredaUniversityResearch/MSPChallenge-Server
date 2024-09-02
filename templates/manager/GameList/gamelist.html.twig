@@ -45,21 +45,21 @@
                         data-action="modal-default#openDetailsModal">
                         <i class="fa fa-info-circle" title= "Session details"></i>
                     </button>
-                {% if gameButton('play', game) %}
+                {% if showGameButton('play', game) %}
                     <button class="btn btn-secondary btn-sm"
                             {{ stimulus_controller('game', { id: game.id, state: 'play' }) }}
                             data-action="game#sessionState">
                         <i class="fa fa-play" title="Play"></i>
                     </button>
                 {% endif %}
-                {% if gameButton('pause', game) %}
+                {% if showGameButton('pause', game) %}
                     <button class="btn btn-secondary btn-sm"
                             {{ stimulus_controller('game', { id: game.id, state: 'pause' }) }}
                             data-action="game#sessionState">
                         <i class="fa fa-pause" title="Pause"></i>
                     </button>
                 {% endif %}
-                {% if gameButton('save', game) %}
+                {% if showGameButton('save', game) %}
                     <button class="btn btn-secondary btn-sm"
                             {{ stimulus_controller('game', { id: game.id, type: 'full' }) }}
                             data-action="game#sessionSave">

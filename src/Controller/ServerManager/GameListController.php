@@ -154,6 +154,22 @@ class GameListController extends BaseController
         );
     }
 
+    #[Route('/manager/game/access/{sessionId}', name: 'manager_game_access', requirements: ['sessionId' => '\d+'])]
+    public function gameSessionAccess(
+        EntityManagerInterface $entityManager,
+        int $sessionId = 1
+    ): Response {
+        // @todo
+        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        $form = $this->createForm(GameListEditFormType::class, $gameSession, [
+            'action' => $this->generateUrl('manager_game_form', ['sessionId' => $sessionId])
+        ]);
+        return $this->render(
+            'manager/GameList/game_details.html.twig',
+            ['gameSession' => $gameSession, 'gameSessionForm' => $form->createView()]
+        );
+    }
+
     #[Route('/manager/game/{sessionId}/log', name: 'manager_game_log', requirements: ['sessionId' => '\d+'])]
     public function gameSessionLog(KernelInterface $kernel, Request $request, int $sessionId): Response
     {
@@ -189,11 +205,19 @@ class GameListController extends BaseController
     public function gameSessionState(
         int $sessionId,
         string $state,
+        EntityManagerInterface $entityManager,
         WatchdogCommunicator $watchdogCommunicator,
         SymfonyToLegacyHelper $symfonyToLegacyHelper
     ): Response {
-        (new GameController($this->projectDir))
-            ->state($sessionId, $state, $watchdogCommunicator, $symfonyToLegacyHelper);
+        try {
+            (new GameController($this->projectDir))
+                ->state($sessionId, $state, $watchdogCommunicator, $symfonyToLegacyHelper);
+        } catch (\Throwable) {
+            return new Response(null, 422);
+        }
+        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        $gameSession->setGameState(new GameStateValue($state));
+        $entityManager->flush();
         return new Response(null, 204);
     }
 

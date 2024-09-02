@@ -18,7 +18,7 @@ class GameButtonDecider extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new TwigFunction('gameButton', [$this, 'gameButtonDecide']),
+            new TwigFunction('showGameButton', [$this, 'gameButtonDecide']),
         ];
     }
 
@@ -48,11 +48,19 @@ class GameButtonDecider extends AbstractExtension
                     return true;
                 }
                 break;
+            case 'access':
+                if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY) {
+                    return true;
+                }
+                break;
             case 'save':
             case 'archive':
+            case 'demo':
+            case 'export':
                 if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY
                     && ($gameSession->getGameState() == GameStateValue::PAUSE
-                        || $gameSession->getGameState() == GameStateValue::SETUP)) {
+                        || $gameSession->getGameState() == GameStateValue::SETUP
+                        || $gameSession->getGameState() == GameStateValue::END)) {
                     return true;
                 }
                 break;

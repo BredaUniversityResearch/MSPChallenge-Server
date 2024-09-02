@@ -17,6 +17,7 @@ export default class extends Controller {
                 method: 'GET',
             });
             success('Success',`Changed state to ${this.stateValue}`, { position: 'mm', duration: 10000 });
+            document.querySelector('turbo-frame#gameDetails').reload();
         } catch (e) {
             error(
                 'Error',
@@ -45,6 +46,7 @@ export default class extends Controller {
                 'Recreating session, please be patient...',
                 {position: 'mm', duration: 10000}
             );
+            document.querySelector('turbo-frame#gameDetails').reload();
         } catch (e) {
             error(
                 'Error',
@@ -63,9 +65,10 @@ export default class extends Controller {
             });
             success(
                 'Success',
-                'Archiving session, please be patient. A downloadable ZIP will become available shortly.',
+                'Archiving session, please be patient.',
                 { position: 'mm', duration: 10000 }
             );
+            document.querySelector('turbo-frame#gameDetails').reload();
         } catch (e) {
             error(
                 'Error',
@@ -101,11 +104,6 @@ export default class extends Controller {
         window.location = `/manager/game/${this.idValue}/export`;
     }
 
-    sessionDownload()
-    {
-        window.location = `/manager/game/${this.idValue}/download`;
-    }
-
     async sessionDemo()
     {
         try {
@@ -118,6 +116,7 @@ export default class extends Controller {
                 'Switched demo mode successfully.',
                 { position: 'mm', duration: 10000 }
             );
+            document.querySelector('turbo-frame#gameDetails').reload();
         } catch (e) {
             error(
                 'Error',
