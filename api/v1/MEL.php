@@ -715,6 +715,10 @@ SUBQUERY,
 
     private static function toWkt(array $coordinates): string
     {
+        // if the first and last element are not the same, add the first element to the end
+        if ($coordinates[0] !== end($coordinates)) {
+            $coordinates[] = $coordinates[0];
+        }
         $originalPolygonCoordsText = implode(
             ',',
             array_map(fn($p) => implode(' ', $p), $coordinates)
