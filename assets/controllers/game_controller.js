@@ -12,6 +12,7 @@ export default class extends Controller {
     async sessionState()
     {
         try {
+            this.element.disabled = true;
             await $.ajax({
                 url: `/manager/game/${this.idValue}/state/${this.stateValue}`,
                 method: 'GET',
@@ -24,12 +25,14 @@ export default class extends Controller {
                 'Session state change failed. ' + e.responseText,
                 { position: 'mm', duration: 10000 }
             );
+            this.element.disabled = false;
         }
     }
 
     async sessionRecreate()
     {
         try {
+            this.element.disabled = true;
             await $.ajax({
                 url: `/manager/game/${this.idValue}/recreate`,
                 method: 'GET',
@@ -53,12 +56,14 @@ export default class extends Controller {
                 'Session recreation failed. ' + e.responseText,
                 { position: 'mm', duration: 10000 }
             );
+            this.element.disabled = false;
         }
     }
 
     async sessionArchive()
     {
         try {
+            this.element.disabled = true;
             await $.ajax({
                 url: `/manager/game/${this.idValue}/archive`,
                 method: 'GET',
@@ -75,6 +80,7 @@ export default class extends Controller {
                 'Session archival failed. ' + e.responseText,
                 { position: 'mm', duration: 10000 }
             );
+            this.element.disabled = false;
         }
     }
 
@@ -107,6 +113,7 @@ export default class extends Controller {
     async sessionDemo()
     {
         try {
+            this.element.disabled = true;
             await $.ajax({
                 url: `/manager/game/${this.idValue}/demo`,
                 method: 'GET',
@@ -123,6 +130,7 @@ export default class extends Controller {
                 'Demo mode switch failed. ' + e.responseText,
                 { position: 'mm', duration: 10000 }
             );
+            this.element.disabled = false;
         }
     }
 
