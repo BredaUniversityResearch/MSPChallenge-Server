@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "5/16/2024",
-    "data_model_hash": "DC69C162BC0CE0FA77F206800CD1A1A6F3B00E410FBE3DD3F187A6F708AEA802",
+    "date_modified": "9/3/2024",
+    "data_model_hash": "9B92653DC5BF9EDBFA6687558D7069FEAA5E115E204F0C8F8872C7E7E7FF65E0",
     "errors": 0,
-    "editor_version": "1.0.0",
-    "config_version": "1.0.0"
+    "editor_version": "1.1.1",
+    "config_version": "1.1.1"
   },
   "datamodel": {
     "restrictions": {
@@ -33057,7 +33057,6 @@
           ]
         }
       ],
-      "layer_type_restriction_group_mapping": null,
       "output_configuration": {
         "pixels_per_mel_cell": 20,
         "simulation_area_cell_size": 5000
@@ -33175,40 +33174,34 @@
         {
           "ship_type_id": 1,
           "ship_type_name": "Cargo",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 2,
           "ship_type_name": "Cruise",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 3,
           "ship_type_name": "Ferry",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 4,
           "ship_type_name": "Tankers",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 5,
           "ship_type_name": "Maintenance",
-          "ship_restriction_group": null,
           "ship_routing_type": "Maintenance",
           "ship_agility": 0.99
         }
       ],
-      "ship_restriction_groups": null,
       "layer_type_ship_type_mapping": [
         {
           "layer_type": "Passenger",
@@ -33317,7 +33310,7 @@
           ]
         }
       }
-    },    
+    },
     "MEL": null,
     "meta": [
       {
@@ -33408,7 +33401,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Countries",
@@ -33483,7 +33477,8 @@
             "media": null
           }
         },
-        "layer_info_properties": []
+        "layer_info_properties": [],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Adriatic_Sea",
@@ -33558,7 +33553,8 @@
             "media": null
           }
         },
-        "layer_info_properties": []
+        "layer_info_properties": [],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Main_Cities",
@@ -33674,7 +33670,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Regions",
@@ -33736,7 +33733,8 @@
             "media": "wiki://Coastal_Regions"
           }
         },
-        "layer_info_properties": []
+        "layer_info_properties": [],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_EEZ",
@@ -33979,7 +33977,11 @@
             "media": "wiki://Blue"
           }
         },
-        "layer_info_properties": []
+        "layer_info_properties": [],
+        "layer_tags": [
+          "Polygon",
+          "EEZ"
+        ]
       },
       {
         "layer_name": "AS_Territorial_Waters",
@@ -34181,7 +34183,8 @@
             "media": "wiki://Grey"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Italian_Reference_Coast_Line",
@@ -34256,7 +34259,8 @@
             "media": "wiki://Italian_Reference_Coastline"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Planning_Sub_Areas",
@@ -34331,7 +34335,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Maritime_Compartments",
@@ -34406,7 +34411,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Marine_reporting_units",
@@ -34537,7 +34543,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Bathymetry",
@@ -34836,7 +34843,8 @@
             "media": "wiki://Bathymetry"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Wind_Intensity_Raster_25_m",
@@ -35051,7 +35059,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Wind_Intensity_Raster_50_m",
@@ -35266,7 +35275,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Wind_Intensity_Raster_75_m",
@@ -35481,7 +35491,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Wind_Intensity_Raster_100_m",
@@ -35696,7 +35707,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Ports",
@@ -35798,7 +35810,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Marinas",
@@ -35873,7 +35886,8 @@
             "media": "wiki://Marinas"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_IMO_Routes",
@@ -36089,7 +36103,8 @@
             "unit": "km",
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Anchorages",
@@ -36164,7 +36179,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_No_Shipping_zones",
@@ -36352,7 +36368,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Precautionary_Areas",
@@ -36511,7 +36528,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": []
+        "layer_info_properties": [],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Areas_to_be_avoided",
@@ -36670,7 +36688,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Shipping_Gates",
@@ -36745,7 +36764,8 @@
             "media": null
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Shipping_Intensity_All_raster",
@@ -36960,7 +36980,8 @@
             "media": null
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Shipping_Intensity_raster",
@@ -37147,7 +37168,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Shipping_Intensity_Cargo_raster",
@@ -37362,7 +37384,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Cargo_Intensity_Raster",
@@ -37549,7 +37572,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Shipping_Intensity_Passengers_raster",
@@ -37764,7 +37788,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Passenger_Intensity_Raster",
@@ -37951,7 +37976,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Maintenance_Intensity_Raster",
@@ -38138,7 +38164,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Shipping_Intensity_Tankers_raster",
@@ -38353,7 +38380,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Tanker_Intensity_Raster",
@@ -38540,7 +38568,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Shipping_Intensity_Fishing_raster",
@@ -38755,7 +38784,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_ConnectionPoints_10km",
@@ -38859,7 +38889,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Bathymetry_0_20m",
@@ -38934,7 +38965,8 @@
             "media": null
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Bathymetry_0_40m",
@@ -39009,7 +39041,8 @@
             "media": null
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Sand_Extraction",
@@ -39084,7 +39117,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Dredging",
@@ -39159,7 +39193,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Wind_Farms",
@@ -39274,7 +39309,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Wave_Farms",
@@ -39361,7 +39397,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Currents_Farms",
@@ -39448,7 +39485,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Oil_Gas_Safety_Zones",
@@ -39551,7 +39589,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Electricity_cables",
@@ -39682,7 +39721,8 @@
             "media": "wiki://AdriaticSea:Interconnectors_(electricity)/Unused"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Electricity_cables_edit",
@@ -39924,7 +39964,8 @@
             "unit": null,
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Electicity_Sockets",
@@ -40082,7 +40123,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Electricity_Transformers",
@@ -40240,7 +40282,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Telecom_Cables",
@@ -40343,7 +40386,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Pipelines",
@@ -40530,7 +40574,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Coastal_Municipalities_new",
@@ -40745,7 +40790,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Bathing_Waters",
@@ -40932,7 +40978,8 @@
             "media": null
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Oil_and_Gas_installations",
@@ -41091,7 +41138,8 @@
             "media": "wiki://Oil_%26_Gas_Installations"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Oil_and_Gas_Licensed_Areas",
@@ -41250,7 +41298,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_MPA",
@@ -41325,7 +41374,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Natura_2000_SPA_raster",
@@ -41428,7 +41478,8 @@
             "media": "wiki://Natura_2000"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Natura_2000_SCI_raster",
@@ -41531,7 +41582,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Nursery_Spawning_Raster",
@@ -41718,7 +41770,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Sensitive_seabed_habitats",
@@ -41989,7 +42042,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_EBSA",
@@ -42064,7 +42118,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Military_Areas",
@@ -42252,7 +42307,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "AS_research_sites",
@@ -42523,7 +42579,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Aquaculture",
@@ -42766,7 +42823,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Fishing_Intensity_raster",
@@ -42981,7 +43039,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Fishing_Restrictions",
@@ -43112,7 +43171,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_target_species_distribution_raster",
@@ -43299,7 +43359,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_target_species_new",
@@ -43766,7 +43827,8 @@
             "media": "wiki://Target_species/Tursiops truncatus"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "AS_Natura_2000",
@@ -43869,7 +43931,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       }
     ],
     "expertise_definitions": [],
@@ -43878,7 +43941,7 @@
     "edition_colour": "#5C67B0FF",
     "edition_letter": "A",
     "region": "adriatic",
-	"projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
+    "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2020,
     "end": 2060,
     "era_total_months": 120,
