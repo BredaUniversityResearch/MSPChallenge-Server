@@ -170,8 +170,8 @@ class GameListController extends BaseController
         );
     }
 
-    #[Route('/manager/game/{sessionId}/log', name: 'manager_game_log', requirements: ['sessionId' => '\d+'])]
-    public function gameSessionLog(KernelInterface $kernel, Request $request, int $sessionId): Response
+    #[Route('/manager/game/{sessionId}/log/{type}', name: 'manager_game_log', requirements: ['sessionId' => '\d+'])]
+    public function gameSessionLog(KernelInterface $kernel, Request $request, int $sessionId, string $type = 'excerpt'): Response
     {
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->redirectToRoute('manager');
@@ -188,7 +188,9 @@ class GameListController extends BaseController
             $rawLogContents
         );
         $logArray = explode('<br />', nl2br(trim($rawLogContents)));
-        $logArray = array_slice($logArray, -5);
+        if ($type == 'excerpt') {
+            $logArray = array_slice($logArray, -5);
+        }
         return $this->render('manager/GameList/game_log.html.twig', [
             'logToastBody' => $logArray
         ]);

@@ -73,6 +73,13 @@
                                 <i class="fa fa-pause"></i> Pause
                             </button>
                         {% endif %}
+                        {% if showGameButton('fastforward', gameSession) %}
+                            <button class="btn btn-success btn-sm"
+                                    {{ stimulus_controller('game', { id: gameSession.id, state: 'fastforward' }) }}
+                                    data-action="game#sessionState">
+                                <i class="fa fa-fast-forward"></i> Fast-forward
+                            </button>
+                        {% endif %}
                         {% if showGameButton('demo', gameSession) %}
                             {% if gameSession.demoSession == 1 %}
                                 {% set demoText = 'Disable demo mode' %}
@@ -93,11 +100,19 @@
                                     data-action="game#sessionRecreate">
                                 <i class="fa fa-repeat"></i> Recreate Session
                             </button>
+                        {% else %}
+                            <button class="btn btn-warning btn-sm" disabled>
+                                <i class="fa fa-repeat"></i> Recreate Session
+                            </button>
                         {% endif %}
                         {% if showGameButton('archive', gameSession) %}
                             <button class="btn btn-warning btn-sm"
                                     {{ stimulus_controller('game', { id: gameSession.id }) }}
                                     data-action="game#sessionArchive">
+                                <i class="fa fa-archive"></i> Archive Session
+                            </button>
+                        {% else %}
+                            <button class="btn btn-warning btn-sm" disabled>
                                 <i class="fa fa-archive"></i> Archive Session
                             </button>
                         {% endif %}
@@ -116,6 +131,13 @@
                                     data-action="game#sessionSave">
                                 <i class="fa fa-save"></i> Save All Layers
                             </button>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                <i class="fa fa-save"></i> Save Session as File
+                            </button>
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                <i class="fa fa-save"></i> Save All Layers
+                            </button>
                         {% endif %}
                         </td>
                         <td colspan="2" class="text-right">
@@ -132,17 +154,23 @@
                                     data-action="game#sessionExport">
                                 <i class="fa fa-file-code-o"></i> Export with Current Plans
                             </button>
+                        {% else %}
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                <i class="fa fa-file-code-o"></i> Export with Current Plans
+                            </button>
                         {% endif %}
                         </td>
                     </tr>
                     <tr class="table-info">
                         <td colspan="4" class="text-left">
-                            <button id="sessionInfoButtonServerLog" onclick="" class="btn btn-secondary btn-sm"><i class="fa fa-bars" aria-hidden="true"></i></i> Show/Hide Session Creation Log</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" class="text-center p-0">
-                            <div id="sessionInfoLog" style="width: 100%; height: 115px; overflow-y:auto; font-size:14px; background-color: #e9ecef; text-align: left; resize: both; display: none;">
+                            <button class="btn btn-secondary btn-sm"
+                                    {{ stimulus_controller('game') }}
+                                    data-action="game#toggleSessionInfoLog">
+                                <i class="fa fa-bars" aria-hidden="true"></i> Show/Hide Session Creation Log
+                            </button>
+                            <div id="sessionInfoLog">
+                                <turbo-frame id="logToastBodyTurboFrame" src="/manager/game/{{ gameSession.id }}/log/complete">
+                                </turbo-frame>
                             </div>
                         </td>
                     </tr>

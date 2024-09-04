@@ -250,6 +250,16 @@ a:active {
     margin: auto;
 }
 
+#sessionInfoLog {
+    width: 700px; 
+    height: 180px;
+    padding: 10px;
+    overflow-y: auto; 
+    background-color: #e9ecef; 
+    resize: both; 
+    display: none;
+}
+
 #footer-wrapper {
     padding: 20px 0 30px 0;
     font-size: 15px;

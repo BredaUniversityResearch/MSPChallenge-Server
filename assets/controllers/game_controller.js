@@ -9,6 +9,15 @@ export default class extends Controller {
         type: String
     }
 
+    toggleSessionInfoLog()
+    {
+        if ($('#sessionInfoLog').is(':visible')) {
+            $('#sessionInfoLog').hide();
+        } else {
+            $('#sessionInfoLog').show();
+        }
+    }
+
     async sessionState()
     {
         try {

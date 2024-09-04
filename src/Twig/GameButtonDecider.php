@@ -30,13 +30,15 @@ class GameButtonDecider extends AbstractExtension
         }
         switch ($buttonType) {
             case 'recreate':
-                if (!$gameSession->getSessionState() == GameSessionStateValue::ARCHIVED) {
+            case 'archive':
+                if ($gameSession->getSessionState() != GameSessionStateValue::ARCHIVED) {
                     return true;
                 }
                 break;
             case 'play':
                 if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY
-                    && $gameSession->getGameState() == GameStateValue::PAUSE) {
+                    && ($gameSession->getGameState() == GameStateValue::PAUSE
+                        || $gameSession->getGameState() == GameStateValue::FASTFORWARD)) {
                     return true;
                 }
                 break;
@@ -48,14 +50,20 @@ class GameButtonDecider extends AbstractExtension
                     return true;
                 }
                 break;
+            case 'fastforward':
+                if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY
+                    && ($gameSession->getGameState() == GameStateValue::PLAY
+                        || $gameSession->getGameState() == GameStateValue::PAUSE)) {
+                    return true;
+                }
+                break;
             case 'access':
+            case 'demo':
                 if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY) {
                     return true;
                 }
                 break;
             case 'save':
-            case 'archive':
-            case 'demo':
             case 'export':
                 if ($gameSession->getSessionState() == GameSessionStateValue::HEALTHY
                     && ($gameSession->getGameState() == GameStateValue::PAUSE

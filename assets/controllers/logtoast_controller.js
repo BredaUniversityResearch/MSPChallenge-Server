@@ -8,7 +8,7 @@ export default class extends Controller {
     showToast()
     {
         $('#logToastTitle').html('Log of session #' + this.element.dataset.session);
-        $('#logToastBodyTurboFrame').attr('src', '/manager/game/' + this.element.dataset.session +'/log');
+        document.querySelector('turbo-frame#logToastBodyTurboFrame').src = '/manager/game/' + this.element.dataset.session +'/log';
         $('#logToast').show();
         this.timeout = setInterval(function () {
             document.querySelector('turbo-frame#logToastBodyTurboFrame').reload();
