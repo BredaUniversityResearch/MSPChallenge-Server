@@ -171,8 +171,12 @@ class GameListController extends BaseController
     }
 
     #[Route('/manager/game/{sessionId}/log/{type}', name: 'manager_game_log', requirements: ['sessionId' => '\d+'])]
-    public function gameSessionLog(KernelInterface $kernel, Request $request, int $sessionId, string $type = 'excerpt'): Response
-    {
+    public function gameSessionLog(
+        KernelInterface $kernel,
+        Request $request,
+        int $sessionId,
+        string $type = 'excerpt'
+    ): Response {
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->redirectToRoute('manager');
         }
