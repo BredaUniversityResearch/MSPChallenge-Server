@@ -20,18 +20,21 @@ export default class extends Controller {
         this.modal.show();
     }
 
-    openDetailsModal({ params: { sessionid } })
+    openSpecialModalBySessionId(endpoint, event)
     {
         let frame = this.prepAndGetTurboFrame();
-        frame.src = '/manager/game/details/' + sessionid;
+        frame.src = '/manager/game/' + endpoint + '/' + event.currentTarget.dataset.session;
         this.modal.show();
     }
 
-    openAccessModal({ params: { sessionid } })
+    openDetailsModal(event)
     {
-        let frame = this.prepAndGetTurboFrame();
-        frame.src = '/manager/game/access/' + sessionid;
-        this.modal.show();
+        this.openSpecialModalBySessionId('details', event);
+    }
+
+    openAccessModal()
+    {
+        this.openSpecialModalBySessionId('access', event);
     }
 
     closeModal(event)
@@ -59,15 +62,6 @@ export default class extends Controller {
             }
         );
         this.modal.hide();
-    }
-
-    async submitFormEditSession(event)
-    {
-        let successMessage = 'Successfully changed the session name.';
-        await this.submitFormGeneric(
-            event,
-            successMessage
-        );
     }
     
     async submitFormGeneric(event, successMessage, successCallback = null)

@@ -1,15 +1,15 @@
 <turbo-frame id="logToastBodyTurboFrame">
     {% for logLines in logToastBody %}
-        <div>
-        {{ logLines | replace(
+        <ul class="list-group">
+        <li class="text-break list-group-item {{ logLines | replace(
             {
-                'INFO:': '<span style="color: green;">INFO:</span>',
-                'NOTICE:': '<span style="color: green;">NOTICE:</span>',
-                'ERROR:': '<span style="color: red;">ERROR:</span>',
-                'WARNING:': '<span style="color: navy;">WARNING:</span>',
-                'DEBUG:': '<span style="color: grey;">DEBUG:</span>',
+                'INFO:': 'list-group-item-primary">',
+                'NOTICE:': 'list-group-item-success">',
+                'ERROR:': 'list-group-item-danger">',
+                'WARNING:': 'list-group-item-warning">',
+                'DEBUG:': 'list-group-item-light">',
             }
-        ) | raw}}
-        </div>
+        ) | raw}}</li>
+        </ul>
     {% endfor %}
 </turbo-frame>

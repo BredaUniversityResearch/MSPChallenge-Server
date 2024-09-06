@@ -5,36 +5,58 @@ import $ from "jquery";
 export default class extends Controller {
     static values = {
         id: Number,
-        state: String,
-        type: String
+        name: String
     }
 
-    toggleSessionInfoLog()
+    startAutoReload()
     {
-        if ($('#sessionInfoLog').is(':visible')) {
-            $('#sessionInfoLog').hide();
-        } else {
-            $('#sessionInfoLog').show();
+        if (typeof gameDetailsFrameReloader === 'undefined') {
+            var gameDetailsFrameReloader = setInterval(function () {
+                this.reloadGameDetailsFrame()
+            }, 5000);
+            alert('reloader defined');
         }
     }
 
-    async sessionState()
+    reloadGameDetailsFrame()
     {
+        document.querySelector('turbo-frame#gameDetails').reload();
+    }
+
+    async editNameThroughPrompt()
+    {
+        let name = prompt('Session name: ', this.nameValue);
+        console.log(name);
         try {
-            this.element.disabled = true;
             await $.ajax({
-                url: `/manager/game/${this.idValue}/state/${this.stateValue}`,
-                method: 'GET',
+                url: '/manager/game/name/' + this.idValue,
+                method: 'post',
+                data: { name: name },
+                dataType: 'json'
             });
-            success('Success',`Changed state to ${this.stateValue}`, { position: 'mm', duration: 10000 });
-            document.querySelector('turbo-frame#gameDetails').reload();
+            success('Success', 'Session name successfully changed.', { position: 'mm', duration: 10000 });
+            this.reloadGameDetailsFrame();
+        } catch (e) {
+            error('Error', e.responseText, { position: 'mm', duration: 10000 });
+        }
+    }
+
+    async sessionState(event)
+    {
+        this.element.disabled = true;
+        let state = event.currentTarget.dataset.state;
+        try {    
+            await $.ajax({
+                url: `/manager/game/${this.idValue}/state/${state}`,
+                method: 'GET'
+            });
+            success('Success',`Changed state to ${state}`, { position: 'mm', duration: 10000 });
         } catch (e) {
             error(
                 'Error',
                 'Session state change failed. ' + e.responseText,
                 { position: 'mm', duration: 10000 }
             );
-            this.element.disabled = false;
         }
     }
 
@@ -58,7 +80,7 @@ export default class extends Controller {
                 'Recreating session, please be patient...',
                 {position: 'mm', duration: 10000}
             );
-            document.querySelector('turbo-frame#gameDetails').reload();
+            this.reloadGameDetailsFrame();
         } catch (e) {
             error(
                 'Error',
@@ -82,7 +104,7 @@ export default class extends Controller {
                 'Archiving session, please be patient.',
                 { position: 'mm', duration: 10000 }
             );
-            document.querySelector('turbo-frame#gameDetails').reload();
+            this.reloadGameDetailsFrame();
         } catch (e) {
             error(
                 'Error',
@@ -93,11 +115,11 @@ export default class extends Controller {
         }
     }
 
-    async sessionSave()
+    async sessionSave(event)
     {
         try {
             await $.ajax({
-                url: `/manager/game/${this.idValue}/save/${this.typeValue}`,
+                url: `/manager/game/${this.idValue}/save/${event.currentTarget.dataset.type}`,
                 method: 'GET',
             });
             success(
@@ -132,7 +154,7 @@ export default class extends Controller {
                 'Switched demo mode successfully.',
                 { position: 'mm', duration: 10000 }
             );
-            document.querySelector('turbo-frame#gameDetails').reload();
+            this.reloadGameDetailsFrame();
         } catch (e) {
             error(
                 'Error',

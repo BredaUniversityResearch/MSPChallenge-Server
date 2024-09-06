@@ -102,6 +102,18 @@ class GameListController extends BaseController
             ]));
     }
 
+    #[Route('/manager/game/name/{sessionId}', name: 'manager_game_name', requirements: ['sessionId' => '\d+'])]
+    public function gameSessionName(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        int $sessionId
+    ): Response {
+        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        $gameSession->setName($request->get('name'));
+        $entityManager->flush();
+        return new Response(null, 204);
+    }
+
     #[Route('/manager/game/form/{sessionId}', name: 'manager_game_form', requirements: ['sessionId' => '\d+'])]
     public function gameSessionForm(
         Request $request,
