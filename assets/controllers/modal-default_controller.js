@@ -4,55 +4,73 @@ import $ from 'jquery';
 import { success } from 'tata-js';
 
 export default class extends Controller {
-    static targets = ['modal', 'modalBody'];
+    static targets = ['modalNewSession', 'modalNewSessionBody', 'modalSessionDetails', 'modalSessionAccess'];
 
-    prepAndGetTurboFrame()
+    static gameDetailsFrameReloader;
+
+    prepAndGetTurboFrame(modalTurboFrame)
     {
-        let frame = document.querySelector('turbo-frame#' + this.element.dataset.turboframe);
+        let frame = document.querySelector('turbo-frame#' + modalTurboFrame);
         frame.innerHTML = '<div class="modal-body"><h3>Loading...</h3></div>';
         return frame;
     }
 
-    openModal(event)
+    openNewSessionModal(event)
     {
-        let frame = this.prepAndGetTurboFrame();
+        let frame = this.prepAndGetTurboFrame('gameForm');
         frame.reload();
-        this.modal.show();
+        Modal.getOrCreateInstance(this.modalNewSessionTarget).show();
     }
 
-    openSpecialModalBySessionId(endpoint, event)
+    openSessionDetailsModal(event)
     {
-        let frame = this.prepAndGetTurboFrame();
-        frame.src = '/manager/game/' + endpoint + '/' + event.currentTarget.dataset.session;
-        this.modal.show();
+        let frame = this.prepAndGetTurboFrame('gameDetails');
+        frame.src = '/manager/game/details/' + event.currentTarget.dataset.session;
+        Modal.getOrCreateInstance(this.modalSessionDetailsTarget).show();
+        this.startDetailsModalAutoReload();
     }
 
-    openDetailsModal(event)
+    openSessionAccessModal(event)
     {
-        this.openSpecialModalBySessionId('details', event);
+        let frame = this.prepAndGetTurboFrame('gameAccess');
+        frame.src = '/manager/game/access/' + event.currentTarget.dataset.session;
+        Modal.getOrCreateInstance(this.modalSessionAccessTarget).show();
     }
 
-    openAccessModal()
+    closeNewSessionModal(event)
     {
-        this.openSpecialModalBySessionId('access', event);
+        Modal.getOrCreateInstance(this.modalNewSessionTarget).hide();
     }
 
-    closeModal(event)
+    closeSessionDetailsModal(event)
     {
-        this.modal.hide();
+        Modal.getOrCreateInstance(this.modalSessionDetailsTarget).hide();
+        this.stopDetailsModalAutoReload();
     }
 
-    get modal()
+    closeSessionAccessModal(event)
     {
-        return Modal.getOrCreateInstance(this.modalTarget);
+        Modal.getOrCreateInstance(this.modalSessionAccessTarget).hide();
+    }
+
+    startDetailsModalAutoReload()
+    {
+        this.gameDetailsFrameReloader = setInterval(function () {
+            document.querySelector('turbo-frame#gameDetails').reload();
+        }, 5000);
+    }
+
+    stopDetailsModalAutoReload()
+    {
+        clearInterval(this.gameDetailsFrameReloader);
     }
 
     async submitFormNewSession(event)
     {
-        let successMessage = 'Successfully added a new session. Please wait for it to be finalised...';
         await this.submitFormGeneric(
             event,
-            successMessage,
+            this.modalNewSessionBodyTarget,
+            'Successfully added a new session. Please wait for it to be finalised...',
             function (sessionId) {
                 if (sessionId) {
                     $('#logToast').attr('data-session', sessionId);
@@ -61,13 +79,13 @@ export default class extends Controller {
                 }
             }
         );
-        this.modal.hide();
+        this.closeNewSessionModal();
     }
     
-    async submitFormGeneric(event, successMessage, successCallback = null)
+    async submitFormGeneric(event, target, successMessage, successCallback = null)
     {
         event.preventDefault();
-        const $form = $(this.modalBodyTarget).find('form');
+        const $form = $(target).find('form');
         let button = $form.find('button[type=submit]');
         if (button) {
             var oldHtml = button.html();
@@ -84,7 +102,7 @@ export default class extends Controller {
             });
             success('Success', successMessage, { position: 'mm', duration: 10000 });
         } catch (e) {
-            this.modalBodyTarget.innerHTML = e.responseText;
+            target.innerHTML = e.responseText;
         }
         if (button) {
             button.html(oldHtml);

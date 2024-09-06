@@ -5,10 +5,10 @@ export default class extends Controller {
 
     static timeout;
 
-    showToast()
+    showToast(event)
     {
-        $('#logToastTitle').html('Log of session #' + this.element.dataset.session);
-        document.querySelector('turbo-frame#logToastBodyTurboFrame').src = '/manager/game/' + this.element.dataset.session +'/log';
+        $('#logToastTitle').html('Log of session #' + event.currentTarget.dataset.session);
+        document.querySelector('turbo-frame#logToastBodyTurboFrame').src = '/manager/game/' + event.currentTarget.dataset.session +'/log';
         $('#logToast').show();
         this.timeout = setInterval(function () {
             document.querySelector('turbo-frame#logToastBodyTurboFrame').reload();

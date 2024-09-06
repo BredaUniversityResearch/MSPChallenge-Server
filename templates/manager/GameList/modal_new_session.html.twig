@@ -1,0 +1,13 @@
+<div class="modal fade" tabindex="-1" aria-hidden="true" data-modal-default-target="modalNewSession">
+    <div class="modal-dialog modal-wide">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Create New Session</h1>
+                <button type="button" class="btn-close" data-action="modal-default#closeNewSessionModal"></button>
+            </div>
+            {% set src = path('manager_game_form') %}
+            <turbo-frame id="gameForm" src="{{ src }}">
+            </turbo-frame>
+        </div>
+    </div>
+</div>

@@ -4,17 +4,11 @@
 
 {% block body %}
     <div class="py-1" {{ stimulus_controller('modal-default') }} data-turboframe="gameForm">
-        <button type="button" id="modalNewSession" class="btn btn-primary" data-action="modal-default#openModal">
+        <button type="button" id="modalNewSession" class="btn btn-primary" data-action="modal-default#openNewSessionModal">
             <i class="fa fa-plus-circle" title="Create new session"></i>
             New Session
         </button>
-        {{ include('manager/modal_default.html.twig',
-            {
-                'modalTitle': 'Create New Session',
-                'modalTurboFrameId': 'gameForm',
-                'modalTurboFrameSrcRoute': 'manager_game_form'
-            }
-        )}}
+        {{ include('manager/GameList/modal_new_session.html.twig') }}
     </div>
     <div class="col-md-12 py-2">
         <div class="pull-right" >Filter:
@@ -41,13 +35,8 @@
                 {{ stimulus_controller('gamelist') }}>
             </turbo-frame>
         </div>
-        {{ include('manager/modal_default.html.twig',
-            {
-                'modalTitle': 'Session Details',
-                'modalTurboFrameId': 'gameDetails',
-                'modalTurboFrameSrcRoute': 'manager_game_details'
-            }
-        )}}
+        {{ include('manager/GameList/modal_session_details.html.twig')}}
+        {{ include('manager/GameList/modal_session_access.html.twig')}}
     </div>
     
 

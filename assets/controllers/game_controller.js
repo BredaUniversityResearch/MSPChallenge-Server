@@ -8,13 +8,16 @@ export default class extends Controller {
         name: String
     }
 
-    startAutoReload()
+    toggleSessionInfoLog()
     {
-        if (typeof gameDetailsFrameReloader === 'undefined') {
-            var gameDetailsFrameReloader = setInterval(function () {
-                this.reloadGameDetailsFrame()
-            }, 5000);
-            alert('reloader defined');
+        if ($('#sessionInfoLog').is(':visible')) {
+            $('#sessionInfoLog').hide();
+            const event = new CustomEvent("infolog-hiding");
+            window.dispatchEvent(event);
+        } else {
+            $('#sessionInfoLog').show();
+            const event = new CustomEvent("infolog-showing");
+            window.dispatchEvent(event);
         }
     }
 
@@ -23,10 +26,14 @@ export default class extends Controller {
         document.querySelector('turbo-frame#gameDetails').reload();
     }
 
+    disableUntilAutoReloadFrame(target)
+    {
+        target.disabled = true;
+    }
+
     async editNameThroughPrompt()
     {
         let name = prompt('Session name: ', this.nameValue);
-        console.log(name);
         try {
             await $.ajax({
                 url: '/manager/game/name/' + this.idValue,
@@ -37,14 +44,14 @@ export default class extends Controller {
             success('Success', 'Session name successfully changed.', { position: 'mm', duration: 10000 });
             this.reloadGameDetailsFrame();
         } catch (e) {
-            error('Error', e.responseText, { position: 'mm', duration: 10000 });
+            error('Error', 'Session name change failed.', { position: 'mm', duration: 10000 });
         }
     }
 
     async sessionState(event)
     {
-        this.element.disabled = true;
         let state = event.currentTarget.dataset.state;
+        this.disableUntilAutoReloadFrame(event.currentTarget);
         try {    
             await $.ajax({
                 url: `/manager/game/${this.idValue}/state/${state}`,
@@ -52,18 +59,14 @@ export default class extends Controller {
             });
             success('Success',`Changed state to ${state}`, { position: 'mm', duration: 10000 });
         } catch (e) {
-            error(
-                'Error',
-                'Session state change failed. ' + e.responseText,
-                { position: 'mm', duration: 10000 }
-            );
+            error('Error', 'Session state change failed. ', { position: 'mm', duration: 10000 });
         }
     }
 
-    async sessionRecreate()
+    async sessionRecreate(event)
     {
+        this.disableUntilAutoReloadFrame(event.currentTarget);
         try {
-            this.element.disabled = true;
             await $.ajax({
                 url: `/manager/game/${this.idValue}/recreate`,
                 method: 'GET',
@@ -72,67 +75,42 @@ export default class extends Controller {
                         $('#logToast').attr('data-session', result);
                         const event = new CustomEvent("session-changing");
                         window.dispatchEvent(event);
+                        const event2 = new CustomEvent("modal-closing");
+                        window.dispatchEvent(event2);
                     }
                 }
             });
-            success(
-                'Success',
-                'Recreating session, please be patient...',
-                {position: 'mm', duration: 10000}
-            );
-            this.reloadGameDetailsFrame();
+            success('Success', 'Recreating session, please be patient...', { position: 'mm', duration: 10000 });
         } catch (e) {
-            error(
-                'Error',
-                'Session recreation failed. ' + e.responseText,
-                { position: 'mm', duration: 10000 }
-            );
-            this.element.disabled = false;
+            error('Error', 'Session recreation failed.', { position: 'mm', duration: 10000 });
         }
     }
 
-    async sessionArchive()
+    async sessionArchive(event)
     {
+        this.disableUntilAutoReloadFrame(event.currentTarget);
         try {
-            this.element.disabled = true;
             await $.ajax({
                 url: `/manager/game/${this.idValue}/archive`,
                 method: 'GET',
             });
-            success(
-                'Success',
-                'Archiving session, please be patient.',
-                { position: 'mm', duration: 10000 }
-            );
-            this.reloadGameDetailsFrame();
+            success('Success', 'Archiving session, please be patient.', { position: 'mm', duration: 10000 });
         } catch (e) {
-            error(
-                'Error',
-                'Session archival failed. ' + e.responseText,
-                { position: 'mm', duration: 10000 }
-            );
-            this.element.disabled = false;
+            error('Error', 'Session archival failed.', { position: 'mm', duration: 10000 });
         }
     }
 
     async sessionSave(event)
     {
+        let type = event.currentTarget.dataset.type;
         try {
             await $.ajax({
-                url: `/manager/game/${this.idValue}/save/${event.currentTarget.dataset.type}`,
+                url: `/manager/game/${this.idValue}/save/${type}`,
                 method: 'GET',
             });
-            success(
-                'Success',
-                'Saving session, please be patient. Check the Saves page to find it.',
-                { position: 'mm', duration: 10000 }
-            );
+            success('Success', 'Saving session, please be patient. Check the Saves page to find it.',{ position: 'mm', duration: 10000 });
         } catch (e) {
-            error(
-                'Error',
-                'Session save failed. ' + e.responseText,
-                { position: 'mm', duration: 10000 }
-            );
+            error('Error', 'Session save failed.', { position: 'mm', duration: 10000 });
         }
     }
 
@@ -141,27 +119,17 @@ export default class extends Controller {
         window.location = `/manager/game/${this.idValue}/export`;
     }
 
-    async sessionDemo()
+    async sessionDemo(event)
     {
+        this.disableUntilAutoReloadFrame(event.currentTarget);
         try {
-            this.element.disabled = true;
             await $.ajax({
                 url: `/manager/game/${this.idValue}/demo`,
                 method: 'GET',
             });
-            success(
-                'Success',
-                'Switched demo mode successfully.',
-                { position: 'mm', duration: 10000 }
-            );
-            this.reloadGameDetailsFrame();
+            success('Success', 'Switched demo mode successfully.', { position: 'mm', duration: 10000 });
         } catch (e) {
-            error(
-                'Error',
-                'Demo mode switch failed. ' + e.responseText,
-                { position: 'mm', duration: 10000 }
-            );
-            this.element.disabled = false;
+            error('Error', 'Demo mode switch failed.', { position: 'mm', duration: 10000 });
         }
     }
 

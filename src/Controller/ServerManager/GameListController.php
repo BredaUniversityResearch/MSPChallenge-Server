@@ -29,6 +29,7 @@ use App\Entity\ServerManager\Setting;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\Domain\Communicator\WatchdogCommunicator;
+use App\Message\GameList\GameListArchiveMessage;
 
 class GameListController extends BaseController
 {
@@ -177,7 +178,7 @@ class GameListController extends BaseController
             'action' => $this->generateUrl('manager_game_form', ['sessionId' => $sessionId])
         ]);
         return $this->render(
-            'manager/GameList/game_details.html.twig',
+            'manager/GameList/game_access.html.twig',
             ['gameSession' => $gameSession, 'gameSessionForm' => $form->createView()]
         );
     }
@@ -239,25 +240,15 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/game/{id}/recreate', name: 'manager_game_recreate', requirements: ['id' => '\d+'])]
+    #[Route('/manager/game/{sessionId}/recreate', name: 'manager_game_recreate', requirements: ['sessionId' => '\d+'])]
     public function gameSessionRecreate(
         EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
-        int $id
+        int $sessionId
     ): Response {
-        $gameSession = $entityManager->getRepository(GameList::class)->find($id);
-        if (is_null($gameSession)) {
-            return new Response(null, 422);
-        }
-        if (!is_null($gameSession->getGameConfigVersion())) {
-            $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
-            return new Response($gameSession->getId(), 200);
-        }
-        if (!is_null($gameSession->getGameSave())) {
-            $messageBus->dispatch(new GameSaveLoadMessage($gameSession->getId(), $gameSession->getGameSave()->getId()));
-            return new Response($gameSession->getId(), 200);
-        }
-        return new Response(null, 422);
+        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
+        return new Response($gameSession->getId(), 200);
     }
 
     #[Route('/manager/game/{id}/archive', name: 'manager_game_archive', requirements: ['id' => '\d+'])]
@@ -267,13 +258,9 @@ class GameListController extends BaseController
         int $id
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($id);
-        if (is_null($gameSession) || $gameSession->getSessionState() == 'archived') {
-            return new Response(null, 422);
-        }
         $gameSession->setSessionState(new GameSessionStateValue('archived'));
-        $entityManager->persist($gameSession);
         $entityManager->flush();
-        //$messageBus->dispatch(new GameListSessionArchive($gameSession->getId()));
+        $messageBus->dispatch(new GameListArchiveMessage($gameSession->getId()));
         return new Response(null, 204);
     }
 

@@ -1,0 +1,14 @@
+<div class="modal fade" tabindex="-1" aria-hidden="true" data-modal-default-target="modalSessionDetails"
+    data-action="modal-closing@window->modal-default#closeSessionDetailsModal infolog-showing@window->modal-default#stopDetailsModalAutoReload infolog-hiding@window->modal-default#startDetailsModalAutoReload">
+    <div class="modal-dialog modal-wide">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title">Session Details</h1>
+                <button type="button" class="btn-close" data-action="modal-default#closeSessionDetailsModal"></button>
+            </div>
+            {% set src = path('manager_game_details') %}
+            <turbo-frame id="gameDetails" src="{{ src }}">
+            </turbo-frame>
+        </div>
+    </div>
+</div>
