@@ -209,6 +209,7 @@ class GameListController extends BaseController
             $logArray = array_slice($logArray, -5);
         }
         return $this->render('manager/GameList/game_log.html.twig', [
+            'type' => $type,
             'logToastBody' => $logArray
         ]);
     }
@@ -234,9 +235,6 @@ class GameListController extends BaseController
         } catch (\Throwable) {
             return new Response(null, 422);
         }
-        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
-        $gameSession->setGameState(new GameStateValue($state));
-        $entityManager->flush();
         return new Response(null, 204);
     }
 

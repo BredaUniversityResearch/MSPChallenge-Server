@@ -26,7 +26,7 @@ export default class extends Controller {
         document.querySelector('turbo-frame#gameDetails').reload();
     }
 
-    disableUntilAutoReloadFrame(target)
+    disableButton(target)
     {
         target.disabled = true;
     }
@@ -42,16 +42,16 @@ export default class extends Controller {
                 dataType: 'json'
             });
             success('Success', 'Session name successfully changed.', { position: 'mm', duration: 10000 });
-            this.reloadGameDetailsFrame();
         } catch (e) {
             error('Error', 'Session name change failed.', { position: 'mm', duration: 10000 });
         }
+        this.reloadGameDetailsFrame();
     }
 
     async sessionState(event)
     {
         let state = event.currentTarget.dataset.state;
-        this.disableUntilAutoReloadFrame(event.currentTarget);
+        this.disableButton(event.currentTarget);
         try {    
             await $.ajax({
                 url: `/manager/game/${this.idValue}/state/${state}`,
@@ -61,11 +61,12 @@ export default class extends Controller {
         } catch (e) {
             error('Error', 'Session state change failed. ', { position: 'mm', duration: 10000 });
         }
+        // no reload, let autoreload handle it
     }
 
     async sessionRecreate(event)
     {
-        this.disableUntilAutoReloadFrame(event.currentTarget);
+        this.disableButton(event.currentTarget);
         try {
             await $.ajax({
                 url: `/manager/game/${this.idValue}/recreate`,
@@ -88,16 +89,21 @@ export default class extends Controller {
 
     async sessionArchive(event)
     {
-        this.disableUntilAutoReloadFrame(event.currentTarget);
+        this.disableButton(event.currentTarget);
         try {
             await $.ajax({
                 url: `/manager/game/${this.idValue}/archive`,
                 method: 'GET',
+                success: function (results) {
+                    const event = new CustomEvent("modal-closing");
+                    window.dispatchEvent(event);
+                }
             });
             success('Success', 'Archiving session, please be patient.', { position: 'mm', duration: 10000 });
         } catch (e) {
             error('Error', 'Session archival failed.', { position: 'mm', duration: 10000 });
         }
+        this.reloadGameDetailsFrame();
     }
 
     async sessionSave(event)
@@ -121,7 +127,7 @@ export default class extends Controller {
 
     async sessionDemo(event)
     {
-        this.disableUntilAutoReloadFrame(event.currentTarget);
+        this.disableButton(event.currentTarget);
         try {
             await $.ajax({
                 url: `/manager/game/${this.idValue}/demo`,
@@ -131,6 +137,7 @@ export default class extends Controller {
         } catch (e) {
             error('Error', 'Demo mode switch failed.', { position: 'mm', duration: 10000 });
         }
+        this.reloadGameDetailsFrame();
     }
 
 }

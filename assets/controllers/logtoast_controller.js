@@ -7,12 +7,15 @@ export default class extends Controller {
 
     showToast(event)
     {
-        $('#logToastTitle').html('Log of session #' + event.currentTarget.dataset.session);
-        document.querySelector('turbo-frame#logToastBodyTurboFrame').src = '/manager/game/' + event.currentTarget.dataset.session +'/log';
+        let sessionId = this.element.dataset.session;
+        $('#logToastTitle').html('Log of session #' + sessionId);
+        document.querySelector('turbo-frame#gameLogExcerpt').src = '/manager/game/' + sessionId +'/log/excerpt';
         $('#logToast').show();
         this.timeout = setInterval(function () {
-            document.querySelector('turbo-frame#logToastBodyTurboFrame').reload();
+            document.querySelector('turbo-frame#gameLogExcerpt').reload();
         }, 2000);
+        const event2 = new CustomEvent("modal-new_session-closing");
+        window.dispatchEvent(event2);
     }
 
     hideToast()

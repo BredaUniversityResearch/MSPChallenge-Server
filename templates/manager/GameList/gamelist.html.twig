@@ -53,6 +53,10 @@
                     <button class="btn btn-secondary btn-sm" data-state="play" data-action="game#sessionState">
                         <i class="fa fa-play" title="Play"></i>
                     </button>
+                {% else %}
+                    <button class="btn btn-secondary btn-sm" disabled>
+                        <i class="fa fa-pause" title="State change impossible at this time"></i>
+                    </button>
                 {% endif %}
                 {% if showGameButton('save', game) %}
                     <button class="btn btn-secondary btn-sm" data-type="full" data-action="game#sessionSave">

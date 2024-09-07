@@ -1,5 +1,5 @@
 <turbo-frame id="gameForm">
-    <div data-modal-default-target="modalBody">
+    <div data-modal-default-target="modalNewSessionBody">
         {{ form_start(gameSessionForm) }}
     {% for flash_error in app.flashes('new_session_error') %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>

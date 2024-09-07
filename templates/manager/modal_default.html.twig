@@ -1,9 +1,10 @@
-<div class="modal fade" tabindex="-1" aria-hidden="true" data-modal-default-target="modal">
+<div class="modal fade" tabindex="-1" aria-hidden="true" data-modal-default-target="{{ modalTarget }}"
+    data-action="{{ modalAction }}">>
     <div class="modal-dialog modal-wide">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title">{{ modalTitle }}</h1>
-                <button type="button" class="btn-close" data-action="modal-default#closeModal"></button>
+                <button type="button" class="btn-close" data-action="modal-default#{{ modalCloseAction }}"></button>
             </div>
             {% set src = path(modalTurboFrameSrcRoute) %}
             <turbo-frame id="{{ modalTurboFrameId }}" src="{{ src }}">

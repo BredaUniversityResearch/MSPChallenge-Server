@@ -1,4 +1,4 @@
-<turbo-frame id="logToastBodyTurboFrame">
+<turbo-frame id="gameLog{{ type }}">
     {% for logLines in logToastBody %}
         <ul class="list-group">
         <li class="text-break list-group-item {{ logLines | replace(
