@@ -15,9 +15,7 @@ use Symfony\Component\HttpFoundation\HeaderUtils;
 class GameSaveController extends BaseController
 {
 
-    public function __construct(
-        private readonly string $projectDir
-    ) {
+    public function __construct() {
     }
 
     #[Route('/manager/game/{id}/download', name: 'manager_game_download', requirements: ['id' => '\d+'])]
