@@ -55,14 +55,17 @@ export default class extends Controller {
 
     startDetailsModalAutoReload()
     {
-        this.gameDetailsFrameReloader = setInterval(function () {
-            document.querySelector('turbo-frame#gameDetails').reload();
-        }, 10000);
+        if (this.gameDetailsFrameReloader === undefined) {
+            this.gameDetailsFrameReloader = setInterval(function () {
+                document.querySelector('turbo-frame#gameDetails').reload();
+            }, 10000);
+        }
     }
 
     stopDetailsModalAutoReload()
     {
         clearInterval(this.gameDetailsFrameReloader);
+        this.gameDetailsFrameReloader = undefined;
     }
 
     async submitFormNewSession(event)

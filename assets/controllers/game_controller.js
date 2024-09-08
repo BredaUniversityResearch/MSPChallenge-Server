@@ -127,6 +127,18 @@ export default class extends Controller {
 
     async sessionDemo(event)
     {
+        if (event.currentTarget.dataset.currentdemosetting == 0) {
+            if (!confirm(
+                'By enabling demo mode, the simulations will start, '+
+                'they will continue until the end (even if you select '+
+                'pause along the way), and subsequently the session will '+
+                'be recreated. After recreation, the whole process '+
+                'continues until you disable demo mode again. '+
+                'Are you sure you want to do that?'
+            )) {
+                return;
+            }
+        }
         this.disableButton(event.currentTarget);
         try {
             await $.ajax({

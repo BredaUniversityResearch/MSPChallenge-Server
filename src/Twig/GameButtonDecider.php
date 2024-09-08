@@ -31,7 +31,8 @@ class GameButtonDecider extends AbstractExtension
         switch ($buttonType) {
             case 'recreate':
             case 'archive':
-                if ($gameSession->getSessionState() != GameSessionStateValue::ARCHIVED) {
+                if ($gameSession->getSessionState() != GameSessionStateValue::ARCHIVED
+                    && $gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
                     return true;
                 }
                 break;

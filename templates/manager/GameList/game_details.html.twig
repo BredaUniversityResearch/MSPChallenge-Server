@@ -17,9 +17,27 @@
                     </tr>
                     <tr>
                         <th scope="col">Simulation state</th>
-                        <td class="text-right">{{ gameSession.sessionState }}</td>
+                        <td class="text-right">
+                        {% set gameState = gameSession.gameState %}
+                        {% if gameSession.sessionState == 'archived' %}
+                            {% set gameState = 'irrelevant' %}
+                        {% endif %}
+                            <span class="badge bg-primary">
+                            <i class="fa fa-info"></i>
+                            {{ gameState }}
+                            </span>
+                        </td>
                         <th scope="col">Session state</th>
-                        <td class="text-right">{{ gameSession.gameState }}</td>
+                        <td class="text-right">
+                            <span class="badge bg-secondary">
+                        {% if gameSession.sessionState == 'healthy' %}
+                            <i class="fa fa-heartbeat"></i>
+                        {% else %}
+                            <i class="fa fa-clock-o"></i>
+                        {% endif %}
+                            {{ gameSession.sessionState }}
+                            </span>
+                        </td>
                     </tr>
                     <tr>
                         <th scope="col">Current Month</th>
@@ -51,15 +69,19 @@
                         <th scop="col">Active Players</th>
                         <td class="text-right">{{ gameSession.playersActive }}</td>
                     </tr>
+                    {% if gameSession.sessionState != 'archived' %}
                     <tr>
                         <td colspan="2">
-                        {% if showGameButton('play', gameSession) %}
+                        {% if showGameButton('pause', gameSession) %}
+                            <button class="btn btn-success btn-sm" data-state="pause" data-action="game#sessionState">
+                                <i class="fa fa-pause"></i> Pause
+                            </button>
+                        {% elseif showGameButton('play', gameSession) %}
                             <button class="btn btn-success btn-sm" data-state="play" data-action="game#sessionState">
                                 <i class="fa fa-play"></i> Play
                             </button>
-                        {% endif %}
-                        {% if showGameButton('pause', gameSession) %}
-                            <button class="btn btn-success btn-sm" data-state="pause" data-action="game#sessionState">
+                        {% else %}
+                            <button class="btn btn-success btn-sm" data-state="pause" disabled>
                                 <i class="fa fa-pause"></i> Pause
                             </button>
                         {% endif %}
@@ -68,13 +90,19 @@
                                 <i class="fa fa-fast-forward"></i> Fast-forward
                             </button>
                         {% endif %}
+                        {% if gameSession.demoSession == 1 %}
+                            {% set demoText = 'Disable demo mode' %}
+                        {% else %}
+                            {% set demoText = 'Enable demo mode' %}
+                        {% endif %}
                         {% if showGameButton('demo', gameSession) %}
-                            {% if gameSession.demoSession == 1 %}
-                                {% set demoText = 'Disable demo mode' %}
-                            {% else %}
-                                {% set demoText = 'Enable demo mode' %}
-                            {% endif %}
-                            <button class="btn btn-info btn-sm" data-action="game#sessionDemo">
+                            <button class="btn btn-info btn-sm"
+                                data-currentdemosetting="{{ gameSession.demoSession }}"
+                                data-action="game#sessionDemo">
+                                <i class="fa fa-bookmark"></i> {{ demoText }}
+                            </button>
+                        {% else %}
+                            <button class="btn btn-info btn-sm" disabled>
                                 <i class="fa fa-bookmark"></i> {{ demoText }}
                             </button>
                         {% endif %}
@@ -100,6 +128,8 @@
                         {% endif %}
                         </td>
                     </tr>
+                    {% endif %}
+                    {% if gameSession.sessionState != 'archived' %}
                     <tr>
                         <td colspan="2">
                         {% if showGameButton('save', gameSession) %}
@@ -137,6 +167,7 @@
                         {% endif %}
                         </td>
                     </tr>
+                    {% endif %}
                     <tr>
                         <td colspan="4" class="text-left">
                             <button class="btn btn-secondary btn-sm" data-action="click->game#toggleSessionInfoLog">
