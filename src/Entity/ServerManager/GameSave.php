@@ -107,12 +107,6 @@ class GameSave
         $this->id = $id;
     }
 
-    public function createFromGameList(GameList $gameList): self
-    {
-        //todo: create this object's props based on $gameList's props
-        return $this;
-    }
-
     public function getId(): ?int
     {
         return $this->id;

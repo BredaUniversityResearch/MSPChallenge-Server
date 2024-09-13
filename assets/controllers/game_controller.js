@@ -135,9 +135,9 @@ export default class extends Controller {
         }
     }
 
-    sessionExport()
+    sessionExport(event)
     {
-        window.location = `/manager/game/${this.idValue}/export`;
+        window.location = `/manager/game/${event.currentTarget.dataset.session}/export`;
     }
 
     async sessionDemo(event)

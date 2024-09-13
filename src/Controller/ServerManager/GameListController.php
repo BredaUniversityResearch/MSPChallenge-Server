@@ -19,6 +19,9 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use App\IncompatibleClientException;
 use App\Controller\BaseController;
 use App\Controller\SessionAPI\GameController;
+use App\Domain\API\v1\Plan;
+use App\Domain\Common\EntityEnums\GameSaveTypeValue;
+use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Version\Exception\InvalidVersionString;
@@ -26,6 +29,9 @@ use App\Entity\ServerManager\Setting;
 use App\Message\GameList\GameListCreationMessage;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Message\GameList\GameListArchiveMessage;
+use App\Message\GameSave\GameSaveCreationMessage;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GameListController extends BaseController
 {
@@ -240,32 +246,66 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/game/{id}/save/{type}',
+        '/manager/game/{sessionId}/save/{type}',
         name: 'manager_game_save',
-        requirements: ['id' => '\d+', 'type' => '\w+']
+        requirements: ['sessionId' => '\d+', 'type' => '\w+']
     )]
     public function gameSessionSave(
         EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
-        int $id,
-        string $type = 'full'
+        int $sessionId,
+        string $type = GameSaveTypeValue::FULL
     ): Response {
-        $gameSession = $entityManager->getRepository(GameList::class)->find($id);
-        if (is_null($gameSession) || $gameSession->getSessionState() != 'healthy' ||
-            ($type != 'full' && $type != 'layers')
-        ) {
+        $gameListRepo = $entityManager->getRepository(GameList::class);
+        $gameSaveRepo = $entityManager->getRepository(GameSave::class);
+        $gameSession = $gameListRepo->find($sessionId);
+        if ($gameSession->getSessionState() != GameSessionStateValue::HEALTHY
+             || ($type != GameSaveTypeValue::FULL && $type != GameSaveTypeValue::LAYERS)) {
             return new Response(null, 422);
         }
-        $gameSave = (new GameSave)->createFromGameList($gameSession);
+        $gameSave = $gameSaveRepo->createGameSaveFromData(
+            $gameListRepo->createDataFromGameList($gameSession)
+        );
+        $gameSave->setSaveType(new GameSaveTypeValue($type));
+        $gameSave->setSaveVisibility(new GameSaveVisibilityValue('active'));
         $entityManager->persist($gameSave);
         $entityManager->flush();
-        if ($type == 'full') {
-            //$messageBus->dispatch(new GameSaveFullSession($gameSave->getId()));
-        }
-        if ($type == 'layers') {
-            //$messageBus->dispatch(new GameSaveLayersSession($gameSave->getId()));
-        }
+        $messageBus->dispatch(new GameSaveCreationMessage($sessionId, $gameSave->getId()));
         return new Response(null, 204);
+    }
+
+    #[Route(
+        '/manager/game/{sessionId}/export',
+        name: 'manager_game_export',
+        requirements: ['sessionId' => '\d+']
+    )]
+    public function gameSessionExport(
+        EntityManagerInterface $entityManager,
+        int $sessionId,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
+    ): Response {
+        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        if ($gameSession->getSessionState() != GameSessionStateValue::HEALTHY) {
+            return new Response(null, 422);
+        }
+        $response = new StreamedResponse(function () use ($gameSession) {
+            $plan = new Plan();
+            $exportedPlans = $plan->ExportPlansToJson($gameSession->getId());
+            $gameConfigComplete = $gameSession->getGameConfigVersion()->getGameConfigComplete();
+            // force an object from meta layer type array
+            $gameConfigComplete['datamodel']['meta'] = array_map(function ($el) {
+                $el['layer_type'] = (object) $el['layer_type'];
+                return $el;
+            }, $gameConfigComplete['datamodel']['meta']);
+            $gameConfigComplete['datamodel']['plans'] = $exportedPlans;
+            echo json_encode($gameConfigComplete, JSON_PRETTY_PRINT);
+        });
+        $response->headers->set('Content-Type', 'text/plain');
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            basename($gameSession->getGameConfigVersion()->getFilePath(), '.json').'_With_Exported_Plans.json'
+        ));
+        return $response;
     }
 
     #[Route('/manager/game/access/{sessionId}', name: 'manager_game_access', requirements: ['sessionId' => '\d+'])]
@@ -279,17 +319,5 @@ class GameListController extends BaseController
             'manager/GameList/game_access.html.twig',
             ['gameSession' => $gameSession]
         );
-    }
-
-    #[Route('/manager/game/{id}/export', name: 'manager_game_export', requirements: ['id' => '\d+'])]
-    public function gameSessionExport(EntityManagerInterface $entityManager, int $id): Response
-    {
-        $gameSession = $entityManager->getRepository(GameList::class)->find($id);
-        if (is_null($gameSession) || $gameSession->getSessionState() != 'healthy') {
-            return new Response(null, 422);
-        }
-        // probably best to do this through the GameConfigFile class
-        // should be immediately returned as a file download
-        return new Response(null, 204);
     }
 }
