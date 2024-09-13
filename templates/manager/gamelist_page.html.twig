@@ -17,17 +17,17 @@
             modalTurboFrameId: 'gameForm'
         }) }}
     </div>
-    <div class="col-md-12 py-2">
+    <div class="col-md-12 py-2" {{ stimulus_controller('gamelist') }}>
         <div class="pull-right" >Filter:
             <span id="radioFilter">
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="public" checked
-                            {{ stimulus_controller('gamelist-filter') }} data-action="gamelist-filter#applyFilter" data-href="{{ path('manager_gamelist') }}">
+                            data-action="gamelist#applyFilter" data-href="{{ path('manager_gamelist') }}">
                     <label class="form-check-label" for="inlineRadio1">Active</label>
                 </div>
                 <div class="form-check form-check-inline mx-0">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="archived"
-                           {{ stimulus_controller('gamelist-filter') }} data-action="gamelist-filter#applyFilter" data-href="{{ path('manager_gamelist', {'sessionState': 'archived'}) }}">
+                           data-action="gamelist#applyFilter" data-href="{{ path('manager_gamelist', {'sessionState': 'archived'}) }}">
                     <label class="form-check-label" for="inlineRadio3">Archived</label>
                 </div>
             </span>
@@ -38,8 +38,7 @@
     </div>
     <div class="col-md-12" {{ stimulus_controller('game') }}>
         <div class="table-responsive">
-            <turbo-frame id="sessionsTable" src="{{ path('manager_gamelist') }}"
-                {{ stimulus_controller('gamelist') }}>
+            <turbo-frame id="sessionsTable" src="{{ path('manager_gamelist') }}">
             </turbo-frame>
         </div>
         {{ include('manager/modal_default.html.twig', {
