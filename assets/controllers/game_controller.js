@@ -3,10 +3,6 @@ import { success, error } from 'tata-js';
 import $ from "jquery";
 
 export default class extends Controller {
-    static values = {
-        id: Number,
-        name: String
-    }
 
     toggleSessionInfoLog()
     {
@@ -31,14 +27,15 @@ export default class extends Controller {
         target.disabled = true;
     }
 
-    async editNameThroughPrompt()
+    async editNameThroughPrompt(event)
     {
-        let name = prompt('Session name: ', this.nameValue);
+        let sessionId = event.currentTarget.dataset.session;
+        let newName = prompt('Session name: ', event.currentTarget.dataset.name);
         try {
             await $.ajax({
-                url: '/manager/game/name/' + this.idValue,
+                url: '/manager/game/name/' + sessionId,
                 method: 'post',
-                data: { name: name },
+                data: { name: newName },
                 dataType: 'json'
             });
             success('Success', 'Session name successfully changed.', { position: 'mm', duration: 10000 });
@@ -50,11 +47,12 @@ export default class extends Controller {
 
     async sessionState(event)
     {
+        let sessionId = event.currentTarget.dataset.session;
         let state = event.currentTarget.dataset.state;
         this.disableButton(event.currentTarget);
         try {    
             await $.ajax({
-                url: `/manager/game/${this.idValue}/state/${state}`,
+                url: `/manager/game/${sessionId}/state/${state}`,
                 method: 'GET'
             });
             success('Success',`Changed state to ${state}`, { position: 'mm', duration: 10000 });
@@ -66,10 +64,17 @@ export default class extends Controller {
 
     async sessionRecreate(event)
     {
+        let sessionId = event.currentTarget.dataset.session;
+        if (!confirm(
+            `This will delete and recreate session ID #${sessionId}. ` +
+            'All existing data will be lost. Are you sure?'
+        )) {
+            return;
+        }
         this.disableButton(event.currentTarget);
         try {
             await $.ajax({
-                url: `/manager/game/${this.idValue}/recreate`,
+                url: `/manager/game/${sessionId}/recreate`,
                 method: 'GET',
                 success: function (result) {
                     if (result) {
@@ -89,10 +94,19 @@ export default class extends Controller {
 
     async sessionArchive(event)
     {
+        let sessionId = event.currentTarget.dataset.session;
+        if (!confirm(
+            `This will permanently archive session #${sessionId}. `+
+            'It will subsequently no longer be usable by end users. '+
+            'If you want a backup, then *first* save this session, *before* continuing! '+
+            'Are you sure?'
+        )) {
+            return;
+        }
         this.disableButton(event.currentTarget);
         try {
             await $.ajax({
-                url: `/manager/game/${this.idValue}/archive`,
+                url: `/manager/game/${sessionId}/archive`,
                 method: 'GET',
                 success: function (results) {
                     const event = new CustomEvent("modal-closing");
@@ -109,9 +123,10 @@ export default class extends Controller {
     async sessionSave(event)
     {
         let type = event.currentTarget.dataset.type;
+        let sessionId = event.currentTarget.dataset.session;
         try {
             await $.ajax({
-                url: `/manager/game/${this.idValue}/save/${type}`,
+                url: `/manager/game/${sessionId}/save/${type}`,
                 method: 'GET',
             });
             success('Success', 'Saving session, please be patient. Check the Saves page to find it.',{ position: 'mm', duration: 10000 });
@@ -127,14 +142,16 @@ export default class extends Controller {
 
     async sessionDemo(event)
     {
-        if (event.currentTarget.dataset.currentdemosetting == 0) {
+        let currentDemoSetting = event.currentTarget.dataset.currentdemosetting;
+        let sessionId = event.currentTarget.dataset.session;
+        if (currentDemoSetting == 0) {
             if (!confirm(
-                'By enabling demo mode, the simulations will start, '+
+                `By enabling demo mode on session #${sessionId}, the simulations will start, `+
                 'they will continue until the end (even if you select '+
                 'pause along the way), and subsequently the session will '+
                 'be recreated. After recreation, the whole process '+
                 'continues until you disable demo mode again. '+
-                'Are you sure you want to do that?'
+                'Are you sure?'
             )) {
                 return;
             }
@@ -142,7 +159,7 @@ export default class extends Controller {
         this.disableButton(event.currentTarget);
         try {
             await $.ajax({
-                url: `/manager/game/${this.idValue}/demo`,
+                url: `/manager/game/${sessionId}/demo`,
                 method: 'GET',
             });
             success('Success', 'Switched demo mode successfully.', { position: 'mm', duration: 10000 });

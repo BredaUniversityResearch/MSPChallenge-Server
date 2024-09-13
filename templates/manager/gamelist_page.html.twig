@@ -3,7 +3,7 @@
 {% block title %}New Server Manager{% endblock %}
 
 {% block body %}
-    <div class="py-1" {{ stimulus_controller('modal-default') }} data-turboframe="gameForm">
+    <div class="py-1" data-turboframe="gameForm">
         <button type="button" id="modalNewSession" class="btn btn-primary" data-action="modal-default#openNewSessionModal">
             <i class="fa fa-plus-circle" title="Create new session"></i>
             New Session
@@ -36,7 +36,7 @@
             Here you can create a new MSP Challenge session, and administer existing ones.
         </div>
     </div>
-    <div class="col-md-12" {{ stimulus_controller('modal-default') }} data-turboframe="gameDetails">
+    <div class="col-md-12" {{ stimulus_controller('game') }}>
         <div class="table-responsive">
             <turbo-frame id="sessionsTable" src="{{ path('manager_gamelist') }}"
                 {{ stimulus_controller('gamelist') }}>
