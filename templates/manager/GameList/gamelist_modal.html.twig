@@ -1,0 +1,8 @@
+{% extends 'modal_default.html.twig' %}
+
+{% block page_specific %}
+<div class="modal-footer" id="sessionInfoLog">
+    <turbo-frame id="gameLogComplete" src="{{ path('manager_game_log') }}">
+    </turbo-frame>
+</div>
+{% endblock %}

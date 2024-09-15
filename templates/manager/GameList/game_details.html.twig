@@ -1,11 +1,11 @@
-<turbo-frame id="gameDetails">
+<turbo-frame id="modalDefaultBody">
     <div class="modal-body">
         <div class="table-responsive">
             <table class="table table-hover table-border-left">
                 <tr>
-                    <th scope="col">Name (ID)</th>
+                    <th scope="col">Name</th>
                     <td class="text-right">
-                        {{ gameSession.name }} &nbsp; ({{ gameSession.ID }})
+                        {{ gameSession.name }}
                         <button class="btn btn-secondary btn-sm"
                             data-session="{{ gameSession.id }}"
                             data-name="{{ gameSession.name }}"

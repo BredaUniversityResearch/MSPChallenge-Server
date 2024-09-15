@@ -4,59 +4,74 @@ import $ from 'jquery';
 import { success } from 'tata-js';
 
 export default class extends Controller {
-    static targets = ['modalNewSession', 'modalNewSessionBody', 'modalSessionDetails', 'modalSessionAccess'];
 
-    prepAndGetTurboFrame(modalTurboFrame)
+    static targets = ['modalDefault', 'modalNewSessionForm'];
+    static modalDefaultBodyReloader;
+
+    autoReloadModalDefaultBody()
     {
-        let frame = document.querySelector('turbo-frame#' + modalTurboFrame);
+        if (this.modalDefaultBodyReloader === undefined) {
+            this.modalDefaultBodyReloader = setInterval(function () {
+                document.querySelector('turbo-frame#modalDefaultBody').reload();
+            }, 10000);
+        }
+    }
+
+    stopReloadModalDefaultBody()
+    {
+        clearInterval(this.modalDefaultBodyReloader);
+        this.modalDefaultBodyReloader = undefined;
+    }
+
+    resetModalAndReturnBodyFrame(title)
+    {
+        $('#modalDefaultTitle').html(title);
+        $('#sessionInfoLog').hide();
+        this.stopReloadModalDefaultBody();
+        return this.prepAndGetTurboFrame('modalDefaultBody');
+    }
+
+    prepAndGetTurboFrame(frameName)
+    {
+        let frame = document.querySelector(`turbo-frame#${frameName}`);
         frame.innerHTML = '<div class="modal-body"><h3>Loading...</h3></div>';
         return frame;
     }
 
-    openNewSessionModal(event)
+    openNewSessionModal()
     {
-        let frame = this.prepAndGetTurboFrame('gameForm');
-        frame.reload();
-        Modal.getOrCreateInstance(this.modalNewSessionTarget).show();
+        let frame = this.resetModalAndReturnBodyFrame('Create New Session');
+        frame.src = '/manager/game/form';
+        Modal.getOrCreateInstance(this.modalDefaultTarget).show();
     }
 
     openSessionDetailsModal(event)
     {
-        let frame = this.prepAndGetTurboFrame('gameDetails');
+        let frame = this.resetModalAndReturnBodyFrame(`Session Details #${event.currentTarget.dataset.session}`);
         frame.src = `/manager/game/${event.currentTarget.dataset.session}/details`;
-        $('#sessionInfoLog').hide();
+        this.autoReloadModalDefaultBody();
         let frame2 = this.prepAndGetTurboFrame('gameLogComplete');
         frame2.src = `/manager/game/${event.currentTarget.dataset.session}/log/complete`;
-        Modal.getOrCreateInstance(this.modalSessionDetailsTarget).show();
+        Modal.getOrCreateInstance(this.modalDefaultTarget).show();
     }
 
     openSessionAccessModal(event)
     {
-        let frame = this.prepAndGetTurboFrame('gameAccess');
-        frame.src = '/manager/game/access/' + event.currentTarget.dataset.session;
-        Modal.getOrCreateInstance(this.modalSessionAccessTarget).show();
+        let frame = this.resetModalAndReturnBodyFrame(`User Access Session #${event.currentTarget.dataset.session}`);
+        frame.src = `/manager/game/access/${event.currentTarget.dataset.session}`;
+        Modal.getOrCreateInstance(this.modalDefaultTarget).show();
     }
 
-    closeNewSessionModal(event)
+    closeModalDefault()
     {
-        Modal.getOrCreateInstance(this.modalNewSessionTarget).hide();
-    }
-
-    closeSessionDetailsModal(event)
-    {
-        Modal.getOrCreateInstance(this.modalSessionDetailsTarget).hide();
-    }
-
-    closeSessionAccessModal(event)
-    {
-        Modal.getOrCreateInstance(this.modalSessionAccessTarget).hide();
+        Modal.getOrCreateInstance(this.modalDefaultTarget).hide();
     }
 
     async submitFormNewSession(event)
     {
         await this.submitFormGeneric(
             event,
-            this.modalNewSessionBodyTarget,
+            this.modalNewSessionFormTarget,
             'Successfully added a new session. Please wait for it to be finalised...',
             function (sessionId) {
                 if (sessionId) {

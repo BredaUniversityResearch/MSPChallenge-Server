@@ -3,18 +3,6 @@ import { success, error } from 'tata-js';
 import $ from "jquery";
 
 export default class extends Controller {
-
-    static gameDetailsFrameReloader;
-
-    connect()
-    {
-        let thisClass = this;
-        if (this.gameDetailsFrameReloader === undefined) {
-            this.gameDetailsFrameReloader = setInterval(function () {
-                thisClass.reloadGameDetailsFrame();
-            }, 10000);
-        }
-    }
     
     toggleSessionInfoLog()
     {
@@ -27,7 +15,7 @@ export default class extends Controller {
 
     reloadGameDetailsFrame()
     {
-        document.querySelector('turbo-frame#gameDetails').reload();
+        document.querySelector('turbo-frame#modalDefaultBody').reload();
     }
 
     disableButton(target)

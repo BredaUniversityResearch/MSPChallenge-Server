@@ -1,21 +1,14 @@
-<div class="modal fade" tabindex="-1" aria-hidden="true" data-modal-default-target="{{ modalTarget }}"
-    data-action="{{ modalAction }}">>
+<div class="modal fade" tabindex="-1" aria-hidden="true" data-modal-default-target="modalDefault"
+    data-action="modal-closing@window->modal-default#closeModalDefault">>
     <div class="modal-dialog modal-wide">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title">{{ modalTitle }}</h1>
-                <button type="button" class="btn-close" data-action="modal-default#{{ modalCloseAction }}"></button>
+                <h1 class="modal-title" id="modalDefaultTitle"></h1>
+                <button type="button" class="btn-close" data-action="modal-default#closeModalDefault"></button>
             </div>
-            {% set srcBody = path(modalBodyTurboFrameSrcRoute) %}
-            <turbo-frame id="{{ modalBodyTurboFrameId }}" src="{{ srcBody }}">
+            <turbo-frame id="modalDefaultBody" src="">
             </turbo-frame>
-            {% if modalFooterTurboFrameId is defined %}
-                {% set srcFooter = path(modalFooterTurboFrameSrcRoute) %}
-            <div class="modal-footer" id="{{ modalFooterTurboFrameStyle }}">
-                <turbo-frame id="{{ modalFooterTurboFrameId }}" src="{{ srcFooter }}">
-                </turbo-frame>
-            </div>
-            {% endif %}
+            {% block page_specific %}{% endblock %}
         </div>
     </div>
 </div>
