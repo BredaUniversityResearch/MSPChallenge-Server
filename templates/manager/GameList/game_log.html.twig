@@ -1,6 +1,6 @@
 <turbo-frame id="gameLog{{ type }}">
+    <ul class="list-group">
     {% for logLines in logToastBody %}
-        <ul class="list-group">
         <li class="text-break list-group-item {{ logLines | replace(
             {
                 'INFO:': 'list-group-item-primary">',
@@ -8,8 +8,8 @@
                 'ERROR:': 'list-group-item-danger">',
                 'WARNING:': 'list-group-item-warning">',
                 'DEBUG:': 'list-group-item-light">',
-            }
-        ) | raw}}</li>
-        </ul>
+            }) | raw }}
+        </li>
     {% endfor %}
+    </ul>
 </turbo-frame>

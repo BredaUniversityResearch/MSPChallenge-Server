@@ -4,16 +4,24 @@ import $ from "jquery";
 
 export default class extends Controller {
 
+    static gameDetailsFrameReloader;
+
+    connect()
+    {
+        let thisClass = this;
+        if (this.gameDetailsFrameReloader === undefined) {
+            this.gameDetailsFrameReloader = setInterval(function () {
+                thisClass.reloadGameDetailsFrame();
+            }, 10000);
+        }
+    }
+    
     toggleSessionInfoLog()
     {
         if ($('#sessionInfoLog').is(':visible')) {
             $('#sessionInfoLog').hide();
-            const event = new CustomEvent("infolog-hiding");
-            window.dispatchEvent(event);
         } else {
             $('#sessionInfoLog').show();
-            const event = new CustomEvent("infolog-showing");
-            window.dispatchEvent(event);
         }
     }
 

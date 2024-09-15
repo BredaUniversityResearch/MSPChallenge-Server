@@ -13,8 +13,8 @@
             modalAction: 'modal-new_session-closing@window->modal-default#closeNewSessionModal',
             modalTitle: 'Create New Session',
             modalCloseAction: 'closeNewSessionModal',
-            modalTurboFrameSrcRoute: 'manager_game_form',
-            modalTurboFrameId: 'gameForm'
+            modalBodyTurboFrameSrcRoute: 'manager_game_form',
+            modalBodyTurboFrameId: 'gameForm'
         }) }}
     </div>
     <div class="col-md-12 py-2" {{ stimulus_controller('gamelist') }}>
@@ -43,19 +43,22 @@
         </div>
         {{ include('manager/modal_default.html.twig', {
             modalTarget: 'modalSessionDetails',
-            modalAction: 'modal-closing@window->modal-default#closeSessionDetailsModal infolog-showing@window->modal-default#stopDetailsModalAutoReload infolog-hiding@window->modal-default#startDetailsModalAutoReload',
+            modalAction: 'modal-closing@window->modal-default#closeSessionDetailsModal',
             modalTitle: 'Session Details',
             modalCloseAction: 'closeSessionDetailsModal',
-            modalTurboFrameSrcRoute: 'manager_game_details',
-            modalTurboFrameId: 'gameDetails'
+            modalBodyTurboFrameSrcRoute: 'manager_game_details',
+            modalBodyTurboFrameId: 'gameDetails',
+            modalFooterTurboFrameId: 'gameLogComplete',
+            modalFooterTurboFrameSrcRoute: 'manager_game_log',
+            modalFooterTurboFrameStyle: 'sessionInfoLog'
         }) }}
         {{ include('manager/modal_default.html.twig', {
             modalTarget: 'modalSessionAccess',
             modalAction: 'modal-session_access-closing@window->modal-default#closeSessionAccessModal',
             modalTitle: 'Session User Access',
             modalCloseAction: 'closeSessionAccessModal',
-            modalTurboFrameSrcRoute: 'manager_game_access',
-            modalTurboFrameId: 'gameAccess'
+            modalBodyTurboFrameSrcRoute: 'manager_game_access',
+            modalBodyTurboFrameId: 'gameAccess'
         }) }}
     </div>
     

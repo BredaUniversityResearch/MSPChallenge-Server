@@ -142,7 +142,7 @@ class GameListController extends BaseController
         );
     }
 
-    #[Route('/manager/game/details/{sessionId}', name: 'manager_game_details', requirements: ['sessionId' => '\d+'])]
+    #[Route('/manager/game/{sessionId}/details', name: 'manager_game_details', requirements: ['sessionId' => '\d+'])]
     public function gameSessionDetails(
         EntityManagerInterface $entityManager,
         int $sessionId = 1
@@ -158,8 +158,8 @@ class GameListController extends BaseController
     public function gameSessionLog(
         KernelInterface $kernel,
         Request $request,
-        int $sessionId,
-        string $type = 'excerpt'
+        int $sessionId = 1,
+        string $type = 'complete'
     ): Response {
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->redirectToRoute('manager');

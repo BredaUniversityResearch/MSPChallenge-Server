@@ -6,9 +6,16 @@
                 <h1 class="modal-title">{{ modalTitle }}</h1>
                 <button type="button" class="btn-close" data-action="modal-default#{{ modalCloseAction }}"></button>
             </div>
-            {% set src = path(modalTurboFrameSrcRoute) %}
-            <turbo-frame id="{{ modalTurboFrameId }}" src="{{ src }}">
+            {% set srcBody = path(modalBodyTurboFrameSrcRoute) %}
+            <turbo-frame id="{{ modalBodyTurboFrameId }}" src="{{ srcBody }}">
             </turbo-frame>
+            {% if modalFooterTurboFrameId is defined %}
+                {% set srcFooter = path(modalFooterTurboFrameSrcRoute) %}
+            <div class="modal-footer" id="{{ modalFooterTurboFrameStyle }}">
+                <turbo-frame id="{{ modalFooterTurboFrameId }}" src="{{ srcFooter }}">
+                </turbo-frame>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
