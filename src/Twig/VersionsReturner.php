@@ -16,7 +16,8 @@ class VersionsReturner extends AbstractExtension implements GlobalsInterface
     {
         return [
             'version' => $this->versionsProvider->getVersion(),
-            'address' => $_ENV['URL_WEB_SERVER_HOST'].':'.($_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80)
+            'address' => $_ENV['URL_WEB_SERVER_HOST'].':'
+                .($_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80)
         ];
     }
 }
