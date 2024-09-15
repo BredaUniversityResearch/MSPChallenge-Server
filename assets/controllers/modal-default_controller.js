@@ -24,6 +24,7 @@ export default class extends Controller {
     {
         let frame = this.prepAndGetTurboFrame('gameDetails');
         frame.src = `/manager/game/${event.currentTarget.dataset.session}/details`;
+        $('#sessionInfoLog').hide();
         let frame2 = this.prepAndGetTurboFrame('gameLogComplete');
         frame2.src = `/manager/game/${event.currentTarget.dataset.session}/log/complete`;
         Modal.getOrCreateInstance(this.modalSessionDetailsTarget).show();

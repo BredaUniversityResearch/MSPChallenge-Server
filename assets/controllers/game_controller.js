@@ -39,6 +39,9 @@ export default class extends Controller {
     {
         let sessionId = event.currentTarget.dataset.session;
         let newName = prompt('Session name: ', event.currentTarget.dataset.name);
+        if (newName == null) {
+            return;
+        }
         try {
             await $.ajax({
                 url: '/manager/game/name/' + sessionId,
