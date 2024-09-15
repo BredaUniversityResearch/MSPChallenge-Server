@@ -14,8 +14,7 @@ export default class extends Controller {
         this.timeout = setInterval(function () {
             document.querySelector('turbo-frame#gameLogExcerpt').reload();
         }, 2000);
-        const event2 = new CustomEvent("modal-new_session-closing");
-        window.dispatchEvent(event2);
+        window.dispatchEvent(new CustomEvent("modal-closing"));
     }
 
     hideToast()

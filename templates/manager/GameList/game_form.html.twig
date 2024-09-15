@@ -1,5 +1,5 @@
 <turbo-frame id="modalDefaultBody">
-    <div data-modal-default-target="modalNewSessionForm">
+    <div data-modal-game-target="modalNewSessionForm">
         {{ form_start(gameSessionForm) }}
     {% for flash_error in app.flashes('new_session_error') %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
@@ -55,8 +55,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-action="modal-default#closeModal">Cancel</button>
-            <button type="submit" class="btn btn-primary" data-action="modal-default#submitFormNewSession">Create session</button>
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-game#submitNewSessionModalForm">Create session</button>
         </div>
         {{ form_end(gameSessionForm) }}
     </div>

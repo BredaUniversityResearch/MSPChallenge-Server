@@ -75,13 +75,10 @@ export default class extends Controller {
             await $.ajax({
                 url: `/manager/game/${sessionId}/recreate`,
                 method: 'GET',
-                success: function (result) {
-                    if (result) {
-                        $('#logToast').attr('data-session', result);
-                        const event = new CustomEvent("session-changing");
-                        window.dispatchEvent(event);
-                        const event2 = new CustomEvent("modal-closing");
-                        window.dispatchEvent(event2);
+                success: function (sessionId) {
+                    if (sessionId) {
+                        $('#logToast').attr('data-session', sessionId);
+                        window.dispatchEvent(new CustomEvent("session-changing"));
                     }
                 }
             });
@@ -108,8 +105,7 @@ export default class extends Controller {
                 url: `/manager/game/${sessionId}/archive`,
                 method: 'GET',
                 success: function (results) {
-                    const event = new CustomEvent("modal-closing");
-                    window.dispatchEvent(event);
+                    window.dispatchEvent(new CustomEvent("modal-closing"));
                 }
             });
             success('Success', 'Archiving session, please be patient.', { position: 'mm', duration: 10000 });
