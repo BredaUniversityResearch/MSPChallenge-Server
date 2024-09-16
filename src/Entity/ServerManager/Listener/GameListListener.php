@@ -20,7 +20,7 @@ class GameListListener
 {
     public function __construct(
         private readonly ConnectionManager $connectionManager
-    ) {  
+    ) {
     }
 
     public function preFlush(GameList $gameSession, PreFlushEventArgs $event): void

@@ -431,7 +431,7 @@ class GameList
 
     /**
      * Get the value of runningGame
-     */ 
+     */
     public function getRunningGame(): ?Game
     {
         return $this->runningGame;
@@ -441,7 +441,7 @@ class GameList
      * Set the value of runningGame
      *
      * @return  self
-     */ 
+     */
     public function setRunningGame($runningGame): self
     {
         $this->runningGame = $runningGame;
