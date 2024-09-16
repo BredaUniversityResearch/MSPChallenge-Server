@@ -104,7 +104,7 @@ abstract class Base extends CommonBase
     private static function getOriginalError(Throwable $errorException): Throwable
     {
         $e = $errorException;
-        while (null !== $prev = $errorException->getPrevious()) {
+        while ((null !== $prev = $errorException->getPrevious()) && $e !== $prev) {
             $e = $prev;
         }
         return $e;

@@ -298,7 +298,10 @@ class Router
             }
         }
 
-        if (count($inValues) > 0) {
+        // to show error if more parameters are given than expected by the method
+        //  disabled for dev, since for development it is useful to be able to pass extra parameters like:
+        //  XDEBUG_TRIGGER=1, PHP_IDE_CONFIG="serverName=symfony"
+        if ((($_ENV['APP_ENV'] ?? 'prod') !== 'dev') && count($inValues) > 0) {
             throw new Exception(
                 "Call to " . $className . "::" . $methodData->getName() .
                 " was provided the following parameters that were not taken by any argument matching this name: \"" .
@@ -332,6 +335,12 @@ class Router
             "Request: " . $className . "/" . $method . PHP_EOL .
             "Call data: " . str_replace(array("\n", "\r"), "", var_export($data, true)) . PHP_EOL .
             "Request URI: " . $_SERVER['REQUEST_URI'];
+        }
+
+        // @marin debug feature: setting a debug-message through a payload field
+        if (is_array($payload) && isset($payload['debug-message']) && is_string($payload['debug-message'])) {
+            $message .= $payload['debug-message'];
+            unset($payload['debug-message']);
         }
 
         return array(

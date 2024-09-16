@@ -14,7 +14,7 @@ class PlanMessage
     private ?int $planMessageId;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planMessage')]
-    #[ORM\JoinColumn(name: 'plan_message_plan_id', referencedColumnName: 'plan_id')]
+    #[ORM\JoinColumn(name: 'plan_message_plan_id', referencedColumnName: 'plan_id', onDelete: 'CASCADE')]
     private ?Plan $plan;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planMessage')]

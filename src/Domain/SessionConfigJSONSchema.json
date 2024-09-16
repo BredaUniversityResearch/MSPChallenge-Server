@@ -100,10 +100,16 @@
               "plan_type": {
                 "oneOf": [
                   {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                   },
                   {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^\\d+$"
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^(0|1),(0|1),(0|1)$"
                   }
                 ]
               },
@@ -524,6 +530,83 @@
               "restriction_settings"
             ]
           }
+        },
+        "policy_settings": {
+          "type": "object",
+          "properties": {
+            "fishing": {
+              "type": "object",
+              "properties": {
+                "all_country_approval": {
+                  "type": "boolean"
+                },
+                "stakeholder_pressure_cool_down": {
+                  "type": "number"
+                },
+                "fleet_info": {
+                  "type": "object",
+                  "properties": {
+                    "gear_types": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "fleets": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "gear_type": {
+                              "oneOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^\\d+$"
+                                }
+                              ]
+                            },
+                            "country_id": {
+                              "oneOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0
+                                },
+                                {
+                                  "type": "string",
+                                  "pattern": "^(\\d+|-1)$"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "gear_type",
+                            "country_id"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "gear_types",
+                    "fleets"
+                  ]
+                }
+              },
+              "required": [
+                "all_country_approval",
+                "stakeholder_pressure_cool_down",
+                "fleet_info"
+              ]
+            }
+          },
+          "required": [
+            "fishing"
+          ]
         },
         "dependencies": {
           "type": "object",
@@ -1062,6 +1145,31 @@
                   "name": {
                     "type": "string"
                   },
+                  "policy_filters": {
+                    "type": "object",
+                    "properties": {
+                      "fleets": {
+                        "type": "array",
+                        "items": [
+                          {
+                            "oneOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              {
+                                "type": "string",
+                                "pattern": "^\\d+$"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "fleets"
+                    ]
+                  },
                   "layers": {
                     "type": "array",
                     "items": {
@@ -1091,17 +1199,6 @@
                 ]
               }
             },
-            "fishing_policy_settings": {
-              "type": "object",
-              "properties": {
-                "all_country_approval": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "all_country_approval"
-              ]
-            },
             "fishing": {
               "type": "array",
               "items": {
@@ -1109,6 +1206,31 @@
                 "properties": {
                   "name": {
                     "type": "string"
+                  },
+                  "policy_filters": {
+                    "type": "object",
+                    "properties": {
+                      "fleets": {
+                        "type": "array",
+                        "items": [
+                          {
+                            "oneOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              {
+                                "type": "string",
+                                "pattern": "^\\d+$"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "fleets"
+                    ]
                   },
                   "initialFishingDistribution": {
                     "type": "array",
@@ -1130,8 +1252,7 @@
                   }
                 },
                 "required": [
-                  "name",
-                  "initialFishingDistribution"
+                  "name"
                 ]
               }
             },
@@ -1201,6 +1322,46 @@
                   "valueDefinitions"
                 ]
               }
+            },
+            "eco": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "policy_filters": {
+                    "type": "object",
+                    "properties": {
+                      "fleets": {
+                        "type": "array",
+                        "items": [
+                          {
+                            "oneOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              {
+                                "type": "string",
+                                "pattern": "^\\d+$"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "fleets"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "policy_filters"
+                ]
+              }
             }
           },
           "required": [
@@ -1216,7 +1377,6 @@
             "initialFishingMapping",
             "fishingDisplayScale",
             "pressures",
-            "fishing_policy_settings",
             "fishing",
             "outcomes",
             "ecologyCategories"
@@ -1664,6 +1824,7 @@
       "required": [
         "restrictions",
         "plans",
+        "policy_settings",
         "dependencies",
         "CEL",
         "SEL",

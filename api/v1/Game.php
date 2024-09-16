@@ -159,7 +159,7 @@ class Game extends Base
      * @throws Exception
      * @todo: use https://github.com/karriereat/json-decoder "to convert your JSON data into an actual php class"
      * phpcs:ignore Generic.Files.LineLength.TooLong
-     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing_policy_settings: array}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, projection: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
+     * @return array{restrictions: array, plans: array, policy_settings: array, stakeholder_pressure_settings: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing: array}, meta: array{array{layer_name: string, layer_type: array{array{availability?: int, displayName: string, value: int}}, layer_info_properties: ?array{array{property_name: string, policy_type?: string}}}}, expertise_definitions: array, oceanview: array, objectives: array, region: string, projection: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameConfigValues(string $overrideFileName = ''): array
@@ -169,6 +169,30 @@ class Game extends Base
             return $data["datamodel"];
         }
         return $data ?? [];
+    }
+
+    /**
+     * Returns an array of all layer properties that have a policy_type field.
+     *
+     * @return array{array{property_name: string, policy_type?: string}}
+     * @throws Exception
+     */
+    public function getPolicyLayerPropertiesFromConfig(): array
+    {
+        static $result = null;
+        if ($result !== null) {
+            return $result;
+        }
+        $result = [];
+        $dataModel = $this->GetGameConfigValues();
+        foreach ($dataModel['meta'] ?? [] as $layer) {
+            foreach ($layer['layer_info_properties'] ?? [] as $layerProp) {
+                if (array_key_exists('policy_type', $layerProp)) {
+                    $result[] = $layerProp;
+                }
+            }
+        }
+        return $result;
     }
 
     /**
@@ -463,6 +487,12 @@ class Game extends Base
         await($this->onGameStateUpdated($state));
     }
 
+    private function getFishingPolicySettings(): array
+    {
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        return $gameConfigValues['policy_settings']['fishing'] ?? [];
+    }
+
     /**
      * @apiGroup Game
      * @throws Exception
@@ -479,12 +509,12 @@ class Game extends Base
             [ 'policy_type' => 'shipping' ], // key 1
             [ 'policy_type' => 'energy' ] // key 2
         ];
+        $policySettings[0] += $this->getFishingPolicySettings();
         $simulationSettings = [];
 
         $data = $this->GetGameConfigValues();
         if (isset($data['MEL'])) {
             $mel = new MEL();
-            $policySettings[0] += $mel->getFishingPolicySettings();
             $simulationSettings[] = [
                 'simulation_type' => 'MEL',
                 'content' => $mel->Config()

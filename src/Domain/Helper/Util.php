@@ -2,7 +2,11 @@
 
 namespace App\Domain\Helper;
 
+use Closure;
 use Exception;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionProperty;
 use ZipArchive;
 
 class Util
@@ -154,6 +158,57 @@ class Util
                     $folderPath . $relativePath . $file,
                     basename($folderPath) . $relativePath . $file
                 );
+            }
+        }
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public static function getClassPropertyNames(
+        string $className,
+        ?int $reflectionPropertyFilter = null,
+        ?string $downToBaseClassName = null
+    ): array {
+        $propertyNames = [];
+        self::traverseClassProperties(
+            $className,
+            function (ReflectionProperty $p) use (&$propertyNames) {
+                $propertyNames[] = $p->getName();
+            },
+            $reflectionPropertyFilter,
+            $downToBaseClassName
+        );
+        return $propertyNames;
+    }
+
+    /**
+     * @param string $className
+     * @param Closure $callback
+     * @param int|null $reflectionPropertyFilter bitwise flags of ReflectionProperty constants
+     * @param string|null $downToBaseClassName stop traversing, but including this base class
+     * @throws ReflectionException
+     */
+    public static function traverseClassProperties(
+        string $className,
+        Closure $callback,
+        ?int $reflectionPropertyFilter = null,
+        ?string $downToBaseClassName = null
+    ): void {
+        $classes = [$className];
+        $currentClass = $className;
+        while (false !== $currentClass && $currentClass !== $downToBaseClassName) {
+            $currentClass = get_parent_class($currentClass);
+            $classes[] = $currentClass;
+        }
+        foreach ($classes as $currentClass) {
+            $currentClassReflection = new \ReflectionClass($currentClass);
+            $currentClassProperties = $currentClassReflection->getProperties($reflectionPropertyFilter);
+            foreach ($currentClassProperties as $property) {
+                if ($property->getDeclaringClass()->getName() !== $currentClass) {
+                    continue;
+                }
+                $callback($property);
             }
         }
     }

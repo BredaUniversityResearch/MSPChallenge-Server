@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "4/25/2024",
-    "data_model_hash": "91EAEF5CE2E0DE4185154BCA4BD3E5393A215127CD1228BA51561C151C9C0521",
+    "date_modified": "9/4/2024",
+    "data_model_hash": "15CA3459C3954CCD076C165820C3DD64CD7690248917883E97C73042E70DD690",
     "errors": 0,
-    "editor_version": "1.0.0",
-    "config_version": "1.0.0"
+    "editor_version": "1.1.1",
+    "config_version": "1.1.1"
   },
   "datamodel": {
     "restrictions": {
@@ -8954,7 +8954,7 @@
           "description": "Wind farms create bottom vibrations"
         },
         {
-          "fromId": 2,
+          "fromId": 1,
           "toId": 46,
           "severity": 1,
           "description": "Wind farms create air disturbance"
@@ -19813,7 +19813,6 @@
           ]
         }
       ],
-      "layer_type_restriction_group_mapping": null,
       "output_configuration": {
         "pixels_per_mel_cell": 20,
         "simulation_area_cell_size": 5000
@@ -20069,68 +20068,58 @@
         {
           "ship_type_id": 1,
           "ship_type_name": "Container",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 2,
           "ship_type_name": "Cruise",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 3,
           "ship_type_name": "DryBulk",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 4,
           "ship_type_name": "GeneralCargo",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 5,
           "ship_type_name": "LiquidBulk",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 6,
           "ship_type_name": "Passenger",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 7,
           "ship_type_name": "Maintenance",
-          "ship_restriction_group": null,
           "ship_routing_type": "Maintenance",
           "ship_agility": 0.99
         },
         {
           "ship_type_id": 8,
           "ship_type_name": "AutomatedVessels",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 9,
           "ship_type_name": "Tanker",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         }
       ],
-      "ship_restriction_groups": null,
       "layer_type_ship_type_mapping": [
         {
           "layer_type": "Cargo",
@@ -20207,6 +20196,16 @@
         }
       ]
     },
+    "policy_settings": {
+      "fishing": {
+        "all_country_approval": true,
+        "stakeholder_pressure_cool_down": 0.0,
+        "fleet_info": {
+          "gear_types": [],
+          "fleets": []
+        }
+      }
+    },
     "MEL": {
       "modelfile": "MELdata/WesternBalticSeaModelForMSPChallenge.eiixml",
       "mode": null,
@@ -20245,6 +20244,11 @@
             },
             {
               "name": "BS_Pipelines_Edit",
+              "influence": 0.6,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 0.6,
               "construction": true
             }
@@ -20468,7 +20472,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Protection Pelagic Fleet",
@@ -20518,7 +20527,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Protection Recreational Fleet",
@@ -20553,7 +20567,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         },
         {
           "name": "Protection Unreported Fleet",
@@ -20588,19 +20607,21 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "3"
+            ]
+          }
         }
       ],
-      "fishing_policy_settings": {
-        "all_country_approval": true
-      },
       "fishing": [
         {
           "name": "Fishing Demersal Fleet",
           "initialFishingDistribution": [
             {
               "country_id": 3,
-              "weight": 0.03
+              "weight": 0.0274
             },
             {
               "country_id": 4,
@@ -20612,7 +20633,7 @@
             },
             {
               "country_id": 6,
-              "weight": 0.02
+              "weight": 0.0411
             },
             {
               "country_id": 7,
@@ -20624,24 +20645,29 @@
             },
             {
               "country_id": 9,
-              "weight": 0.03
+              "weight": 0.02055
             },
             {
               "country_id": 10,
-              "weight": 0.03
+              "weight": 0.04795
             },
             {
               "country_id": 11,
               "weight": 0.0
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Fishing Pelagic Fleet",
           "initialFishingDistribution": [
             {
               "country_id": 3,
-              "weight": 0.00005
+              "weight": 0.0416
             },
             {
               "country_id": 4,
@@ -20653,7 +20679,7 @@
             },
             {
               "country_id": 6,
-              "weight": 0.00005
+              "weight": 0.0624
             },
             {
               "country_id": 7,
@@ -20665,24 +20691,29 @@
             },
             {
               "country_id": 9,
-              "weight": 0.00005
+              "weight": 0.0312
             },
             {
               "country_id": 10,
-              "weight": 0.00004
+              "weight": 0.0728
             },
             {
               "country_id": 11,
               "weight": 0.0
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Fishing Recreational Fishery",
           "initialFishingDistribution": [
             {
               "country_id": 3,
-              "weight": 0.004
+              "weight": 0.003
             },
             {
               "country_id": 4,
@@ -20694,7 +20725,7 @@
             },
             {
               "country_id": 6,
-              "weight": 0.002
+              "weight": 0.0045
             },
             {
               "country_id": 7,
@@ -20706,24 +20737,29 @@
             },
             {
               "country_id": 9,
-              "weight": 0.003
+              "weight": 0.00225
             },
             {
               "country_id": 10,
-              "weight": 0.003
+              "weight": 0.00525
             },
             {
               "country_id": 11,
               "weight": 0.0
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         },
         {
           "name": "Fishing Unreported Fleet",
           "initialFishingDistribution": [
             {
               "country_id": 3,
-              "weight": 0.006
+              "weight": 0.003
             },
             {
               "country_id": 4,
@@ -20735,7 +20771,7 @@
             },
             {
               "country_id": 6,
-              "weight": 0.006
+              "weight": 0.0045
             },
             {
               "country_id": 7,
@@ -20747,17 +20783,22 @@
             },
             {
               "country_id": 9,
-              "weight": 0.006
+              "weight": 0.00225
             },
             {
               "country_id": 10,
-              "weight": 0.006
+              "weight": 0.00525
             },
             {
               "country_id": 11,
               "weight": 0.0
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "3"
+            ]
+          }
         }
       ],
       "outcomes": [
@@ -21113,7 +21154,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Countries",
@@ -21469,7 +21511,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_EEZ_BSH",
@@ -21797,6 +21840,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "EEZ"
         ]
       },
       {
@@ -21985,7 +22032,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Territorial_Waters_BSH",
@@ -22299,7 +22347,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Populated_Places",
@@ -22485,7 +22534,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Bathymetry",
@@ -22700,7 +22750,8 @@
             "media": "wiki://Bathymetry"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Sediments",
@@ -22944,7 +22995,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Ecosystem_Health_Status",
@@ -23075,7 +23127,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Temperature",
@@ -23290,7 +23343,8 @@
             "media": "wiki://Sea_Bottom_Temperature"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Salinity",
@@ -23477,7 +23531,8 @@
             "media": "wiki://Salinity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Topography",
@@ -23692,7 +23747,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Eutrophication_Status",
@@ -23894,7 +23950,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Recreational_Fishing",
@@ -24110,7 +24167,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Bathing_sites",
@@ -24354,7 +24412,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_ICE_Coverage",
@@ -24486,7 +24545,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Military_Areas_WBS",
@@ -24531,7 +24591,7 @@
         "layer_special_entity_type": "Default",
         "layer_depth": 1,
         "layer_property_as_type": "type_1",
-"layer_type": {
+        "layer_type": {
           "0": {
             "displayName": "Air Force Exercise",
             "approval": "NotDependent",
@@ -24730,7 +24790,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_bat_20_poly",
@@ -24805,7 +24866,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Ports_Model",
@@ -24963,7 +25025,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_Lanes",
@@ -25277,7 +25340,8 @@
             "unit": "km",
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_National_Lanes",
@@ -25493,7 +25557,8 @@
             "unit": "km",
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Fairways",
@@ -25723,7 +25788,8 @@
             "unit": "km",
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_No_Shipping_Zones",
@@ -26009,7 +26075,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Connection_Lanes",
@@ -26197,7 +26264,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Connection_Points",
@@ -26357,7 +26425,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_Gates",
@@ -26447,7 +26516,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "10kpoints_in_sea",
@@ -26537,7 +26607,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "20kpoints_in_sea",
@@ -26627,7 +26698,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "40kpoints_in_sea",
@@ -26731,7 +26803,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Dredging_Sites",
@@ -26919,7 +26992,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Sand_Gravel_Extraction",
@@ -26994,7 +27068,8 @@
             "media": "wiki://Sand_and_Gravel_Extraction"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Dredging_Deposit_Sites",
@@ -27196,7 +27271,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_Intensity_Total_Raster",
@@ -27383,7 +27459,8 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_Intensity_raster",
@@ -27570,7 +27647,8 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cargo_Intensity_Raster",
@@ -27757,7 +27835,8 @@
             "media": "wiki://Cargo_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Passenger_Intensity_Raster",
@@ -27944,7 +28023,8 @@
             "media": "wiki://Passenger_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Maintenance_Intensity_Raster",
@@ -28131,7 +28211,8 @@
             "media": "wiki://Maintenance_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Tanker_Intensity_Raster",
@@ -28318,7 +28399,8 @@
             "media": "wiki://Tanker_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_AutomatedVessels_Intensity_Raster",
@@ -28505,7 +28587,8 @@
             "media": "wiki://Automated_Vessel_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wind_Farms_existing",
@@ -28789,7 +28872,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cables_Edit",
@@ -29059,7 +29143,8 @@
             "unit": null,
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Sockets_Edit",
@@ -29189,7 +29274,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Transformers_Edit",
@@ -29319,7 +29405,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Oil_Gas_Platforms",
@@ -29507,7 +29594,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Oil_Gas_Terminals",
@@ -29611,7 +29699,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Pipelines_Edit",
@@ -29701,7 +29790,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Pipelines",
@@ -29931,7 +30021,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wind_Farms_planned",
@@ -30567,7 +30658,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cables_Wind_Farms_planned",
@@ -30895,7 +30987,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Energy_Transformers",
@@ -31069,7 +31162,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Main_Transmission_Lines",
@@ -31285,7 +31379,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wave_Resource_raster",
@@ -31472,7 +31567,8 @@
             "media": "wiki://Wave_Density"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wind_Resource_raster",
@@ -31659,7 +31755,8 @@
             "media": "wiki://Wind_Density"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cables_Other",
@@ -31917,7 +32014,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Natura_2000_new",
@@ -32119,7 +32217,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_MPA",
@@ -32166,7 +32265,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No Protection",
+            "displayName": "default",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
@@ -32180,118 +32279,6 @@
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
             "lineColor": "#004C12FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "1": {
-            "displayName": "No Demersal Fleets",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#009924FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "2": {
-            "displayName": "No Pelagic Fleets",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#33FF63FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "3": {
-            "displayName": "No Recreational Fleets",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "18",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#80FF95FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "4": {
-            "displayName": "No Unreported Fleets",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "18",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#80FF95FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -32390,8 +32377,24 @@
             "content_validation": 0,
             "unit": null,
             "default_value": null
+          },
+          {
+            "property_name": "POLICY_BUFFER_ZONE",
+            "policy_type": "buffer_zone",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Buffer zone policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Unesco_Sites",
@@ -32579,7 +32582,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shellfish_Farms",
@@ -32669,7 +32673,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Finfish_Farms",
@@ -32773,7 +32778,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Birds_Breeding_Areas",
@@ -32876,7 +32882,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Birds_Wintering_Areas",
@@ -32979,7 +32986,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Fisheries_closure",
@@ -33125,7 +33133,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cod_Fisheries_closure",
@@ -33271,7 +33280,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cod_Spawning",
@@ -33402,7 +33412,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Bottom_Disturbance",
@@ -33589,7 +33600,8 @@
             "media": "wiki://Bottom_Disturbance"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Artificial_Habitat",
@@ -33776,7 +33788,8 @@
             "media": "wiki://Artificial_Substrate"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Continuous_Noise",
@@ -33963,7 +33976,8 @@
             "media": "wiki://Noise"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Impulse_Noise",
@@ -34150,7 +34164,8 @@
             "media": "wiki://Noise"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Air_Disturbance",
@@ -34337,7 +34352,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Surface_Disturbance",
@@ -34524,7 +34540,8 @@
             "media": "wiki://Surface_Disturbance"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Bottom_Vibration",
@@ -34711,7 +34728,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Demersal_Fleet",
@@ -34898,7 +34916,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Pelagic_Fleet",
@@ -35085,7 +35104,8 @@
             "media": "wiki://Protection_Pelagic"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Recreational_Fleet",
@@ -35272,7 +35292,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Unreported_Fleet",
@@ -35459,7 +35480,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Cod",
@@ -35646,7 +35668,8 @@
             "media": "wiki://Cod"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Seals",
@@ -35833,7 +35856,8 @@
             "media": "wiki://Seal"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Seabirds",
@@ -36020,7 +36044,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Phytoplankton",
@@ -36207,7 +36232,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Pelagic_Macrofauna",
@@ -36394,7 +36420,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Harbour_Porpoise",
@@ -36581,7 +36608,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Other_Demersal_Fish",
@@ -36768,7 +36796,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Other_Pelagic_Fish",
@@ -36955,13 +36984,14 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Flatfish",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Flatfish",
+        "layer_short": "Flatfish (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -37142,13 +37172,14 @@
             "media": "wiki://Flatfish"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Herring",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Herring",
+        "layer_short": "Herring (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -37329,7 +37360,8 @@
             "media": "wiki://Herring"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Benthic_Macrofauna",
@@ -37516,7 +37548,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Benthic_Meiofauna",
@@ -37703,7 +37736,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Benthic_Producers",
@@ -37890,7 +37924,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Sprat",
@@ -38077,7 +38112,8 @@
             "media": "wiki://Sprat"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Zooplankton",
@@ -38264,7 +38300,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Demersal_Fleet_Catch",
@@ -38451,7 +38488,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Pelagic_Fleet_Catch",
@@ -38638,7 +38676,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Recreational_Fleet_Catch",
@@ -38825,7 +38864,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Unreported_Fleet_Catch",
@@ -39012,7 +39052,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       }
     ],
     "expertise_definitions": null,
@@ -39180,11 +39221,11 @@
         "deadline": 192
       }
     ],
-    "edition_name": "Baltic Sea edition",
+    "edition_name": "Western Baltic Sea edition",
     "edition_colour": "#FF7979FF",
     "edition_letter": "B",
     "region": "balticline",
-	"projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
+    "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2018,
     "end": 2050,
     "era_total_months": 96,

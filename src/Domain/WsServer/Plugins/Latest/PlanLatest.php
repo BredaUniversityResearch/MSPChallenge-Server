@@ -2,11 +2,14 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\PolicyType;
+use App\Domain\API\v1\GeneralPolicyType;
 use App\Domain\Common\CommonBase;
+use App\Domain\Common\EntityEnums\PolicyTypeName;
+use App\Domain\PolicyData\PolicyDataFactory;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
+use Swaggest\JsonSchema\InvalidValue;
 use function App\await;
 use function App\parallel;
 use function App\tpf;
@@ -23,32 +26,53 @@ class PlanLatest extends CommonBase
      */
     public function latest(int $lastupdate): array|PromiseInterface
     {
+
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        $qb
+            ->select(
+                'pl.plan_id as id',
+                'pl.plan_country_id as country',
+                'pl.plan_name as name',
+                'pl.plan_description as description',
+                'pl.plan_gametime as startdate',
+                'pl.plan_state as state',
+                'pl.plan_previousstate as previousstate',
+                'pl.plan_lastupdate as lastupdate',
+                'pl.plan_lock_user_id as locked',
+                'pl.plan_active as active',
+                'pl.plan_type as type',
+                'pl.plan_energy_error as energy_error',
+                'pl.plan_alters_energy_distribution as alters_energy_distribution'
+            )
+            ->from('plan', 'pl');
+        // query general policies of plan, one per column
+        $generalPolicyTypes = GeneralPolicyType::getConstants();
+        foreach (PolicyTypeName::cases() as $policyTypeName) {
+            if (!array_key_exists(strtoupper($policyTypeName->value), $generalPolicyTypes)) {
+                continue;
+            }
+            $po = 'po_'.$policyTypeName->value; // intermediate policy table name
+            // this assumes no duplicate policy types per plan
+            $qb
+                ->leftJoin(
+                    'pp',
+                    'policy',
+                    $po,
+                    "pp.policy_id = $po.id and $po.type = ".$qb->createPositionalParameter($policyTypeName->value)
+                )
+                ->addSelect($po.'.data as ' . $policyTypeName->value.'_data');
+        }
+        $qb
+            ->where('pl.plan_lastupdate >= ' . $qb->createPositionalParameter($lastupdate))
+            ->andWhere('pl.plan_active = ' . $qb->createPositionalParameter(1))
+            ->leftJoin('pl', 'plan_policy', 'pp', 'pl.plan_id = pp.plan_id')
+            ->groupBy('pl.plan_id');
         //get all plans that have changed
         $promise = $this->getAsyncDatabase()->query(
             $qb
-                ->select(
-                    'plan_id as id',
-                    'plan_country_id as country',
-                    'plan_name as name',
-                    'plan_description as description',
-                    'plan_gametime as startdate',
-                    'plan_state as state',
-                    'plan_previousstate as previousstate',
-                    'plan_lastupdate as lastupdate',
-                    'plan_country_id as country',
-                    'plan_lock_user_id as locked',
-                    'plan_active as active',
-                    'plan_type as type',
-                    'plan_energy_error as energy_error',
-                    'plan_alters_energy_distribution as alters_energy_distribution'
-                )
-                ->from('plan')
-                ->where('plan_lastupdate >= ' . $qb->createPositionalParameter($lastupdate))
-                ->andWhere('plan_active = ' . $qb->createPositionalParameter(1))
         )
         ->then(function (Result $result) {
-            $plans = $result->fetchAllRows();
+            $plans = ($result->fetchAllRows() ?? []) ?: [];
             $toPromiseFunctions = [];
             foreach ($plans as $key => &$d) {
                 //all layers, this is needed to merge them with geometry later
@@ -145,8 +169,8 @@ class PlanLatest extends CommonBase
                     /** @var Result[] $results */
                     $toPromiseFunctions = [];
                     foreach ($plans as $pKey => &$d) {
-                        $d['layers'] = $results['layers' . $pKey]->fetchAllRows();
-                        $d['grids'] = collect($results['grids' . $pKey]->fetchAllRows())
+                        $d['layers'] = ($results['layers' . $pKey]->fetchAllRows() ?? []) ?: [];
+                        $d['grids'] = collect(($results['grids' . $pKey]->fetchAllRows() ?? []) ?: [])
                             // fail-safe. grid persistent field should be int. If not, remove the grid.
                             ->filter(function ($value, $key) {
                                 return ctype_digit((string)$value['persistent']);
@@ -190,19 +214,20 @@ class PlanLatest extends CommonBase
                         }
                         unset($g);
 
-                        $deleted = $results['deleted' . $pKey]->fetchAllRows();
+                        $deleted = ($results['deleted' . $pKey]->fetchAllRows() ?? []) ?: [];
                         $d['deleted_grids'] = array();
                         foreach ($deleted as $del) {
                             $d['deleted_grids'][] = $del['grid_persistent'];
                         }
 
-                        $fishingValues = $results['fishing' . $pKey]->fetchAllRows();
+                        $fishingValues = ($results['fishing' . $pKey]->fetchAllRows() ?? []) ?: [];
                         if (count($fishingValues) > 0) {
                             $d['fishing'] = $fishingValues;
                         }
 
-                        $d['votes'] = $results['votes' . $pKey]->fetchAllRows();
-                        $d['restriction_settings'] = $results['restriction_settings' . $pKey]->fetchAllRows();
+                        $d['votes'] = ($results['votes' . $pKey]->fetchAllRows() ?? []) ?: [];
+                        $d['restriction_settings'] =
+                            ($results['restriction_settings' . $pKey]->fetchAllRows() ?? []) ?: [];
                     }
                     unset($d);
                     return parallel($toPromiseFunctions)
@@ -225,6 +250,56 @@ class PlanLatest extends CommonBase
         return $this->isAsync() ? $promise : await($promise);
     }
 
+    private function formatByPolicyType(array &$plan, PolicyTypeName $policyType): void
+    {
+        $policy['policy_type'] = $policyType->value;
+        switch ($policyType) {
+            case PolicyTypeName::ENERGY_DISTRIBUTION: // PolicyUpdateEnergyPlan
+                $policy['alters_energy_distribution'] = $plan['alters_energy_distribution'];
+                if (!empty($plan['grids'])) {
+                    $policy['grids'] = $plan['grids'];
+                }
+                if (!empty($plan['deleted_grids'])) {
+                    $policy['deleted_grids'] = $plan['deleted_grids'];
+                }
+                if (!empty($plan['energy_error'])) {
+                    $policy['energy_error'] = $plan['energy_error'];
+                }
+                unset($plan['grids'], $plan['deleted_grids'], $plan['energy_error']);
+                break;
+            case PolicyTypeName::FISHING_EFFORT: // PolicyUpdateFishingPlan
+                if (!empty($plan['fishing'])) {
+                    $policy['fishing'] = $plan['fishing'];
+                }
+                unset($plan['fishing']);
+                break;
+            case PolicyTypeName::SHIPPING_SAFETY_ZONES: // PolicyUpdateShippingPlan
+                if (!empty($plan['restriction_settings'])) {
+                    $policy['restriction_settings'] = $plan['restriction_settings'];
+                }
+                unset($plan['restriction_settings']);
+                break;
+            default:
+                $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'], true));
+                break;
+        }
+
+        $plan['policies'][] = $policy;
+
+        unset(
+            $plan[$policyType->value.'_data'],
+            // PolicyUpdateEnergyPlan
+            $plan['alters_energy_distribution'],
+            $plan['grids'],
+            $plan['deleted_grids'],
+            $plan['energy_error'],
+            // PolicyUpdateFishingPlan
+            $plan['fishing'],
+            // PolicyUpdateShippingPlan
+            $plan['restriction_settings']
+        );
+    }
+
     /**
      * new format since new UI style (2022-11-24), see MSP-4142
      *
@@ -237,49 +312,19 @@ class PlanLatest extends CommonBase
             ->map(function ($plan) {
                 $type = $plan['type'];
                 unset($plan['type']);
-
-                // PolicyUpdateEnergyPlan
-                if (($type & PolicyType::ENERGY) === PolicyType::ENERGY) {
-                    $policy['policy_type'] = 'energy';
-                    $policy['alters_energy_distribution'] = $plan['alters_energy_distribution'];
-                    if (!empty($plan['grids'])) {
-                        $policy['grids'] = $plan['grids'];
+                $generalPolicyTypes = GeneralPolicyType::getConstants();
+                foreach (PolicyTypeName::cases() as $policyTypeName) {
+                    $policyTypeNameToUpper = strtoupper($policyTypeName->value);
+                    if (!array_key_exists($policyTypeNameToUpper, $generalPolicyTypes)) {
+                        continue;
                     }
-                    if (!empty($plan['deleted_grids'])) {
-                        $policy['deleted_grids'] = $plan['deleted_grids'];
+                    $typeValue = $generalPolicyTypes[$policyTypeNameToUpper];
+                    if ((($type & $typeValue) !== $typeValue) && // no plan.plan_type match
+                        empty($plan[$policyTypeName->value.'_data'])) { // no policy data record
+                        continue;
                     }
-                    if (!empty($plan['energy_error'])) {
-                        $policy['energy_error'] = $plan['energy_error'];
-                    }
-                    $plan['policies'][] = $policy;
+                    $this->formatByPolicyType($plan, $policyTypeName);
                 }
-                unset(
-                    $policy,
-                    $plan['alters_energy_distribution'],
-                    $plan['grids'],
-                    $plan['deleted_grids'],
-                    $plan['energy_error']
-                );
-
-                // PolicyUpdateFishingPlan
-                if (($type & PolicyType::FISHING) === PolicyType::FISHING) {
-                    $policy['policy_type'] = 'fishing';
-                    if (!empty($plan['fishing'])) {
-                        $policy['fishing'] = $plan['fishing'];
-                    }
-                    $plan['policies'][] = $policy;
-                }
-                unset($policy, $plan['fishing']);
-
-                // PolicyUpdateShippingPlan
-                if (($type & PolicyType::SHIPPING) === PolicyType::SHIPPING) {
-                    $policy['policy_type'] = 'shipping';
-                    if (!empty($plan['restriction_settings'])) {
-                        $policy['restriction_settings'] = $plan['restriction_settings'];
-                    }
-                    $plan['policies'][] = $policy;
-                }
-                unset($policy, $plan['restriction_settings']);
                 return $plan;
             })
             ->all();
