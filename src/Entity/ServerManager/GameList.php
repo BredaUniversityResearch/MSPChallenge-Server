@@ -5,6 +5,7 @@ namespace App\Entity\ServerManager;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
+use App\Entity\Game;
 use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -89,6 +90,8 @@ class GameList
 
     #[ORM\Column(length: 45, nullable: true)]
     private ?string $serverVersion = null;
+
+    private ?Game $runningGame = null;
 
     /**
      * @param int|null $id
@@ -426,6 +429,26 @@ class GameList
         return $this;
     }
 
+    /**
+     * Get the value of runningGame
+     */ 
+    public function getRunningGame(): ?Game
+    {
+        return $this->runningGame;
+    }
+
+    /**
+     * Set the value of runningGame
+     *
+     * @return  self
+     */ 
+    public function setRunningGame($runningGame): self
+    {
+        $this->runningGame = $runningGame;
+
+        return $this;
+    }
+
     public function checkPasswordFormat(string $adminorplayer, string $string): bool|string
     {
         if (is_object(json_decode($string))) {
@@ -483,19 +506,9 @@ class GameList
         return json_encode($newArray);
     }
 
-    private function getCountries(): array
+    public function getCountries(): array
     {
-        if (!is_null($this->getGameSave())) { // session eminates from a save
-            $configData = []; // to do
-        } else { // session eminates from a config file, so from scratch
-            $configData = $this->getGameConfigVersion()->getGameConfigComplete();
-        }
-
-        $countries = [];
-        if (!isset($configData['datamodel']) || !isset($configData['datamodel']['meta'])) {
-            return $countries;
-        }
-
+        $configData = $this->getRunningGame()->getRunningGameConfigFileContents();
         foreach ($configData['datamodel']['meta'] as $layerMeta) {
             if ($layerMeta['layer_name'] == $configData['datamodel']['countries']) {
                 foreach ($layerMeta['layer_type'] as $country) {
@@ -505,9 +518,9 @@ class GameList
                         'country_colour' => $country['polygonColor'],
                     ];
                 }
+                break;
             }
         }
-
         return $countries;
     }
 }

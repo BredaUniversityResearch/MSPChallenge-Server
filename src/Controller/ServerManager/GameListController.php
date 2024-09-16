@@ -6,7 +6,6 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
 use App\Form\GameListAddFormType;
-use App\Form\GameListEditFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +27,7 @@ use Version\Exception\InvalidVersionString;
 use App\Entity\ServerManager\Setting;
 use App\Message\GameList\GameListCreationMessage;
 use App\Domain\Communicator\WatchdogCommunicator;
+use App\Form\GameListUserAccessFormType;
 use App\Message\GameList\GameListArchiveMessage;
 use App\Message\GameSave\GameSaveCreationMessage;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -311,13 +311,23 @@ class GameListController extends BaseController
     #[Route('/manager/game/access/{sessionId}', name: 'manager_game_access', requirements: ['sessionId' => '\d+'])]
     public function gameSessionAccess(
         EntityManagerInterface $entityManager,
+        Request $request,
         int $sessionId = 1
     ): Response {
-        // @todo
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        $form = $this->createForm(GameListUserAccessFormType::class, $gameSession, [
+            'action' => $this->generateUrl('manager_game_access')
+        ]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $gameSession = $form->getData();
+            $entityManager->flush();
+            return new Response(null, 200);
+        }
         return $this->render(
             'manager/GameList/game_access.html.twig',
-            ['gameSession' => $gameSession]
+            ['gameSessionUserAccessForm' => $form->createView()],
+            new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
         );
     }
 }
