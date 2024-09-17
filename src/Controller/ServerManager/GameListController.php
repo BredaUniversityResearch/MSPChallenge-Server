@@ -316,13 +316,13 @@ class GameListController extends BaseController
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $form = $this->createForm(GameListUserAccessFormType::class, $gameSession, [
-            'action' => $this->generateUrl('manager_game_access', ['sessionId' => $sessionId])
+            'action' => $this->generateUrl('manager_game_access', ['sessionId' => $gameSession->getId()])
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $gameSession = $form->getData();
             $entityManager->flush();
-            return new Response($sessionId, 200);
+            return new Response($gameSession->getId(), 200);
         }
         return $this->render(
             'manager/GameList/game_access.html.twig',
