@@ -500,7 +500,7 @@ class Game extends Base
     {
         $gameConfigValues = (new Game())->GetGameConfigValues();
         $policySettings = collect(array_values($gameConfigValues['policy_settings'] ?? []))
-            ->filter(fn($ps) => $ps['enabled'] == true)->all(); // keys: fishing, shipping, energy, eco_gear
+            ->filter(fn($ps) => $ps['enabled'] == true)->all();
         array_walk($policySettings, function (&$ps) {
             unset($ps['enabled']);
         });
