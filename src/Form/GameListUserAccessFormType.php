@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\ServerManager\GameList;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -21,7 +22,9 @@ class GameListUserAccessFormType extends AbstractType
         ];
         $externalProviderHelp = 'Enter one username or e-mail address per line, and click Find.';
         $builder
-            ->add('provider_admin', ChoiceType::class, [
+            ->add('passwordAdmin', HiddenType::class)
+            ->add('passwordPlayer', HiddenType::class)
+            /*->add('provider_admin', ChoiceType::class, [
                 'choices' => $providerChoices, 'mapped' => false, 'expanded' => true, 'multiple' => false
             ])
             ->add('provider_admin_external', ChoiceType::class, [
@@ -53,7 +56,7 @@ class GameListUserAccessFormType extends AbstractType
             ])
             ->add('users_playerall', TextType::class, [
                 'mapped' => false, 'help' => $externalProviderHelp
-            ])
+            ])*/
         ;
     }
 

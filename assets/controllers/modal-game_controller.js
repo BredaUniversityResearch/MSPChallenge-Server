@@ -4,7 +4,7 @@ import { success } from 'tata-js';
 
 export default class extends Controller {
 
-    static targets = ['modalNewSessionForm'];
+    static targets = ['modalNewSessionForm', 'modalUserAccessForm'];
     static modalDefaultBodyReloader;
 
     autoReloadModalDefaultBody()
@@ -62,36 +62,64 @@ export default class extends Controller {
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
+    async submitUserAccessModalForm(event)
+    {
+        await this.submitFormGeneric(
+            event,
+            this.modalUserAccessFormTarget,
+            null,
+            function (sessionId) {
+                success(
+                    'Success',
+                    `User access for session #${sessionId} successfully saved.`,
+                    { position: 'mm', duration: 10000 }
+                );
+            }
+        );
+    }
+
     async submitNewSessionModalForm(event)
     {
+        await this.submitFormGeneric(
+            event,
+            this.modalNewSessionFormTarget,
+            'Successfully added a new session. Please wait for it to be finalised...',
+            function (sessionId) {
+                if (sessionId) {
+                    $('#logToast').attr('data-session', sessionId);
+                    window.dispatchEvent(new CustomEvent("session-changing"));
+                }
+            }
+        );
+    }
+    
+    async submitFormGeneric(event, target, successMessage, successCallback = null)
+    {
         event.preventDefault();
-        const $form = $(this.modalNewSessionFormTarget).find('form');
+        const $form = $(target).find('form');
         let button = $form.find('button[type=submit]');
-        var oldButtonHtml = button.html();
-        button.html('<i class="fa fa-refresh fa-spin"></i>');
-        button.prop('disabled', true);
+        if (button) {
+            var oldHtml = button.html();
+            button.html('<i class="fa fa-refresh fa-spin"></i>');
+            button.prop('disabled', true);
+        }
         try {
             await $.ajax({
                 url: $form.prop('action'),
                 method: $form.prop('method'),
                 data: $form.serialize(),
                 dataType: 'json',
-                success: function (sessionId) {
-                    if (sessionId) {
-                        $('#logToast').attr('data-session', sessionId);
-                        window.dispatchEvent(new CustomEvent("session-changing"));
-                    }
-                }
+                success: successCallback
             });
-            success(
-                'Success',
-                'Successfully added a new session. Please wait for it to be finalised...',
-                { position: 'mm', duration: 10000 }
-            );
+            if (successMessage) {
+                success('Success', successMessage, { position: 'mm', duration: 10000 });
+            }
         } catch (e) {
-            this.modalNewSessionFormTarget.innerHTML = e.responseText;
+            target.innerHTML = e.responseText;
         }
-        button.html(oldButtonHtml);
-        button.prop('disabled', false);
+        if (button) {
+            button.html(oldHtml);
+            button.prop('disabled', false);
+        }
     }
 }
