@@ -487,12 +487,6 @@ class Game extends Base
         await($this->onGameStateUpdated($state));
     }
 
-    private function getFishingPolicySettings(): array
-    {
-        $gameConfigValues = (new Game())->GetGameConfigValues();
-        return $gameConfigValues['policy_settings']['fishing'] ?? [];
-    }
-
     /**
      * @apiGroup Game
      * @throws Exception
@@ -504,12 +498,12 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function PolicySimSettings(): array
     {
-        $policySettings = [
-            [ 'policy_type' => 'fishing' ], // key 0
-            [ 'policy_type' => 'shipping' ], // key 1
-            [ 'policy_type' => 'energy' ] // key 2
-        ];
-        $policySettings[0] += $this->getFishingPolicySettings();
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        $policySettings = collect(array_values($gameConfigValues['policy_settings'] ?? []))
+            ->filter(fn($ps) => $ps['enabled'] == true)->all(); // keys: fishing, shipping, energy, eco_gear
+        array_walk($policySettings, function (&$ps) {
+            unset($ps['enabled']);
+        });
         $simulationSettings = [];
 
         $data = $this->GetGameConfigValues();

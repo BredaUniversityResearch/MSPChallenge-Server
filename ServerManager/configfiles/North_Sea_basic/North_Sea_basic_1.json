@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "1/31/2024",
-    "data_model_hash": "E41E2B792C7A3323F66EE7DA7FEA706ECDD047982E1A98324ADBFDE38DEB58FF",
+    "date_modified": "9/17/2024",
+    "data_model_hash": "E5DEA086A786496C779F64D99729971A406A84D919E25F889C01AC8F756DBD5D",
     "errors": 0,
-    "editor_version": "1.1.0",
-    "config_version": "1.1.0"
+    "editor_version": "1.1.1",
+    "config_version": "1.1.1"
   },
   "datamodel": {
     "restrictions": {
@@ -21407,7 +21407,6 @@
           ]
         }
       ],
-      "layer_type_restriction_group_mapping": null,
       "output_configuration": {
         "pixels_per_mel_cell": 10,
         "simulation_area_cell_size": 5000
@@ -21672,40 +21671,34 @@
         {
           "ship_type_id": 1,
           "ship_type_name": "Ferry",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.9
         },
         {
           "ship_type_id": 2,
           "ship_type_name": "Passenger",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.7
         },
         {
           "ship_type_id": 3,
           "ship_type_name": "Tanker",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.7
         },
         {
           "ship_type_id": 4,
           "ship_type_name": "Cargo",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.7
         },
         {
           "ship_type_id": 5,
           "ship_type_name": "Maintenance",
-          "ship_restriction_group": null,
           "ship_routing_type": "Maintenance",
           "ship_agility": 0.99
         }
       ],
-      "ship_restriction_groups": null,
       "layer_type_ship_type_mapping": [
         {
           "layer_type": "Ferry",
@@ -21825,8 +21818,22 @@
               "country_id": "-1"
             }
           ]
-        }        
-      }      
+        },
+        "policy_type": "fishing",
+        "enabled": true
+      },
+      "shipping": {
+        "policy_type": "shipping",
+        "enabled": true
+      },
+      "energy": {
+        "policy_type": "energy",
+        "enabled": true
+      },
+      "eco_gear": {
+        "policy_type": "eco_gear",
+        "enabled": false
+      }
     },
     "MEL": {
       "modelfile": "MELdata/North Sea model for MSP.eiixml",
@@ -22153,11 +22160,6 @@
         },
         {
           "name": "Protection Bottom Trawl",
-          "policy_filters": {
-            "fleets": [
-              "0"
-            ]
-          },
           "layers": [
             {
               "name": "NS_Oil_Gas_Offshore_Instalations",
@@ -22239,15 +22241,15 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Protection Industrial Trawl",
-          "policy_filters": {
-            "fleets": [
-              "1"
-            ]
-          },
           "layers": [
             {
               "name": "NS_Oil_Gas_Offshore_Instalations",
@@ -22314,15 +22316,15 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Protection Nets",
-          "policy_filters": {
-            "fleets": [
-              "2"
-            ]
-          },
           "layers": [
             {
               "name": "NS_Pipelines",
@@ -22384,7 +22386,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         }
       ],
       "fishing": [
@@ -30901,7 +30908,7 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": "wiki://Pipelines"
-          },	
+          },
           "3": {
             "displayName": "Unused",
             "approval": "NotDependent",
@@ -30929,8 +30936,8 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": "wiki://Pipelines"
-		  }
-		},
+          }
+        },
         "layer_info_properties": [
           {
             "property_name": "STATUS",
@@ -35533,7 +35540,7 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#3182BD",
+            "pointColor": "#3182BDFF",
             "pointSize": 0.4,
             "pointSpriteName": "Aquaculturefish",
             "description": "",
@@ -35684,7 +35691,7 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#3182BD",
+            "pointColor": "#3182BDFF",
             "pointSize": 0.4,
             "pointSpriteName": "Aquacultureshellfish",
             "description": "",
@@ -35835,7 +35842,7 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#08519C",
+            "pointColor": "#08519CFF",
             "pointSize": 0.4,
             "pointSpriteName": "Aquaculturefish",
             "description": "",

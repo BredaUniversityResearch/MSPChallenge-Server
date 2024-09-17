@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "9/4/2024",
-    "data_model_hash": "CB08696821F4E353577A43EDABA96A474F8FEF58766238AE7D2A8504E436DDD6",
+    "date_modified": "9/17/2024",
+    "data_model_hash": "3335D0CEBB894865E4D464E360DB6D8886D077083BFE852CEB0C43A56A5DC031",
     "errors": 0,
     "editor_version": "1.1.1",
     "config_version": "1.1.1"
@@ -22837,7 +22837,21 @@
         "fleet_info": {
           "gear_types": [],
           "fleets": []
-        }
+        },
+        "policy_type": "fishing",
+        "enabled": true
+      },
+      "shipping": {
+        "policy_type": "shipping",
+        "enabled": true
+      },
+      "energy": {
+        "policy_type": "energy",
+        "enabled": true
+      },
+      "eco_gear": {
+        "policy_type": "eco_gear",
+        "enabled": false
       }
     },
     "MEL": {

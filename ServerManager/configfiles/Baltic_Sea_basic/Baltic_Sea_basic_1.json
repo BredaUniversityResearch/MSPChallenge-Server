@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "9/3/2024",
-    "data_model_hash": "37E6CBA79C094DF96F0647DBF6115B74C4E8A2A63ABE7AFBEA10C07C99A5F0BF",
+    "date_modified": "9/17/2024",
+    "data_model_hash": "E742164C953AF43BA8AFF6E140F67AA4BA329EE1B505241935DD64B7C88FA661",
     "errors": 0,
     "editor_version": "1.1.1",
     "config_version": "1.1.1"
@@ -20471,7 +20471,21 @@
               "country_id": "-1"
             }
           ]
-        }
+        },
+        "policy_type": "fishing",
+        "enabled": true
+      },
+      "shipping": {
+        "policy_type": "shipping",
+        "enabled": true
+      },
+      "energy": {
+        "policy_type": "energy",
+        "enabled": true
+      },
+      "eco_gear": {
+        "policy_type": "eco_gear",
+        "enabled": false
       }
     },
     "MEL": {
