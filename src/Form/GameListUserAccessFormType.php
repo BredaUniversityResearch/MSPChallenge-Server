@@ -17,7 +17,7 @@ class GameListUserAccessFormType extends AbstractType
     {
         $providerChoices = [
             'Set a password' => 'local',
-            'Set users from MSP Challenge' => 'App\\Domain\\API\\v1\\Auth_MSP' // to do, get this list via a function call
+            'Set users from MSP Challenge' => 'App\\Domain\\API\\v1\\Auth_MSP' // to do, get this via a function call
         ];
         $userTeams = $builder->getData()->getCountries();
         $externalProviderHelp = 'Enter one username or e-mail address per line, and click Find.';
@@ -62,15 +62,15 @@ class GameListUserAccessFormType extends AbstractType
             ->add('users_playerall', TextType::class, [
                 'mapped' => false, 'help' => $externalProviderHelp
             ]);
-            foreach ($userTeams as $key => $country) {
-                $builder->add("password_player_country_{$country['country_id']}", TextType::class, ['mapped' => false]);
-                $builder->add("users_player_country_{$country['country_id']}", CollectionType::class, [
-                    'entry_type' => TextType::class,
-                    'allow_add' => true,
-                    'prototype' => true,
-                    'mapped' => false
-                ]);
-            }
+        foreach ($userTeams as $key => $country) {
+            $builder->add("password_player_country_{$country['country_id']}", TextType::class, ['mapped' => false]);
+            $builder->add("users_player_country_{$country['country_id']}", CollectionType::class, [
+                'entry_type' => TextType::class,
+                'allow_add' => true,
+                'prototype' => true,
+                'mapped' => false
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
