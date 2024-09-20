@@ -12,122 +12,65 @@
                 <div class="col">
                     <div id="adminUserAccess">
                         <h6>Administrators</h6>
-                        <div class="form-check">
-                            <!-- input class="form-check-input" type="radio" name="provider_admin" value="local" onChange="" -->
-                            <label class="form-check-label" for="provider_admin">
-                                Set a password
-                            </label>
-                        </div>
-                        <div id="adminPasswordFields">
-                            <div class="input-group mb-3">
-                                <!-- input type="text" class="form-control" placeholder="Enter a password. Administrators require a password." id="password_admin" name="password_admin" -->
-                            </div>  
-                        </div>
-                        <div id="adminProviders">
-                            <div class="form-check">
-                                <!-- input class="form-check-input" type="radio" name="provider_admin" value="external" onChange="" -->
-                                <label class="form-check-label" for="provider_admin">
-                                    Set users from
-                                </label>
-                                <!-- select class="form-control-sm d-inline-block p-0 h-25" id="provider_admin_external"  /select -->
-                                <small id="passwordHelpBlock" class="form-text text-muted">
-                                    Enter one username or e-mail address per line, and click Find.
-                                </small>
-                            </div>
+                        {{ form_widget(gameSessionUserAccessForm.provider_admin, {'attr': {'class': 'form-select'}}) }}
+                        <div id="adminPasswordFields" class="py-2">
+                            {{ form_widget(gameSessionUserAccessForm.password_admin, {'attr': {'class': 'form-control'}}) }}
                         </div>
                         <div id="adminUserFields">
-                            <div class="input-group mb-3">
-                                <div contenteditable="true" class="form-control" style="height: auto !important;" id="users_admin"></div>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" id="button-find-users_admin" onclick="">Find</button>
-                                </div>
-                            </div>
-                        </div>                          
+                            <ul class="users_admin list-group list-group-horizontal"
+                                data-prototype="{{ form_widget(gameSessionUserAccessForm.users_admin.vars.prototype)|e('html_attr') }}"
+                            ></ul>
+                            <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_admin">Add user</button>
+                        </div>
                     </div>
                 </div>
                 <div class="col">
                     <div id="regionUserAccess">
                         <h6>Region Managers</h6>
-                        <div class="form-check">
-                            <!-- input class="form-check-input" type="radio" name="provider_region" id="provider_region" value="local" onChange="" -->
-                            <label class="form-check-label" for="provider_region">
-                                Set a password
-                            </label>
-                        </div>
-                        <div id="regionPasswordFields">
-                            <div class="input-group mb-3">
-                                <!-- input type="text" class="form-control" placeholder="Enter a password. Region managers require a password." id="password_region" name="password_region" -->
-                            </div>
-                        </div>
-                        <div id="regionProviders">
-                            <div class="form-check">
-                                <!-- input class="form-check-input" type="radio" name="provider_region" value="external" onChange="" -->
-                                <label class="form-check-label" for="provider_region">
-                                    Set users from
-                                </label>
-                                <!-- select class="form-control-sm d-inline-block p-0 h-25" id="provider_region_external"  /select -->
-                                <small id="passwordHelpBlock" class="form-text text-muted">
-                                    Enter one username or e-mail address per line, and click Find.
-                                </small>
-                            </div>
+                        {{ form_widget(gameSessionUserAccessForm.provider_region, {'attr': {'class': 'form-select'}}) }}
+                        <div id="regionPasswordFields" class="py-2">
+                            {{ form_widget(gameSessionUserAccessForm.password_region, {'attr': {'class': 'form-control'}}) }}
                         </div>
                         <div id="regionUserFields">
-                            <div class="input-group mb-3">
-                                <div contenteditable="true" class="form-control" style="height: auto !important;" id="users_region"></div>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" id="button-find-users_region" onclick="">Find</button>
-                                </div>
-                            </div>
+                            <ul class="users_region list-group list-group-horizontal"
+                                data-prototype="{{ form_widget(gameSessionUserAccessForm.users_region.vars.prototype)|e('html_attr') }}"
+                            ></ul>
+                            <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_region">Add user</button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <div id="playerUserAccess" style="margin-top: 25px;">
+                    <div id="playerUserAccess" class="mt-3">
                         <h6>Players</h6>
-                        <div class="form-check">
-                            <!-- input class="form-check-input" type="radio" name="provider_player" id="provider_player" value="local" onChange="" -->
-                            <label class="form-check-label" for="provider_player">
-                                Set a password
-                            </label>
-                        </div>
-                        <div id="playerPasswordFields">
-                            <div class="input-group mb-3">
-                                <!-- input type="text" class="form-control" placeholder="Leave empty for immediate access." id="password_playerall" name="password_playerall" oninput="" -->
-                                <div class="input-group-append">
-                                    <span class="input-group-text">All countries</span>
+                        {{ form_widget(gameSessionUserAccessForm.provider_player, {'attr': {'class': 'form-select'}}) }}
+                        <div id="playerPasswordFields" class="py-2">
+                            <div class="input-group py-2">
+                                {{ form_widget(gameSessionUserAccessForm.password_playerall, {'attr': {'class': 'form-control'}})}}
+                                <span class="input-group-text">All</span>
+                            </div>
+                            {% for country in gameSession.countries %}
+                                <div class="input-group py-2">
+                                    {{ form_widget(gameSessionUserAccessForm["password_player_country_#{country.country_id}"], {'attr': {'class': 'form-control'}}) }}
+                                    <span class="input-group-text country-label" style="background-color: {{ country.country_colour }}">{{ country.country_name}}</span>
                                 </div>
-                            </div>
-                            <div id="playerPasswordExtraFields">
-                            </div>
-                        </div>
-                        <div id="playerProviders">
-                            <div class="form-check">
-                                <!-- input class="form-check-input" type="radio" name="provider_player" value="external" onChange="" -->
-                                <label class="form-check-label" for="provider_player">
-                                    Set users from 
-                                </label>
-                                <!-- select class="form-control-sm d-inline-block p-0 h-25" id="provider_player_external"  /select -->
-                                <small id="passwordHelpBlock" class="form-text text-muted">
-                                    Enter one username or e-mail address per line, and click Find.
-                                </small>
-                            </div>
+                            {% endfor %}
                         </div>
                         <div id="playerUserFields">
-                            <div class="input-group mb-3">
-                                <div contenteditable="true" class="form-control" style="height: auto !important;" id="users_playerall"></div>
-                                
-                                <div class="input-group-append">
-                                    <span class="input-group-text">All countries</span>
-                                </div>
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button" id="button-find-users_playerall" onclick="">Find</button>
-                                </div>
+                            <div class="input-group py-2">
+                                {{ form_widget(gameSessionUserAccessForm.users_playerall, {'attr': {'class': 'form-control'}})}}
+                                <span class="input-group-text">All</span>
                             </div>
-                            <div id="playerUserExtraFields">
-                            </div>
-                        </div>
+                            {% for country in gameSession.countries %}
+                                <ul class="users_player_country_{{country.country_id}} list-group list-group-horizontal py-2"
+                                    data-prototype="{{ form_widget(gameSessionUserAccessForm["users_player_country_#{country.country_id}"].vars.prototype)|e('html_attr') }}"
+                                ></ul>
+                                <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_player_country_{{country.country_id}}">
+                                    Add user to <span class="country-label" style="background-color: {{ country.country_colour }}">{{country.country_name}}</span>
+                                </button>
+                            {% endfor %}
+                        </div>                        
                     </div>
                 </div>
             </div>
@@ -136,6 +79,7 @@
             <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
             <button type="submit" class="btn btn-primary" data-action="modal-game#submitUserAccessModalForm">Save</button>
         </div>
-        {{ form_end(gameSessionUserAccessForm) }}
+        {{ form_widget(gameSessionUserAccessForm._token) }}
+        {{ form_end(gameSessionUserAccessForm, { render_rest: false }) }}
     </div>
 </turbo-frame>

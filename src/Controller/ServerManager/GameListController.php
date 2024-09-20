@@ -326,7 +326,7 @@ class GameListController extends BaseController
         }
         return $this->render(
             'manager/GameList/game_access.html.twig',
-            ['gameSessionUserAccessForm' => $form->createView()],
+            ['gameSessionUserAccessForm' => $form->createView(), 'gameSession' => $gameSession],
             new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
         );
     }
