@@ -58,18 +58,23 @@ class GameListUserAccessFormType extends AbstractType
             ])
             ->add('password_playerall', TextType::class, [
                 'mapped' => false
-            ])
-            ->add('users_playerall', TextType::class, [
-                'mapped' => false, 'help' => $externalProviderHelp
             ]);
         foreach ($userTeams as $key => $country) {
-            $builder->add("password_player_country_{$country['country_id']}", TextType::class, ['mapped' => false]);
-            $builder->add("users_player_country_{$country['country_id']}", CollectionType::class, [
-                'entry_type' => TextType::class,
-                'allow_add' => true,
-                'prototype' => true,
-                'mapped' => false
-            ]);
+            $builder
+                ->add("password_player_country_{$country['country_id']}", TextType::class, ['mapped' => false])
+                ->add('users_playerall', CollectionType::class, [
+                    'entry_type' => TextType::class,
+                    'allow_add' => true,
+                    'prototype' => true,
+                    'mapped' => false,
+                    'help' => $externalProviderHelp
+                ])
+                ->add("users_player_country_{$country['country_id']}", CollectionType::class, [
+                    'entry_type' => TextType::class,
+                    'allow_add' => true,
+                    'prototype' => true,
+                    'mapped' => false
+                ]);
         }
     }
 

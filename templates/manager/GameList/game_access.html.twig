@@ -16,11 +16,17 @@
                         <div id="adminPasswordFields" class="py-2">
                             {{ form_widget(gameSessionUserAccessForm.password_admin, {'attr': {'class': 'form-control'}}) }}
                         </div>
-                        <div id="adminUserFields">
-                            <ul class="users_admin list-group list-group-horizontal"
-                                data-prototype="{{ form_widget(gameSessionUserAccessForm.users_admin.vars.prototype)|e('html_attr') }}"
-                            ></ul>
-                            <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_admin">Add user</button>
+                        <div id="adminUserFields" class="container">
+                            <div class="row py-2">
+                                <div class="col border-bottom border-light-subtle">
+                                    <ul class="users_admin list-group list-group-horizontal"
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_admin.vars.prototype)|e('html_attr') }}"
+                                    ></ul>
+                                </div>
+                                <div class="col col-auto">
+                                    <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_admin">Add user</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -31,11 +37,17 @@
                         <div id="regionPasswordFields" class="py-2">
                             {{ form_widget(gameSessionUserAccessForm.password_region, {'attr': {'class': 'form-control'}}) }}
                         </div>
-                        <div id="regionUserFields">
-                            <ul class="users_region list-group list-group-horizontal"
-                                data-prototype="{{ form_widget(gameSessionUserAccessForm.users_region.vars.prototype)|e('html_attr') }}"
-                            ></ul>
-                            <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_region">Add user</button>
+                        <div id="regionUserFields" class="container">
+                            <div class="row py-2">
+                                <div class="col border-bottom border-light-subtle">
+                                    <ul class="users_region list-group list-group-horizontal"
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_region.vars.prototype)|e('html_attr') }}"
+                                    ></ul>
+                                </div>
+                                <div class="col col-auto">
+                                    <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_region">Add user</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -57,18 +69,32 @@
                                 </div>
                             {% endfor %}
                         </div>
-                        <div id="playerUserFields">
-                            <div class="input-group py-2">
-                                {{ form_widget(gameSessionUserAccessForm.users_playerall, {'attr': {'class': 'form-control'}})}}
-                                <span class="input-group-text">All</span>
+                        <div id="playerUserFields" class="container">
+                            <div class="row py-2">
+                                <div class="col border-bottom border-light-subtle">
+                                    <ul class="users_playerall list-group list-group-horizontal py-2 w-75"
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_playerall.vars.prototype)|e('html_attr') }}"
+                                    ></ul>
+                                </div>
+                                <div class="col col-auto">
+                                    <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_playerall">
+                                        Add user to all</span>
+                                    </button>
+                                </div>
                             </div>
                             {% for country in gameSession.countries %}
-                                <ul class="users_player_country_{{country.country_id}} list-group list-group-horizontal py-2"
-                                    data-prototype="{{ form_widget(gameSessionUserAccessForm["users_player_country_#{country.country_id}"].vars.prototype)|e('html_attr') }}"
-                                ></ul>
-                                <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_player_country_{{country.country_id}}">
-                                    Add user to <span class="country-label" style="background-color: {{ country.country_colour }}">{{country.country_name}}</span>
-                                </button>
+                            <div class="row py-2">
+                                <div class="col border-bottom border-light-subtle">
+                                    <ul class="users_player_country_{{country.country_id}} list-group list-group-horizontal py-2 w-75"
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm["users_player_country_#{country.country_id}"].vars.prototype)|e('html_attr') }}"
+                                    ></ul>
+                                </div>
+                                <div class="col col-auto">
+                                    <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_player_country_{{country.country_id}}">
+                                        Add user to <span class="country-label" style="background-color: {{ country.country_colour }}">{{country.country_name}}</span>
+                                    </button>
+                                </div>
+                            </div>
                             {% endfor %}
                         </div>                        
                     </div>

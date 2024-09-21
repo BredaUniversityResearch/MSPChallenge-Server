@@ -28,7 +28,7 @@ class GameListListener
         if (is_null($gameSession->getPasswordPlayer())) {
             $gameSession->setPasswordPlayer('');
         }
-        $gameSession->encodePasswords();
+        //$gameSession->encodePasswords();
     }
 
     public function postLoad(GameList $gameSession, PostLoadEventArgs $event): void
