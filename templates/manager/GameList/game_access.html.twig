@@ -1,5 +1,5 @@
 <turbo-frame id="modalDefaultBody">
-    <div data-modal-game-target="modalUserAccessForm">
+    <div data-modal-game-target="modalUserAccessForm" {{ stimulus_controller('modal-game-user-access') }}>
         {{ form_start(gameSessionUserAccessForm) }}
         {{ form_errors(gameSessionUserAccessForm) }}
         <div class="modal-body">
@@ -12,19 +12,20 @@
                 <div class="col">
                     <div id="adminUserAccess">
                         <h6>Administrators</h6>
-                        {{ form_widget(gameSessionUserAccessForm.provider_admin, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_widget(gameSessionUserAccessForm.provider_admin, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'admin' } }) }}
                         <div id="adminPasswordFields" class="py-2">
                             {{ form_widget(gameSessionUserAccessForm.password_admin, {'attr': {'class': 'form-control'}}) }}
                         </div>
                         <div id="adminUserFields" class="container">
                             <div class="row py-2">
-                                <div class="col border-bottom border-light-subtle">
-                                    <ul class="users_admin list-group list-group-horizontal"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_admin.vars.prototype)|e('html_attr') }}"
-                                    ></ul>
+                                <div class="col border-bottom border-dark pb-2">
+                                    <div id="usersAdmin"
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_admin.vars.prototype, {'attr': {'class': 'form-control mb-2'}})|e('html_attr') }}">
+                                    </div>
                                 </div>
                                 <div class="col col-auto">
-                                    <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_admin">Add user</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-collection="usersAdmin"
+                                        data-action="modal-game-user-access#addUserInput">Add user</button>
                                 </div>
                             </div>
                         </div>
@@ -33,19 +34,20 @@
                 <div class="col">
                     <div id="regionUserAccess">
                         <h6>Region Managers</h6>
-                        {{ form_widget(gameSessionUserAccessForm.provider_region, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_widget(gameSessionUserAccessForm.provider_region, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'region' } }) }}
                         <div id="regionPasswordFields" class="py-2">
                             {{ form_widget(gameSessionUserAccessForm.password_region, {'attr': {'class': 'form-control'}}) }}
                         </div>
                         <div id="regionUserFields" class="container">
                             <div class="row py-2">
-                                <div class="col border-bottom border-light-subtle">
-                                    <ul class="users_region list-group list-group-horizontal"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_region.vars.prototype)|e('html_attr') }}"
-                                    ></ul>
+                                <div class="col border-bottom border-dark pb-2">
+                                    <div id="usersRegion"
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_region.vars.prototype, {'attr': {'class': 'form-control mb-2'}})|e('html_attr') }}">
+                                    </div>
                                 </div>
                                 <div class="col col-auto">
-                                    <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_region">Add user</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-collection="usersRegion"
+                                        data-action="modal-game-user-access#addUserInput">Add user</button>
                                 </div>
                             </div>
                         </div>
@@ -56,7 +58,7 @@
                 <div class="col">
                     <div id="playerUserAccess" class="mt-3">
                         <h6>Players</h6>
-                        {{ form_widget(gameSessionUserAccessForm.provider_player, {'attr': {'class': 'form-select'}}) }}
+                        {{ form_widget(gameSessionUserAccessForm.provider_player, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'player' } }) }}
                         <div id="playerPasswordFields" class="py-2">
                             <div class="input-group py-2">
                                 {{ form_widget(gameSessionUserAccessForm.password_playerall, {'attr': {'class': 'form-control'}})}}
@@ -71,26 +73,26 @@
                         </div>
                         <div id="playerUserFields" class="container">
                             <div class="row py-2">
-                                <div class="col border-bottom border-light-subtle">
-                                    <ul class="users_playerall list-group list-group-horizontal py-2 w-75"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_playerall.vars.prototype)|e('html_attr') }}"
-                                    ></ul>
+                                <div class="col border-bottom border-dark pb-2">
+                                    <div id="usersPlayerall"
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_playerall.vars.prototype, {'attr': {'class': 'form-control mb-2'}})|e('html_attr') }}">
+                                    </div>
                                 </div>
                                 <div class="col col-auto">
-                                    <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_playerall">
-                                        Add user to all</span>
-                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" data-collection="usersPlayerall"
+                                        data-action="modal-game-user-access#addUserInput">Add user to all</button>
                                 </div>
                             </div>
                             {% for country in gameSession.countries %}
                             <div class="row py-2">
-                                <div class="col border-bottom border-light-subtle">
-                                    <ul class="users_player_country_{{country.country_id}} list-group list-group-horizontal py-2 w-75"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm["users_player_country_#{country.country_id}"].vars.prototype)|e('html_attr') }}"
-                                    ></ul>
+                                <div class="col border-bottom border-dark pb-2">
+                                    <div id="usersPlayerCountry{{country.country_id}}"
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm["users_player_country_#{country.country_id}"].vars.prototype, {'attr': {'class': 'form-control mb-2'}})|e('html_attr') }}">
+                                    </div>
                                 </div>
                                 <div class="col col-auto">
-                                    <button type="button" class="btn btn-outline-secondary" data-collection-holder-class="users_player_country_{{country.country_id}}">
+                                    <button type="button" class="btn btn-outline-secondary" data-collection="usersPlayerCountry{{country.country_id}}"
+                                        data-action="modal-game-user-access#addUserInput">
                                         Add user to <span class="country-label" style="background-color: {{ country.country_colour }}">{{country.country_name}}</span>
                                     </button>
                                 </div>
