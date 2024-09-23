@@ -17,7 +17,8 @@ class GameListUserAccessFormType extends AbstractType
     {
         $providerChoices = [
             'Let them log in with a password' => 'local',
-            'Let them log in with an MSP Challenge account' => 'App\\Domain\\API\\v1\\Auth_MSP' // to do, get this via a function call
+            'Let them log in with an MSP Challenge account' => 'App\\Domain\\API\\v1\\Auth_MSP' 
+            // to do, get this via a function call
         ];
         $userTeams = $builder->getData()->getCountries();
         $externalProviderHelp = 'Enter one username or e-mail address per line, and click Find.';
