@@ -67,14 +67,7 @@ export default class extends Controller {
         await this.submitFormGeneric(
             event,
             this.modalUserAccessFormTarget,
-            null,
-            function (sessionId) {
-                success(
-                    'Success',
-                    `User access for session #${sessionId} successfully saved.`,
-                    { position: 'mm', duration: 10000 }
-                );
-            }
+            'User access successfully saved.'
         );
     }
 
@@ -104,16 +97,17 @@ export default class extends Controller {
             button.prop('disabled', true);
         }
         try {
-            await $.ajax({
+            var ajaxObj = {
                 url: $form.prop('action'),
                 method: $form.prop('method'),
                 data: $form.serialize(),
-                dataType: 'json',
-                success: successCallback
-            });
-            if (successMessage) {
-                success('Success', successMessage, { position: 'mm', duration: 10000 });
+                dataType: 'json'
             }
+            if (successCallback) {
+                ajaxObj['success'] = successCallback;
+            }
+            await $.ajax(ajaxObj);
+            success('Success', successMessage, { position: 'mm', duration: 10000 });
         } catch (e) {
             target.innerHTML = e.responseText;
         }

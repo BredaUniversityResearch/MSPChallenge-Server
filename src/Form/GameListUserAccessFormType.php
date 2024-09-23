@@ -16,8 +16,8 @@ class GameListUserAccessFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $providerChoices = [
-            'Set a password' => 'local',
-            'Set users from MSP Challenge' => 'App\\Domain\\API\\v1\\Auth_MSP' // to do, get this via a function call
+            'Let them log in with a password' => 'local',
+            'Let them log in with an MSP Challenge account' => 'App\\Domain\\API\\v1\\Auth_MSP' // to do, get this via a function call
         ];
         $userTeams = $builder->getData()->getCountries();
         $externalProviderHelp = 'Enter one username or e-mail address per line, and click Find.';
@@ -25,13 +25,13 @@ class GameListUserAccessFormType extends AbstractType
             ->add('passwordAdmin', HiddenType::class)
             ->add('passwordPlayer', HiddenType::class)
 
-            ->add('provider_admin', ChoiceType::class, [
+            ->add('providerAdmin', ChoiceType::class, [
                 'choices' => $providerChoices, 'mapped' => false, 'expanded' => false, 'multiple' => false
             ])
-            ->add('password_admin', TextType::class, [
-                'mapped' => false
+            ->add('passwordAdminRaw', TextType::class, [
+                'mapped' => false, 'required' => false
             ])
-            ->add("users_admin", CollectionType::class, [
+            ->add("usersAdmin", CollectionType::class, [
                 'entry_type' => TextType::class,
                 'allow_add' => true,
                 'prototype' => true,
@@ -41,13 +41,13 @@ class GameListUserAccessFormType extends AbstractType
                 'mapped' => false
             ])
 
-            ->add('provider_region', ChoiceType::class, [
+            ->add('providerRegion', ChoiceType::class, [
                 'choices' => $providerChoices, 'mapped' => false, 'expanded' => false, 'multiple' => false
             ])
-            ->add('password_region', TextType::class, [
-                'mapped' => false
+            ->add('passwordRegionRaw', TextType::class, [
+                'mapped' => false, 'required' => false
             ])
-            ->add("users_region", CollectionType::class, [
+            ->add("usersRegion", CollectionType::class, [
                 'entry_type' => TextType::class,
                 'allow_add' => true,
                 'prototype' => true,
@@ -57,13 +57,13 @@ class GameListUserAccessFormType extends AbstractType
                 'mapped' => false
             ])
             
-            ->add('provider_player', ChoiceType::class, [
+            ->add('providerPlayer', ChoiceType::class, [
                 'choices' => $providerChoices, 'mapped' => false, 'expanded' => false, 'multiple' => false
             ])
-            ->add('password_playerall', TextType::class, [
-                'mapped' => false
+            ->add('passwordPlayerall', TextType::class, [
+                'mapped' => false, 'required' => false
             ])
-            ->add('users_playerall', CollectionType::class, [
+            ->add('usersPlayerall', CollectionType::class, [
                 'entry_type' => TextType::class,
                 'allow_add' => true,
                 'prototype' => true,
@@ -74,8 +74,10 @@ class GameListUserAccessFormType extends AbstractType
             ]);
         foreach ($userTeams as $key => $country) {
             $builder
-                ->add("password_player_country_{$country['country_id']}", TextType::class, ['mapped' => false])
-                ->add("users_player_country_{$country['country_id']}", CollectionType::class, [
+                ->add("passwordPlayerCountry{$country['country_id']}", TextType::class, [
+                    'mapped' => false, 'required' => false
+                ])
+                ->add("usersPlayerCountry{$country['country_id']}", CollectionType::class, [
                     'entry_type' => TextType::class,
                     'allow_add' => true,
                     'prototype' => true,

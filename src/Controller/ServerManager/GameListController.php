@@ -322,7 +322,6 @@ class GameListController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $gameSession = $form->getData();
             $entityManager->flush();
-            return new Response($gameSession->getId(), 200);
         }
         return $this->render(
             'manager/GameList/game_access.html.twig',

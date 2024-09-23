@@ -12,15 +12,15 @@
                 <div class="col">
                     <div id="adminUserAccess">
                         <h6>Administrators</h6>
-                        {{ form_widget(gameSessionUserAccessForm.provider_admin, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'admin' } }) }}
+                        {{ form_widget(gameSessionUserAccessForm.providerAdmin, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'admin' } }) }}
                         <div id="adminPasswordFields" class="py-2">
-                            {{ form_widget(gameSessionUserAccessForm.password_admin, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_widget(gameSessionUserAccessForm.passwordAdminRaw, {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
                         </div>
                         <div id="adminUserFields" class="container">
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersAdmin"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_admin.vars.prototype, {'attr': {'class': 'form-control mb-2'}})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.usersAdmin.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">
@@ -34,15 +34,15 @@
                 <div class="col">
                     <div id="regionUserAccess">
                         <h6>Region Managers</h6>
-                        {{ form_widget(gameSessionUserAccessForm.provider_region, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'region' } }) }}
+                        {{ form_widget(gameSessionUserAccessForm.providerRegion, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'region' } }) }}
                         <div id="regionPasswordFields" class="py-2">
-                            {{ form_widget(gameSessionUserAccessForm.password_region, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_widget(gameSessionUserAccessForm.passwordRegionRaw, {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
                         </div>
                         <div id="regionUserFields" class="container">
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersRegion"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_region.vars.prototype, {'attr': {'class': 'form-control mb-2'}})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.usersRegion.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">
@@ -58,15 +58,15 @@
                 <div class="col">
                     <div id="playerUserAccess" class="mt-3">
                         <h6>Players</h6>
-                        {{ form_widget(gameSessionUserAccessForm.provider_player, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'player' } }) }}
+                        {{ form_widget(gameSessionUserAccessForm.providerPlayer, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'player' } }) }}
                         <div id="playerPasswordFields" class="py-2">
                             <div class="input-group py-2">
-                                {{ form_widget(gameSessionUserAccessForm.password_playerall, {'attr': {'class': 'form-control'}})}}
+                                {{ form_widget(gameSessionUserAccessForm.passwordPlayerall, {'attr': {'class': 'form-control', 'placeholder': 'Enter password. Applies to all country teams.' }})}}
                                 <span class="input-group-text">All</span>
                             </div>
                             {% for country in gameSession.countries %}
                                 <div class="input-group py-2">
-                                    {{ form_widget(gameSessionUserAccessForm["password_player_country_#{country.country_id}"], {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_widget(gameSessionUserAccessForm["passwordPlayerCountry#{country.country_id}"], {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
                                     <span class="input-group-text country-label" style="background-color: {{ country.country_colour }}">{{ country.country_name}}</span>
                                 </div>
                             {% endfor %}
@@ -75,7 +75,7 @@
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersPlayerall"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.users_playerall.vars.prototype, {'attr': {'class': 'form-control mb-2'}})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.usersPlayerall.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address. Applies to all country teams.' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">
@@ -87,7 +87,7 @@
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersPlayerCountry{{country.country_id}}"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm["users_player_country_#{country.country_id}"].vars.prototype, {'attr': {'class': 'form-control mb-2'}})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm["usersPlayerCountry#{country.country_id}"].vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">
@@ -105,7 +105,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
-            <button type="submit" class="btn btn-primary" data-action="modal-game#submitUserAccessModalForm">Save</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-game-user-access#translateFormStateAndSubmit">Save</button>
         </div>
         {{ form_widget(gameSessionUserAccessForm._token) }}
         {{ form_end(gameSessionUserAccessForm, { render_rest: false }) }}
