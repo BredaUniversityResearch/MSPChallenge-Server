@@ -226,21 +226,6 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
         $fileSystem->remove($tempDumpFile);
     }
 
-    protected function migrateSessionDatabase(): void
-    {
-        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
-        $process = new Process([
-            $this->phpBinary,
-            'bin/console',
-            'doctrine:migrations:migrate',
-            '-vv',
-            '--em='.$this->database,
-            '--no-interaction',
-            '--env='.$_ENV['APP_ENV']
-        ], $this->kernel->getProjectDir());
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
-    }
-
     /**
      * @throws \Exception
      */
