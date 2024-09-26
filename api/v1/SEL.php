@@ -728,8 +728,12 @@ class SEL extends Base
                     );
                 } else {
                     $melConfig = &$globalConfig["MEL"];
-                    if (!array_key_exists("x_min", $melConfig) || !array_key_exists("y_min", $melConfig) ||
-                        !array_key_exists("x_max", $melConfig) || !array_key_exists("y_max", $melConfig)) {
+                    if (!is_array($melConfig) ||
+                        !array_key_exists("x_min", $melConfig) ||
+                        !array_key_exists("y_min", $melConfig) ||
+                        !array_key_exists("x_max", $melConfig) ||
+                        !array_key_exists("y_max", $melConfig)
+                    ) {
                         throw new Exception(
                             "SEL has a layer \"".$heatmap["layer_name"].
                             "\" that is marked for use by MEL. However the bounding box configuration in the MEL ".
