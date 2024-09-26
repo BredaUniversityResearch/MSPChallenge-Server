@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "9/17/2024",
-    "data_model_hash": "ED36BCA5A8622B465504861952FD0D8828988D16F0238DF33AB3E702D250F7A2",
+    "date_modified": "9/26/2024",
+    "data_model_hash": "3B83CA3F89ED43821EDE088026D456E7A2BF71C43E947303FA607A912E9A692B",
     "errors": 0,
     "editor_version": "1.1.1",
     "config_version": "1.1.1"
@@ -5410,7 +5410,7 @@
     "policy_settings": {
       "fishing": {
         "all_country_approval": true,
-        "stakeholder_pressure_cool_down": 0.0,
+        "stakeholder_pressure_cool_down": 0.1,
         "fleet_info": {
           "gear_types": [
             "Demersal trawl",
@@ -5448,15 +5448,15 @@
           ]
         },
         "policy_type": "fishing",
-        "enabled": false
+        "enabled": true
       },
       "shipping": {
         "policy_type": "shipping",
-        "enabled": false
+        "enabled": true
       },
       "energy": {
         "policy_type": "energy",
-        "enabled": false
+        "enabled": true
       },
       "eco_gear": {
         "policy_type": "eco_gear",
@@ -14298,6 +14298,21 @@
             "content_validation": 0,
             "unit": null,
             "default_value": null
+          },
+          {
+            "property_name": "SEASONAL_CLOSURE",
+            "policy_type": "seasonal_closure",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Seasonal closure policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
           }
         ],
         "layer_tags": []
@@ -17880,7 +17895,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Benthic Invertebrates (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "fish",
+        "layer_subcategory": "macrobenthos",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
