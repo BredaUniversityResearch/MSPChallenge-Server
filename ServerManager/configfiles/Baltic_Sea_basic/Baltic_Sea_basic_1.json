@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "9/17/2024",
-    "data_model_hash": "E742164C953AF43BA8AFF6E140F67AA4BA329EE1B505241935DD64B7C88FA661",
+    "date_modified": "9/26/2024",
+    "data_model_hash": "841A877A043A9A754D23A974CE0A1D0CE3D18C647C172EAED4E53E36B242EEA6",
     "errors": 0,
     "editor_version": "1.1.1",
     "config_version": "1.1.1"
@@ -20447,7 +20447,7 @@
     "policy_settings": {
       "fishing": {
         "all_country_approval": true,
-        "stakeholder_pressure_cool_down": 0.0,
+        "stakeholder_pressure_cool_down": 0.1,
         "fleet_info": {
           "gear_types": [
             "Active Demersal",
@@ -33412,6 +33412,21 @@
             "enabled": 1,
             "editable": 1,
             "display_name": "Buffer zone policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "SEASONAL_CLOSURE",
+            "policy_type": "seasonal_closure",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Seasonal closure policy",
             "sprite_name": null,
             "update_visuals": false,
             "update_text": false,

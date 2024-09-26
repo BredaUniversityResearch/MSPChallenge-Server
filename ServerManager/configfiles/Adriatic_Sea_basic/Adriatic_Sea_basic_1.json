@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "9/17/2024",
-    "data_model_hash": "BCFA561132D067C1A0823D7F97BE0D4C756F256D0988499B5754461D44849D66",
+    "date_modified": "9/26/2024",
+    "data_model_hash": "C1579574CE4CA419196D5CA30F583E62977339FBABF6B0BE602C7F6E46BA62D0",
     "errors": 0,
     "editor_version": "1.1.1",
     "config_version": "1.1.1"
@@ -41388,7 +41388,38 @@
             "media": ""
           }
         },
-        "layer_info_properties": null,
+        "layer_info_properties": [
+          {
+            "property_name": "SEASONAL_CLOSURE",
+            "policy_type": "seasonal_closure",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Seasonal closure policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "POLICY_BUFFER_ZONE",
+            "policy_type": "buffer_zone",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Buffer zone policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          }
+        ],
         "layer_tags": []
       },
       {
