@@ -206,8 +206,8 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                                 'payload' => null
                             ];
                             PluginHelper::getInstance()->dump($connResourceId, $data);
-                            $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)
-                                ->sendAsJson($data);
+                            $conn = $this->getClientConnectionResourceManager()->getClientConnection($connResourceId);
+                            $conn?->sendAsJson($data); // check if connection is alive
                             return $this->setBatchToCommunicated(
                                 $connResourceId,
                                 $batchGuid,
