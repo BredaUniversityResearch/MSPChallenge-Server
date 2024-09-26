@@ -35,9 +35,30 @@ class Batch extends Base
      */
     private function startBatch(int $countryId, int $userId, string $batchGuid): int
     {
+        $this->getDatabase()->query(
+            <<< 'SQL'
+            DELETE FROM api_batch_task WHERE api_batch_task_batch_id IN (
+                SELECT api_batch_id FROM api_batch WHERE api_batch_guid = ?
+            )
+            SQL,
+            array($batchGuid),
+        );
         $id = $this->getDatabase()->query(
-            "INSERT INTO api_batch(api_batch_country_id, api_batch_user_id, api_batch_guid) VALUES (?, ?, ?)",
-            array($countryId, $userId, $batchGuid),
+            <<< 'SQL'
+            INSERT INTO api_batch(
+                api_batch_country_id,
+                api_batch_user_id,
+                api_batch_guid
+            ) VALUES (:countryId, :userId, :batchGuid) 
+                ON DUPLICATE KEY UPDATE
+                    api_batch_state='Setup',
+                    api_batch_country_id=:countryId,
+                    api_batch_user_id=:userId,
+                    api_batch_server_id=NULL,
+                    api_batch_communicated=0,
+                    api_batch_lastupdate=0
+            SQL,
+            array('countryId' => $countryId, 'userId' => $userId, 'batchGuid' => $batchGuid),
             true
         );
         if (empty($id)) { // empty array (no connection), or false (insert failed)
@@ -315,18 +336,20 @@ class Batch extends Base
                             ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                             ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
                     )
-                    ->then(function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
-                        $batchResult = [];
-                        foreach ($taskResultsContainer as $groupId => $taskResults) {
-                            foreach ($taskResults as $taskId => $taskResult) {
-                                $batchResult[$batchGuid]['results'][] = [
-                                    'call_id' => $taskId,
-                                    'payload' => json_encode($taskResult) ?: null
-                                ];
+                    ->then(
+                        function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
+                            $batchResult = [];
+                            foreach ($taskResultsContainer as $taskResults) {
+                                foreach ($taskResults as $taskId => $taskResult) {
+                                    $batchResult[$batchGuid]['results'][] = [
+                                        'call_id' => $taskId,
+                                        'payload' => json_encode($taskResult) ?: null
+                                    ];
+                                }
                             }
+                            return $batchResult;
                         }
-                        return $batchResult;
-                    });
+                    );
                 })
                 ->otherwise(function ($reason) use ($batchGuid) {
                     // run async query to set batches to failed, no need to wait for the result.
