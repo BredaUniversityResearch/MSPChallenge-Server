@@ -66,6 +66,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $this->openSaveZip();
             $this->setupSessionDatabase();
             $this->importSessionDatabase();
+            $this->migrateSessionDatabase();
             $this->importSessionRunningConfig();
             $this->importRasterStore();
             $this->finaliseSaveLoad();
