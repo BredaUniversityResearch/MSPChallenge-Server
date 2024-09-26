@@ -37,7 +37,7 @@ $action = $_POST["action"] ?? "";
 if ($action == 'load') {
     $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
     /** @var GameSaveRepository $gameSaveRepo */
-    $gameSaveRepo = $em->getRepository(GameSave::class);
+    $gameSaveRepo = $em->getRepository(GameSaveNew::class);
     $gameSave = $gameSaveRepo->find($gamesave->id);
     /** @var GameListRepository $gameListRepo */
     $gameListRepo = $em->getRepository(GameList::class);

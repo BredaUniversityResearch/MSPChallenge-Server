@@ -66,6 +66,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $this->openSaveZip();
             $this->setupSessionDatabase();
             $this->importSessionDatabase();
+            $this->migrateSessionDatabase();
             $this->importSessionRunningConfig();
             $this->importRasterStore();
             $this->finaliseSaveLoad();
@@ -223,6 +224,21 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
         $this->debug('Session database dump import attempt completed.');
         $fileSystem = new Filesystem();
         $fileSystem->remove($tempDumpFile);
+    }
+
+    protected function migrateSessionDatabase(): void
+    {
+        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
+        $process = new Process([
+            $this->phpBinary,
+            'bin/console',
+            'doctrine:migrations:migrate',
+            '-vv',
+            '--em='.$this->database,
+            '--no-interaction',
+            '--env='.$_ENV['APP_ENV']
+        ], $this->kernel->getProjectDir());
+        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
     }
 
     /**
