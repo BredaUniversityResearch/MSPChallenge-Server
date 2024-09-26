@@ -2670,8 +2670,10 @@ class Plan extends Base
      * @apiDescription (De)activate a plan policy
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetGeneralPolicyData(int $plan_id, string $policy_data): void
+    public function SetGeneralPolicyData(int $plan_id, string $policy_data): ?PromiseInterface
     {
+        // todo: convert blocking doctrine calls to async database calls
+
         $policyData = PolicyDataFactory::createPolicyDataByJsonObject(json_decode($policy_data));
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
         if (null === $plan = $em->getRepository(\App\Entity\Plan::class)->createQueryBuilder('pl')
@@ -2711,6 +2713,11 @@ class Plan extends Base
 
         // backwards compatibility: for policies energy, fishing, shipping, we also need to update the plan type
         //   todo: https://jira.cradle.buas.nl/browse/MSP-5146
-        await($this->setGeneralPolicyEnabled($plan_id, $policyData->getPolicyTypeName()->value, true));
+        $promise = $this->setGeneralPolicyEnabled($plan_id, $policyData->getPolicyTypeName()->value, true);
+        if ($this->isAsync()) {
+            return $promise;
+        }
+        await($promise);
+        return null;
     }
 }
