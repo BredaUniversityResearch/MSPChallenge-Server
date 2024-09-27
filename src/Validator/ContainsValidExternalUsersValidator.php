@@ -75,7 +75,8 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
                     foreach ($originalUsersArray as $originalUser) {
                         if (!in_array($originalUser, $foundUsersArray)) {
                             $this->context->buildViolation(
-                                'Please correct {{ provider }} user "{{ userToCorrect }}" to the appropriate username from this list: {{ knownUsers }}.'
+                                'Please correct {{ provider }} user "{{ userToCorrect }}" '.
+                                'to the appropriate username from this list: {{ knownUsers }}.'
                             )
                             ->setParameter('{{ userToCorrect }}', $originalUser)
                             ->setParameter('{{ knownUsers }}', implode(', ', $foundUsersArray))
