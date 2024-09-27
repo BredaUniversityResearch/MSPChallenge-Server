@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Domain\API\v1\UserBase;
 use App\Entity\ServerManager\GameList;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -15,11 +16,11 @@ class GameListUserAccessFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $providerChoices = [
-            'Let them log in with a password' => 'local',
-            'Let them log in with an MSP Challenge account' => 'App\\Domain\\API\\v1\\Auth_MSP'
-            // to do, get this via a function call
-        ];
+        $providerChoices['Should log in with a password'] = 'local';
+        $providers = UserBase::getProviders();
+        foreach ($providers as $provider) {
+            $providerChoices['Should login with '.$provider['name'].' account'] = $provider['id'];
+        }
         $userTeams = $builder->getData()->getCountries();
         $externalProviderHelp = 'Enter one username or e-mail address per line, and click Find.';
         $builder
@@ -30,7 +31,7 @@ class GameListUserAccessFormType extends AbstractType
                 'choices' => $providerChoices, 'mapped' => false, 'expanded' => false, 'multiple' => false
             ])
             ->add('passwordAdminRaw', TextType::class, [
-                'mapped' => false, 'required' => false
+                'mapped' => false
             ])
             ->add("usersAdmin", CollectionType::class, [
                 'entry_type' => TextType::class,

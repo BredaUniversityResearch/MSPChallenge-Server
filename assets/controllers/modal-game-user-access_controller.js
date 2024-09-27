@@ -1,6 +1,7 @@
 import { Controller } from 'stimulus';
 import $ from 'jquery';
-import { success } from 'tata-js';
+import { error } from 'tata-js';
+import { Exception } from 'sass';
 
 export default class extends Controller {
 
@@ -56,6 +57,9 @@ export default class extends Controller {
             );
             this.passwordAdmin.value = newUsersAdmin.substring(0, newUsersAdmin.length - 1);
         }
+        if (!this.passwordAdmin.value) {
+            throw 'Administrator login settings cannot be empty.';
+        }
 
         this.passwordRegion.provider = $('#game_list_user_access_form_providerRegion').val();
         if (this.passwordRegion.provider == 'local') {
@@ -65,7 +69,7 @@ export default class extends Controller {
             $(`input[name^="game_list_user_access_form[usersRegion]"]`).each(
                 function() { if ($(this).val()) { newUsersRegion += $(this).val() + '|'; } }
             );
-            this.passwordAdmin.value = newUsersRegion.substring(0, newUsersRegion.length - 1);
+            this.passwordRegion.value = newUsersRegion.substring(0, newUsersRegion.length - 1);
         }
 
         $('#game_list_user_access_form_passwordAdmin').val(
@@ -74,6 +78,7 @@ export default class extends Controller {
                 region: this.passwordRegion
             })
         );
+        console.log($('#game_list_user_access_form_passwordAdmin').val());
     }
 
     translatePasswordPlayer()
@@ -96,7 +101,7 @@ export default class extends Controller {
             );
             if (newUsersPlayer) {
                 for (const team in this.passwordPlayer.value) {
-                    this.passwordPlayer.value[team] = newUsersPlayer;
+                    this.passwordPlayer.value[team] = newUsersPlayer.substring(0, newUsersPlayer.length - 1);
                 }
             } else {
                 let newUsersPlayerTeams = {};
@@ -115,14 +120,19 @@ export default class extends Controller {
         }
 
         $('#game_list_user_access_form_passwordPlayer').val(JSON.stringify(this.passwordPlayer));
+        console.log($('#game_list_user_access_form_passwordPlayer').val());
     }
 
     translateFormStateAndSubmit(event)
     {
         event.preventDefault();
-        this.translatePasswordAdmin();
-        this.translatePasswordPlayer();
-        window.dispatchEvent(new CustomEvent("user-access-saving"));
+        try {
+            this.translatePasswordAdmin();
+            this.translatePasswordPlayer();
+            window.dispatchEvent(new CustomEvent("user-access-saving"));
+        } catch (errorMessage) {
+            error("Error", errorMessage, { position: 'mm', duration: 10000 });
+        }
     }
 
     toggleProvider(event)

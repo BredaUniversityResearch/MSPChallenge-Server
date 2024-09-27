@@ -32,6 +32,9 @@ use App\Message\GameList\GameListArchiveMessage;
 use App\Message\GameSave\GameSaveCreationMessage;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Domain\API\v1\Auths;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormInterface;
 
 class GameListController extends BaseController
 {
@@ -138,6 +141,30 @@ class GameListController extends BaseController
         return $this->render(
             'manager/GameList/game_form.html.twig',
             ['gameSessionForm' => $form->createView()],
+            new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
+        );
+    }
+
+    #[Route('/manager/game/access/{sessionId}', name: 'manager_game_access', requirements: ['sessionId' => '\d+'])]
+    public function gameSessionAccess(
+        EntityManagerInterface $entityManager,
+        Request $request,
+        int $sessionId,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
+    ): Response {
+        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        $form = $this->createForm(GameListUserAccessFormType::class, $gameSession, [
+            'action' => $this->generateUrl('manager_game_access', ['sessionId' => $gameSession->getId()])
+        ]);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $gameSession = $form->getData();
+            $entityManager->flush();
+            return new Response(0, 200);
+        }
+        return $this->render(
+            'manager/GameList/game_access.html.twig',
+            ['gameSessionUserAccessForm' => $form->createView(), 'gameSessionCountries' => $gameSession->getCountries()],
             new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
         );
     }
@@ -306,27 +333,5 @@ class GameListController extends BaseController
             basename($gameSession->getGameConfigVersion()->getFilePath(), '.json').'_With_Exported_Plans.json'
         ));
         return $response;
-    }
-
-    #[Route('/manager/game/access/{sessionId}', name: 'manager_game_access', requirements: ['sessionId' => '\d+'])]
-    public function gameSessionAccess(
-        EntityManagerInterface $entityManager,
-        Request $request,
-        int $sessionId
-    ): Response {
-        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
-        $form = $this->createForm(GameListUserAccessFormType::class, $gameSession, [
-            'action' => $this->generateUrl('manager_game_access', ['sessionId' => $gameSession->getId()])
-        ]);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $gameSession = $form->getData();
-            $entityManager->flush();
-        }
-        return $this->render(
-            'manager/GameList/game_access.html.twig',
-            ['gameSessionUserAccessForm' => $form->createView(), 'gameSession' => $gameSession],
-            new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
-        );
     }
 }

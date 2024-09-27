@@ -271,17 +271,17 @@ abstract class UserBase extends Base implements JWTUserInterface
         );
     }
 
-    private function checkProviderExists($provider): bool
+    public static function checkProviderExists($provider): bool
     {
         return is_subclass_of($provider, Auths::class);
     }
 
-    public function getProviders(): array
+    public static function getProviders(): array
     {
         $return = array();
         self::AutoloadAllClasses();
         foreach (get_declared_classes() as $class) {
-            if ($this->checkProviderExists($class)) {
+            if (self::checkProviderExists($class)) {
                 $return[] = [
                     "id" => $class,
                     "name" => (new $class)->getName()
@@ -294,11 +294,20 @@ abstract class UserBase extends Base implements JWTUserInterface
     /**
      * @throws Exception
      */
-    public function checkExists(string $provider, string $users)
+    public static function checkExists(string $provider, string $users): array
     {
-        if ($this->checkProviderExists($provider)) {
+        if (self::checkProviderExists($provider)) {
             $call_provider = new $provider;
             return $call_provider->checkUser($users);
+        }
+        throw new Exception("Could not work with authentication provider '" . $provider . "'.");
+    }
+
+    public static function getProviderName(string $provider): string
+    {
+        if (self::checkProviderExists($provider)) {
+            $call_provider = new $provider;
+            return $call_provider->getName();
         }
         throw new Exception("Could not work with authentication provider '" . $provider . "'.");
     }

@@ -315,7 +315,7 @@ abstract class Base extends CommonBase
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function AutoloadAllClasses(): void
+    public static function AutoloadAllClasses(): void
     {
         $classmap = require(APIHelper::getInstance()->GetBaseFolder() . 'vendor/composer/autoload_classmap.php');
         foreach ($classmap as $class => $file) {

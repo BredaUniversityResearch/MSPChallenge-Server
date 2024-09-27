@@ -10,6 +10,7 @@ use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator as AcmeAssert;
 use function App\isBase64Encoded;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
@@ -57,9 +58,11 @@ class GameList
     private ?int $gameRunningTilTime = null;
 
     #[Assert\NotBlank]
+    #[AcmeAssert\ContainsValidExternalUsers]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $passwordAdmin = null;
 
+    #[AcmeAssert\ContainsValidExternalUsers]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $passwordPlayer = null;
 

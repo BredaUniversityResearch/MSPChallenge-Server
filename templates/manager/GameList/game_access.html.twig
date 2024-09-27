@@ -1,8 +1,10 @@
 <turbo-frame id="modalDefaultBody">
     <div data-modal-game-target="modalUserAccessForm" {{ stimulus_controller('modal-game-user-access') }}>
         {{ form_start(gameSessionUserAccessForm) }}
-        {{ form_errors(gameSessionUserAccessForm) }}
         <div class="modal-body">
+            <div class="text-danger">
+                {{ form_errors(gameSessionUserAccessForm) }}
+            </div>
             <p>When setting a password, anyone who has that password will be able to log on to your session as that user type. 
             When setting specific users, those users will be able to log on to your session as that user type (assuming they entered the correct username and password).
             </p>
@@ -64,7 +66,7 @@
                                 {{ form_widget(gameSessionUserAccessForm.passwordPlayerall, {'attr': {'class': 'form-control', 'placeholder': 'Enter password. Applies to all country teams.' }})}}
                                 <span class="input-group-text">All</span>
                             </div>
-                            {% for country in gameSession.countries %}
+                            {% for country in gameSessionCountries %}
                                 <div class="input-group py-2">
                                     {{ form_widget(gameSessionUserAccessForm["passwordPlayerCountry#{country.country_id}"], {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
                                     <span class="input-group-text country-label" style="background-color: {{ country.country_colour }}">{{ country.country_name}}</span>
@@ -83,7 +85,7 @@
                                         data-action="modal-game-user-access#addUserInput">Add user to all</button>
                                 </div>
                             </div>
-                            {% for country in gameSession.countries %}
+                            {% for country in gameSessionCountries %}
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersPlayerCountry{{country.country_id}}"
