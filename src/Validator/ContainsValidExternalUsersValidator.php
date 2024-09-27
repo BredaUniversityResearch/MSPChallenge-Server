@@ -52,7 +52,7 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
         }
     }
 
-    private function validateUserValue(array $providerValueArray, Constraint $constraint): void
+    private function validateUserValue(array $providerValueArray, ContainsValidExternalUsers $constraint): void
     {
         if ($providerValueArray['provider'] != 'local' && !empty($providerValueArray['value'])) {
             $originalUsersArray = explode('|', $providerValueArray['value']);
