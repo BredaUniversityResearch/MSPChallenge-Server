@@ -42,7 +42,10 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
                 }
             }
             $totalUsersArray = array_unique($totalUsersArray ?? []);
-            $totalUsersObject = (object) ['provider' => $valueAsObject->provider, 'value' => implode('|', $totalUsersArray)];
+            $totalUsersObject = (object) [
+                'provider' => $valueAsObject->provider,
+                'value' => implode('|', $totalUsersArray)
+            ];
             $this->validateUserValue($totalUsersObject, $constraint);
         } else {
             throw new UnexpectedValueException($value, 'MSP Challenge password json');
