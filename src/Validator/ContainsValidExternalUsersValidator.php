@@ -28,40 +28,40 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
             throw new UnexpectedValueException($value, 'json');
         }
 
-        $valueAsObject = json_decode($value);
-        if (isset($valueAsObject->admin) && isset($valueAsObject->region)
-            && isset($valueAsObject->admin->provider) && isset($valueAsObject->admin->value)
-            && isset($valueAsObject->region->provider) && isset($valueAsObject->region->value)
+        $valueArray = json_decode($value, true);
+        if (isset($valueArray['admin']) && isset($valueArray['region'])
+            && isset($valueArray['admin']['provider']) && isset($valueArray['admin']['value'])
+            && isset($valueArray['region']['provider']) && isset($valueArray['region']['value'])
         ) {
-            $this->validateUserValue($valueAsObject->admin, $constraint);
-            $this->validateUserValue($valueAsObject->region, $constraint);
-        } elseif (isset($valueAsObject->provider) && isset($valueAsObject->value)) {
-            foreach ($valueAsObject->value as $teamValue) {
+            $this->validateUserValue($valueArray['admin'], $constraint);
+            $this->validateUserValue($valueArray['region'], $constraint);
+        } elseif (isset($valueArray['provider']) && isset($valueArray['value'])) {
+            foreach ($valueArray['value'] as $teamValue) {
                 if (!empty($teamValue)) {
                     $totalUsersArray[] = $teamValue;
                 }
             }
             $totalUsersArray = array_unique($totalUsersArray ?? []);
-            $totalUsersObject = (object) [
-                'provider' => $valueAsObject->provider,
+            $totalUsersArray = [
+                'provider' => $valueArray['provider'],
                 'value' => implode('|', $totalUsersArray)
             ];
-            $this->validateUserValue($totalUsersObject, $constraint);
+            $this->validateUserValue($totalUsersArray, $constraint);
         } else {
             throw new UnexpectedValueException($value, 'MSP Challenge password json');
         }
     }
 
-    private function validateUserValue(object $providerValueObject, Constraint $constraint): void
+    private function validateUserValue(array $providerValueArray, Constraint $constraint): void
     {
-        if ($providerValueObject->provider != 'local' && !empty($providerValueObject->value)) {
-            $originalUsersArray = explode('|', $providerValueObject->value);
-            $result = UserBase::checkExists($providerValueObject->provider, $providerValueObject->value);
+        if ($providerValueArray['provider'] != 'local' && !empty($providerValueArray['value'])) {
+            $originalUsersArray = explode('|', $providerValueArray['value']);
+            $result = UserBase::checkExists($providerValueArray['provider'], $providerValueArray['value']);
             if (!empty($result['notfound'])) {
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ submittedUsers }}', implode(', ', $originalUsersArray))
                     ->setParameter('{{ knownUsers }}', 'none')
-                    ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueObject->provider))
+                    ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueArray['provider']))
                     ->addViolation();
             } else {
                 $foundUsersArray = explode('|', $result['found']);
@@ -69,8 +69,20 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
                     $this->context->buildViolation($constraint->message)
                         ->setParameter('{{ submittedUsers }}', implode(', ', $originalUsersArray))
                         ->setParameter('{{ knownUsers }}', implode(', ', $foundUsersArray))
-                        ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueObject->provider))
+                        ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueArray['provider']))
                         ->addViolation();
+                } else {
+                    foreach ($originalUsersArray as $originalUser) {
+                        if (!in_array($originalUser, $foundUsersArray)) {
+                            $this->context->buildViolation(
+                                'Please correct {{ provider }} user "{{ userToCorrect }}" to the appropriate username from this list: {{ knownUsers }}.'
+                            )
+                            ->setParameter('{{ userToCorrect }}', $originalUser)
+                            ->setParameter('{{ knownUsers }}', implode(', ', $foundUsersArray))
+                            ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueArray['provider']))
+                            ->addViolation();
+                        }
+                    }
                 }
             }
         }
