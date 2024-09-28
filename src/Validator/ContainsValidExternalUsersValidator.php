@@ -36,7 +36,7 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
             $this->validateUserValue($valueArray['admin'], $constraint);
             $this->validateUserValue($valueArray['region'], $constraint);
             return;
-        } 
+        }
         if (isset($valueArray['provider']) && isset($valueArray['value'])) {
             foreach ($valueArray['value'] as $teamValue) {
                 if (!empty($teamValue)) {
@@ -50,7 +50,7 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
             ];
             $this->validateUserValue($totalUsersArray, $constraint);
             return;
-        } 
+        }
         throw new UnexpectedValueException($value, 'MSP Challenge password json');
     }
 
@@ -66,7 +66,7 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
                     ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueArray['provider']))
                     ->addViolation();
                 return;
-            } 
+            }
             $foundUsersArray = explode('|', $result['found']);
             if (count($foundUsersArray) != count($originalUsersArray)) {
                 $this->context->buildViolation($constraint->message)
@@ -75,7 +75,7 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
                     ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueArray['provider']))
                     ->addViolation();
                 return;
-            } 
+            }
             $foundAlternativeUsersArray = array_diff($foundUsersArray, $originalUsersArray);
             $originalUsersWithAlternativeArray = array_diff($originalUsersArray, $foundUsersArray);
             if (!empty($foundAlternativeUsersArray)) {
