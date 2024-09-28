@@ -511,7 +511,13 @@ class GameList
 
     public function getCountries(): array
     {
-        $configData = $this->getRunningGame()->getRunningGameConfigFileContents();
+        if (!is_null($this->getRunningGame())) {
+            $configData = $this->getRunningGame()->getRunningGameConfigFileContents();
+        } elseif (!is_null($this->getGameConfigVersion())) {
+            $configData = $this->getGameConfigVersion()->getGameConfigComplete();
+        } else {
+            return [];
+        }
         $countries = [];
         foreach ($configData['datamodel']['meta'] as $layerMeta) {
             if ($layerMeta['layer_name'] == $configData['datamodel']['countries']) {
