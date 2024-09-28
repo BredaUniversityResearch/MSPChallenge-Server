@@ -68,7 +68,7 @@
                             </div>
                             {% for country in gameSessionCountries %}
                                 <div class="input-group py-2">
-                                    {{ form_widget(gameSessionUserAccessForm["passwordPlayerCountry#{country.country_id}"], {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
+                                    {{ form_widget(gameSessionUserAccessForm["passwordPlayerCountry#{country.country_id}"], {'attr': {'class': 'form-control', 'placeholder': 'Enter password. Overridden by first "All" field.' }}) }}
                                     <span class="input-group-text country-label" style="background-color: {{ country.country_colour }}">{{ country.country_name}}</span>
                                 </div>
                             {% endfor %}
@@ -89,7 +89,7 @@
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersPlayerCountry{{country.country_id}}"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm["usersPlayerCountry#{country.country_id}"].vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address' }})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionUserAccessForm["usersPlayerCountry#{country.country_id}"].vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address. Overridden by first "All" field.' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">

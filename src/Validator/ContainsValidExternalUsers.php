@@ -8,11 +8,13 @@ use Symfony\Component\Validator\Constraint;
 class ContainsValidExternalUsers extends Constraint
 {
     public string $message =
-        'Contains unknown {{ provider }} users. Submitted: {{ submittedUsers }}, of which known: {{ knownUsers }}.';
+        'Contains unknown or duplicated {{ provider }} users. Submitted: {{ submittedUsers }}, of which known: {{ knownUsers }}.';
 
-    // all configurable options must be passed to the constructor
+    public string $messageAlternate = 
+        'Please correct {{ userToCorrect }} to appropriate {{ provider }} username(s): {{ knownUsers }}.';
+
     public function __construct()
     {
-        parent::__construct([]);
+        parent::__construct();
     }
 }
