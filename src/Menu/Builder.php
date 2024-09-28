@@ -44,10 +44,10 @@ class Builder
     public function createSubMenu(array $options): ItemInterface
     {
         $menu = $this->factory->createItem('subMenu');
-        $menu->addChild('Sessions');
-        $menu->addChild('Saves');
-        $menu->addChild('Configurations');
-        $menu->addChild('Settings');
+        $menu->addChild('Sessions', ['route' => 'manager']);
+        $menu->addChild('Saves', ['route' => 'manager_gamesave']);
+        $menu->addChild('Configurations', ['route' => 'manager_gameconfig']);
+        $menu->addChild('Settings', ['route' => 'manager_setting']);
 
         return $menu;
     }

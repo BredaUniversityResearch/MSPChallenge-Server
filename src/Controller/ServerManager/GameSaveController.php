@@ -19,7 +19,13 @@ class GameSaveController extends BaseController
     {
     }
 
-    #[Route('/manager/game/{id}/download', name: 'manager_game_download', requirements: ['id' => '\d+'])]
+    #[Route('/manager/saves', name: 'manager_gamesave')]
+    public function index(): Response
+    {
+        return $this->render('manager/gamesave_page.html.twig');
+    }
+
+    #[Route('/manager/saves/{id}/download', name: 'manager_game_download', requirements: ['id' => '\d+'])]
     public function gameSessionDownload(
         EntityManagerInterface $entityManager,
         KernelInterface $kernel,
