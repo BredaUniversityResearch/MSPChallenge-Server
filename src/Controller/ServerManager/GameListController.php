@@ -32,9 +32,6 @@ use App\Message\GameList\GameListArchiveMessage;
 use App\Message\GameSave\GameSaveCreationMessage;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use App\Domain\API\v1\Auths;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\FormInterface;
 
 class GameListController extends BaseController
 {
@@ -108,7 +105,12 @@ class GameListController extends BaseController
             ]));
     }
 
-    #[Route('/manager/game/name/{sessionId}', name: 'manager_game_name', requirements: ['sessionId' => '\d+'])]
+    #[Route(
+        '/manager/game/name/{sessionId}',
+        name: 'manager_game_name',
+        requirements: ['sessionId' => '\d+'],
+        methods: ['POST']
+    )]
     public function gameSessionName(
         Request $request,
         EntityManagerInterface $entityManager,
