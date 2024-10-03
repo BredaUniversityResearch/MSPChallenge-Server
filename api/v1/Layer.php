@@ -776,6 +776,6 @@ class Layer extends Base
         $data['layer_info_properties'] = (isset($data['layer_info_properties'])) ?
             json_decode($data['layer_info_properties']) : null;
         $data['layer_text_info'] = (isset($data['layer_text_info'])) ? json_decode($data['layer_text_info']) : null;
-        $data['layer_tags'] = json_decode($data['layer_tags'] ?? [], true);
+        $data['layer_tags'] =  (isset($data['layer_tags'])) ? json_decode($data['layer_tags']) : null;
     }
 }
