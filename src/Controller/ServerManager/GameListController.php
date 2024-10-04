@@ -122,53 +122,40 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/game/form', name: 'manager_game_form')]
+    #[Route('/manager/game/form/{sessionId}', name: 'manager_game_form')]
     public function gameSessionForm(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        MessageBusInterface $messageBus
-    ): Response {
-        $form = $this->createForm(GameListAddFormType::class, new GameList(), [
-            'entity_manager' => $entityManager,
-            'action' => $this->generateUrl('manager_game_form')
-        ]);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $gameSession = $form->getData();
-            $entityManager->persist($gameSession);
-            $entityManager->flush();
-            $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
-            return new Response($gameSession->getId(), 200);
-        }
-        return $this->render(
-            'manager/GameList/game_form.html.twig',
-            ['gameSessionForm' => $form->createView()],
-            new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
-        );
-    }
-
-    #[Route('/manager/game/access/{sessionId}', name: 'manager_game_access', requirements: ['sessionId' => '\d+'])]
-    public function gameSessionAccess(
         EntityManagerInterface $entityManager,
         Request $request,
-        int $sessionId,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper
+        MessageBusInterface $messageBus,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper,
+        int $sessionId = 0
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
-        $form = $this->createForm(GameListUserAccessFormType::class, $gameSession, [
-            'action' => $this->generateUrl('manager_game_access', ['sessionId' => $gameSession->getId()])
-        ]);
+        $form = $this->createForm(
+            ($sessionId == 0) ? GameListAddFormType::class : GameListUserAccessFormType::class,
+            ($sessionId == 0) ? new GameList() : $gameSession,
+            [
+                'entity_manager' => $entityManager,
+                'action' => $this->generateUrl('manager_game_form', ['sessionId' => $sessionId])
+            ]
+        );
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $gameSession = $form->getData();
+            if ($sessionId == 0) {
+                $entityManager->persist($gameSession);
+                $entityManager->flush();
+                $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
+                return new Response($gameSession->getId(), 200);
+            }
             $entityManager->flush();
             return new Response('0', 200);
         }
         return $this->render(
-            'manager/GameList/game_access.html.twig',
+            ($sessionId == 0) ? 'manager/GameList/game_form.html.twig' : 'manager/GameList/game_access.html.twig',
             [
-                'gameSessionUserAccessForm' => $form->createView(),
-                'gameSessionCountries' => $gameSession->getCountries()
+                'gameSessionForm' => $form->createView(),
+                'gameSessionCountries' => ($sessionId == 0) ? [] : $gameSession->getCountries()
             ],
             new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
         );

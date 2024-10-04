@@ -1,7 +1,6 @@
 import { Controller } from 'stimulus';
 import $ from 'jquery';
 import { error } from 'tata-js';
-import { Exception } from 'sass';
 
 export default class extends Controller {
 

@@ -41,7 +41,7 @@ export default class extends Controller {
     openNewSessionModal()
     {
         let frame = this.resetModalAndReturnBodyFrame('Create New Session');
-        frame.src = '/manager/game/form';
+        frame.src = '/manager/game/form/0';
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
@@ -58,7 +58,7 @@ export default class extends Controller {
     openSessionAccessModal(event)
     {
         let frame = this.resetModalAndReturnBodyFrame(`User Access Session #${event.currentTarget.dataset.session}`);
-        frame.src = `/manager/game/access/${event.currentTarget.dataset.session}`;
+        frame.src = `/manager/game/form/${event.currentTarget.dataset.session}`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 

@@ -96,5 +96,6 @@ class GameListUserAccessFormType extends AbstractType
         $resolver->setDefaults([
             'data_class' => GameList::class,
         ]);
+        $resolver->setDefined('entity_manager');
     }
 }

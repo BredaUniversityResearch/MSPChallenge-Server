@@ -1,28 +1,28 @@
 <turbo-frame id="modalDefaultBody">
     <div data-modal-game-target="modalUserAccessForm" {{ stimulus_controller('modal-game-user-access') }}>
-        {{ form_start(gameSessionUserAccessForm) }}
+        {{ form_start(gameSessionForm) }}
         <div class="modal-body">
             <div class="text-danger">
-                {{ form_errors(gameSessionUserAccessForm) }}
+                {{ form_errors(gameSessionForm) }}
             </div>
             <p>When setting a password, anyone who has that password will be able to log on to your session as that user type. 
             When setting specific users, those users will be able to log on to your session as that user type (assuming they entered the correct username and password).
             </p>
-            {{ form_widget(gameSessionUserAccessForm.passwordAdmin) }}
-            {{ form_widget(gameSessionUserAccessForm.passwordPlayer) }}
+            {{ form_widget(gameSessionForm.passwordAdmin) }}
+            {{ form_widget(gameSessionForm.passwordPlayer) }}
             <div class="row">
                 <div class="col">
                     <div id="adminUserAccess">
                         <h6>Administrators</h6>
-                        {{ form_widget(gameSessionUserAccessForm.providerAdmin, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'admin' } }) }}
+                        {{ form_widget(gameSessionForm.providerAdmin, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'admin' } }) }}
                         <div id="adminPasswordFields" class="py-2">
-                            {{ form_widget(gameSessionUserAccessForm.passwordAdminRaw, {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
+                            {{ form_widget(gameSessionForm.passwordAdminRaw, {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
                         </div>
                         <div id="adminUserFields" class="container">
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersAdmin"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.usersAdmin.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address' }})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionForm.usersAdmin.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">
@@ -36,15 +36,15 @@
                 <div class="col">
                     <div id="regionUserAccess">
                         <h6>Region Managers</h6>
-                        {{ form_widget(gameSessionUserAccessForm.providerRegion, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'region' } }) }}
+                        {{ form_widget(gameSessionForm.providerRegion, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'region' } }) }}
                         <div id="regionPasswordFields" class="py-2">
-                            {{ form_widget(gameSessionUserAccessForm.passwordRegionRaw, {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
+                            {{ form_widget(gameSessionForm.passwordRegionRaw, {'attr': {'class': 'form-control', 'placeholder': 'Enter password' }}) }}
                         </div>
                         <div id="regionUserFields" class="container">
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersRegion"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.usersRegion.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address' }})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionForm.usersRegion.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">
@@ -60,15 +60,15 @@
                 <div class="col">
                     <div id="playerUserAccess" class="mt-3">
                         <h6>Players</h6>
-                        {{ form_widget(gameSessionUserAccessForm.providerPlayer, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'player' } }) }}
+                        {{ form_widget(gameSessionForm.providerPlayer, {'attr': {'class': 'form-select', 'data-action': 'modal-game-user-access#toggleProvider', 'data-provider': 'player' } }) }}
                         <div id="playerPasswordFields" class="py-2">
                             <div class="input-group py-2">
-                                {{ form_widget(gameSessionUserAccessForm.passwordPlayerall, {'attr': {'class': 'form-control', 'placeholder': 'Enter password. Applies to all country teams.' }})}}
+                                {{ form_widget(gameSessionForm.passwordPlayerall, {'attr': {'class': 'form-control', 'placeholder': 'Enter password. Applies to all country teams.' }})}}
                                 <span class="input-group-text">All</span>
                             </div>
                             {% for country in gameSessionCountries %}
                                 <div class="input-group py-2">
-                                    {{ form_widget(gameSessionUserAccessForm["passwordPlayerCountry#{country.country_id}"], {'attr': {'class': 'form-control', 'placeholder': 'Enter password. Overridden by first "All" field.' }}) }}
+                                    {{ form_widget(gameSessionForm["passwordPlayerCountry#{country.country_id}"], {'attr': {'class': 'form-control', 'placeholder': 'Enter password. Overridden by first "All" field.' }}) }}
                                     <span class="input-group-text country-label" style="background-color: {{ country.country_colour }}">{{ country.country_name}}</span>
                                 </div>
                             {% endfor %}
@@ -77,7 +77,7 @@
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersPlayerall"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm.usersPlayerall.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address. Applies to all country teams.' }})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionForm.usersPlayerall.vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address. Applies to all country teams.' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">
@@ -89,7 +89,7 @@
                             <div class="row py-2">
                                 <div class="col border-bottom border-dark pb-2">
                                     <div id="usersPlayerCountry{{country.country_id}}"
-                                        data-prototype="{{ form_widget(gameSessionUserAccessForm["usersPlayerCountry#{country.country_id}"].vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address. Overridden by first "All" field.' }})|e('html_attr') }}">
+                                        data-prototype="{{ form_widget(gameSessionForm["usersPlayerCountry#{country.country_id}"].vars.prototype, {'attr': {'class': 'form-control mb-2', 'placeholder': 'Enter username or e-mail address. Overridden by first "All" field.' }})|e('html_attr') }}">
                                     </div>
                                 </div>
                                 <div class="col col-auto">
@@ -109,7 +109,7 @@
             <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
             <button type="submit" class="btn btn-primary" data-action="modal-game-user-access#translateFormStateAndSubmit">Save</button>
         </div>
-        {{ form_widget(gameSessionUserAccessForm._token) }}
-        {{ form_end(gameSessionUserAccessForm, { render_rest: false }) }}
+        {{ form_widget(gameSessionForm._token) }}
+        {{ form_end(gameSessionForm, { render_rest: false }) }}
     </div>
 </turbo-frame>
