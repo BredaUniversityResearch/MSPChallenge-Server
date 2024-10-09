@@ -3,8 +3,8 @@
     "date_modified": "9/26/2024",
     "data_model_hash": "841A877A043A9A754D23A974CE0A1D0CE3D18C647C172EAED4E53E36B242EEA6",
     "errors": 0,
-    "editor_version": "1.1.1",
-    "config_version": "1.1.1"
+    "editor_version": "2.0.0",
+    "config_version": "2.0.0"
   },
   "datamodel": {
     "restrictions": {
@@ -20458,17 +20458,131 @@
             {
               "//comment": "0 Active Demersal",
               "gear_type": "0",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initialFishingDistribution": [
+                {
+                  "country_id": 3,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 4,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 5,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 6,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 7,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 8,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 9,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 10,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 11,
+                  "weight": 1.0
+                }
+              ]          
             },
             {
               "//comment": "1 Passive Demersal",
               "gear_type": "1",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initialFishingDistribution": [
+                {
+                  "country_id": 3,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 4,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 5,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 6,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 7,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 8,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 9,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 10,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 11,
+                  "weight": 1.0
+                }
+              ]
             },
             {
               "//comment": "2 Pelagic",
               "gear_type": "2",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initialFishingDistribution": [
+                {
+                  "country_id": 3,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 4,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 5,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 6,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 7,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 8,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 9,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 10,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 11,
+                  "weight": 1.0
+                }
+              ]   
             }
           ]
         },
@@ -20910,44 +21024,6 @@
       "fishing": [
         {
           "name": "Fishing intensity Active Demersal",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 1.0
-            },
-            {
-              "country_id": 4,
-              "weight": 1.0
-            },
-            {
-              "country_id": 5,
-              "weight": 1.0
-            },
-            {
-              "country_id": 6,
-              "weight": 1.0
-            },
-            {
-              "country_id": 7,
-              "weight": 1.0
-            },
-            {
-              "country_id": 8,
-              "weight": 1.0
-            },
-            {
-              "country_id": 9,
-              "weight": 1.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1.0
-            },
-            {
-              "country_id": 11,
-              "weight": 1.0
-            }
-          ],
           "policy_filters": {
             "fleets": [
               "0"
@@ -20956,44 +21032,6 @@
         },
         {
           "name": "Fishing intensity Passive Demersal",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 1.0
-            },
-            {
-              "country_id": 4,
-              "weight": 1.0
-            },
-            {
-              "country_id": 5,
-              "weight": 1.0
-            },
-            {
-              "country_id": 6,
-              "weight": 1.0
-            },
-            {
-              "country_id": 7,
-              "weight": 1.0
-            },
-            {
-              "country_id": 8,
-              "weight": 1.0
-            },
-            {
-              "country_id": 9,
-              "weight": 1.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1.0
-            },
-            {
-              "country_id": 11,
-              "weight": 1.0
-            }
-          ],
           "policy_filters": {
             "fleets": [
               "1"
@@ -21002,44 +21040,6 @@
         },
         {
           "name": "Fishing intensity Pelagic",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 1.0
-            },
-            {
-              "country_id": 4,
-              "weight": 1.0
-            },
-            {
-              "country_id": 5,
-              "weight": 1.0
-            },
-            {
-              "country_id": 6,
-              "weight": 1.0
-            },
-            {
-              "country_id": 7,
-              "weight": 1.0
-            },
-            {
-              "country_id": 8,
-              "weight": 1.0
-            },
-            {
-              "country_id": 9,
-              "weight": 1.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1.0
-            },
-            {
-              "country_id": 11,
-              "weight": 1.0
-            }
-          ],
           "policy_filters": {
             "fleets": [
               "2"

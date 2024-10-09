@@ -202,12 +202,25 @@ class MEL extends Base
             true
         );
 
-        $config = $this->Config();
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        $config = $gameConfigValues['MEL'] ?? null;
         $weightsByFleet = array();
         if (isset($config["fishing"])) {
             $fishingFleets = $config["fishing"];
-            foreach ($fishingFleets as $fishingFleet) {
+            foreach ($fishingFleets as $index => $fishingFleet) {
                 $weightsByCountry = array();
+
+                // BEGIN new format requires fleet look-up for initialFishingDistribution
+                $fleetIndex = $fishingFleet['policy_filters']['fleets'][0] ?? null;
+                if (null === $fleetIndex) {
+                    throw new Exception(
+                        "No MEL->fishing[{$index}]->policy_filters->fleets[0] (int) set in the game config."
+                    );
+                }
+                $fishingFleet['initialFishingDistribution'] =
+                    $gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'][$fleetIndex]
+                        ['initialFishingDistribution'] ?? null;
+                // END new format requires fleet look-up for initialFishingDistribution
 
                 if (isset($fishingFleet["initialFishingDistribution"])) {
                     $fishingValues = $fishingFleet["initialFishingDistribution"];

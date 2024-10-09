@@ -3,8 +3,8 @@
     "date_modified": "9/26/2024",
     "data_model_hash": "4D88BF870A424E22BE1E93393B492448E36A353BE30935852F85BB2C24B1E503",
     "errors": 0,
-    "editor_version": "1.1.1",
-    "config_version": "1.1.1"
+    "editor_version": "2.0.0",
+    "config_version": "2.0.0"
   },
   "datamodel": {
     "restrictions": {
@@ -22194,17 +22194,119 @@
             {
               "//comment": "0 Bottom trawl (otter, beam, seine)",
               "gear_type": "0",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initialFishingDistribution": [
+                {
+                  "country_id": 3,
+                  "weight": 54.0
+                },
+                {
+                  "country_id": 4,
+                  "weight": 54.0
+                },
+                {
+                  "country_id": 5,
+                  "weight": 16.0
+                },
+                {
+                  "country_id": 6,
+                  "weight": 32.0
+                },
+                {
+                  "country_id": 7,
+                  "weight": 15.0
+                },
+                {
+                  "country_id": 8,
+                  "weight": 2.0
+                },
+                {
+                  "country_id": 9,
+                  "weight": 55.0
+                },
+                {
+                  "country_id": 10,
+                  "weight": 780.0
+                }
+              ]              
             },
             {
               "//comment": "1 Industrial and pelagic trawl",
               "gear_type": "1",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initialFishingDistribution": [
+                {
+                  "country_id": 3,
+                  "weight": 406.0
+                },
+                {
+                  "country_id": 4,
+                  "weight": 406.0
+                },
+                {
+                  "country_id": 5,
+                  "weight": 1.0
+                },
+                {
+                  "country_id": 6,
+                  "weight": 538.0
+                },
+                {
+                  "country_id": 7,
+                  "weight": 597.0
+                },
+                {
+                  "country_id": 8,
+                  "weight": 2.0
+                },
+                {
+                  "country_id": 9,
+                  "weight": 4328.0
+                },
+                {
+                  "country_id": 10,
+                  "weight": 1936.0
+                }
+              ]              
             },
             {
               "//comment": "2 Drift and fixed nets",
               "gear_type": "2",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initialFishingDistribution": [
+                {
+                  "country_id": 3,
+                  "weight": 127.0
+                },
+                {
+                  "country_id": 4,
+                  "weight": 127.0
+                },
+                {
+                  "country_id": 5,
+                  "weight": 6.0
+                },
+                {
+                  "country_id": 6,
+                  "weight": 57.0
+                },
+                {
+                  "country_id": 7,
+                  "weight": 29.0
+                },
+                {
+                  "country_id": 8,
+                  "weight": 2.0
+                },
+                {
+                  "country_id": 9,
+                  "weight": 97.0
+                },
+                {
+                  "country_id": 10,
+                  "weight": 1255.0
+                }
+              ]              
             }
           ]
         },
@@ -22786,114 +22888,27 @@
       "fishing": [
         {
           "name": "Bottom Trawl",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 54.0
-            },
-            {
-              "country_id": 4,
-              "weight": 54.0
-            },
-            {
-              "country_id": 5,
-              "weight": 16.0
-            },
-            {
-              "country_id": 6,
-              "weight": 32.0
-            },
-            {
-              "country_id": 7,
-              "weight": 15.0
-            },
-            {
-              "country_id": 8,
-              "weight": 2.0
-            },
-            {
-              "country_id": 9,
-              "weight": 55.0
-            },
-            {
-              "country_id": 10,
-              "weight": 780.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Industrial and Pelagic Trawl",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 406.0
-            },
-            {
-              "country_id": 4,
-              "weight": 406.0
-            },
-            {
-              "country_id": 5,
-              "weight": 1.0
-            },
-            {
-              "country_id": 6,
-              "weight": 538.0
-            },
-            {
-              "country_id": 7,
-              "weight": 597.0
-            },
-            {
-              "country_id": 8,
-              "weight": 2.0
-            },
-            {
-              "country_id": 9,
-              "weight": 4328.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1936.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Drift and Fixed Nets",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 127.0
-            },
-            {
-              "country_id": 4,
-              "weight": 127.0
-            },
-            {
-              "country_id": 5,
-              "weight": 6.0
-            },
-            {
-              "country_id": 6,
-              "weight": 57.0
-            },
-            {
-              "country_id": 7,
-              "weight": 29.0
-            },
-            {
-              "country_id": 8,
-              "weight": 2.0
-            },
-            {
-              "country_id": 9,
-              "weight": 97.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1255.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         }
       ],
       "outcomes": [
