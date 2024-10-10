@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "9/26/2024",
-    "data_model_hash": "841A877A043A9A754D23A974CE0A1D0CE3D18C647C172EAED4E53E36B242EEA6",
+    "date_modified": "10/9/2024",
+    "data_model_hash": "1D8CFC3872C748CB588FBE7EF422D10209D5B4F8C69A0B5C343909C8B18DC6AC",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -20459,85 +20459,85 @@
               "//comment": "0 Active Demersal",
               "gear_type": "0",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 11,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 }
-              ]          
+              ]
             },
             {
               "//comment": "1 Passive Demersal",
               "gear_type": "1",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 11,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 }
               ]
             },
@@ -20545,44 +20545,44 @@
               "//comment": "2 Pelagic",
               "gear_type": "2",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 11,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 }
-              ]   
+              ]
             }
           ]
         },

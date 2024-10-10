@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "9/26/2024",
-    "data_model_hash": "4D88BF870A424E22BE1E93393B492448E36A353BE30935852F85BB2C24B1E503",
+    "date_modified": "10/10/2024",
+    "data_model_hash": "94EA09BD1ABF3CF73D6F50F65D50A93E48B86209BADD1067249C95E65C62ECCB",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -22195,38 +22195,38 @@
               "//comment": "0 Bottom trawl (otter, beam, seine)",
               "gear_type": "0",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 54.0
+                  "effort_weight": 54.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 54.0
+                  "effort_weight": 54.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 16.0
+                  "effort_weight": 16.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 32.0
+                  "effort_weight": 32.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 15.0
+                  "effort_weight": 15.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 2.0
+                  "effort_weight": 2.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 55.0
+                  "effort_weight": 55.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 780.0
+                  "effort_weight": 780.0
                 }
               ]              
             },
@@ -22234,79 +22234,79 @@
               "//comment": "1 Industrial and pelagic trawl",
               "gear_type": "1",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 406.0
+                  "effort_weight": 406.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 406.0
+                  "effort_weight": 406.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 538.0
+                  "effort_weight": 538.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 597.0
+                  "effort_weight": 597.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 2.0
+                  "effort_weight": 2.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 4328.0
+                  "effort_weight": 4328.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 1936.0
+                  "effort_weight": 1936.0
                 }
-              ]              
+              ]
             },
             {
               "//comment": "2 Drift and fixed nets",
               "gear_type": "2",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 127.0
+                  "effort_weight": 127.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 127.0
+                  "effort_weight": 127.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 6.0
+                  "effort_weight": 6.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 57.0
+                  "effort_weight": 57.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 29.0
+                  "effort_weight": 29.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 2.0
+                  "effort_weight": 2.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 97.0
+                  "effort_weight": 97.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 1255.0
+                  "effort_weight": 1255.0
                 }
-              ]              
+              ]
             }
           ]
         },

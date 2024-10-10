@@ -583,6 +583,24 @@
                               ]
                             }
                           },
+                          "initial_fishing_distribution": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "country_id": {
+                                  "type": "number"
+                                },
+                                "effort_weight": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "country_id",
+                                "effort_weight"
+                              ]
+                            }
+                          },
                           "required": [
                             "gear_type",
                             "country_id"
@@ -1231,24 +1249,6 @@
                     "required": [
                       "fleets"
                     ]
-                  },
-                  "initialFishingDistribution": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "country_id": {
-                          "type": "number"
-                        },
-                        "weight": {
-                          "type": "number"
-                        }
-                      },
-                      "required": [
-                        "country_id",
-                        "weight"
-                      ]
-                    }
                   }
                 },
                 "required": [

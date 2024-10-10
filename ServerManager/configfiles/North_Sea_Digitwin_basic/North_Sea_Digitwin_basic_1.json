@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "9/17/2024",
-    "data_model_hash": "F7070A550525BB778B0428F57606BD31FCAC6BA389A9808E1609F0779FA78B4E",
+    "date_modified": "10/10/2024",
+    "data_model_hash": "1F713DC817F81DE124D29382DC3C3D3182D1637C17E99FD4B454A1678A34767F",
     "errors": 0,
-    "editor_version": "1.1.1",
-    "config_version": "1.1.1"
+    "editor_version": "2.0.0",
+    "config_version": "2.0.0"
   },
   "datamodel": {
     "restrictions": {
@@ -22845,77 +22845,77 @@
               "//comment": "0 Bottom trawl (otter, beam, seine)",
               "gear_type": "0",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 54.0
+                  "effort_weight": 54.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 54.0
+                  "effort_weight": 54.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 16.0
+                  "effort_weight": 16.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 32.0
+                  "effort_weight": 32.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 15.0
+                  "effort_weight": 15.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 2.0
+                  "effort_weight": 2.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 55.0
+                  "effort_weight": 55.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 780.0
+                  "effort_weight": 780.0
                 }
-              ]              
+              ]
             },
             {
               "//comment": "1 Industrial and pelagic trawl",
               "gear_type": "1",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 406.0
+                  "effort_weight": 406.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 406.0
+                  "effort_weight": 406.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 1.0
+                  "effort_weight": 1.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 538.0
+                  "effort_weight": 538.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 597.0
+                  "effort_weight": 597.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 2.0
+                  "effort_weight": 2.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 4328.0
+                  "effort_weight": 4328.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 1936.0
+                  "effort_weight": 1936.0
                 }
               ]
             },
@@ -22923,43 +22923,57 @@
               "//comment": "2 Drift and fixed nets",
               "gear_type": "2",
               "country_id": "-1",
-              "initialFishingDistribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
-                  "weight": 127.0
+                  "effort_weight": 127.0
                 },
                 {
                   "country_id": 4,
-                  "weight": 127.0
+                  "effort_weight": 127.0
                 },
                 {
                   "country_id": 5,
-                  "weight": 6.0
+                  "effort_weight": 6.0
                 },
                 {
                   "country_id": 6,
-                  "weight": 57.0
+                  "effort_weight": 57.0
                 },
                 {
                   "country_id": 7,
-                  "weight": 29.0
+                  "effort_weight": 29.0
                 },
                 {
                   "country_id": 8,
-                  "weight": 2.0
+                  "effort_weight": 2.0
                 },
                 {
                   "country_id": 9,
-                  "weight": 97.0
+                  "effort_weight": 97.0
                 },
                 {
                   "country_id": 10,
-                  "weight": 1255.0
+                  "effort_weight": 1255.0
                 }
-              ]              
+              ]
             }
           ]
-        }
+        },
+        "policy_type": "fishing",
+        "enabled": true
+      },
+      "shipping": {
+        "policy_type": "shipping",
+        "enabled": true
+      },
+      "energy": {
+        "policy_type": "energy",
+        "enabled": true
+      },
+      "eco_gear": {
+        "policy_type": "eco_gear",
+        "enabled": false
       }
     },
     "MEL": {
@@ -23203,6 +23217,7 @@
             "fleets": [
               "0"
             ]
+          }
         },
         {
           "name": "Protection Industrial Trawl",
@@ -23307,6 +23322,7 @@
             "fleets": [
               "2"
             ]
+          }
         }
       ],
       "fishing": [
@@ -23316,7 +23332,7 @@
             "fleets": [
               "0"
             ]
-          }          
+          }
         },
         {
           "name": "Industrial and Pelagic Trawl",

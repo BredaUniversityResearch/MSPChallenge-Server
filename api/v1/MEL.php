@@ -63,10 +63,10 @@ class MEL extends Base
         if (isset($config["fishing"])) {
             $countries = $db->query("SELECT * FROM country WHERE country_is_manager = 0");
             foreach ($config["fishing"] as $fleet) {
-                if (isset($fleet["initialFishingDistribution"])) {
+                if (isset($fleet["initial_fishing_distribution"])) {
                     foreach ($countries as $country) {
                         $foundCountry = false;
-                        foreach ($fleet["initialFishingDistribution"] as $distribution) {
+                        foreach ($fleet["initial_fishing_distribution"] as $distribution) {
                             if ($distribution["country_id"] == $country["country_id"]) {
                                 $foundCountry = true;
                                 break;
@@ -76,7 +76,7 @@ class MEL extends Base
                         if (!$foundCountry) {
                             throw new Exception(
                                 "Country with ID ".$country["country_id"].
-                                " is missing a distribution entry in the initialFishingDistribution table for fleet ".
+                                " is missing a distribution entry in the initial_fishing_distribution table for fleet ".
                                 $fleet["name"]." for MEL."
                             );
                         }
@@ -210,27 +210,27 @@ class MEL extends Base
             foreach ($fishingFleets as $index => $fishingFleet) {
                 $weightsByCountry = array();
 
-                // BEGIN new format requires fleet look-up for initialFishingDistribution
+                // BEGIN new format requires fleet look-up for initial_fishing_distribution
                 $fleetIndex = $fishingFleet['policy_filters']['fleets'][0] ?? null;
                 if (null === $fleetIndex) {
                     throw new Exception(
                         "No MEL->fishing[{$index}]->policy_filters->fleets[0] (int) set in the game config."
                     );
                 }
-                $fishingFleet['initialFishingDistribution'] =
+                $fishingFleet['initial_fishing_distribution'] =
                     $gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'][$fleetIndex]
-                        ['initialFishingDistribution'] ?? null;
-                // END new format requires fleet look-up for initialFishingDistribution
+                        ['initial_fishing_distribution'] ?? null;
+                // END new format requires fleet look-up for initial_fishing_distribution
 
-                if (isset($fishingFleet["initialFishingDistribution"])) {
-                    $fishingValues = $fishingFleet["initialFishingDistribution"];
+                if (isset($fishingFleet["initial_fishing_distribution"])) {
+                    $fishingValues = $fishingFleet["initial_fishing_distribution"];
 
                     //We need to average the weights over the available countries
                     $sum = 0.0;
                     foreach ($fishingValues as $val) {
-                        if (isset($val["weight"]) && isset($val["country_id"])) {
-                            $sum += $val["weight"];
-                            $weightsByCountry[$val["country_id"]] = $val["weight"];
+                        if (isset($val["effort_weight"]) && isset($val["country_id"])) {
+                            $sum += $val["effort_weight"];
+                            $weightsByCountry[$val["country_id"]] = $val["effort_weight"];
                         }
                     }
 
