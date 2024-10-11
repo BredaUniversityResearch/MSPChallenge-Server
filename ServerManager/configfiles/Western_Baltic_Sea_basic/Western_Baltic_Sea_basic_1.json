@@ -20501,7 +20501,7 @@
         },
         {
           "name": "Protection Pelagic Germany",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "0"
