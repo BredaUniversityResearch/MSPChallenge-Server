@@ -2,7 +2,6 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\Game;
 use App\Domain\API\v1\GeneralPolicyType;
 use App\Domain\Common\CommonBase;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
@@ -248,9 +247,6 @@ class PlanLatest extends CommonBase
         return $this->isAsync() ? $promise : await($promise);
     }
 
-    /**
-     * @throws \Exception
-     */
     private function formatByPolicyType(array &$plan, PolicyTypeName $policyType): void
     {
         $policy['policy_type'] = $policyType->value;
@@ -270,13 +266,7 @@ class PlanLatest extends CommonBase
                 break;
             case PolicyTypeName::FISHING_EFFORT: // PolicyUpdateFishingPlan
                 if (!empty($plan['fishing'])) {
-                    foreach ($plan['fishing'] as $key => $fishingRecord) {
-                        // new format: fleet, effort_weight instead of country_id, type, amount
-                        $policy['fishing'][$key] = [
-                            'fleet' => $this->getFleetIdFromFishingRecord($fishingRecord),
-                            'effort_weight' => $fishingRecord['amount']
-                        ];
-                    }
+                    $policy['fishing'] = $plan['fishing'];
                 }
                 unset($plan['fishing']);
                 break;
@@ -305,32 +295,6 @@ class PlanLatest extends CommonBase
             // PolicyUpdateShippingPlan
             $plan['restriction_settings']
         );
-    }
-
-    /**
-     * @param array{country_id: int, type: string, amount: float} $fishingRecord
-     * @return int
-     * @throws \Exception
-     * @todo: add fleet id to the fishing table for direct look-up
-     *   currently, we still have to match by the MEL pressure name to find the corresponding fleet id
-     */
-    private function getFleetIdFromFishingRecord(array $fishingRecord): int
-    {
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
-        $config = $game->GetGameConfigValues(); // don't worry , there is cache on this
-
-        $fishing = collect(
-            $config['MEL']['fishing'] ?? []
-        )->filter(fn($p) => $p['name'] == $fishingRecord['type'])->first();
-        if (empty($fishing)) {
-            throw new \Exception('Fishing type not found: ' . $fishingRecord['type']);
-        }
-        $fleetId = $fishing['policy_filters']['fleets'][0] ?? null;
-        if (!ctype_digit($fleetId)) {
-            throw new \Exception('Fleet id not found for fishing type: ' . $fishingRecord['type']);
-        }
-        return $fleetId;
     }
 
     /**
