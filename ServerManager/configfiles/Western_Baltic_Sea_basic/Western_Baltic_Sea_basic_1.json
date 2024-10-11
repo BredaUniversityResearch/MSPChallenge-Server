@@ -20510,7 +20510,7 @@
         },
         {
           "name": "Protection Pelagic Denmark",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "1"
@@ -20519,7 +20519,7 @@
         },
         {
           "name": "Protection Pelagic Sweden",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "2"
@@ -20528,7 +20528,7 @@
         },
         {
           "name": "Protection Pelagic Poland",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "3"
@@ -20537,7 +20537,7 @@
         },
         {
           "name": "Protection Pelagic Finland",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "4"
@@ -20546,7 +20546,7 @@
         },
         {
           "name": "Protection Demersal Germany",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "5"
@@ -20555,7 +20555,7 @@
         },
         {
           "name": "Protection Demersal Denmark",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "6"
@@ -20564,7 +20564,7 @@
         },
         {
           "name": "Protection Demersal Sweden",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "7"
@@ -20573,7 +20573,7 @@
         },
         {
           "name": "Protection Demersal Poland",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "8"
@@ -20582,7 +20582,7 @@
         },
         {
           "name": "Protection Demersal Finland",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "9"
@@ -20591,7 +20591,7 @@
         },
         {
           "name": "Protection Demersal Latvia",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "10"
@@ -20600,7 +20600,7 @@
         },
         {
           "name": "Protection Recreational Germany",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "11"
@@ -20609,7 +20609,7 @@
         },
         {
           "name": "Protection Recreational Denmark",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "12"
@@ -20618,7 +20618,7 @@
         },
         {
           "name": "Protection Recreational Sweden",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "13"
@@ -20627,7 +20627,7 @@
         },
         {
           "name": "Protection Recreational Poland",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "14"
@@ -20636,7 +20636,7 @@
         },
         {
           "name": "Protection Recreational Finland",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "15"
@@ -20645,7 +20645,7 @@
         },
         {
           "name": "Protection Recreational Latvia",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "16"
@@ -20654,7 +20654,7 @@
         },
         {
           "name": "Protection Unreported fishery Germany",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "17"
@@ -20663,7 +20663,7 @@
         },
         {
           "name": "Protection Unreported fishery Denmark",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "18"
@@ -20672,7 +20672,7 @@
         },
         {
           "name": "Protection Unreported fishery Sweden",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "19"
@@ -20681,7 +20681,7 @@
         },
         {
           "name": "Protection Unreported fishery Poland",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "20"
@@ -20690,7 +20690,7 @@
         },
         {
           "name": "Protection Unreported fishery Finland",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "21"
@@ -20699,7 +20699,7 @@
         },
         {
           "name": "Protection Unreported fishery Latvia",
-          "layers": null,
+          "layers": [],
           "policy_filters": {
             "fleets": [
               "22"
