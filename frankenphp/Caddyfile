@@ -15,7 +15,7 @@
 
 {$CADDY_EXTRA_CONFIG}
 
-{$SERVER_NAME:localhost} {
+http://php:80, {$SERVER_NAME:localhost} {
     @blockApi {
         path /api/getandaddpdutoList
     }
