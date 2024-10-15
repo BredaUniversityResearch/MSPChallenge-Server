@@ -15,7 +15,6 @@ abstract class PolicyDataBase extends ClassStructure implements LogContainerInte
     use LogContainerTrait;
 
     public string $policy_type;
-    public float $pressure = 0.0;
 
     abstract public function getPolicyTypeName(): PolicyTypeName;
 
@@ -42,8 +41,5 @@ abstract class PolicyDataBase extends ClassStructure implements LogContainerInte
         );
         $ownerSchema->additionalProperties = true; // we allow additional properties
         $properties->policy_type = Schema::string();
-        $properties->pressure = Schema::number();
-        $properties->pressure->minimum = 0;
-        $properties->pressure->maximum = 1;
     }
 }
