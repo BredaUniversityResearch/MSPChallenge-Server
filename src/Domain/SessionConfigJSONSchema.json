@@ -1252,7 +1252,8 @@
                   }
                 },
                 "required": [
-                  "name"
+                  "name",
+                  "policy_filters"
                 ]
               }
             },
