@@ -7853,18 +7853,6 @@
               "id": 24,
               "multiline": true,
               "link": "Marine_Protected_Areas"
-            },
-            {
-              "name": "Fisheries Closure",
-              "id": 38,
-              "multiline": false,
-              "link": "Fisheries_closure"
-            },
-            {
-              "name": "Cod Fisheries Closure",
-              "id": 39,
-              "multiline": true,
-              "link": "Cod_Fisheries_Closure"
             }
           ]
         },
@@ -8228,28 +8216,10 @@
           "description": "If desired, demersal fleets can be banned from operating in a particular Marine Protected Area. "
         },
         {
-          "fromId": 38,
-          "toId": 20,
-          "severity": -3,
-          "description": "Demersal fleets are banned from operating in fisheries closure. "
-        },
-        {
-          "fromId": 39,
-          "toId": 20,
-          "severity": -3,
-          "description": "Demersal fleets are banned from operating in cod fisheries closure. "
-        },
-        {
           "fromId": 1,
           "toId": 21,
           "severity": -3,
           "description": "Fishing in the water column at a wind farm is dangerous. "
-        },
-        {
-          "fromId": 38,
-          "toId": 21,
-          "severity": -3,
-          "description": "Pelagic fleets are not allowed in in fisheries closures. "
         },
         {
           "fromId": 24,
@@ -8268,12 +8238,6 @@
           "toId": 21,
           "severity": -3,
           "description": "Pelagic fleets steer clear from busy tanker shipping areas. "
-        },
-        {
-          "fromId": 39,
-          "toId": 22,
-          "severity": -3,
-          "description": "Recreational fisheries are not allowed in cod fisheries closure. "
         },
         {
           "fromId": 24,
@@ -8978,28 +8942,10 @@
           "description": "Demersal fleets avoid areas with electricity cables"
         },
         {
-          "fromId": 38,
-          "toId": 22,
-          "severity": -3,
-          "description": "Recreational fleets are banned from operating in fisheries closure. "
-        },
-        {
           "fromId": 24,
           "toId": 47,
           "severity": -3,
           "description": "If desired, unreported fleets can be banned from operating in a particular Marine Protected Area."
-        },
-        {
-          "fromId": 38,
-          "toId": 47,
-          "severity": -3,
-          "description": "Unreported fleets are not allowed in fisheries closure. "
-        },
-        {
-          "fromId": 39,
-          "toId": 47,
-          "severity": -3,
-          "description": "Unreported fisheries are not allowed in cod fisheries closure. "
         },
         {
           "fromId": 1,
@@ -20501,7 +20447,13 @@
         },
         {
           "name": "Protection Pelagic Germany",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "0"
@@ -20510,7 +20462,13 @@
         },
         {
           "name": "Protection Pelagic Denmark",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "1"
@@ -20519,7 +20477,13 @@
         },
         {
           "name": "Protection Pelagic Sweden",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "2"
@@ -20528,7 +20492,13 @@
         },
         {
           "name": "Protection Pelagic Poland",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "3"
@@ -20537,7 +20507,13 @@
         },
         {
           "name": "Protection Pelagic Finland",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "4"
@@ -20546,7 +20522,13 @@
         },
         {
           "name": "Protection Demersal Germany",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "5"
@@ -20555,7 +20537,13 @@
         },
         {
           "name": "Protection Demersal Denmark",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "6"
@@ -20564,7 +20552,13 @@
         },
         {
           "name": "Protection Demersal Sweden",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "7"
@@ -20573,7 +20567,13 @@
         },
         {
           "name": "Protection Demersal Poland",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "8"
@@ -20582,7 +20582,13 @@
         },
         {
           "name": "Protection Demersal Finland",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "9"
@@ -20591,7 +20597,13 @@
         },
         {
           "name": "Protection Demersal Latvia",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "10"
@@ -20600,7 +20612,13 @@
         },
         {
           "name": "Protection Recreational Germany",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "11"
@@ -20609,7 +20627,13 @@
         },
         {
           "name": "Protection Recreational Denmark",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "12"
@@ -20618,7 +20642,13 @@
         },
         {
           "name": "Protection Recreational Sweden",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "13"
@@ -20627,7 +20657,13 @@
         },
         {
           "name": "Protection Recreational Poland",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "14"
@@ -20636,7 +20672,13 @@
         },
         {
           "name": "Protection Recreational Finland",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "15"
@@ -20645,7 +20687,13 @@
         },
         {
           "name": "Protection Recreational Latvia",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "16"
@@ -20654,7 +20702,13 @@
         },
         {
           "name": "Protection Unreported fishery Germany",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "17"
@@ -20663,7 +20717,13 @@
         },
         {
           "name": "Protection Unreported fishery Denmark",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "18"
@@ -20672,7 +20732,13 @@
         },
         {
           "name": "Protection Unreported fishery Sweden",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "19"
@@ -20681,7 +20747,13 @@
         },
         {
           "name": "Protection Unreported fishery Poland",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "20"
@@ -20690,7 +20762,13 @@
         },
         {
           "name": "Protection Unreported fishery Finland",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "21"
@@ -20699,7 +20777,13 @@
         },
         {
           "name": "Protection Unreported fishery Latvia",
-          "layers": [],
+          "layers": [
+            {
+              "name": "BS_MPA",
+              "influence": 1,
+              "construction": false
+            }
+			],
           "policy_filters": {
             "fleets": [
               "22"
@@ -20766,139 +20850,185 @@
         {
           "name": "Fishing Pelagic Germany",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "0"
+            ]
           }
         },
         {
           "name": "Fishing Pelagic Denmark",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "1"
+            ]
           }
         },
         {
           "name": "Fishing Pelagic Sweden",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "2"
+            ]
           }
         },
         {
           "name": "Fishing Pelagic Poland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "3"
+            ]
           }
         },
         {
           "name": "Fishing Pelagic Finland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "4"
+            ]
           }
         },
         {
           "name": "Fishing Demersal Germany",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "5"
+            ]
           }
         },
         {
           "name": "Fishing Demersal Denmark",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "6"
+            ]
           }
         },
         {
           "name": "Fishing Demersal Sweden",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "7"
+            ]
           }
         },
         {
           "name": "Fishing Demersal Poland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "8"
+            ]
           }
         },
         {
           "name": "Fishing Demersal Finland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "9"
+            ]
           }
         },
         {
           "name": "Fishing Demersal Latvia",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "10"
+            ]
           }
         },
         {
           "name": "Fishing Recreational Germany",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "11"
+            ]
           }
         },
         {
           "name": "Fishing Recreational Denmark",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "12"
+            ]
           }
         },
         {
           "name": "Fishing Recreational Sweden",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "13"
+            ]
           }
         },
         {
           "name": "Fishing Recreational Poland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "14"
+            ]
           }
         },
         {
           "name": "Fishing Recreational Finland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "15"
+            ]
           }
         },
         {
           "name": "Fishing Recreational Latvia",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "16"
+            ]
           }
         },
         {
           "name": "Fishing Unreported fishery Germany",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "17"
+            ]
           }
         },
         {
           "name": "Fishing Unreported fishery Denmark",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "18"
+            ]
           }
         },
         {
           "name": "Fishing Unreported fishery Sweden",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "19"
+            ]
           }
         },
         {
           "name": "Fishing Unreported fishery Poland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "20"
+            ]
           }
         },
         {
           "name": "Fishing Unreported fishery Finland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "21"
+            ]
           }
         },
         {
           "name": "Fishing Unreported fishery Latvia",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "22"
+            ]
           }
         }
       ],
@@ -21017,7 +21147,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Harbour Porpoise",
+              "valueName": "Harbor Porpoise",
               "valueColor": "#73D9FFFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
@@ -21084,26 +21214,26 @@
           "unit": "g/m2",
           "valueDefinitions": [
             {
-              "valueName": "Unreported Fleet Catch",
-              "valueColor": "#CEFF73FF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Recreational Fleet Catch",
-              "valueColor": "#FFC773FF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Demersal Fleet Catch",
+              "valueName": "Unreported Catches",
               "valueColor": "#73FFBCFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Pelagic Fleet Catch",
-              "valueColor": "#FFC773FF",
+              "valueName": "Recreational Catches",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Demersal Catches",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Pelagic Catches",
+              "valueColor": "#73FFBCFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             }
@@ -21169,133 +21299,177 @@
         {
           "name": "Ecological fishing Pelagic Germany",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "0"
+            ]
           }
         },
         {
           "name": "Ecological fishing Pelagic Denmark",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "1"
+            ]
           }
         },
         {
           "name": "Ecological fishing Pelagic Sweden",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "2"
+            ]
           }
         },
         {
           "name": "Ecological fishing Pelagic Poland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "3"
+            ]
           }
         },
         {
           "name": "Ecological fishing Pelagic Finland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "4"
+            ]
           }
         },
         {
           "name": "Ecological fishing Demersal Germany",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "5"
+            ]
           }
         },
         {
           "name": "Ecological fishing Demersal Denmark",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "6"
+            ]
           }
         },
         {
           "name": "Ecological fishing Demersal Sweden",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "7"
+            ]
           }
         },
         {
           "name": "Ecological fishing Demersal Poland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "8"
+            ]
           }
         },
         {
           "name": "Ecological fishing Demersal Finland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "9"
+            ]
           }
         },
         {
           "name": "Ecological fishing Demersal Latvia",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "10"
+            ]
           }
         },
         {
           "name": "Ecological fishing Recreational Germany",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "11"
+            ]
           }
         },
         {
           "name": "Ecological fishing Recreational Denmark",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "12"
+            ]
           }
         },
         {
           "name": "Ecological fishing Recreational Sweden",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "13"
+            ]
           }
         },
         {
           "name": "Ecological fishing Recreational Poland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "14"
+            ]
           }
         },
         {
           "name": "Ecological fishing Recreational Finland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "15"
+            ]
           }
         },
         {
           "name": "Ecological fishing Recreational Latvia",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "16"
+            ]
           }
         },
         {
           "name": "Ecological fishing Unreported fishery Germany",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "17"
+            ]
           }
         },
         {
           "name": "Ecological fishing Unreported fishery Denmark",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "18"
+            ]
           }
         },
         {
           "name": "Ecological fishing Unreported fishery Sweden",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "19"
+            ]
           }
         },
         {
           "name": "Ecological fishing Unreported fishery Poland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "20"
+            ]
           }
         },
         {
           "name": "Ecological fishing Unreported fishery Finland",
           "policy_filters": {
-            "fleets": []
+            "fleets": [
+              "21"
+            ]
           }
         },
         {
@@ -33255,300 +33429,6 @@
         "layer_tags": []
       },
       {
-        "layer_name": "BS_Fisheries_closure",
-        "layer_geotype": "polygon",
-        "layer_entity_value_max": null,
-        "layer_short": "Fisheries Closure",
-        "layer_category": "ecology",
-        "layer_subcategory": "protected_areas",
-        "layer_download_from_geoserver": 1,
-        "layer_width": 1024,
-        "layer_height": 1024,
-        "layer_raster_material": "RasterMELNew",
-        "layer_raster_filter_mode": 1,
-        "layer_raster_color_interpolation": 0,
-        "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 1,
-        "layer_selectable": 1,
-        "layer_editable": 1,
-        "layer_toggleable": 1,
-        "layer_active_on_start": 0,
-        "layer_green": 0,
-        "layer_tooltip": "Areas where fishing is prohibited",
-        "layer_information": "",
-        "layer_media": "wiki://Fisheries_Closure",
-        "layer_text_info": null,
-        "layer_states": [
-          {
-            "state": "ASSEMBLY",
-            "time": 2
-          },
-          {
-            "state": "ACTIVE",
-            "time": 10
-          },
-          {
-            "state": "DISMANTLE",
-            "time": 2
-          }
-        ],
-        "layer_editing_type": "",
-        "layer_special_entity_type": "Default",
-        "layer_depth": 1,
-        "layer_property_as_type": null,
-        "layer_type": {
-          "0": {
-            "displayName": "Fisheries Closure",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#238B4580",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#238B4580",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#7AC943FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Fisheries_Closure"
-          }
-        },
-        "layer_info_properties": [
-          {
-            "property_name": "action",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "Shape_STAr",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "Shape_STLe",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "Id",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "EC_Regulat",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          }
-        ],
-        "layer_tags": []
-      },
-      {
-        "layer_name": "BS_Cod_Fisheries_closure",
-        "layer_geotype": "polygon",
-        "layer_entity_value_max": null,
-        "layer_short": "Cod Fisheries Closure",
-        "layer_category": "ecology",
-        "layer_subcategory": "protected_areas",
-        "layer_download_from_geoserver": 1,
-        "layer_width": 1024,
-        "layer_height": 1024,
-        "layer_raster_material": "RasterMELNew",
-        "layer_raster_filter_mode": 1,
-        "layer_raster_color_interpolation": 0,
-        "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 1,
-        "layer_selectable": 1,
-        "layer_editable": 1,
-        "layer_toggleable": 1,
-        "layer_active_on_start": 0,
-        "layer_green": 0,
-        "layer_tooltip": "Areas where cod fisheries are prohibited",
-        "layer_information": "",
-        "layer_media": "wiki://Cod_Fisheries_Closure",
-        "layer_text_info": null,
-        "layer_states": [
-          {
-            "state": "ASSEMBLY",
-            "time": 2
-          },
-          {
-            "state": "ACTIVE",
-            "time": 10
-          },
-          {
-            "state": "DISMANTLE",
-            "time": 2
-          }
-        ],
-        "layer_editing_type": "",
-        "layer_special_entity_type": "Default",
-        "layer_depth": 1,
-        "layer_property_as_type": null,
-        "layer_type": {
-          "0": {
-            "displayName": "Cod Fisheries Closure",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#BAE4B380",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#7AC943FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#7AC943FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Cod_Fisheries_Closure"
-          }
-        },
-        "layer_info_properties": [
-          {
-            "property_name": "Shape_STAr",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "Shape_STLe",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "Prohibited",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "Id",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "EC_Regulat",
-            "enabled": 1,
-            "editable": 0,
-            "display_name": "",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          }
-        ],
-        "layer_tags": []
-      },
-      {
         "layer_name": "BS_Cod_Spawning",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
@@ -33701,9 +33581,9 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Impulsive Noise",
+        "layer_tooltip": "Impulse Noise",
         "layer_information": "",
-        "layer_media": "wiki://Impulsive_Noise",
+        "layer_media": "wiki://Impulse_Noise",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -33750,7 +33630,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki://Impulse_Noise"
           },
           "1": {
             "displayName": "Low",
@@ -33778,7 +33658,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki://Impulse_Noise"
           },
           "2": {
             "displayName": "Medium",
@@ -33806,7 +33686,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "Impulse_Noise"
           },
           "3": {
             "displayName": "High",
@@ -33834,7 +33714,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki://Impulse_Noise"
           },
           "4": {
             "displayName": "Very high",
@@ -33862,7 +33742,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki://Impulse_Noise"
           }
         },
         "layer_info_properties": null,
@@ -34126,7 +34006,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki:/Surface_Disturbance"
           },
           "1": {
             "displayName": "Low",
@@ -34154,7 +34034,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki://Surface_Disturbance"
           },
           "2": {
             "displayName": "Medium",
@@ -34182,7 +34062,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki://Surface_Disturbance"
           },
           "3": {
             "displayName": "High",
@@ -34210,7 +34090,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki://Surface_Disturbance"
           },
           "4": {
             "displayName": "Very high",
@@ -34238,7 +34118,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": "wiki://Surface_Disturbance" 
           }
         },
         "layer_info_properties": null,
@@ -34690,7 +34570,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -34718,7 +34598,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -34746,7 +34626,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -34774,7 +34654,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -34802,7 +34682,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -34878,7 +34758,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -34906,7 +34786,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -34934,7 +34814,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -34962,7 +34842,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -34990,7 +34870,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -35066,7 +34946,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -35094,7 +34974,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -35122,7 +35002,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -35150,7 +35030,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -35178,7 +35058,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -35254,7 +35134,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -35282,7 +35162,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -35310,7 +35190,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -35338,7 +35218,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -35366,7 +35246,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -35442,7 +35322,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -35470,7 +35350,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -35498,7 +35378,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -35526,7 +35406,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -35554,7 +35434,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -35630,7 +35510,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -35658,7 +35538,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -35686,7 +35566,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -35714,7 +35594,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -35742,7 +35622,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -35818,7 +35698,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -35846,7 +35726,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -35874,7 +35754,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -35902,7 +35782,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -35930,7 +35810,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -36006,7 +35886,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -36034,7 +35914,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -36062,7 +35942,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -36090,7 +35970,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -36118,7 +35998,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -36194,7 +36074,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -36222,7 +36102,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -36250,7 +36130,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -36278,7 +36158,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -36306,7 +36186,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -36382,7 +36262,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -36410,7 +36290,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -36438,7 +36318,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -36466,7 +36346,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -36494,7 +36374,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -36570,7 +36450,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -36598,7 +36478,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -36626,7 +36506,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -36654,7 +36534,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -36682,7 +36562,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -36758,7 +36638,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -36786,7 +36666,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -36814,7 +36694,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -36842,7 +36722,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -36870,7 +36750,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -36946,7 +36826,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "1": {
             "displayName": "Low",
@@ -36974,7 +36854,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "2": {
             "displayName": "Medium",
@@ -37002,7 +36882,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "3": {
             "displayName": "High",
@@ -37030,7 +36910,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           },
           "4": {
             "displayName": "Very high",
@@ -37058,7 +36938,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media":  null
           }
         },
         "layer_info_properties": null,
@@ -37134,7 +37014,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -37162,7 +37042,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -37190,7 +37070,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -37218,7 +37098,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -37246,7 +37126,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -37510,7 +37390,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -37538,7 +37418,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -37566,7 +37446,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -37594,7 +37474,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -37622,7 +37502,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -37698,7 +37578,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -37726,7 +37606,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -37754,7 +37634,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -37782,7 +37662,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -37810,7 +37690,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -37886,7 +37766,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -37914,7 +37794,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -37942,7 +37822,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -37970,7 +37850,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -37998,7 +37878,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -38074,7 +37954,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -38102,7 +37982,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -38130,7 +38010,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -38158,7 +38038,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -38186,7 +38066,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -38262,7 +38142,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -38290,7 +38170,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -38318,7 +38198,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -38346,7 +38226,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -38374,7 +38254,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -38450,7 +38330,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -38478,7 +38358,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -38506,7 +38386,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -38534,7 +38414,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -38562,7 +38442,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -38638,7 +38518,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -38666,7 +38546,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -38694,7 +38574,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -38722,7 +38602,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -38750,7 +38630,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -38826,7 +38706,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -38854,7 +38734,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -38882,7 +38762,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -38910,7 +38790,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -38938,7 +38818,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -39014,7 +38894,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -39042,7 +38922,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -39070,7 +38950,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -39098,7 +38978,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -39126,7 +39006,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bottom_Disturbance"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -39365,7 +39245,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -39390,10 +39270,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -39418,10 +39298,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -39446,10 +39326,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -39474,10 +39354,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -39502,7 +39382,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -39553,7 +39433,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -39578,10 +39458,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -39606,10 +39486,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -39634,10 +39514,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -39662,10 +39542,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -39690,7 +39570,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -39741,7 +39621,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -39766,10 +39646,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -39794,10 +39674,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -39822,10 +39702,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -39850,10 +39730,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -39878,7 +39758,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -39929,7 +39809,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -39954,10 +39834,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -39982,10 +39862,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -40010,10 +39890,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -40038,10 +39918,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -40066,7 +39946,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -40117,7 +39997,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -40142,10 +40022,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -40170,10 +40050,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -40198,10 +40078,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -40226,10 +40106,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -40254,7 +40134,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -40305,7 +40185,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -40330,10 +40210,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -40358,10 +40238,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -40386,10 +40266,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -40414,10 +40294,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -40442,7 +40322,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -40493,7 +40373,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -40518,10 +40398,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -40546,10 +40426,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -40574,10 +40454,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -40602,10 +40482,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -40630,7 +40510,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -40681,7 +40561,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -40706,10 +40586,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -40734,10 +40614,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -40762,10 +40642,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -40790,10 +40670,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -40818,7 +40698,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -40869,7 +40749,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -40894,10 +40774,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -40922,10 +40802,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -40950,10 +40830,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -40978,10 +40858,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -41006,7 +40886,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -41057,7 +40937,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -41082,10 +40962,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -41110,10 +40990,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -41138,10 +41018,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -41166,10 +41046,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -41194,7 +41074,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -41245,7 +41125,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -41270,10 +41150,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -41298,10 +41178,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -41326,10 +41206,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -41354,10 +41234,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -41382,7 +41262,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -41433,7 +41313,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -41458,10 +41338,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -41486,10 +41366,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -41514,10 +41394,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -41542,10 +41422,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -41570,7 +41450,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -41621,7 +41501,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -41646,10 +41526,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -41674,10 +41554,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -41702,10 +41582,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -41730,10 +41610,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -41758,7 +41638,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -41809,7 +41689,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -41834,10 +41714,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -41862,10 +41742,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -41890,10 +41770,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -41918,10 +41798,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -41946,7 +41826,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -41997,7 +41877,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -42022,10 +41902,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -42050,10 +41930,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -42078,10 +41958,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -42106,10 +41986,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -42134,7 +42014,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Cod"
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -42185,7 +42065,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -42210,10 +42090,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -42238,10 +42118,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -42266,10 +42146,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -42294,10 +42174,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -42322,7 +42202,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -42351,7 +42231,7 @@
         "layer_green": 0,
         "layer_tooltip": "Recreational Catches",
         "layer_information": "",
-        "layer_media": "wiki//Active_Demersal_Catch",
+        "layer_media": "wiki//Recreational_Catch",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -42373,7 +42253,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -42398,10 +42278,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -42426,10 +42306,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -42454,10 +42334,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -42482,10 +42362,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -42510,7 +42390,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -42539,7 +42419,7 @@
         "layer_green": 0,
         "layer_tooltip": "Demersal Catches",
         "layer_information": "",
-        "layer_media": "wiki//Active_Demersal_Catch",
+        "layer_media": "wiki//Demersal_Catch",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -42561,7 +42441,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -42586,10 +42466,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -42614,10 +42494,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -42642,10 +42522,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -42670,10 +42550,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -42698,7 +42578,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -42727,7 +42607,7 @@
         "layer_green": 0,
         "layer_tooltip": "Pelagic Catches",
         "layer_information": "",
-        "layer_media": "wiki//Active_Demersal_Catch",
+        "layer_media": "wiki//Pelagic_Catch",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -42749,7 +42629,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very low density",
+            "displayName": "Very low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -42774,10 +42654,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "1": {
-            "displayName": "Low density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 250,
             "map_type": null,
@@ -42802,10 +42682,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "2": {
-            "displayName": "Medium density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 500,
             "map_type": null,
@@ -42830,10 +42710,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "3": {
-            "displayName": "High density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 750,
             "map_type": null,
@@ -42858,10 +42738,10 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           },
           "4": {
-            "displayName": "Very high density",
+            "displayName": "Very high",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -42886,7 +42766,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": null
           }
         },
         "layer_info_properties": null,
