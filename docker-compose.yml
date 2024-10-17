@@ -45,6 +45,7 @@ services:
       - database
     volumes:
       - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
+      - mariadb_data:/var/lib/mysql
     logging:
       driver: "local"
 
@@ -147,6 +148,7 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  mariadb_data:
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
 
