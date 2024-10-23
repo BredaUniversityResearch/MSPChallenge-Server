@@ -20864,7 +20864,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA|1",
+              "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
             },
@@ -20919,7 +20919,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA|2",
+              "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
             },
@@ -20974,7 +20974,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA|3",
+              "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
             },

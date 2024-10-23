@@ -22228,7 +22228,7 @@
                   "country_id": 10,
                   "effort_weight": 780.0
                 }
-              ]              
+              ]
             },
             {
               "//comment": "1 Industrial and pelagic trawl",
@@ -22728,7 +22728,7 @@
               "construction": false
             },
             {
-              "name": "NS_Marine_Protected_Areas|1",
+              "name": "NS_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             }
@@ -22803,7 +22803,7 @@
               "construction": true
             },
             {
-              "name": "NS_Marine_Protected_Areas|2",
+              "name": "NS_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             }
@@ -22873,7 +22873,7 @@
               "construction": false
             },
             {
-              "name": "NS_Marine_Protected_Areas|3",
+              "name": "NS_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             }

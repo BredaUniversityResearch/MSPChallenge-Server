@@ -5755,7 +5755,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|3",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5815,7 +5815,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|2",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5875,7 +5875,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|1",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5925,7 +5925,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|5",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5975,7 +5975,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|4",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
