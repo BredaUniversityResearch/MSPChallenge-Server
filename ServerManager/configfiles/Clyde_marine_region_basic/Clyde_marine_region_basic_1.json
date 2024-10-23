@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "9/26/2024",
-    "data_model_hash": "3B83CA3F89ED43821EDE088026D456E7A2BF71C43E947303FA607A912E9A692B",
+    "date_modified": "10/9/2024",
+    "data_model_hash": "8B2C2F091C2F5A623AF0F0435B5246DF55F331DB295B452100B1FC1601CBDA20",
     "errors": 0,
-    "editor_version": "1.1.1",
-    "config_version": "1.1.1"
+    "editor_version": "2.0.0",
+    "config_version": "2.0.0"
   },
   "datamodel": {
     "restrictions": {
@@ -5423,27 +5423,137 @@
             {
               "//comment": "0 Demersal trawl",
               "gear_type": "0",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
             },
             {
               "//comment": "1 Scallop fleet",
               "gear_type": "1",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
             },
             {
               "//comment": "2 Nephrops fleet",
               "gear_type": "2",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
             },
             {
               "//comment": "3 Pots and creels",
               "gear_type": "3",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
             },
             {
               "//comment": "4 Seine",
               "gear_type": "4",
-              "country_id": "-1"
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
             }
           ]
         },
@@ -5645,7 +5755,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|3",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5705,7 +5815,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|2",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5765,7 +5875,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|1",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5815,7 +5925,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|5",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5865,7 +5975,7 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|4",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5910,28 +6020,6 @@
       "fishing": [
         {
           "name": "Fishing intensity Demersal trawl",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ],
           "policy_filters": {
             "fleets": [
               "0"
@@ -5940,28 +6028,6 @@
         },
         {
           "name": "Fishing intensity Seine",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ],
           "policy_filters": {
             "fleets": [
               "4"
@@ -5970,28 +6036,6 @@
         },
         {
           "name": "Fishing intensity Pots and creels",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ],
           "policy_filters": {
             "fleets": [
               "3"
@@ -6000,28 +6044,6 @@
         },
         {
           "name": "Fishing intensity Nephrops fleet",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ],
           "policy_filters": {
             "fleets": [
               "2"
@@ -6030,28 +6052,6 @@
         },
         {
           "name": "Fishing intensity Scallop fleet",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ],
           "policy_filters": {
             "fleets": [
               "1"
