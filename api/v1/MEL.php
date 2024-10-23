@@ -45,7 +45,38 @@ class MEL extends Base
     public function Config(): ?array
     {
         $gameConfigValues = (new Game())->GetGameConfigValues();
-        return $gameConfigValues['MEL'] ?? null;
+        $melConfig = $gameConfigValues['MEL'] ?? null;
+
+        // a mel pressure could hold a policy_filters field
+        $pressures = $melConfig['pressures'] ?? [];
+        foreach ($pressures as $pressureIndex => $pressure) {
+            if (empty($pressure['policy_filters'])) {
+                continue;
+            }
+            // if so, traverse all pressure layers and try to find the corresponding layer in the meta section
+            foreach (($pressure['layers'] ?? []) as $pressureLayerIndex => $pressureLayer) {
+                if (empty($pressureLayer['name'])) {
+                    continue;
+                }
+                if (null === $layer = collect($gameConfigValues['meta'] ?? [])->filter(
+                    fn($l) => $l['layer_name'] == $pressureLayer['name']
+                )->first()) {
+                    continue;
+                }
+                // if found, check if the meta layer has a layer info property for policies
+                $layerInfoPolicyTypeProps = collect($layer['layer_info_properties'] ?? [])->filter(
+                    fn($p) => !empty($p['policy_type'])
+                )->all();
+                if (empty($layerInfoPolicyTypeProps)) {
+                    continue;
+                }
+                // if so, apply those pressure policy filters to the pressure layer
+                $melConfig['pressures'][$pressureIndex]['layers'][$pressureLayerIndex]['policy_filters'] =
+                    $pressure['policy_filters'];
+            }
+        }
+
+        return $melConfig;
     }
 
     /**
@@ -347,22 +378,50 @@ class MEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Update(): array
     {
+//SET @month = 4;
+//SET @prevMonth = 2;
+//
+//SELECT DISTINCT layer_name, layer_melupdate
+//FROM layer
+//WHERE layer_melupdate = 1
+//OR layer_id IN (
+//  WITH geometry_with_months AS (
+//      SELECT g.geometry_layer_id, jt.months
+//      FROM geometry g
+//      JOIN JSON_TABLE(JSON_UNQUOTE(JSON_EXTRACT(g.geometry_data, '$.SEASONAL_CLOSURE')), '$.items[*]'
+//          COLUMNS (
+//              months JSON PATH '$.months'
+//          )
+//      ) jt ON TRUE
+//  )
+//  SELECT DISTINCT l.layer_original_id
+//  FROM layer l
+//  JOIN geometry_with_months g ON g.geometry_layer_id=l.layer_id AND
+//    (
+//        g.months & @prevMonth != @prevMonth
+//        AND g.months & @month = @month
+//    ) OR (
+//        g.months & @prevMonth = @prevMonth
+//        AND g.months & @month != @month
+//    )
+//);
+
         $game = new Game();
         $policyLayerProps = collect($game->getPolicyLayerPropertiesFromConfig())->keyBy('property_name')->all();
         $currentMonth = $game->GetCurrentMonthAsId();
         $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $qb = $conn->createQueryBuilder();
         $qb
-            ->select('l.layer_name')
-            ->from('layer', 'l')
+            ->select('layer_name')
+            ->from('layer')
             // layers that have a melupdate flag set
-            ->where($qb->expr()->eq('l.layer_melupdate', 1));
+            ->where($qb->expr()->eq('layer_melupdate', 1));
         foreach ($policyLayerProps as $layerProp) {
             // or, any layer with a schedule policy filter matching one of these criteria:
             // * the previous month was not listed but the current month is
             // * the current month is listed, but the previous month is not
             $qb->orWhere($qb->expr()->in(
-                'l.layer_id',
+                'layer_id',
                 sprintf(
                     <<< 'SUBQUERY'
                     WITH
@@ -475,10 +534,11 @@ SUBQUERY,
      * - layer name
      * - optionally, the layer type, which is used to filter on the geometry type
      * - optionally, flag to only get ones being constructed
+     * - optionally, policy filters to apply
      * @throws Exception
      * @api {POST} /mel/GeometryExportName Geometry Export Name
      * @apiParam {string} layer name to return the geometry data for
-     * @apiParam {int} layer_type type within the layer to return. -1 for all types. @deprecated not used anymore
+     * @apiParam {int} layer_type type within the layer to return. -1 for all types.
      * @apiParam {bool} construction_only whether to return data only if it's being constructed.
      * @apiParam {string} policy_filters JSON object with the policy filters to apply
      * @apiSuccess {string} JSON Object
@@ -486,7 +546,7 @@ SUBQUERY,
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GeometryExportName(
         string $name,
-        int $layer_type = -1, // @deprecated not used anymore, instead we use the policy_filters
+        int $layer_type = -1,
         bool $construction_only = false,
         ?string $policy_filters = null
     ): ?array {
@@ -495,6 +555,7 @@ SUBQUERY,
         }
         return $this->exportAllGeometryFromLayer(
             $name,
+            $layer_type,
             $construction_only,
             $policy_filters
         );
@@ -502,15 +563,16 @@ SUBQUERY,
 
     /**
      * @param string $name
+     * @param int $geometryType
      * @param bool $constructionOnly
      * @param object|null $policyFilters
      *
      * @return array|null
      * @throws NonUniqueResultException
-     * @throws Exception
      */
     private function exportAllGeometryFromLayer(
         string $name,
+        int $geometryType = -1,
         bool $constructionOnly = false,
         ?object $policyFilters = null
     ): ?array {
@@ -559,6 +621,14 @@ SUBQUERY,
                     )
                 )
                 ->setParameter('planLayerState', PlanLayerState::ACTIVE->value);
+        }
+        if ($geometryType != -1) {
+            $qb
+                ->andWhere(
+                    $qb->expr()->like('ge.geometryType', ':geometryType')
+                )
+                ->setParameter('geometryType', "%$geometryType%");
+            $this->log('Filtering on geometry type: '.$geometryType);
         }
 
         $q = $qb->getQuery();
