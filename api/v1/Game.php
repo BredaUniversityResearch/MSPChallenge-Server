@@ -174,7 +174,7 @@ class Game extends Base
     /**
      * @throws Exception
      */
-    public function getFleetIndexByCountryAndGearType(int $countryId, int $gearTypeIndex): ?string
+    public function getFleetIndexByCountryAndGearType(int $countryId, int $gearTypeIndex): ?int
     {
         $gameConfigValues = $this->GetGameConfigValues();
         if (false === $result = collect($gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'] ?? [])
@@ -190,7 +190,7 @@ class Game extends Base
      * @return ?array{gear_type: int, country_id: int}
      * @throws Exception
      */
-    public function getFleetFromIndex(string $fleetIndex): ?array
+    public function getFleetFromIndex(int $fleetIndex): ?array
     {
         $gameConfigValues = $this->GetGameConfigValues();
         if (null === $fleet =
