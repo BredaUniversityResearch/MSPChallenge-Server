@@ -82,6 +82,41 @@ class MEL extends Base
     /**
      * @throws Exception
      */
+    public function getFishingNameByFleetIndex(int $fleetIndex): ?string
+    {
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        $gameConfigValues = $game->GetGameConfigValues();
+        if (null === ($melConfig = $gameConfigValues['MEL'] ?? null)) {
+            return null;
+        }
+        $fishing = collect($melConfig['fishing'] ?? [])
+            ->filter(fn($f) => in_array($fleetIndex, $f['policy_filters']['fleets'] ?? []))
+            ->first();
+        return $fishing['name'] ?? null;
+    }
+
+    /**
+     * @return int[]
+     * @throws Exception
+     */
+    public function getFleetIndicesFromFishingName(string $fishingName): array
+    {
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        $gameConfigValues = $game->GetGameConfigValues();
+        if (null === ($melConfig = $gameConfigValues['MEL'] ?? null)) {
+            return [];
+        }
+        $fishing = collect($melConfig['fishing'] ?? [])
+            ->filter(fn($f) => $f['name'] === $fishingName)
+            ->first();
+        return array_map(fn($i) => intval($i), $fishing['policy_filters']['fleets'] ?? []);
+    }
+
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function OnReimport(array $config): void
     {

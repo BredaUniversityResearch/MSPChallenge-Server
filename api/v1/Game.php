@@ -172,6 +172,41 @@ class Game extends Base
     }
 
     /**
+     * @throws Exception
+     */
+    public function getFleetIndexByCountryAndGearType(int $countryId, int $gearTypeIndex): ?string
+    {
+        $gameConfigValues = $this->GetGameConfigValues();
+        if (false === $result = collect($gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'] ?? [])
+            ->search(
+                fn($f) => $f['country_id'] == $countryId && $f['gear_type'] == $gearTypeIndex
+            )) {
+            return null;
+        }
+        return $result;
+    }
+
+    /**
+     * @return ?array{gear_type: int, country_id: int}
+     * @throws Exception
+     */
+    public function getFleetFromIndex(string $fleetIndex): ?array
+    {
+        $gameConfigValues = $this->GetGameConfigValues();
+        if (null === $fleet =
+            $gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'][$fleetIndex] ?? null) {
+            return null;
+        }
+        if (!array_key_exists('gear_type', $fleet) || !array_key_exists('country_id', $fleet)) {
+            return null;
+        }
+        return [
+            'gear_type' => (int) $fleet['gear_type'],
+            'country_id' => (int) $fleet['country_id']
+        ];
+    }
+
+    /**
      * Returns an array of all layer properties that have a policy_type field.
      *
      * @return array{array{property_name: string, policy_type?: string}}

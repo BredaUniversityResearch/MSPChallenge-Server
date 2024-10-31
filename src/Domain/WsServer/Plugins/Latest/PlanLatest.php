@@ -3,9 +3,11 @@
 namespace App\Domain\WsServer\Plugins\Latest;
 
 use App\Domain\API\v1\GeneralPolicyType;
+use App\Domain\API\v1\Plan;
 use App\Domain\Common\CommonBase;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
 use Drift\DBAL\Result;
+use Exception;
 use React\Promise\PromiseInterface;
 use function App\await;
 use function App\parallel;
@@ -19,11 +21,11 @@ class PlanLatest extends CommonBase
      * @param int $lastupdate
      * @return array|PromiseInterface
      * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      * @noinspection SpellCheckingInspection
      */
     public function latest(int $lastupdate): array|PromiseInterface
     {
-
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         $qb
             ->select(
@@ -69,6 +71,8 @@ class PlanLatest extends CommonBase
             $qb
         )
         ->then(function (Result $result) {
+            $planObj = new Plan();
+            $this->asyncDataTransferTo($planObj);
             $plans = ($result->fetchAllRows() ?? []) ?: [];
             $toPromiseFunctions = [];
             foreach ($plans as $key => &$d) {
@@ -123,7 +127,7 @@ class PlanLatest extends CommonBase
                         $qb
                             ->select(
                                 'fishing_country_id as country_id',
-                                'fishing_type as gear_type',
+                                'fishing_type',
                                 'fishing_amount as effort_weight'
                             )
                             ->from('fishing')
@@ -162,7 +166,7 @@ class PlanLatest extends CommonBase
             }
             unset($d);
             return parallel($toPromiseFunctions)
-                ->then(function (array $results) use (&$plans) {
+                ->then(function (array $results) use (&$plans, $planObj) {
                     /** @var Result[] $results */
                     $toPromiseFunctions = [];
                     foreach ($plans as $pKey => &$d) {
@@ -219,6 +223,7 @@ class PlanLatest extends CommonBase
 
                         $fishingValues = ($results['fishing' . $pKey]->fetchAllRows() ?? []) ?: [];
                         if (count($fishingValues) > 0) {
+                            $fishingValues = $planObj->addGearTypeToFishingValues($fishingValues);
                             $d['fishing'] = $fishingValues;
                         }
 

@@ -2340,9 +2340,9 @@ class Plan extends Base
             $initialData = $this->getDatabase()->query(
                 "
                 SELECT
-					fishing.fishing_type as type,
+					fishing.fishing_type,
 					fishing.fishing_country_id as country_id,
-					fishing.fishing_amount as amount
+					fishing.fishing_amount as effort_weight
 				FROM fishing
 					INNER JOIN plan ON plan.plan_id = fishing.fishing_plan_id
 				WHERE fishing.fishing_plan_id = ?",
@@ -2350,7 +2350,36 @@ class Plan extends Base
             );
         }
 
-        return $initialData;
+        return $this->addGearTypeToFishingValues($initialData);
+    }
+
+    /**
+     * @param mixed $fishingValues
+     * @return array
+     * @throws Exception
+     */
+    public function addGearTypeToFishingValues(mixed $fishingValues): array
+    {
+        $mel = new MEL();
+        $this->asyncDataTransferTo($mel);
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        return collect($fishingValues)
+            ->map(function ($fishing) use ($mel, $game) {
+                $fleetIndices = $mel->getFleetIndicesFromFishingName($fishing['fishing_type']);
+                if (count($fleetIndices) != 1) {
+                    throw new Exception(
+                        'Fishing type: ' . $fishing['fishing_type'] . ' has none, or more than one fleet index'
+                    );
+                }
+                if (null === $fleet = $game->getFleetFromIndex($fleetIndices[0])) {
+                    throw new Exception('Fleet index: ' . $fleetIndices[0] . ' not found');
+                }
+                $fishing['gear_type'] = $fleet['gear_type'];
+                unset($fishing['fishing_type']);
+                return $fishing;
+            })
+            ->all();
     }
 
     /**
@@ -2366,12 +2395,28 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Fishing(int $plan, array $fishing_values): ?PromiseInterface
     {
+        $mel = new MEL();
+        $this->asyncDataTransferTo($mel);
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
         $promise = $this
             ->DeleteFishing($plan)
-            ->then(function () use ($plan, $fishing_values) {
+            ->then(function () use ($plan, $fishing_values, $game, $mel) {
                 $toPromiseFunctions = [];
                 foreach ($fishing_values as $fishingValues) {
-                    $toPromiseFunctions[] = tpf(function () use ($plan, $fishingValues) {
+                    if (null === $fleetIndex = $game->getFleetIndexByCountryAndGearType(
+                        $fishingValues['country_id'],
+                        $fishingValues['gear_type']
+                    )) {
+                        throw new Exception(
+                            "Fleet index not found for country " . $fishingValues['country_id'] .
+                            " and gear type " . $fishingValues['gear_type']
+                        );
+                    }
+                    if (null === $fishingName = $mel->getFishingNameByFleetIndex($fleetIndex)) {
+                        throw new Exception("MEL Fishing name not found for fleet index " . $fleetIndex);
+                    }
+                    $toPromiseFunctions[] = tpf(function () use ($plan, $fishingValues, $fishingName) {
                         $qb = $this->getAsyncDatabase()->createQueryBuilder();
                         return $this->getAsyncDatabase()->query(
                             $qb
@@ -2379,7 +2424,7 @@ class Plan extends Base
                                 ->values([
                                     'fishing_country_id' =>
                                         $qb->createPositionalParameter($fishingValues['country_id']),
-                                    'fishing_type' => $qb->createPositionalParameter($fishingValues['gear_type']),
+                                    'fishing_type' => $qb->createPositionalParameter($fishingName),
                                     'fishing_amount' => $qb->createPositionalParameter($fishingValues['effort_weight']),
                                     'fishing_plan_id' => $qb->createPositionalParameter($plan)
                                 ])
