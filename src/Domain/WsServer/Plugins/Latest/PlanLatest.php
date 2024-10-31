@@ -123,8 +123,8 @@ class PlanLatest extends CommonBase
                         $qb
                             ->select(
                                 'fishing_country_id as country_id',
-                                'fishing_type as type',
-                                'fishing_amount as amount'
+                                'fishing_type as gear_type',
+                                'fishing_amount as effort_weight'
                             )
                             ->from('fishing')
                             ->where('fishing_plan_id = ' . $qb->createPositionalParameter($d['id']))

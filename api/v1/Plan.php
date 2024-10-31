@@ -2379,8 +2379,8 @@ class Plan extends Base
                                 ->values([
                                     'fishing_country_id' =>
                                         $qb->createPositionalParameter($fishingValues['country_id']),
-                                    'fishing_type' => $qb->createPositionalParameter($fishingValues['type']),
-                                    'fishing_amount' => $qb->createPositionalParameter($fishingValues['amount']),
+                                    'fishing_type' => $qb->createPositionalParameter($fishingValues['gear_type']),
+                                    'fishing_amount' => $qb->createPositionalParameter($fishingValues['effort_weight']),
                                     'fishing_plan_id' => $qb->createPositionalParameter($plan)
                                 ])
                         );
