@@ -596,7 +596,9 @@ SUBQUERY,
 
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query("UPDATE layer SET layer_melupdate=0");
-        return array_column($r, 'layer_name');
+        $a = array_column($r, 'layer_name');
+        $a['debug-message'] = 'Current month ID: '.$currentMonth;
+        return $a;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
