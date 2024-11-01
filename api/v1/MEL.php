@@ -242,7 +242,7 @@ class MEL extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function InitialFishing(array $fishing_values): void
+    public function InitialFishing(array $fishing_values): array
     {
         $existingPlans = $this->getDatabase()->query(
             "SELECT plan.plan_id FROM plan WHERE plan.plan_gametime = -1 AND (plan.plan_type & ? = ?)",
@@ -252,13 +252,14 @@ class MEL extends Base
             // In this case we already have something in the database that is a fishing plan, might be of a previous
             //   instance of MEL on this session or a starting plan.
             //   Don't insert any new values in the database to avoid the fishing values increasing every start of MEL.
-            return;
+            $this->log('Found existing fishing plan, canceling fishing values insertion');
+            return [
+                'log' => $this->getLogMessages()
+            ];
         }
 
-        $countries = $this->getDatabase()->query("SELECT country_id FROM country WHERE country_is_manager != 1");
-        $numCountries = count($countries);
-
-        $planid = $this->getDatabase()->query(
+        // insert starting plan.
+        $planId = $this->getDatabase()->query(
             "
             INSERT INTO plan (
                 plan_name, plan_country_id, plan_gametime, plan_state, plan_type) VALUES (?, ?, ?, ?, ?
@@ -268,64 +269,165 @@ class MEL extends Base
             true
         );
 
-        $gameConfigValues = (new Game())->GetGameConfigValues();
-        $config = $gameConfigValues['MEL'] ?? null;
-        $weightsByFleet = array();
-        if (isset($config["fishing"])) {
-            $fishingFleets = $config["fishing"];
-            foreach ($fishingFleets as $index => $fishingFleet) {
-                $weightsByCountry = array();
-
-                // BEGIN new format requires fleet look-up for initial_fishing_distribution
-                $fleetIndex = $fishingFleet['policy_filters']['fleets'][0] ?? null;
-                if (null === $fleetIndex) {
-                    throw new Exception(
-                        "No MEL->fishing[{$index}]->policy_filters->fleets[0] (int) set in the game config."
-                    );
-                }
-                $fishingFleet['initial_fishing_distribution'] =
-                    $gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'][$fleetIndex]
-                        ['initial_fishing_distribution'] ?? null;
-                // END new format requires fleet look-up for initial_fishing_distribution
-
-                if (isset($fishingFleet["initial_fishing_distribution"])) {
-                    $fishingValues = $fishingFleet["initial_fishing_distribution"];
-
-                    //We need to average the weights over the available countries
-                    $sum = 0.0;
-                    foreach ($fishingValues as $val) {
-                        if (isset($val["effort_weight"]) && isset($val["country_id"])) {
-                            $sum += $val["effort_weight"];
-                            $weightsByCountry[$val["country_id"]] = $val["effort_weight"];
-                        }
-                    }
-
-                    $weightMultiplier = ($sum > 0)? 1.0 / $sum : 1.0 / $numCountries;
-                    foreach ($weightsByCountry as &$countryWeight) {
-                        $countryWeight *= $weightMultiplier;
-                    }
-
-                    $weightsByFleet[$fishingFleet["name"]] = $weightsByCountry;
-                }
-            }
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        $gameConfigValues = $game->GetGameConfigValues();
+        // no fleets defined, return
+        if (empty($gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'])) {
+            $this->error('No policy_settings->fishing->fleet_info->fleets defined in the config.');
+            return [
+                'log' => $this->getLogMessages()
+            ];
         }
 
-        foreach ($fishing_values as $fishing) {
-            $name = $fishing["fleet_name"];
+        $fishingFleetNameToValue = collect($fishing_values)->keyBy('fleet_name')
+            ->map(fn($f) => $f['fishing_value'])
+            ->all();
+        foreach ($gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'] as $fleetIndex => $fleet) {
+            $fleetDescription = $fleet['//comment'] ?? 'index '.$fleetIndex;
 
-            foreach ($countries as $country) {
-                $countryId = $country["country_id"];
-                $weight = $weightsByFleet[$name][$countryId] ?? 1;
+            // fleet it not defined in the MEL->fishing config, so skip it
+            if (null == $fishingFleetName = $this->getFishingNameByFleetIndex($fleetIndex)) {
+                $this->log(
+                    'Could not match MEL->fishing with fleet '. $fleetDescription.
+                    ', are you missing field policy_filters->fleets, or are you missing a name field?',
+                    self::LOG_LEVEL_WARNING
+                );
+                continue;
+            }
+            if (!array_key_exists($fishingFleetName, $fishingFleetNameToValue)) {
+                $this->log(
+                    'Could not find fishing value for fleet '.$fleetDescription. ', with name: '.$fishingFleetName,
+                    self::LOG_LEVEL_WARNING
+                );
+                continue;
+            }
+            if (empty(trim($fleet['country_id']))) {
+                $this->log('Country ID is not set, or 0, for fleet '.$fleetDescription, self::LOG_LEVEL_WARNING);
+                continue;
+            }
+            // a specific country is set for this fleet, so a national fleet
+            if ($fleet['country_id'] != -1) {
                 $this->getDatabase()->query(
                     "
                     INSERT INTO fishing (
                         fishing_country_id, fishing_plan_id, fishing_type, fishing_amount, fishing_active
                     ) VALUES (?, ?, ?, ?, ?)
                     ",
-                    array($country['country_id'], $planid, $name, $fishing["fishing_value"] * $weight, 1)
+                    array(
+                        $fleet['country_id'], $planId, $fishingFleetName, $fishingFleetNameToValue[$fishingFleetName], 1
+                    )
                 );
+                $this->log(sprintf(
+                    'Inserted fishing value %.2f, for national fleet %s, with name %s, for country %d',
+                    $fishingFleetNameToValue[$fishingFleetName],
+                    $fleetDescription,
+                    $fishingFleetName,
+                    $fleet['country_id']
+                ));
+                continue;
+            }
+
+            // a global fleet, so insert for all countries, but weighted using initial_fishing_distribution
+            //  if initial_fishing_distribution is not set, show a warning, but fall-back to equal distribution\
+            $countries = $this->getDatabase()->query('SELECT country_id FROM country WHERE country_is_manager != 1');
+            if (!isset($fleet["initial_fishing_distribution"])) {
+                $this->log(
+                    'No initial_fishing_distribution set for fleet '.$fleetDescription.', no distributions used.',
+                    self::LOG_LEVEL_WARNING
+                );
+                foreach ($countries as $country) {
+                    $this->getDatabase()->query(
+                        "
+                        INSERT INTO fishing (
+                            fishing_country_id, fishing_plan_id, fishing_type, fishing_amount, fishing_active
+                        ) VALUES (?, ?, ?, ?, ?)
+                        ",
+                        [
+                            $country['country_id'], $planId, $fishingFleetName,
+                            $fishingFleetNameToValue[$fishingFleetName],
+                            1
+                        ]
+                    );
+                    $this->log(sprintf(
+                        'Inserted fishing value  %.2f, for global fleet %s, with name'.
+                        ' %s, for country %d without distributions',
+                        $fishingFleetNameToValue[$fishingFleetName],
+                        $fleetDescription,
+                        $fishingFleetName,
+                        $country['country_id']
+                    ));
+                }
+                continue;
+            }
+
+            // log error if one of the initial_fishing_distribution entries is missing a country_id or effort_weight
+            $numMissingCountryIdFields = collect($fleet["initial_fishing_distribution"])->filter(
+                fn($val) => !isset($val["country_id"])
+            )->count();
+            if ($numMissingCountryIdFields > 0) {
+                $this->log(sprintf(
+                    'initial_fishing_distribution for fleet %s is missing %d country_id fields',
+                    $fleetDescription,
+                    $numMissingCountryIdFields
+                ), self::LOG_LEVEL_ERROR);
+            }
+            $numMissingEffortWeightFields = collect($fleet["initial_fishing_distribution"])->filter(
+                fn($val) => !isset($val["effort_weight"])
+            )->count();
+            if ($numMissingEffortWeightFields > 0) {
+                $this->log(sprintf(
+                    'initial_fishing_distribution for fleet %s is missing %d effort_weight fields',
+                    $fleetDescription,
+                    $numMissingEffortWeightFields
+                ), self::LOG_LEVEL_ERROR);
+            }
+
+            $numCountries = count($countries);
+            $weightsByCountry = [];
+            //We need to average the weights over the available countries
+            $sum = 0.0;
+            foreach ($fleet["initial_fishing_distribution"] as $val) {
+                if (!isset($val["effort_weight"]) || !isset($val["country_id"])) {
+                    continue;
+                }
+                $sum += $val["effort_weight"];
+                $weightsByCountry[$val["country_id"]] = $val["effort_weight"];
+            }
+            $weightMultiplier = ($sum > 0) ? 1.0 / $sum : 1.0 / $numCountries;
+            foreach ($weightsByCountry as &$countryWeight) {
+                $countryWeight *= $weightMultiplier;
+            }
+            foreach ($countries as $country) {
+                $v = $fishingFleetNameToValue[$fishingFleetName] * ($weightsByCountry[$country['country_id']] ?? 1);
+                $this->getDatabase()->query(
+                    "
+                    INSERT INTO fishing (
+                        fishing_country_id, fishing_plan_id, fishing_type, fishing_amount, fishing_active
+                    ) VALUES (?, ?, ?, ?, ?)
+                    ",
+                    array(
+                        $country['country_id'],
+                        $planId,
+                        $fishingFleetName,
+                        $v,
+                        1
+                    )
+                );
+                $this->log(sprintf(
+                    'Inserted fishing value %.2f, for global fleet %s, with name %s, for country %d'.
+                    ' with distribution %.2f',
+                    $v,
+                    $fleetDescription,
+                    $fishingFleetName,
+                    $country['country_id'],
+                    ($weightsByCountry[$country['country_id']] ?? 1)
+                ));
             }
         }
+        return [
+            'log' => $this->getLogMessages()
+        ];
     }
 
     /**
