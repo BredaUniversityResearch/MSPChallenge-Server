@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "10/11/2024",
-    "data_model_hash": "7CE7F01AE3F70ACF4CBE5CA9D5F289C3EE22AB679CE05B4C2FBF79CF177B51A0",
+    "date_modified": "10/29/2024",
+    "data_model_hash": "C89CF96368B9E077881340B2AF88539F28A321A29AF93284D585C552501D1AC1",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -19748,7 +19748,7 @@
                 8,
                 9
               ],
-              "cost_multiplier": 200000000000.0
+              "cost_multiplier": 2E+11
             },
             {
               "ship_type_ids": [
@@ -20450,10 +20450,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "0"
@@ -20465,10 +20465,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "1"
@@ -20480,10 +20480,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "2"
@@ -20495,10 +20495,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "3"
@@ -20510,10 +20510,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "4"
@@ -20525,10 +20525,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "5"
@@ -20540,10 +20540,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "6"
@@ -20555,10 +20555,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "7"
@@ -20570,10 +20570,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "8"
@@ -20585,10 +20585,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "9"
@@ -20600,10 +20600,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "10"
@@ -20615,10 +20615,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "11"
@@ -20630,10 +20630,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "12"
@@ -20645,10 +20645,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "13"
@@ -20660,10 +20660,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "14"
@@ -20675,10 +20675,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "15"
@@ -20690,10 +20690,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "16"
@@ -20705,10 +20705,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "17"
@@ -20720,10 +20720,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "18"
@@ -20735,10 +20735,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "19"
@@ -20750,10 +20750,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "20"
@@ -20765,10 +20765,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "21"
@@ -20780,10 +20780,10 @@
           "layers": [
             {
               "name": "BS_MPA",
-              "influence": 1,
+              "influence": 1.0,
               "construction": false
             }
-			],
+          ],
           "policy_filters": {
             "fleets": [
               "22"
@@ -21108,6 +21108,18 @@
         {
           "name": "Pelagic Catches",
           "subcategory": "Fishery"
+        },
+        {
+          "name": "Harbor Porpoise Bycatch",
+          "subcategory": "Bycatch"
+        },
+        {
+          "name": "Seals Bycatch",
+          "subcategory": "Bycatch"
+        },
+        {
+          "name": "Seabirds Bycatch",
+          "subcategory": "Bycatch"
         }
       ],
       "ecologyCategories": [
@@ -34118,7 +34130,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Surface_Disturbance" 
+            "media": "wiki://Surface_Disturbance"
           }
         },
         "layer_info_properties": null,
@@ -35058,7 +35070,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -35134,7 +35146,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -35190,7 +35202,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -35218,7 +35230,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -35246,7 +35258,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -35322,7 +35334,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -35350,7 +35362,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -35378,7 +35390,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -35406,7 +35418,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -35434,7 +35446,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -35510,7 +35522,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -35538,7 +35550,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -35566,7 +35578,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -35594,7 +35606,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -35622,7 +35634,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -35698,7 +35710,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -35726,7 +35738,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -35754,7 +35766,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -35782,7 +35794,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -35810,7 +35822,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -35886,7 +35898,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -35914,7 +35926,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -35942,7 +35954,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -35970,7 +35982,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -35998,7 +36010,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -36074,7 +36086,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -36102,7 +36114,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -36130,7 +36142,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -36158,7 +36170,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -36186,7 +36198,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -36262,7 +36274,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -36290,7 +36302,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -36318,7 +36330,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -36346,7 +36358,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -36374,7 +36386,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -36450,7 +36462,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -36478,7 +36490,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -36506,7 +36518,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -36534,7 +36546,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -36562,7 +36574,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -36638,7 +36650,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -36666,7 +36678,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -36694,7 +36706,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -36722,7 +36734,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -36750,7 +36762,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
@@ -36826,7 +36838,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "1": {
             "displayName": "Low",
@@ -36854,7 +36866,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "2": {
             "displayName": "Medium",
@@ -36882,7 +36894,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "3": {
             "displayName": "High",
@@ -36910,7 +36922,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           },
           "4": {
             "displayName": "Very high",
@@ -36938,7 +36950,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media":  null
+            "media": null
           }
         },
         "layer_info_properties": null,
