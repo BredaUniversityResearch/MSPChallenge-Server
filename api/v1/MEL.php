@@ -856,7 +856,14 @@ SUBQUERY,
         ?object $policyFilters,
         array &$exportResult,
     ): void {
-        $policyLayerProps = collect((new Game())->getPolicyLayerPropertiesFromConfig())->keyBy('property_name')->all();
+        $layer = $geometry->getLayer()->getOriginalLayer() ?? $geometry->getLayer();
+        $policyLayerProps = collect(
+            (new Game())->getPolicyLayerPropertiesFromConfig($layer->getLayerName())
+        )->keyBy('property_name')->all();
+        if (empty($policyLayerProps)) { // no polices found, default handling then
+            $this->addGeometryToResult($geometry, $exportResult);
+            return;
+        }
         // filter all policy geometry data properties and convert them to json objects
         $geomDataProperties = array_map(
             fn($s) => json_decode($s),
@@ -897,7 +904,7 @@ SUBQUERY,
             }
             $policiesToApply[] = $policyData;
         }
-        if (empty($policiesToApply)) {
+        if (empty($policiesToApply)) { // polices were filtered out, do nothing
             return;
         }
         $this->log(

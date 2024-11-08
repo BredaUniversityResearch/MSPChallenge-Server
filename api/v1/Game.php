@@ -212,7 +212,7 @@ class Game extends Base
      * @return array{array{property_name: string, policy_type?: string}}
      * @throws Exception
      */
-    public function getPolicyLayerPropertiesFromConfig(): array
+    public function getPolicyLayerPropertiesFromConfig(?string $layerNameFilter = null): array
     {
         static $result = null;
         if ($result !== null) {
@@ -221,6 +221,9 @@ class Game extends Base
         $result = [];
         $dataModel = $this->GetGameConfigValues();
         foreach ($dataModel['meta'] ?? [] as $layer) {
+            if ($layerNameFilter !== null && $layer['layer_name'] !== $layerNameFilter) {
+                continue;
+            }
             foreach ($layer['layer_info_properties'] ?? [] as $layerProp) {
                 if (array_key_exists('policy_type', $layerProp)) {
                     $result[] = $layerProp;
