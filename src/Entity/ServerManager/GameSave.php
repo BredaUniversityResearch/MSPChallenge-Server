@@ -225,6 +225,18 @@ class GameSave
         return $this->gameCurrentMonth;
     }
 
+    public function getGameCurrentMonthPretty(): string
+    {
+        return $this->makeDatePretty($this->gameCurrentMonth);
+    }
+
+    private function makeDatePretty(int $month): string
+    {
+        return \DateTimeImmutable::createFromFormat('m Y', '1 '.$this->gameStartYear)
+            ->add(\DateInterval::createFromDateString($month.' month'))
+            ->format('M Y');
+    }
+
     public function setGameCurrentMonth(int $gameCurrentMonth): self
     {
         $this->gameCurrentMonth = $gameCurrentMonth;

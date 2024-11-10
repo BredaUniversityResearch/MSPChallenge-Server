@@ -18,12 +18,12 @@
         {% endif %}
         {% for gameSave in gameSaves %}
             <tr>
-                <td>{{ gameSave.saveTimestamp }} </td>
+                <td>{{ gameSave.saveTimestamp|date("Y-m-d H:i:s") }} </td>
                 <td>{{ gameSave.name }}</td>
-                <td>{{ gameSave.gameCurrentMonth }}</td>
+                <td>{{ gameSave.gameCurrentMonthPretty }}</td>
                 <td>{{ gameSave.gameConfigFilesFilename }}</td>
                 <td>{{ gameSave.saveType }}</td>
-                <td>
+                <td class="text-center">
                     <button class="btn btn-secondary btn-sm" 
                         data-session="{{ gameSave.id }}" 
                         data-action="">
