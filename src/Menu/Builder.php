@@ -45,7 +45,7 @@ class Builder
     {
         $menu = $this->factory->createItem('subMenu');
         $menu->addChild('Sessions', ['route' => 'manager']);
-        $menu->addChild('Saves', ['route' => 'manager_gamesave']);
+        $menu->addChild('Saves', ['route' => 'manager_saves']);
         $menu->addChild('Configurations', ['route' => 'manager_gameconfig']);
         $menu->addChild('Settings', ['route' => 'manager_setting']);
 

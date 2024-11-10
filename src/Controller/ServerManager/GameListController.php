@@ -35,12 +35,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GameListController extends BaseController
 {
-
-    public function __construct(
-        private readonly string $projectDir
-    ) {
-    }
-
     #[Route('/manager', name: 'manager')]
     public function index(): Response
     {
@@ -59,18 +53,18 @@ class GameListController extends BaseController
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
         string $sessionState = 'public'
     ): Response {
-        if (is_null($request->headers->get('Turbo-Frame'))) {
-            return $this->gameListJson($entityManager, $provider, $request, $sessionState);
-        }
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
+        if (is_null($request->headers->get('Turbo-Frame'))) {
+            return $this->gameClientJson($entityManager, $provider, $request, $gameList);
+        }
         return $this->render('manager/GameList/gamelist.html.twig', ['sessionslist' => $gameList]);
     }
 
-    private function gameListJson(
+    private function gameClientJson(
         EntityManagerInterface $entityManager,
         VersionsProvider $provider,
         Request $request,
-        string $sessionState
+        array $gameList
     ): Response {
         try {
             $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
@@ -88,7 +82,6 @@ class GameListController extends BaseController
         } catch (InvalidVersionString $e) {
             return new JsonResponse(self::wrapPayloadForResponse([], $e->getMessage()), 400);
         }
-        $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         if (is_null($serverDesc)) {
             return new JsonResponse(
@@ -215,10 +208,11 @@ class GameListController extends BaseController
     public function gameSessionState(
         int $sessionId,
         string $state,
+        KernelInterface $kernel,
         WatchdogCommunicator $watchdogCommunicator,
         SymfonyToLegacyHelper $symfonyToLegacyHelper
     ): Response {
-        (new GameController($this->projectDir))
+        (new GameController($kernel->getProjectDir()))
             ->state($sessionId, $state, $watchdogCommunicator, $symfonyToLegacyHelper);
         return new Response(null, 204);
     }
@@ -252,13 +246,14 @@ class GameListController extends BaseController
         EntityManagerInterface $entityManager,
         WatchdogCommunicator $watchdogCommunicator,
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
+        KernelInterface $kernel,
         int $sessionId
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $gameSession->setDemoSession(($gameSession->getDemoSession() === 1) ? 0 : 1);
         $entityManager->flush();
         if ($gameSession->getDemoSession() == 1 && $gameSession->getGameState() != GameStateValue::PLAY) {
-            (new GameController($this->projectDir))
+            (new GameController($kernel->getProjectDir()))
             ->state($sessionId, GameStateValue::PLAY, $watchdogCommunicator, $symfonyToLegacyHelper);
         }
         return new Response(null, 204);

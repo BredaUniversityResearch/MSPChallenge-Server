@@ -1,144 +1,41 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Server Manager{% endblock %}
+{% block subtitle %}Saves{% endblock %}
 
 {% block body %}
-
-<div class="tab-pane fade" id="tabSavesList" role="tabpanel" aria-labelledby="tabSavesList-tab">
-    <div class="row">
-        <div class="col-md-12 flex-row">
-            <button type="button" id="btnLoadSave" class="btn btn-primary pull-left" data-toggle="modal" data-target="#modalUploadSave"><i class="fa fa-plus-circle" title=""></i> Upload Session Save</button>
-            <button id="buttonRefreshSavesList" class="btn btn-primary"><i class="fa fa-refresh" title="Refresh" id="buttonRefreshSavesListIcon"></i> Refresh</button>
-        </div>
-        <div class="col-md-12" id="savesList">
-            <div class="float-left">
-                Here you can review and reuse saves of MSP Challenge sessions.
-            </div>
-            <div class="well well-sm float-right" >
-                Filter:
-                <span id="radioFilterSavesList">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="inlineRadioOptionSaves" id="inlineRadio1" value="active" checked>
-                                    <label class="form-check-label" for="inlineRadio1">Active</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="inlineRadioOptionSaves" id="inlineRadio3" value="archived">
-                                    <label class="form-check-label" for="inlineRadio3">Archived</label>
-                                </div>
-                            </span>
-            </div>
-        </div>
-
-        <div class="col-md-12">
-            <div class="table-responsive">
-                <table id="savesTable" class="table table-hover table-striped">
-                    <thead>
-                    <tr>
-                        <th>Created</th>
-                        <th>Session Name</th>
-                        <th>Month / Year</th>
-                        <th>Configuration</th>
-                        <th>Type</th>
-                        <th class="text-center">Quick Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody id="savesListtbody">
-                    <tr>
-                        <td id="savesListtd" colspan="8" class="text-center"><span><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span> waiting for data...</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div>
+    <div class="py-1">
+        <button type="button" id="modalUploadSave" class="btn btn-primary" data-action="">
+            <i class="fa fa-plus-circle" title="Upload session save"></i>
+            Upload session save
+        </button>
     </div>
-</div>
-
-<!-- Modal Save info -->
-<div class="modal fade" id="saveInfo" tabindex="-1" role="dialog" aria-labelledby="saveModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="saveModalCenterTitle">Save Details</h5>
-                <button type="button" id="btnCloseSaveInfo" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-border-left" id="saveInfoTable">
-                        <tr class="bg-primary">
-                            <td class="text-center" colspan="2" style="color: #FFFFFF" id="SaveInfoName"></td>
-                        </tr>
-                        <tr>
-                            <th>Saved on</th>
-                            <td class="text-right" id="SaveInfoTimestamp"></td>
-                        </tr>
-                        <tr>
-                            <th>Month & Year of the Simulation</th>
-                            <td class="text-right" id="SaveInfoMonth"></td>
-                        </tr>
-                        <tr>
-                            <th>Configuration</th>
-                            <td class="text-right" id="SaveInfoConfig"></td>
-                        </tr>
-                        <tr>
-                            <th>Type</th>
-                            <td class="text-right" id="SaveInfoType"></td>
-                        </tr>
-                        <tr>
-                            <th>Visibility</th>
-                            <td class="text-right" id="SaveInfoVisibility"></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-left">
-                                <p><strong>Notes</strong></p>
-                                <form class="form-horizontal" role="form" data-toggle="validator" id="formSaveNotes" enctype="multipart/form-data">
-                                    <input type="hidden" id="SaveInfoId" />
-                                    <textarea class="form-control" id="SaveInfoNotes" rows="3" onchange="SaveNotes();"></textarea>
-                                </form>
-                            </td>
-                        </tr>
-                        <tr class="table-info">
-                            <td class="text-center" colspan="2">
-                                <button id="buttonLoadSave" class="btn btn-info btn-sm" onClick=""><i class="fa fa-plus-circle" title=""></i> Load</button>
-                                <button id="buttonSaveDownload" class="btn btn-secondary btn-sm" onClick=""><i class="fa fa-download" title="Download save file"></i> Download</button>
-                                <button id="buttonSaveArchive" class="btn btn-info btn-sm" onClick=""></button>
-                            </td>
-                        </tr>
-                    </table>
+    <div class="col-md-12 py-2">
+        <div class="pull-right">Filter:
+            <span id="radioFilter">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="active" checked
+                            data-action="" data-href="">
+                    <label class="form-check-label" for="inlineRadio1">Active</label>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
+                <div class="form-check form-check-inline mx-0">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="archived"
+                           data-action="" data-href="">
+                    <label class="form-check-label" for="inlineRadio3">Archived</label>
+                </div>
+            </span>
+        </div>
+        <div>
+            Here you can review and reuse saves of MSP Challenge sessions.
         </div>
     </div>
-</div>
-
-<!-- Modal: Upload Save  -->
-<div class="modal fade" id="modalUploadSave" tabindex="-1" role="dialog" aria-labelledby="uploadsaveModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="uploadsaveModalLabel">Upload a Session Save File</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form class="form-horizontal" role="form" data-toggle="validator" id="formUploadSave" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="uploadedSaveFile">Choose a save file you stored on your computer somewhere for uploading</label>
-                        <input type="file" class="form-control-file" id="uploadedSaveFile" accept=".zip">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onClick="UploadSave();">Upload</button>
-            </div>
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <turbo-frame id="savesTable" src="{{ path('manager_gamesave', { saveVisibility: 'active' }) }}">
+            </turbo-frame>
         </div>
     </div>
+    <!-- include('manager/GameList/gamelist_modal.html.twig') -->
 </div>
 
 {% endblock %}

@@ -1,0 +1,61 @@
+<!-- Modal Save info -->
+<div class="modal fade" id="saveInfo" tabindex="-1" role="dialog" aria-labelledby="saveModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="saveModalCenterTitle">Save Details</h5>
+                <button type="button" id="btnCloseSaveInfo" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-border-left" id="saveInfoTable">
+                        <tr class="bg-primary">
+                            <td class="text-center" colspan="2" style="color: #FFFFFF" id="SaveInfoName"></td>
+                        </tr>
+                        <tr>
+                            <th>Saved on</th>
+                            <td class="text-right" id="SaveInfoTimestamp"></td>
+                        </tr>
+                        <tr>
+                            <th>Month & Year of the Simulation</th>
+                            <td class="text-right" id="SaveInfoMonth"></td>
+                        </tr>
+                        <tr>
+                            <th>Configuration</th>
+                            <td class="text-right" id="SaveInfoConfig"></td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td class="text-right" id="SaveInfoType"></td>
+                        </tr>
+                        <tr>
+                            <th>Visibility</th>
+                            <td class="text-right" id="SaveInfoVisibility"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-left">
+                                <p><strong>Notes</strong></p>
+                                <form class="form-horizontal" role="form" data-toggle="validator" id="formSaveNotes" enctype="multipart/form-data">
+                                    <input type="hidden" id="SaveInfoId" />
+                                    <textarea class="form-control" id="SaveInfoNotes" rows="3" onchange="SaveNotes();"></textarea>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr class="table-info">
+                            <td class="text-center" colspan="2">
+                                <button id="buttonLoadSave" class="btn btn-info btn-sm" onClick=""><i class="fa fa-plus-circle" title=""></i> Load</button>
+                                <button id="buttonSaveDownload" class="btn btn-secondary btn-sm" onClick=""><i class="fa fa-download" title="Download save file"></i> Download</button>
+                                <button id="buttonSaveArchive" class="btn btn-info btn-sm" onClick=""></button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -9,20 +9,29 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Controller\BaseController;
+use App\Entity\ServerManager\GameSave;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 
 class GameSaveController extends BaseController
 {
-
-    public function __construct()
-    {
-    }
-
-    #[Route('/manager/saves', name: 'manager_gamesave')]
+    #[Route('/manager/saves', name: 'manager_saves')]
     public function index(): Response
     {
         return $this->render('manager/gamesave_page.html.twig');
+    }
+
+    #[Route(
+        '/manager/saves/{saveVisibility}',
+        name: 'manager_gamesave',
+        requirements: ['saveVisibility' => '\w+']
+    )]
+    public function gameSave(
+        EntityManagerInterface $entityManager,
+        string $saveVisibility
+    ): Response {
+        $gameSaves = $entityManager->getRepository(GameSave::class)->findBy(['saveVisibility' => $saveVisibility]);
+        return $this->render('manager/GameSave/gamesave.html.twig', ['gameSaves' => $gameSaves]);
     }
 
     #[Route('/manager/saves/{id}/download', name: 'manager_game_download', requirements: ['id' => '\d+'])]

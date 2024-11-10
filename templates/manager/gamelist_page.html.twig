@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Server Manager{% endblock %}
+{% block subtitle %}Sessions{% endblock %}
 
 {% block body %}
 <div {{ stimulus_controller('gamelist')|stimulus_controller('game')|stimulus_controller('modal-game') }}
@@ -8,11 +8,11 @@
     <div class="py-1">
         <button type="button" id="modalNewSession" class="btn btn-primary" data-action="modal-game#openNewSessionModal">
             <i class="fa fa-plus-circle" title="Create new session"></i>
-            New Session
+            New session
         </button>
     </div>
     <div class="col-md-12 py-2">
-        <div class="pull-right" >Filter:
+        <div class="pull-right">Filter:
             <span id="radioFilter">
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="public" checked
