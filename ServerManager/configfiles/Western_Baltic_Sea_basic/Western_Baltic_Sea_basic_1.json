@@ -21111,15 +21111,15 @@
         },
         {
           "name": "Seals Bycatch",
-          "subcategory": "Fishery"
+          "subcategory": "Bycatch"
         },
         {
           "name": "Seabirds Bycatch",
-          "subcategory": "Fishery"
+          "subcategory": "Bycatch"
         },
         {
           "name": "Harbor Porpoise Bycatch",
-          "subcategory": "Fishery"
+          "subcategory": "Bycatch"
         }
       ],
       "ecologyCategories": [
@@ -21248,7 +21248,14 @@
               "valueColor": "#73FFBCFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
-            },
+            }
+          ]
+        },
+        {
+          "categoryName": "Bycatch",
+          "categoryColor": "#FDAE61FF",
+          "unit": "g/m2",
+          "valueDefinitions": [
             {
               "valueName": "Harbor Porpoise Bycatch",
               "valueColor": "#73D9FFFF",
