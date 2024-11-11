@@ -1,0 +1,3225 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+EwEPlugin
+</name>
+</assembly>
+<members>
+<member name="T:EwEPlugin.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:EwEPlugin.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:EwEPlugin.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="P:EwEPlugin.My.Resources.Resources.GENERIC_VALUE_UNKNOWN">
+<summary>
+  Looks up a localized string similar to (unknown).
+</summary>
+</member>
+<member name="P:EwEPlugin.My.Resources.Resources.PLUGIN_ERROR_GENERIC">
+<summary>
+  Looks up a localized string similar to Plug-in {0} encoutered an error. {1}.
+</summary>
+</member>
+<member name="P:EwEPlugin.My.Resources.Resources.PLUGIN_ERROR_POINT">
+<summary>
+  Looks up a localized string similar to Plug-in {0} encountered an error in {1}. {2}. {3}.
+</summary>
+</member>
+<member name="P:EwEPlugin.My.Resources.Resources.PLUGIN_EXCEPTION_DUPLICATE">
+<summary>
+  Looks up a localized string similar to Duplicate plug-in {1} encountered in {0}. This plug-in cannot not be used..
+</summary>
+</member>
+<member name="T:EwEPlugin.cPluginAssembly">
+ ---------------------------------------------------------------------------
+ <summary>
+ Holds information on a particular plugin assembly (author, version, copyright, etc)
+ as well as a list of <see cref="T:EwEPlugin.IPlugin">plug-ins</see> found in the assembly.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginAssembly.cPluginComparer">
+ -----------------------------------------------------------------------
+ <summary>
+ IComparer that sorts plug-ins by name, ascending.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.m_dictPlugins">
+ <summary>All available plugins in this assembly.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.m_bEnabled">
+ <summary>Assembly enable state.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.m_compatibility">
+ <summary>Assembly compatibility state.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.m_bLicenseChecked">
+ <summary>License checked flag. For UI display purposes only.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.m_bLicensed">
+ <summary>Assembly licensed state. For UI display purposes only</summary>
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.m_dtExpiry">
+ <summary>Assembly license expiry date. For UI display purposes only</summary>
+</member>
+<member name="M:EwEPlugin.cPluginAssembly.#ctor(System.Reflection.Assembly,System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Create a new plugin assembly wrapper.
+ </summary>
+ <param name="ass">The wrapped <see cref="P:EwEPlugin.cPluginAssembly.Assembly"/>.</param>
+ <param name="bEnabled">Flag stating that the plug-in assembly is allowed to load.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Plugin(System.String,System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set a named <see cref="T:EwEPlugin.IPlugin">plugin</see>.
+ </summary>
+ <param name="strName">The <see cref="P:EwEPlugin.IPlugin.DisplayName">name</see>
+ of the plugin.</param>
+ <param name="bAllowDisabled">Flag stating if plug-ins from disabled 
+ assemblies can be aquired as well.</param>
+ <remarks>An exception will be thrown when adding a plugin
+ with a duplicate name.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Plugins(System.Type,System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Gets a collection of <see cref="T:EwEPlugin.IPlugin">plugins</see> in this assembly.
+ </summary>
+ <param name="t">The <see cref="T:System.Type">Type</see> of the plugins to retrieve,
+ or Nothing to return all plugins in this Assembly.</param>
+ <param name="bAllowDisabled">Flag stating if plug-ins from disabled 
+ assemblies can be aquired as well.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.CanRun">
+ -----------------------------------------------------------------------
+ <summary>
+ States whether this assembly is allowed to be accessed for invoking 
+ plug-ins.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Enabled">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/Set assembly enabled state.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.SessionEnabled">
+ -----------------------------------------------------------------------
+ <summary>
+ Get whether this assembly is enable for a session. This flag can only
+ be set at plugin assembly load time to ensure that a plug-in assembly
+ enabled state does not change thoughtout a session.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.AlwaysEnabled">
+ -----------------------------------------------------------------------
+ <summary>
+ Get whether this assembly cannot be disabled.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.IsLicensed">
+ -----------------------------------------------------------------------
+ <summary>
+ Get whether this assembly is licensed.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Expiry">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the license date for this assembly, if any.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.ePluginCompatibilityTypes.VersionCompatible">
+ <summary>Versions are fully compatible.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.ePluginCompatibilityTypes.VersionCompatibleCaution">
+ <summary>Versions may be compatible.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.ePluginCompatibilityTypes.VersionIncompatible">
+ <summary>Major revision version incompatibility detected.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginAssembly.ePluginCompatibilityTypes.IncompatibleUndetermined">
+ <summary>Unable to determine level of incompatibility.</summary>
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Compatibility">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set plugin compatibility state.
+ </summary>
+ <remarks>
+ States whether a plug-in is compatible with the set of assemblies that
+ the main application relies on.
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginAssembly.IsCompatibleToRun">
+ -----------------------------------------------------------------------
+ <summary>
+ States whether a plugin assembly is compatible enough to run with EwE.
+ </summary>
+ <returns>True if compatible to run, false otherwise.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginAssembly.IsCompatible">
+ -----------------------------------------------------------------------
+ <summary>
+ States whether a plugin assembly is compatible with all EwE assemblies.
+ </summary>
+ <returns>True if compatible to run, false otherwise.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Company">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set assembly company name.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Version">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set assembly version.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Description">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set assembly description.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Copyright">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set assembly copyright.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Filename">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set assembly file name.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.AssemblyName">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the <see cref="P:EwEPlugin.cPluginAssembly.AssemblyName">AssemblyName</see> associated with this
+ plug-in assembly.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginAssembly.Assembly">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the actual <see cref="P:EwEPlugin.cPluginAssembly.Assembly">Assembly</see> of the plug-in.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginException">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin exception
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginException.#ctor(EwEPlugin.cPluginAssembly,System.String,System.Exception)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Constructor, initializes a new instance of a cPluginException.
+ </summary>
+ <param name="strMessage"></param>
+ <param name="exception"></param>
+ <param name="assembly"></param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginException.#ctor(EwEPlugin.cPluginAssembly,System.String)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Constructor, initializes a new instance of a cPluginException.
+ </summary>
+ <param name="strMessage"></param>
+ <param name="assembly"></param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginException.#ctor(EwEPlugin.cPluginAssembly,System.Exception)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Constructor, initializes a new instance of a cPluginException.
+ </summary>
+ <param name="exception"></param>
+ <param name="assembly"></param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginException.Assembly">
+ ---------------------------------------------------------------------------
+ <summary>
+ Get the assembly that caused the exception.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plug-in manager, handles loading and enabling of <see cref="T:EwEPlugin.IPlugin">EwE plug-ins</see>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.cPluginContext">
+ -----------------------------------------------------------------------
+ <summary>
+ Helper class, used to report the link between a plug-in and its assambly.
+ </summary>
+ <remarks>
+ Yes, you don't have to say it. You are totally right. This class is 
+ utterly obsolete if the reflection library is properly used, but hey.
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.cPluginContext.#ctor(EwEPlugin.IPlugin,EwEPlugin.cPluginAssembly)">
+ -------------------------------------------------------------------
+ <summary>
+ Hatch me one, me harties!
+ </summary>
+ <param name="plugin"></param>
+ <param name="assembly"></param>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.cPluginContext.Plugin">
+ -------------------------------------------------------------------
+ <summary>
+ Get the plug-in point.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.cPluginContext.Assembly">
+ -------------------------------------------------------------------
+ <summary>
+ Get the plug-in assembly that contains the <see cref="P:EwEPlugin.cPluginManager.cPluginContext.Plugin">plug-in</see>.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.cInvokeMethodInfo">
+ -----------------------------------------------------------------------
+ <summary>
+ Yet another helper class. This one serves to pass function parameter
+ info to InvokeMethod on a different thread.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="F:EwEPlugin.cPluginManager.m_core">
+ <summary>The one core for this plugin manager.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginManager.m_uic">
+ <summary>The one UI context for this plug-in manager.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginManager.m_dlgtCoreState">
+ <summary>Delegate that this class can use to check whether the current 
+ core execution state allows a plug-in to run.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginManager.m_sync">
+ <summary>Sync object to marshall plug-in calls across threads.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginManager.m_ThreadID">
+ <summary>Id of the thread that create the plugin manager used to decide
+ if the sync object should be used to marshall plug-in calls across threads.</summary>
+</member>
+<member name="F:EwEPlugin.cPluginManager.m_bLoaded">
+ <summary>Flag stating whether plug-ins have been loaded.</summary>
+</member>
+<member name="P:EwEPlugin.cPluginManager.Core">
+ ---------------------------------------------------------------------------
+ <summary>
+ Assign an EwECore to the plugin manager. This core will be used to 
+ initialize plugins when they are loaded.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.UIContext">
+ ---------------------------------------------------------------------------
+ <summary>
+ Assign an UI Context to the plugin manager. This context will be passed to
+ any plug-in that requires this interface at startup.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.CoreExecutionStateDelegate">
+ ---------------------------------------------------------------------------
+ <summary>
+ Get/set the delegate that the plug-in can invoke to test whether a plug-in
+ is allowed to execute.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.SyncObject">
+ ---------------------------------------------------------------------------
+ <summary>
+ Get/set the cross-threading synchronization context.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.DisabledPlugins">
+ ---------------------------------------------------------------------------
+ <summary>
+ Get an arraylist with names of all plug-in assemblies that are the user has
+ marked as 'disabled'.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.OnConfirmOverwrite">
+ -----------------------------------------------------------------------
+ <summary>
+ Delegate to implement plug-in overwrite confirmation handling.
+ </summary>
+ <param name="strPlugin">The short name of the plug-in to overwrite.</param>
+ <returns>True if the plug-in can be overwritten.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="F:EwEPlugin.cPluginManager.m_dictAssemblies">
+ <summary>
+ Dictionary of <see cref="T:EwEPlugin.cPluginAssembly">Plugin assemblies</see> 
+ that have already been loaded by the plugin manager.
+ </summary>
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPluginDefault(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Load all plug-ins that are not marked as 'disabled'.
+ </summary>
+ <param name="strSubfolder">The directory to search for plug-ins relative 
+ to the EwE startup folder and all the directories under.</param>
+ <remarks>This method was added for the benefit of Python interoperability.</remarks>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean,System.String[])"/>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPlugins">
+ -----------------------------------------------------------------------
+ <summary>
+ Load plugins with default options.
+ </summary>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean,System.String[])"/>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean)"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Load all plug-ins that are not marked as 'disabled'.
+ </summary>
+ <param name="strSubfolder">The directory to search for plug-ins relative 
+ to the EwE startup folder.</param>
+ <param name="bAllDirectories">True to search all directories, false to 
+ search the top directory only.</param>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean,System.String[])"/>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean,System.String[])">
+ -----------------------------------------------------------------------
+ <summary>
+ Load all plug-ins that are not marked as 'disabled'.
+ </summary>
+ <param name="strSubfolder">The directory to search for plug-ins relative to
+ the EwE startup folder.</param>
+ <param name="bAllDirectories">True to search all directories, false to search the top directory only.</param>
+ <param name="disabledPlugins">Array with file names of plug-ins that should 
+ NOT be enabled. These assemblies will still have to be known by the manager 
+ in case the user wants to enable the assemblies  in the future.</param>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean)"/>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPluginAssembly(System.String,System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Load EwE plugins from a file.
+ </summary>
+ <param name="strFileName">The file name to load plugins from.</param>
+ <returns>True if this assembly was loaded and contained plugins.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.UnloadPluginAssembly(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Unload a plugin file.
+ </summary>
+ <param name="strFileName">The file name to unload.</param>
+ <returns>True if unloaded succesfully.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.AssemblyUpdatedHandler">
+ -----------------------------------------------------------------------
+ <summary>
+ Assembly update finished delegate.
+ </summary>
+ <param name="strName">The name of the plugin that was  updated.</param>
+ <param name="result">Update <see cref="T:EwEUtils.Core.eAutoUpdateResultTypes">result</see>.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="E:EwEPlugin.cPluginManager.AssemblyUpdated">
+ -----------------------------------------------------------------------
+ <summary>
+ Assembly update finished handler.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.AssemblyUpdatingHandler">
+ -----------------------------------------------------------------------
+ <summary>
+ Assembly update in progress delegate.
+ </summary>
+ <param name="strName">The name of the plugin that is being updated.</param>
+ <param name="status">Update status.</param>
+ <param name="sProgress">Update progress.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="E:EwEPlugin.cPluginManager.AssemblyUpdating">
+ -----------------------------------------------------------------------
+ <summary>
+ Assembly update in progress handler.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.AssemblyAddedHandler">
+ -----------------------------------------------------------------------
+ <summary>
+ Assembly added delegate.
+ </summary>
+ <param name="paAdded">The plugin assembly that was added.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="E:EwEPlugin.cPluginManager.AssemblyAdded">
+ -----------------------------------------------------------------------
+ <summary>
+ Assembly added event.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.AssemblyRemovedHandler">
+ -----------------------------------------------------------------------
+ <summary>
+ Assembly removed delegate.
+ </summary>
+ <param name="paRemoved">The plugin assembly that was removed.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="E:EwEPlugin.cPluginManager.AssemblyRemoved">
+ -----------------------------------------------------------------------
+ <summary>
+ Assembly removed event.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.PluginExceptionHandler">
+ -----------------------------------------------------------------------
+ <summary>
+ A plugin has thrown an exception delegate.
+ </summary>
+ <param name="PluginException">The exception that was thrown.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="E:EwEPlugin.cPluginManager.PluginException">
+ -----------------------------------------------------------------------
+ <summary>
+ A plugin has thrown an exception.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.PluginEnabledHandler">
+ -----------------------------------------------------------------------
+ <summary>
+ A plugin enabled state change delegate.
+ </summary>
+ <param name="ip">The GUI plug-in that changed enabled state.</param>
+ <param name="bEnable">The new enabled state of the plug-in.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="E:EwEPlugin.cPluginManager.PluginEnabled">
+ -----------------------------------------------------------------------
+ <summary>
+ A plugin enabled state has changed.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.AssemblyUserDisabledHandler">
+ -----------------------------------------------------------------------
+ <summary>
+ A plugin disabled by the user delegate.
+ </summary>
+ <param name="strPluginName">The name of the plug-in that was not loaded
+ because user settings prohibited this.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="E:EwEPlugin.cPluginManager.AssemblyUserDisabled">
+ -----------------------------------------------------------------------
+ <summary>
+ A plug-in was not loaded because user settings prohibited this.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.CoreInitialized(System.Object,System.Object,System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the Core Initialized plugin point on any available and responsive 
+ <see cref="T:EwEPlugin.ICorePlugin">ICorePlugin plug-in</see>.
+ </summary>
+ <param name="objEcoPath"></param>
+ <param name="objEcoSim"></param>
+ <param name="objEcoSpace"></param>
+ <returns>True if successful.</returns>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.CoreDataInitialized(System.Object,System.Object,System.Object,System.Object,System.Object,System.Object,System.Object,System.Object,System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the Core Initialized plugin point on any available and responsive 
+ <see cref="T:EwEPlugin.ICorePlugin">ICorePlugin plug-in</see>.
+ </summary>
+ <param name="objEcopathData">The Ecopath data structures</param>
+ <param name="objStanzaData">The stanza data structures</param>
+ <param name="objTaxonData">The taxon data structures</param>
+ <param name="objEcosamplerData">The ecosampler data structures</param>
+ <param name="objPDSdata">Particle size distribution data structures</param>
+ <param name="objEcosimData">The Ecosim data structures</param>
+ <param name="objEcosimTimeSeriesData">The Ecosim time series data structures</param>
+ <param name="objSearchData">The search data structures</param>
+ <param name="objEcoSpaceData">The Ecospace data structures</param>
+ <returns>True if successful.</returns>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.ValidateLifespan">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the Validate Lifespan plug-in point on any available and
+ response <see cref="T:EwEPlugin.ILicensePlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.ExpiryDate(System.DateTime@)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the ExpiryDate plug-in point on any available and
+ response <see cref="T:EwEPlugin.ILicensePlugin"/>.
+ </summary>
+ <param name="enddate">The end date of this plug-in.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.DataValidated(EwEUtils.Core.eVarNameFlags,EwEUtils.Core.eDataTypes)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IDataValidatedPlugin.DataValidated(EwEUtils.Core.eVarNameFlags,EwEUtils.Core.eDataTypes)">DataValidated</see>
+ plugin point on any available and responsive <see cref="T:EwEPlugin.IDataValidatedPlugin">IDataValidatedPlugin</see>
+ plug-in.
+ </summary>
+ <param name="varname"></param>
+ <param name="datatype"></param>
+ <returns>True if successful.</returns>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.OpenDatabase(System.String)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, close a plug-in data link.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.IsDatabaseModified(EwEPlugin.cPluginAssembly)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, polls all plug-ins for unsaved data modifications.
+ </summary>
+ <param name="pa">cPluginAssembly to check, if any.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.CloseDatabase">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, close a plug-in data link.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.PreProcessMessage(EwEUtils.Core.IMessage,System.Boolean@)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, filter a message.
+ </summary>
+ <param name="msg">The message to filter.</param>
+ <param name="bCancelMessage">Flag, stating whether the message should be
+ cancelled.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadModel(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the Load plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcopathPlugin">Ecopath plug-in</see>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.SaveModel(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the Save plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcopathPlugin">Ecopath plug-in</see>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.CloseModel">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the Closed plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcopathPlugin">Ecopath plug-in</see>.
+ </summary>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.MassBalance(System.Object,System.Int32,System.Int32@)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the MassBalance plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcopathPlugin">Ecopath plug-in</see>.
+ </summary>
+ <param name="EcoPathDataStructures">Ecopath data structure, required for the 
+ mass balance calculation.</param>
+ <param name="EstimateFor">Purpose of invocation, required for the mass
+ balance calculation.</param>
+ <param name="iResult">Mass Balance calculation result.</param>
+ <returns>True if a MassBalance plugin was executed succesfully.</returns>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Core MassBalance documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcopathRunInvalidated">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcopathRunInvalidatedPlugin.EcopathRunInvalidated"/> 
+ plug-in point on any available and responsive <see cref="T:EwEPlugin.IEcopathRunInvalidatedPlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcosimScenarioAdded(System.Object,System.Int32)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the EcosimScenarioAdded plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcosimScenarioAddedOrRemovedPlugin"/>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <param name="scenarioID">The database ID of the scanerio that was just added.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcosimScenarioRemoved(System.Object,System.Int32)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the EcosimScenarioRemoved plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcosimScenarioAddedOrRemovedPlugin"/>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <param name="scenarioID">The database ID of the scanerio that was just removed.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcosimLoadScenario(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the LoadEcosimScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcosimPlugin">Ecosim plug-in</see>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.SaveEcosimScenario(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the SaveEcosimScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcosimPlugin">Ecosim plug-in</see>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcosimCloseScenario">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the CloseEcosimScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcosimPlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcosimRunInvalidated">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcosimRunInvalidatedPlugin.EcosimRunInvalidated"/> 
+ plug-in point on any available and responsive <see cref="T:EwEPlugin.IEcosimRunInvalidatedPlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcosimLoadedTimeSeries">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcosimTimeSeriesPlugin.TimeSeriesLoaded"/> 
+ plug-in point on any available and responsive <see cref="T:EwEPlugin.IEcosimTimeSeriesPlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcosimClosedTimeSeries">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcosimTimeSeriesPlugin.TimeSeriesClosed"/> 
+ plug-in point on any available and responsive <see cref="T:EwEPlugin.IEcosimTimeSeriesPlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceScenarioAdded(System.Object,System.Int32)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the EcospaceScenarioAdded plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcospaceScenarioAddedOrRemovedPlugin"/>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <param name="scenarioID">The database ID of the scanerio that was just added.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceScenarioRemoved(System.Object,System.Int32)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the EcospaceScenarioRemoved plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcospaceScenarioAddedOrRemovedPlugin"/>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <param name="scenarioID">The database ID of the scanerio that was just removed.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceLoadScenario(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the LoadEcospaceScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcospacePlugin">Ecospace plug-in</see>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceInitialized(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Invokes right after LoadEcospaceScenario
+ </summary>
+ <param name="EcospaceDatastructures"></param>
+ <returns>True if successful.</returns>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.SaveEcospaceScenario(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the SaveEcospaceScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcospacePlugin">Ecospace plug-in</see>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceCloseScenario">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the CloseEcospaceScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcospacePlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceRunInvalidated">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcospaceRunInvalidatedPlugin.EcospaceRunInvalidated"/> 
+ plug-in point.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceInitRunStarted(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcospaceInitRunStartedPlugin.EcospaceInitRunStarted(System.Object)"/> 
+ plug-in point.
+ </summary>
+ <param name="EcospaceDataStructures"></param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceInitRunCompleted(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcospaceInitRunCompletedPlugin.EcospaceInitRunCompleted(System.Object)"/> 
+ plug-in point.
+ </summary>
+ <param name="EcospaceDataStructures"></param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceBeginLayerChange(System.Int32,System.DateTime,System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcospaceLayerChangePlugin.EcospaceBeginLayerChange(System.Int32,System.DateTime,System.Object)"/> 
+ plug-in point.
+ </summary>
+ <param name="iTime"></param>
+ <param name="dt"></param>
+ <param name="layer"></param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcospaceEndLayerChange(System.Int32,System.DateTime,System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="M:EwEPlugin.IEcospaceLayerChangePlugin.EcospaceEndLayerChange(System.Int32,System.DateTime,System.Object)"/> 
+ plug-in point on any available and responsive <see cref="T:EwEPlugin.IEcospaceLayerChangePlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcotracerScenarioAdded(System.Object,System.Int32)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the EcotracerScenarioAdded plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcotracerScenarioAddedOrRemovedPlugin"/>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <param name="scenarioID">The database ID of the scanerio that was just added.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcotracerScenarioRemoved(System.Object,System.Int32)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the EcotracerScenarioRemoved plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcotracerScenarioAddedOrRemovedPlugin"/>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <param name="scenarioID">The database ID of the scanerio that was just removed.</param>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcotracerLoadScenario(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the LoadEcotracerScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcotracerPlugin">Ecotracer plug-in</see>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcotracerInitialized(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Invokes right after LoadEcotracerScenario
+ </summary>
+ <param name="EcotracerDatastructures"></param>
+ <returns></returns>
+ <remarks></remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.SaveEcotracerScenario(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the SaveEcotracerScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcotracerPlugin">Ecotracer plug-in</see>.
+ </summary>
+ <param name="dataSource">The datasource that invoked this plug-in point.</param>
+ <remarks>Due to avoid circular references, this project is unable to reference
+ the assembly EwECore. As such, links in this help text cannot be resolved.
+ Refer to the EwE Datasource documentation for calling conventions and 
+ proper parameter usage.</remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.EcotracerCloseScenario">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the CloseEcotracerScenario plug-in point on any available and responsive 
+ <see cref="T:EwEPlugin.IEcotracerPlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.BroadcastData(System.String,EwEPlugin.Data.IPluginData)">
+ -----------------------------------------------------------------------
+ <summary>
+ Exchange data from a <see cref="T:EwEPlugin.Data.IDataProducerPlugin">data producer plug-in</see>
+ to any interested <see cref="T:EwEPlugin.Data.IDataConsumerPlugin">data consumer plug-in</see>.
+ </summary>
+ <param name="data">The <see cref="T:EwEPlugin.Data.IPluginData">data</see> to exchange.</param>
+ <returns>True if broadcast succeeded.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.IsDataAvailable(System.String,EwEUtils.Core.IRunType)">
+ -----------------------------------------------------------------------
+ <summary>
+ Query whether any loaded <see cref="T:EwEPlugin.Data.IDataProducerPlugin">IDataProducerPlugin</see>
+ exposes <see cref="T:EwEPlugin.Data.IPluginData">plug-in data</see> under a given name.
+ </summary>
+ <param name="strDataName">The name of the data to match.</param>
+ <param name="runType">Run type that the data is requested for, or
+ Null if the run type is irrelevant.</param>
+ <returns>True if the requested data is available.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.IsDataAvailable(System.Type,EwEUtils.Core.IRunType)">
+ -----------------------------------------------------------------------
+ <summary>
+ Query whether any loaded <see cref="T:EwEPlugin.Data.IDataProducerPlugin">IDataProducerPlugin</see>
+ exposes <see cref="T:EwEPlugin.Data.IPluginData">plug-in data</see> of a given type.
+ </summary>
+ <param name="dataType">The type of the data to match.</param>
+ <param name="runType">Run type that the data is requested for, or
+ Null if the run type is irrelevant.</param>
+ <returns>True if the requested data is available.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.GetData(System.Type)">
+ -----------------------------------------------------------------------
+ <summary>
+ Get all <see cref="T:EwEPlugin.Data.IPluginData">plug-in data</see> from loaded
+ <see cref="T:EwEPlugin.Data.IDataProducerPlugin">IDataProducerPlugin</see>
+ instances that expose data of a given <see cref="T:System.Type">Type</see>.
+ </summary>
+ <param name="dataType">The type of the data to match.</param>
+ <returns>An array of data, or an empty array if an error occurred.</returns>
+ <remarks>This method is not thread-safe.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.EnableData(System.Type,EwEUtils.Core.IRunType)">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set whether remote data is enabled.
+ </summary>
+ <param name="dataType">The type of the data to match.</param>
+ <param name="runType">Run type that the data is requested for, or
+ Null if the run type is irrelevant.</param>
+ <returns>True if the requested data is available.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.EnableDataProducer(System.String,System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Enable or disable a specific data producer.
+ </summary>
+ <param name="strProducer">The name of the producer to enable or disable.</param>
+ <param name="bEnable">Enable flag.</param>
+ <returns>True if the requested producer is enabled.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.PostRunSearchResults(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point, called whenever search objective results have been 
+ calculated.
+ </summary>
+ <param name="SearchDS">Search data structures holding the 
+ search results.</param>
+ <returns>True if successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.HandleCommand(System.Object)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Bridge, invokes the <see cref="P:EwEPlugin.ICommandHandlerPlugin.HandleCommand(System.Object)"/> 
+ plug-in point on any available and responsive <see cref="T:EwEPlugin.ICommandHandlerPlugin"/>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.GetPluginDefs(System.Type,EwEPlugin.cPluginAssembly)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Returns a collection of <see cref="T:EwEPlugin.cPluginManager.cPluginContext">plug-in definitions</see>
+ of a given <see cref="T:System.Type">Type</see>.
+ </summary>
+ <param name="t">The <see cref="T:System.Type">Type</see> of the plugins to retrieve.</param>
+ <param name="pa">The <see cref="T:EwEPlugin.cPluginAssembly">plug-in assembly</see> to search.
+ If not specified, all plug-in assemblies will be searched.</param>
+ <returns>A collection of <see cref="T:EwEPlugin.cPluginManager.cPluginContext">plug-in contexts</see>
+ linking to plug-ins of the given type.</returns>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.GetPluginDefs(System.String,EwEPlugin.cPluginAssembly)">
+ ---------------------------------------------------------------------------
+ <summary>
+ Returns a collection of <see cref="T:EwEPlugin.cPluginManager.cPluginContext">plug-in definitions</see>
+ of a given <see cref="P:EwEPlugin.IPlugin.Name"/>.
+ </summary>
+ <param name="strName">The <see cref="T:System.Type">Type</see> of the plugins to retrieve.</param>
+ <param name="pa">The <see cref="T:EwEPlugin.cPluginAssembly">plug-in assembly</see> to search.
+ If not specified, all plug-in assemblies will be searched.</param>
+ <returns>A collection of <see cref="T:EwEPlugin.cPluginManager.cPluginContext">plug-in contexts</see>
+ linking to plug-ins of the given type.</returns>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.GetPlugins(System.String,EwEPlugin.cPluginAssembly)">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns all <see cref="T:EwEPlugin.IPlugin">plug-ins</see> with a given name.
+ </summary>
+ <param name="strName">Name of the plugin to return. Names are
+ case insensitive.</param>
+ <returns>A collection of <see cref="T:EwEPlugin.IPlugin">plug-ins</see> with the 
+ given name.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.GetPlugins(System.Type,EwEPlugin.cPluginAssembly)">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns all <see cref="T:EwEPlugin.IPlugin">plug-ins</see> with a given type.
+ </summary>
+ <param name="t">Type of the plugin to return.</param>
+ <returns>A collection of <see cref="T:EwEPlugin.IPlugin">plug-ins</see> with the 
+ given name.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.DataProducers(System.Type)">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns a list of available producers that produce data of a given
+ <paramref name="typeData">type</paramref>.
+ </summary>
+ <param name="typeData">The <see cref="T:System.Type">type</see> of data to test.</param>
+ <returns></returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.PluginAssembly(System.String,System.Version)">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns a plugin assembly by <see cref="P:System.Reflection.AssemblyName.Name">name</see> 
+ and (optionally) by <see cref="P:System.Reflection.AssemblyName.Version">version</see> number.
+ </summary>
+ <param name="strName">Name of the assembly</param>
+ <param name="ver"></param>
+ <value></value>
+ <returns></returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.PluginAssemblies">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns a collection of <see cref="T:EwEPlugin.cPluginAssembly">plug-in assemblies</see>.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.cPluginManager.PluginAssemblyNames">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns a list of <see cref="T:System.Reflection.AssemblyName">AssemblyName</see> instances
+ for the loaded plugin assemblies.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.GetIncompatiblePlugins">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns a list of <see cref="T:System.Reflection.AssemblyName">AssemblyName</see> instances
+ for incompatible plug-ins.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.CanExecutePlugin">
+ -----------------------------------------------------------------------
+ <summary>
+ Callback delegate to be implemented by the class that can tell whether a
+ plugin is allowed to run given a specific <see cref="T:EwEUtils.Core.eCoreExecutionState">Core execution state</see>.
+ </summary>
+ <param name="coreExectionState">The state to verify.</param>
+ <returns>True if a plugin can execute for this state, false otherwise.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.UpdatePluginEnabledStates(EwEPlugin.IGUIPlugin)">
+ -----------------------------------------------------------------------
+ <summary>
+ Method to call whenever the plugins need to respond to core state changes.
+ </summary>
+ <param name="ip">A <see cref="T:EwEPlugin.IGUIPlugin">GUI plugin</see> to update the
+ enabled state for (optional). If this parameter is omitted, the enabled
+ state of all currently loaded IGUIPlugin instances is checked.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cPluginManager.eInvocationType">
+ <summary>
+ Enumerated type, stating how a plug-in calls are handled, and how the plug-in
+ manager gathers invocation results.
+ </summary>
+ <remarks>
+ Why is 'invoke' spelled with a 'k', and 'invocation' with a 'c'? Granted,
+ 'invoce' and 'invokation' look pretty silly, but... why? Shall we propose
+ to consistently use a 'q' instead? Or 'ck'? Wow, I think I need a life...
+ </remarks>
+</member>
+<member name="F:EwEPlugin.cPluginManager.eInvocationType.All">
+ <summary>
+ All plug-ins implementing a method will be invoked, and invocation
+ results will be combined via the logical AND operator. Effectively,
+ this means that all implementations will have to succeed for the 
+ plug-in point to succeed.
+ </summary>
+</member>
+<member name="F:EwEPlugin.cPluginManager.eInvocationType.Any">
+ <summary>
+ All plug-ins implementing a method will be invoked, and invocation
+ results will be combined via the logical OR operator. Effectively,
+ this means that any implementation can succeed for the plug-in 
+ point to succeed.
+ </summary>
+</member>
+<member name="F:EwEPlugin.cPluginManager.eInvocationType.Exclusive">
+ <summary>
+ Only the first encountered plug-in that implements a method will be
+ invoked, and the plug-in result will depend on the result of that
+ single invocation. Effectively, this means that this type of plug-in
+ point is invoked exclusively.
+ </summary>
+</member>
+<member name="M:EwEPlugin.cPluginManager.TryInvokeMethod(System.Type,System.String,System.Object[],EwEPlugin.cPluginManager.eInvocationType,System.Collections.Generic.ICollection{EwEPlugin.cPluginManager.cPluginContext})">
+ -----------------------------------------------------------------------
+ <summary>
+ Invoke a generic method on all plugins of a specific type.
+ </summary>
+ <param name="typePlugin">The <see cref="T:System.Type">Type</see> of the plugin.</param>
+ <param name="strMethod">The name of the method to invoke.</param>
+ <param name="aArgs">The arguments to pass to the method to invoke.</param>
+ <param name="invocation">Flag stating whether the plug-in point is exclusive.
+ Exclusive plug-in points are meant to replace core functionality. The first
+ plug-in point encountered is invoked in which case True is returned. If no
+ suitable plug-in point is found, a return value of False is expected.
+ </param>
+ <returns>True if the method could be found for the given type.</returns>
+ <remarks>
+ <para>Note that this method tries to match argument types to the values
+ provided in <paramref name="aArgs">aArgs</paramref>. If this array of values 
+ happens to contain Null (or Nothing), call <see cref="M:EwEPlugin.cPluginManager.InvokeMethod(System.Type,System.String,System.Object[],EwEPlugin.cPluginManager.eInvocationType,System.Collections.Generic.ICollection{EwEPlugin.cPluginManager.cPluginContext})">InvokeMethod</see>
+ instead.</para>
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.MarshallInvokeMethod(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Marshall bridge for <see cref="M:EwEPlugin.cPluginManager.InvokeMethod(System.Type,System.String,System.Object[],EwEPlugin.cPluginManager.eInvocationType,System.Collections.Generic.ICollection{EwEPlugin.cPluginManager.cPluginContext})">InvokeMethod</see>.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.InvokeMethod(System.Type,System.String,System.Object[],EwEPlugin.cPluginManager.eInvocationType,System.Collections.Generic.ICollection{EwEPlugin.cPluginManager.cPluginContext})">
+ -----------------------------------------------------------------------
+ <summary>
+ Invoke a generic method on all plugins of a specific type.
+ </summary>
+ <param name="typePlugin">The <see cref="T:System.Type">Type</see> of the plugin.</param>
+ <param name="strMethod">The name of the method to invoke.</param>
+ <param name="aArgs">The arguments to pass to the method to invoke.</param>
+ <param name="invocation">Flag stating whether the plug-in point is exclusive.
+ Exclusive plug-in points are meant to replace core functionality. The first
+ plug-in point encountered is invoked in which case True is returned. If no
+ suitable plug-in point is found, a return value of False is expected.
+ </param>
+ <param name="collPlugins">Collection of plugins to test, if any.</param>
+ <returns>True if the method could be found for the given type.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPlugin(EwEPlugin.cPluginAssembly,System.String,System.String,System.Object[])">
+ -----------------------------------------------------------------------
+ <summary>
+ Loads a plugin by class name from a given assembly.
+ </summary>
+ <param name="assem">The <see cref="T:EwEPlugin.cPluginAssembly"/> to load from.</param>
+ <param name="strAssemblyPath">The path to the assembly.</param>
+ <param name="strClassName">The name of the class to load from this assembly.</param>
+ <param name="args">An array of arguments.</param>
+ <returns>A successfully created <see cref="T:EwEPlugin.IPlugin"/> instance, or Nothing
+ if an error occurred.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.ExtractAssemblyAttribute(System.Reflection.Assembly,System.Type)">
+ -----------------------------------------------------------------------
+ <summary>
+ Retrieves an embedded custom attribute from a .NET Assembly, such as 
+ company information, version number or copyright notice.
+ </summary>
+ <param name="assem">The Assembly to access.</param>
+ <param name="t">The Type of the attribute to obtain.</param>
+ <returns>An object, or Nothing if an error occurred.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.GetCompatibility(System.Reflection.Assembly)">
+ -----------------------------------------------------------------------
+ <summary>
+ Tests whether a specific assembly is compatible with the assemblies 
+ currently loaded by the main application.
+ </summary>
+ <param name="assemPlugin">The assembly to test</param>
+ <returns>True if compatible.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.ICoreDataPlugin">
+ ===========================================================================
+ <summary>
+ Interface for a plug-in that is invoked when the EwE Core has initialized 
+ its main data structures. Plug-in points in this interface
+ will allow an implementing plug-in to obtain a reference to the data structures.
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.ICoreDataPlugin.CoreDataInitialized(System.Object,System.Object,System.Object,System.Object,System.Object,System.Object,System.Object,System.Object,System.Object)">
+ <summary>
+ The core has loaded a model and initialized its internal data
+ </summary>
+ <param name="objEcopathData">The Ecopath data structures</param>
+ <param name="objStanzaData">The stanza data structures</param>
+ <param name="objTaxonData">The taxon data structures</param>
+ <param name="objEcosamplerData">The ecosampler data structures</param>
+ <param name="objPDSdata">Particle size distribution data structures</param>
+ <param name="objEcosimData">The Ecosim data structures</param>
+ <param name="objEcosimTimeSeriesData">The Ecosim time series data structures</param>
+ <param name="objSearchData">The search data structures</param>
+ <param name="objEcoSpaceData">The Ecospace data structures</param>
+</member>
+<member name="T:EwEPlugin.ICorePlugin">
+ ===========================================================================
+ <summary>
+ Interface for a plug-in that is invoked when the EwE Core loads the three main
+ models Ecopath, Ecosim and Ecospace. Plug-in points in this interface
+ will allow an implementing plug-in to obtain a reference to the three models.
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.ICorePlugin.CoreInitialized(System.Object@,System.Object@,System.Object@)">
+ <summary>
+ The core has loaded a model and initialized its internal data
+ </summary>
+ <param name="objEcoPath">The Ecopath model</param>
+ <param name="objEcoSim">The Ecosim model</param>
+ <param name="objEcoSpace">The Ecospace model</param>
+</member>
+<member name="T:EwEPlugin.IDataValidatedPlugin">
+ ===========================================================================
+ <summary>
+ Interface for implementing plug-ins that extend value validation events with 
+ the EwE Core. Whenever a user modifies a value, this value is passed to the 
+ core for validation against allowed value ranges, against other existing 
+ values, etc. Users can decide to extend this process by adding custom tests.
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.IDataValidatedPlugin.DataValidated(EwEUtils.Core.eVarNameFlags,EwEUtils.Core.eDataTypes)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point called when the core has succesfully validated a variable.
+ </summary>
+ <param name="varname">The eVarname flag identifying the variable that 
+ passed Core validation.</param>
+ <param name="dt">The eDataTypes flag identifying the core source of the
+ variable.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.ILicensePlugin">
+ ===========================================================================
+ <summary>
+ Interface for implementing plug-ins that are licensed.
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.ILicensePlugin.Expiry(System.DateTime@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point to obtain the expiry date.
+ </summary>
+ <param name="dt"></param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IMessageFilterPlugin">
+ ===========================================================================
+ <summary>
+ <para>Interface for a plug-in that is invoked when the EwE Core is about to 
+ broadcast a <see cref="T:EwEUtils.Core.IMessage"/> through the EwE application that may impact 
+ the user experience of the software. This plug-in point can be overridden to
+ alter or cancel the message if the message were to disrupt the flow of a
+ plug-in.</para>
+ <para>Note that not all messages may pass through this plug-in point for
+ two reasons.
+ <list type="bullet">
+ <item>
+ <term>Performance</term>
+ <description>The EwE core sends hundreds of messages to synchronize the internal
+ models and user interfaces. Filtering all these messages through the loose-
+ typed plug-in system would noticably affect performance of the EwE application.
+ </description>
+ </item>
+ <item>
+ <term>Reliability</term>
+ <description>Messages that are crucial to the functioning of the EwE application,
+ such as <see cref="F:EwEUtils.Core.eMessageImportance.Maintenance">maintenance</see>
+ and <see cref="F:EwEUtils.Core.eMessageImportance.Progress">progress</see> messages 
+ should not be disabled or altered, and are therefor not presented via this
+ plug-in point.</description>
+ </item>
+ </list></para>
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.IMessageFilterPlugin.PreProcessMessage(EwEUtils.Core.IMessage,System.Boolean@)">
+ -----------------------------------------------------------------------
+ <summary>
+ A publicly visible message, e.g. a message that is not meant for 
+ <see cref="F:EwEUtils.Core.eMessageImportance.Maintenance">internal EwE maintenance</see> or 
+ <see cref="F:EwEUtils.Core.eMessageImportance.Progress">progress feedback</see>, is about 
+ to be broadcasted to all its handlers. This is yer chance to shoot it down! 
+ Go for it!
+ </summary>
+ <param name="msg">The message that is about to be broadcasted.</param>
+ <param name="bCancelMessage">Flag, determining whether the message should
+ not be broadcasted. If True is returned here, the message will not be
+ broadcasted.</param>
+ <remarks>
+ Note that this filter is not intended as a substitute for EwE core
+ message handlers. Message filter plug-ins only receive messages that are
+ meant for the user, not for the internal workings of EwE. If you are 
+ interested in monitoring these messages you will have to set up a proper 
+ message handler in your code.
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.ISaveFilterPlugin">
+ ===========================================================================
+ <summary>
+ Interface for implementing plug-ins that may prevent the core from saving or
+ discarding data.
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.ISaveFilterPlugin.SaveChanges(System.Boolean@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point called when the core is about to save changes.
+ </summary>
+ <param name="bCancel">Setting this to False will abort the save attempt.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.ISaveFilterPlugin.DiscardChanges(System.Boolean@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point called when the core is about to save changes.
+ </summary>
+ <param name="bCancel">Setting this to False will abort the save attempt.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cEcopathRunType">
+ -----------------------------------------------------------------------
+ <summary>
+ Class defining Ecopath run/computation dependencies for exchanging data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cEcosimRunType">
+ -----------------------------------------------------------------------
+ <summary>
+ Class defining Ecosim run/computation dependencies for exchanging data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cEcospaceRunType">
+ -----------------------------------------------------------------------
+ <summary>
+ Class defining Ecospace run/computation dependencies for exchanging data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cFishingPolicySearchRunType">
+ -----------------------------------------------------------------------
+ <summary>
+ Class defining Fishing Policy Search run/computation dependencies for exchanging data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.cSearchRunType">
+ -----------------------------------------------------------------------
+ <summary>
+ Class defining Search run/computation dependencies for exchanging data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.Data.IDataBroadcaster">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for defining a data broadcaster.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.Data.IDataConsumerPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that is able to receive broadcasted
+ data.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataConsumerPlugin.ReceiveData(System.String,EwEPlugin.Data.IPluginData)">
+ -----------------------------------------------------------------------
+ <summary>
+ Interface to receive data originating from 
+ <see cref="M:EwEPlugin.Data.IDataBroadcaster.BroadcastData(System.String,EwEPlugin.Data.IPluginData)">IDataBroadcaster.BroadcastData</see>.
+ </summary>
+ <param name="strDataName">Name of the data that is being broadcasted.</param>
+ <param name="data">The <see cref="T:EwEPlugin.Data.IPluginData">data</see> that is being 
+ broadcasted.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.Data.IDataProducerPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that can broadcast data.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataProducerPlugin.Broadcaster(EwEPlugin.Data.IDataBroadcaster)">
+ -----------------------------------------------------------------------
+ <summary>
+ Initialization interface to inform the plug-in where to send its data
+ to once ready.
+ </summary>
+ <param name="broadcaster">The <see cref="T:EwEPlugin.Data.IDataBroadcaster">IDataBroadcaster</see> 
+ to send data to.</param>
+ <remarks>
+ The plug-in should call <see cref="M:EwEPlugin.Data.IDataBroadcaster.BroadcastData(System.String,EwEPlugin.Data.IPluginData)">IDataBroadcaster.BroadcastData</see>,
+ from where any <see cref="T:EwEPlugin.Data.IDataConsumerPlugin">IDataConsumerPlugin</see>
+ -derived class gets a chance to consume the data by implementing
+ <see cref="M:EwEPlugin.Data.IDataConsumerPlugin.ReceiveData(System.String,EwEPlugin.Data.IPluginData)">ReceiveData</see>.
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataProducerPlugin.IsDataAvailable(System.Type,EwEUtils.Core.IRunType)">
+ -----------------------------------------------------------------------
+ <summary>
+ Requests whether data with a given <see cref="T:System.Type">Type</see> and
+ <see cref="T:EwEUtils.Core.IRunType">run type</see> is provided by this plug-in.
+ </summary>
+ <param name="typeData">
+ <see cref="T:System.Type">Type</see> of the data to request.
+ </param>
+ <param name="runType">
+ <see cref="T:EwEUtils.Core.IRunType">Run type</see> of the data to request.
+ </param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataProducerPlugin.GetDataByType(System.Type,EwEPlugin.Data.IPluginData@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Request data from this plug-in for a data with a specific
+ <see cref="T:System.Type">Type</see>.
+ </summary>
+ <param name="typeData"><see cref="T:System.Type">Type</see> of the data to request.</param>
+ <param name="data">The <see cref="T:EwEPlugin.Data.IPluginData">data</see> offered by 
+ the plug-in.</param>
+ <returns>True if requested data is available.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataProducerPlugin.IsEnabled">
+ -----------------------------------------------------------------------
+ <summary>
+ Get whether a data producer is allowed to distribute data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataProducerPlugin.SetEnabled(System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Set whether a data producer is allowed to distribute data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataProducerPlugin.SetEnabled(System.Type,EwEUtils.Core.IRunType,System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Set whether a plug-in distributes data for a given run type.
+ </summary>
+ <param name="typeData"><see cref="T:System.Type">Type</see> of the data to enable.</param>
+ <param name="runType">
+ <see cref="T:EwEUtils.Core.IRunType">Run type</see> of the data to enable or disable.
+ </param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataProducerPlugin.IsEnabled(System.Type,EwEUtils.Core.IRunType)">
+ -----------------------------------------------------------------------
+ <summary>
+ Get whether a plug-in distributes data for a given run type.
+ </summary>
+ <param name="typeData"><see cref="T:System.Type">Type</see> of the data to request 
+ enabled state for.</param>
+ <param name="runType">
+ <see cref="T:EwEUtils.Core.IRunType">Run type</see> of the data to enable or disable.
+ </param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.Data.IDataSearchProducerPlugin">
+ -------------------------------------------------------------------
+ <summary>
+ Plug-in interface for data providers that allow data to be searched.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataSearchProducerPlugin.StartSearch(System.Object,System.Int32)">
+ -------------------------------------------------------------------
+ <summary>
+ Starts an asynchronous search for data.
+ </summary>
+ <param name="data">The data providing search terms.</param>
+ <param name="iMaxResults">The max number of results to return.</param>
+ <returns>True if started successful.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataSearchProducerPlugin.StopSearch">
+ -------------------------------------------------------------------
+ <summary>
+ Interrupt a current search.
+ </summary>
+ <returns>True if stopped succesfully.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataSearchProducerPlugin.IsSeaching">
+ -------------------------------------------------------------------
+ <summary>
+ Queries a data producer if a search is in progress.
+ </summary>
+ <returns>True if a search is in progress.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataSearchProducerPlugin.SearchResults(System.Object,EwEPlugin.Data.IDataSearchResults@)">
+ -------------------------------------------------------------------
+ <summary>
+ Returns search results.
+ </summary>
+ <param name="dataTerm">The search term that was used.</param>
+ <param name="results">Returned search results.</param>
+ <returns>True if successful.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDataSearchProducerPlugin.CreateSearchTerm">
+ -------------------------------------------------------------------
+ <summary>
+ Returns a search term for an interface to substitute data into.
+ </summary>
+ <returns></returns>
+ -------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.Data.IDataSearchResults">
+ -------------------------------------------------------------------
+ <summary>
+ Interface for building a container for plug-in search results provided
+ by <see cref="T:EwEPlugin.Data.IDataSearchProducerPlugin">data search plug-ins.</see>
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.Data.IDataSearchResults.SearchTerm">
+ -------------------------------------------------------------------
+ <summary>
+ Get the term that was used to obtain these results.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.Data.IDataSearchResults.SearchResults">
+ -------------------------------------------------------------------
+ <summary>
+ Get an array of search results that matched the term.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.Data.IDataSearchResults.SearchScores">
+ -------------------------------------------------------------------
+ <summary>
+ Get an array of score results for the matches.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.Data.IPluginData">
+ ---------------------------------------------------------------------------
+ <summary>
+ Base type for data shared by plugins.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.Data.IPluginData.PluginName">
+ -----------------------------------------------------------------------
+ <summary>
+ Name of the <see cref="T:EwEPlugin.IPlugin">type name</see> of the plug-in that 
+ exposed this data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.Data.IPluginData.RunType">
+ -----------------------------------------------------------------------
+ <summary>
+ The <see cref="T:EwEUtils.Core.IRunType">run type</see> that this data was produced with.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.Data.ITaxonSearchCapabilitiesPlugin">
+ <summary>
+ Plug-in point allowing taxonomy <see cref="T:EwEPlugin.Data.IDataSearchProducerPlugin">search
+ plug-ins</see> to report their search capabilities.
+ </summary>
+</member>
+<member name="T:EwEPlugin.Data.IDatabasePlugin">
+ =======================================================================
+ <summary>
+ Plug-in point to allow plug-ins to track database operations with EwE.
+ </summary>
+ =======================================================================
+</member>
+<member name="M:EwEPlugin.Data.IDatabasePlugin.Open(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Execution interface for the EwE open database plug-in point. This 
+ method is invoked whenever the EwE core opens a database connection.
+ </summary>
+ <returns>
+ True if the plug-in point executed succesfully, or False otherwise.
+ This is rather tricky; returning False here may stop EwE6 from being
+ </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDatabasePlugin.Close">
+ -----------------------------------------------------------------------
+ <summary>
+ Execution interface for the EwE close database plug-in point. This 
+ method is invoked whenever the EwE core closes a database connection.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.Data.IDatabasePlugin.IsModified">
+ -----------------------------------------------------------------------
+ <summary>
+ Execution interface for a plug-in point to report whether is has any
+ pending changes. This method is invoked whenever the EwE core polls
+ for unsaved modifications prior to undertaking actions that may cause 
+ data to be lost.
+ </summary>
+ <returns>
+ True if a plug-in has unsaved data, False otherwise.
+ </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.Data.IModelImportPlugin">
+ =======================================================================
+ <summary>
+ Plug-in point for implementing <see cref="T:EwEUtils.Database.IModelImporter">model import logic</see>.
+ </summary>
+ =======================================================================
+</member>
+<member name="T:EwEPlugin.IEcopathMassBalancePlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that performs a custom Ecopath 
+ Mass Balance calculation. If provided, this plug-in point will replace
+ the native Mass Balance calculation provided with EwE6.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcopathMassBalancePlugin.EcopathMassBalance(System.Object,System.Int32,System.Int32@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Execute a Mass balance calculation.
+ </summary>
+ <param name="EcoPathDataStructures">A reference to the Ecopath data 
+ structures as defined in the EwE project.</param>
+ <param name="eEstimateFor">Enumerated value, stating the purpose of the mass 
+ balance calculation.</param>
+ <param name="iResult">The result of the mass balance calculation. For 
+ possible values refer to the eStatusFlags enumerated type in the EwE project.
+ </param>
+ <returns>True if a mass-balance calculation has been performed successfully.</returns>
+ <remarks>
+ This plug-in point is exclusive, meaning that only one IEcopathMassBalancePlugin 
+ plug-in is allowed to successfully perform this calculation. The first plug-in
+ of this type that successfully executes blocks the execution of any other
+ plug-in of this type.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcopathPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that is invoked whenever an EwE
+ Ecopath model has been loaded or has been saved, but before the datasource is
+ closed.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcopathPlugin.LoadModel(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecopath model has been loaded, 
+ exposing the data source that the Ecopath model was loaded from.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source from which
+ data is being loaded.</param>
+ <remarks>This plug-in point is non-exclusive, meaning that multiple
+ plug-ins can respond to this event.</remarks>
+ <returns>True if loaded successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcopathPlugin.SaveModel(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecopath model has been saved, 
+ exposing the data source that the Ecopath model was loaded from.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source to which
+ data is being saved.</param>
+ <remarks>This plug-in point is non-exclusive, meaning that multiple
+ plug-ins can respond to this event.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcopathPlugin.CloseModel">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecopath model has been closed.
+ </summary>
+ <returns>True if closed successful.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcopathRunCompleted2Plugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that is automatically invoked when
+ Ecopath has ran succesfully.
+ </summary>
+ <remarks>
+ This interfaces functionally replaces IEcopathRunCompletedPlugin without
+ breaking backward compatibility.
+ </remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcopathRunCompleted2Plugin.EcopathRunCompleted(System.Object@,System.Object@,System.Object@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Execute an Ecopath Run Completed plug-in.
+ </summary>
+ <param name="EcoPathDataStructures">A reference to the Ecopath data 
+ structures as defined in the EwE project.</param>
+ <param name="TaxonDataStructures">A reference to the taxon data 
+ structures as defined in the EwE project.</param>
+ <param name="StanzaDataStructures">A reference to the stanza data 
+ structures as defined in the EwE project.</param>
+ <remarks>This plug-in point is non-exclusive, meaning that multiple
+ plug-ins can respond to this event.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcopathRunCompletedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that is automatically invoked when
+ Ecopath has ran succesfully.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcopathRunCompletedPlugin.EcopathRunCompleted(System.Object@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Execute an Ecopath Run Completed plug-in.
+ </summary>
+ <param name="EcoPathDataStructures">A reference to the Ecopath data 
+ structures as defined in the EwE project.</param>
+ <remarks>This plug-in point is non-exclusive, meaning that multiple
+ plug-ins can respond to this event.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcopathRunCompletedPostPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that is automatically invoked when
+ Ecopath has ran succesfully - after all IEcopathRunCompletedPlugin instances
+ have been called.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcopathRunInitializedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin point called at the start of an Ecopath run.
+ After all the data has been loaded but before Ecopath has started to compute 
+ the missing parameters. 
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcopathRunInitializedPlugin.EcopathRunInitialized(System.Object,System.Object,System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plugin point called at the start of an Ecopath run.
+ After all the data has been loaded but before Ecopath has started to compute the missing parameters. 
+ </summary>
+ <param name="EcopathDataAsObject">cEcopathDataStructures as an object.</param>
+ <param name="TaxonDataAsObject">cTanonDataStructures as an object.</param>
+ <param name="StanzaDataAsObject">cStanzaDataStructures as an object.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcopathRunInvalidatedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that is automatically invoked when
+ an Ecospace run is invalidated. This happens when an user input causes
+ the current Ecopath results to become invalid, or when a model is closed.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcopathRunInvalidatedPlugin.EcopathRunInvalidated">
+ -----------------------------------------------------------------------
+ <summary>
+ Execute an Ecopath Run Invalidated plug-in.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcosimBeginTimestepPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for a plug-in that is invoked when the Ecosim model is about to
+ start computing a time step.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimBeginTimestepPlugin.EcosimBeginTimeStep(System.Single[]@,System.Object,System.Int32)">
+ <summary>
+ Ecosim is about to compute a time step.
+ </summary>
+ <param name="BiomassAtTimestep">The biomasses at the beginning at the time step.</param>
+ <param name="EcosimDatastructures">The Ecosim data structures that you can poke around in.</param>
+ <param name="iTime">The time step that will be executed.</param>
+</member>
+<member name="T:EwEPlugin.IEcosimBeginTimestepPostPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for a plug-in that is invoked when the Ecosim model is about to
+ start computing a time step, after all instances of <see cref="T:EwEPlugin.IEcosimBeginTimestepPlugin"/>
+ points have been called.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimBeginTimestepPostPlugin.EcosimBeginTimeStepPost(System.Single[]@,System.Object,System.Int32)">
+ <summary>
+ Ecosim is about to compute a time step, and all instances of <see cref="T:EwEPlugin.IEcosimBeginTimestepPlugin"/>
+ have had the opportunity to run.
+ </summary>
+ <param name="BiomassAtTimestep">The biomasses at the beginning at the time step.</param>
+ <param name="EcosimDatastructures">The Ecosim data structures that you can poke around in.</param>
+ <param name="iTime">The time step that will be executed.</param>
+</member>
+<member name="T:EwEPlugin.IEcosimDataInitializedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin points for the initialization of Ecosim data cEcosimDataStructures 
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimDataInitializedPlugin.EcosimPreDataInitialized(System.Object)">
+ <summary>
+ Ecosim has loaded a scenario and is about to call cEcosimModel.Init() to initialize its data.
+ </summary>
+ <param name="EcosimDatastructures">Ecosim datastructures instance.</param>
+ <remarks>This can be used prior to the initialization of Ecosim data to set variables that are used by Ecosim to set derived variables. </remarks>
+</member>
+<member name="M:EwEPlugin.IEcosimDataInitializedPlugin.EcosimPreRunInitialized(System.Object)">
+ <summary>
+ Ecosim is about to initailize for a run
+ </summary>
+ <param name="EcosimDatastructures">cEcosimDataStructures instance.</param>
+ <remarks>Call prior to initialization of run data.</remarks>
+</member>
+<member name="T:EwEPlugin.IEcosimEndTimestepPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin points for the end of an Ecosim time step.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcosimEndTimestepPostPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin points for the end of an Ecosim time step, after all <see cref="T:EwEPlugin.IEcosimEndTimestepPlugin"/>
+ plug-ins have ran.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcosimInitializedPlugin">
+ <summary>
+ Plugin for initialization of Ecosim Scenarios
+ </summary>
+ <remarks>Contains plugin points for initialization of Ecosim Scenarios</remarks>
+</member>
+<member name="M:EwEPlugin.IEcosimInitializedPlugin.EcosimInitialized(System.Object)">
+ <summary>
+ Plugin Point called when an Ecosim Scenario has loaded
+ </summary>
+ <param name="EcosimDatastructures">cEcosimDataStructures passed as an object.</param>
+ <remarks>Called after an Ecosim scenario has loaded but prior to initialization of data.</remarks>
+</member>
+<member name="T:EwEPlugin.IEcosimModifyEffort">
+ <summary>
+ Plugin Point to modify effort during an Ecosim run 
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="M:EwEPlugin.IEcosimModifyEffort.EcosimModifyEffort(System.Boolean@,System.Single[],System.Single[],System.Int32,System.Int32,System.Object)">
+ <summary>
+ Call at each Ecosim timestep before fishing mortality is set. If the bEffortModified = True then a new fishing mortality will be computed from Effort().
+ </summary>
+ <param name="bEffortModified">
+ If True then fishing mortality will be computed from effort. 
+ If False then Effort() will be ignored and fishing mortality will not be modified. 
+ </param>
+ <param name="Effort">Fishing effort at the current timestep. Alter this and set bEffortModified = True to change fishing effort. </param>
+ <param name="BB">Biomass at the current timestep</param>
+ <param name="iTimeIndex">Time index of the current timestep</param>
+ <param name="iYearIndex">Year index of the current timestep</param>
+ <param name="EcosimDataStructures">cEcosimDataStructures as an Object</param>
+ <remarks></remarks>
+</member>
+<member name="T:EwEPlugin.IEcosimModifyFGearPlugin">
+ <summary>
+ Plugin Point to modify Ecosim Fishing Effort during a MSE or Fishing Policy Search.
+ </summary>
+ <remarks>This will not modify effort during a normal Ecosim run.</remarks>
+</member>
+<member name="M:EwEPlugin.IEcosimModifyFGearPlugin.EcosimModifyFGear(System.Single[],System.Single[],System.Object,System.Int32)">
+ <summary>
+ Method that gets called when a Fishing Policy or MSE search is modifying Fishing Effort.
+ </summary>
+ <param name="FGear">Array of Relative Fishing Effort dimensioned by fleet for the current timestep.</param>
+ <param name="BB">Array of Biomass by group for the current timestep</param>
+ <param name="EcosimDataStructures">Reference to the current EcosimDataStructures passed as an object.</param>
+ <param name="CurrentTimeStepIndex">Current timestep index.</param>
+ <remarks>At this time this only changes effort during a search there is no easy way to change effort during a normal run. </remarks>
+</member>
+<member name="T:EwEPlugin.IEcosimModifyTimeseriesPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin points for the initialization of Ecosim data cEcosimDataStructures 
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimModifyTimeseriesPlugin.EcosimModifyTimeseries(System.Object)">
+ <summary>
+ Ecosim is about to initialize for a run. This point allows plug-ins to 
+ adjust loaded reference data prior to a run.
+ </summary>
+ <param name="TimeSeriesDataStructures">cTimeSeriesDataStructures instance.</param>
+ <remarks>Call prior to initialization of run data.</remarks>
+</member>
+<member name="T:EwEPlugin.IEcosimPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing plugin points that are invoked from the EwE
+ Ecosim model.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimPlugin.LoadEcosimScenario(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecosim has loaded a scenario, exposing
+ the datasource that the scenario was loaded from.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source from which
+ data is being loaded.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimPlugin.SaveEcosimScenario(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecosim has saved a scenario, exposing
+ the datasource that the scenario was loaded from.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source to which
+ data is being saved.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimPlugin.CloseEcosimScenario">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecosim scenario has been closed.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcosimRunCompletedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing plugin points that are invoked when Ecosim finishes
+ a run.
+ <seealso cref="T:EwEPlugin.IEcosimRunCompletedPostPlugin"/>
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimRunCompletedPlugin.EcosimRunCompleted(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecosim has finished running.
+ <seealso cref="T:EwEPlugin.IEcosimRunCompletedPostPlugin"/>
+ </summary>
+ <param name="EcosimDatastructures">Ecosim data structires.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcosimRunCompletedPostPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing plugin points that are invoked when Ecosim finishes
+ a run, and all <see cref="T:EwEPlugin.IEcosimRunCompletedPlugin"/> points have been called.
+ <seealso cref="T:EwEPlugin.IEcosimRunCompletedPlugin"/>
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimRunCompletedPostPlugin.EcosimRunCompletedPost(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecosim has finished running, and all
+ <see cref="T:EwEPlugin.IEcosimRunCompletedPlugin"/> points have been called.
+ <seealso cref="T:EwEPlugin.IEcosimRunCompletedPlugin"/>
+ </summary>
+ <param name="EcosimDatastructures">Ecosim data structires.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimRunInitializedPlugin.EcosimRunInitialized(System.Object)">
+ <summary>
+ Ecosim has initialized and is about to start the time loop
+ </summary>
+ <param name="EcosimDatastructures"></param>
+ <remarks></remarks>
+</member>
+<member name="T:EwEPlugin.IEcosimRunInvalidatedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that is automatically invoked when
+ an Ecosim run is invalidated. This happens when an user input causes
+ the current Ecosim results to become invalid, or when an Ecospace scenario
+ is closed.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimRunInvalidatedPlugin.EcosimRunInvalidated">
+ -----------------------------------------------------------------------
+ <summary>
+ Execute an Ecosim Run Invalidated plug-in.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcosimScenarioAddedOrRemovedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for responding to adding or removing an Ecosim scenario.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimScenarioAddedOrRemovedPlugin.EcosimScenarioAdded(System.Object,System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecosim scenario has been added.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source to which
+ the scenario was added.</param>
+ <param name="scenarioID">The database ID of the newly created Ecosim scenario.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimScenarioAddedOrRemovedPlugin.EcosimScenarioRemoved(System.Object,System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecosim scenario has been removed.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source from which
+ the scenario was removed.</param>
+ <param name="scenarioID">The database ID of the newly created Ecosim scenario.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcosimShapeFunctionPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing plugin points that provide different types of 
+ shape functions.
+ <seealso cref="T:EwEUtils.Core.IShapeFunction"/>
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcosimSubTimestepsPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin points for begin and end of Ecosim sub timesteps. 
+ </summary>
+ <remarks>
+ Monthly timesteps in Ecosim can be divided into multiple sub timesteps. The number of sub timesteps in set via the cEcosimDatastructures.StepsPerMonth which has a default of one.  
+ This allows a plugin to run Ecosim with more then 12 timesteps per year. Once Ecosim has run it will reset cEcosimDatastructures.StepsPerMonth to its default value of one 
+ all subsequent runs of Ecosim will be on a monthly timestep unless cEcosimDatastructures.StepsPerMonth has been set after the run. 
+ This funtionality is only available via code and has no user interface. 
+ User interface objects e.g. cCore.EcosimGroupOutputs are NOT update for sub timesteps and will not be updated until the end of the monthly timestep.
+ </remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimSubTimestepsPlugin.EcosimSubTimeStepBegin(System.Single[]@,System.Single,System.Single,System.Int32,System.Object)">
+ <summary>
+ Plugin point called at the start of each sub timestep by Ecosim
+ </summary>
+ <param name="BiomassAtTimestep">Biomass at the start of the sub timestep</param>
+ <param name="TimeInYears">Time of the current sub timestep in years</param>
+ <param name="DeltaT">Delta t of the timestep</param>
+ <param name="SubTimestepIndex">Index of the current sub timestep 1 to cEcosimDatastructures.StepsPerMonth</param>
+ <param name="EcosimDatastructures">Ecosim data structures cEcosimDatastructures cast to an object</param>
+ <remarks> 
+ In Ecosim the number of sub time steps to run per month is set via the cEcosimDatastructures.StepsPerMonth with a default of one.
+ EcosimSubTimeStepBegin() is called once at the start of each Ecosim sub timestep. 
+ A sub timestep only runs the numeric integration routine (rk4) and does not call the timestep delegate passed to cCore.RunEcosim(EcoSimTimeStepDelegate) 
+ or set any of the Core's Ecosim output objects e.g. cCore.EcosimGroupOutputs will not be update to the values of the new sub timestep. 
+ Only values used in the calculation of the sub timestep will be updated(the EcosimDatastructures argument).
+ </remarks>
+</member>
+<member name="M:EwEPlugin.IEcosimSubTimestepsPlugin.EcosimSubTimeStepEnd(System.Single[]@,System.Single,System.Single,System.Int32,System.Object)">
+ <summary>
+ Plugin point called at the end of each sub timestep by Ecosim
+ </summary>
+ <param name="BiomassAtTimestep">Biomass at the end of the sub timestep</param>
+ <param name="TimeInYears">Time of the current sub timestep in years</param>
+ <param name="DeltaT">Delta t of the timestep</param>
+ <param name="SubTimestepIndex">Index of the current sub timestep 1 to cEcosimDatastructures.StepsPerMonth</param>
+ <param name="EcosimDatastructures">Ecosim data structures cEcosimDatastructures cast to an object</param>
+ <remarks> 
+ In Ecosim the number of sub time steps to run per month is set via the cEcosimDatastructures.StepsPerMonth with a default of one.
+ EcosimSubTimeStepEnd() is called once at the end of each Ecosim sub timestep. 
+ A sub timestep only runs the numeric integration routine (rk4) and does not call the timestep delegate passed to cCore.RunEcosim(EcoSimTimeStepDelegate) 
+ or set any of the Core's Ecosim output objects e.g. cCore.EcosimGroupOutputs will not be update to the values of the new sub timestep. 
+ Only values used in the calculation of the sub timestep will be updated(the EcosimDatastructures argument).
+ </remarks>
+</member>
+<member name="T:EwEPlugin.IEcosimTimeSeriesPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing plugin points that are invoked whenever major time
+ series events occur.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimTimeSeriesPlugin.TimeSeriesLoaded">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecosim has loaded time series.
+ </summary>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcosimTimeSeriesPlugin.TimeSeriesClosed">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecosim has unloaded time series.
+ </summary>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceBeginTimestepPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for extending the Ecospace begin time step logic. Plug-ins of this
+ type are invoked as soon as the EwE Core is about to begin its calculatios
+ of an Ecospace time step.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceBeginTimestepPlugin.EcospaceBeginTimeStep(System.Object,System.Int32)">
+ <summary>
+ Begin of an Ecospace time step.
+ </summary>
+ <param name="EcospaceDatastructures">Ecospace data structures.</param>
+ <param name="iTime">Cumulative time step.</param>
+</member>
+<member name="T:EwEPlugin.IEcospaceBeginTimestepPostPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for extending the Ecospace end time step logic. Plug-ins of this
+ type are invoked as soon as the EwE Core has finished its calculatios
+ of an Ecospace time step, and after all IEcospaceBeginTimestepPlugin points
+ have been called.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceBeginTimestepPostPlugin.EcospaceBeginTimeStepPost(System.Object,System.Int32)">
+ <summary>
+ Begin of an Ecospace time step, invoked after all <see cref="M:EwEPlugin.IEcosimBeginTimestepPlugin.EcosimBeginTimeStep(System.Single[]@,System.Object,System.Int32)">IEcosimBeginTimestepPlugin.EcosimBeginTimeStep</see> calls have been made.
+ </summary>
+ <param name="EcospaceDatastructures">Ecospace data structures.</param>
+ <param name="iTime">Cumulative time step.</param>
+</member>
+<member name="T:EwEPlugin.IEcospaceCalcCostOfSailingPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for overriding the Ecospace cost of sailing calculations.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceCalcCostOfSailingPlugin.CalculateCostOfSailing(System.Object,System.Single[0:,0:],System.Boolean[0:,0:][0:,0:],System.Single[0:,0:][])">
+ -----------------------------------------------------------------------
+ <summary>
+ Datasource load ecospace scenario plugin point.
+ </summary>
+ <param name="EcospaceData">Ecospace data structure providing context
+ information for this calculation.</param>
+ <param name="Depth">Ecospace depth(row, col).</param>
+ <param name="Port">Ecospace ports(fleet, row, col). Fleets are indexed
+ one-based, the 0-fleet data contains the aggregation of ports for all 
+ fleets.</param>
+ <param name="Sail">Sailing cost buffer(fleet, row, col) to receive the
+ calculated cost of sailing.</param>
+ <remarks>This plugin point is exclusive; plug-ins of this type will be
+ invoked in an arbitrairy order until a plug-in returns True. If this
+ happens, Ecospace will not attempt to calculate cost of sailing.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceEndTimestepPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for extending the Ecospace end time step logic. Plug-ins of this
+ type are invoked as soon as the EwE Core has finished its calculatios
+ of an Ecospace time step.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceEndTimestepPostPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for extending the Ecospace end time step logic. Plug-ins of this
+ type are invoked as soon as the EwE Core has finished its calculatios
+ of an Ecospace time step, and after all IEcospaceEndTimestepPlugin points
+ have been called.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceInitializedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for extending the Ecospace initialzation logic. Plug-ins of this
+ type are invoked as soon as all Ecospace data is loaded in the EwE Core.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceInitializedPlugin.EcospaceInitialized(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecospace has loaded a new scenario, is
+ initialized, and is ready to be used.
+ </summary>
+ <param name="EcospaceDatastructures">The ecospace datastructures that 
+ just received new scenario data.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceInitRunCompletedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Ecospace plugin point called when all run initialization has completed and 
+ time steps are about to begin.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceInitRunCompletedPlugin.EcospaceInitRunCompleted(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecospace is about to start running.
+ </summary>
+ <param name="EcospaceDatastructures">The ecospace datastructures.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceInitRunStartedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Ecospace plugin point called when run initialization is about to start.
+ </summary>
+ <seealso cref="T:EwEPlugin.IEcospaceInitRunCompletedPlugin"/>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceInitRunStartedPlugin.EcospaceInitRunStarted(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecospace is about to initialize for running.
+ </summary>
+ <param name="EcospaceDatastructures">The ecospace datastructures.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceLayerChangePlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for extending the Ecospace events before and after a spatial layer 
+ receives content through the spatial-temporal data framework.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceLayerChangePlugin.EcospaceBeginLayerChange(System.Int32,System.DateTime,System.Object)">
+ <summary>
+ An Ecospace layer is about to receive data through the spatial-temporal
+ data framework. This call allows plug-ins to gather the data in the 
+ layer before it will be altered.
+ </summary>
+ <param name="iTime">Cumulative time step.</param>
+ <param name="dt">Absolute time for the time step.</param>
+ <param name="layer">The Ecospace basemap layer that is about to receive data.</param>
+</member>
+<member name="M:EwEPlugin.IEcospaceLayerChangePlugin.EcospaceEndLayerChange(System.Int32,System.DateTime,System.Object)">
+ <summary>
+ An Ecospace layer has just received data through the spatial-temporal
+ data framework. This call allows plug-ins to gather the data in the 
+ layer after it has been altered and integrated into Ecospace.
+ </summary>
+ <param name="iTime">Cumulative time step.</param>
+ <param name="dt">Absolute time for the time step.</param>
+ <param name="layer">The Ecospace basemap layer that received data.</param>
+</member>
+<member name="T:EwEPlugin.IEcospacePlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for extending the logic of loading and saving Ecospace data.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospacePlugin.LoadEcospaceScenario(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecospace has loaded a scenario, exposing
+ the datasource that the scenario was loaded from.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source from which
+ data is being loaded.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospacePlugin.SaveEcospaceScenario(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecospace has saved a scenario, exposing
+ the datasource that the scenario was loaded from.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source to which
+ data is being saved.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospacePlugin.CloseEcospaceScenario">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecospace scenario has been closed.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospacePostFishingEffortModTimestepPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for extending the Ecospace fishing effort logic. Plug-ins of this
+ type are invoked as soon as Ecospace fishing effort has been calculated.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceResultWriterPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for providing an Ecospace result writer as a plug-in.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceResultWriterUtils">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for overriding functionality in the Ecospace Results Writers
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceResultWriterUtils.ModelAreaFileName(System.String@,System.Object,EwEUtils.Core.eEcospaceResultsAverageType)">
+ <summary>
+ Overwrite the default file name of the Ecospace area/region averaged .csv files
+ </summary>
+ <param name="FileName">
+ Name of the Ecospace area/region average file. 
+ This is the file name only the path will be set by the Ecospace output directory. </param>
+ <param name="DataSourceAsObject">
+ cEcospaceResultsWriterDataSourceBase as Object the contains the data to be written to file. 
+ This is supplied here so you can tell what type of data is being written to this file.</param>
+ <param name="AvgType">Time step averageing of the data Annual or Ecospace timestep</param>
+ <returns>True if you want to new file name to be used. False otherwise.</returns>
+ <remarks>Overrides the cEcospaceAvgModelAreaResultsWriter.getFileName() function</remarks>
+</member>
+<member name="M:EwEPlugin.IEcospaceResultWriterUtils.MapGroupFileName(System.String@,EwEUtils.Core.eVarNameFlags,System.Int32,System.String,System.Int32)">
+ <summary>
+ Overwrite the default group file name of the Ecospace map outputs.
+ </summary>
+ <param name="FileName">
+ New name of the file. 
+ This is the file name only the path will be set by the Ecospace output directory. </param>
+ <param name="varname">eVarNameFlags of the data</param>
+ <param name="iGrp">Group Index</param>
+ <param name="strExt">Extention of the file</param>
+ <param name="iModelTimeStep">Model time step of the file</param>
+ <returns>Return True if the new file name should be used</returns>
+ <remarks>Overrides the cEcospaceBaseResultsWriter.GetGroupFileName(...) function</remarks>
+</member>
+<member name="M:EwEPlugin.IEcospaceResultWriterUtils.MapFleetFileName(System.String@,EwEUtils.Core.eVarNameFlags,System.Int32,System.String,System.Int32)">
+ <summary>
+ Overwrite the default Fleet file name of the Ecospace map outputs.
+ </summary>
+ <param name="FileName">
+ New name of the file. 
+ This is the file name only the path will be set by the Ecospace output directory. </param>
+ <param name="varname">eVarNameFlags of the data</param>
+ <param name="iFlt">Group Index</param>
+ <param name="strExt">Extention of the file</param>
+ <param name="iModelTimeStep">Model time step of the file</param>
+ <returns>Return True if the new file name should be used</returns>
+ <remarks>Overrides the cEcospaceBaseResultsWriter.GetFleetFileName(...) function</remarks>
+</member>
+<member name="T:EwEPlugin.IEcospaceRunInvalidatedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that is automatically invoked when
+ an Ecospace run is invalidated. This happens when an user input causes
+ the current Ecospace results to become invalid, or when an Ecospace scenario
+ is closed.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceRunInvalidatedPlugin.EcospaceRunInvalidated">
+ -----------------------------------------------------------------------
+ <summary>
+ Execute an Ecospace Run Invalidated plug-in.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcospaceScenarioAddedOrRemovedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for responding to adding or removing an Ecospace scenario.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceScenarioAddedOrRemovedPlugin.EcospaceScenarioAdded(System.Object,System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecospace scenario has been added.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source to which
+ the scenario was added.</param>
+ <param name="scenarioID">The database ID of the newly created Ecospace scenario.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcospaceScenarioAddedOrRemovedPlugin.EcospaceScenarioRemoved(System.Object,System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecospace scenario has been removed.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source from which
+ the scenario was removed.</param>
+ <param name="scenarioID">The database ID of the newly created Ecospace scenario.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.ISpatialDataConverterPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for providing a spatial data converter as a plugin.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.ISpatialDataSetPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for providing a spatial data set as a plugin.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcotracerInitializedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Ecotracer post-initialization plug-in
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcotracerPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing plugin points that are invoked from the EwE
+ Ecosim model.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcotracerPlugin.LoadEcotracerScenario(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecotracer has loaded a scenario, exposing
+ the datasource that the scenario was loaded from.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source from which
+ data is being loaded.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcotracerPlugin.SaveEcotracerScenario(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when Ecotracer has saved a scenario, exposing
+ the datasource that the scenario was loaded from.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source to which
+ data is being saved.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcotracerPlugin.CloseEcospaceScenario">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecotracer scenario has been closed.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEcotracerScenarioAddedOrRemovedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for responding to adding or removing an Ecotracer scenario.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcotracerScenarioAddedOrRemovedPlugin.EcotracerScenarioAdded(System.Object,System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecotracer scenario has been added.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source to which
+ the scenario was added.</param>
+ <param name="scenarioID">The database ID of the newly created Ecotracer scenario.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IEcotracerScenarioAddedOrRemovedPlugin.EcotracerScenarioRemoved(System.Object,System.Int32)">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point that is called when an Ecotracer scenario has been removed.
+ </summary>
+ <param name="dataSource">A reference to the EwE data source from which
+ the scenario was removed.</param>
+ <param name="scenarioID">The database ID of the newly created Ecotracer scenario.</param>
+ <remarks>This plugin point is non-exclusive; each implementation 
+ of this plugin point will be called.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IAutolaunchPlugin">
+ ===========================================================================
+ <summary>
+ Plug-in that should automatically launch its User Interface when loaded.
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.IAutolaunchPlugin.Autolaunch">
+ -----------------------------------------------------------------------
+ <summary>
+ Plug-in point to state whether auto-launch is active. If set to true,
+ the plug-in will be launched, activating its user interface if available.
+ </summary>
+ <returns>A plug-in should return true if it desires to be auto-lanched.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IAutoRunPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that automatically executes with
+ one or more of the EwE <see cref="T:EwEUtils.Core.eCoreComponentType">core components</see>.
+ Note that this plug-in point just serves to centrally identify the auto-run
+ setting in the user interface. The plug-in is responsible for triggering and
+ implementing the auto-run behaviour by implementing the desired plug-in points.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IAutoRunPlugin.AutoRunTypes">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns an array of <see cref="T:EwEUtils.Core.eCoreComponentType"/> identifiers that this
+ plug-in can execute with.
+ </summary>
+ <returns>An array of <see cref="T:EwEUtils.Core.eCoreComponentType"/> identifiers that this
+ plug-in can execute with.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IAutoRunPlugin.AutoRun(EwEUtils.Core.eCoreComponentType)">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set if this plug-in is enabled to auto-run with a given <see cref="T:EwEUtils.Core.eCoreComponentType">core component</see>..
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IAutoSavePlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plugin point that automatically saves its
+ data. Note that this plug-in point just serves to identify the auto-save
+ setting in the user interface. The plug-in is responsible for triggering and
+ implementing the auto-save behaviour.
+ </summary>
+ <remarks>
+ <para>The EwE framework expects an AutoSave plug-in to store its files in a
+ location that is determined as follows:</para>
+ <code>Dim strPath as string = Path.Combine(core.DefaultOutputPath(Me.AutoSaveType), Me.AutoSaveSubPath)</code>
+ <para>The EwE auto-save options interface will display this storage location
+ for auto-save plug-ins. Developers are responsible to follow this folder
+ convention when implementing auto-save behaviour.</para>
+ </remarks>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IAutoSavePlugin.AutoSave">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set whether this plug-in is allowed to auto-save data.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IAutoSavePlugin.AutoSaveType">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns the <see cref="T:EwEUtils.Core.eAutosaveTypes"/> core autosave type that defines the
+ output path that this plug-in writes to.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IAutoSavePlugin.AutoSaveOutputPath">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the output path to save to. A plug-in is responsible for ensuting
+ that the default output path is nested under the EwE location for the 
+ provided <see cref="M:EwEPlugin.IAutoSavePlugin.AutoSaveType"/>.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.ICommandHandlerPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin interface that defines all functionality required to intercept the 
+ execution of a user interface command.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.ICommandHandlerPlugin.HandleCommand(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Implement this point to intercept execution of commands.
+ </summary>
+ <param name="cmd">The cCommand taht is being executed.</param>
+ <returns>True if EwE should consider the command as handled, or
+ Fals if EwE needs to handle the command.</returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IConfigurablePlugin">
+ ===========================================================================
+ <summary>
+ Plug-in point that provides a <see cref="T:EwEUtils.Core.IConfigurable">configurable</see>
+ interactions.
+ </summary>
+ ===========================================================================
+</member>
+<member name="T:EwEPlugin.IDockStatePlugin">
+ ===========================================================================
+ <summary>
+ Plugin point that allows a GUI plugin to state its desired dock location.
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.IDockStatePlugin.DockState">
+ -----------------------------------------------------------------------
+ <summary>
+ The dockstate for the form of this plugin.
+ </summary>
+ <remarks>
+ Values are interpreted as
+ WeifenLuo DockState enumerated values. This project is not linked to
+ WeifenLuo's DockPanel suite, but implementing plug-ins can include
+ such a reference and return actual DockState enumerated values here.
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IEwEOptionsPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plug-in interface that defines all functionality required to add a custom
+ item to the EwE options tree.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IEwEOptionsPlugin.Label">
+ -----------------------------------------------------------------------
+ <summary>
+ Override this to specify the options tree node name for this plug-in.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IGUIPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ IGUIPlugin, interface for implementing <see cref="T:EwEPlugin.IPlugin">plugins</see> that
+ must be accessible from a Windows GUI.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IGUIPlugin.ControlImage">
+ -----------------------------------------------------------------------
+ <summary>
+ Get a WinForms image to show in the control for this plug-in.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IGUIPlugin.ControlTooltipText">
+ -----------------------------------------------------------------------
+ <summary>
+ Get the tool tip text to display for the control for this plug-in.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IGUIPlugin.OnControlClick(System.Object,System.EventArgs,System.Object@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Event handler that will be called when the control for this plug-in
+ is clicked or activated.
+ </summary>
+ <param name="sender">The control that was clicked or activated.</param>
+ <param name="e">Event parameters pertaining the control.</param>
+ <param name="frmPlugin">A reference to the form that the plug-in creates
+ or activates in response to this event.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IGUIPlugin.EnabledState">
+ -----------------------------------------------------------------------
+ <summary>
+ Get must meet to allow this plug-in to run. All GUI controls attached
+ to this plug-in will be enabled and disabled in tune with this state.
+ </summary>
+ <returns>A eCoreExecutionState value, or 0 if this plug-in should be accessible anytime.</returns>
+ <remarks>See EwECore/Core/cCoreStateMonitor.eCoreExecutionState for possible values.</remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IHelpPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ IPluginHelpPlugin, interface for providing help information for a 
+ <see cref="T:EwEPlugin.IPlugin">plugin</see>.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IHelpPlugin.HelpURL">
+ <summary>Get the URL to the help file for a plug-in.</summary>
+</member>
+<member name="P:EwEPlugin.IHelpPlugin.HelpTopic">
+ <summary>Get the URL to the topic in the <see cref="P:EwEPlugin.IHelpPlugin.HelpURL">help file</see>.</summary>
+</member>
+<member name="T:EwEPlugin.IMenuItemPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin interface that defines all functionality required to add a menu
+ item to the EwE main menu.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IMenuItemPlugin.MenuItemLocation">
+ -----------------------------------------------------------------------
+ <summary>
+ <para>
+ Implement this point to specify the menu item location for this plugin.
+ </para>
+ <para>A location is a '\' separated series of menu item names, starting 
+ at the root node of the menu that the plug-in is nested into.</para>
+ <para>Use of the '|' character to separate menu item names is deprecated.</para>
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IMenuItemTogglePlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin interface that defines all functionality required to add a menu
+ item to the EwE main menu. The menu item can be checked or unchecked.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IMenuItemTogglePlugin.IsChecked">
+ -----------------------------------------------------------------------
+ <summary>
+ Implement this to specify whether a menu item should be checked or 
+ unchecked at a given moment. This options should always have been part of 
+ <see cref="T:EwEPlugin.IMenuItemPlugin"/>.
+ </summary>
+ <remarks>
+ Note that the checked state may not show in the Windows UI if a plug-in 
+ has been given a <see cref="P:EwEPlugin.IGUIPlugin.ControlImage"/>.
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.INavigationTreeItemPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plug-in interface that defines all functionality required to add a custom
+ item to the EwE navigation tree.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.INavigationTreeItemPlugin.NavigationTreeItemLocation">
+ -----------------------------------------------------------------------
+ <summary>
+ Override this to specify the navigation tree item location for this plug-in.
+ </summary>
+ <remarks>
+ <para>A location is a '\' separated series of TreeNode names, starting 
+ at the root node of the navigation tree that the plug-in is nested into.</para>
+ <para>Use of the '|' character to separate node names is deprecated.</para>
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IUIContextPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Plugin interface that defines all functionality required to receive a user
+ interface UI context.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IUIContextPlugin.UIContext(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Implement this plug-in point to receive a user interface context. See
+ ScientificInterfaceShared > Controls > cUIContext for a full description
+ of this object.
+ </summary>
+ <param name="uic"></param>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IDisposedPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing a plug-in that is explicitly de-initialized.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.IPlugin">
+ ===========================================================================
+ <summary>
+ Base interface for defining an EwE6 plug-in. Plug-ins are detected by the
+ presence of this Interface.
+ </summary>
+ ===========================================================================
+</member>
+<member name="M:EwEPlugin.IPlugin.Initialize(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Initialize the plugin.
+ </summary>
+ <param name="core">The core this plugin is initialized for.</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IPlugin.Name">
+ -----------------------------------------------------------------------
+ <summary>
+ Uniquely identifies a plugin. This field cannot be left empty!
+ </summary>
+ <remarks>
+ The name field will be used to determine the order of appearance of 
+ user interface plug-in elements; user interface elements originating
+ from plug-ins will be sorted by this property in ascending order.
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IPlugin.DisplayName">
+ -----------------------------------------------------------------------
+ <summary>
+ User-friendly display name of a plug-in.
+ </summary>
+ <seealso cref="P:EwEPlugin.IPlugin.DisplayName"/>
+ <seealso cref="P:EwEPlugin.IPlugin.Description"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IPlugin.Description">
+ -----------------------------------------------------------------------
+ <summary>
+ Description of a plug-in.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IPlugin.Author">
+ -----------------------------------------------------------------------
+ <summary>
+ Describes the author of the plugin.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwEPlugin.IPlugin.Contact">
+ -----------------------------------------------------------------------
+ <summary>
+ Provides contact information about the plugin.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.IMSEBatch.MSEBatchInitialized(System.Object,System.Object)">
+ <summary>
+ The MSE Batch Manager has been initialized
+ </summary>
+ <param name="MSEBatchManager">Instance of cMSEBatchManager as an object.</param>
+ <param name="MSEBatchManagerDataStrucures">Instance of cMSEBatchManagerDataStructures as an object.</param>
+ <remarks></remarks>
+</member>
+<member name="T:EwEPlugin.IMSEInitialized">
+ <summary>
+ Interface for MSE initialization plugin points that are invoked once the MSE model has been loaded
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="M:EwEPlugin.IMSEInitialized.MSEInitialized(System.Object,System.Object,System.Object)">
+ <summary>
+ MSE model has been initialized
+ </summary>
+ <param name="MSEModel">MSE model</param>
+ <param name="MSEDataStructure">MSE data structures</param>
+ <param name="EcosimDatastructures">Ecosim data structures</param>
+ <remarks></remarks>
+</member>
+<member name="T:EwEPlugin.IMSERunPlugin">
+ <summary>
+ Interface for MSE initialization plugin points that are invoked once the MSE model has been loaded
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="M:EwEPlugin.IMSERunPlugin.MSERunStarted">
+ <summary>
+ An MSE run is about to start.
+ </summary>
+ <remarks>Called at the start of a run before the data has been initialized.</remarks>
+</member>
+<member name="M:EwEPlugin.IMSERunPlugin.MSERunCompleted">
+ <summary>
+ An MSE run has completed.
+ </summary>
+ <remarks>Called at the end of a run after all the data has been populated and before the interface has been notified.</remarks>
+</member>
+<member name="M:EwEPlugin.IMSERunPlugin.MSEIterationStarted">
+ <summary>
+ An MSE iteration has started.
+ </summary>
+ <remarks>The MSE has completed the initialization for an iteration and is about the run Ecosim.</remarks>
+</member>
+<member name="M:EwEPlugin.IMSERunPlugin.MSEIterationCompleted">
+ <summary>
+ An MSE iteration has completed.
+ </summary>
+ <remarks>The MSE has populated data from the iteration but has not re-initialized for the next iteration.</remarks>
+</member>
+<member name="M:EwEPlugin.IMSERunPlugin.MSEDoAssessment(System.Single[])">
+ <summary>
+ The Stock Assessment model has been run.
+ </summary>
+ <param name="Biomass">Biomass(ngroups) calculated by Ecosim in the first month of the year.</param>
+ <remarks>
+ The MSE Stock Assessment model is call in the first month of a year by Ecosim. 
+ MSEDoAssessment is called after the model has been run and can be used to update variables in cMSEDataStructures that are used to set Quotas in cMSE.UpdateQuotas(biomass()).
+ Updates cMSEDataStructures.Bestimate(ngroups) estimated biomass for this year.
+ cMSEDataStructures.BestimateLast(ngroups) estimated biomass for the previous year.
+ cMSEDataStructures.KalmanGain(ngroups) for this year.
+ </remarks>
+</member>
+<member name="M:EwEPlugin.IMSERunPlugin.MSEUpdateQuotas(System.Single[])">
+ <summary>
+ Update cMSEDataStructures.QuotaTime(ngroups) with the quota for a year.
+ </summary>
+ <param name="Biomass">Biomass(ngroups) calculated by Ecosim in the first month of the year. </param>
+ <remarks>
+ MSEUpdateQuotas() is called after cMSEDataStructures.QuotaTime(ngroups) has been updated and can be used to 
+ </remarks>
+</member>
+<member name="M:EwEPlugin.IMSERunPlugin.MSERegulateEffort(System.Single[],System.Single[],System.Single[],System.Int32)">
+ <summary>
+ Regulate effort based on Quota and user selected controls.
+ </summary>
+ <param name="Biomass">Biomass(ngroups) for this time step.</param>
+ <param name="QMult">Density dependant catchability multiplier</param>
+ <param name="QYear">Catchability increase over time due to improved fishing efficiency.</param>
+ <param name="iTimeIndex">Cumulative time index.</param>
+ <remarks>Sets effort in cEcosimDataStructures.FishRateGear(nfleet,ngroups) base on Quota and user selected controls.</remarks>
+</member>
+<member name="T:EwEPlugin.IMSYPlugin">
+ <summary>
+ Interface for implementing MSY search plugin points that are invoked from the EwE core.
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="M:EwEPlugin.IMSYPlugin.MSYInitialized(System.Object,System.Object)">
+ <summary>
+ MSY has been initialized
+ </summary>
+ <param name="MSEDataStructure">MSE data structures</param>
+ <param name="EcosimDatastructures">Ecosim data structures</param>
+ <remarks></remarks>
+</member>
+<member name="M:EwEPlugin.IMSYPlugin.MSYRunStarted(System.Object,System.Object)">
+ <summary>
+ The MSY variables have been initialized and search is about to start.
+ </summary>
+ <param name="MSEDataStructure"></param>
+ <param name="EcosimDatastructures"></param>
+ <remarks></remarks>
+</member>
+<member name="M:EwEPlugin.IMSYPlugin.MSYEffortCompleted(System.Single[],System.Single[])">
+ <summary>
+ MSY search has completed all its iteration and computed effort for all fleets. Interface objects have not been populated at this time.
+ </summary>
+ <param name="MSYEffortByFleet">MSY effort for all fleets</param>
+ <param name="MSYFbyGroup">MSY Fishing mortality for groups</param>
+ <remarks></remarks>
+</member>
+<member name="M:EwEPlugin.IMSYPlugin.MSYRunCompleted">
+ <summary>
+ MSY search is completed all iterface object have been populated.
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="M:EwEPlugin.IMonteCarloPlugin.MontCarloInitialized(System.Object)">
+ <summary>
+ The MonteCarlo model has initialized. Passes the MonteCarlo model to a plugin.
+ </summary>
+ <param name="MonteCarloAsObject">The cEcosimMonteCarlo object as an Object </param>
+</member>
+<member name="M:EwEPlugin.IMonteCarloPlugin.MonteCarloRunInitialized">
+ <summary>
+ The MonteCarlo model has initialized for a run. Ecosim SS has been calculated, and
+ the MC will start iterating next.
+ </summary>
+</member>
+<member name="M:EwEPlugin.IMonteCarloPlugin.MonteCarloBalancedEcopathModel(System.Int32,System.Int32)">
+ <summary>
+ The MonteCarlo has found a balanced model and it about to run Ecosim.
+ </summary>
+ <param name="TrialNumber">Number of the current trial.</param>
+ <param name="nIterations">Number of iteration to find a balanced Ecopath model</param>
+ <remarks>The Plugin Manager will marshal the call to MonteCarloBalancedEcopathModel(...) from the MonteCarlo thread onto the main thread. 
+ If the plugin wants to thread its process it can't block the main thread so it has to use WaitLock.Reset() to set the signal state and return immediately. 
+ Then once the thread has completed call WaitLock.Set() to release the signal state and allow the MonteCarlo to continue.
+ If the Plugin ignores the WaitLock the MonteCarlo will continue running when MonteCarloBalancedEcopathModel(...) returns.
+  </remarks>
+</member>
+<member name="M:EwEPlugin.IMonteCarloPlugin.MonteCarloEcosimRunCompleted">
+ <summary>
+ The MonteCarlo has completed its Ecosim run and will start another trial.
+ </summary>
+</member>
+<member name="M:EwEPlugin.IMonteCarloPlugin.MonteCarloRunCompleted">
+ <summary>
+ The MonteCarlo has completed its run.
+ </summary>
+</member>
+<member name="T:EwEPlugin.IMonteCarloResultWriterPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for providing an Monte Carlo result writer as a plug-in.
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="T:EwEPlugin.ISearchPlugin">
+ ---------------------------------------------------------------------------
+ <summary>
+ Interface for implementing plugin points that are invoked from the EwE
+ searches
+ </summary>
+ ---------------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.ISearchPlugin.SearchInitialized(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Search has been initialized by the core.
+ </summary>
+ <param name="SearchDatastructures">cSearchDataStructures</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.ISearchPlugin.PostRunSearchResults(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ The user selected minimization routine has made a call to the function 
+ being minimized.
+ </summary>
+ <param name="SearchDatastructures">cSearchDataStructures</param>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.ISearchPlugin.SearchIterationsStarting">
+ -----------------------------------------------------------------------
+ <summary>
+ Search iteration are about to start.
+ </summary>
+ <remarks>
+ The minimization is about to run for the user selected number of 
+ iteration. 
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.ISearchPlugin.SearchCompleted(System.Object)">
+ -----------------------------------------------------------------------
+ <summary>
+ Search is completed.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+</members>
+</doc>
