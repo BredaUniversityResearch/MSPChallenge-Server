@@ -21248,6 +21248,24 @@
               "valueColor": "#73FFBCFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Harbor Porpoise Bycatch",
+              "valueColor": "#73D9FFFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Seals Bycatch",
+              "valueColor": "#FFC773FF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Seabirds Bycatch",
+              "valueColor": "#FF7272FF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
             }
           ]
         },
