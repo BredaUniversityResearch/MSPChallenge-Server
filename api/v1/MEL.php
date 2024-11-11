@@ -877,7 +877,8 @@ SUBQUERY,
         /** @var PolicyDataBase[]|ItemsPolicyDataBase[] $policiesToApply */
         $policiesToApply = [];
         foreach ($geomDataProperties as $policyData) {
-            $this->log('Encountered policies for geometry: '.($geometry->getName() ?? 'unnamed'));
+            $g = $geometry->getOriginalGeometry() ?? $geometry;
+            $this->log('Encountered policies for geometry: '.($geometry->getName() ?? $g->getName() ?? 'unnamed'));
             if (!is_object($policyData)) {
                 $this->log('Policy data is not a json object: '.json_encode($policyData), self::LOG_LEVEL_WARNING);
                 continue;
