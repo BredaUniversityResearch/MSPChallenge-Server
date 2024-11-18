@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<EwEModel Name="MSP_tools_Test_1" DBVersion="6.700014" EwEVersion="6.7.0.18848">
+<EwEModel Name="MSP_tools_Test_1" DBVersion="6.700014" EwEVersion="6.7.0.18889">
   <Table Name="Auxillary" Columns="DBID:System.Int64,Remark:System.String,Settings:System.String,ValueID:System.String,VisualStyle:System.String" Num="4330">
     <Row>1,"Original value: Based on data for  cod  in SDs 22-24 from Table 8.3.4.11 in ICES Advice 2017 on fishing opportunities, catch, and effort (Baltis Sea Ecoregion). SSB for age +3 for year 1994. SSB divided by area size for SD 22, 23 and 24 (44 746 square km)  to obtain gWW / m2. Carbon weight calculated using a conversion factor of 10:1.",,EcoPathGroupInput:5:BiomassAreaInput,</Row>
     <Row>2,"Total of natural mortality (ICES value 0,2) and average fishing mortality for years 2008 to 2013 of 0,907 for age classes 4 and 5+ (based on tables 2.3.17, 2.3.19, and 2.3.23 in ICES WGBFAS Report 2014).
@@ -962,7 +962,7 @@ Values for IUU fishery of flat fish read off Appendix Tables  in Rossing et al. 
     <Row>842,,,EcospaceLayerMigration:10:Name,AAEAAAD/////AQAAAAAAAAAMAgAAAE5Fd0VDb3JlLCBWZXJzaW9uPTYuNy4wLjE4ODQ4LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTFkODc1MzkzYjNlYmNhZDAMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAAB5Fd0VDb3JlLkF1eGlsaWFyeS5jVmlzdWFsU3R5bGULAAAADG1faGF0Y2hTdHlsZQltX2NsckZvcmUJbV9jbHJCYWNrBW1faW1nDW1fc3RyRm9udE5hbWULbV9zRm9udFNpemULbV9mb250c3R5bGUMbV9ncmFkaWVudElEEG1fZ3JhZGllbnRDb2xvcnMQbV9ncmFkaWVudEJyZWFrcw5tX2dyYWRpZW50TmFtZQQEBAQBAAQABAcBI1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkltYWdlAwAAAAsYU3lzdGVtLkRyYXdpbmcuRm9udFN0eWxlAwAAAAgWU3lzdGVtLkRyYXdpbmcuQ29sb3JbXQMAAAAGAgAAAAX8////I1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAQAAAAd2YWx1ZV9fAAgDAAAABQAAAAX7////FFN5c3RlbS5EcmF3aW5nLkNvbG9yBAAAAARuYW1lBXZhbHVlCmtub3duQ29sb3IFc3RhdGUBAAAACQcHAwAAAAoAAAAAAAAAACMAAQAB+v////v///8KAAAAAAAAAAAbAAEACgYHAAAABUFyaWFsAAAAQQX4////GFN5c3RlbS5EcmF3aW5nLkZvbnRTdHlsZQEAAAAHdmFsdWVfXwAIAwAAAAAAAAAAAAAACgoGCQAAAAAL</Row>
     <Row>843,,,EcospaceLayerOtherMortInput:10:Name,AAEAAAD/////AQAAAAAAAAAMAgAAAE5Fd0VDb3JlLCBWZXJzaW9uPTYuNy4wLjE4ODQ4LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTFkODc1MzkzYjNlYmNhZDAMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAAB5Fd0VDb3JlLkF1eGlsaWFyeS5jVmlzdWFsU3R5bGULAAAADG1faGF0Y2hTdHlsZQltX2NsckZvcmUJbV9jbHJCYWNrBW1faW1nDW1fc3RyRm9udE5hbWULbV9zRm9udFNpemULbV9mb250c3R5bGUMbV9ncmFkaWVudElEEG1fZ3JhZGllbnRDb2xvcnMQbV9ncmFkaWVudEJyZWFrcw5tX2dyYWRpZW50TmFtZQQEBAQBAAQABAcBI1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkltYWdlAwAAAAsYU3lzdGVtLkRyYXdpbmcuRm9udFN0eWxlAwAAAAgWU3lzdGVtLkRyYXdpbmcuQ29sb3JbXQMAAAAGAgAAAAX8////I1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAQAAAAd2YWx1ZV9fAAgDAAAABQAAAAX7////FFN5c3RlbS5EcmF3aW5nLkNvbG9yBAAAAARuYW1lBXZhbHVlCmtub3duQ29sb3IFc3RhdGUBAAAACQcHAwAAAAoAAAAAAAAAACMAAQAB+v////v///8KAAAAAAAAAAAbAAEACgYHAAAABUFyaWFsAAAAQQX4////GFN5c3RlbS5EcmF3aW5nLkZvbnRTdHlsZQEAAAAHdmFsdWVfXwAIAwAAAAAAAAAAAAAACgoGCQAAAAAL</Row>
     <Row>844,,,EcospaceLayerHabitat:19:Name,AAEAAAD/////AQAAAAAAAAAMAgAAAE5Fd0VDb3JlLCBWZXJzaW9uPTYuNy4wLjE4ODQ4LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTFkODc1MzkzYjNlYmNhZDAMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAAB5Fd0VDb3JlLkF1eGlsaWFyeS5jVmlzdWFsU3R5bGULAAAADG1faGF0Y2hTdHlsZQltX2NsckZvcmUJbV9jbHJCYWNrBW1faW1nDW1fc3RyRm9udE5hbWULbV9zRm9udFNpemULbV9mb250c3R5bGUMbV9ncmFkaWVudElEEG1fZ3JhZGllbnRDb2xvcnMQbV9ncmFkaWVudEJyZWFrcw5tX2dyYWRpZW50TmFtZQQEBAQBAAQABAcBI1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFVN5c3RlbS5EcmF3aW5nLkJpdG1hcAMAAAALGFN5c3RlbS5EcmF3aW5nLkZvbnRTdHlsZQMAAAAIFlN5c3RlbS5EcmF3aW5nLkNvbG9yW10DAAAABgIAAAAF/P///yNTeXN0ZW0uRHJhd2luZy5EcmF3aW5nMkQuSGF0Y2hTdHlsZQEAAAAHdmFsdWVfXwAIAwAAAAUAAAAF+////xRTeXN0ZW0uRHJhd2luZy5Db2xvcgQAAAAEbmFtZQV2YWx1ZQprbm93bkNvbG9yBXN0YXRlAQAAAAkHBwMAAAAKAAAAAAAAAABOAAEAAfr////7////CgAAAAAAAAAAGwABAAkHAAAABggAAAAFQXJpYWwAAABBBff///8YU3lzdGVtLkRyYXdpbmcuRm9udFN0eWxlAQAAAAd2YWx1ZV9fAAgDAAAAAAAAAAAAAAAKCgYKAAAAAAUHAAAAFVN5c3RlbS5EcmF3aW5nLkJpdG1hcAEAAAAERGF0YQcCAwAAAAkLAAAADwsAAACDAAAAAolQTkcNChoKAAAADUlIRFIAAAAQAAAAEAgGAAAAH/P/YQAAAARnQU1BAACxjwv8YQUAAAA6SURBVDhPpcgxEQAgDAAx/DvAIx6KgQz8MWTJWvvMF2bBLJgFs2AWzIJZMAtmwSyYBbNgFsyC+ezMBciWhB+RRgfmAAAAAElFTkSuQmCCCw==</Row>
-    <Row>845,%3c%3fxml+version%3d%221.0%22+standalone%3d%22yes%22%3f%3e%3csettings%3e%3cgames%3e%3cgame+name%3d%22Trial%22+version%3d%22WBS%2bmodel%2b-%2btrial%2b-%2b30%252f01%252f24%22+author%3d%22Marcela%2bC.%2bNascimento%2band%2bMarco%2bScotti%22+contact%3d%22mnascimento%2540geomar.de%22+ecosim_id%3d%221%22+ecospace_id%3d%2210%22+spinup_years%3d%2210%22+run_years%3d%221000%22+calc_indicators%3d%22True%22+mpa_cell_closure%3d%220.25%22+bycatch_weight%3d%2210%22%3e%3cdescription%3eWBS%2bmodel%2bfrom%2bScotti%2bet%2bal%2b2022%252c%2bICES%2bSD%2b22-24%2b%252c%2bEcospace%2bfrom%2bNascimento%2band%2bScotti%2b2023%3c%2fdescription%3e%3cpressures%3e%3cpressure_environmental+name%3d%22Impulse%2bNoise%22+%2f%3e%3cpressure_environmental+name%3d%22Bottom%2bDisturbance%22+%2f%3e%3cpressure_environmental+name%3d%22Surface%2bDisturbance%22+%2f%3e%3cpressure_environmental+name%3d%22Artificial%2bHabitat%22+%2f%3e%3cpressure_environmental+name%3d%22Protection%2bPelagic%2bFleet%22+%2f%3e%3cpressure_fishing_intensity+name%3d%22Fishing%2bPelagic%2bFleet%22+%2f%3e%3cpressure_fishing_eco+name%3d%22Ecological%2bFishing%2bPelagic%2bFleet%22+%2f%3e%3cpressure_environmental+name%3d%22Protection%2bDemersal%2bFleet%22+%2f%3e%3cpressure_fishing_intensity+name%3d%22Fishing%2bDemersal%2bFleet%22+%2f%3e%3cpressure_fishing_eco+name%3d%22Ecological%2bFishing%2bDemersal%2bFleet%22+%2f%3e%3cpressure_environmental+name%3d%22Protection%2bRecreational%2bFleet%22+%2f%3e%3cpressure_fishing_intensity+name%3d%22Fishing%2bRecreational%2bFishery%22+%2f%3e%3cpressure_fishing_eco+name%3d%22Ecological%2bfishing%2brecreational%2bfishery%22+%2f%3e%3cpressure_environmental+name%3d%22Protection%2bUnreported%2bFleet%22+%2f%3e%3cpressure_fishing_intensity+name%3d%22Fishing%2bUnreported%2bFleet%22+%2f%3e%3cpressure_fishing_eco+name%3d%22Ecological%2bFishing%2bUnreported%2bFleet%22+%2f%3e%3cpressure_environmental+name%3d%22Continuous%2bNoise%22+%2f%3e%3cpressure_environmental+name%3d%22Bottom%2bVibration%22+%2f%3e%3cpressure_environmental+name%3d%22Air%2bDisturbance%22+%2f%3e%3c%2fpressures%3e%3cmappings%3e%3cmapping+pressure%3d%22Fishing%2bintensity%2brecreational%2bfishery%22+driver%3d%22FleetInput_4%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Low%2bfrequency%2bnoise1%22+driver%3d%22EcospaceLayerDriver_28%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bintensity%2bpelagic%2bfleet%22+driver%3d%22FleetInput_2%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Air%2bdisturbance1%22+driver%3d%22EcospaceLayerDriver_33%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Bottom%2bvibration1%22+driver%3d%22EcospaceLayerDriver_29%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Water%2bsurface%2bvelocity1%22+driver%3d%22EcospaceLayerDriver_34%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bbycatch%252fIUUfishery1%22+driver%3d%22EcospaceMPA_29%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bintensity%2bdemersal%2bfleet%22+driver%3d%22FleetInput_1%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22High%2bfrequency%2bnoise1%22+driver%3d%22EcospaceLayerDriver_30%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2brecreational%2bfishery1%22+driver%3d%22EcospaceMPA_27%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bdemersal%2bfleet1%22+driver%3d%22EcospaceMPA_27%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bintensity%2bbycatch%252fIUUfishery%22+driver%3d%22FleetInput_5%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bpelagic%2bfleet1%22+driver%3d%22EcospaceMPA_26%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Artificial%2bhabitat1%22+driver%3d%22EcospaceHabitat_28%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Surface%2bdisturbance1%22+driver%3d%22EcospaceLayerDriver_32%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Bottom%2bdisturbance1%22+driver%3d%22EcospaceLayerDriver_31%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Impulse%2bNoise%22+driver%3d%22EcospaceLayerDriver_28%22+%2f%3e%3cmapping+pressure%3d%22Surface%2bDisturbance%22+driver%3d%22EcospaceLayerDriver_32%22+%2f%3e%3cmapping+pressure%3d%22Artificial%2bHabitat%22+driver%3d%22EcospaceHabitat_28%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bPelagic%2bFleet%22+driver%3d%22EcospaceMPA_26%22+%2f%3e%3cmapping+pressure%3d%22Bottom%2bVibration%22+driver%3d%22EcospaceLayerDriver_29%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bDemersal%2bFleet%22+driver%3d%22FleetInput_1%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bRecreational%2bFleet%22+driver%3d%22EcospaceMPA_28%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bRecreational%2bFishery%22+driver%3d%22FleetInput_4%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bUnreported%2bFleet%22+driver%3d%22EcospaceMPA_29%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bUnreported%2bFleet%22+driver%3d%22FleetInput_5%22+%2f%3e%3cmapping+pressure%3d%22Continuous%2bNoise%22+driver%3d%22EcospaceLayerDriver_30%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bPelagic%2bFleet%22+driver%3d%22FleetInput_2%22+%2f%3e%3cmapping+pressure%3d%22Air%2bDisturbance%22+driver%3d%22EcospaceLayerDriver_33%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bDemersal%2bFleet%22+driver%3d%22EcospaceMPA_27%22+%2f%3e%3cmapping+pressure%3d%22Bottom%2bDisturbance%22+driver%3d%22EcospaceLayerDriver_31%22+%2f%3e%3c%2fmappings%3e%3coutputs%3e%3coutput+name%3d%22Benthic%2bMacrofauna%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Seals%22+type%3d%22Biomass%22+numerators%3d%221%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Seabirds%22+type%3d%22Biomass%22+numerators%3d%220%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Cod%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c1%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Flatfish%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Harbour%2bPorpoise%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Other%2bDemersal%2bFish%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Herring%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Sprat%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Other%2bPelagic%2bFish%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Pelagic%2bMacrofauna%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Benthic%2bMeiofauna%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Zooplankton%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Phytoplankton%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Benthic%2bProducers%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Pelagic%2bFleet%2bCatch%22+type%3d%22Catch%22+numerators%3d%221%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Demersal%2bFleet%2bCatch%22+type%3d%22Catch%22+numerators%3d%220%2c1%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Recreational%2bFleet%2bCatch%22+type%3d%22Catch%22+numerators%3d%220%2c0%2c1%2c0%22+denominators%3d%220%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Unreported%2bFleet%2bCatch%22+type%3d%22Catch%22+numerators%3d%220%2c0%2c0%2c1%22+denominators%3d%220%2c0%2c0%2c0%22+%2f%3e%3c%2foutputs%3e%3c%2fgame%3e%3c%2fgames%3e%3c%2fsettings%3e,,MSPChallenge2050Config,</Row>
+    <Row>845,%3c%3fxml+version%3d%221.0%22+standalone%3d%22yes%22%3f%3e%3csettings%3e%3cgames%3e%3cgame+name%3d%22Trial%22+version%3d%22WBS%2bmodel%2b-%2btrial%2b-%2b30%252f01%252f24%22+author%3d%22Marcela%2bC.%2bNascimento%2band%2bMarco%2bScotti%22+contact%3d%22mnascimento%2540geomar.de%22+ecosim_id%3d%221%22+ecospace_id%3d%2210%22+spinup_years%3d%2210%22+run_years%3d%221000%22+calc_indicators%3d%22True%22+mpa_cell_closure%3d%220.25%22+bycatch_weight%3d%2210%22%3e%3cdescription%3eWBS%2bmodel%2bfrom%2bScotti%2bet%2bal%2b2022%252c%2bICES%2bSD%2b22-24%2b%252c%2bEcospace%2bfrom%2bNascimento%2band%2bScotti%2b2023%3c%2fdescription%3e%3cpressures%3e%3cpressure_environmental+name%3d%22Impulse%2bNoise%22+%2f%3e%3cpressure_environmental+name%3d%22Bottom%2bDisturbance%22+%2f%3e%3cpressure_environmental+name%3d%22Surface%2bDisturbance%22+%2f%3e%3cpressure_environmental+name%3d%22Artificial%2bHabitat%22+%2f%3e%3cpressure_environmental+name%3d%22Protection%2bPelagic%2bFleet%22+%2f%3e%3cpressure_fishing_intensity+name%3d%22Fishing%2bPelagic%2bFleet%22+%2f%3e%3cpressure_fishing_eco+name%3d%22Ecological%2bFishing%2bPelagic%2bFleet%22+%2f%3e%3cpressure_environmental+name%3d%22Protection%2bDemersal%2bFleet%22+%2f%3e%3cpressure_fishing_intensity+name%3d%22Fishing%2bDemersal%2bFleet%22+%2f%3e%3cpressure_fishing_eco+name%3d%22Ecological%2bFishing%2bDemersal%2bFleet%22+%2f%3e%3cpressure_environmental+name%3d%22Protection%2bRecreational%2bFleet%22+%2f%3e%3cpressure_fishing_intensity+name%3d%22Fishing%2bRecreational%2bFishery%22+%2f%3e%3cpressure_fishing_eco+name%3d%22Ecological%2bfishing%2brecreational%2bfishery%22+%2f%3e%3cpressure_environmental+name%3d%22Protection%2bUnreported%2bFleet%22+%2f%3e%3cpressure_fishing_intensity+name%3d%22Fishing%2bUnreported%2bFleet%22+%2f%3e%3cpressure_fishing_eco+name%3d%22Ecological%2bFishing%2bUnreported%2bFleet%22+%2f%3e%3cpressure_environmental+name%3d%22Continuous%2bNoise%22+%2f%3e%3cpressure_environmental+name%3d%22Bottom%2bVibration%22+%2f%3e%3cpressure_environmental+name%3d%22Air%2bDisturbance%22+%2f%3e%3c%2fpressures%3e%3cmappings%3e%3cmapping+pressure%3d%22Fishing%2bintensity%2brecreational%2bfishery%22+driver%3d%22FleetInput_4%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Low%2bfrequency%2bnoise1%22+driver%3d%22EcospaceLayerDriver_28%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bintensity%2bpelagic%2bfleet%22+driver%3d%22FleetInput_2%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Air%2bdisturbance1%22+driver%3d%22EcospaceLayerDriver_33%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Bottom%2bvibration1%22+driver%3d%22EcospaceLayerDriver_29%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Water%2bsurface%2bvelocity1%22+driver%3d%22EcospaceLayerDriver_34%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bbycatch%252fIUUfishery1%22+driver%3d%22EcospaceMPA_29%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bintensity%2bdemersal%2bfleet%22+driver%3d%22FleetInput_1%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22High%2bfrequency%2bnoise1%22+driver%3d%22EcospaceLayerDriver_30%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2brecreational%2bfishery1%22+driver%3d%22EcospaceMPA_27%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bdemersal%2bfleet1%22+driver%3d%22EcospaceMPA_27%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bintensity%2bbycatch%252fIUUfishery%22+driver%3d%22FleetInput_5%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bpelagic%2bfleet1%22+driver%3d%22EcospaceMPA_26%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Artificial%2bhabitat1%22+driver%3d%22EcospaceHabitat_28%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Surface%2bdisturbance1%22+driver%3d%22EcospaceLayerDriver_32%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Bottom%2bdisturbance1%22+driver%3d%22EcospaceLayerDriver_31%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Impulse%2bNoise%22+driver%3d%22EcospaceLayerDriver_28%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Surface%2bDisturbance%22+driver%3d%22EcospaceLayerDriver_32%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Artificial%2bHabitat%22+driver%3d%22EcospaceHabitat_28%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bPelagic%2bFleet%22+driver%3d%22EcospaceMPA_26%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Bottom%2bVibration%22+driver%3d%22EcospaceLayerDriver_29%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bDemersal%2bFleet%22+driver%3d%22FleetInput_1%22+multiplier%3d%222%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bRecreational%2bFleet%22+driver%3d%22EcospaceMPA_28%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bRecreational%2bFishery%22+driver%3d%22FleetInput_4%22+multiplier%3d%2250%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bUnreported%2bFleet%22+driver%3d%22EcospaceMPA_29%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bUnreported%2bFleet%22+driver%3d%22FleetInput_5%22+multiplier%3d%227%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Continuous%2bNoise%22+driver%3d%22EcospaceLayerDriver_30%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Fishing%2bPelagic%2bFleet%22+driver%3d%22FleetInput_2%22+multiplier%3d%222.5%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Air%2bDisturbance%22+driver%3d%22EcospaceLayerDriver_33%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Protection%2bDemersal%2bFleet%22+driver%3d%22EcospaceMPA_27%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3cmapping+pressure%3d%22Bottom%2bDisturbance%22+driver%3d%22EcospaceLayerDriver_31%22+multiplier%3d%221%22+eco_fishing%3d%220%22+%2f%3e%3c%2fmappings%3e%3coutputs%3e%3coutput+name%3d%22Benthic%2bMacrofauna%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Seals%22+type%3d%22Biomass%22+numerators%3d%221%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Seabirds%22+type%3d%22Biomass%22+numerators%3d%220%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Cod%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c1%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Flatfish%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Harbour%2bPorpoise%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Other%2bDemersal%2bFish%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Herring%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Sprat%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Other%2bPelagic%2bFish%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Pelagic%2bMacrofauna%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Benthic%2bMeiofauna%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Zooplankton%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Phytoplankton%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Benthic%2bProducers%22+type%3d%22Biomass%22+numerators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c1%2c0%22+denominators%3d%220%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Pelagic%2bFleet%2bCatch%22+type%3d%22Catch%22+numerators%3d%221%2c0%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Demersal%2bFleet%2bCatch%22+type%3d%22Catch%22+numerators%3d%220%2c1%2c0%2c0%22+denominators%3d%220%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Recreational%2bFleet%2bCatch%22+type%3d%22Catch%22+numerators%3d%220%2c0%2c1%2c0%22+denominators%3d%220%2c0%2c0%2c0%22+%2f%3e%3coutput+name%3d%22Unreported%2bFleet%2bCatch%22+type%3d%22Catch%22+numerators%3d%220%2c0%2c0%2c1%22+denominators%3d%220%2c0%2c0%2c0%22+%2f%3e%3c%2foutputs%3e%3c%2fgame%3e%3c%2fgames%3e%3c%2fsettings%3e,,MSPChallenge2050Config,</Row>
     <Row>846,Model was fited to time series previously and then enabled the time series
 21/11/23 Fishing mortality and fishing effort reset to 1 on 11/21/23 as indicated on EwE tools for MSP - EwE model guidelines for MSP gameplay (2017)
 21/11/23 No changes applied on mediation effects and egg production
@@ -1005,410 +1005,410 @@ Values for IUU fishery of flat fish read off Appendix Tables  in Rossing et al. 
     <Row>881,,,EcospaceLayerMPA:29:Name,AAEAAAD/////AQAAAAAAAAAMAgAAAE5Fd0VDb3JlLCBWZXJzaW9uPTYuNy4wLjE4ODQ4LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTFkODc1MzkzYjNlYmNhZDAMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAAB5Fd0VDb3JlLkF1eGlsaWFyeS5jVmlzdWFsU3R5bGULAAAADG1faGF0Y2hTdHlsZQltX2NsckZvcmUJbV9jbHJCYWNrBW1faW1nDW1fc3RyRm9udE5hbWULbV9zRm9udFNpemULbV9mb250c3R5bGUMbV9ncmFkaWVudElEEG1fZ3JhZGllbnRDb2xvcnMQbV9ncmFkaWVudEJyZWFrcw5tX2dyYWRpZW50TmFtZQQEBAQBAAQABAcBI1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkltYWdlAwAAAAsYU3lzdGVtLkRyYXdpbmcuRm9udFN0eWxlAwAAAAgWU3lzdGVtLkRyYXdpbmcuQ29sb3JbXQMAAAAGAgAAAAX8////I1N5c3RlbS5EcmF3aW5nLkRyYXdpbmcyRC5IYXRjaFN0eWxlAQAAAAd2YWx1ZV9fAAgDAAAABAAAAAX7////FFN5c3RlbS5EcmF3aW5nLkNvbG9yBAAAAARuYW1lBXZhbHVlCmtub3duQ29sb3IFc3RhdGUBAAAACQcHAwAAAAoAAAD/AAAAAAAAAgAB+v////v///8KAAAAAAAAAAAbAAEACgYHAAAABUFyaWFsAAAAQQX4////GFN5c3RlbS5EcmF3aW5nLkZvbnRTdHlsZQEAAAAHdmFsdWVfXwAIAwAAAAAAAADx2P//CgoGCQAAAAAL</Row>
   </Table>
   <Table Name="EcopathCatch" Columns="DiscardMortality:System.Single,Discards:System.Single,FleetID:System.Int64,GroupID:System.Int64,Landing:System.Single,Price:System.Single" Num="432">
-    <Row>1,0,2,2,0,1</Row>
-    <Row>1,0,2,3,0,1</Row>
-    <Row>1,0,2,4,0,1</Row>
-    <Row>1,0,2,5,0,1</Row>
-    <Row>1,0,2,6,0,1</Row>
-    <Row>1,0,2,29,0,0</Row>
-    <Row>1,0,2,30,0,1</Row>
-    <Row>1,0.007495974,2,10,0.1529791,4.7</Row>
-    <Row>1,0.002685483,2,12,0.02518851,2.7</Row>
-    <Row>1,0.00366,2,15,0.03004,14.6</Row>
-    <Row>1,0,2,20,0,1</Row>
-    <Row>1,0,2,21,0,1</Row>
-    <Row>1,0,2,22,0,1</Row>
-    <Row>1,0,2,23,0,1</Row>
-    <Row>1,0,2,26,0,1</Row>
-    <Row>1,0,2,27,0,1</Row>
-    <Row>1,0,2,28,0,1</Row>
-    <Row>1,0,2,1,0,1</Row>
-    <Row>1,0,1,2,0,1</Row>
-    <Row>1,0,1,3,0,1</Row>
-    <Row>1,0,1,4,0,1</Row>
-    <Row>1,0.001224242,1,5,0.03603476,14.9</Row>
-    <Row>1,0.00238446,1,6,0.01559491,1</Row>
-    <Row>1,0.01409415,1,29,0.01916171,17.34022</Row>
-    <Row>1,0.00376761,1,30,0.03088209,111.2</Row>
-    <Row>1,0,1,10,0,1</Row>
-    <Row>1,0,1,12,0,1</Row>
-    <Row>1,0,1,15,0,1</Row>
-    <Row>1,0,1,20,0,1</Row>
-    <Row>1,0,1,21,0.0355,1</Row>
-    <Row>1,0,1,22,0,1</Row>
-    <Row>1,0,1,23,0,1</Row>
-    <Row>1,0,1,26,0,1</Row>
-    <Row>1,0,1,27,0,1</Row>
-    <Row>1,0,1,28,0,1</Row>
     <Row>1,0,1,1,0,1</Row>
-    <Row>1,0,4,2,0,1</Row>
-    <Row>1,0,4,3,0,1</Row>
-    <Row>1,0,4,4,0,1</Row>
-    <Row>1,0,4,5,0.004247538,14</Row>
-    <Row>1,0,4,6,0.002561089,1</Row>
-    <Row>1,0,4,29,0.001035327,17.68823</Row>
-    <Row>1,0,4,30,0.00169851,111</Row>
-    <Row>1,0,4,10,0.004130435,4</Row>
-    <Row>1,0,4,12,0,2</Row>
-    <Row>1,0,4,15,0.00165224,14</Row>
-    <Row>1,0,4,20,0,1</Row>
-    <Row>1,0,4,21,0,1</Row>
-    <Row>1,0,4,22,0,1</Row>
-    <Row>1,0,4,23,0,1</Row>
-    <Row>1,0,4,26,0,1</Row>
-    <Row>1,0,4,27,0,1</Row>
-    <Row>1,0,4,28,0,1</Row>
+    <Row>1,0,2,1,0,1</Row>
     <Row>1,0,4,1,0,1</Row>
-    <Row>1,0,5,2,4.75E-07,1</Row>
-    <Row>1,0,5,3,0.00204,1</Row>
-    <Row>1,0,5,4,3.737475E-05,1</Row>
-    <Row>1,0,5,5,0,1</Row>
-    <Row>1,0,5,6,0,1</Row>
-    <Row>1,0,5,29,0.005155405,1</Row>
-    <Row>1,0,5,30,0.00831,1</Row>
-    <Row>1,0,5,10,0.003059581,1</Row>
-    <Row>1,0,5,12,0.006775767,1</Row>
-    <Row>1,0,5,15,0.00808094,1</Row>
-    <Row>1,0,5,20,0,1</Row>
-    <Row>1,0,5,21,0,1</Row>
-    <Row>1,0,5,22,0,1</Row>
-    <Row>1,0,5,23,0,1</Row>
-    <Row>1,0,5,26,0,1</Row>
-    <Row>1,0,5,27,0,1</Row>
-    <Row>1,0,5,28,0,1</Row>
     <Row>1,0,5,1,0,1</Row>
+    <Row>1,0,1,2,0,1</Row>
+    <Row>1,0,2,2,0,1</Row>
+    <Row>1,0,4,2,0,1</Row>
+    <Row>1,0,5,2,4.75E-07,1</Row>
+    <Row>1,0,1,3,0,1</Row>
+    <Row>1,0,2,3,0,1</Row>
+    <Row>1,0,4,3,0,1</Row>
+    <Row>1,0,5,3,0.00204,1</Row>
+    <Row>1,0,1,4,0,1</Row>
+    <Row>1,0,2,4,0,1</Row>
+    <Row>1,0,4,4,0,1</Row>
+    <Row>1,0,5,4,3.737475E-05,1</Row>
+    <Row>1,0.001224242,1,5,0.03603476,14.9</Row>
+    <Row>1,0,2,5,0,1</Row>
+    <Row>1,0,4,5,0.004247538,14</Row>
+    <Row>1,0,5,5,0,1</Row>
+    <Row>1,0.00238446,1,6,0.01559491,1</Row>
+    <Row>1,0,2,6,0,1</Row>
+    <Row>1,0,4,6,0.002561089,1</Row>
+    <Row>1,0,5,6,0,1</Row>
+    <Row>1,0,1,10,0,1</Row>
+    <Row>1,0.007495974,2,10,0.1529791,4.7</Row>
+    <Row>1,0,4,10,0.004130435,4</Row>
+    <Row>1,0,5,10,0.003059581,1</Row>
+    <Row>1,0,1,12,0,1</Row>
+    <Row>1,0.002685483,2,12,0.02518851,2.7</Row>
+    <Row>1,0,4,12,0,2</Row>
+    <Row>1,0,5,12,0.006775767,1</Row>
+    <Row>1,0,1,15,0,1</Row>
+    <Row>1,0.00366,2,15,0.03004,14.6</Row>
+    <Row>1,0,4,15,0.00165224,14</Row>
+    <Row>1,0,5,15,0.00808094,1</Row>
+    <Row>1,0,1,20,0,1</Row>
+    <Row>1,0,2,20,0,1</Row>
+    <Row>1,0,4,20,0,1</Row>
+    <Row>1,0,5,20,0,1</Row>
+    <Row>1,0,1,21,0.0355,1</Row>
+    <Row>1,0,2,21,0,1</Row>
+    <Row>1,0,4,21,0,1</Row>
+    <Row>1,0,5,21,0,1</Row>
+    <Row>1,0,1,22,0,1</Row>
+    <Row>1,0,2,22,0,1</Row>
+    <Row>1,0,4,22,0,1</Row>
+    <Row>1,0,5,22,0,1</Row>
+    <Row>1,0,1,23,0,1</Row>
+    <Row>1,0,2,23,0,1</Row>
+    <Row>1,0,4,23,0,1</Row>
+    <Row>1,0,5,23,0,1</Row>
+    <Row>1,0,1,26,0,1</Row>
+    <Row>1,0,2,26,0,1</Row>
+    <Row>1,0,4,26,0,1</Row>
+    <Row>1,0,5,26,0,1</Row>
+    <Row>1,0,1,27,0,1</Row>
+    <Row>1,0,2,27,0,1</Row>
+    <Row>1,0,4,27,0,1</Row>
+    <Row>1,0,5,27,0,1</Row>
+    <Row>1,0,1,28,0,1</Row>
+    <Row>1,0,2,28,0,1</Row>
+    <Row>1,0,4,28,0,1</Row>
+    <Row>1,0,5,28,0,1</Row>
+    <Row>1,0.01409415,1,29,0.01916171,17.34022</Row>
+    <Row>1,0,2,29,0,0</Row>
+    <Row>1,0,4,29,0.001035327,17.68823</Row>
+    <Row>1,0,5,29,0.005155405,1</Row>
+    <Row>1,0.00376761,1,30,0.03088209,111.2</Row>
+    <Row>1,0,2,30,0,1</Row>
+    <Row>1,0,4,30,0.00169851,111</Row>
+    <Row>1,0,5,30,0.00831,1</Row>
   </Table>
   <Table Name="EcopathCatchCode" Columns="Code:System.Int64,GroupID:System.Int64,Proportion:System.Single" Num="0" />
   <Table Name="EcopathDietComp" Columns="DetritusFate:System.Single,Diet:System.Single,PredID:System.Int64,PreyID:System.Int64" Num="1296">
-    <Row>0,0,2,2</Row>
-    <Row>0,0,2,3</Row>
-    <Row>0,0,2,4</Row>
-    <Row>0,0,2,5</Row>
-    <Row>0,0.104,2,6</Row>
-    <Row>0,0.077,2,29</Row>
-    <Row>0,0.145,2,30</Row>
-    <Row>0,0.434,2,10</Row>
-    <Row>0,0,2,12</Row>
-    <Row>0,0.24,2,15</Row>
-    <Row>0,0,2,20</Row>
-    <Row>0,0,2,21</Row>
-    <Row>0,0,2,22</Row>
-    <Row>0,0,2,23</Row>
-    <Row>0,0,2,26</Row>
-    <Row>0,0,2,27</Row>
-    <Row>0,0,2,28</Row>
-    <Row>1,0,2,1</Row>
-    <Row>0,0,3,2</Row>
-    <Row>0,0,3,3</Row>
-    <Row>0,0,3,4</Row>
-    <Row>0,0,3,5</Row>
-    <Row>0,0.03,3,6</Row>
-    <Row>0,0.01,3,29</Row>
-    <Row>0,0.23,3,30</Row>
-    <Row>0,0.07000001,3,10</Row>
-    <Row>0,0.05,3,12</Row>
-    <Row>0,0.06,3,15</Row>
-    <Row>0,0.03,3,20</Row>
-    <Row>0,0.31,3,21</Row>
-    <Row>0,0,3,22</Row>
-    <Row>0,0.03,3,23</Row>
-    <Row>0,0,3,26</Row>
-    <Row>0,0,3,27</Row>
-    <Row>0,0,3,28</Row>
-    <Row>1,0.05,3,1</Row>
-    <Row>0,0,4,2</Row>
-    <Row>0,0,4,3</Row>
-    <Row>0,0,4,4</Row>
-    <Row>0,0.009297211,4,5</Row>
-    <Row>0,0.033,4,6</Row>
-    <Row>0,0,4,29</Row>
-    <Row>0,0.389883,4,30</Row>
-    <Row>0,0.259922,4,10</Row>
-    <Row>0,0.039988,4,12</Row>
-    <Row>0,0,4,15</Row>
-    <Row>0,0,4,20</Row>
-    <Row>0,0,4,21</Row>
-    <Row>0,0,4,22</Row>
-    <Row>0,0,4,23</Row>
-    <Row>0,0,4,26</Row>
-    <Row>0,0,4,27</Row>
-    <Row>0,0,4,28</Row>
-    <Row>1,0,4,1</Row>
-    <Row>0,0,5,2</Row>
-    <Row>0,0,5,3</Row>
-    <Row>0,0,5,4</Row>
-    <Row>0,0,5,5</Row>
-    <Row>0,0.043,5,6</Row>
-    <Row>0,0.013,5,29</Row>
-    <Row>0,0.193,5,30</Row>
-    <Row>0,0.071,5,10</Row>
-    <Row>0,0.048,5,12</Row>
-    <Row>0,0,5,15</Row>
-    <Row>0,0,5,20</Row>
-    <Row>0,0.613,5,21</Row>
-    <Row>0,0,5,22</Row>
-    <Row>0,0.019,5,23</Row>
-    <Row>0,0,5,26</Row>
-    <Row>0,0,5,27</Row>
-    <Row>0,0,5,28</Row>
-    <Row>1,0,5,1</Row>
-    <Row>0,0,6,2</Row>
-    <Row>0,0,6,3</Row>
-    <Row>0,0,6,4</Row>
-    <Row>0,0,6,5</Row>
-    <Row>0,0.003,6,6</Row>
-    <Row>0,0,6,29</Row>
-    <Row>0,0.036,6,30</Row>
-    <Row>0,0.012,6,10</Row>
-    <Row>0,0.016,6,12</Row>
-    <Row>0,0.04,6,15</Row>
-    <Row>0,0,6,20</Row>
-    <Row>0,0.812,6,21</Row>
-    <Row>0,0,6,22</Row>
-    <Row>0,0.073,6,23</Row>
-    <Row>0,0,6,26</Row>
-    <Row>0,0,6,27</Row>
-    <Row>0,0,6,28</Row>
-    <Row>1,0.008,6,1</Row>
-    <Row>0,0,29,2</Row>
-    <Row>0,0,29,3</Row>
-    <Row>0,0,29,4</Row>
-    <Row>0,0,29,5</Row>
-    <Row>0,0.0003141366,29,6</Row>
-    <Row>0,0,29,29</Row>
-    <Row>0,0.1071413,29,30</Row>
-    <Row>0,0.0001570683,29,10</Row>
-    <Row>0,0.001099478,29,12</Row>
-    <Row>0,0,29,15</Row>
-    <Row>0,0.03672209,29,20</Row>
-    <Row>0,0.8228918,29,21</Row>
-    <Row>0,0.0008035608,29,22</Row>
-    <Row>0,0.03087057,29,23</Row>
-    <Row>0,0,29,26</Row>
-    <Row>0,0,29,27</Row>
-    <Row>0,0,29,28</Row>
-    <Row>1,0,29,1</Row>
-    <Row>0,0,30,2</Row>
-    <Row>0,0,30,3</Row>
-    <Row>0,0,30,4</Row>
-    <Row>0,0,30,5</Row>
-    <Row>0,0,30,6</Row>
-    <Row>0,0,30,29</Row>
-    <Row>0,0.011,30,30</Row>
-    <Row>0,0,30,10</Row>
-    <Row>0,0.12,30,12</Row>
-    <Row>0,0.093,30,15</Row>
-    <Row>0,0,30,20</Row>
-    <Row>0,0.576,30,21</Row>
-    <Row>0,0,30,22</Row>
-    <Row>0,0.2,30,23</Row>
-    <Row>0,0,30,26</Row>
-    <Row>0,0,30,27</Row>
-    <Row>0,0,30,28</Row>
-    <Row>1,0,30,1</Row>
-    <Row>0,0,10,2</Row>
-    <Row>0,0,10,3</Row>
-    <Row>0,0,10,4</Row>
-    <Row>0,0,10,5</Row>
-    <Row>0,0,10,6</Row>
-    <Row>0,0,10,29</Row>
-    <Row>0,0,10,30</Row>
-    <Row>0,0,10,10</Row>
-    <Row>0,0,10,12</Row>
-    <Row>0,0,10,15</Row>
-    <Row>0,0,10,20</Row>
-    <Row>0,0.063,10,21</Row>
-    <Row>0,0,10,22</Row>
-    <Row>0,0.932,10,23</Row>
-    <Row>0,0,10,26</Row>
-    <Row>0,0,10,27</Row>
-    <Row>0,0,10,28</Row>
-    <Row>1,0.005,10,1</Row>
-    <Row>0,0,12,2</Row>
-    <Row>0,0,12,3</Row>
-    <Row>0,0,12,4</Row>
-    <Row>0,0,12,5</Row>
-    <Row>0,0,12,6</Row>
-    <Row>0,0,12,29</Row>
-    <Row>0,0,12,30</Row>
-    <Row>0,0,12,10</Row>
-    <Row>0,0,12,12</Row>
-    <Row>0,0,12,15</Row>
-    <Row>0,0,12,20</Row>
-    <Row>0,0.0002,12,21</Row>
-    <Row>0,0,12,22</Row>
-    <Row>0,0.9798,12,23</Row>
-    <Row>0,0,12,26</Row>
-    <Row>0,0,12,27</Row>
-    <Row>0,0,12,28</Row>
-    <Row>1,0.02,12,1</Row>
-    <Row>0,0,15,2</Row>
-    <Row>0,0,15,3</Row>
-    <Row>0,0,15,4</Row>
-    <Row>0,0,15,5</Row>
-    <Row>0,0,15,6</Row>
-    <Row>0,0,15,29</Row>
-    <Row>0,0.0035,15,30</Row>
-    <Row>0,0,15,10</Row>
-    <Row>0,0,15,12</Row>
-    <Row>0,0.0005,15,15</Row>
-    <Row>0,0.077,15,20</Row>
-    <Row>0,0.032,15,21</Row>
-    <Row>0,0,15,22</Row>
-    <Row>0,0.887,15,23</Row>
-    <Row>0,0,15,26</Row>
-    <Row>0,0,15,27</Row>
-    <Row>0,0,15,28</Row>
-    <Row>1,0,15,1</Row>
-    <Row>0,0,20,2</Row>
-    <Row>0,0,20,3</Row>
-    <Row>0,0,20,4</Row>
-    <Row>0,0,20,5</Row>
-    <Row>0,0,20,6</Row>
-    <Row>0,0,20,29</Row>
-    <Row>0,0,20,30</Row>
-    <Row>0,0,20,10</Row>
-    <Row>0,0,20,12</Row>
-    <Row>0,0,20,15</Row>
-    <Row>0,0.05,20,20</Row>
-    <Row>0,0,20,21</Row>
-    <Row>0,0,20,22</Row>
-    <Row>0,0.75,20,23</Row>
-    <Row>0,0,20,26</Row>
-    <Row>0,0.2,20,27</Row>
-    <Row>0,0,20,28</Row>
-    <Row>1,0,20,1</Row>
-    <Row>0,0,21,2</Row>
-    <Row>0,0,21,3</Row>
-    <Row>0,0,21,4</Row>
-    <Row>0,0,21,5</Row>
-    <Row>0,0,21,6</Row>
-    <Row>0,0,21,29</Row>
-    <Row>0,0,21,30</Row>
-    <Row>0,0,21,10</Row>
-    <Row>0,0,21,12</Row>
-    <Row>0,0,21,15</Row>
-    <Row>0,0,21,20</Row>
-    <Row>0,0.006,21,21</Row>
-    <Row>0,0.0032,21,22</Row>
-    <Row>0,0.0026,21,23</Row>
-    <Row>0,0,21,26</Row>
-    <Row>0,0.2222,21,27</Row>
-    <Row>0,0.01,21,28</Row>
-    <Row>1,0.756,21,1</Row>
-    <Row>0,0,22,2</Row>
-    <Row>0,0,22,3</Row>
-    <Row>0,0,22,4</Row>
-    <Row>0,0,22,5</Row>
-    <Row>0,0,22,6</Row>
-    <Row>0,0,22,29</Row>
-    <Row>0,0,22,30</Row>
-    <Row>0,0,22,10</Row>
-    <Row>0,0,22,12</Row>
-    <Row>0,0,22,15</Row>
-    <Row>0,0,22,20</Row>
-    <Row>0,0,22,21</Row>
-    <Row>0,0.004,22,22</Row>
-    <Row>0,0,22,23</Row>
-    <Row>0,0,22,26</Row>
-    <Row>0,0,22,27</Row>
-    <Row>0,0,22,28</Row>
-    <Row>1,0.996,22,1</Row>
-    <Row>0,0,23,2</Row>
-    <Row>0,0,23,3</Row>
-    <Row>0,0,23,4</Row>
-    <Row>0,0,23,5</Row>
-    <Row>0,0,23,6</Row>
-    <Row>0,0,23,29</Row>
-    <Row>0,0,23,30</Row>
-    <Row>0,0,23,10</Row>
-    <Row>0,0,23,12</Row>
-    <Row>0,0,23,15</Row>
-    <Row>0,0,23,20</Row>
-    <Row>0,0,23,21</Row>
-    <Row>0,0,23,22</Row>
-    <Row>0,0.2,23,23</Row>
-    <Row>0,0.15,23,26</Row>
-    <Row>0,0.55,23,27</Row>
-    <Row>0,0,23,28</Row>
-    <Row>1,0.1,23,1</Row>
-    <Row>0,0,26,2</Row>
-    <Row>0,0,26,3</Row>
-    <Row>0,0,26,4</Row>
-    <Row>0,0,26,5</Row>
-    <Row>0,0,26,6</Row>
-    <Row>0,0,26,29</Row>
-    <Row>0,0,26,30</Row>
-    <Row>0,0,26,10</Row>
-    <Row>0,0,26,12</Row>
-    <Row>0,0,26,15</Row>
-    <Row>0,0,26,20</Row>
-    <Row>0,0,26,21</Row>
-    <Row>0,0,26,22</Row>
-    <Row>0,0,26,23</Row>
-    <Row>0,0.15,26,26</Row>
-    <Row>0,0.45,26,27</Row>
-    <Row>0,0,26,28</Row>
-    <Row>1,0.4,26,1</Row>
-    <Row>0,0,27,2</Row>
-    <Row>0,0,27,3</Row>
-    <Row>0,0,27,4</Row>
-    <Row>0,0,27,5</Row>
-    <Row>0,0,27,6</Row>
-    <Row>0,0,27,29</Row>
-    <Row>0,0,27,30</Row>
-    <Row>0,0,27,10</Row>
-    <Row>0,0,27,12</Row>
-    <Row>0,0,27,15</Row>
-    <Row>0,0,27,20</Row>
-    <Row>0,0,27,21</Row>
-    <Row>0,0,27,22</Row>
-    <Row>0,0,27,23</Row>
-    <Row>0,0,27,26</Row>
-    <Row>0,0,27,27</Row>
-    <Row>0,0,27,28</Row>
-    <Row>1,0,27,1</Row>
-    <Row>0,0,28,2</Row>
-    <Row>0,0,28,3</Row>
-    <Row>0,0,28,4</Row>
-    <Row>0,0,28,5</Row>
-    <Row>0,0,28,6</Row>
-    <Row>0,0,28,29</Row>
-    <Row>0,0,28,30</Row>
-    <Row>0,0,28,10</Row>
-    <Row>0,0,28,12</Row>
-    <Row>0,0,28,15</Row>
-    <Row>0,0,28,20</Row>
-    <Row>0,0,28,21</Row>
-    <Row>0,0,28,22</Row>
-    <Row>0,0,28,23</Row>
-    <Row>0,0,28,26</Row>
-    <Row>0,0,28,27</Row>
-    <Row>0,0,28,28</Row>
-    <Row>1,0,28,1</Row>
-    <Row>0,1.971748E-07,1,2</Row>
-    <Row>0,3.692324E-05,1,3</Row>
-    <Row>0,6.525976E-06,1,4</Row>
-    <Row>0,8.94079E-05,1,5</Row>
-    <Row>0,7.747739E-05,1,6</Row>
-    <Row>0,1.578891E-05,1,29</Row>
-    <Row>0,0.0001587549,1,30</Row>
-    <Row>0,0.0006277169,1,10</Row>
-    <Row>0,0.0003447338,1,12</Row>
-    <Row>0,0.0002818785,1,15</Row>
-    <Row>0,0.00192642,1,20</Row>
-    <Row>0,0.3148025,1,21</Row>
-    <Row>0,0.005650045,1,22</Row>
-    <Row>0,0.08278771,1,23</Row>
-    <Row>0,0.01646235,1,26</Row>
-    <Row>0,0.01204938,1,27</Row>
-    <Row>0,0.2931741,1,28</Row>
     <Row>0,0,1,1</Row>
+    <Row>1,0,2,1</Row>
+    <Row>1,0.05,3,1</Row>
+    <Row>1,0,4,1</Row>
+    <Row>1,0,5,1</Row>
+    <Row>1,0.008,6,1</Row>
+    <Row>1,0.005,10,1</Row>
+    <Row>1,0.02,12,1</Row>
+    <Row>1,0,15,1</Row>
+    <Row>1,0,20,1</Row>
+    <Row>1,0.756,21,1</Row>
+    <Row>1,0.996,22,1</Row>
+    <Row>1,0.1,23,1</Row>
+    <Row>1,0.4,26,1</Row>
+    <Row>1,0,27,1</Row>
+    <Row>1,0,28,1</Row>
+    <Row>1,0,29,1</Row>
+    <Row>1,0,30,1</Row>
+    <Row>0,1.971748E-07,1,2</Row>
+    <Row>0,0,2,2</Row>
+    <Row>0,0,3,2</Row>
+    <Row>0,0,4,2</Row>
+    <Row>0,0,5,2</Row>
+    <Row>0,0,6,2</Row>
+    <Row>0,0,10,2</Row>
+    <Row>0,0,12,2</Row>
+    <Row>0,0,15,2</Row>
+    <Row>0,0,20,2</Row>
+    <Row>0,0,21,2</Row>
+    <Row>0,0,22,2</Row>
+    <Row>0,0,23,2</Row>
+    <Row>0,0,26,2</Row>
+    <Row>0,0,27,2</Row>
+    <Row>0,0,28,2</Row>
+    <Row>0,0,29,2</Row>
+    <Row>0,0,30,2</Row>
+    <Row>0,3.692324E-05,1,3</Row>
+    <Row>0,0,2,3</Row>
+    <Row>0,0,3,3</Row>
+    <Row>0,0,4,3</Row>
+    <Row>0,0,5,3</Row>
+    <Row>0,0,6,3</Row>
+    <Row>0,0,10,3</Row>
+    <Row>0,0,12,3</Row>
+    <Row>0,0,15,3</Row>
+    <Row>0,0,20,3</Row>
+    <Row>0,0,21,3</Row>
+    <Row>0,0,22,3</Row>
+    <Row>0,0,23,3</Row>
+    <Row>0,0,26,3</Row>
+    <Row>0,0,27,3</Row>
+    <Row>0,0,28,3</Row>
+    <Row>0,0,29,3</Row>
+    <Row>0,0,30,3</Row>
+    <Row>0,6.525976E-06,1,4</Row>
+    <Row>0,0,2,4</Row>
+    <Row>0,0,3,4</Row>
+    <Row>0,0,4,4</Row>
+    <Row>0,0,5,4</Row>
+    <Row>0,0,6,4</Row>
+    <Row>0,0,10,4</Row>
+    <Row>0,0,12,4</Row>
+    <Row>0,0,15,4</Row>
+    <Row>0,0,20,4</Row>
+    <Row>0,0,21,4</Row>
+    <Row>0,0,22,4</Row>
+    <Row>0,0,23,4</Row>
+    <Row>0,0,26,4</Row>
+    <Row>0,0,27,4</Row>
+    <Row>0,0,28,4</Row>
+    <Row>0,0,29,4</Row>
+    <Row>0,0,30,4</Row>
+    <Row>0,8.94079E-05,1,5</Row>
+    <Row>0,0,2,5</Row>
+    <Row>0,0,3,5</Row>
+    <Row>0,0.009297211,4,5</Row>
+    <Row>0,0,5,5</Row>
+    <Row>0,0,6,5</Row>
+    <Row>0,0,10,5</Row>
+    <Row>0,0,12,5</Row>
+    <Row>0,0,15,5</Row>
+    <Row>0,0,20,5</Row>
+    <Row>0,0,21,5</Row>
+    <Row>0,0,22,5</Row>
+    <Row>0,0,23,5</Row>
+    <Row>0,0,26,5</Row>
+    <Row>0,0,27,5</Row>
+    <Row>0,0,28,5</Row>
+    <Row>0,0,29,5</Row>
+    <Row>0,0,30,5</Row>
+    <Row>0,7.747739E-05,1,6</Row>
+    <Row>0,0.104,2,6</Row>
+    <Row>0,0.03,3,6</Row>
+    <Row>0,0.033,4,6</Row>
+    <Row>0,0.043,5,6</Row>
+    <Row>0,0.003,6,6</Row>
+    <Row>0,0,10,6</Row>
+    <Row>0,0,12,6</Row>
+    <Row>0,0,15,6</Row>
+    <Row>0,0,20,6</Row>
+    <Row>0,0,21,6</Row>
+    <Row>0,0,22,6</Row>
+    <Row>0,0,23,6</Row>
+    <Row>0,0,26,6</Row>
+    <Row>0,0,27,6</Row>
+    <Row>0,0,28,6</Row>
+    <Row>0,0.0003141366,29,6</Row>
+    <Row>0,0,30,6</Row>
+    <Row>0,0.0006277169,1,10</Row>
+    <Row>0,0.434,2,10</Row>
+    <Row>0,0.07000001,3,10</Row>
+    <Row>0,0.259922,4,10</Row>
+    <Row>0,0.071,5,10</Row>
+    <Row>0,0.012,6,10</Row>
+    <Row>0,0,10,10</Row>
+    <Row>0,0,12,10</Row>
+    <Row>0,0,15,10</Row>
+    <Row>0,0,20,10</Row>
+    <Row>0,0,21,10</Row>
+    <Row>0,0,22,10</Row>
+    <Row>0,0,23,10</Row>
+    <Row>0,0,26,10</Row>
+    <Row>0,0,27,10</Row>
+    <Row>0,0,28,10</Row>
+    <Row>0,0.0001570683,29,10</Row>
+    <Row>0,0,30,10</Row>
+    <Row>0,0.0003447338,1,12</Row>
+    <Row>0,0,2,12</Row>
+    <Row>0,0.05,3,12</Row>
+    <Row>0,0.039988,4,12</Row>
+    <Row>0,0.048,5,12</Row>
+    <Row>0,0.016,6,12</Row>
+    <Row>0,0,10,12</Row>
+    <Row>0,0,12,12</Row>
+    <Row>0,0,15,12</Row>
+    <Row>0,0,20,12</Row>
+    <Row>0,0,21,12</Row>
+    <Row>0,0,22,12</Row>
+    <Row>0,0,23,12</Row>
+    <Row>0,0,26,12</Row>
+    <Row>0,0,27,12</Row>
+    <Row>0,0,28,12</Row>
+    <Row>0,0.001099478,29,12</Row>
+    <Row>0,0.12,30,12</Row>
+    <Row>0,0.0002818785,1,15</Row>
+    <Row>0,0.24,2,15</Row>
+    <Row>0,0.06,3,15</Row>
+    <Row>0,0,4,15</Row>
+    <Row>0,0,5,15</Row>
+    <Row>0,0.04,6,15</Row>
+    <Row>0,0,10,15</Row>
+    <Row>0,0,12,15</Row>
+    <Row>0,0.0005,15,15</Row>
+    <Row>0,0,20,15</Row>
+    <Row>0,0,21,15</Row>
+    <Row>0,0,22,15</Row>
+    <Row>0,0,23,15</Row>
+    <Row>0,0,26,15</Row>
+    <Row>0,0,27,15</Row>
+    <Row>0,0,28,15</Row>
+    <Row>0,0,29,15</Row>
+    <Row>0,0.093,30,15</Row>
+    <Row>0,0.00192642,1,20</Row>
+    <Row>0,0,2,20</Row>
+    <Row>0,0.03,3,20</Row>
+    <Row>0,0,4,20</Row>
+    <Row>0,0,5,20</Row>
+    <Row>0,0,6,20</Row>
+    <Row>0,0,10,20</Row>
+    <Row>0,0,12,20</Row>
+    <Row>0,0.077,15,20</Row>
+    <Row>0,0.05,20,20</Row>
+    <Row>0,0,21,20</Row>
+    <Row>0,0,22,20</Row>
+    <Row>0,0,23,20</Row>
+    <Row>0,0,26,20</Row>
+    <Row>0,0,27,20</Row>
+    <Row>0,0,28,20</Row>
+    <Row>0,0.03672209,29,20</Row>
+    <Row>0,0,30,20</Row>
+    <Row>0,0.3148025,1,21</Row>
+    <Row>0,0,2,21</Row>
+    <Row>0,0.31,3,21</Row>
+    <Row>0,0,4,21</Row>
+    <Row>0,0.613,5,21</Row>
+    <Row>0,0.812,6,21</Row>
+    <Row>0,0.063,10,21</Row>
+    <Row>0,0.0002,12,21</Row>
+    <Row>0,0.032,15,21</Row>
+    <Row>0,0,20,21</Row>
+    <Row>0,0.006,21,21</Row>
+    <Row>0,0,22,21</Row>
+    <Row>0,0,23,21</Row>
+    <Row>0,0,26,21</Row>
+    <Row>0,0,27,21</Row>
+    <Row>0,0,28,21</Row>
+    <Row>0,0.8228918,29,21</Row>
+    <Row>0,0.576,30,21</Row>
+    <Row>0,0.005650045,1,22</Row>
+    <Row>0,0,2,22</Row>
+    <Row>0,0,3,22</Row>
+    <Row>0,0,4,22</Row>
+    <Row>0,0,5,22</Row>
+    <Row>0,0,6,22</Row>
+    <Row>0,0,10,22</Row>
+    <Row>0,0,12,22</Row>
+    <Row>0,0,15,22</Row>
+    <Row>0,0,20,22</Row>
+    <Row>0,0.0032,21,22</Row>
+    <Row>0,0.004,22,22</Row>
+    <Row>0,0,23,22</Row>
+    <Row>0,0,26,22</Row>
+    <Row>0,0,27,22</Row>
+    <Row>0,0,28,22</Row>
+    <Row>0,0.0008035608,29,22</Row>
+    <Row>0,0,30,22</Row>
+    <Row>0,0.08278771,1,23</Row>
+    <Row>0,0,2,23</Row>
+    <Row>0,0.03,3,23</Row>
+    <Row>0,0,4,23</Row>
+    <Row>0,0.019,5,23</Row>
+    <Row>0,0.073,6,23</Row>
+    <Row>0,0.932,10,23</Row>
+    <Row>0,0.9798,12,23</Row>
+    <Row>0,0.887,15,23</Row>
+    <Row>0,0.75,20,23</Row>
+    <Row>0,0.0026,21,23</Row>
+    <Row>0,0,22,23</Row>
+    <Row>0,0.2,23,23</Row>
+    <Row>0,0,26,23</Row>
+    <Row>0,0,27,23</Row>
+    <Row>0,0,28,23</Row>
+    <Row>0,0.03087057,29,23</Row>
+    <Row>0,0.2,30,23</Row>
+    <Row>0,0.01646235,1,26</Row>
+    <Row>0,0,2,26</Row>
+    <Row>0,0,3,26</Row>
+    <Row>0,0,4,26</Row>
+    <Row>0,0,5,26</Row>
+    <Row>0,0,6,26</Row>
+    <Row>0,0,10,26</Row>
+    <Row>0,0,12,26</Row>
+    <Row>0,0,15,26</Row>
+    <Row>0,0,20,26</Row>
+    <Row>0,0,21,26</Row>
+    <Row>0,0,22,26</Row>
+    <Row>0,0.15,23,26</Row>
+    <Row>0,0.15,26,26</Row>
+    <Row>0,0,27,26</Row>
+    <Row>0,0,28,26</Row>
+    <Row>0,0,29,26</Row>
+    <Row>0,0,30,26</Row>
+    <Row>0,0.01204938,1,27</Row>
+    <Row>0,0,2,27</Row>
+    <Row>0,0,3,27</Row>
+    <Row>0,0,4,27</Row>
+    <Row>0,0,5,27</Row>
+    <Row>0,0,6,27</Row>
+    <Row>0,0,10,27</Row>
+    <Row>0,0,12,27</Row>
+    <Row>0,0,15,27</Row>
+    <Row>0,0.2,20,27</Row>
+    <Row>0,0.2222,21,27</Row>
+    <Row>0,0,22,27</Row>
+    <Row>0,0.55,23,27</Row>
+    <Row>0,0.45,26,27</Row>
+    <Row>0,0,27,27</Row>
+    <Row>0,0,28,27</Row>
+    <Row>0,0,29,27</Row>
+    <Row>0,0,30,27</Row>
+    <Row>0,0.2931741,1,28</Row>
+    <Row>0,0,2,28</Row>
+    <Row>0,0,3,28</Row>
+    <Row>0,0,4,28</Row>
+    <Row>0,0,5,28</Row>
+    <Row>0,0,6,28</Row>
+    <Row>0,0,10,28</Row>
+    <Row>0,0,12,28</Row>
+    <Row>0,0,15,28</Row>
+    <Row>0,0,20,28</Row>
+    <Row>0,0.01,21,28</Row>
+    <Row>0,0,22,28</Row>
+    <Row>0,0,23,28</Row>
+    <Row>0,0,26,28</Row>
+    <Row>0,0,27,28</Row>
+    <Row>0,0,28,28</Row>
+    <Row>0,0,29,28</Row>
+    <Row>0,0,30,28</Row>
+    <Row>0,1.578891E-05,1,29</Row>
+    <Row>0,0.077,2,29</Row>
+    <Row>0,0.01,3,29</Row>
+    <Row>0,0,4,29</Row>
+    <Row>0,0.013,5,29</Row>
+    <Row>0,0,6,29</Row>
+    <Row>0,0,10,29</Row>
+    <Row>0,0,12,29</Row>
+    <Row>0,0,15,29</Row>
+    <Row>0,0,20,29</Row>
+    <Row>0,0,21,29</Row>
+    <Row>0,0,22,29</Row>
+    <Row>0,0,23,29</Row>
+    <Row>0,0,26,29</Row>
+    <Row>0,0,27,29</Row>
+    <Row>0,0,28,29</Row>
+    <Row>0,0,29,29</Row>
+    <Row>0,0,30,29</Row>
+    <Row>0,0.0001587549,1,30</Row>
+    <Row>0,0.145,2,30</Row>
+    <Row>0,0.23,3,30</Row>
+    <Row>0,0.389883,4,30</Row>
+    <Row>0,0.193,5,30</Row>
+    <Row>0,0.036,6,30</Row>
+    <Row>0,0,10,30</Row>
+    <Row>0,0,12,30</Row>
+    <Row>0,0.0035,15,30</Row>
+    <Row>0,0,20,30</Row>
+    <Row>0,0,21,30</Row>
+    <Row>0,0,22,30</Row>
+    <Row>0,0,23,30</Row>
+    <Row>0,0,26,30</Row>
+    <Row>0,0,27,30</Row>
+    <Row>0,0,28,30</Row>
+    <Row>0,0.1071413,29,30</Row>
+    <Row>0,0.011,30,30</Row>
   </Table>
   <Table Name="EcopathDietCompSample" Columns="Diet:System.Single,PredID:System.Int64,PreyID:System.Int64,SampleID:System.Int64" Num="0" />
   <Table Name="EcopathDiscardFate" Columns="DiscardFate:System.Single,FleetID:System.Int64,GroupID:System.Int64" Num="12">
-    <Row>1,2,1</Row>
     <Row>1,1,1</Row>
+    <Row>1,2,1</Row>
     <Row>1,4,1</Row>
     <Row>1,5,1</Row>
   </Table>
@@ -1850,7 +1850,7 @@ Values for IUU fishery of flat fish read off Appendix Tables  in Rossing et al. 
     <Row>29,1,1,9</Row>
   </Table>
   <Table Name="EcopathModel" Columns="Area:System.Single,AreaName:System.String,Author:System.String,CodeEcobase:System.String,Contact:System.String,Country:System.String,DateEnd:System.Int64,DateStart:System.Int64,Description:System.String,EcoSimVulMultAll:System.Int64,EcosystemType:System.String,FirstYear:System.Int64,GroupDigits:System.Byte,LastSaved:System.Single,LastSavedVersion:System.String,MaxLat:System.Single,MaxLon:System.Single,MinLat:System.Single,MinLon:System.Single,ModelID:System.Int64,MonetaryUnit:System.String,Name:System.String,NumDigits:System.Int32,NumYears:System.Single,PublicationDOI:System.String,PublicationRef:System.String,PublicationURI:System.String,StepsPerYear:System.Int64,UnitCurrency:System.Int64,UnitCurrencyCustom:System.String,UnitMonetary:System.String,UnitTime:System.Int64,UnitTimeCustom:System.String,WithSeason:System.Boolean" Num="34">
-    <Row>42228,,Dr Marcela Nascimento and Dr Marco Scotti (First constructed by Silvia Opitz),,mnascimento@geomar.de/nascimento.marcelac@gmail.com,,,,"Modell der südwestlichen Ostsee entsprechend der ICES Unterabteilungen 22 und 24 unter Einbeziehung der deutschen AWZ mit NATURA 2000 Gebieten. Eingabewerte für Nicht-Fischgruppen wurden zum großen Teil aus Vorgängermodellen für die Ostsee übernommen, die von 1974 bis 2012 reichen. Eingabewerte für Fischarten / Fischartengruppen wurden zum Teil aus ICES Daten errechnet (Anlandungen, Biomasse für das Startjahr 1994), zum Teil aus Vorgängermodellen in Ost- und Nordsee übernommen (Nahrungskomposition, P/B und Q/B, etc.).",0,,1994,0,45397.57,6.7.0.18848,56.83,7,53.83,8.9,1,,MSP - Western Baltic Sea ICES SD 22-24,3,1,,,,12,3,,EUR,1,,False</Row>
+    <Row>42228,,Dr Marcela Nascimento and Dr Marco Scotti (First constructed by Silvia Opitz),,mnascimento@geomar.de/nascimento.marcelac@gmail.com,,,,"Modell der südwestlichen Ostsee entsprechend der ICES Unterabteilungen 22 und 24 unter Einbeziehung der deutschen AWZ mit NATURA 2000 Gebieten. Eingabewerte für Nicht-Fischgruppen wurden zum großen Teil aus Vorgängermodellen für die Ostsee übernommen, die von 1974 bis 2012 reichen. Eingabewerte für Fischarten / Fischartengruppen wurden zum Teil aus ICES Daten errechnet (Anlandungen, Biomasse für das Startjahr 1994), zum Teil aus Vorgängermodellen in Ost- und Nordsee übernommen (Nahrungskomposition, P/B und Q/B, etc.).",0,,1994,0,45420.65,6.7.0.18848,56.83,7,53.83,8.9,1,,MSP - Western Baltic Sea ICES SD 22-24,3,1,,,,12,3,,EUR,1,,False</Row>
   </Table>
   <Table Name="EcopathPSD" Columns="ClimateType:System.Int32,FirstWeightClass:System.Single,ModelID:System.Int64,MortalityType:System.Int64,NumAgeSteps:System.Int64,NumWeightClasses:System.Int64" Num="6">
     <Row>0,0.125,1,0,101,25</Row>
@@ -2952,7 +2952,7 @@ Values for IUU fishery of flat fish read off Appendix Tables  in Rossing et al. 
   <Table Name="EcosimTimeSeriesFleet" Columns="FleetID:System.Int64,GroupID:System.Int64,TimeSeriesID:System.Int64" Num="0" />
   <Table Name="EcosimTimeSeriesGroup" Columns="GroupID:System.Int64,TimeSeriesID:System.Int64,VariableName:System.String" Num="0" />
   <Table Name="EcospaceScenario" Columns="AdjustSpace:System.Boolean,AssumeSquareCells:System.Boolean,Author:System.String,CellAreaMap:System.String,CellLength:System.Single,CellSize:System.Single,Contact:System.String,CoordinateSystemWKT:System.String,DepthAMap:System.String,DepthMap:System.String,Description:System.String,EcosimScenarioID:System.Int64,EffortDistrThreshold:System.Single,EffortZoneMap:System.String,ExclusionMap:System.String,FirstPenaltyMonth:System.Single,FitResponseType:System.Byte,FlowMap:System.String,IFDPower:System.Single,Incol:System.Int64,Inrow:System.Int64,LastSaved:System.Single,LastSavedVersion:System.String,MinLat:System.Single,MinLon:System.Single,ModelType:System.Int32,NoFishWeight:System.Single,NumEffortZones:System.Int64,NumPacketsMultiplier:System.Single,NumRegions:System.Int64,NumThreads:System.Int32,PenaltyPower:System.Single,PredictEffort:System.Boolean,Q10DriverMap:System.String,RegionMap:System.String,RelCinMap:System.String,RelPPMap:System.String,ScenarioID:System.Int64,ScenarioName:System.String,SpinupYears:System.Int64,TimeStep:System.Single,Tolerance:System.Single,TotalTime:System.Single,UseEffortDistrThreshold:System.Int32,UseExact:System.Boolean,UsePenaltySearch:System.Byte,UseSpinup:System.Byte" Num="47">
-    <Row>True,True,Dr Marcela Nascimento and Marco Scotti,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,6.067098,,mnascimento@geomar.de/ nascimento.marcelac@gmail.com,"GEOGCS[WGS 84, DATUM[WGS_1984, SPHEROID[WGS 84,6378137,298.257223563, AUTHORITY[EPSG,7030]], AUTHORITY[EPSG,6326]], PRIMEM[Greenwich,0, AUTHORITY[EPSG,8901]], UNIT[degree,0.01745329251994328, AUTHORITY[EPSG,9122]], AUTHORITY[EPSG,4326]]",gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,gzip: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,Created: 6/7/2023 10:56 AM,0,10000,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,gzip:H4sIAAAAAAAEAO3USw7AIAgE0At1Ydfc/15NXDRp6wcs6oSM7GaBL0hMR+rUqaheD3NP8ehiVXm52r3sJoXM4Crr3Cfl4pqkGnC970BzTVX9nheia3TGeK41ex/JNe//iunCfUelbYNL5aOLrqCupmyrq2Gjiy666KIrmKsiA3UlQFdOwVx3CuR6pCCuTwrhKqSSzzpCcclrJRfCevN0LRcAAA==,60,,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,0.5,76,44,45386.64,6.7.0.18829,3682664,4254097,2,0.3,1,0.5,0,1,10,True,,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,gzip: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,10,WBS 1994 ICES 22 - 24 - 2023,10,0.08333334,0.01,30,0,False,0,1</Row>
+    <Row>True,True,Dr Marcela Nascimento and Marco Scotti,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,6.067098,,mnascimento@geomar.de/ nascimento.marcelac@gmail.com,"GEOGCS[WGS 84, DATUM[WGS_1984, SPHEROID[WGS 84,6378137,298.257223563, AUTHORITY[EPSG,7030]], AUTHORITY[EPSG,6326]], PRIMEM[Greenwich,0, AUTHORITY[EPSG,8901]], UNIT[degree,0.01745329251994328, AUTHORITY[EPSG,9122]], AUTHORITY[EPSG,4326]]",gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,gzip: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,Created: 6/7/2023 10:56 AM,0,10000,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,gzip:H4sIAAAAAAAEAO3USw7AIAgE0At1Ydfc/15NXDRp6wcs6oSM7GaBL0hMR+rUqaheD3NP8ehiVXm52r3sJoXM4Crr3Cfl4pqkGnC970BzTVX9nheia3TGeK41ex/JNe//iunCfUelbYNL5aOLrqCupmyrq2Gjiy666KIrmKsiA3UlQFdOwVx3CuR6pCCuTwrhKqSSzzpCcclrJRfCevN0LRcAAA==,60,,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,0.5,76,44,45429.37,6.7.0.18848,3682664,4254097,2,0.3,1,0.5,0,1,10,True,,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,gzip: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,10,WBS 1994 ICES 22 - 24 - 2023,10,0.08333334,0.01,30,0,False,0,1</Row>
   </Table>
   <Table Name="EcospaceScenarioCapacityDrivers" Columns="GroupID:System.Int64,ScenarioID:System.Int64,ShapeID:System.Int64,Target:System.Int64,VarDBID:System.Int64" Num="300">
     <Row>169,10,82,100,16</Row>
@@ -3064,7 +3064,7 @@ To use mmol/l, as available on Aquamaps, it must be converted",19,gzip:H4sIAAAAA
     <Row>0.5,3,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,29,1000,174,,False,False,0,300,,5,2,10</Row>
     <Row>0.5,3,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TFs///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdmPufr6AOAAA=,30,1000,175,,False,False,0,300,,5,2,10</Row>
   </Table>
-  <Table Name="EcospaceScenarioGroupHabitat" Columns="GroupID:System.Int64,HabitatID:System.Int64,Preference:System.Single,ScenarioID:System.Int64" Num="148">
+  <Table Name="EcospaceScenarioGroupHabitat" Columns="GroupID:System.Int64,HabitatID:System.Int64,Preference:System.Single,ScenarioID:System.Int64" Num="140">
     <Row>169,12,1,10</Row>
     <Row>170,12,1,10</Row>
     <Row>171,12,1,10</Row>
@@ -3082,7 +3082,6 @@ To use mmol/l, as available on Aquamaps, it must be converted",19,gzip:H4sIAAAAA
     <Row>180,16,1,10</Row>
     <Row>180,17,1,10</Row>
     <Row>180,18,1,10</Row>
-    <Row>180,19,0.9,10</Row>
     <Row>180,28,1,10</Row>
     <Row>181,13,0.1,10</Row>
     <Row>181,14,0.5,10</Row>
@@ -3090,7 +3089,6 @@ To use mmol/l, as available on Aquamaps, it must be converted",19,gzip:H4sIAAAAA
     <Row>181,16,0.7,10</Row>
     <Row>181,17,1,10</Row>
     <Row>181,18,1,10</Row>
-    <Row>181,19,0.9,10</Row>
     <Row>181,28,1,10</Row>
     <Row>182,12,1,10</Row>
     <Row>183,12,1,10</Row>
@@ -3117,7 +3115,7 @@ To use mmol/l, as available on Aquamaps, it must be converted",19,gzip:H4sIAAAAA
     <Row>176,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,11,10</Row>
     <Row>176,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,12,10</Row>
   </Table>
-  <Table Name="EcospaceScenarioHabitat" Columns="HabitatID:System.Int64,HabitatMap:System.String,HabitatName:System.String,ScenarioID:System.Int64,Sequence:System.Int64" Num="45">
+  <Table Name="EcospaceScenarioHabitat" Columns="HabitatID:System.Int64,HabitatMap:System.String,HabitatName:System.String,ScenarioID:System.Int64,Sequence:System.Int64" Num="40">
     <Row>12,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,All,10,0</Row>
     <Row>13,gzip:H4sIAAAAAAAEAOWVOQ7AIAwEP5QCav//X6mRYnDErg+Q22UGgxHtabgSIOsnr3vvLrDXgN1VYeJ4U5Jh2lhdZmRVmIxT6OXY6luh3kEP8qpFs7r/fEn6Tur2dXrazj/NTPbrOqcrKQIwFILbghgXm2LL0BCQj7i8AvmVraAOAAA=,Bedrock,10,2</Row>
     <Row>14,gzip:H4sIAAAAAAAEALVXSw4FIQi7kAtZc/97zVJ+akEmJpPJy9BCseKbg8bsWoxhEcop8E4RGTSqRIZoOv5ZRV7aUEajI9ocq2aLl8Z3mBKhmC3bWFm/79cdz2LZt3y1uupSX4RyMif5hFFZx0eYWbV8dAWn8RwZ0+mPo0Nauu6iyNCuZB2DZgXVKBxDpmNdZ5DeCWuPRL5/Yds5wWv84L1NlVJBEqxy6ZofJ9B2lvlTND6vy8zOnyf+nM+wuu130RzOdTY38f3X2fMyMY046ucv1Tk2zJ1lDwVc0q+/rGAKRzeayLsNOYX32ei20sR3rdxqTU6JLnbv2X2fe9jLAz9JcN6vWVo+QerfEWjwHxRU6D6TSwZIytAFim+zk+W45wCTP/m56t6gDgAA,Hard bottom complex,10,1</Row>
@@ -3125,10 +3123,9 @@ To use mmol/l, as available on Aquamaps, it must be converted",19,gzip:H4sIAAAAA
     <Row>16,gzip:H4sIAAAAAAAEAN2UwQ6AMAhDf8jDOO///8uTZiYEylY2YkwWD/hasKxdjfd0IovPq0yr7s5lSg2fPB7T2d9ZIQ6YlElvfLrEsw3T5VWAVTI2ewebpibD+byJUlGky22qRoKC+xnNu5ne0KbNdW1pe8yIpiDTMfqdmazjkZoq5x46sTfmNM+qJ+u70051AP1rrn56vFIEyFAKbgkCfgyVDUV6Vj6UrjD7DapFlRygDgAA,Hard clay,10,4</Row>
     <Row>17,gzip:H4sIAAAAAAAEAK2WWQ7CMAxEL8RH++373wuhUmKPJ15qFCEhkb6xx0s5X0fpnJVb8rlXutniXczoiTptEauR7mjnV/mObc5bhMVezBZfbkr0VDNeYbFgdZouiM4Vo8vrznm2uuhqPduoU3rVsLd1PO2egRmb9ZyOY0D6cYYzYJjo2d/IlN5xMr2putrHbruK/ZaxkeknMDpZ3H7qdrOJ27SrZnc7q4ivi83aPl3sP9GR+0z3jCjHvCew3sxV/82/s7y71X5kPcNn37vcqqzLW+fAdTqOF5XVG0vXOzu5YkgSzcgy9BXhNyI17W/ZmSdHDvCko9es3EYzmrWdf/OMb06WQbQ5Jtqe0PPyibp2G7tUdwCL5JnngkgsvJUqrl0UYG/JSfTCkb01p3AxqrbzyZ/gdJHYCPL+ElsZThb8X7IRuz4ihPAGrvK6ZaAOAAA=,mud,10,5</Row>
     <Row>18,gzip:H4sIAAAAAAAEAL2WSw7DMAhEL5RFWXP/e1VKlfg32IDHlTdp5bxhKFDkkuvDOkpkBXji86Dc2Kg0kyfgyUOzbovxvMNso+TEWZgxnv3OfmQSjweyBHhzU2/Wj9D+lojqy1brUF5ezt/oNTUVQD88zglTRqXLfckq4VSx29yk1lBL6RkxjRs5YE/3WgOzD6jeujXX6k22atF7NHDXHNB/p2LP7jvqhLY9D4TVzUvtVhPn4ozf0TVXDX37T62ieUBxuWXNK2i7vpw73myHSasv90FPVHl1tP3MabszZLJEWIIxKfVlJPZfF4IGk5A9WxDny65rw6X+c1PkCkpev3rGv8mgDgAA,Zostera 2016,10,6</Row>
-    <Row>19,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,Recreational fisheries,10,7</Row>
-    <Row>28,gzip:H4sIAAAAAAAEANWVMRKAMAgEP2SR1Pz/XzZaZCZOCCwQ5xoL3L2go+1qXARk8Tyc1o9uhyeYOd/m5o65jp8kw1MnN6dgqRtSvUrejOMa59D/yq62Obz9Sf5p+5AK93uV64YCube273Zm2nJPZsjCOe+P/S+WJwa+C2Z3aArs4coQAQxFcC6I8mbV2HJoGJDJuNzpeuU0oA4AAA==,Wind Farms,10,8</Row>
+    <Row>28,gzip:H4sIAAAAAAAEANWVMRKAMAgEP2SR1Pz/XzZaZCZOCCwQ5xoL3L2go+1qXARk8Tyc1o9uhyeYOd/m5o65jp8kw1MnN6dgqRtSvUrejOMa59D/yq62Obz9Sf5p+5AK93uV64YCube273Zm2nJPZsjCOe+P/S+WJwa+C2Z3aArs4coQAQxFcC6I8mbV2HJoGJDJuNzpeuU0oA4AAA==,Wind Farms,10,7</Row>
   </Table>
-  <Table Name="EcospaceScenarioHabitatFishery" Columns="FleetID:System.Int64,HabitatID:System.Int64,ScenarioID:System.Int64" Num="57">
+  <Table Name="EcospaceScenarioHabitatFishery" Columns="FleetID:System.Int64,HabitatID:System.Int64,ScenarioID:System.Int64" Num="72">
     <Row>37,13,10</Row>
     <Row>37,14,10</Row>
     <Row>37,15,10</Row>
@@ -3141,7 +3138,12 @@ To use mmol/l, as available on Aquamaps, it must be converted",19,gzip:H4sIAAAAA
     <Row>38,16,10</Row>
     <Row>38,17,10</Row>
     <Row>38,18,10</Row>
-    <Row>39,19,10</Row>
+    <Row>39,13,10</Row>
+    <Row>39,14,10</Row>
+    <Row>39,15,10</Row>
+    <Row>39,16,10</Row>
+    <Row>39,17,10</Row>
+    <Row>39,18,10</Row>
     <Row>40,13,10</Row>
     <Row>40,14,10</Row>
     <Row>40,15,10</Row>
@@ -3164,11 +3166,11 @@ To use mmol/l, as available on Aquamaps, it must be converted",19,gzip:H4sIAAAAA
     <Row>gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,12,10,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=,gzip:H4sIAAAAAAAEAO2SQQoAIAgEP9TBu///V+cgSGhNXcPrOqOiDMGVAll4XmZa9umqMHE85GTsrAqfwUKvyo62RXujtv1uZudLG/81M9nbbe6udBGAoRDcFcTYbIodQ0tAN3GdJClc66AOAAA=</Row>
   </Table>
   <Table Name="EcospaceScenarioMPA" Columns="MPAID:System.Int64,MPAMap:System.String,MPAmonth:System.String,MPAname:System.String,ScenarioID:System.Int64,Sequence:System.Int64" Num="30">
-    <Row>25,gzip:H4sIAAAAAAAEAJVWQQLDIAj7kBfP+f+/dujQgAHUXtaSBAjWboxzzfMRJEwAB5AEFPITmUuu4OGLenSZBzOiOsITHoytdNm7Um8lrO1DizCYtyjrBu55aywNYg7+2dWzx7HavNopgXi1t6j9S7zNySd6ETC+rb8/s913oui9ygrOACnEoFZR6lhVx9etc0VHQKww/bWJbmvb7x33+SzCzUi3jJw1q07ExbG8Gfeu1mrPs0Qw9OALOSGJgxfOZTrsxBATXZw0Pyu7V0kbdYyA1tZR1uryNad2vokh7NWyQC0C/uw9sGf0/yVxpP3vErj+gnwXnHkuDBfZnu//BQB+PpHRDaEIAAA=,111111111111,HELCOM MPAs all status,10,1</Row>
-    <Row>26,gzip:H4sIAAAAAAAEAKWRwQoAIAhDf8iL5/3/f0UgoeXSaB59mwMBQFRawmSnPM+8hhbUznE4u30XsAonUpsig680zFeI1BGXjCPspcCnkxt3ZyRbXzyOdz4WS3gNZLU1HusCAAA=,000000000000,Pelagic fleet MPA protection,10,2</Row>
-    <Row>27,gzip:H4sIAAAAAAAEAKWRwQoAIAhDf8iL5/3/f0UgoeXSaB59mwMBQFRawmSnPM+8hhbUznE4u30XsAonUpsig680zFeI1BGXjCPspcCnkxt3ZyRbXzyOdz4WS3gNZLU1HusCAAA=,000000000000,Demersal fleet MPA protection,10,3</Row>
-    <Row>28,gzip:H4sIAAAAAAAEAJVWQQLDIAj7kBfP+f+/dujQgAHUXtaSBAjWboxzzfMRJEwAB5AEFPITmUuu4OGLenSZBzOiOsITHoytdNm7Um8lrO1DizCYtyjrBu55aywNYg7+2dWzx7HavNopgXi1t6j9S7zNySd6ETC+rb8/s913oui9ygrOACnEoFZR6lhVx9etc0VHQKww/bWJbmvb7x33+SzCzUi3jJw1q07ExbG8Gfeu1mrPs0Qw9OALOSGJgxfOZTrsxBATXZw0Pyu7V0kbdYyA1tZR1uryNad2vokh7NWyQC0C/uw9sGf0/yVxpP3vErj+gnwXnHkuDBfZnu//BQB+PpHRDaEIAAA=,000000000000,Recreational fleet MPA protection,10,4</Row>
-    <Row>29,gzip:H4sIAAAAAAAEAKWRwQoAIAhDf8iL5/3/f0UgoeXSaB59mwMBQFRawmSnPM+8hhbUznE4u30XsAonUpsig680zFeI1BGXjCPspcCnkxt3ZyRbXzyOdz4WS3gNZLU1HusCAAA=,000000000000,Unreported MPA protection,10,5</Row>
+    <Row>25,gzip:H4sIAAAAAAAEALO2Jh4AACe9NeosAAAA,111111111111,HELCOM MPAs all status,10,1</Row>
+    <Row>26,gzip:H4sIAAAAAAAEALO2Jh4AACe9NeosAAAA,000000000000,Pelagic fleet MPA protection,10,2</Row>
+    <Row>27,gzip:H4sIAAAAAAAEALO2Jh4AACe9NeosAAAA,000000000000,Demersal fleet MPA protection,10,3</Row>
+    <Row>28,gzip:H4sIAAAAAAAEALO2Jh4AACe9NeosAAAA,000000000000,Recreational fleet MPA protection,10,4</Row>
+    <Row>29,gzip:H4sIAAAAAAAEALO2Jh4AACe9NeosAAAA,000000000000,Unreported MPA protection,10,5</Row>
   </Table>
   <Table Name="EcospaceScenarioMPAFishery" Columns="FleetID:System.Int64,MPAID:System.Int64,ScenarioID:System.Int64" Num="48">
     <Row>37,25,10</Row>
@@ -3232,77 +3234,77 @@ To use mmol/l, as available on Aquamaps, it must be converted",19,gzip:H4sIAAAAA
     <Row>0,1,False,0,2,2,1,0,1,cod,0.03786553</Row>
   </Table>
   <Table Name="StanzaLifeStage" Columns="AgeStart:System.Int32,GroupID:System.Int64,Mortality:System.Single,Sequence:System.Int64,SpawnProp:System.Single,StanzaID:System.Int64,vbK:System.Single" Num="14">
-    <Row>0,6,0,1,1,1,0.3</Row>
     <Row>35,5,0,2,1,1,0.3</Row>
+    <Row>0,6,0,1,1,1,0.3</Row>
   </Table>
   <Table Name="UpdateLog" Columns="Date:System.String,EwEVersion:System.String,Remark:System.String,Version:System.Single" Num="272">
-    <Row>20/12/2013,,Release,6.400004</Row>
-    <Row>27/09/2016,6.5.14040.0,Validated exclusion maps,6.500001</Row>
-    <Row>27/09/2016,6.5.14040.0,Re-checked capacity maps,6.500002</Row>
-    <Row>27/09/2016,6.5.14040.0,Enable multiple connections for a single dataset layer,6.500003</Row>
-    <Row>27/09/2016,6.5.14040.0,Reworked storage of Ecospace external data connections,6.500004</Row>
-    <Row>27/09/2016,6.5.14040.0,Enabled monthly time series,6.500005</Row>
-    <Row>27/09/2016,6.5.14040.0,Cleaned up Ecospace driver tables,6.500006</Row>
-    <Row>27/09/2016,6.5.14040.0,Added flag to use square cells in Ecospace,6.500007</Row>
-    <Row>27/09/2016,6.5.14040.0,"Added WKT support, removed CellSize field",6.500008</Row>
-    <Row>27/09/2016,6.5.14040.0,Added capacity calculation types per group,6.500009</Row>
-    <Row>27/09/2016,6.5.14040.0,"Changed shape fn type to long, added taxon exploitation status",6.50001</Row>
-    <Row>27/09/2016,6.5.14040.0,Lower foraging time limit for Ecosim can be altered,6.500011</Row>
-    <Row>27/09/2016,6.5.14040.0,"Added Ecospace monthly maps, flow map, and removed stored advection maps",6.500012</Row>
-    <Row>27/09/2016,6.5.14040.0,Added EcoBase metadata fields,6.500013</Row>
-    <Row>27/09/2016,6.5.14040.0,Discontinued EcospaceScenarioHabitatChange,6.500014</Row>
-    <Row>27/09/2016,6.5.14040.0,Added publication metadata fields,6.500015</Row>
-    <Row>27/09/2016,6.5.14040.0,Fixed possible taxon table errors,6.500016</Row>
-    <Row>27/09/2016,6.5.14040.0,Increased taxon table key field sizes,6.500017</Row>
-    <Row>27/09/2016,6.5.14040.0,Added EcoBase reference field,6.500019</Row>
-    <Row>27/09/2016,6.5.14040.0,Updated to new migration maps,6.50002</Row>
-    <Row>27/09/2016,6.5.14040.0,Added settings to auxillary data,6.500021</Row>
-    <Row>27/09/2016,6.5.14040.0,Removed discontinued migration fields,6.500022</Row>
-    <Row>27/09/2016,6.5.14040.0,Addes Ecopath sample tables,6.500023</Row>
-    <Row>27/09/2016,6.5.14040.0,Updated shape functions,6.500024</Row>
-    <Row>27/09/2016,6.5.14040.0,"Added Ecospace migration area movement, Ecosim environmental driver table",6.500025</Row>
-    <Row>27/09/2016,6.5.14040.0,Added imported diets to samples,6.500026</Row>
-    <Row>27/09/2016,6.5.14040.0,"Updated Ecosim environmental drivers, discontinued obsolete fields",6.500027</Row>
-    <Row>16/12/2016,6.6.14149.0,Updated Ecotracer,6.501001</Row>
-    <Row>16/12/2016,6.6.14149.0,"Advection, upwelling stored by month",6.501002</Row>
-    <Row>12/07/2018,6.6.15447.0,Added biomass accumulation rate to samples,6.600001</Row>
-    <Row>12/07/2018,6.6.15447.0,"Added second pool code to fleet time series, fixed samples",6.600002</Row>
-    <Row>12/07/2018,6.6.15447.0,Re-checked capacity maps,6.600003</Row>
-    <Row>12/07/2018,6.6.15447.0,Updated capacity calculation types,6.600004</Row>
-    <Row>12/07/2018,6.6.15447.0,Released fleet time series FK constraints,6.600005</Row>
-    <Row>12/07/2018,6.6.15447.0,Added units to env. driver layers,6.600006</Row>
-    <Row>12/07/2018,6.6.15447.0,Validated Ecospace MPAs,6.600007</Row>
-    <Row>12/07/2018,6.6.15447.0,Added Ecosim catchability forcing,6.600008</Row>
-    <Row>12/07/2018,6.6.15447.0,Cleaned up pedigree table structure,6.600009</Row>
-    <Row>12/07/2018,6.6.15447.0,Allow pedigree values outside predefined levels,6.60001</Row>
-    <Row>14/03/2019,6.6.15836.0,"Added ecospace fitness response type, stanza spawn proportion",6.600012</Row>
-    <Row>14/03/2019,6.6.15836.0,Added ecospace other mort driver layer,6.600013</Row>
-    <Row>14/03/2019,6.6.15836.0,Brought back shared foraging arenas,6.600014</Row>
-    <Row>14/03/2019,6.6.15836.0,"Removed EatEffBad, added KMoveFit",6.600015</Row>
-    <Row>14/03/2019,6.6.15836.0,Ecosim catchabilities have enough room,6.600016</Row>
-    <Row>14/03/2019,6.6.15836.0,SS stored with Ecosamples,6.600017</Row>
-    <Row>14/03/2019,6.6.15836.0,Ensured default pedigree levels,6.600018</Row>
-    <Row>04/12/2019,6.6.16275.0,"Added AquaMaps, OBIS, and WoRMS taxonomic code fields",6.600019</Row>
-    <Row>04/12/2019,6.6.16275.0,Added Q10 driver map,6.60002</Row>
-    <Row>04/12/2019,6.6.16275.0,Fixed importance layer primary key for some models,6.600021</Row>
-    <Row>04/12/2019,6.6.16275.0,Fixed potential ecospace connection storage problem,6.600022</Row>
-    <Row>04/12/2019,6.6.16275.0,Fixed potential pedigree saving problem,6.600023</Row>
-    <Row>06/02/2020,6.6.16540.0,Fixed potential ecosampler saving problem,6.600024</Row>
-    <Row>06/02/2020,6.6.16540.0,Fixed potential ecosampler saving problem,6.600025</Row>
-    <Row>10/02/2023,6.6.8.18072,Fixed potential ecosampler saving problem - reprise,6.600026</Row>
-    <Row>21/11/2023,6.7.0.18558,Added additive proportion of predation mortality,6.700001</Row>
-    <Row>21/11/2023,6.7.0.18558,Added other mortality saving,6.700002</Row>
-    <Row>21/11/2023,6.7.0.18558,Added Ecosim shared arena sequence,6.700003</Row>
-    <Row>21/11/2023,6.7.0.18558,"Remember Ecosim and Ecospace capacity driver settings; Ecospace spin-up settings",6.700004</Row>
-    <Row>21/11/2023,6.7.0.18558,Added stanza recruitment linkage,6.700005</Row>
-    <Row>21/11/2023,6.7.0.18558,Made capacity &amp; mortality driver handling robust in Ecosim and Ecospace,6.700006</Row>
-    <Row>21/11/2023,6.7.0.18558,"Added disabled ext connections, per layer",6.700007</Row>
-    <Row>21/11/2023,6.7.0.18558,Added applied data range to ext connections,6.700008</Row>
-    <Row>21/11/2023,6.7.0.18558,Fixed potential ecosampler saving problem - reprise,6.700009</Row>
-    <Row>21/11/2023,6.7.0.18558,Added fleet nominal effort,6.70001</Row>
-    <Row>21/11/2023,6.7.0.18558,Catchabilities now driven through time series,6.700011</Row>
-    <Row>21/11/2023,6.7.0.18558,"External data can now start and end at a specific date, not at a year",6.700012</Row>
-    <Row>21/11/2023,6.7.0.18558,Added effort zones and cell area maps,6.700013</Row>
-    <Row>21/11/2023,6.7.0.18558,Added effort attraction model,6.700014</Row>
+    <Row>12/20/2013,,Release,6.400004</Row>
+    <Row>9/27/2016,6.5.14040.0,Validated exclusion maps,6.500001</Row>
+    <Row>9/27/2016,6.5.14040.0,Re-checked capacity maps,6.500002</Row>
+    <Row>9/27/2016,6.5.14040.0,Enable multiple connections for a single dataset layer,6.500003</Row>
+    <Row>9/27/2016,6.5.14040.0,Reworked storage of Ecospace external data connections,6.500004</Row>
+    <Row>9/27/2016,6.5.14040.0,Enabled monthly time series,6.500005</Row>
+    <Row>9/27/2016,6.5.14040.0,Cleaned up Ecospace driver tables,6.500006</Row>
+    <Row>9/27/2016,6.5.14040.0,Added flag to use square cells in Ecospace,6.500007</Row>
+    <Row>9/27/2016,6.5.14040.0,"Added WKT support, removed CellSize field",6.500008</Row>
+    <Row>9/27/2016,6.5.14040.0,Added capacity calculation types per group,6.500009</Row>
+    <Row>9/27/2016,6.5.14040.0,"Changed shape fn type to long, added taxon exploitation status",6.50001</Row>
+    <Row>9/27/2016,6.5.14040.0,Lower foraging time limit for Ecosim can be altered,6.500011</Row>
+    <Row>9/27/2016,6.5.14040.0,"Added Ecospace monthly maps, flow map, and removed stored advection maps",6.500012</Row>
+    <Row>9/27/2016,6.5.14040.0,Added EcoBase metadata fields,6.500013</Row>
+    <Row>9/27/2016,6.5.14040.0,Discontinued EcospaceScenarioHabitatChange,6.500014</Row>
+    <Row>9/27/2016,6.5.14040.0,Added publication metadata fields,6.500015</Row>
+    <Row>9/27/2016,6.5.14040.0,Fixed possible taxon table errors,6.500016</Row>
+    <Row>9/27/2016,6.5.14040.0,Increased taxon table key field sizes,6.500017</Row>
+    <Row>9/27/2016,6.5.14040.0,Added EcoBase reference field,6.500019</Row>
+    <Row>9/27/2016,6.5.14040.0,Updated to new migration maps,6.50002</Row>
+    <Row>9/27/2016,6.5.14040.0,Added settings to auxillary data,6.500021</Row>
+    <Row>9/27/2016,6.5.14040.0,Removed discontinued migration fields,6.500022</Row>
+    <Row>9/27/2016,6.5.14040.0,Addes Ecopath sample tables,6.500023</Row>
+    <Row>9/27/2016,6.5.14040.0,Updated shape functions,6.500024</Row>
+    <Row>9/27/2016,6.5.14040.0,"Added Ecospace migration area movement, Ecosim environmental driver table",6.500025</Row>
+    <Row>9/27/2016,6.5.14040.0,Added imported diets to samples,6.500026</Row>
+    <Row>9/27/2016,6.5.14040.0,"Updated Ecosim environmental drivers, discontinued obsolete fields",6.500027</Row>
+    <Row>12/16/2016,6.6.14149.0,Updated Ecotracer,6.501001</Row>
+    <Row>12/16/2016,6.6.14149.0,"Advection, upwelling stored by month",6.501002</Row>
+    <Row>7/12/2018,6.6.15447.0,Added biomass accumulation rate to samples,6.600001</Row>
+    <Row>7/12/2018,6.6.15447.0,"Added second pool code to fleet time series, fixed samples",6.600002</Row>
+    <Row>7/12/2018,6.6.15447.0,Re-checked capacity maps,6.600003</Row>
+    <Row>7/12/2018,6.6.15447.0,Updated capacity calculation types,6.600004</Row>
+    <Row>7/12/2018,6.6.15447.0,Released fleet time series FK constraints,6.600005</Row>
+    <Row>7/12/2018,6.6.15447.0,Added units to env. driver layers,6.600006</Row>
+    <Row>7/12/2018,6.6.15447.0,Validated Ecospace MPAs,6.600007</Row>
+    <Row>7/12/2018,6.6.15447.0,Added Ecosim catchability forcing,6.600008</Row>
+    <Row>7/12/2018,6.6.15447.0,Cleaned up pedigree table structure,6.600009</Row>
+    <Row>7/12/2018,6.6.15447.0,Allow pedigree values outside predefined levels,6.60001</Row>
+    <Row>3/14/2019,6.6.15836.0,"Added ecospace fitness response type, stanza spawn proportion",6.600012</Row>
+    <Row>3/14/2019,6.6.15836.0,Added ecospace other mort driver layer,6.600013</Row>
+    <Row>3/14/2019,6.6.15836.0,Brought back shared foraging arenas,6.600014</Row>
+    <Row>3/14/2019,6.6.15836.0,"Removed EatEffBad, added KMoveFit",6.600015</Row>
+    <Row>3/14/2019,6.6.15836.0,Ecosim catchabilities have enough room,6.600016</Row>
+    <Row>3/14/2019,6.6.15836.0,SS stored with Ecosamples,6.600017</Row>
+    <Row>3/14/2019,6.6.15836.0,Ensured default pedigree levels,6.600018</Row>
+    <Row>12/4/2019,6.6.16275.0,"Added AquaMaps, OBIS, and WoRMS taxonomic code fields",6.600019</Row>
+    <Row>12/4/2019,6.6.16275.0,Added Q10 driver map,6.60002</Row>
+    <Row>12/4/2019,6.6.16275.0,Fixed importance layer primary key for some models,6.600021</Row>
+    <Row>12/4/2019,6.6.16275.0,Fixed potential ecospace connection storage problem,6.600022</Row>
+    <Row>12/4/2019,6.6.16275.0,Fixed potential pedigree saving problem,6.600023</Row>
+    <Row>2/6/2020,6.6.16540.0,Fixed potential ecosampler saving problem,6.600024</Row>
+    <Row>2/6/2020,6.6.16540.0,Fixed potential ecosampler saving problem,6.600025</Row>
+    <Row>2/10/2023,6.6.8.18072,Fixed potential ecosampler saving problem - reprise,6.600026</Row>
+    <Row>11/21/2023,6.7.0.18558,Added additive proportion of predation mortality,6.700001</Row>
+    <Row>11/21/2023,6.7.0.18558,Added other mortality saving,6.700002</Row>
+    <Row>11/21/2023,6.7.0.18558,Added Ecosim shared arena sequence,6.700003</Row>
+    <Row>11/21/2023,6.7.0.18558,"Remember Ecosim and Ecospace capacity driver settings; Ecospace spin-up settings",6.700004</Row>
+    <Row>11/21/2023,6.7.0.18558,Added stanza recruitment linkage,6.700005</Row>
+    <Row>11/21/2023,6.7.0.18558,Made capacity &amp; mortality driver handling robust in Ecosim and Ecospace,6.700006</Row>
+    <Row>11/21/2023,6.7.0.18558,"Added disabled ext connections, per layer",6.700007</Row>
+    <Row>11/21/2023,6.7.0.18558,Added applied data range to ext connections,6.700008</Row>
+    <Row>11/21/2023,6.7.0.18558,Fixed potential ecosampler saving problem - reprise,6.700009</Row>
+    <Row>11/21/2023,6.7.0.18558,Added fleet nominal effort,6.70001</Row>
+    <Row>11/21/2023,6.7.0.18558,Catchabilities now driven through time series,6.700011</Row>
+    <Row>11/21/2023,6.7.0.18558,"External data can now start and end at a specific date, not at a year",6.700012</Row>
+    <Row>11/21/2023,6.7.0.18558,Added effort zones and cell area maps,6.700013</Row>
+    <Row>11/21/2023,6.7.0.18558,Added effort attraction model,6.700014</Row>
   </Table>
 </EwEModel>

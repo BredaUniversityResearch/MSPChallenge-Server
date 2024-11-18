@@ -76,6 +76,7 @@ services:
       - database
       - php
       - redis
+      - simulations
     environment:
       # this forces non-ssl
       SERVER_NAME: :80
