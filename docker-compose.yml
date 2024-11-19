@@ -1,12 +1,10 @@
 services:
   redis:
-    image: 'mspserver-redis'
+    image: "${IMAGE_PREFIX:-}mspserver-redis"
     build:
       context: .
       target: redis_base
     restart: always
-    ports:
-      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
     networks:
       - redis
     logging:
@@ -14,7 +12,7 @@ services:
 
   database:
     # check https://hub.docker.com/_/mariadb for info.
-    image: 'mspserver-mariadb'
+    image: "${IMAGE_PREFIX:-}mspserver-mariadb"
     build:
       context: .
       target: mariadb_base
@@ -47,7 +45,7 @@ services:
       driver: "local"
 
   php:
-    image: 'mspserver-php'
+    image: "${IMAGE_PREFIX:-}mspserver-php"
     depends_on:
       - database
       - redis
@@ -115,7 +113,7 @@ services:
       driver: "local"
 
   simulations:
-    image: 'mspserver-simulations'
+    image: "${IMAGE_PREFIX:-}mspserver-simulations"
     build:
       context: .
       dockerfile: simulations/debian.11-x64/Dockerfile
@@ -133,11 +131,12 @@ services:
       - php
 
   blackfire:
-    image: 'mspserver-blackfire'
+    image: "${IMAGE_PREFIX:-}mspserver-blackfire"
     build:
       context: .
       target: blackfire_base
-    ports: ["8307"]
+    ports:
+      - "${BLACKFIRE_PORT:-}:8307"
     environment:
         # Define Blackfire Agent log vebosity level
         BLACKFIRE_LOG_LEVEL: 4
