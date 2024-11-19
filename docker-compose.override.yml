@@ -32,7 +32,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
     ports:
       # run Adminer on port 8082 since 8080 will be used by mitmproxy
-      - 8082:8080
+      - ${ADMINER_PORT:-8082}:8080
     networks:
       - database
     volumes:
@@ -46,12 +46,15 @@ services:
       context: .
       target: mitmproxy_base
     container_name: mitmproxy
-    entrypoint: "mitmweb --web-host 0.0.0.0 --mode reverse:http://php --set websocket=true"
+    entrypoint: "mitmweb --web-host 0.0.0.0 --listen-port ${MITMPROXY_PORT:-8080} --web-port ${MITMPROXY_WEB_PORT:-8081} --mode reverse:http://php --set websocket=true"
     networks:
       - php
     ports:
-      - '8080:8080'
-      - '8081:8081'
+      - "${MITMPROXY_PORT:-8080}:${MITMPROXY_PORT:-8080}"
+      - "${MITMPROXY_WEB_PORT:-8081}:${MITMPROXY_WEB_PORT:-8081}"
+    environment:
+      MITMPROXY_PORT: ${MITMPROXY_PORT:-8080}
+      MITMPROXY_WEB_PORT: ${MITMPROXY_WEB_PORT:-8081}
     depends_on:
       - php
     logging:
@@ -85,9 +88,9 @@ services:
       WEB_SERVER_HOST: mitmproxy
       URL_WEB_SERVER_HOST: mitmproxy
       URL_WS_SERVER_HOST: mitmproxy
-      WEB_SERVER_PORT: 8080
-      URL_WEB_SERVER_PORT: 8080
-      URL_WS_SERVER_PORT: 8080
+      WEB_SERVER_PORT: ${MITMPROXY_PORT:-8080}
+      URL_WEB_SERVER_PORT: ${MITMPROXY_PORT:-8080}
+      URL_WS_SERVER_PORT: ${MITMPROXY_PORT:-8080}
       WS_SERVER_PAYLOAD_DUMP: "${WS_SERVER_PAYLOAD_DUMP:-0}"
 
       # See https://xdebug.org/docs/all_settings#mode
@@ -100,7 +103,7 @@ services:
     ports:
       # HTTP
       - target: 80
-        published: 80
+        published: ${WEB_SERVER_PORT:-443}
         protocol: tcp
 
 ###> symfony/mercure-bundle ###

@@ -24,4 +24,4 @@ COPY ${source_dir} /app
 RUN chmod +x /app/MSW
 
 # Define the entrypoint to run the .NET app
-ENTRYPOINT ["./MSW"]
+ENTRYPOINT ["sh", "-c", "./MSW Port=$WATCHDOG_PORT"]
