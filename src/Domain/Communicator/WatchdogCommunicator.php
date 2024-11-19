@@ -120,7 +120,7 @@ class WatchdogCommunicator extends AbstractCommunicator
     {
         $sessionId = $this->gameList->getId();
         if (getenv('DOCKER') !== false) {
-            return 'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'php').'/'.$sessionId.
+            return 'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).'/'.$sessionId.
                 '/';
         }
         /** @noinspection HttpUrlsUsage */
