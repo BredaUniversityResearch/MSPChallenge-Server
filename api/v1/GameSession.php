@@ -81,10 +81,10 @@ class GameSession extends Base
 
         if ($forDocker) {
             $deferred = new Deferred();
-            // this is always called from inside the docker environment,so just use http://caddy:80/ or
+            // this is always called from inside the docker environment,so just use http://php:80/ or
             //   http://mitmproxy:8080/
             $GLOBALS['RequestApiRoot'][1] = 'http://'.
-                ($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiRoot;
+                ($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).$apiRoot;
             return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][1])->promise();
         }
 
@@ -141,10 +141,10 @@ class GameSession extends Base
         $apiFolder = "/ServerManager/api/";
 
         if ($forDocker) {
-            // this is always called from inside the docker environment,so just use http://caddy:80/ or
+            // this is always called from inside the docker environment,so just use http://php:80/ or
             //   http://mitmproxy:8080/
             $GLOBALS['ServerManagerApiRoot'][1] = 'http://'.
-                ($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiFolder;
+                ($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).$apiFolder;
             return $GLOBALS['ServerManagerApiRoot'][1];
         }
 
