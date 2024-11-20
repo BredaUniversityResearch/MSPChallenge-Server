@@ -48,7 +48,7 @@ class GameSaveController extends BaseController
         }
         $fileSystem = new FileSystem();
         $saveFileName = sprintf($containerBag->get('app.server_manager_save_name'), $id);
-        $saveFilePath = $containerBag->get('app.server_manager_save_dir').$saveFileName;            
+        $saveFilePath = $containerBag->get('app.server_manager_save_dir').$saveFileName;
         if (!$fileSystem->exists($saveFilePath)) {
             return new Response(null, 422);
         }

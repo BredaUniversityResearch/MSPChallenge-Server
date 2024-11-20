@@ -145,7 +145,8 @@ class GameListController extends BaseController
             return new Response('0', 200);
         }
         return $this->render(
-            ($sessionId == 0) ? 'manager/GameList/gamelist_form.html.twig' : 'manager/GameList/gamelist_access.html.twig',
+            ($sessionId == 0) ?
+                'manager/GameList/gamelist_form.html.twig' : 'manager/GameList/gamelist_access.html.twig',
             [
                 'gameSessionForm' => $form->createView(),
                 'gameSessionCountries' => ($sessionId == 0) ? [] : $gameSession->getCountries()
