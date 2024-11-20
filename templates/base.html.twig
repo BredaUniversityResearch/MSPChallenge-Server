@@ -47,7 +47,7 @@
         {%  endfor %}
         </div>
         <div id="content-wrapper">
-            <div id="content" {{ stimulus_controller('modal-default') }}>
+            <div id="content" {{ stimulus_controller('modal-default')|stimulus_controller('list-default') }}>
                 <div id="menu-user">
                     {{ knp_menu_render('subMenu') }}
                 </div>
