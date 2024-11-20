@@ -6,6 +6,7 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
 use App\Form\GameListAddFormType;
+use App\Form\GameListUserAccessFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,11 +28,11 @@ use Version\Exception\InvalidVersionString;
 use App\Entity\ServerManager\Setting;
 use App\Message\GameList\GameListCreationMessage;
 use App\Domain\Communicator\WatchdogCommunicator;
-use App\Form\GameListUserAccessFormType;
 use App\Message\GameList\GameListArchiveMessage;
 use App\Message\GameSave\GameSaveCreationMessage;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class GameListController extends BaseController
 {
@@ -107,10 +108,16 @@ class GameListController extends BaseController
     public function gameSessionName(
         Request $request,
         EntityManagerInterface $entityManager,
+        ValidatorInterface $validator,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         int $sessionId
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $gameSession->setName($request->get('name'));
+        $errors = $validator->validate($gameSession);
+        if (count($errors) > 0) {
+            return new Response(null, 422);
+        }
         $entityManager->flush();
         return new Response(null, 204);
     }

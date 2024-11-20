@@ -1,6 +1,6 @@
 import { Controller } from 'stimulus';
 import $ from 'jquery';
-import { success } from 'tata-js';
+import { successNotification } from '../helpers/notification';
 
 export default class extends Controller {
 
@@ -24,9 +24,9 @@ export default class extends Controller {
 
     resetModalAndReturnBodyFrame(title)
     {
-        $('#modalDefaultTitle').html(title);
-        $('#sessionInfoLog').html('<turbo-frame id="gameLogComplete" src=""></turbo-frame>');
-        $('#sessionInfoLog').hide();
+        document.getElementById('modalDefaultTitle').innerHTML = title;
+        document.getElementById('sessionInfoLog').innerHTML = '<turbo-frame id="gameLogComplete" src=""></turbo-frame>';
+        document.getElementById('sessionInfoLog').style.display = 'none';
         this.stopReloadModalDefaultBody();
         return this.prepAndGetTurboFrame('modalDefaultBody');
     }
@@ -99,17 +99,17 @@ export default class extends Controller {
             button.html('<i class="fa fa-refresh fa-spin"></i>');
             button.prop('disabled', true);
         }
-        try {
-            await $.ajax({
-                url: $form.prop('action'),
-                method: $form.prop('method'),
-                data: $form.serialize(),
-                dataType: 'json',
-                success: successCallback
-            });
-            success('Success', successMessage, { position: 'mm', duration: 10000 });
-        } catch (e) {
-            target.innerHTML = e.responseText;
+        const response = await fetch($form.prop('action'), {
+            method: $form.prop('method'),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: $form.serialize()
+        });
+        const responseText = await response.text();
+        if (response.status != 200) {
+            target.innerHTML = responseText;
+        } else {
+            successNotification(successMessage);
+            successCallback(responseText);
         }
         if (button) {
             button.html(oldHtml);

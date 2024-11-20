@@ -1,5 +1,4 @@
 import {Controller} from "stimulus";
-import $ from 'jquery';
 
 export default class extends Controller {
 
@@ -8,9 +7,9 @@ export default class extends Controller {
     showToast(event)
     {
         let sessionId = this.element.dataset.session;
-        $('#logToastTitle').html('Log of session #' + sessionId);
+        document.getElementById('logToastTitle').innerHTML = `Log of session #${sessionId}`;
         document.querySelector('turbo-frame#gameLogExcerpt').src = '/manager/game/' + sessionId +'/log/excerpt';
-        $('#logToast').show();
+        document.getElementById('logToast').style.display = 'block';
         this.timeout = setInterval(function () {
             document.querySelector('turbo-frame#gameLogExcerpt').reload();
         }, 2000);
@@ -19,7 +18,7 @@ export default class extends Controller {
 
     hideToast()
     {
-        $('#logToast').hide();
+        document.getElementById('logToast').style.display = 'none';
         clearInterval(this.timeout);
     }
 }

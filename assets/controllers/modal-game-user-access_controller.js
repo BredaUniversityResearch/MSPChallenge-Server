@@ -1,6 +1,6 @@
 import { Controller } from 'stimulus';
 import $ from 'jquery';
-import { error } from 'tata-js';
+import { errorNotification } from '../helpers/notification';
 
 export default class extends Controller {
 
@@ -130,7 +130,7 @@ export default class extends Controller {
             this.translatePasswordPlayer();
             window.dispatchEvent(new CustomEvent("user-access-saving"));
         } catch (errorMessage) {
-            error("Error", errorMessage, { position: 'mm', duration: 10000 });
+            errorNotification(errorMessage);
         }
     }
 

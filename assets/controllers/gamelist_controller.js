@@ -1,6 +1,5 @@
 import { Controller } from 'stimulus';
-import { success, error } from 'tata-js';
-import $ from "jquery";
+import { successNotification, errorNotification } from '../helpers/notification';
 
 export default class extends Controller {
 
@@ -14,10 +13,10 @@ export default class extends Controller {
     
     toggleSessionInfoLog()
     {
-        if ($('#sessionInfoLog').is(':visible')) {
-            $('#sessionInfoLog').hide();
+        if (document.getElementById('sessionInfoLog').style.display == 'none') {
+            document.getElementById('sessionInfoLog').style.display = 'initial';
         } else {
-            $('#sessionInfoLog').show();
+            document.getElementById('sessionInfoLog').style.display = 'none';
         }
     }
 
@@ -35,20 +34,16 @@ export default class extends Controller {
     {
         let sessionId = event.currentTarget.dataset.session;
         let newName = prompt('Session name: ', event.currentTarget.dataset.name);
-        if (newName == null) {
+        const response = await fetch(`/manager/game/${sessionId}/name`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ name: newName })
+        });
+        if (response.status != 204) {
+            errorNotification('Session name change failed. Please make sure it is not empty.');
             return;
         }
-        try {
-            await $.ajax({
-                url: `/manager/game/${sessionId}/name`,
-                method: 'post',
-                data: { name: newName },
-                dataType: 'json'
-            });
-            success('Success', 'Session name successfully changed.', { position: 'mm', duration: 10000 });
-        } catch (e) {
-            error('Error', 'Session name change failed.', { position: 'mm', duration: 10000 });
-        }
+        successNotification('Session name successfully changed.');
         this.reloadGameDetailsFrame();
     }
 
@@ -57,15 +52,12 @@ export default class extends Controller {
         let sessionId = event.currentTarget.dataset.session;
         let state = event.currentTarget.dataset.state;
         this.disableButton(event.currentTarget);
-        try {    
-            await $.ajax({
-                url: `/manager/game/${sessionId}/state/${state}`,
-                method: 'GET'
-            });
-            success('Success',`Changed state to ${state}`, { position: 'mm', duration: 10000 });
-        } catch (e) {
-            error('Error', 'Session state change failed. ', { position: 'mm', duration: 10000 });
+        const response = await fetch(`/manager/game/${sessionId}/state/${state}`);
+        if (response.status != 204) {
+            errorNotification('Session state change failed.');
+            return;
         }
+        successNotification(`Changed state to ${state}.`);
         // no reload, let autoreload handle it
     }
 
@@ -79,21 +71,17 @@ export default class extends Controller {
             return;
         }
         this.disableButton(event.currentTarget);
-        try {
-            await $.ajax({
-                url: `/manager/game/${sessionId}/recreate`,
-                method: 'GET',
-                success: function (sessionId) {
-                    if (sessionId) {
-                        $('#logToast').attr('data-session', sessionId);
-                        window.dispatchEvent(new CustomEvent("session-changing"));
-                    }
-                }
-            });
-            success('Success', 'Recreating session, please be patient...', { position: 'mm', duration: 10000 });
-        } catch (e) {
-            error('Error', 'Session recreation failed.', { position: 'mm', duration: 10000 });
+        const response = await fetch(`/manager/game/${sessionId}/recreate`);
+        if (response.status != 200) {
+            errorNotification('Session recreation failed.');
+            return;
         }
+        const responseText = await response.text();
+        if (responseText) {
+            document.querySelector('#logToast').setAttribute('data-session', responseText);
+            window.dispatchEvent(new CustomEvent("session-changing"));
+        }
+        successNotification('Recreating session, please be patient...');
     }
 
     async sessionArchive(event)
@@ -108,39 +96,37 @@ export default class extends Controller {
             return;
         }
         this.disableButton(event.currentTarget);
-        try {
-            await $.ajax({
-                url: `/manager/game/${sessionId}/archive`,
-                method: 'GET',
-                success: function (results) {
-                    window.dispatchEvent(new CustomEvent("modal-closing"));
-                }
-            });
-            success('Success', 'Archiving session, please be patient.', { position: 'mm', duration: 10000 });
-        } catch (e) {
-            error('Error', 'Session archival failed.', { position: 'mm', duration: 10000 });
+        const response = await fetch(`/manager/game/${sessionId}/archive`);
+        if (response.status != 204) {
+            errorNotification('Session archival failed.');
+            return;
         }
-        this.reloadGameDetailsFrame();
+        window.dispatchEvent(new CustomEvent("modal-closing"));
+        successNotification('Archiving session, please be patient.');
     }
 
     async sessionSave(event)
     {
         let type = event.currentTarget.dataset.type;
         let sessionId = event.currentTarget.dataset.session;
-        try {
-            await $.ajax({
-                url: `/manager/game/${sessionId}/save/${type}`,
-                method: 'GET',
-            });
-            success('Success', 'Saving session, please be patient. Check the Saves page to find it.',{ position: 'mm', duration: 10000 });
-        } catch (e) {
-            error('Error', 'Session save failed.', { position: 'mm', duration: 10000 });
+        const response = await fetch (`/manager/game/${sessionId}/save/${type}`);
+        if (response.status != 204) {
+            errorNotification('Session save failed.');
+            return;
         }
+        successNotification('Saving session, please be patient. Check the Saves page to find it.');
     }
 
-    sessionExport(event)
+    async sessionExport(event)
     {
-        window.location = `/manager/game/${event.currentTarget.dataset.session}/export`;
+        const downloadURL = `/manager/game/${event.currentTarget.dataset.session}/export`;;
+        const response = await fetch(downloadURL);
+        if (response.status != 200) {
+            errorNotification('Could not download exported config file.');
+            return;
+        }
+        // choosing not to read and use the response blob, because our config files can become a little big
+        window.location = downloadURL;
     }
 
     async sessionDemo(event)
@@ -160,15 +146,12 @@ export default class extends Controller {
             }
         }
         this.disableButton(event.currentTarget);
-        try {
-            await $.ajax({
-                url: `/manager/game/${sessionId}/demo`,
-                method: 'GET',
-            });
-            success('Success', 'Switched demo mode successfully.', { position: 'mm', duration: 10000 });
-        } catch (e) {
-            error('Error', 'Demo mode switch failed.', { position: 'mm', duration: 10000 });
+        const response = await fetch (`/manager/game/${sessionId}/demo`);
+        if (response.status != 204) {
+            errorNotification('Demo mode switch failed.');
+            return;
         }
+        successNotification('Switched demo mode successfully.');
         this.reloadGameDetailsFrame();
     }
 

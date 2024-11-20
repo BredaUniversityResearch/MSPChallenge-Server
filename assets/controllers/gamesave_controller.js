@@ -1,5 +1,5 @@
 import { Controller } from 'stimulus';
-import { success, error } from 'tata-js';
+import { errorNotification } from '../helpers/notification';
 
 export default class extends Controller {
 
@@ -8,7 +8,7 @@ export default class extends Controller {
         const downloadURL = `/manager/saves/${event.currentTarget.dataset.save}/download`;
         const response = await fetch(downloadURL);
         if (response.status != 200) {
-            error('Error', 'Could not download save file.', { position: 'mm', duration: 10000 });
+            errorNotification('Could not download save file. It might still be in the process of being created.');
             return;
         }
         // choosing not to read and use the response blob, because our save files can become huge

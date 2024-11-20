@@ -1,5 +1,5 @@
 import { Controller } from 'stimulus';
-import { success, error, info } from 'tata-js';
+import { successNotification, errorNotification, noticeNotification } from '../helpers/notification';
 
 export default class extends Controller {
     static values = {
@@ -11,22 +11,13 @@ export default class extends Controller {
     connect()
     {
         if (this.successValue) {
-            success('Success', this.successValue, {
-                position: 'mm',
-                duration: 10000
-            });
+            successNotification(this.successValue);
         }
         if (this.errorValue) {
-            error('Error', this.errorValue, {
-                position: 'mm',
-                duration: 10000
-            });
+            errorNotification(this.errorValue);
         }
         if (this.noticeValue) {
-            info('Notice', this.noticeValue, {
-                position: 'mm',
-                duration: 30000
-            });
+            noticeNotification(this.noticeValue);
         }
     }
 }

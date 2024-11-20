@@ -13,3 +13,4 @@ import $ from 'jquery';
 import '@popperjs/core';
 import 'bootstrap';
 import 'tata-js';
+import './helpers/notification.js';
