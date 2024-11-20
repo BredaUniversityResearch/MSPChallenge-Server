@@ -9,7 +9,7 @@
                         <button class="btn btn-secondary btn-sm"
                             data-session="{{ gameSession.id }}"
                             data-name="{{ gameSession.name }}"
-                            data-action="game#editNameThroughPrompt">
+                            data-action="gamelist#sessionEditName">
                             <i class="fa fa-edit"></i>
                         </button>
                     </td>
@@ -79,14 +79,14 @@
                 <button class="btn btn-success btn-sm"
                     data-session="{{ gameSession.id }}"
                     data-state="pause"
-                    data-action="game#sessionState">
+                    data-action="gamelist#sessionState">
                     <i class="fa fa-pause"></i> Pause
                 </button>
             {% elseif showGameButton('play', gameSession) %}
                 <button class="btn btn-success btn-sm"
                     data-session="{{ gameSession.id }}"
                     data-state="play"
-                    data-action="game#sessionState">
+                    data-action="gamelist#sessionState">
                     <i class="fa fa-play"></i> Play
                 </button>
             {% else %}
@@ -98,7 +98,7 @@
                 <button class="btn btn-success btn-sm"
                     data-session="{{ gameSession.id }}"
                     data-state="fastforward"
-                    data-action="game#sessionState">
+                    data-action="gamelist#sessionState">
                     <i class="fa fa-fast-forward"></i> Fast-forward
                 </button>
             {% endif %}
@@ -111,7 +111,7 @@
                 <button class="btn btn-info btn-sm"
                     data-session="{{ gameSession.id }}"
                     data-currentdemosetting="{{ gameSession.demoSession }}"
-                    data-action="game#sessionDemo">
+                    data-action="gamelist#sessionDemo">
                     <i class="fa fa-bookmark"></i> {{ demoText }}
                 </button>
             {% else %}
@@ -124,7 +124,7 @@
             {% if showGameButton('recreate', gameSession) %}
                 <button class="btn btn-warning btn-sm"
                     data-session="{{ gameSession.id }}"
-                    data-action="game#sessionRecreate">
+                    data-action="gamelist#sessionRecreate">
                     <i class="fa fa-repeat"></i> Recreate Session
                 </button>
             {% else %}
@@ -135,7 +135,7 @@
             {% if showGameButton('archive', gameSession) %}
                 <button class="btn btn-warning btn-sm"
                     data-session="{{ gameSession.id }}"
-                    data-action="game#sessionArchive">
+                    data-action="gamelist#sessionArchive">
                     <i class="fa fa-archive"></i> Archive Session
                 </button>
             {% else %}
@@ -151,13 +151,13 @@
                 <button class="btn btn-secondary btn-sm"
                     data-session="{{ gameSession.id }}"
                     data-type="full"
-                    data-action="game#sessionSave">
+                    data-action="gamelist#sessionSave">
                     <i class="fa fa-save"></i> Save Session as File
                 </button>
                 <button class="btn btn-secondary btn-sm"
                     data-session="{{ gameSession.id }}"
                     data-type="layers"
-                    data-action="game#sessionSave">
+                    data-action="gamelist#sessionSave">
                     <i class="fa fa-save"></i> Save All Layers
                 </button>
             {% else %}
@@ -180,7 +180,7 @@
             {% if showGameButton('export', gameSession) %}
                 <button class="btn btn-secondary btn-sm"
                     data-session="{{ gameSession.id }}"
-                    data-action="game#sessionExport">
+                    data-action="gamelist#sessionExport">
                     <i class="fa fa-file-code-o"></i> Export with Current Plans
                 </button>
             {% else %}
@@ -191,7 +191,7 @@
             </div>
         </div>
         {% endif %}
-        <button class="my-1 btn btn-secondary btn-sm" data-action="game#toggleSessionInfoLog">
+        <button class="my-1 btn btn-secondary btn-sm" data-action="gamelist#toggleSessionInfoLog">
             <i class="fa fa-bars" aria-hidden="true"></i> Show/Hide Session Creation Log
         </button>
     </div>

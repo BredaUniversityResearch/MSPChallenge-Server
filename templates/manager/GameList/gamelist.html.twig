@@ -44,14 +44,14 @@
                     <button class="btn btn-secondary btn-sm"
                         data-session="{{ game.id }}"
                         data-state="pause"
-                        data-action="game#sessionState">
+                        data-action="gamelist#sessionState">
                         <i class="fa fa-pause" title="Pause"></i>
                     </button>
                 {% elseif showGameButton('play', game) %}
                     <button class="btn btn-secondary btn-sm"
                         data-session="{{ game.id }}"
                         data-state="play"
-                        data-action="game#sessionState">
+                        data-action="gamelist#sessionState">
                         <i class="fa fa-play" title="Play"></i>
                     </button>
                 {% else %}
@@ -63,7 +63,7 @@
                     <button class="btn btn-secondary btn-sm"
                         data-session="{{ game.id }}"
                         data-type="full"
-                        data-action="game#sessionSave">
+                        data-action="gamelist#sessionSave">
                         <i class="fa fa-save" title="Save"></i>
                     </button>
                 {% else %}

@@ -24,8 +24,13 @@
                 <td>{{ gameSave.gameConfigFilesFilename }}</td>
                 <td>{{ gameSave.saveType }}</td>
                 <td class="text-center">
+                    <button class="btn btn-secondary btn-sm"
+                        data-save="{{ gameSave.id }}"
+                        data-action="gamesave#saveDownload">
+                        <i class="fa fa-download"></i>
+                    </button>
                     <button class="btn btn-secondary btn-sm" 
-                        data-session="{{ gameSave.id }}" 
+                        data-save="{{ gameSave.id }}" 
                         data-action="">
                         <i class="fa fa-info-circle" title= "Save details"></i>
                     </button>

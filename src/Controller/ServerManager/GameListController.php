@@ -99,7 +99,7 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/game/name/{sessionId}',
+        '/manager/game/{sessionId}/name',
         name: 'manager_game_name',
         requirements: ['sessionId' => '\d+'],
         methods: ['POST']
@@ -115,7 +115,7 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/game/form/{sessionId}', name: 'manager_game_form')]
+    #[Route('/manager/game/{sessionId}/form', name: 'manager_game_form')]
     public function gameSessionForm(
         EntityManagerInterface $entityManager,
         Request $request,
@@ -145,7 +145,7 @@ class GameListController extends BaseController
             return new Response('0', 200);
         }
         return $this->render(
-            ($sessionId == 0) ? 'manager/GameList/game_form.html.twig' : 'manager/GameList/game_access.html.twig',
+            ($sessionId == 0) ? 'manager/GameList/gamelist_form.html.twig' : 'manager/GameList/gamelist_access.html.twig',
             [
                 'gameSessionForm' => $form->createView(),
                 'gameSessionCountries' => ($sessionId == 0) ? [] : $gameSession->getCountries()
@@ -161,7 +161,7 @@ class GameListController extends BaseController
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         return $this->render(
-            'manager/GameList/game_details.html.twig',
+            'manager/GameList/gamelist_details.html.twig',
             ['gameSession' => $gameSession]
         );
     }
@@ -191,7 +191,7 @@ class GameListController extends BaseController
         if ($type == 'excerpt') {
             $logArray = array_slice($logArray, -5);
         }
-        return $this->render('manager/GameList/game_log.html.twig', [
+        return $this->render('manager/GameList/gamelist_log.html.twig', [
             'type' => $type,
             'logToastBody' => $logArray
         ]);

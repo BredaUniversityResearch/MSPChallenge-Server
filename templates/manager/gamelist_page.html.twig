@@ -3,7 +3,7 @@
 {% block subtitle %}Sessions{% endblock %}
 
 {% block body %}
-<div {{ stimulus_controller('gamelist')|stimulus_controller('game')|stimulus_controller('modal-game') }}
+<div {{ stimulus_controller('gamelist')|stimulus_controller('modal-game') }}
     data-action="user-access-saving@window->modal-game#submitUserAccessModalForm">
     <div class="py-1">
         <button type="button" id="modalNewSession" class="btn btn-primary" data-action="modal-game#openNewSessionModal">

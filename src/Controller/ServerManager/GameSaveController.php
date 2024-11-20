@@ -10,6 +10,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Controller\BaseController;
 use App\Entity\ServerManager\GameSave;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 
@@ -38,21 +39,23 @@ class GameSaveController extends BaseController
     public function gameSessionDownload(
         EntityManagerInterface $entityManager,
         KernelInterface $kernel,
+        ContainerBagInterface $containerBag,
         int $id
     ): Response {
-        $gameSession = $entityManager->getRepository(GameList::class)->find($id);
-        if (is_null($gameSession) || $gameSession->getSessionState() != 'archived') {
+        $gameSave = $entityManager->getRepository(GameSave::class)->find($id);
+        if (is_null($gameSave)) {
             return new Response(null, 422);
         }
         $fileSystem = new FileSystem();
-        $logPath = $kernel->getProjectDir() . "/ServerManager/session_archive/session_archive_{$id}.zip";
-        if (!$fileSystem->exists($logPath)) {
+        $saveFileName = sprintf($containerBag->get('app.server_manager_save_name'), $id);
+        $saveFilePath = $containerBag->get('app.server_manager_save_dir').$saveFileName;            
+        if (!$fileSystem->exists($saveFilePath)) {
             return new Response(null, 422);
         }
-        $response = new BinaryFileResponse($logPath);
+        $response = new BinaryFileResponse($saveFilePath);
         $disposition = HeaderUtils::makeDisposition(
             HeaderUtils::DISPOSITION_ATTACHMENT,
-            "session_archive_{$id}.zip"
+            $saveFileName
         );
         $response->headers->set('Content-Disposition', $disposition);
         return $response;

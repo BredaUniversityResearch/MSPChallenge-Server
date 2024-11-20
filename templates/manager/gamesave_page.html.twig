@@ -3,7 +3,7 @@
 {% block subtitle %}Saves{% endblock %}
 
 {% block body %}
-<div>
+<div {{ stimulus_controller('gamesave') }}>
     <div class="py-1">
         <button type="button" id="modalUploadSave" class="btn btn-primary" data-action="">
             <i class="fa fa-plus-circle" title="Upload session save"></i>
