@@ -1,7 +1,7 @@
 {
   "metadata": {
     "date_modified": "10/29/2024",
-    "data_model_hash": "C89CF96368B9E077881340B2AF88539F28A321A29AF93284D585C552501D1AC1",
+    "data_model_hash": "70F7F8945391076CB30D9FF1021EED4C240A22514117AD3FC599B90A8D37694C",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -20449,6 +20449,41 @@
           "name": "Protection Pelagic Germany",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20463,6 +20498,41 @@
         {
           "name": "Protection Pelagic Denmark",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20479,6 +20549,41 @@
           "name": "Protection Pelagic Sweden",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20493,6 +20598,41 @@
         {
           "name": "Protection Pelagic Poland",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20509,6 +20649,41 @@
           "name": "Protection Pelagic Finland",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20523,6 +20698,41 @@
         {
           "name": "Protection Demersal Germany",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20539,6 +20749,41 @@
           "name": "Protection Demersal Denmark",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20553,6 +20798,41 @@
         {
           "name": "Protection Demersal Sweden",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20569,6 +20849,41 @@
           "name": "Protection Demersal Poland",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20583,6 +20898,41 @@
         {
           "name": "Protection Demersal Finland",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20599,6 +20949,41 @@
           "name": "Protection Demersal Latvia",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20613,6 +20998,26 @@
         {
           "name": "Protection Recreational Germany",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20629,6 +21034,26 @@
           "name": "Protection Recreational Denmark",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20643,6 +21068,26 @@
         {
           "name": "Protection Recreational Sweden",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20659,6 +21104,26 @@
           "name": "Protection Recreational Poland",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20673,6 +21138,26 @@
         {
           "name": "Protection Recreational Finland",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20689,6 +21174,26 @@
           "name": "Protection Recreational Latvia",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20703,6 +21208,21 @@
         {
           "name": "Protection Unreported fishery Germany",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20719,6 +21239,21 @@
           "name": "Protection Unreported fishery Denmark",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20733,6 +21268,21 @@
         {
           "name": "Protection Unreported fishery Sweden",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -20749,6 +21299,21 @@
           "name": "Protection Unreported fishery Poland",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20764,6 +21329,21 @@
           "name": "Protection Unreported fishery Finland",
           "layers": [
             {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
@@ -20778,6 +21358,21 @@
         {
           "name": "Protection Unreported fishery Latvia",
           "layers": [
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Shipping_Intensity_Total_Raster",
+              "influence": 1.0,
+              "construction": false
+            },
             {
               "name": "BS_MPA",
               "influence": 1.0,
@@ -21120,6 +21715,34 @@
         {
           "name": "Harbor Porpoise Bycatch",
           "subcategory": "Bycatch"
+        },
+        {
+          "name": "Benthic Macrofauna Bycatch",
+          "subcategory": "Bycatch"
+        },
+        {
+          "name": "Other Pelagic Fish Catch",
+          "subcategory": "Fishery"
+        },
+        {
+          "name": "Sprat Catch",
+          "subcategory": "Fishery"
+        },
+        {
+          "name": "Herring Catch",
+          "subcategory": "Fishery"
+        },
+        {
+          "name": "Other Demersal Fish Catch",
+          "subcategory": "Fishery"
+        },
+        {
+          "name": "Flatfish Catch",
+          "subcategory": "Fishery"
+        },
+        {
+          "name": "Cod Catch",
+          "subcategory": "Fishery"
         }
       ],
       "ecologyCategories": [
@@ -21248,6 +21871,42 @@
               "valueColor": "#73FFBCFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Other Pelagic Fish Catch",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Sprat Catch",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Herring Catch",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Other Demersal Fish Catch",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Flatfish Catch",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Cod Catch",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
             }
           ]
         },
@@ -21257,20 +21916,26 @@
           "unit": "g/m2",
           "valueDefinitions": [
             {
-              "valueName": "Harbor Porpoise Bycatch",
-              "valueColor": "#73D9FFFF",
-              "unit": "g/m2",
-              "valueDependentCountry": -1
-            },
-            {
               "valueName": "Seals Bycatch",
-              "valueColor": "#FFC773FF",
+              "valueColor": "#73FFBCFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             },
             {
               "valueName": "Seabirds Bycatch",
-              "valueColor": "#FF7272FF",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Harbor Porpoise Bycatch",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Benthic Macrofauna Bycatch",
+              "valueColor": "#73FFBCFF",
               "unit": "g/m2",
               "valueDependentCountry": -1
             }
@@ -21282,32 +21947,8 @@
           "unit": "km2",
           "valueDefinitions": [
             {
-              "valueName": "No Protection",
+              "valueName": "Default",
               "valueColor": "#FF7272FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No Demersal Fleets",
-              "valueColor": "#FFC773FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No Pelagic Fleets",
-              "valueColor": "#CEFF73FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No Recreational Fleets",
-              "valueColor": "#CEFF73FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No Unreported Fleets",
-              "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
@@ -32726,7 +33367,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "default",
+            "displayName": "Default",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
@@ -42810,6 +43451,1134 @@
         "layer_tags": []
       },
       {
+        "layer_name": "mel_Other_Pelagic_Fish_Catch",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Other Pelagic Fish Catch (Simulated)",
+        "layer_category": "activities",
+        "layer_subcategory": "fishing",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 76,
+        "layer_height": 44,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 0,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Other Pelagic Fish Catch",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -2,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very low density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "1": {
+            "displayName": "Low density",
+            "approval": "EEZ",
+            "value": 250,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "2": {
+            "displayName": "Medium density",
+            "approval": "EEZ",
+            "value": 500,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "3": {
+            "displayName": "High density",
+            "approval": "EEZ",
+            "value": 750,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "4": {
+            "displayName": "Very high density",
+            "approval": "EEZ",
+            "value": 1000,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Sprat_Catch",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Sprat Catch (Simulated)",
+        "layer_category": "activities",
+        "layer_subcategory": "fishing",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 76,
+        "layer_height": 44,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 0,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Sprat Catch",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -2,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very low density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "1": {
+            "displayName": "Low density",
+            "approval": "EEZ",
+            "value": 250,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "2": {
+            "displayName": "Medium density",
+            "approval": "EEZ",
+            "value": 500,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "3": {
+            "displayName": "High density",
+            "approval": "EEZ",
+            "value": 750,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "4": {
+            "displayName": "Very high density",
+            "approval": "EEZ",
+            "value": 1000,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Herring_Catch",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Herring Catch (Simulated)",
+        "layer_category": "activities",
+        "layer_subcategory": "fishing",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 76,
+        "layer_height": 44,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 0,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Herring Catch",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -2,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very low density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "1": {
+            "displayName": "Low density",
+            "approval": "EEZ",
+            "value": 250,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "2": {
+            "displayName": "Medium density",
+            "approval": "EEZ",
+            "value": 500,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "3": {
+            "displayName": "High density",
+            "approval": "EEZ",
+            "value": 750,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "4": {
+            "displayName": "Very high density",
+            "approval": "EEZ",
+            "value": 1000,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Other_Demersal_Fish_Catch",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Other Demersal Fish Catch (Simulated)",
+        "layer_category": "activities",
+        "layer_subcategory": "fishing",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 76,
+        "layer_height": 44,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 0,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Other Demersal Fish Catch",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -2,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very low density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "1": {
+            "displayName": "Low density",
+            "approval": "EEZ",
+            "value": 250,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "2": {
+            "displayName": "Medium density",
+            "approval": "EEZ",
+            "value": 500,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "3": {
+            "displayName": "High density",
+            "approval": "EEZ",
+            "value": 750,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "4": {
+            "displayName": "Very high density",
+            "approval": "EEZ",
+            "value": 1000,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Flatfish_Catch",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Flatfish Catch (Simulated)",
+        "layer_category": "activities",
+        "layer_subcategory": "fishing",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 76,
+        "layer_height": 44,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 0,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Flatfish Catch",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -2,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very low density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "1": {
+            "displayName": "Low density",
+            "approval": "EEZ",
+            "value": 250,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "2": {
+            "displayName": "Medium density",
+            "approval": "EEZ",
+            "value": 500,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "3": {
+            "displayName": "High density",
+            "approval": "EEZ",
+            "value": 750,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "4": {
+            "displayName": "Very high density",
+            "approval": "EEZ",
+            "value": 1000,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Cod_Catch",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Cod Catch (Simulated)",
+        "layer_category": "activities",
+        "layer_subcategory": "fishing",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 76,
+        "layer_height": 44,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 0,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Cod Catch",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -2,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very low density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "1": {
+            "displayName": "Low density",
+            "approval": "EEZ",
+            "value": 250,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "2": {
+            "displayName": "Medium density",
+            "approval": "EEZ",
+            "value": 500,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "3": {
+            "displayName": "High density",
+            "approval": "EEZ",
+            "value": 750,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "4": {
+            "displayName": "Very high density",
+            "approval": "EEZ",
+            "value": 1000,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
         "layer_name": "mel_Seals_Bycatch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
@@ -43368,6 +45137,194 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": null
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+	  {
+        "layer_name": "mel_Benthic_Macrofauna_Bycatch",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Benthic Macrofauna Bycatch (Simulated)",
+        "layer_category": "activities",
+        "layer_subcategory": "fishing",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 76,
+        "layer_height": 44,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 0,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Benthic Macrofauna Bycatch",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -2,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very low density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "1": {
+            "displayName": "Low density",
+            "approval": "EEZ",
+            "value": 250,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "2": {
+            "displayName": "Medium density",
+            "approval": "EEZ",
+            "value": 500,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "3": {
+            "displayName": "High density",
+            "approval": "EEZ",
+            "value": 750,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          },
+          "4": {
+            "displayName": "Very high density",
+            "approval": "EEZ",
+            "value": 1000,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
           }
         },
         "layer_info_properties": null,
