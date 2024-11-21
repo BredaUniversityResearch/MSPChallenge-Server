@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
-use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
 
 final class Version20241120210913 extends MSPMigration
