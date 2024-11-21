@@ -27,7 +27,7 @@ INSERT INTO `game_config_files` (`filename`, `description`) VALUES
 SQL
         );
         $lastInsertedId = $this->connection->lastInsertId();
-        $this->addSql(<<<'SQL'
+        $this->addSql(<<<"SQL"
 INSERT INTO `game_config_version` (`game_config_files_id`, `version`, `version_message`, `visibility`, `upload_time`, `upload_user`, `last_played_time`, `file_path`, `region`, `client_versions`) VALUES
 ($lastInsertedId, 1, 'See www.mspchallenge.info', 'active', unix_timestamp(), 1, 0, 'Eastern_Med_Sea_basic/Eastern_Med_Sea_basic_1.json', 'easternmed', 'Any')
 SQL
