@@ -21953,6 +21953,12 @@
               "valueDependentCountry": -1
             },
             {
+              "valueName": "No Protection",
+              "valueColor": "#FF7272FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+            {
               "valueName": "Habitats Directive",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
@@ -21966,6 +21972,12 @@
             },
             {
               "valueName": "Habitats and Birds Directive",
+              "valueColor": "#CEFF73FF",
+              "unit": "km2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "UNESCO",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
