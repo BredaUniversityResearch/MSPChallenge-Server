@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
 
 final class Version20241120210913 extends MSPMigration
@@ -20,18 +21,33 @@ final class Version20241120210913 extends MSPMigration
 
     protected function onUp(Schema $schema): void
     {
-        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
-        $this->addSql(<<<'SQL'
-INSERT INTO `game_config_files` (`filename`, `description`) VALUES
-('Eastern_Med_Sea_basic', 'Eastern Mediterranean Sea basic configuration file supplied by BUas')
-SQL
-        );
-        $lastInsertedId = $this->connection->lastInsertId();
-        $this->addSql(<<<"SQL"
-INSERT INTO `game_config_version` (`game_config_files_id`, `version`, `version_message`, `visibility`, `upload_time`, `upload_user`, `last_played_time`, `file_path`, `region`, `client_versions`) VALUES
-($lastInsertedId, 1, 'See www.mspchallenge.info', 'active', unix_timestamp(), 1, 0, 'Eastern_Med_Sea_basic/Eastern_Med_Sea_basic_1.json', 'easternmed', 'Any')
-SQL
-        );
+        $this->connection->beginTransaction();
+        try {
+            // phpcs:ignoreFile Generic.Files.LineLength.TooLong
+            $this->connection->insert('game_config_files', [
+                'filename' => 'Eastern_Med_Sea_basic',
+                'description' => 'Eastern Mediterranean Sea basic configuration file supplied by BUas'
+            ]);
+            $lastInsertedId = $this->connection->lastInsertId();
+            $this->connection->insert('game_config_version', [
+                'game_config_files_id' => $lastInsertedId,
+                'version' => 1,
+                'version_message' => 'See www.mspchallenge.info',
+                'visibility' => 'active',
+                'upload_time' => time(),
+                'upload_user' => 1,
+                'last_played_time' => 0,
+                'file_path' => 'Eastern_Med_Sea_basic/Eastern_Med_Sea_basic_1.json',
+                'region' => 'easternmed',
+                'client_versions' => 'Any'
+            ]);
+            // Commit the transaction
+            $this->connection->commit();
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of error
+            $this->connection->rollBack();
+            throw $e;
+        }
     }
 
     protected function onDown(Schema $schema): void
