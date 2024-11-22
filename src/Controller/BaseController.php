@@ -8,14 +8,14 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class BaseController extends AbstractController
 {
-    protected function getSessionIdFromHeaders(HeaderBag $headers): string
+    protected function getSessionIdFromHeaders(HeaderBag $headers): int
     {
         $sessionId = $headers->get('X-Session-ID');
         if (!$sessionId || !is_numeric($sessionId)) {
             // this should not happen, since the CheckApiSessionIdListener should have already checked this
             throw new BadRequestHttpException('Missing or invalid X-Session-ID header');
         }
-        return $sessionId;
+        return (int)$sessionId;
     }
 
     public static function wrapPayloadForResponse(array $payload, ?string $message = null): array
