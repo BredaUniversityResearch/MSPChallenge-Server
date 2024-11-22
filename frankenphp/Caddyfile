@@ -28,6 +28,11 @@ http://php:80, {$SERVER_NAME:localhost} {
     }
     error @phpFile "Not found" 404
 
+    @apiWithSessionId {
+        path_regexp sessionIdPath ^/([^/]+)/api/(.*)$
+    }
+    header @apiWithSessionId X-Session-ID {re.sessionIdPath.1}
+
 	log {
 		# Redact the authorization query parameter that can be set by Mercure
 		format filter {

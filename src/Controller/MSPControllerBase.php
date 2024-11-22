@@ -6,7 +6,7 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class MSPControllerBase extends AbstractController
+class MSPControllerBase extends BaseController
 {
     /**
      * @throws Exception

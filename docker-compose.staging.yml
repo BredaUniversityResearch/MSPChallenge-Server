@@ -38,7 +38,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
     ports:
       # run Adminer on port 8082 since 8080 will be used by mitmproxy
-      - 8082:8080
+      - ${ADMINER_PORT:-8082}:8080
     networks:
       - database
     volumes:

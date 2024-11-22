@@ -402,7 +402,7 @@ class WsServer extends EventDispatcher implements
                     )
                 );
         }
-        $scheme = ($_ENV['URL_WS_SERVER_SCHEME'] ?? null) ?: 'ws://';
+        $scheme = (($_ENV['URL_WS_SERVER_SCHEME'] ?? null) ?: 'ws').'://';
         $host = ($_ENV['URL_WS_SERVER_HOST'] ?? null) ?: $hostDefaultValue;
         return $scheme.$host.':'.$port.$uri;
     }

@@ -8,6 +8,7 @@ use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/api/Game')]
+#[OA\Tag(name: 'Game', description: 'Operations related to game management')]
 class GameController extends BaseController
 {
     public function __construct(
@@ -23,13 +27,50 @@ class GameController extends BaseController
     ) {
     }
 
+    #[Route(
+        path: '/CreatePOVConfig',
+        name: 'session_api_game_create_pov_config',
+        methods: ['POST']
+    )]
+    #[OA\Post(
+        summary: 'Create POV Config',
+        requestBody: new OA\RequestBody(
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'region_bottom_left_x', type: 'number'),
+                    new OA\Property(property: 'region_bottom_left_y', type: 'number'),
+                    new OA\Property(property: 'region_top_right_x', type: 'number'),
+                    new OA\Property(property: 'region_top_right_y', type: 'number'),
+                    new OA\Property(property: 'output_image_format', type: 'string', nullable: true),
+                    new OA\Property(
+                        property: 'excl_layers_by_tags',
+                        type: 'array',
+                        items: new OA\Items(type: 'string'),
+                        nullable: true
+                    )
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'POV Config created successfully',
+                content: new OA\MediaType(
+                    mediaType: 'application/zip',
+                    schema: new OA\Schema(type: 'string', format: 'binary')
+                )
+            ),
+            new OA\Response(response: 400, description: 'Invalid region coordinates'),
+            new OA\Response(response: 500, description: 'Internal server error')
+        ]
+    )]
     public function createPOVConfig(
-        int $sessionId,
         Request $request,
         LoggerInterface $logger,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         SymfonyToLegacyHelper $symfonyToLegacyHelper
     ): StreamedResponse|JsonResponse {
+        $sessionId = $this->getSessionIdFromHeaders($request->headers);
         $regionBottomLeftX = $request->request->get('region_bottom_left_x');
         $regionBottomLeftY = $request->request->get('region_bottom_left_y');
         $regionTopRightX = $request->request->get('region_top_right_x');

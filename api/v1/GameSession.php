@@ -90,7 +90,7 @@ class GameSession extends Base
 
         $_SERVER['HTTPS'] ??= 'off';
         /** @noinspection HttpUrlsUsage */
-        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
+        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
 
         $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
         return $connection->query(
@@ -137,7 +137,7 @@ class GameSession extends Base
         $serverName = $_SERVER["SERVER_NAME"] ?? gethostname();
 
         /** @noinspection HttpUrlsUsage */
-        $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
+        $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
         $apiFolder = "/ServerManager/api/";
 
         if ($forDocker) {

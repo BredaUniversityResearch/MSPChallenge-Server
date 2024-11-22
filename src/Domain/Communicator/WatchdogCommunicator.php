@@ -124,7 +124,7 @@ class WatchdogCommunicator extends AbstractCommunicator
                 '/';
         }
         /** @noinspection HttpUrlsUsage */
-        $protocol = $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http://';
+        $protocol = ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
         $address = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $this->gameList->getGameServer()->getAddress() ??
             gethostname();
         $port = $_ENV['URL_WEB_SERVER_PORT'] ?? 80;

@@ -1,0 +1,50 @@
+nelmio_api_doc:
+    documentation:
+        servers:
+          - url: '%env(default:app.default_scheme:URL_WEB_SERVER_SCHEME)%://%env(default:app.default_host:URL_WEB_SERVER_HOST)%:%env(default:app.default_port:URL_WEB_SERVER_PORT)%/{sessionId}'
+            variables:
+                sessionId:
+                    default: '1'
+                    description: The session ID
+                    pattern: '^\d+$' # Regular expression to validate as an integer
+        info:
+            title: MSP Challenge API
+            # description: This is an awesome app!
+            version: 5.0.0
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+                    description: 'call /api/User/RequestSession and copy the value of api_access_token here'
+            schemas:
+                ResponseStructure:
+                    type: object
+                    properties:
+                        header_type:
+                            type: string
+                        header_data:
+                            type: string
+                        success:
+                            type: boolean
+                        message:
+                            type: string
+                        payload:
+                            type: array
+                            items:
+                                type: object
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api/(?!doc$) # Accepts routes under /api except /api/doc
+
+when@dev:
+    nelmio_api_doc:
+        documentation:
+            servers:
+              - url: 'http://localhost:%env(default:app.default_port:WEB_SERVER_PORT)%/{sessionId}'
+                variables:
+                    sessionId:
+                        default: '1'
+                        description: The session ID
+                        pattern: '^\d+$' # Regular expression to validate as an integer
