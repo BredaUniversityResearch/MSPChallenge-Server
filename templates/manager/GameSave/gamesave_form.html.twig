@@ -1,25 +1,37 @@
-<!-- Modal: Upload Save  -->
-<div class="modal fade" id="modalUploadSave" tabindex="-1" role="dialog" aria-labelledby="uploadsaveModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="uploadsaveModalLabel">Upload a Session Save File</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<turbo-frame id="modalDefaultBody">
+    <div data-modal-gamesave-target="modalSaveLoadForm">
+        {{ form_start(gameSaveForm) }}
+        {{ form_errors(gameSaveForm) }}
+        <div class="modal-body">
+            <div class="form-group">
+                {{ form_label(gameSaveForm.name, 'Session Name', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(gameSaveForm.name) }}
+                </div>
+                {{ form_widget(gameSaveForm.name, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameSaveForm.name) }}</div>
             </div>
-            <div class="modal-body">
-                <form class="form-horizontal" role="form" data-toggle="validator" id="formUploadSave" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="uploadedSaveFile">Choose a save file you stored on your computer somewhere for uploading</label>
-                        <input type="file" class="form-control-file" id="uploadedSaveFile" accept=".zip">
-                    </div>
-                </form>
+            <div class="form-group">
+                {{ form_label(gameSaveForm.gameWatchdogServer, 'Simulation Server', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(gameSaveForm.gameWatchdogServer) }}
+                </div>
+                {{ form_widget(gameSaveForm.gameWatchdogServer, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameSaveForm.gameWatchdogServer) }}</div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onClick="UploadSave();">Upload</button>
+            <div class="form-group">
+                {{ form_label(gameSaveForm.gameSave, 'Select the Session Save you wish to load', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(gameSaveForm.gameSave) }}
+                </div>
+                {{ form_widget(gameSaveForm.gameSave, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameSaveForm.gameSave) }}</div>
             </div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-gamesave#submitSaveLoadModalForm">Create session</button>
+        </div>
+        {{ form_end(gameSaveForm) }}
     </div>
-</div>
+</turbo-frame>

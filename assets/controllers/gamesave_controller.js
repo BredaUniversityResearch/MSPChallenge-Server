@@ -3,6 +3,15 @@ import { errorNotification } from '../helpers/notification';
 
 export default class extends Controller {
 
+
+    connect()
+    {
+        for (var i = 1; i < 99999; i++) {
+            // no need for any auto-reloading anywhere on the gamesave page
+            window.clearInterval(i);
+        }
+    }
+
     async saveDownload(event)
     {
         const downloadURL = `/manager/saves/${event.currentTarget.dataset.save}/download`;

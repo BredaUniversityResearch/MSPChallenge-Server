@@ -3,7 +3,7 @@
 {% block subtitle %}Saves{% endblock %}
 
 {% block body %}
-<div {{ stimulus_controller('gamesave') }}>
+<div {{ stimulus_controller('gamesave')|stimulus_controller('modal-gamesave') }}>
     <div class="py-1">
         <button type="button" id="modalUploadSave" class="btn btn-primary" data-action="">
             <i class="fa fa-plus-circle" title="Upload session save"></i>
@@ -36,7 +36,7 @@
             </turbo-frame>
         </div>
     </div>
-    <!-- include('manager/GameList/gamelist_modal.html.twig') -->
+    {{ include('manager/modal_default.html.twig') }}
 </div>
 
 {% endblock %}
