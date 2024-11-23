@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Controller\BaseController;
+use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameSave;
 use App\Form\GameListAddBySaveLoadFormType;
@@ -122,12 +123,23 @@ class GameSaveController extends BaseController
             $entityManager->flush();
         }
         return $this->render(
-            'manager/GameList/gamesave_details.html.twig',
+            'manager/GameSave/gamesave_details.html.twig',
             [
                 'gameSaveForm' => $form->createView(),
                 'gameSave' => $gameSave
             ],
             new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
         );
+    }
+
+    #[Route('/manager/saves/{saveId}/archive', name: 'manager_save_archive', requirements: ['saveId' => '\d+'])]
+    public function gameSaveArchive(
+        EntityManagerInterface $entityManager,
+        int $saveId
+    ): Response {
+        $gameSave = $entityManager->getRepository(GameSave::class)->find($saveId);
+        $gameSave->setSaveVisibility(new GameSaveVisibilityValue('archived'));
+        $entityManager->flush();
+        return new Response(null, 204);
     }
 }

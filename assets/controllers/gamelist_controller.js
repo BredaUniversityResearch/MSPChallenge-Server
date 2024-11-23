@@ -25,11 +25,6 @@ export default class extends Controller {
         document.querySelector('turbo-frame#modalDefaultBody').reload();
     }
 
-    disableButton(target)
-    {
-        target.disabled = true;
-    }
-
     async sessionEditName(event)
     {
         let sessionId = event.currentTarget.dataset.session;
@@ -51,7 +46,7 @@ export default class extends Controller {
     {
         let sessionId = event.currentTarget.dataset.session;
         let state = event.currentTarget.dataset.state;
-        this.disableButton(event.currentTarget);
+        event.currentTarget.disabled = true;
         const response = await fetch(`/manager/game/${sessionId}/state/${state}`);
         if (response.status != 204) {
             errorNotification('Session state change failed.');
@@ -70,7 +65,7 @@ export default class extends Controller {
         )) {
             return;
         }
-        this.disableButton(event.currentTarget);
+        event.currentTarget.disabled = true;
         const response = await fetch(`/manager/game/${sessionId}/recreate`);
         if (response.status != 200) {
             errorNotification('Session recreation failed.');
@@ -95,7 +90,7 @@ export default class extends Controller {
         )) {
             return;
         }
-        this.disableButton(event.currentTarget);
+        event.currentTarget.disabled = true;
         const response = await fetch(`/manager/game/${sessionId}/archive`);
         if (response.status != 204) {
             errorNotification('Session archival failed.');
@@ -145,7 +140,7 @@ export default class extends Controller {
                 return;
             }
         }
-        this.disableButton(event.currentTarget);
+        event.currentTarget.disabled = true;
         const response = await fetch (`/manager/game/${sessionId}/demo`);
         if (response.status != 204) {
             errorNotification('Demo mode switch failed.');

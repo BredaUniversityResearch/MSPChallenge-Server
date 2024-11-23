@@ -14,3 +14,5 @@ import '@popperjs/core';
 import 'bootstrap';
 import 'tata-js';
 import './helpers/notification.js';
+import './helpers/form.js';
+import './helpers/modal.js';

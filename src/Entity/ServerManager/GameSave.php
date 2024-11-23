@@ -422,6 +422,11 @@ class GameSave
         return $this;
     }
 
+    public function getSaveTimestampPretty(): ?string
+    {
+        return $this->getSaveTimestamp()->format('j M Y G:i');
+    }
+
     public function getSaveTimestamp(): ?\DateTimeInterface
     {
         return $this->saveTimestamp;

@@ -1,40 +1,43 @@
 import { Controller } from 'stimulus';
 import $ from 'jquery';
-import { successNotification } from '../helpers/notification';
+import { submitFormGeneric } from '../helpers/form';
+import Modal from '../helpers/modal';
 
 export default class extends Controller {
 
     static targets = ['modalSaveLoadForm', 'modalSaveEditForm'];
-    
-    stopReloadModalDefaultBody()
+
+    modalHelper;
+
+    connect()
     {
-        clearInterval(this.modalDefaultBodyReloader);
-        this.modalDefaultBodyReloader = undefined;
+        this.modalHelper = new Modal;
     }
     
-    resetModalAndReturnBodyFrame(title)
+    setupSaveModal(title)
     {
         document.getElementById('modalDefaultTitle').innerHTML = title;
-        return this.prepAndGetTurboFrame('modalDefaultBody');
-    }
-
-    prepAndGetTurboFrame(frameName)
-    {
-        let frame = document.querySelector(`turbo-frame#${frameName}`);
-        frame.innerHTML = '<div class="modal-body"><h3>Loading...</h3></div>';
-        return frame;
     }
 
     openSaveLoadModal(event)
     {
-        let frame = this.resetModalAndReturnBodyFrame('Create New Session');
+        this.setupSaveModal('Create New Session');
+        let frame = this.modalHelper.prepAndGetTurboFrame();
         frame.src = `/manager/saves/${event.currentTarget.dataset.save}/form`;
+        window.dispatchEvent(new CustomEvent("modal-opening"));
+    }
+
+    openSaveDetailsModal(event)
+    {
+        this.setupSaveModal('Save Details');
+        let frame = this.modalHelper.prepAndGetTurboFrame();
+        frame.src = `/manager/saves/${event.currentTarget.dataset.save}/details`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
     async submitSaveLoadModalForm(event)
     {
-        await this.submitFormGeneric(
+        await submitFormGeneric(
             event,
             this.modalSaveLoadFormTarget,
             'Successfully reloaded the session. Please wait for it to be finalised...',
@@ -47,31 +50,15 @@ export default class extends Controller {
         );
     }
 
-    async submitFormGeneric(event, target, successMessage, successCallback = null)
+    async submitSaveEditModalForm(event)
     {
-        event.preventDefault();
-        const $form = $(target).find('form');
-        let button = $form.find('button[type=submit]');
-        if (button) {
-            var oldHtml = button.html();
-            button.html('<i class="fa fa-refresh fa-spin"></i>');
-            button.prop('disabled', true);
-        }
-        const response = await fetch($form.prop('action'), {
-            method: $form.prop('method'),
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: $form.serialize()
-        });
-        const responseText = await response.text();
-        if (response.status != 200) {
-            target.innerHTML = responseText;
-        } else {
-            successNotification(successMessage);
-            successCallback(responseText);
-        }
-        if (button) {
-            button.html(oldHtml);
-            button.prop('disabled', false);
-        }
+        await submitFormGeneric(
+            event,
+            this.modalSaveEditFormTarget,
+            'Successfully saved your notes.',
+            function (result) { 
+                window.dispatchEvent(new CustomEvent("modal-closing"));
+            }
+        )
     }
 }

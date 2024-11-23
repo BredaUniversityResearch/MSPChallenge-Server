@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\ServerManager\GameSave;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,7 +14,7 @@ class GameSaveEditFormType extends AbstractType
     {
         $entityManager = $options['entity_manager'];
         $builder
-            ->add('saveNotes')
+            ->add('saveNotes', TextareaType::class)
         ;
     }
 
