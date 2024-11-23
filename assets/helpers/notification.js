@@ -12,5 +12,5 @@ export function errorNotification(errorMessage)
 
 export function noticeNotification(noticeMessage)
 {
-    info('Notice', this.noticeValue, { position: 'mm', duration: 30000 });
+    info('Notice', noticeMessage, { position: 'mm', duration: 30000 });
 }
