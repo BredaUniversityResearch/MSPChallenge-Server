@@ -31,7 +31,7 @@ class CheckApiSessionIdListener
                 $event->setResponse(new JsonResponse(
                     Router::formatResponse(
                         false,
-                        'Missing or invalid X-Session-ID header',
+                        'Missing or invalid session ID',
                         null,
                         __CLASS__,
                         __FUNCTION__

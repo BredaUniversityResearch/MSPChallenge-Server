@@ -14,7 +14,7 @@ class BaseController extends AbstractController
         $sessionId = $request->query->get('session');
         if (!$sessionId || !is_numeric($sessionId)) {
             // this should not happen, since the CheckApiSessionIdListener should have already checked this
-            throw new BadRequestHttpException('Missing or invalid X-Session-ID header');
+            throw new BadRequestHttpException('Missing or invalid session ID');
         }
         return (int)$sessionId;
     }
