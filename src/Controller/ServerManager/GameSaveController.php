@@ -7,12 +7,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Controller\BaseController;
 use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
-use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameSave;
 use App\Form\GameListAddBySaveLoadFormType;
 use App\Form\GameSaveEditFormType;
@@ -45,7 +43,6 @@ class GameSaveController extends BaseController
     #[Route('/manager/saves/{saveId}/download', name: 'manager_saves_download', requirements: ['saveId' => '\d+'])]
     public function gameSaveDownload(
         EntityManagerInterface $entityManager,
-        KernelInterface $kernel,
         ContainerBagInterface $containerBag,
         int $saveId
     ): Response {
@@ -73,7 +70,6 @@ class GameSaveController extends BaseController
         EntityManagerInterface $entityManager,
         Request $request,
         MessageBusInterface $messageBus,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         int $saveId
     ): Response {
         $form = $this->createForm(

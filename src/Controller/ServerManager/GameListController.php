@@ -109,7 +109,6 @@ class GameListController extends BaseController
         Request $request,
         EntityManagerInterface $entityManager,
         ValidatorInterface $validator,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         int $sessionId
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
@@ -127,7 +126,6 @@ class GameListController extends BaseController
         EntityManagerInterface $entityManager,
         Request $request,
         MessageBusInterface $messageBus,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         int $sessionId = 0
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
