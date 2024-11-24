@@ -1,5 +1,4 @@
 import { Controller } from 'stimulus';
-import $ from 'jquery';
 import { submitFormGeneric } from '../helpers/form';
 import Modal from '../helpers/modal';
 
@@ -43,7 +42,7 @@ export default class extends Controller {
             'Successfully reloaded the session. Please wait for it to be finalised...',
             function (sessionId) {
                 if (sessionId) {
-                    $('#logToast').attr('data-session', sessionId);
+                    document.getElementById('logToast').setAttribute('data-session', sessionId);
                     window.dispatchEvent(new CustomEvent("session-changing"));
                 }
             }

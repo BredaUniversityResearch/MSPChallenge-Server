@@ -1,5 +1,4 @@
 import { Controller } from 'stimulus';
-import $ from 'jquery';
 import { submitFormGeneric } from '../helpers/form';
 import Modal from '../helpers/modal';
 
@@ -25,7 +24,7 @@ export default class extends Controller {
     openNewSessionModal()
     {
         this.setupSessionModal('Create New Session');
-        let frame = this.ModalHelper.prepAndGetTurboFrame();
+        let frame = this.modalHelper.prepAndGetTurboFrame();
         frame.src = '/manager/game/0/form';
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
@@ -69,7 +68,7 @@ export default class extends Controller {
             'Successfully added a new session. Please wait for it to be finalised...',
             function (sessionId) {
                 if (sessionId) {
-                    $('#logToast').attr('data-session', sessionId);
+                    document.getElementById('logToast').setAttribute('data-session', sessionId);
                     window.dispatchEvent(new CustomEvent("session-changing"));
                 }
             }
