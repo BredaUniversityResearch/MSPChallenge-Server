@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class MSPControllerBase extends BaseController
 {

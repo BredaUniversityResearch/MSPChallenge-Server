@@ -35,8 +35,7 @@ nelmio_api_doc:
                             items:
                                 type: object
     areas: # to filter documented areas
-        path_patterns:
-            - ^/api/(?!doc$) # Accepts routes under /api except /api/doc
+        path_patterns: '%app.api_path_patterns%'
 
 when@dev:
     nelmio_api_doc:

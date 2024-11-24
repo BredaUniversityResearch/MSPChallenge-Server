@@ -55,7 +55,7 @@ class UserController extends BaseController
         ServerManager $serverManager,
         AuthenticationSuccessHandler $authenticationSuccessHandler
     ): Response {
-        $sessionId = $this->getSessionIdFromHeaders($request->headers);
+        $sessionId = $this->getSessionIdFromRequest($request);
         try {
             $user = new User();
             $user->setGameSessionId($sessionId);
@@ -107,7 +107,7 @@ class UserController extends BaseController
         JWTTokenManagerInterface $jwtManager,
         AuthenticationSuccessHandler $authenticationSuccessHandler
     ): Response {
-        $sessionId = $this->getSessionIdFromHeaders($request->headers);
+        $sessionId = $this->getSessionIdFromRequest($request);
         try {
             // if refresh does not exist, or is not valid, or we don't know about it, then don't continue
             $currentRefreshToken = $request->get('api_refresh_token');

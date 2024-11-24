@@ -3,14 +3,15 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\HeaderBag;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class BaseController extends AbstractController
 {
-    protected function getSessionIdFromHeaders(HeaderBag $headers): int
+    protected function getSessionIdFromRequest(Request $request): int
     {
-        $sessionId = $headers->get('X-Session-ID');
+        // check query parameter session
+        $sessionId = $request->query->get('session');
         if (!$sessionId || !is_numeric($sessionId)) {
             // this should not happen, since the CheckApiSessionIdListener should have already checked this
             throw new BadRequestHttpException('Missing or invalid X-Session-ID header');

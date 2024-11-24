@@ -70,7 +70,7 @@ class GameController extends BaseController
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         SymfonyToLegacyHelper $symfonyToLegacyHelper
     ): StreamedResponse|JsonResponse {
-        $sessionId = $this->getSessionIdFromHeaders($request->headers);
+        $sessionId = $this->getSessionIdFromRequest($request);
         $regionBottomLeftX = $request->request->get('region_bottom_left_x');
         $regionBottomLeftY = $request->request->get('region_bottom_left_y');
         $regionTopRightX = $request->request->get('region_top_right_x');

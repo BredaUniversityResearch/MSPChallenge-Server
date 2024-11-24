@@ -7,6 +7,8 @@ parameters:
     app.default_scheme: 'http'
     app.default_host: 'localhost'
     app.default_port: '80'
+    app.api_path_patterns:
+        - ^/api/(?!doc$) # Accepts routes under /api except /api/doc
 
     # URL to the MSP Challenge download page
     app.clients_url: 'https://community.mspchallenge.info/wiki/Download'
@@ -135,7 +137,7 @@ services:
 
     App\EventListener\CheckApiSessionIdListener:
         arguments:
-            $areas: '%nelmio_api_doc.areas%'
+            $pathPatterns: '%app.api_path_patterns%'
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
 

@@ -6,7 +6,6 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use ServerManager\ServerManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -33,7 +32,7 @@ class LegacyController extends MSPControllerBase
     {
         // for backwards compatibility
         $_REQUEST['query'] = $_GET['query'] = $query;
-        $_REQUEST['session'] = $_GET['session'] = $this->getSessionIdFromHeaders($request->headers);
+        $_REQUEST['session'] = $_GET['session'] = $this->getSessionIdFromRequest($request);
         $_SERVER['REQUEST_URI'] = $request->getRequestUri();
         $_POST = $request->request->all();
         foreach ($request->headers as $headerName => $headerValue) {
@@ -46,22 +45,6 @@ class LegacyController extends MSPControllerBase
         ob_end_clean();
 
         return new JsonResponse($json, 200);
-    }
-
-    #[Route(
-        path: '/api_test{anything}',
-        name: 'legacy_api_test',
-        requirements: ['anything' => '.*'],
-        methods: ['GET', 'POST']
-    )]
-    public function apiTest(Request $request): Response
-    {
-        ob_start();
-        require('api_test/index.php');
-        $content = ob_get_contents();
-        ob_end_clean();
-
-        return new Response($content);
     }
 
     #[Route(

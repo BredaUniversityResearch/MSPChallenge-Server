@@ -11,9 +11,9 @@ class CheckApiSessionIdListener
 {
     private array $pathPatterns;
 
-    public function __construct(array $areas)
+    public function __construct(array $pathPatterns)
     {
-        $this->pathPatterns = $areas['path_patterns'] ?? [];
+        $this->pathPatterns = $pathPatterns;
     }
 
     public function onKernelRequest(RequestEvent $event): void
@@ -25,7 +25,8 @@ class CheckApiSessionIdListener
             if (!preg_match('#' . $pattern . '#', $path)) {
                 continue;
             }
-            $sessionId = $request->headers->get('X-Session-ID');
+            // check query parameter session
+            $sessionId = $request->query->get('session');
             if (!$sessionId || !is_numeric($sessionId)) {
                 $event->setResponse(new JsonResponse(
                     Router::formatResponse(
