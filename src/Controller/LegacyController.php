@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
-class LegacyController extends MSPControllerBase
+class LegacyController extends LegacyControllerBase
 {
     public function __construct(
         // below is required by legacy to be auto-wire, has its own ::getInstance()

@@ -2,7 +2,7 @@
 
 namespace App\Controller\ServerManager;
 
-use App\Controller\MSPControllerBase;
+use App\Controller\LegacyControllerBase;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 use ServerManager\ServerManager;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class LegacyController extends MSPControllerBase
+class LegacyController extends LegacyControllerBase
 {
     public function __construct(
         // below is required by legacy to be auto-wire, has its own ::getInstance()

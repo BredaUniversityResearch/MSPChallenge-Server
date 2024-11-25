@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 #[Route('/api/User')]
-#[OA\Tag(name: 'User', description: 'Operations related to user management')]
+#[OA\Tag(name: 'User', description: 'Operations related to user management and authorization')]
 class UserController extends BaseController
 {
     #[Route(
@@ -27,14 +27,14 @@ class UserController extends BaseController
         methods: ['POST']
     )]
     #[OA\Post(
-        summary: 'Request a new session',
+        summary: 'Creates a new session for the desired country id',
         requestBody: new OA\RequestBody(
             content: new OA\MediaType(
                 mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(
-                    required: ['build_timestamp', 'country_id', 'user_name', 'country_password'],
+                    required: ['country_id', 'user_name'],
                     properties: [
-                        new OA\Property(property: 'build_timestamp', type: 'string', default: ''),
+                        new OA\Property(property: 'build_timestamp', type: 'string', default: '', nullable: true),
                         new OA\Property(property: 'country_id', type: 'integer', default: '1'),
                         new OA\Property(property: 'user_name', type: 'string', default: ''),
                         new OA\Property(property: 'country_password', type: 'string', default: '', nullable: true)
@@ -44,9 +44,90 @@ class UserController extends BaseController
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: 'Session requested successfully'),
-            new OA\Response(response: 400, description: 'Invalid request'),
-            new OA\Response(response: 500, description: 'Internal server error')
+            new OA\Response(
+                response: 200,
+                description: 'Session requested successfully',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(
+                                    property: 'payload',
+                                    type: 'array',
+                                    items: new OA\Items(
+                                        properties: [
+                                            new OA\Property(
+                                                property: 'session_id',
+                                                description: 'The session id generated for the user',
+                                                type: 'integer'
+                                            ),
+                                            new OA\Property(property: 'api_access_token', type: 'string'),
+                                            new OA\Property(property: 'api_refresh_token', type: 'string')
+                                        ],
+                                        type: 'object'
+                                    )
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Bad request',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'result',
+                            summary: '400 bad request response',
+                            value: [
+                                'success' => false,
+                                'message' => 'Missing or invalid session ID'
+                            ]
+                        )
+                    ],
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure')
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Internal server error',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'result1',
+                            summary: '500 internal server error response 1',
+                            value: [
+                                'success' => false,
+                                'message' => 'Could not authenticate you. Your username and/or password could be '.
+                                    'incorrect',
+                            ]
+                        ),
+                        new OA\Examples(
+                            example: 'result2',
+                            summary: '500 internal server error response 2',
+                            value: [
+                                'success' => false,
+                                'message' => 'That password is incorrect'
+                            ]
+                        ),
+                        new OA\Examples(
+                            example: 'result3',
+                            summary: '500 internal server error response 3',
+                            value: [
+                                'success' => false,
+                                'message' => 'You are not allowed to log on for that country'
+                            ]
+                        )
+                    ],
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure')
+                    ]
+                )
+            )
         ]
     )]
     public function requestSession(
@@ -60,7 +141,7 @@ class UserController extends BaseController
             $user = new User();
             $user->setGameSessionId($sessionId);
             $payload = $user->RequestSession(
-                $request->get('build_timestamp'),
+                $request->get('build_timestamp', ''),
                 $request->get('country_id'),
                 $request->get('user_name'),
                 $request->get('country_password', '')

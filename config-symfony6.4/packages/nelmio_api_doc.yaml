@@ -1,5 +1,8 @@
 nelmio_api_doc:
     documentation:
+        # define the order in which tags are shown here, User first
+        tags:
+            - name: "User"
         servers:
           - url: '%env(default:app.default_scheme:URL_WEB_SERVER_SCHEME)%://%env(default:app.default_host:URL_WEB_SERVER_HOST)%:%env(default:app.default_port:URL_WEB_SERVER_PORT)%/{sessionId}'
             variables:
@@ -30,13 +33,19 @@ nelmio_api_doc:
                             type: boolean
                         message:
                             type: string
+                            nullable: true
+                            description: 'In case of a failure a message that describes what went wrong'
                         payload:
                             type: array
                             items:
                                 type: object
+        security:
+            - Bearer: []
     areas: # to filter documented areas
         path_patterns: '%app.api_path_patterns%'
 
+# note that using mitmproxy results into "TypeError: NetworkError when attempting to fetch resource." response,
+#   therefore we force dev to use "localhost" with the right port
 when@dev:
     nelmio_api_doc:
         documentation:

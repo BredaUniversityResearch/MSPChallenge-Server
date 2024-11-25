@@ -55,9 +55,13 @@ class LayerController extends BaseController
     public function list(
         Request $request
     ): Response {
-        return $this->forward('App\Controller\LegacyController::__invoke', [
-            'request' => $request,
-            'query' => 'Layer/List'
-        ]);
+        return $this->forward(
+            'App\Controller\LegacyController::__invoke',
+            [
+                'request' => $request,
+                'query' => 'Layer/List'
+            ],
+            $request->query->all()
+        );
     }
 }
