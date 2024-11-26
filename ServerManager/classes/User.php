@@ -151,10 +151,18 @@ class User extends Base
         die();
     }
 
-    public function logout()
+    /**
+     * @throws HydraErrorException
+     */
+    public function logout(): void
     {
+        if (!$this->isLoggedIn) {
+            return;
+        }
+        $this->db->deleteById('users', $this->data()->id);
         session_unset();
         session_destroy();
+        $this->getCallAuthoriser('logout');
     }
 
     public function importTokenFields(array $tokenFields): ?int
@@ -196,7 +204,14 @@ class User extends Base
         if (!$this->exists()) {
             return;
         }
-        $response = $this->getCallAuthoriser('refresh_tokens?page=1');
+        $params = [
+            'page' => 1,
+            'username' => $this->data()->username,
+            'order[valid]' => 'DESC'
+        ];
+        $queryString = http_build_query($params);
+
+        $response = $this->getCallAuthoriser('refresh_tokens?'.$queryString);
         if (false === $refreshTokenData = current($response['hydra:member'] ?? [])) {
             return;
         }

@@ -13,17 +13,21 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        # so if an invalid token is present in the header, it will still be shown
+        public:
+            pattern: ^/api/(doc|User/RequestToken|User/RequestSession|Game/CreatePOVConfig)
+            security: false
         login:
-            pattern: ^/\d+/api/User/RequestSession$
+            pattern: ^/api/User/RequestSession$
             stateless: true
             json_login:
                 check_path: session_api_user_controller
         main:
-            pattern: ^/\d+/api/\w+/\w+
+            pattern: ^/api/.*
             stateless: true
             jwt: ~
             provider: jwt
 
     access_control:
-        - { path: ^/\d+/api/(User/RequestToken|User/RequestSession|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName|Game/CreatePOVConfig), roles: PUBLIC_ACCESS }
-        - { path: ^/\d+/api/\w+/\w+$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/\d+/api/(GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
+        - { path: ^/api/.*, roles: IS_AUTHENTICATED_FULLY }

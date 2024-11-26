@@ -132,8 +132,8 @@ class LayerController extends BaseController
                                             new OA\Property(
                                                 property: 'FID',
                                                 type: 'integer',
-                                                nullable: true,
-                                                example: null
+                                                example: null,
+                                                nullable: true
                                             ),
                                             new OA\Property(
                                                 property: 'the_geom',

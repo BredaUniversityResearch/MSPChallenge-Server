@@ -166,10 +166,19 @@ class UserController extends BaseController
     #[OA\Post(
         summary: 'Request a new token',
         requestBody: new OA\RequestBody(
-            content: new OA\JsonContent(
-                properties: [
-                    // Define properties here
-                ]
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    required: ['api_refresh_token'],
+                    properties: [
+                        new OA\Property(
+                            property: 'api_refresh_token',
+                            description: 'The refresh token which was previously issued when requesting the session',
+                            type: 'string'
+                        )
+                    ],
+                    type: 'object'
+                )
             )
         ),
         responses: [

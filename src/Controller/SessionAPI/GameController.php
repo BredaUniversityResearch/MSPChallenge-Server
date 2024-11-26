@@ -35,20 +35,36 @@ class GameController extends BaseController
     #[OA\Post(
         summary: 'Create POV Config',
         requestBody: new OA\RequestBody(
-            content: new OA\JsonContent(
-                properties: [
-                    new OA\Property(property: 'region_bottom_left_x', type: 'number'),
-                    new OA\Property(property: 'region_bottom_left_y', type: 'number'),
-                    new OA\Property(property: 'region_top_right_x', type: 'number'),
-                    new OA\Property(property: 'region_top_right_y', type: 'number'),
-                    new OA\Property(property: 'output_image_format', type: 'string', nullable: true),
-                    new OA\Property(
-                        property: 'excl_layers_by_tags',
-                        type: 'array',
-                        items: new OA\Items(type: 'string'),
-                        nullable: true
-                    )
-                ]
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    required: [
+                        'region_bottom_left_x', 'region_bottom_left_y', 'region_top_right_x', 'region_top_right_y'
+                    ],
+                    properties: [
+                        new OA\Property(property: 'region_bottom_left_x', type: 'number', example: 3920035),
+                        new OA\Property(property: 'region_bottom_left_y', type: 'number', example: 3282700),
+                        new OA\Property(property: 'region_top_right_x', type: 'number', example: 3930639),
+                        new OA\Property(property: 'region_top_right_y', type: 'number', example: 3292502),
+                        new OA\Property(
+                            property: 'output_image_format',
+                            type: 'string',
+                            default: ConfigCreator::DEFAULT_IMAGE_FORMAT,
+                            nullable: true
+                        ),
+                        new OA\Property(
+                            property: 'excl_layers_by_tags',
+                            description: 'The layers to exclude from the export by tags. '.
+                                'You can specify multiple tags to match for each layer. Format: json array of arrays',
+                            type: 'string',
+                            format: 'json',
+                            default: null,
+                            example: '[["ValueMap","Bathymetry"]]',
+                            nullable: true
+                        )
+                    ]
+                )
             )
         ),
         responses: [
@@ -61,13 +77,29 @@ class GameController extends BaseController
                 )
             ),
             new OA\Response(response: 400, description: 'Invalid region coordinates'),
-            new OA\Response(response: 500, description: 'Internal server error')
+            new OA\Response(
+                response: 500,
+                description: 'Internal server error',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'exception',
+                            summary: 'database exception response',
+                            value: [
+                                'success' => false,
+                                'message' => 'Query exception: SQLSTATE[42S02]: Base table or view not found...'
+                            ]
+                        )
+                    ],
+                    ref: '#/components/schemas/ResponseStructure'
+                )
+            )
         ]
     )]
     public function createPOVConfig(
         Request $request,
         LoggerInterface $logger,
-        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        // below is required by legacy to be auto-wired, has its own ::getInstance()
         SymfonyToLegacyHelper $symfonyToLegacyHelper
     ): StreamedResponse|JsonResponse {
         $sessionId = $this->getSessionIdFromRequest($request);
@@ -93,6 +125,20 @@ class GameController extends BaseController
                     $request->request->get('output_image_format') ?: ConfigCreator::DEFAULT_IMAGE_FORMAT
                 );
             }
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                Router::formatResponse(
+                    false,
+                    'Could not set output image format, error: '.$e->getMessage(),
+                    null,
+                    __CLASS__,
+                    __FUNCTION__
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+        $exclLayerByTags = null;
+        try {
             if ($request->request->has('excl_layers_by_tags')) {
                 $exclLayerByTags = json_decode(
                     $request->request->get('excl_layers_by_tags'),
@@ -100,16 +146,35 @@ class GameController extends BaseController
                     512,
                     JSON_THROW_ON_ERROR
                 );
-                $exclLayerByTags = is_array($exclLayerByTags) ? $exclLayerByTags : [];
-                $configCreator->setExcludedLayersByTags(array_map(
-                    fn($s) => new LayerTags($s),
-                    $exclLayerByTags
-                ));
             }
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                Router::formatResponse(
+                    false,
+                    'Invalid value for field excl_layers_by_tags, error: '.$e->getMessage(),
+                    null,
+                    __CLASS__,
+                    __FUNCTION__
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+        $exclLayerByTags = is_array($exclLayerByTags) ? $exclLayerByTags : [];
+        $configCreator->setExcludedLayersByTags(array_map(
+            fn($s) => new LayerTags($s),
+            $exclLayerByTags
+        ));
+        try {
             $zipFilepath = $configCreator->createAndZip($region);
         } catch (\Exception $e) {
             return new JsonResponse(
-                Router::formatResponse(false, $e->getMessage(), null, __CLASS__, __FUNCTION__),
+                Router::formatResponse(
+                    false,
+                    'Could not create POV config, error: '.$e->getMessage(),
+                    null,
+                    __CLASS__,
+                    __FUNCTION__
+                ),
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }

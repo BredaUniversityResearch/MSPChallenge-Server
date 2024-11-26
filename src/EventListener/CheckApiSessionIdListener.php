@@ -26,7 +26,7 @@ class CheckApiSessionIdListener
                 continue;
             }
             // check query parameter session
-            $sessionId = $request->query->get('session');
+            $sessionId = $request->attributes->get('sessionId');
             if (!$sessionId || !is_numeric($sessionId)) {
                 $event->setResponse(new JsonResponse(
                     Router::formatResponse(
