@@ -28,9 +28,16 @@ class SessionController extends AbstractController
         int $session,
         string $query
     ): Response {
+        // Clone the original attributes and add the session ID
+        $attributes = $request->attributes->all();
+        $attributes['sessionId'] = $session;
+        // Merge the route information into the attributes
         $routeInfo = $router->match('/api/'.$query);
-        $subRequest = $request->duplicate(null, null, $routeInfo);
+        $attributes = array_merge($attributes, $routeInfo);
+        // Create a sub-request with the modified attributes, and leave the rest of the original request untouched
+        $subRequest = $request->duplicate(attributes: $attributes);
         $subRequest->attributes->set('sessionId', $session);
+
         return $httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 }
