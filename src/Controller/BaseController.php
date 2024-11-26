@@ -19,12 +19,15 @@ class BaseController extends AbstractController
         return (int)$sessionId;
     }
 
-    public static function wrapPayloadForResponse(array $payload, ?string $message = null): array
-    {
+    public static function wrapPayloadForResponse(
+        bool $success,
+        mixed $payload = null,
+        ?string $message = null
+    ): array {
         return [
             'header_type' => '',
             'header_data' => '',
-            'success' => is_null($message),
+            'success' => $success,
             'message' => $message,
             'payload' => $payload
         ];
