@@ -316,7 +316,10 @@ class LayerController extends BaseController
                                             new OA\Property(
                                                 property: 'data',
                                                 type: 'object',
-                                                example: '{"Status":"Open","Area_cal":"2695738","Dist_coast":"2610.41","Updateyea_":"2014","Country":"England","Depth_m_":"","Name":"WEST STONES","original_layer_name":"NS_Dredging_Deposit_Areas"}'
+                                                example:
+                                                    '{"Status":"Open","Area_cal":"2695738","Dist_coast":"2610.41",'.
+                                                    '"Updateyea_":"2014","Country":"England","Depth_m_":"","Name":'.
+                                                    '"WEST STONES","original_layer_name":"NS_Dredging_Deposit_Areas"}'
                                             )
                                         ],
                                         type: 'object'

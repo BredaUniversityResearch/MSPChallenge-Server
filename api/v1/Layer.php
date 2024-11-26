@@ -73,7 +73,8 @@ class Layer extends Base
             LEFT JOIN plan ON plan_layer_plan_id=plan.plan_id
             WHERE geometry.geometry_active=? AND (
                 layer_id=? OR layer_original_id=?
-            ) AND (geometry_subtractive=? OR geometry_subtractive IS NULL) AND (plan_state=? OR plan_state=? OR plan_state IS NULL)
+            ) AND (geometry_subtractive=? OR geometry_subtractive IS NULL)
+              AND (plan_state=? OR plan_state=? OR plan_state IS NULL)
             ",
             array(1, $layer_id, $layer_id, 0, "APPROVED", "IMPLEMENTED")
         ); // getting all active geometry, except those within plans that are not APPROVED or not IMPLEMENTED
