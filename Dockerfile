@@ -136,7 +136,7 @@ RUN set -eux; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
 
-FROM mariadb:10.6.16 AS mariadb_base
+FROM mariadb:10.11.10 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
 FROM adminer AS adminer_base
 FROM mitmproxy/mitmproxy:10.3.1 as mitmproxy_base
