@@ -48,13 +48,13 @@ class MEL extends Base
         $melConfig = $gameConfigValues['MEL'] ?? null;
 
         // a mel pressure could hold a policy_filters field
-        $pressures = $melConfig['pressures'] ?? [];
+        $pressures = $melConfig['pressures'];
         foreach ($pressures as $pressureIndex => $pressure) {
             if (empty($pressure['policy_filters'])) {
                 continue;
             }
             // if so, traverse all pressure layers and try to find the corresponding layer in the meta section
-            foreach (($pressure['layers'] ?? []) as $pressureLayerIndex => $pressureLayer) {
+            foreach ($pressure['layers'] as $pressureLayerIndex => $pressureLayer) {
                 if (empty($pressureLayer['name'])) {
                     continue;
                 }
@@ -90,7 +90,7 @@ class MEL extends Base
         if (null === ($melConfig = $gameConfigValues['MEL'] ?? null)) {
             return null;
         }
-        $fishing = collect($melConfig['fishing'] ?? [])
+        $fishing = collect($melConfig['fishing'])
             ->filter(fn($f) => in_array($fleetIndex, $f['policy_filters']['fleets'] ?? []))
             ->first();
         return $fishing['name'] ?? null;
@@ -108,7 +108,7 @@ class MEL extends Base
         if (null === ($melConfig = $gameConfigValues['MEL'] ?? null)) {
             return [];
         }
-        $fishing = collect($melConfig['fishing'] ?? [])
+        $fishing = collect($melConfig['fishing'])
             ->filter(fn($f) => $f['name'] === $fishingName)
             ->first();
         return array_map(fn($i) => intval($i), $fishing['policy_filters']['fleets'] ?? []);
