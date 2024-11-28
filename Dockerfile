@@ -138,7 +138,7 @@ RUN set -eux; \
 
 FROM mariadb:10.11.10 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
-FROM adminer AS adminer_base
+FROM shyim/adminerevo AS adminer_base
 FROM mitmproxy/mitmproxy:10.3.1 as mitmproxy_base
 FROM redis:7.2.4-alpine AS redis_base
 FROM erikdubbelboer/phpredisadmin as phpredisadmin_base
