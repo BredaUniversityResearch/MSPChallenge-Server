@@ -38337,7 +38337,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "NS_Elasmobranch_abundance_abs_4326_DT",
+        "layer_name": "NS_Elasmobranch_abundance_abs_4326",
         "layer_geotype": "raster",
         "layer_entity_value_max": 1000.0,
         "layer_short": "Sharks and Rays Abundance (Static)",
