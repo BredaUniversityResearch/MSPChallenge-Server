@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "10/29/2024",
-    "data_model_hash": "70F7F8945391076CB30D9FF1021EED4C240A22514117AD3FC599B90A8D37694C",
+    "date_modified": "11/25/2024",
+    "data_model_hash": "17D1912B0199899F00961B4B023699DC44457C04100938611DC0E334A023E772",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -20157,117 +20157,255 @@
             {
               "//comment": "0 Pelagic Germany",
               "gear_type": "0",
-              "country_id": "6"
+              "country_id": "6",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 6,
+                  "effort_weight": 0.018
+                }
+              ]
             },
             {
               "//comment": "1 Pelagic Denmark",
               "gear_type": "0",
-              "country_id": "3"
+              "country_id": "3",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 0.127
+                }
+              ]
             },
             {
               "//comment": "2 Pelagic Sweden",
               "gear_type": "0",
-              "country_id": "10"
+              "country_id": "10",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 10,
+                  "effort_weight": 0.057
+                }
+              ]
             },
             {
               "//comment": "3 Pelagic Poland",
               "gear_type": "0",
-              "country_id": "9"
+              "country_id": "9",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 9,
+                  "effort_weight": 0.007
+                }
+              ]
             },
             {
               "//comment": "4 Pelagic Finland",
               "gear_type": "0",
-              "country_id": "5"
+              "country_id": "5",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 5,
+                  "effort_weight": 0.0
+                }
+              ]
             },
             {
               "//comment": "5 Demersal Germany",
               "gear_type": "1",
-              "country_id": "6"
+              "country_id": "6",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 6,
+                  "effort_weight": 0.031
+                }
+              ]
             },
             {
               "//comment": "6 Demersal Denmark",
               "gear_type": "1",
-              "country_id": "3"
+              "country_id": "3",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 0.067
+                }
+              ]
             },
             {
               "//comment": "7 Demersal Sweden",
               "gear_type": "1",
-              "country_id": "10"
+              "country_id": "10",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 10,
+                  "effort_weight": 0.013
+                }
+              ]
             },
             {
               "//comment": "8 Demersal Poland",
               "gear_type": "1",
-              "country_id": "9"
+              "country_id": "9",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 9,
+                  "effort_weight": 0.018
+                }
+              ]
             },
             {
               "//comment": "9 Demersal Finland",
               "gear_type": "1",
-              "country_id": "5"
+              "country_id": "5",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 5,
+                  "effort_weight": 0.008
+                }
+              ]
             },
             {
               "//comment": "10 Demersal Latvia",
               "gear_type": "1",
-              "country_id": "7"
+              "country_id": "7",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 7,
+                  "effort_weight": 0.0
+                }
+              ]
             },
             {
               "//comment": "11 Recreational Germany",
               "gear_type": "2",
-              "country_id": "6"
+              "country_id": "6",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 6,
+                  "effort_weight": 0.002
+                }
+              ]
             },
             {
               "//comment": "12 Recreational Denmark",
               "gear_type": "2",
-              "country_id": "3"
+              "country_id": "3",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 0.008
+                }
+              ]
             },
             {
               "//comment": "13 Recreational Sweden",
               "gear_type": "2",
-              "country_id": "10"
+              "country_id": "10",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 10,
+                  "effort_weight": 0.005
+                }
+              ]
             },
             {
               "//comment": "14 Recreational Poland",
               "gear_type": "2",
-              "country_id": "9"
+              "country_id": "9",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 6,
+                  "effort_weight": 0.0
+                }
+              ]
             },
             {
               "//comment": "15 Recreational Finland",
               "gear_type": "2",
-              "country_id": "5"
+              "country_id": "5",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 5,
+                  "effort_weight": 0.0
+                }
+              ]
             },
             {
               "//comment": "16 Recreational Latvia",
               "gear_type": "2",
-              "country_id": "7"
+              "country_id": "7",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 7,
+                  "effort_weight": 0.0
+                }
+              ]
             },
             {
               "//comment": "17 Unreported fishery Germany",
               "gear_type": "3",
-              "country_id": "6"
+              "country_id": "6",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 6,
+                  "effort_weight": 0.007
+                }
+              ]
             },
             {
               "//comment": "18 Unreported fishery Denmark",
               "gear_type": "3",
-              "country_id": "3"
+              "country_id": "3",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 0.021
+                }
+              ]
             },
             {
               "//comment": "19 Unreported fishery Sweden",
               "gear_type": "3",
-              "country_id": "10"
+              "country_id": "10",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 10,
+                  "effort_weight": 0.002
+                }
+              ]
             },
             {
               "//comment": "20 Unreported fishery Poland",
               "gear_type": "3",
-              "country_id": "9"
+              "country_id": "9",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 9,
+                  "effort_weight": 0.003
+                }
+              ]
             },
             {
               "//comment": "21 Unreported fishery Finland",
               "gear_type": "3",
-              "country_id": "5"
+              "country_id": "5",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 5,
+                  "effort_weight": 0.0
+                }
+              ]
             },
             {
               "//comment": "22 Unreported fishery Latvia",
               "gear_type": "3",
-              "country_id": "7"
+              "country_id": "7",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 7,
+                  "effort_weight": 0.0
+                }
+              ]
             }
           ]
         },
@@ -20288,7 +20426,7 @@
       }
     },
     "MEL": {
-      "modelfile": "MELdata/WesternBaltic_National_Fleets_by_catch.eiixml",
+      "modelfile": "MELdata/WesternBaltic_National_Fleets.eiixml",
       "mode": null,
       "rows": 44,
       "columns": 76,
@@ -20370,7 +20508,7 @@
             },
             {
               "name": "BS_Pipelines",
-              "influence": 0.5,
+              "influence": 0.1,
               "construction": false
             }
           ]
@@ -20386,11 +20524,6 @@
             {
               "name": "BS_Finfish_Farms",
               "influence": 0.2,
-              "construction": false
-            },
-            {
-              "name": "BS_Recreational_Fishing",
-              "influence": 0.3,
               "construction": false
             },
             {
@@ -20430,18 +20563,33 @@
             },
             {
               "name": "BS_Pipelines",
-              "influence": 0.4,
+              "influence": 0.1,
               "construction": false
             },
             {
               "name": "BS_Wind_Farms_existing",
-              "influence": 0.8,
+              "influence": 0.4,
               "construction": false
             },
             {
               "name": "BS_Oil_Gas_Platforms",
-              "influence": 0.8,
+              "influence": 0.4,
               "construction": false
+            },
+            {
+              "name": "BS_Pipelines",
+              "influence": 0.1,
+              "construction": true
+            },
+            {
+              "name": "BS_Wind_Farms_existing",
+              "influence": 0.2,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 0.4,
+              "construction": true
             }
           ]
         },
@@ -20455,16 +20603,6 @@
             },
             {
               "name": "BS_Wind_Farms_existing",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Pipelines",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Cables_Edit",
               "influence": 1.0,
               "construction": false
             },
@@ -20487,6 +20625,21 @@
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -20511,16 +20664,6 @@
             {
               "name": "BS_Pipelines",
               "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Cables_Edit",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Pipelines",
-              "influence": 1.0,
               "construction": true
             },
             {
@@ -20537,6 +20680,21 @@
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -20561,16 +20719,6 @@
             {
               "name": "BS_Pipelines",
               "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Cables_Edit",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Pipelines",
-              "influence": 1.0,
               "construction": true
             },
             {
@@ -20587,6 +20735,21 @@
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -20611,16 +20774,6 @@
             {
               "name": "BS_Pipelines",
               "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Cables_Edit",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Pipelines",
-              "influence": 1.0,
               "construction": true
             },
             {
@@ -20637,6 +20790,21 @@
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -20661,16 +20829,6 @@
             {
               "name": "BS_Pipelines",
               "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Cables_Edit",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "BS_Pipelines",
-              "influence": 1.0,
               "construction": true
             },
             {
@@ -20687,6 +20845,21 @@
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -20703,7 +20876,7 @@
               "influence": 1.0,
               "construction": true
             },
-			{
+            {
               "name": "BS_Wind_Farms_existing",
               "influence": 1.0,
               "construction": false
@@ -20735,6 +20908,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -20753,7 +20946,7 @@
               "influence": 1.0,
               "construction": true
             },
-			{
+            {
               "name": "BS_Wind_Farms_existing",
               "influence": 1.0,
               "construction": false
@@ -20785,6 +20978,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -20803,7 +21016,7 @@
               "influence": 1.0,
               "construction": true
             },
-			{
+            {
               "name": "BS_Wind_Farms_existing",
               "influence": 1.0,
               "construction": false
@@ -20835,6 +21048,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -20853,7 +21086,7 @@
               "influence": 1.0,
               "construction": true
             },
-			{
+            {
               "name": "BS_Wind_Farms_existing",
               "influence": 1.0,
               "construction": false
@@ -20885,6 +21118,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -20903,7 +21156,7 @@
               "influence": 1.0,
               "construction": true
             },
-			{
+            {
               "name": "BS_Wind_Farms_existing",
               "influence": 1.0,
               "construction": false
@@ -20935,6 +21188,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -20953,7 +21226,7 @@
               "influence": 1.0,
               "construction": true
             },
-			{
+            {
               "name": "BS_Wind_Farms_existing",
               "influence": 1.0,
               "construction": false
@@ -20985,6 +21258,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21009,17 +21302,32 @@
               "construction": false
             },
             {
-              "name": "BS_Cod_Fisheries_closure",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "BS_Shipping_Intensity_Total_Raster",
               "influence": 1.0,
               "construction": false
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21044,17 +21352,32 @@
               "construction": false
             },
             {
-              "name": "BS_Cod_Fisheries_closure",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "BS_Shipping_Intensity_Total_Raster",
               "influence": 1.0,
               "construction": false
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21079,17 +21402,32 @@
               "construction": false
             },
             {
-              "name": "BS_Cod_Fisheries_closure",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "BS_Shipping_Intensity_Total_Raster",
               "influence": 1.0,
               "construction": false
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21114,17 +21452,32 @@
               "construction": false
             },
             {
-              "name": "BS_Cod_Fisheries_closure",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "BS_Shipping_Intensity_Total_Raster",
               "influence": 1.0,
               "construction": false
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21149,17 +21502,32 @@
               "construction": false
             },
             {
-              "name": "BS_Cod_Fisheries_closure",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "BS_Shipping_Intensity_Total_Raster",
               "influence": 1.0,
               "construction": false
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21184,17 +21552,32 @@
               "construction": false
             },
             {
-              "name": "BS_Cod_Fisheries_closure",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "BS_Shipping_Intensity_Total_Raster",
               "influence": 1.0,
               "construction": false
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21227,6 +21610,26 @@
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": false
             }
           ],
           "policy_filters": {
@@ -21255,6 +21658,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21287,6 +21710,26 @@
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": false
             }
           ],
           "policy_filters": {
@@ -21315,6 +21758,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -21347,6 +21810,26 @@
               "name": "BS_MPA",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": false
             }
           ],
           "policy_filters": {
@@ -21375,6 +21858,26 @@
             },
             {
               "name": "BS_MPA",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Cod_Fisheries_closure",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Oil_Gas_Platforms",
               "influence": 1.0,
               "construction": false
             }
@@ -33529,7 +34032,7 @@
         "layer_name": "BS_Unesco_Sites",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Unesco Sites",
+        "layer_short": "UNESCO Sites",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 1,
@@ -34248,6 +34751,300 @@
           }
         },
         "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "BS_Fisheries_closure",
+        "layer_geotype": "polygon",
+        "layer_entity_value_max": null,
+        "layer_short": "Fisheries Closure",
+        "layer_category": "ecology",
+        "layer_subcategory": "protected_areas",
+        "layer_download_from_geoserver": 1,
+        "layer_width": 1024,
+        "layer_height": 1024,
+        "layer_raster_material": "RasterMELNew",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Areas where fishing is prohibited",
+        "layer_information": "",
+        "layer_media": "wiki://Fisheries_Closure",
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": 1,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Fisheries Closure",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#238B4580",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#238B4580",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#7AC943FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Fisheries_Closure"
+          }
+        },
+        "layer_info_properties": [
+          {
+            "property_name": "action",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Shape_STAr",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Shape_STLe",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Id",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "EC_Regulat",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          }
+        ],
+        "layer_tags": []
+      },
+      {
+        "layer_name": "BS_Cod_Fisheries_closure",
+        "layer_geotype": "polygon",
+        "layer_entity_value_max": null,
+        "layer_short": "Cod Fisheries Closure",
+        "layer_category": "ecology",
+        "layer_subcategory": "protected_areas",
+        "layer_download_from_geoserver": 1,
+        "layer_width": 1024,
+        "layer_height": 1024,
+        "layer_raster_material": "RasterMELNew",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Areas where cod fisheries are prohibited",
+        "layer_information": "",
+        "layer_media": "wiki://Cod_Fisheries_Closure",
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 2
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": 1,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Cod Fisheries Closure",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#BAE4B380",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#7AC943FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#7AC943FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Cod_Fisheries_Closure"
+          }
+        },
+        "layer_info_properties": [
+          {
+            "property_name": "Shape_STAr",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Shape_STLe",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Prohibited",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Id",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "EC_Regulat",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          }
+        ],
         "layer_tags": []
       },
       {
@@ -41417,7 +42214,7 @@
         "layer_green": 0,
         "layer_tooltip": "Other Pelagic Fish",
         "layer_information": "",
-        "layer_media": "wiki://Other_Pelagic_Fish",
+        "layer_media": "wiki://Pelagic_Fish",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -45154,7 +45951,7 @@
         "layer_info_properties": null,
         "layer_tags": []
       },
-	  {
+      {
         "layer_name": "mel_Benthic_Macrofauna_Bycatch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
