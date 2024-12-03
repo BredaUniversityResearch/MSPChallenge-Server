@@ -1274,27 +1274,27 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSGROSSEFFICIENCY">
 <summary>
-  Looks up a localized string similar to Gross efficiency.
+  Looks up a localized string similar to Gross efficiency (catch/net p.p.).
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSMEANTROPHICLEVELCATCH">
 <summary>
-  Looks up a localized string similar to Mean TL of the catch.
+  Looks up a localized string similar to Mean trophic level of the catch.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSMEASUREOFFIT">
 <summary>
-  Looks up a localized string similar to Measure of fit.
+  Looks up a localized string similar to Measure of fit, t*.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSNETSYSTEMPRODUCTION">
 <summary>
-  Looks up a localized string similar to NetSystemProduction.
+  Looks up a localized string similar to Net system production.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSOMNIVINDEX">
 <summary>
-  Looks up a localized string similar to Omnivory index.
+  Looks up a localized string similar to System omnivory index.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSPEDIGREE">
@@ -1304,17 +1304,17 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSPROFIT">
 <summary>
-  Looks up a localized string similar to Profit.
+  Looks up a localized string similar to Total profit.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALBNONDET">
 <summary>
-  Looks up a localized string similar to TotalBNonDet.
+  Looks up a localized string similar to Total biomass (excluding detritus).
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALBT">
 <summary>
-  Looks up a localized string similar to TotalBT.
+  Looks up a localized string similar to Total biomass/total throughput.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALCATCH">
@@ -1334,7 +1334,7 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALEXPORTS">
 <summary>
-  Looks up a localized string similar to Total exports.
+  Looks up a localized string similar to Sum of all exports.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALFIXEDCOST">
@@ -1344,7 +1344,7 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALFLOWDETRITUS">
 <summary>
-  Looks up a localized string similar to TotalFlowDetritus.
+  Looks up a localized string similar to Sum of all flows into detritus.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALMARKETVALUE">
@@ -1354,27 +1354,27 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALNETPP">
 <summary>
-  Looks up a localized string similar to TotalNetPP.
+  Looks up a localized string similar to Calculated total net primary production.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALPB">
 <summary>
-  Looks up a localized string similar to TotalPB.
+  Looks up a localized string similar to Total primary production/total biomass.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALPRESP">
 <summary>
-  Looks up a localized string similar to TotalPResp.
+  Looks up a localized string similar to Total primary production/total respiration.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALPRODUCTION">
 <summary>
-  Looks up a localized string similar to Total production.
+  Looks up a localized string similar to Sum of all production.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALRESPFLOW">
 <summary>
-  Looks up a localized string similar to TotalRespFlow.
+  Looks up a localized string similar to Sum of all respiratory flows.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALSHADOWVALUE">
@@ -1384,7 +1384,7 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALTHROUGHPUT">
 <summary>
-  Looks up a localized string similar to Total throughput.
+  Looks up a localized string similar to Total system throughput.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ECOPATHSTATSTOTALVALUE">
@@ -10838,6 +10838,15 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="F:EwECore.eTimeSeriesType.TimeForcing">
  <summary>Time forcing, forcing</summary>
 </member>
+<member name="F:EwECore.eTimeSeriesType.Catches">
+ <summary>Absolute catches, reference</summary>
+</member>
+<member name="F:EwECore.eTimeSeriesType.CatchesForcing">
+ <summary>Absolute catches, forcing</summary>
+</member>
+<member name="F:EwECore.eTimeSeriesType.CatchesRel">
+ <summary>Relative catches, reference</summary>
+</member>
 <member name="F:EwECore.eTimeSeriesType.DiscardProportion">
  <summary>Absolute discard proportion (fleet x group, driver)</summary>
 </member>
@@ -12172,11 +12181,11 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="M:EwECore.Database.cEwEAccessDatabase.GetAdapter(System.String)">
  -------------------------------------------------------------------
  <summary>
- Obtains and configures a <see cref="!:OleDbDataAdapter">OleDbDataAdapter</see>
+ Obtains and configures a <see cref="T:System.Data.OleDb.OleDbDataAdapter">OleDbDataAdapter</see>
  for the current M$ Access database.
  </summary>
  <param name="strSQL">The SQL query to obtain the adapter for.</param>
- <returns>A <see cref="!:OleDbDataAdapter">OleDbDataAdapter</see> if
+ <returns>A <see cref="T:System.Data.OleDb.OleDbDataAdapter">OleDbDataAdapter</see> if
  successful, or Nothing when an error occurred.</returns>
  <remarks>
  <para>The returned adapter is initialized with default insert, update 
@@ -17269,6 +17278,33 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  </summary>
  -----------------------------------------------------------------------
 </member>
+<member name="T:EwECore.cDBUpdate6_70_00_15">
+ --------------------------------------------------------------------------
+ <summary>
+ <para>Database update 6.70.0.15:</para>
+ <para>
+ Made hab cap gradient correction flag persistent.
+ </para>
+ </summary>
+ --------------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_15.UpdateVersion">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateVersion"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_15.UpdateDescription">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateDescription"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cDBUpdate6_70_00_15.ApplyUpdate(EwEUtils.Database.cEwEDatabase@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Go for it.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
 <member name="T:EwECore.DataSources.cDataSourceFactory">
  =======================================================================
  <summary>
@@ -20826,7 +20862,7 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  </summary>
  <param name="DC">Diet</param>
  <param name="TTLX">TTL</param>
- <param name="BQB"></param>
+ <param name="BQB">The array to receive the calculated omnivory index</param>
  <param name="NumGroups"></param>
  -----------------------------------------------------------------------
 </member>
@@ -22121,12 +22157,12 @@ min_B_QB: minimum B*QB.
  <param name="core">The core instance to write result for.</param>
  -----------------------------------------------------------------------
 </member>
-<member name="M:EwECore.cEcopathResultWriter.WriteResults(System.String)">
+<member name="M:EwECore.cEcopathResultWriter.WriteBasicEsimates(System.String)">
  -----------------------------------------------------------------------
  <summary>
  Write Ecopath estimates to a CSV file.
  </summary>
- <param name="strFN">The target file name.</param>
+ <param name="strPath">The target path.</param>
  <returns>True if successful.</returns>
  -----------------------------------------------------------------------
 </member>
@@ -22860,6 +22896,12 @@ min_B_QB: minimum B*QB.
   Catch Rate at Ecopath base. Include all catch even discards that survive. set in SetRelativeCatchabilities
  </summary>
  <remarks>EcopathCatch / StartBiomass</remarks>
+</member>
+<member name="F:EwECore.cEcosimDatastructures.BQB">
+ <summary>Per-group Omnivory index over time (group x time).</summary>
+</member>
+<member name="F:EwECore.cEcosimDatastructures.SysOm">
+ <summary>Systen omnivory index over time.</summary>
 </member>
 <member name="F:EwECore.cEcosimDatastructures.MPred">
  <summary>
@@ -25782,14 +25824,6 @@ min_B_QB: minimum B*QB.
  </summary>
  <returns>True if there is loaded data, False otherwise. Does not test the map bounds or dates.</returns>
 </member>
-<member name="M:EwECore.EcospaceTimeSeries.cEcospaceTimeSeriesManager.TimeStepToDate(System.Int32)">
- <summary>
- Get the calendar date for the current model time step
- </summary>
- <param name="itimestep"></param>
- <returns></returns>
- <remarks>This method is identical to <see cref="M:EwECore.cCore.EcospaceTimestepToAbsoluteTime(System.Int32)"/></remarks>
-</member>
 <member name="M:EwECore.EcospaceTimeSeries.cEcospaceTimeSeriesManager.checkDates(System.DateTime,System.DateTime)">
  <summary>
  Are the start date and the end date of the input time series data within the model run
@@ -26889,6 +26923,30 @@ min_B_QB: minimum B*QB.
  
  </remarks>
 </member>
+<member name="M:EwECore.cEcoSpace.CalDistance(System.Single,System.Single,System.Single,System.Single,System.Boolean)">
+ <summary>
+ Villy C received this sub is from Reg Watson 04 May 2001, modified to function and dropped last terms, also made types explicit
+ Calculates the distance between two map points Lon1,Lat1 and Lon2,Lat2
+ Points are measured decimal degrees
+ Returns Dist, Long Dist(X), Lat Dist(Y) in either NatMiles or km (DistType)
+ DistType 0=NatMiles, 1=km, 2=degrees
+ Provided by Laura Wing lwing@clausent.demon.co.uk to Ken White
+ Uses a spherical triangle to the pole
+ 3 variations:
+   Same Hemisphere
+   Different Hemisphere
+   Spans Greenwich meridian or anti-meridian
+ Expects - (Neg) for South Latitudes
+ Note: always goes the shortest way... not over pole or wrong way around the world
+ Dist does not have a sign but XDist and YDist do
+ </summary>
+ <param name="Lon1"></param>
+ <param name="Lat1"></param>
+ <param name="Lon2"></param>
+ <param name="Lat2"></param>
+ <param name="bAssumeSquareCells"></param>
+ <returns></returns>
+</member>
 <member name="M:EwECore.cEcoSpace.setHabCapFromHabitat">
  <summary>
  Set the capacity of each cell in the map based on habitat inputs Habitat Preference and Proportion of Habitat type in cell
@@ -27221,7 +27279,7 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.cEcospaceDataStructures.EnvironmentalLayerCapacityDisabled">
  <summary>Environmental layer capacity disabled flag (layer)</summary>
 </member>
-<member name="P:EwECore.cEcospaceDataStructures.AllowHabCapGradientCorrections">
+<member name="P:EwECore.cEcospaceDataStructures.UseHabCapGradientCorrections">
  <summary>
  If true, Ecospace is allowed to recalculate the habitat 
  capacity gradient if input capacity contains values less than <see cref="P:EwECore.cEcospaceDataStructures.MinHabCap"/> 
@@ -27310,7 +27368,7 @@ min_B_QB: minimum B*QB.
  </summary>
  <remarks>
  Used only to distribute total effort across the cells. Does not effect the total effort.
- If <see cref="F:EwECore.cEcospaceDataStructures.bUseEffortDistThreshold">bUseEffortDistThreshold</see> = True this will only include cells below the fishing effort threshold</remarks>
+ If <see cref="F:EwECore.cEcospaceDataStructures.UseEffortDistThreshold">bUseEffortDistThreshold</see> = True this will only include cells below the fishing effort threshold</remarks>
 </member>
 <member name="F:EwECore.cEcospaceDataStructures.SEmult">
  <summary>
@@ -27501,7 +27559,7 @@ min_B_QB: minimum B*QB.
  </summary>
  <remarks>Populate in <see cref="M:EwECore.cEcospaceDataStructures.PopulateFleetCells"></see></remarks>
 </member>
-<member name="F:EwECore.cEcospaceDataStructures.bUseEffortDistThreshold">
+<member name="F:EwECore.cEcospaceDataStructures.UseEffortDistThreshold">
  <summary>
  Boolean flag is fishing effort restricted to cells with a Sail() of less than EffortDistThreshold
  </summary>
@@ -32548,10 +32606,6 @@ pass in params that this method needs instead of obtaining them from the manager
  <summary>Conventional discount rate for intergeneration discount rate computations</summary>
  <remarks>Drate = 1/(1+DiscountFactor)</remarks>
 </member>
-<member name="F:EwECore.cSearchDatastructures.Dfgrate">
- <summary>Intergenerational discount rate for computations</summary>
- <remarks>Dfgrate = 1/(1+GenDiscountFactor)</remarks>
-</member>
 <member name="F:EwECore.cSearchDatastructures.deltaDDfg">
  <summary>Ratio of intergenerational to standard discount rate </summary>
   <remarks>deltaDDfg = Dfgrate/Drate</remarks>
@@ -35092,27 +35146,6 @@ Passed into the Constructor
  and <see cref="T:EwECore.eTimeSeriesCategoryType">categories</see>.
  </summary>
  ---------------------------------------------------------------------------
-</member>
-<member name="M:EwECore.cTimeSeriesFactory.TimeSeriesCategory(EwECore.eTimeSeriesType)">
- -----------------------------------------------------------------------
- <summary>
- Determine the <see cref="T:EwECore.eTimeSeriesCategoryType">Time series category</see>
- based on a <see cref="T:EwECore.eTimeSeriesType">Time series type</see>. For instance,
- time series types <see cref="F:EwECore.eTimeSeriesType.Catches"/>
- and <see cref="F:EwECore.eTimeSeriesType.FishingEffort"/>
- are <see cref="F:EwECore.eTimeSeriesCategoryType.Fleet"/>-related time series. With the
- Discardless changes time series category <see cref="F:EwECore.eTimeSeriesCategoryType.FleetGroup"/>
- was introduced.
- </summary>
- <param name="timeSeriesType">The type to get the category for.</param>
- <remarks>
- This method was added to centralize interpretation of the awkward enumerator 
- <see cref="T:EwECore.eTimeSeriesType">eTimeSeriesType</see>.
- </remarks>
- <returns>
- A time series category for the provided time series type.
- </returns>
- -----------------------------------------------------------------------
 </member>
 <member name="M:EwECore.cTimeSeriesFactory.CreateTimeSeries(EwECore.eTimeSeriesType,EwECore.cCore,System.Int32)">
  -----------------------------------------------------------------------

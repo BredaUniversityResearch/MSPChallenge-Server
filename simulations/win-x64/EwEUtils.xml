@@ -1584,9 +1584,6 @@ EwEUtils
 <member name="F:EwEUtils.Core.eVarNameFlags.EffortDistThreshold">
  <summary>To document</summary>
 </member>
-<member name="F:EwEUtils.Core.eVarNameFlags.EcospaceUseLocalMemory">
- <summary>To document</summary>
-</member>
 <member name="F:EwEUtils.Core.eVarNameFlags.EcospaceIBMMovePacketOnStanza">
  <summary>To document</summary>
 </member>
@@ -8145,16 +8142,6 @@ types.</remarks>
  <returns>The OS version and service pack description of the running computer.</returns>
  -----------------------------------------------------------------------
 </member>
-<member name="M:EwEUtils.SystemUtilities.cSystemUtils.IsRDC">
- -----------------------------------------------------------------------
- <summary>
- Returns whether this application is running in a remote desktop session.
- </summary>
- <returns>True if this application was running in a remote desktop session.</returns>
- <remarks>This test should also properly detect VNC. Other protocols have
- not been evaluated.</remarks>
- -----------------------------------------------------------------------
-</member>
 <member name="M:EwEUtils.SystemUtilities.cSystemUtils.IsRightToLeft">
  -------------------------------------------------------------------
  <summary>
@@ -8787,17 +8774,6 @@ types.</remarks>
  <returns></returns>
  -------------------------------------------------------------------
 </member>
-<member name="M:EwEUtils.Utilities.cFileUtils.FindFile(System.String,System.String,System.Boolean)">
- -------------------------------------------------------------------
- <summary>
- Find a file in a directory.
- </summary>
- <param name="strFile">Name of the file to locate.</param>
- <param name="strPath">Directory to search.</param>
- <param name="bRecursive">Flag stating if subdirectories should be searched recursively.</param>
- <returns>The full path to the file if found, or an empty string if the file could not be located.</returns>
- -------------------------------------------------------------------
-</member>
 <member name="M:EwEUtils.Utilities.cFileUtils.FilesByDialogFilter(System.String[],System.String[])">
  -------------------------------------------------------------------
  <summary>
@@ -8808,29 +8784,16 @@ types.</remarks>
  <returns></returns>
  -------------------------------------------------------------------
 </member>
-<member name="M:EwEUtils.Utilities.cFileUtils.CleanupFileFilter(System.String,System.Boolean,System.Char,System.Boolean)">
- -------------------------------------------------------------------
- <summary>
- Cleans up a file filter. If no pipe characters ('|') characters are
- found in the provided filter, the call is forwarded to <see cref="M:EwEUtils.Utilities.cFileUtils.CleanupExtensions(System.String,System.Boolean,System.Char,System.Boolean)"/>.
- </summary>
- <param name="strFilter">The <paramref name="cSeparator"/>-separated string of extensions to clean.</param>
- <param name="bIgnoreCase">Flag, indicating whether upper/lower case should be ignored.</param>
- <param name="cSeparator">The character that separates extentions.</param>
- <returns>A cleaned-up list of file extensions</returns>
- -------------------------------------------------------------------
-</member>
 <member name="M:EwEUtils.Utilities.cFileUtils.CleanupExtensions(System.String,System.Boolean,System.Char,System.Boolean)">
  -------------------------------------------------------------------
  <summary>
- Cleans up a semi-colon separated list of file extension, removing 
- duplicate file filters, and optionally sorting them.
+ Cleans up a string of separated file extensions, eliminating duplicates
+ and optionally sorting them.
  </summary>
- <param name="strFilter">The <paramref name="cSeparator"/>-separated 
- string of extensions to clean.</param>
+ <param name="strExt">The <paramref name="cSeparator"/>-separated string of extensions to clean.</param>
  <param name="bIgnoreCase">Flag, indicating whether upper/lower case should be ignored.</param>
  <param name="cSeparator">The character that separates extentions.</param>
- <returns>A cleaned-up list of file extensions</returns>
+ <returns>A merged </returns>
  -------------------------------------------------------------------
 </member>
 <member name="M:EwEUtils.Utilities.cFileUtils.CreateBackup(System.String,System.String@,System.IO.FileAttributes)">
@@ -8864,7 +8827,8 @@ types.</remarks>
 <member name="M:EwEUtils.Utilities.cFileUtils.MakeTempFile(System.String)">
  -----------------------------------------------------------------------
  <summary>
- Create a random file in the %TEMP% folder, and return the path to the file.
+ Create a random file in the application cache folder, and return the 
+ path to the file.
  <seealso cref="M:EwEUtils.Utilities.cFileUtils.PurgeTempFile(System.String)"/>
  <seealso cref="M:EwEUtils.Utilities.cFileUtils.PurgeTempFiles"/>
  </summary>
@@ -9007,6 +8971,34 @@ types.</remarks>
  <returns>A imageformat, or nothing if the file extension was not
  recognized as a known format.</returns>
  -------------------------------------------------------------------
+</member>
+<member name="M:EwEUtils.Utilities.cFileUtils.IsOSCaseSensitive">
+ -----------------------------------------------------------------------
+ <summary>
+ Returns whether the current OS is (most likely) case sensitive
+ </summary>
+ <returns></returns>
+ <remarks>
+ https://stackoverflow.com/questions/430256/how-do-i-determine-whether-the-filesystem-is-case-sensitive-in-net
+ </remarks>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEUtils.Utilities.cFileUtils.IsFileInUse(System.String)">
+ -----------------------------------------------------------------------
+ <summary>
+ Check if a file is in use by another process.
+ </summary>
+ <param name="The_File">The full path of the file.</param>
+ <returns>Return TRUE if is in use, otherwise return FALSE</returns>
+ <remarks>
+ https://gist.github.com/RallyTuning/ca6500dfee46a476a4b33432a6b3da77
+ </remarks>
+ <example>
+ <code>
+ Dim bInUse As Boolean = IsFileInUse("C:\folder\file.txt")
+ </code>
+ </example>
+ -----------------------------------------------------------------------
 </member>
 <member name="T:EwEUtils.Utilities.cFuzzySearch">
  -----------------------------------------------------------------------
@@ -9231,13 +9223,6 @@ types.</remarks>
  <returns>A <see cref="T:System.Reflection.PropertyInfo">PropertyInfo</see> instance,
  or nothing if an error occurred.</returns>
  -------------------------------------------------------------------
-</member>
-<member name="T:EwEUtils.Utilities.cRegistryUtils">
- =======================================================================
- <summary>
- Helper class providing standardized access to the Windows registry.
- </summary>
- =======================================================================
 </member>
 <member name="M:EwEUtils.Utilities.cResourceUtils.SaveResourceToFile(System.String,System.String,System.Boolean,System.Reflection.Assembly,System.String)">
  -----------------------------------------------------------------------
@@ -9651,20 +9636,6 @@ types.</remarks>
  </summary>
  <param name="strSrc">The string to hash.</param>
  <returns>A base64 MD5 hash.</returns>
- -----------------------------------------------------------------------
-</member>
-<member name="F:EwEUtils.Utilities.cStringUtils.CSV_SEPARATORCHARS">
- -----------------------------------------------------------------------
- <summary>
- String truncation method, blatantly copied from 
- http://www.codeproject.com/KB/vb/NewPathCompactPath.aspx
- </summary>
- <param name="strSrc">The string to truncate with path ellipses.</param>
- <param name="iWidth">Allowed width of the string in pixels.</param>
- <param name="ft">The font to measure the string with.</param>
- <param name="tfFlags">Optional string format flags</param>
- <returns>A truncated string.</returns>
- <remarks>Note that this method does not modify the original string.</remarks>
  -----------------------------------------------------------------------
 </member>
 <member name="M:EwEUtils.Utilities.cStringUtils.ToCSVField(System.Object,System.Char,System.Int32)">

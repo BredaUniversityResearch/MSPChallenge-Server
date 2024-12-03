@@ -29,8 +29,8 @@ class VersionsProvider implements ProviderInterface
             'REL' => $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'].'RELdata/',
         ];
         $this->setComponentsVersions();
-        $this->configVersion = Version::fromString('1.0.0');
-        $this->lowestClientVersion = Version::fromString('4.0.0');
+        $this->configVersion = Version::fromString('2.0.0');
+        $this->lowestClientVersion = Version::fromString('5.0.0');
     }
 
     public function isSupported(): bool
