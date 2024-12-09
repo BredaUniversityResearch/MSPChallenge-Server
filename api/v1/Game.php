@@ -179,7 +179,10 @@ class Game extends Base
         $gameConfigValues = $this->GetGameConfigValues();
         if (false === $result = collect($gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'] ?? [])
             ->search(
-                fn($f) => $f['country_id'] == $countryId && $f['gear_type'] == $gearTypeIndex
+                fn($f) => (
+                    // -1 is a wildcard for any country
+                    ($f['country_id'] == -1) || ($f['country_id'] == $countryId)
+                ) && $f['gear_type'] == $gearTypeIndex
             )) {
             return null;
         }
