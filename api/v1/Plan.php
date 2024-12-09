@@ -5,13 +5,9 @@ namespace App\Domain\API\v1;
 use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\PolicyData\PolicyDataFactory;
-use App\Domain\Services\ConnectionManager;
-use App\Entity\PlanPolicy;
-use App\Entity\Policy;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
-use React\Promise\ExtendedPromiseInterface;
 use React\Promise\PromiseInterface;
 use function App\parallel;
 use function App\resolveOnFutureTick;
@@ -2712,53 +2708,66 @@ class Plan extends Base
      * @api {POST} /plan/SetGeneralPolicyData Set a general policy to a plan
      * @apiParam {int} id plan id
      * @apiParam {string} policy type, should match PolicyTypeName enum
-     * @apiDescription (De)activate a plan policy
+     * @apiDescription Set a general policy to a plan
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function SetGeneralPolicyData(int $plan_id, string $policy_data): ?PromiseInterface
     {
-        // todo: convert blocking doctrine calls to async database calls
+        $qb = $this->getAsyncDatabase()->createQueryBuilder()
+            ->from('plan', 'pl')
+            ->select(
+                // plan_id,plan_country_id,plan_name,plan_description,plan_time,plan_gametime,plan_state,plan_lock_user_id,plan_lastupdate,plan_previousstate,plan_active,plan_constructionstart,plan_type,plan_energy_error,plan_alters_energy_distribution
+                'pl.*',
+                'pp.id as plan_policy_id',
+                'po.id as policy_id',
+                'po.type as policy_type',
+                'po.data as policy_data'
+            )
+            ->leftJoin('pl', 'plan_policy', 'pp', 'pl.plan_id = pp.plan_id')
+            ->leftJoin('pp', 'policy', 'po', 'pp.policy_id = po.id')
+            ->where('pl.plan_id = ?')
+            ->setParameters([$plan_id]);
+        $toPromiseFunction[] = tpf(fn() => $this->getAsyncDatabase()->query($qb)
+            ->then(function (Result $result) use ($plan_id, $policy_data) {
+                $rows = ($result->fetchAllRows() ?? []) ?: [];
+                if (empty($rows)) {
+                    throw new Exception('Plan not found');
+                }
+                $planPolicies = collect($rows)->keyBy('policy_type')->all();
+                $policyData = PolicyDataFactory::createPolicyDataByJsonObject(json_decode($policy_data));
 
-        $policyData = PolicyDataFactory::createPolicyDataByJsonObject(json_decode($policy_data));
-        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
-        if (null === $plan = $em->getRepository(\App\Entity\Plan::class)->createQueryBuilder('pl')
-            ->select('pl', 'pp', 'po')
-            ->leftJoin('pl.planPolicies', 'pp')
-            ->leftJoin('pp.policy', 'po')
-            ->where('pl.planId = :id')
-            ->setParameter('id', $plan_id)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ) {
-            throw new Exception('Plan not found');
-        }
+                if (array_key_exists($policyData->getPolicyTypeName()->value, $planPolicies)) {
+                    return $this->getAsyncDatabase()->update(
+                        'policy',
+                        [
+                            'id' => $planPolicies[$policyData->getPolicyTypeName()->value]['policy_id']
+                        ],
+                        ['data' => $policy_data]
+                    );
+                }
+                return $this->getAsyncDatabase()->insert(
+                    'policy',
+                    ['type' => $policyData->getPolicyTypeName()->value, 'data' => $policy_data]
+                )
+                ->then(function (Result $result) use ($plan_id) {
+                    if (null === $policyId = $result->getLastInsertedId()) {
+                        throw new Exception('Failed to insert policy');
+                    }
+                    return $this->getAsyncDatabase()->insert(
+                        'plan_policy',
+                        ['plan_id' => $plan_id, 'policy_id' => $policyId]
+                    );
+                });
+            }));
 
-        $planPolicies = collect($plan->getPlanPolicies())->keyBy(
-            fn(PlanPolicy $pp) => $pp->getPolicy()->getType()->value
-        )->toArray();
-        if (array_key_exists($policyData->getPolicyTypeName()->value, $planPolicies)) {
-            $planPolicy = $planPolicies[$policyData->getPolicyTypeName()->value];
-            $policy = $planPolicy->getPolicy();
-            $policy->setData($policyData->jsonSerialize());
-            $em->persist($policy);
-        } else {
-            $policy = new Policy();
-            $policy
-                ->setType($policyData->getPolicyTypeName())
-                ->setData($policyData->jsonSerialize());
-            $em->persist($policy);
-            $planPolicy = new PlanPolicy();
-            $planPolicy
-                ->setPlan($plan) // this will also add the plan policy to the plan
-                ->setPolicy($policy); // this will also add the plan policy to the policy
-        }
-        $plan->setPlanLastUpdate(sprintf("%.6f", microtime(true)));
-        $em->persist($plan);
-        $em->flush();
 
         // backwards compatibility: for policies energy, fishing, shipping, we also need to update the plan type
         //   todo: https://jira.cradle.buas.nl/browse/MSP-5146
-        $promise = $this->setGeneralPolicyEnabled($plan_id, $policyData->getPolicyTypeName()->value, true);
+        $policyData = PolicyDataFactory::createPolicyDataByJsonObject(json_decode($policy_data));
+        $toPromiseFunction[] = tpf(
+            fn() => $this->setGeneralPolicyEnabled($plan_id, $policyData->getPolicyTypeName()->value, true)
+        );
+        $promise = parallel($toPromiseFunction);
         if ($this->isAsync()) {
             return $promise;
         }
