@@ -75,7 +75,7 @@ EwEPlugin
 <member name="F:EwEPlugin.cPluginAssembly.m_dtExpiry">
  <summary>Assembly license expiry date. For UI display purposes only</summary>
 </member>
-<member name="M:EwEPlugin.cPluginAssembly.#ctor(System.Reflection.Assembly,System.Boolean,System.String)">
+<member name="M:EwEPlugin.cPluginAssembly.#ctor(System.Reflection.Assembly,System.Boolean)">
  -----------------------------------------------------------------------
  <summary>
  Create a new plugin assembly wrapper.
@@ -242,13 +242,6 @@ EwEPlugin
  </summary>
  -----------------------------------------------------------------------
 </member>
-<member name="P:EwEPlugin.cPluginAssembly.Sandbox">
- -----------------------------------------------------------------------
- <summary>
- Get the name of the sandbox the plug-in was loaded in, if any.
- </summary>
- -----------------------------------------------------------------------
-</member>
 <member name="T:EwEPlugin.cPluginException">
  ---------------------------------------------------------------------------
  <summary>
@@ -399,24 +392,68 @@ EwEPlugin
  </summary>
  ---------------------------------------------------------------------------
 </member>
+<member name="T:EwEPlugin.cPluginManager.OnConfirmOverwrite">
+ -----------------------------------------------------------------------
+ <summary>
+ Delegate to implement plug-in overwrite confirmation handling.
+ </summary>
+ <param name="strPlugin">The short name of the plug-in to overwrite.</param>
+ <returns>True if the plug-in can be overwritten.</returns>
+ -----------------------------------------------------------------------
+</member>
 <member name="F:EwEPlugin.cPluginManager.m_dictAssemblies">
  <summary>
  Dictionary of <see cref="T:EwEPlugin.cPluginAssembly">Plugin assemblies</see> 
  that have already been loaded by the plugin manager.
  </summary>
 </member>
-<member name="M:EwEPlugin.cPluginManager.LoadPlugins(System.Collections.ArrayList,System.String,System.IO.SearchOption)">
+<member name="M:EwEPlugin.cPluginManager.LoadPluginDefault(System.String)">
  -----------------------------------------------------------------------
  <summary>
  Load all plug-ins that are not marked as 'disabled'.
  </summary>
- <param name="alDisabledPlugins">Optional ArrayList of file names to 
- plug-ins that should NOT be enabled. These assemblies will still have to 
- be known by the manager in case the user wants to enable the assemblies 
- in the future.</param>
+ <param name="strSubfolder">The directory to search for plug-ins relative 
+ to the EwE startup folder and all the directories under.</param>
+ <remarks>This method was added for the benefit of Python interoperability.</remarks>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean,System.String[])"/>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPlugins">
+ -----------------------------------------------------------------------
+ <summary>
+ Load plugins with default options.
+ </summary>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean,System.String[])"/>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean)"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean)">
+ -----------------------------------------------------------------------
+ <summary>
+ Load all plug-ins that are not marked as 'disabled'.
+ </summary>
+ <param name="strSubfolder">The directory to search for plug-ins relative 
+ to the EwE startup folder.</param>
+ <param name="bAllDirectories">True to search all directories, false to 
+ search the top directory only.</param>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean,System.String[])"/>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean,System.String[])">
+ -----------------------------------------------------------------------
+ <summary>
+ Load all plug-ins that are not marked as 'disabled'.
+ </summary>
  <param name="strSubfolder">The directory to search for plug-ins relative to
  the EwE startup folder.</param>
- <param name="option">See <see cref="T:System.IO.SearchOption"/>.</param>
+ <param name="bAllDirectories">True to search all directories, false to search the top directory only.</param>
+ <param name="disabledPlugins">Array with file names of plug-ins that should 
+ NOT be enabled. These assemblies will still have to be known by the manager 
+ in case the user wants to enable the assemblies  in the future.</param>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean)"/>
+ <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins"/>
  -----------------------------------------------------------------------
 </member>
 <member name="M:EwEPlugin.cPluginManager.LoadPluginAssembly(System.String,System.Boolean)">
@@ -2788,7 +2825,7 @@ EwEPlugin
 <member name="P:EwEPlugin.IGUIPlugin.ControlImage">
  -----------------------------------------------------------------------
  <summary>
- Get an image to show in the control for this plug-in.
+ Get a WinForms image to show in the control for this plug-in.
  </summary>
  -----------------------------------------------------------------------
 </member>

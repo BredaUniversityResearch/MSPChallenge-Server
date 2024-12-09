@@ -50,7 +50,7 @@ abstract class ItemsPolicyDataBase extends PolicyDataBase
                 $match = $data->match($otherItem);
                 $this->log(
                     'Filter '.$data->getFilterTypeName()->value.' detected, '.($match === false ? '*NO* ':'').
-                    'match on: '.json_encode($otherItem),
+                    'match on: '.json_encode($otherItem).', with filter data: '.json_encode($item),
                     self::LOG_LEVEL_DEBUG
                 );
                 if ($match === false) {

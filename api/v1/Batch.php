@@ -4,7 +4,9 @@ namespace App\Domain\API\v1;
 
 use App\Domain\WsServer\ExecuteBatchRejection;
 use Doctrine\DBAL\Types\Types;
+use Drift\DBAL\ConnectionPool;
 use Drift\DBAL\Result;
+use Drift\DBAL\SingleConnection;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\Promise;
@@ -220,6 +222,7 @@ class Batch extends Base
     public function setCommunicated(string $batchGuid): Promise
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getAsyncDatabase()->query(
             $qb
                 ->update('api_batch')
@@ -228,6 +231,10 @@ class Batch extends Base
         );
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
     public function executeQueuedBatch(string $batchGuid, string $serverId): Promise
     {
         // get batch tasks to execute
@@ -272,102 +279,119 @@ class Batch extends Base
             return $deferred->promise();
         })
         ->then(function (Result $result) use ($batchGuid) {
-            $groupToBatchTasks = collect(($result->fetchAllRows() ?? []) ?: [])
-                ->groupBy('api_batch_task_group')
-                ->sortKeys()
-                ->all();
+            $apiBatchTasks = ($result->fetchAllRows() ?? []) ?: [];
+            // let's make the batch transactional
+            /** @var ConnectionPool $pool */
+            $pool = $this->getAsyncDatabase();
+            // so we are forcing a transactional connection here, passed through any subsequent async calls later on,
+            //  using asyncDataTransferTo
+            return $pool->startTransaction()->then(fn ($conn) => $this->setAsyncDatabase($conn))->then(function () use (
+                $apiBatchTasks,
+                $batchGuid,
+                $pool
+            ) {
+                $groupToBatchTasks = collect($apiBatchTasks)
+                    ->groupBy('api_batch_task_group')
+                    ->sortKeys()
+                    ->all();
 
-            $chain = [];
-            foreach ($groupToBatchTasks as $groupId => $batchTasks) {
-                $parallel = [];
-                /** @var array $task */
-                foreach ($batchTasks as $task) {
-                    $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
-                    $endpoint = $task['api_batch_task_api_endpoint'];
+                $chain = [];
+                foreach ($groupToBatchTasks as $groupId => $batchTasks) {
+                    $parallel = [];
+                    /** @var array $task */
+                    foreach ($batchTasks as $task) {
+                        $callData = json_decode($task['api_batch_task_api_endpoint_data'], true);
+                        $endpoint = $task['api_batch_task_api_endpoint'];
 
-                    // create ObjectMethod and inject game session id, and async database into the instance.
-                    $objectMethod = Router::createObjectMethodFromEndpoint($endpoint);
-                    /** @var Base $instance */
-                    $instance = $objectMethod->getInstance();
-                    $this->asyncDataTransferTo($instance);
+                        // create ObjectMethod and inject game session id, and async database into the instance.
+                        $objectMethod = Router::createObjectMethodFromEndpoint($endpoint);
+                        /** @var Base $instance */
+                        $instance = $objectMethod->getInstance();
+                        $this->asyncDataTransferTo($instance);
 
-                    $parallel[$task['api_batch_task_reference_identifier']] = tpf(
-                        function () use (
-                            $objectMethod,
-                            $callData,
-                            $batchGuid,
-                            $task
-                        ) {
-                            return Router::executeCallAsync(
+                        $parallel[$task['api_batch_task_reference_identifier']] = tpf(
+                            function () use (
                                 $objectMethod,
                                 $callData,
-                                function (array &$callData) use ($batchGuid) {
-                                    // fix references in call data using batch cache results
-                                    array_walk_recursive(
-                                        $callData,
-                                        function (&$value, $key, array $presentResults) {
-                                            self::fixupReferences($value, $key, $presentResults);
-                                        },
+                                $batchGuid,
+                                $task
+                            ) {
+                                return Router::executeCallAsync(
+                                    $objectMethod,
+                                    $callData,
+                                    function (array &$callData) use ($batchGuid) {
+                                        // fix references in call data using batch cache results
+                                        array_walk_recursive(
+                                            $callData,
+                                            function (&$value, $key, array $presentResults) {
+                                                self::fixupReferences($value, $key, $presentResults);
+                                            },
+                                            $this->cachedBatchResults[$batchGuid]
+                                        );
+                                    },
+                                    function (&$payload) use ($batchGuid, $task) {
+                                        // fill batch cache results
                                         $this->cachedBatchResults[$batchGuid]
-                                    );
-                                },
-                                function (&$payload) use ($batchGuid, $task) {
-                                    // fill batch cache results
-                                    $this->cachedBatchResults[$batchGuid][
-                                        $task['api_batch_task_reference_identifier']
-                                    ] = $payload;
+                                            [$task['api_batch_task_reference_identifier']] = $payload;
+                                    }
+                                );
+                            }
+                        );
+                    }
+                    $chain[$groupId] = tpf(function () use ($parallel) {
+                        return parallel($parallel);
+                    });
+                }
+
+                return chain($chain)
+                    ->then(function (array $taskResultsContainer) use ($batchGuid, $pool) {
+                        /** @var SingleConnection $conn */
+                        $conn = $this->getAsyncDatabase();
+                        $pool->commitTransaction($conn);
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        return $this->getAsyncDatabase()->query(
+                            $qb
+                                ->update('api_batch')
+                                ->set('api_batch_state', $qb->createPositionalParameter('Success'))
+                                ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
+                        )
+                            ->then(
+                                function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
+                                    $batchResult = [];
+                                    foreach ($taskResultsContainer as $taskResults) {
+                                        foreach ($taskResults as $taskId => $taskResult) {
+                                            $batchResult[$batchGuid]['results'][] = [
+                                                'call_id' => $taskId,
+                                                'payload' => json_encode($taskResult) ?: null
+                                            ];
+                                        }
+                                    }
+                                    return $batchResult;
                                 }
                             );
-                        }
-                    );
-                }
-                $chain[$groupId] = tpf(function () use ($parallel) {
-                    return parallel($parallel);
-                });
-            }
-
-            return chain($chain)
-                ->then(function (array $taskResultsContainer) use ($batchGuid) {
-                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    return $this->getAsyncDatabase()->query(
-                        $qb
-                            ->update('api_batch')
-                            ->set('api_batch_state', $qb->createPositionalParameter('Success'))
-                            ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-                            ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
-                    )
-                    ->then(
-                        function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
-                            $batchResult = [];
-                            foreach ($taskResultsContainer as $taskResults) {
-                                foreach ($taskResults as $taskId => $taskResult) {
-                                    $batchResult[$batchGuid]['results'][] = [
-                                        'call_id' => $taskId,
-                                        'payload' => json_encode($taskResult) ?: null
-                                    ];
-                                }
-                            }
-                            return $batchResult;
-                        }
-                    );
-                })
-                ->otherwise(function ($reason) use ($batchGuid) {
-                    // run async query to set batches to failed, no need to wait for the result.
-                    $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                    $this->getAsyncDatabase()->query(
-                        $qb
-                            ->update('api_batch')
-                            ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
-                            ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-                            ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
-                    );
-                    // Propagate by returning rejection
-                    return reject($reason);
-                })
-                ->always(function () use ($batchGuid) {
-                    // clean up batch cache results
-                    unset($this->cachedBatchResults[$batchGuid]);
-                });
+                    })
+                    ->otherwise(function ($reason) use ($batchGuid, $pool) {
+                        /** @var SingleConnection $conn */
+                        $conn = $this->getAsyncDatabase();
+                        $pool->rollbackTransaction($conn);
+                        // run async query to set batches to failed, no need to wait for the result.
+                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                        $this->getAsyncDatabase()->query(
+                            $qb
+                                ->update('api_batch')
+                                ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
+                                ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
+                        );
+                        // Propagate by returning rejection
+                        return reject($reason);
+                    })
+                    ->always(function () use ($batchGuid) {
+                        // clean up batch cache results
+                        unset($this->cachedBatchResults[$batchGuid]);
+                    });
+            });
         });
     }
 
