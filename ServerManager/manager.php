@@ -242,7 +242,7 @@ require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/h
                             Simulation Servers
                         </div>
                         <div class="card-body">
-                            <p class="card-text">Any simulation servers additional to this one, if you would rather have the background simulations run on a different computer than this one.</p>
+                            <p class="card-text">Default simulation servers imported into game sessions on creation.</p>
                         </div>
                         <div class="card-footer">
                             <button type="button" id="btnSimServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSimServers">Change</button>

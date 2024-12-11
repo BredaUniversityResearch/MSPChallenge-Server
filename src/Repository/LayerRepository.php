@@ -5,9 +5,7 @@ namespace App\Repository;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\Layer;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\NonUniqueResultException;
 use ReflectionException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
@@ -21,11 +19,6 @@ class LayerRepository extends EntityRepository
 
     private ?ObjectNormalizer $normalizer = null; // to be created upon usage
     private ?Serializer $serializer = null; // to be created upon usage
-
-    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
-    {
-        parent::__construct($em, $class);
-    }
 
     /**
      * @throws NonUniqueResultException

@@ -4,6 +4,7 @@ namespace App\Domain\WsServer\Plugins\Tick;
 
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
+use App\Domain\API\v1\Simulations;
 use App\Domain\Common\MSPBrowserFactory;
 use App\Domain\Services\ConnectionManager;
 use App\SilentFailException;
@@ -58,9 +59,6 @@ class GameTick extends TickBase
                     'game_currentmonth as month',
                     'game_planning_gametime as era_gametime',
                     'game_planning_realtime as era_realtime',
-                    'game_mel_lastmonth as mel_lastmonth',
-                    'game_cel_lastmonth as cel_lastmonth',
-                    'game_sel_lastmonth as sel_lastmonth',
                     'game_state as state'
                 )
                 ->from('game')
@@ -98,18 +96,20 @@ class GameTick extends TickBase
             wdo("Trying to tick the server", OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
 
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
-        if (!$game->areSimulationsUpToDate($tickData)) {
-            if ($showDebug) {
-                wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
-            }
-            return null;
-        }
-
-        return $this->serverTickInternal($showDebug)
-            ->otherwise(function (SilentFailException $e) {
-                // Handle the rejection, and don't propagate. This is like catch without a rethrow
+        $simulations = new Simulations();
+        $this->asyncDataTransferTo($simulations);
+        return $simulations->getUnsynchronizedSimulations($tickData['month'])
+            ->then(function (Result $result) use ($showDebug) {
+                if ($result->fetchCount() == 0) { // all simulations are up-to-date
+                    return $this->serverTickInternal($showDebug)
+                        ->otherwise(function (SilentFailException $e) {
+                            // Handle the rejection, and don't propagate. This is like catch without a rethrow
+                            return null;
+                        });
+                }
+                if ($showDebug) {
+                    wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
+                }
                 return null;
             });
     }
@@ -227,9 +227,9 @@ class GameTick extends TickBase
                     ->set('game_state', $qb->createPositionalParameter('END'))
             )
             ->then(function (/*Result $result*/) {
-                $game = new Game();
-                $this->asyncDataTransferTo($game);
-                return $game->changeWatchdogState('END');
+                $simulations = new Simulations();
+                $this->asyncDataTransferTo($simulations);
+                return $simulations->changeWatchdogState('END');
             });
         } elseif (($state == "PLAY" || $state == "FASTFORWARD") && $monthsDone >= $tick['era_gametime'] &&
             $tick['era_gametime'] < $tick['era_time']) {
@@ -240,9 +240,9 @@ class GameTick extends TickBase
                     ->set('game_state', $qb->createPositionalParameter('SIMULATION'))
             )
             ->then(function (/*Result $result*/) {
-                $game = new Game();
-                $this->asyncDataTransferTo($game);
-                return $game->changeWatchdogState('SIMULATION');
+                $simulations = new Simulations();
+                $this->asyncDataTransferTo($simulations);
+                return $simulations->changeWatchdogState('SIMULATION');
             });
         } elseif (($state == "SIMULATION" && $monthsDone >= $tick['era_time'] - $tick['era_gametime']) ||
             $monthsDone >= $tick['era_time']) {
@@ -256,9 +256,9 @@ class GameTick extends TickBase
                     ->set('game_planning_realtime', $era_realtime[$era])
             )
             ->then(function (Result $result) {
-                $game = new Game();
-                $this->asyncDataTransferTo($game);
-                return $game->changeWatchdogState('PLAY');
+                $simulations = new Simulations();
+                $this->asyncDataTransferTo($simulations);
+                return $simulations->changeWatchdogState('PLAY');
             });
         } else {
             return $this->getAsyncDatabase()->query($qb);

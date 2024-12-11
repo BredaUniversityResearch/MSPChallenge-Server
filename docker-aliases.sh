@@ -43,7 +43,7 @@ alias de="${ALIAS_DE_BASE} ${PHP_CONTAINER}"
 # de + supervisor (s)
 alias des="de /usr/bin/supervisord -c /etc/supervisord.conf"
 # de + supervisorctl (sc)
-alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw]\n'; de supervisorctl"
+alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw|messenger-consume]\n'; de supervisorctl"
 # de + list (l) + log (l) + supervisor (s)
 alias dells="de ls -l /var/log/supervisor/"
 # de + tail log (tl)
@@ -52,6 +52,8 @@ alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files 
 alias detlw="detl app-ws-server.log"
 # de + tail log (tl) + msw (m)
 alias detlm="detl msw.log"
+# de + tail log (tl) + messenger-consume (c)
+alias detlc="detl messenger-consume.log"
 # de + top (t)
 alias det='de top; de pkill -f top'
 # de + choose profile (cpf) to "Choose Blackfire profile on running websocket server process"

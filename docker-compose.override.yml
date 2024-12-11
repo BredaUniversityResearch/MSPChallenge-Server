@@ -19,6 +19,11 @@ services:
     logging:
       driver: "local"
 
+  database:
+    image: 'mspserver-mariadb-dev'
+    ports:
+      - "${DATABASE_PORT:-3306}:${DATABASE_PORT:-3306}"
+
   adminer:
     image: 'mspserver-adminer-dev'
     build:

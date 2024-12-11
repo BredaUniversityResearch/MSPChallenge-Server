@@ -57,6 +57,7 @@ services:
             - { name: messenger.message_handler, handles: App\Message\Analytics\UserLogOnOffSessionMessage }
 
     App\Domain\Services\SymfonyToLegacyHelper:
+        public: true
         arguments:
             $analyticsLogger: '@monolog.logger.analytics'
 

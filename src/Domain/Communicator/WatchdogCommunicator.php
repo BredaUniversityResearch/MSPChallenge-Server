@@ -7,6 +7,7 @@ use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Game;
 use App\Entity\ServerManager\GameList;
+use App\Repository\GameRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
@@ -55,9 +56,10 @@ class WatchdogCommunicator extends AbstractCommunicator
         $this->lastCompleteURLCalled = $this->getWatchdogUrl();
         $postValues = [
             'game_session_api' => $this->getSessionAPIBaseUrl(),
+            // todo: loop through all watchdog servers
             'game_session_token' => ConnectionManager::getInstance()
                 ->getCachedGameSessionDbConnection($this->gameList->getId())->createQueryBuilder()
-                ->select('game_session_watchdog_token')->from('game_session')->fetchOne(),
+                ->select('token')->from('watchdog')->fetchOne(),
             'game_state' => strtoupper($newWatchdogState),
             'required_simulations' => $this->getRequiredSimulations(),
             'api_access_token' => json_encode([
@@ -139,7 +141,9 @@ class WatchdogCommunicator extends AbstractCommunicator
         $result = [];
         $possibleSims = $this->versionsProvider->getComponentsVersions();
         $em = $this->connectionManager->getGameSessionEntityManager($this->gameList->getId());
-        $game = $em->getRepository(Game::class)->retrieve();
+        /** @var GameRepository $gameRepo */
+        $gameRepo = $em->getRepository(Game::class);
+        $game = $gameRepo->retrieve();
         $em->refresh($game); // don't really know why, but without this the postLoad event isn't initiated
         $config = $game->getRunningGameConfigFileContents()['datamodel'];
         foreach ($possibleSims as $possibleSim => $possibleSimVersion) {

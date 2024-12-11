@@ -2,22 +2,13 @@
 
 namespace App\Domain\API\v1;
 
-use App\Domain\Common\MSPBrowserFactory;
-use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use Closure;
 use Drift\DBAL\Result;
 use Exception;
-use Psr\Http\Message\ResponseInterface;
-use React\EventLoop\Loop;
-use React\EventLoop\LoopInterface;
-use React\Promise\Deferred;
+
 use React\Promise\PromiseInterface;
-use function App\assertFulfilled;
-use function App\resolveOnFutureTick;
 use function App\await;
-use function App\tpf;
 
 class Game extends Base
 {
@@ -547,10 +538,14 @@ class Game extends Base
      */
     private function onGameStateUpdated(string $newGameState): PromiseInterface
     {
-        return $this->changeWatchdogState($newGameState);
+        $simulations = new Simulations();
+        $this->asyncDataTransferTo($simulations);
+        return $simulations->changeWatchdogState($newGameState);
     }
 
     /**
+     * @deprected use Simulations::StartWatchdog instead
+     *
      * @ForceNoTransaction
      * @noinspection PhpUnused
      * @throws Exception
@@ -558,209 +553,9 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function StartWatchdog(): void
     {
-        // no need to startup watchdog in docker, handled by supervisor.
-        if (getenv('DOCKER') !== false) {
-            return;
-        }
-        // below code is only necessary for Windows
-        if (!str_starts_with(php_uname(), "Windows")) {
-            return;
-        }
-        self::StartSimulationExe([
-            'exe' => 'MSW.exe',
-            'working_directory' => SymfonyToLegacyHelper::getInstance()->getProjectDir().'/'.(
-                $_ENV['WATCHDOG_WINDOWS_RELATIVE_PATH'] ?? 'simulations/.NETFramework/MSW/'
-            )
-        ]);
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private static function StartSimulationExe(array $params): void
-    {
-        // below code is only necessary for Windows
-        if (!str_starts_with(php_uname(), "Windows")) {
-            return;
-        }
-        $args = isset($params["args"])? $params["args"]." " : "";
-        $args = $args."APIEndpoint=".GameSession::GetRequestApiRoot();
-        $workingDirectory = "";
-        if (isset($params["working_directory"])) {
-            $workingDirectory = "cd ".$params["working_directory"]." & ";
-        }
-        Database::execInBackground(
-            'start cmd.exe @cmd /c "'.$workingDirectory.'start '.$params["exe"].' '.$args.'"'
-        );
-    }
-
-    private function createWatchdogRequestPromiseFunction(string $url): ToPromiseFunction
-    {
-        return tpf(function () use ($url) {
-            $browser = MSPBrowserFactory::create($url);
-            $deferred = new Deferred();
-            $browser
-                // any response is acceptable, even 4xx or 5xx status codes
-                ->withRejectErrorResponse(false)
-                ->withTimeout(1)
-                ->request('GET', $url)
-                ->done(
-                    // watchdog is running
-                    function (/*ResponseInterface $response*/) use ($deferred) {
-                        $deferred->resolve(true); // we have a response
-                    },
-                    // so the Watchdog is off, and now it should be switched on
-                    function (/*Exception $e*/) use ($deferred) {
-                        $deferred->resolve(false); // no response yet..
-                    }
-                );
-            return $deferred->promise();
-        });
-    }
-
-    private function createWatchdogRequestRepeatedOnFulfilledFunction(
-        LoopInterface $loop,
-        Deferred $deferred,
-        Closure $repeatedFunction,
-        int &$numAttemptsLeft,
-        int $maxAttempts
-    ): Closure {
-        // so if the "promise function" is fulfilled, it gets repeated.
-        return function (bool $requestSucceeded) use (
-            $loop,
-            $deferred,
-            $repeatedFunction,
-            &$numAttemptsLeft,
-            $maxAttempts
-        ) {
-            if ($requestSucceeded) {
-                $deferred->resolve();
-                return;
-            }
-            if ($numAttemptsLeft == $maxAttempts) { // first attempt
-                self::StartWatchdog(); // try to start watchdog if the first attempt fails.
-            }
-            $numAttemptsLeft--;
-            if ($numAttemptsLeft <= 0) {
-                $deferred->resolve();
-                return; // do not repeat anymore, even if the watchdog is not alive
-            }
-            $loop->futureTick($repeatedFunction);
-        };
-    }
-
-    private function createWatchdogRequestRepeatedFunction(
-        LoopInterface $loop,
-        Deferred $deferred,
-        Closure $promiseFunction,
-        int &$numAttemptsLeft,
-        int $maxAttempts
-    ): Closure {
-        return function () use ($loop, $deferred, $promiseFunction, &$numAttemptsLeft, $maxAttempts) {
-            assertFulfilled(
-                $promiseFunction(),
-                $this->createWatchdogRequestRepeatedOnFulfilledFunction(
-                    $loop,
-                    $deferred,
-                    $this->createWatchdogRequestRepeatedFunction(
-                        $loop,
-                        $deferred,
-                        $promiseFunction,
-                        $numAttemptsLeft,
-                        $maxAttempts
-                    ),
-                    $numAttemptsLeft,
-                    $maxAttempts
-                )
-            );
-        };
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function assureWatchdogAlive(): ?PromiseInterface
-    {
-        // note(MH): GetWatchdogAddress is not async, but it is cached once it has been retrieved once, so that's "fine"
-        $url = $this->GetWatchdogAddress();
-        if (empty($url)) {
-            return null;
-        }
-        $deferred = new Deferred();
-        $loop = Loop::get();
-        $maxAttempts = 4;
-        $numAttemptsLeft = $maxAttempts;
-        $loop->futureTick($this->createWatchdogRequestRepeatedFunction(
-            $loop,
-            $deferred,
-            function () use ($url) {
-                return ($this->createWatchdogRequestPromiseFunction($url))();
-            },
-            $numAttemptsLeft,
-            $maxAttempts
-        ));
-        return $deferred->promise();
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function changeWatchdogState(string $newWatchdogGameState): ?PromiseInterface
-    {
-        if (null === $promise = $this->assureWatchdogAlive()) {
-            return null;
-        }
-        return $promise
-            ->then(function () {
-                return GameSession::getRequestApiRootAsync(getenv('DOCKER') !== false);
-            })
-            ->then(function (string $apiRoot) use ($newWatchdogGameState) {
-                $simulationsHelper = new Simulations();
-                $this->asyncDataTransferTo($simulationsHelper);
-                $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
-                $tokens = $simulationsHelper->GetTokensForWatchdog();
-                $newAccessToken = json_encode([
-                    'token' => $tokens['token'],
-                    'valid_until' => (new \DateTime('+1 hour'))->format('Y-m-d H:i:s')
-                ]);
-                $recoveryToken = json_encode([
-                    'token' => $tokens['api_refresh_token'],
-                    'valid_until' => \DateTime::createFromFormat('U', $tokens['exp'])->format('Y-m-d H:i:s')
-                ]);
-                return $this->getWatchdogSessionUniqueToken()
-                    ->then(function (string $watchdogSessionUniqueToken) use (
-                        $simulations,
-                        $apiRoot,
-                        $newWatchdogGameState,
-                        $newAccessToken,
-                        $recoveryToken
-                    ) {
-                        // note(MH): GetWatchdogAddress is not async, but it is cached once it
-                        //   has been retrieved once, so that's "fine"
-                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
-                        $browser = MSPBrowserFactory::create($url);
-                        $postValues = [
-                            'game_session_api' => $apiRoot,
-                            'game_session_token' => $watchdogSessionUniqueToken,
-                            'game_state' => $newWatchdogGameState,
-                            'required_simulations' => $simulations,
-                            'api_access_token' => $newAccessToken,
-                            'api_access_renew_token' => $recoveryToken,
-                            'month' => $this->GetCurrentMonthAsId()
-                        ];
-                        return $browser->post(
-                            $url,
-                            [
-                                'Content-Type' => 'application/x-www-form-urlencoded'
-                            ],
-                            http_build_query($postValues)
-                        );
-                    });
-            })
-            ->then(function (ResponseInterface $response) {
-                return $this->logWatchdogResponse("/Watchdog/UpdateState", $response);
-            });
+        $simulations = new Simulations();
+        $this->asyncDataTransferTo($simulations);
+        $simulations->StartWatchdog();
     }
 
     /**
@@ -854,19 +649,5 @@ class Game extends Base
     public function GetCountries(): array
     {
         return $this->getDatabase()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function areSimulationsUpToDate(array $tickData): bool
-    {
-        $config = $this->GetGameConfigValues();
-        if ((isset($config["MEL"]) && $tickData['month'] > $tickData['mel_lastmonth']) ||
-            (isset($config["CEL"]) && $tickData['month'] > $tickData['cel_lastmonth']) ||
-            (isset($config["SEL"]) && $tickData['month'] > $tickData['sel_lastmonth'])) {
-            return false;
-        }
-        return true;
     }
 }

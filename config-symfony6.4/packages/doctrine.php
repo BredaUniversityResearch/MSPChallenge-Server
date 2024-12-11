@@ -4,10 +4,11 @@ use App\Domain\Services\ConnectionManager;
 use Symfony\Config\Doctrine\DbalConfig;
 use Symfony\Config\Doctrine\OrmConfig;
 use Symfony\Config\DoctrineConfig;
+use Symfony\Config\StofDoctrineExtensionsConfig;
 
 // a good yaml/php example of the doctrine configuration, see:
 //   https://symfony.com/doc/current/doctrine/multiple_entity_managers.html
-return static function (DoctrineConfig $doctrineConfig) {
+return static function (DoctrineConfig $doctrineConfig, StofDoctrineExtensionsConfig $stofDoctrineExtensionsConfig) {
     $connectionManager = ConnectionManager::getInstance();
     $dbNames = [
         $connectionManager->getServerManagerDbName()
@@ -16,7 +17,8 @@ return static function (DoctrineConfig $doctrineConfig) {
         $dbNames[] = $connectionManager->getGameSessionDbName($gameSessionId);
     }
     $dbalConfig = new DbalConfig();
-    $dbalConfig->defaultConnection($connectionManager->getServerManagerDbName());
+    $dbalConfig
+        ->defaultConnection($connectionManager->getServerManagerDbName());
     $ormConfig = new OrmConfig([
         # Since doctrine/doctrine-bundle 2.11:
         #   Not setting "doctrine.orm.enable_lazy_ghost_objects" to true is deprecated.
@@ -24,14 +26,29 @@ return static function (DoctrineConfig $doctrineConfig) {
         #   Otherwise the GameConfigVersion::getGameConfigCompleteRaw() will return null.
         'enable_lazy_ghost_objects' => false
     ]);
+    $dqlConfig = [
+        'string_functions' => [
+            'UUID_SHORT' => 'App\Doctrine\Functions\UuidShortFunction'
+        ]
+    ];
+    $serverManagerDbName = $connectionManager->getServerManagerDbName();
     $ormConfig
-        ->defaultEntityManager($connectionManager->getServerManagerDbName());
+        ->defaultEntityManager($serverManagerDbName);
     foreach ($dbNames as $dbName) {
         $dbalConfig->connection($dbName, $connectionManager->getConnectionConfig($dbName));
-        $ormConfig->entityManager($dbName, $connectionManager->getEntityManagerConfig($dbName));
+        $ormConfig->entityManager($dbName, $connectionManager->getEntityManagerConfig($dbName))->dql($dqlConfig);
     }
     $doctrineConfig->dbal($dbalConfig);
     $doctrineConfig->orm($ormConfig);
+
+    $stofDoctrineExtensionsConfig->defaultLocale('en_us');
+    foreach ($dbNames as $dbName) {
+        $stofDoctrineExtensionsConfig->orm($dbName, [
+            'timestampable' => true,
+            'softdeleteable' => true
+        ]);
+    }
+
     if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
         return;
     }

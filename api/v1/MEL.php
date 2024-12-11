@@ -4,6 +4,7 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanLayerState;
+use App\Domain\Common\InternalSimulationName;
 use App\Domain\PolicyData\BufferZonePolicyData;
 use App\Domain\PolicyData\PolicyDataBase;
 use App\Domain\PolicyData\ItemsPolicyDataBase;
@@ -12,6 +13,8 @@ use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Domain\PolicyData\SeasonalClosurePolicyData;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Geometry;
+use App\Entity\Simulation;
+use App\Repository\SimulationRepository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -418,10 +421,11 @@ SUBQUERY,
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function TickDone(): void
     {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query(
-            'UPDATE game SET game_mel_lastmonth=game_currentmonth, game_mel_lastupdate=UNIX_TIMESTAMP(NOW(6))'
-        );
+        /** @var SimulationRepository $repo */
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(Simulation::class);
+        $game = new Game();
+        $repo->notifyUpdateFinished(InternalSimulationName::MEL, $game->GetCurrentMonthAsId());
     }
 
     /**

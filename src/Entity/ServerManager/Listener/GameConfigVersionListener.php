@@ -18,15 +18,16 @@ class GameConfigVersionListener
      */
     public function postLoad(GameConfigVersion $gameConfigVersion, PostLoadEventArgs $event): void
     {
-        $path = "{$this->kernel->getProjectDir()}/ServerManager/configfiles/{$gameConfigVersion->getFilePath()}";
-        $gameConfigContentCompleteRaw = file_get_contents($path);
-        $gameConfigContentComplete = json_decode($gameConfigContentCompleteRaw, true);
-        if ($gameConfigContentComplete === false) {
-            throw new \Exception(
-                "Cannot read contents of the session's chosen configuration file: {$path}"
-            );
-        }
-        $gameConfigVersion->setGameConfigCompleteRaw($gameConfigContentCompleteRaw);
-        $gameConfigVersion->setGameConfigComplete($gameConfigContentComplete);
+        // not needed anymore?
+//        $path = "{$this->kernel->getProjectDir()}/ServerManager/configfiles/{$gameConfigVersion->getFilePath()}";
+//        $gameConfigContentCompleteRaw = file_get_contents($path);
+//        $gameConfigContentComplete = json_decode($gameConfigContentCompleteRaw, true);
+//        if ($gameConfigContentComplete === false) {
+//            throw new \Exception(
+//                "Cannot read contents of the session's chosen configuration file: {$path}"
+//            );
+//        }
+//        $gameConfigVersion->setGameConfigCompleteRaw($gameConfigContentCompleteRaw);
+//        $gameConfigVersion->setGameConfigComplete($gameConfigContentComplete);
     }
 }
