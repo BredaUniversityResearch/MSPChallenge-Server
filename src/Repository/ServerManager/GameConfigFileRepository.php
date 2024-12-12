@@ -3,16 +3,10 @@
 namespace App\Repository\ServerManager;
 
 use App\Entity\ServerManager\GameConfigFile;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
 class GameConfigFileRepository extends EntityRepository
 {
-    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
-    {
-        parent::__construct($em, $class);
-    }
 
     public function save(GameConfigFile $entity, bool $flush = false): void
     {
@@ -31,29 +25,4 @@ class GameConfigFileRepository extends EntityRepository
             $this->getEntityManager()->flush();
         }
     }
-
-//    /**
-//     * @return GameConfigFile[] Returns an array of GameConfigFile objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('g')
-//            ->andWhere('g.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('g.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?GameConfigFile
-//    {
-//        return $this->createQueryBuilder('g')
-//            ->andWhere('g.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

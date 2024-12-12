@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
-class PlanPolicyRepository extends EntityRepository
+class WatchdogRepository extends EntityRepository
 {
 
 }

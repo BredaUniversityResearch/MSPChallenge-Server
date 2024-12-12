@@ -12,9 +12,7 @@ use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
@@ -25,12 +23,6 @@ class GameListRepository extends EntityRepository
 {
     private ?ObjectNormalizer $normalizer = null;
     private ?Serializer $serializer = null; // to be created upon usage// to be created upon usage
-
-
-    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
-    {
-        parent::__construct($em, $class);
-    }
 
     public function save(GameList $entity, bool $flush = false): void
     {

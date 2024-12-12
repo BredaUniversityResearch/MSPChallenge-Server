@@ -2,6 +2,10 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\InternalSimulationName;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\Simulation;
+use App\Repository\SimulationRepository;
 use Exception;
 use stdClass;
 
@@ -108,11 +112,10 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateFinished(int $month): void
     {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query(
-            'UPDATE game SET game_cel_lastmonth=?, game_cel_lastupdate=UNIX_TIMESTAMP(NOW(6))',
-            [$month]
-        );
+        /** @var SimulationRepository $repo */
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(Simulation::class);
+        $repo->notifyUpdateFinished(InternalSimulationName::CEL, $month);
     }
 
     /**

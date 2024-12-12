@@ -66,7 +66,7 @@ COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor.d/
 COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
 COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
-COPY --link docker/supervisor/supervisor.d/messenger-worker.ini /etc/supervisor.d/messenger-worker.ini
+COPY --link docker/supervisor/supervisor.d/messenger-consume.ini /etc/supervisor.d/messenger-worker.ini
 
 ENTRYPOINT ["docker-entrypoint"]
 
@@ -136,9 +136,9 @@ RUN set -eux; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
 
-FROM mariadb:10.6.16 AS mariadb_base
+FROM mariadb:10.11.10 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
-FROM adminer AS adminer_base
+FROM shyim/adminerevo AS adminer_base
 FROM mitmproxy/mitmproxy:10.3.1 as mitmproxy_base
 FROM redis:7.2.4-alpine AS redis_base
 FROM erikdubbelboer/phpredisadmin as phpredisadmin_base

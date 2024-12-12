@@ -162,13 +162,13 @@ abstract class CommonBase implements LogContainerInterface
     {
         return $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
-                ->select('game_session_watchdog_token')
-                ->from('game_session')
+                ->select('token')
+                ->from('watchdog')
                 ->setMaxResults(1)
         )
         ->then(function (Result $result) {
             $row = $result->fetchFirstRow();
-            return $row['game_session_watchdog_token'] ?? '0';
+            return $row['token'] ?? '0';
         });
     }
 
