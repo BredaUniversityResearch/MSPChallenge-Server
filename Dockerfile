@@ -39,6 +39,11 @@ RUN set -eux; \
         gd \
 	;
 
+# write command history to a history file
+RUN echo 'export HISTFILE=/root/.bash_history' >> /root/.bashrc
+# to force the command history to be written out, even if the shell is not exited properly
+RUN echo "export PROMPT_COMMAND='history -a'" >> /root/.bashrc
+
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
