@@ -7,15 +7,15 @@ namespace DoctrineMigrations;
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Simulations;
 use App\Domain\Common\InternalSimulationName;
-use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\Watchdog;
 use Doctrine\DBAL\Schema\Schema;
-use App\Entity\Simulation;
+use Exception;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 // todo : see https://github.com/doctrine/DoctrineMigrationsBundle/issues/521
+// phpcs:ignore Generic.Files.LineLength.TooLong
 // @phpstan-ignore-next-line " Class DoctrineMigrations\Version20241128170458 implements deprecated interface Symfony\Component\DependencyInjection\ContainerAwareInterface: since Symfony 6.4, use dependency injection instead"
 final class Version20241128170458 extends MSPMigration implements ContainerAwareInterface
 {
@@ -33,24 +33,34 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
 
     /**
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function insertSimulationRecords(): void
     {
         $result = preg_match('/msp_session_(\d+)/', $this->connection->getDatabase(), $matches);
-        $this->abortIf($result !== 1, 'Database name does not match the expected format: msp_session_{id}');
+        $this->abortIf(
+            $result !== 1,
+            'Database name does not match the expected format: msp_session_{id}'
+        );
 
         $game = new Game();
         $game->setGameSessionId((int)$matches);
         try {
             $config = $game->GetGameConfigValues();
-        } catch (\Exception $e) {
-            $this->warnIf(true, 'Failed to retrieve game configuration values. Skipping simulation registration, error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            $this->warnIf(
+                true,
+                'Failed to retrieve game configuration values. Skipping simulation registration, error: '.
+                $e->getMessage()
+            );
             return; // nothing to do
         }
 
         // filter possible internal simulations with the ones present in the config
-        $simulations = array_intersect_key(array_flip(array_map(fn(InternalSimulationName $e) => $e->value, InternalSimulationName::cases())), $config);
+        $simulations = array_intersect_key(array_flip(array_map(
+            fn(InternalSimulationName $e) => $e->value,
+            InternalSimulationName::cases()
+        )), $config);
         if (empty($simulations)) {
             $this->warnIf(true, 'No simulations found to register in game configuration');
             return; // no configured simulations
@@ -58,13 +68,11 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
         $sim = new Simulations();
         $sim->setGameSessionId((int)$matches);
         $versions = $sim->GetConfiguredSimulationTypes();
-        $simId = 1;
         foreach ($versions as $name => $version) {
             $nameLowered = strtolower($name);
             $sql = <<<"SQL"
-                INSERT INTO simulation (id, watchdog_id, name, version, last_month)
+                INSERT INTO simulation (watchdog_id, name, version, last_month)
                 SELECT
-                    '{$simId}' as `id`,
                     '1' as `watchdog_id`,
                     '{$name}' as `name`,
                     '{$version}' as `version`,
@@ -72,18 +80,20 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
                 FROM game
                 SQL;
             $this->addSql($sql);
-            $simId++;
         }
         // in-case there is no game record for the simulation, insert it with default values
-    $this->addSql(
-            'INSERT IGNORE INTO simulation (watchdog_id, name, version) VALUES ' . implode(',', array_map(
-                function (string $name) use ($versions) {
-                    return "(1, '$name','{$versions[$name]}')";
-                },
-                array_keys($simulations),
-                $simulations
-            ))
-        );
+        foreach ($simulations as $name => $sim) {
+            $version = $versions[$name];
+            $sql = <<<"SQL"
+                INSERT IGNORE INTO simulation (watchdog_id, name, version)
+                SELECT
+                    `id` as `watchdog_id`,
+                    '{$name}' as `name`,
+                    '{$version}' as `version`
+                FROM watchdog                        
+                SQL;
+            $this->addSql($sql);
+        }
     }
 
     /**
@@ -96,9 +106,8 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
         $watchdogPort = (int)($_ENV['WATCHDOG_PORT'] ?? 45000);
         $watchdogAddress = $_ENV['WATCHDOG_ADDRESS'] ?? '';
         $sql = <<<"SQL"
-            INSERT INTO watchdog (`id`,`server_id`, `address`, `port`, `status`, `token`)
+            INSERT INTO watchdog (`server_id`, `address`, `port`, `status`, `token`)
             SELECT 
-                '1' as `id`,
                 '{$watchdogServerId}' as `server_id`,
                 IF('{$watchdogAddress}'='',`game_session_watchdog_address`,'{$watchdogAddress}') as `address`,
                 {$watchdogPort} as `port`,
@@ -110,10 +119,12 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
 
         // insert watchdog record based on environment variables if the previous query did not insert anything
         $watchdogAddress = $_ENV['WATCHDOG_ADDRESS'] ?? 'localhost';
+        // phpcs:disable Generic.Files.LineLength.TooLong
         $this->addSql(<<<"SQL"
-            INSERT IGNORE INTO watchdog (`id`,`server_id`, `address`, `port`, `status`, `token`) VALUES (1, '{$watchdogServerId}', '{$watchdogAddress}', {$watchdogPort}, 'ready', UUID_SHORT())
+            INSERT IGNORE INTO watchdog (`server_id`, `address`, `port`, `status`, `token`) VALUES ('{$watchdogServerId}', '{$watchdogAddress}', {$watchdogPort}, 'ready', UUID_SHORT())
             SQL
         );
+        // phpcs:enable Generic.Files.LineLength.TooLong
     }
 
     protected function getDatabaseType(): ?MSPDatabaseType
@@ -122,7 +133,7 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function onUp(Schema $schema): void
     {
@@ -145,7 +156,8 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
             )
             SQL
         );
-        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
+
+        // phpcs:disable Generic.Files.LineLength.TooLong
         $this->addSql(<<<'SQL'
             CREATE TABLE `simulation` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -161,16 +173,20 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             SQL
         );
+        // phpcs:enable Generic.Files.LineLength.TooLong
 
         $this->insertWatchdogRecord();
         $this->insertSimulationRecords();
+        // phpcs:ignore Generic.Files.LineLength.TooLong
         $this->addSql('ALTER TABLE `game_session` DROP `game_session_watchdog_address`, DROP `game_session_watchdog_token`');
+        // phpcs:ignore Generic.Files.LineLength.TooLong
         $this->addSql('ALTER TABLE game DROP COLUMN game_mel_lastupdate, DROP COLUMN game_cel_lastupdate, DROP COLUMN game_sel_lastupdate, DROP COLUMN game_mel_lastmonth, DROP COLUMN game_cel_lastmonth, DROP COLUMN game_sel_lastmonth');
     }
 
     protected function onDown(Schema $schema): void
     {
         $this->addSql('DROP TABLE simulation');
+        // phpcs:ignore Generic.Files.LineLength.TooLong
         $this->addSql('ALTER TABLE game ADD COLUMN game_mel_lastmonth INT NOT NULL DEFAULT -1 AFTER game_eratime, ADD COLUMN game_cel_lastmonth INT NOT NULL DEFAULT -1 AFTER game_mel_lastmonth, ADD COLUMN game_sel_lastmonth INT NOT NULL DEFAULT -1 AFTER game_cel_lastmonth, ADD COLUMN game_mel_lastupdate double NULL DEFAULT NULL AFTER game_sel_lastmonth, ADD COLUMN game_cel_lastupdate double NULL DEFAULT NULL AFTER game_mel_lastupdate, ADD COLUMN game_sel_lastupdate double NULL DEFAULT NULL AFTER game_cel_lastupdate');
         $this->addSql(<<<'SQL'
             ALTER TABLE `game_session`
