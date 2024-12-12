@@ -291,7 +291,6 @@ class CommonSessionHandler
         $versions = $this->getConfiguredSimulationTypes();
         /** @var WatchdogRepository $watchdogRepo */
         $watchdogRepo = $this->entityManager->getRepository(Watchdog::class);
-        /** @var Watchdog $watchdog */
         if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => Watchdog::getInternalServerId()])) {
             $watchdog = new Watchdog();
             $watchdog
@@ -299,7 +298,7 @@ class CommonSessionHandler
                     $_ENV['WATCHDOG_ADDRESS'] ?? $this->gameSession->getGameWatchdogServer()->getAddress() ??
                         'localhost'
                 )
-                ->setPort((int)$_ENV['WATCHDOG_PORT'] ?? 45000)
+                ->setPort((int)($_ENV['WATCHDOG_PORT'] ?? 45000))
                 ->setToken(0) // this is temporary and will be updated later
                 ->setStatus(WatchdogStatus::READY)
                 ->setServerId(Watchdog::getInternalServerId());

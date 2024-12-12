@@ -63,6 +63,7 @@ class Watchdog
     public function __construct()
     {
         $this->simulations = new ArrayCollection();
+        $this->archived = false;
     }
 
     public function getId(): ?int

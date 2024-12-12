@@ -15,6 +15,8 @@ use App\Entity\Simulation;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+// todo : see https://github.com/doctrine/DoctrineMigrationsBundle/issues/521
+// @phpstan-ignore-next-line " Class DoctrineMigrations\Version20241128170458 implements deprecated interface Symfony\Component\DependencyInjection\ContainerAwareInterface: since Symfony 6.4, use dependency injection instead"
 final class Version20241128170458 extends MSPMigration implements ContainerAwareInterface
 {
     private ?ContainerInterface $container = null;
@@ -91,7 +93,7 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
     {
         // insert watchdog record given the data from game_session, if it is there
         $watchdogServerId = Watchdog::getInternalServerId()->toBinary();
-        $watchdogPort = (int)$_ENV['WATCHDOG_PORT'] ?? 45000;
+        $watchdogPort = (int)($_ENV['WATCHDOG_PORT'] ?? 45000);
         $watchdogAddress = $_ENV['WATCHDOG_ADDRESS'] ?? '';
         $sql = <<<"SQL"
             INSERT INTO watchdog (`id`,`server_id`, `address`, `port`, `status`, `token`)

@@ -99,7 +99,7 @@ class Simulations extends Base
         bool            $archived = false
     ): PromiseInterface {
         $expr = $this->getAsyncDatabase()->createQueryBuilder()->expr();
-        $andExpressions = [];
+        $andExpressions = ['1=1'];
         $parameters = [];
         if ($statusFilter !== null) {
             $andExpressions[] = $expr->eq('w.status', '?');
@@ -321,7 +321,7 @@ class Simulations extends Base
             ->then(function () {
                 return GameSession::getRequestApiRootAsync(getenv('DOCKER') !== false);
             })
-            ->then(function (string $apiRoot) use ($newWatchdogGameState) {
+            ->then(function (string $apiRoot) {
                 // set registered watchdogs to status ready
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 $qb

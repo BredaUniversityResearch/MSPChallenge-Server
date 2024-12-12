@@ -95,15 +95,13 @@ class GameLatest extends CommonBase
      * @throws Exception
      */
     public function prepareLatest(
-        int $teamId,
         float $lastUpdateTime,
-        int $user,
         bool $showDebug = false
     ): PromiseInterface {
         return $this->calculateUpdatedTime(
             $showDebug
         )
-        ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
+        ->then(function (array $tick) use ($lastUpdateTime) {
             if ($lastUpdateTime < PHP_FLOAT_EPSILON) { // first client update
                 $this->allowEnergyKpiUpdate = true;
                 return $tick;
@@ -134,12 +132,7 @@ class GameLatest extends CommonBase
      */
     public function latest(int $teamId, float $lastUpdateTime, int $user, bool $showDebug = false): ?PromiseInterface
     {
-        return $this->prepareLatest(
-            $teamId,
-            $lastUpdateTime,
-            $user,
-            $showDebug
-        )
+        return $this->prepareLatest($lastUpdateTime, $showDebug)
         ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
             $context = [
                 self::CONTEXT_PARAM_NEW_TIME => microtime(true),
