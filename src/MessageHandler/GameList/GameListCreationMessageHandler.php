@@ -94,7 +94,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         }
         try {
             $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
-            $this->validateGameConfigComplete($this->createSessionRunningConfig());
+            $this->validateGameConfig($this->createSessionRunningConfig());
             $this->notice("Session {$this->gameSession->getName()} creation initiated. Please wait.");
             $this->setupSessionDatabase();
             $this->migrateSessionDatabase();

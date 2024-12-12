@@ -236,14 +236,14 @@ class CommonSessionHandler
     /**
      * @throws \Exception
      */
-    protected function validateGameConfigComplete(string $gameConfigFilepath): void
+    protected function validateGameConfig(string $gameConfigFilepath): void
     {
-        if (false === $gameConfigContentCompleteRaw = file_get_contents($gameConfigFilepath)) {
+        if (false === $gameConfigContent = file_get_contents($gameConfigFilepath)) {
             throw new \Exception(
                 "Cannot read contents of the session's chosen configuration file: {$gameConfigFilepath}"
             );
         }
-        $gameConfigContents = json_decode($gameConfigContentCompleteRaw);
+        $gameConfigContents = json_decode($gameConfigContent);
         if ($gameConfigContents === false) {
             throw new \Exception(
                 "Cannot decode contents of the session's chosen configuration file: {$gameConfigFilepath}"
@@ -266,7 +266,8 @@ class CommonSessionHandler
             "Contents of config file {$gameConfigFilepath} were successfully validated, having meta data: ".
             json_encode($gameConfigContents->metadata)
         );
-        $gameConfigContents = json_decode($gameConfigContentCompleteRaw, true); // to array
+        $gameConfigContents = json_decode($gameConfigContent, true); // to array
+        // todo: we should just use the object version instead of the array one.
         $this->dataModel = $gameConfigContents['datamodel'];
     }
 

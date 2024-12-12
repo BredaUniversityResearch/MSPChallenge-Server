@@ -70,7 +70,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
             $this->notice("Save reload into session {$this->gameSession->getName()} initiated. Please wait.");
             $this->openSaveZip();
-            $this->validateGameConfigComplete($this->importSessionRunningConfig());
+            $this->validateGameConfig($this->importSessionRunningConfig());
             $this->setupSessionDatabase();
             $this->importSessionDatabase();
             $this->migrateSessionDatabase();
