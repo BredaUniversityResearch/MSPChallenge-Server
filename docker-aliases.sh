@@ -76,7 +76,7 @@ alias drg="${MY2_SETUP} && docker stop grafana ; docker rm grafana ; MSYS_NO_PAT
 # docker (d) + stop (s) + all containers (a)
 alias dsa='docker stop $(docker ps -a -q)'
 # docker (d) + system (s) + prune (p)
-alias dsp='docker system prune -a'
+alias dsp='docker system prune -a -f'
 # docker (d) + clean
 alias dclean='dsa && dsp'
 
