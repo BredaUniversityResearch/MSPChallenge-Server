@@ -78,5 +78,5 @@ alias dsa='docker stop $(docker ps -a -q)'
 # docker (d) + system (s) + prune (p)
 alias dsp='docker system prune -a -f'
 # docker (d) + clean
-alias dclean='dsa && dsp'
+alias dclean='dsa ; dsp'
 
