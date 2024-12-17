@@ -10386,7 +10386,7 @@
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELCustomizable",
-        "layer_raster_filter_mode": 1,
+        "layer_raster_filter_mode": 0,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.01,
