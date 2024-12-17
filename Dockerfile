@@ -69,9 +69,7 @@ COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
 RUN mkdir -p /var/log/supervisor/
 COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor.d/
-COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
-COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
-COPY --link docker/supervisor/supervisor.d/messenger-consume.ini /etc/supervisor.d/messenger-worker.ini
+COPY --link docker/supervisor/supervisor.d/*.ini /etc/supervisor.d/
 
 ENTRYPOINT ["docker-entrypoint"]
 

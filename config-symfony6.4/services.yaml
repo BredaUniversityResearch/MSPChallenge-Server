@@ -130,6 +130,8 @@ services:
 
     App\Domain\Communicator\WatchdogCommunicator:
 
+    App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
+
 when@dev:
     parameters:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'

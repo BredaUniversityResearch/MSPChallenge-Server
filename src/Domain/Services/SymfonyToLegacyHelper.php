@@ -51,7 +51,6 @@ class SymfonyToLegacyHelper
         EntityManagerInterface $em,
         MessageBusInterface $messageBus,
         VersionsProvider $provider,
-        MessageBusInterface $analyticsMessageBus,
         LoggerInterface $analyticsLogger,
         WatchdogCommunicator $watchdogCommunicator,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
@@ -68,7 +67,6 @@ class SymfonyToLegacyHelper
         $this->em = $em;
         $this->messageBus = $messageBus;
         $this->provider = $provider;
-        $this->analyticsMessageBus = $analyticsMessageBus;
         $this->analyticsLogger = $analyticsLogger;
         $this->watchdogCommunicator = $watchdogCommunicator;
         $this->authenticationSuccessHandler = $authenticationSuccessHandler;
@@ -114,11 +112,6 @@ class SymfonyToLegacyHelper
     public function getProvider(): VersionsProvider
     {
         return $this->provider;
-    }
-
-    public function getAnalyticsMessageBus(): MessageBusInterface
-    {
-        return $this->analyticsMessageBus;
     }
 
     public function getAnalyticsLogger(): LoggerInterface

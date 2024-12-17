@@ -6,14 +6,21 @@ use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Common\MSPBrowserFactory;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\Simulation;
+use App\Entity\Watchdog;
+use App\Message\Watchdog\GameStateChangedMessage;
+use App\Message\Watchdog\Token;
 use Closure;
+use DateMalformedStringException;
+use DateTime;
 use Doctrine\DBAL\Query\Expression\CompositeExpression;
+use Drift\DBAL\Result;
 use Exception;
-use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use Symfony\Component\Uid\Uuid;
 use function App\assertFulfilled;
 use function App\tpf;
 
@@ -310,6 +317,78 @@ class Simulations extends Base
     }
 
     /**
+     * @throws DateMalformedStringException
+     */
+    private function createWatchdogEntityFromAssociative(array $watchdog): Watchdog
+    {
+        $address = $watchdog['address'];
+        $port = $watchdog['port'];
+        if ($watchdog['server_id'] == Watchdog::getInternalServerId()->toBinary()) {
+            // prefer the environment variable over the database value for the internal watchdog
+            $address = $_ENV['WATCHDOG_ADDRESS'] ?? $address;
+            $port = $_ENV['WATCHDOG_PORT'] ?? $port;
+        }
+        $w = new Watchdog();
+        $w
+            ->setServerId(Uuid::fromBinary($watchdog['server_id']))
+            ->setScheme($watchdog['scheme'])
+            ->setAddress($address)
+            ->setPort($port)
+            ->setStatus(WatchdogStatus::from($watchdog['status']))
+            ->setToken($watchdog['token'])
+            ->setCreatedAt(new DateTime($watchdog['created_at']))
+            ->setDeletedAt(new DateTime($watchdog['deleted_at']))
+            ->setUpdatedAt(new DateTime($watchdog['updated_at']));
+        return $w;
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    private function createSimulationEntityFromAssociative(array $sim): Simulation
+    {
+        $s = new Simulation();
+        $s
+            ->setName($sim['name'])
+            ->setVersion($sim['version'])
+            ->setLastMonth($sim['last_month'])
+            ->setCreatedAt(new DateTime($sim['s_created_at']))
+            ->setUpdatedAt(new DateTime($sim['s_updated_at']));
+        return $s;
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    private function getWatchdogs(): PromiseInterface
+    {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder()
+            ->select(
+                'w.*',
+                's.*',
+                // aliases for the columns, to be able to distinguish between the two tables
+                'w.id as w_id',
+                's.created_at as s_created_at',
+                's.updated_at as s_updated_at'
+            )
+            ->from('simulation', 's')
+            ->innerJoin('s', 'watchdog', 'w', 's.watchdog_id = w.id')
+            ->where('w.deleted_at IS NULL'); // only active simulations
+        return $this->getAsyncDatabase()->query($qb)->then(function (Result $result) {
+            $sims = ($result->fetchAllRows() ?? []) ?: [];
+            $watchdogs = [];
+            foreach ($sims as $sim) {
+                $watchdogs[$sim['w_id']] ??= $this->createWatchdogEntityFromAssociative($sim);
+                $simEntity = $this->createSimulationEntityFromAssociative($sim);
+                // this will also assign the watchdog to the simulation
+                $watchdogs[$sim['w_id']]->getSimulations()->add($simEntity);
+            }
+            return $watchdogs;
+        });
+    }
+
+    /**
      * @throws Exception
      */
     public function changeWatchdogState(string $newWatchdogGameState): ?PromiseInterface
@@ -332,52 +411,38 @@ class Simulations extends Base
                 return $this->getAsyncDatabase()->query($qb)->then(fn() => $apiRoot);
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
-                $simulationsHelper = new Simulations();
-                $this->asyncDataTransferTo($simulationsHelper);
-                $simulations = json_encode($simulationsHelper->GetConfiguredSimulationTypes(), JSON_FORCE_OBJECT);
-                $tokens = $simulationsHelper->GetTokensForWatchdog();
-                $newAccessToken = json_encode([
-                    'token' => $tokens['token'],
-                    'valid_until' => (new \DateTime('+1 hour'))->format('Y-m-d H:i:s')
-                ]);
-                $recoveryToken = json_encode([
-                    'token' => $tokens['api_refresh_token'],
-                    'valid_until' => \DateTime::createFromFormat('U', $tokens['exp'])->format('Y-m-d H:i:s')
-                ]);
-                return $this->getWatchdogSessionUniqueToken()
-                    ->then(function (string $watchdogSessionUniqueToken) use (
-                        $simulations,
-                        $apiRoot,
-                        $newWatchdogGameState,
-                        $newAccessToken,
-                        $recoveryToken
-                    ) {
-                        // note(MH): GetWatchdogAddress is not async, but it is cached once it
-                        //   has been retrieved once, so that's "fine"
-                        $url = $this->GetWatchdogAddress()."/Watchdog/UpdateState";
-                        $browser = MSPBrowserFactory::create($url);
+                /** @var Watchdog[] $watchdogs */
+                return $this->getWatchdogs()->then(function (array $watchdogs) use (
+                    $apiRoot,
+                    $newWatchdogGameState
+                ) {
+                    foreach ($watchdogs as $watchdog) {
+                        $simulationsHelper = new Simulations();
+                        $this->asyncDataTransferTo($simulationsHelper);
                         $game = new Game();
                         $this->asyncDataTransferTo($game);
-                        $postValues = [
-                            'game_session_api' => $apiRoot,
-                            'game_session_token' => $watchdogSessionUniqueToken,
-                            'game_state' => $newWatchdogGameState,
-                            'required_simulations' => $simulations,
-                            'api_access_token' => $newAccessToken,
-                            'api_access_renew_token' => $recoveryToken,
-                            'month' => $game->GetCurrentMonthAsId()
-                        ];
-                        return $browser->post(
-                            $url,
-                            [
-                                'Content-Type' => 'application/x-www-form-urlencoded'
-                            ],
-                            http_build_query($postValues)
-                        );
-                    });
-            })
-            ->then(function (ResponseInterface $response) {
-                return $this->logWatchdogResponse("/Watchdog/UpdateState", $response);
+                        $tokens = $simulationsHelper->GetTokensForWatchdog();
+                        $message = new GameStateChangedMessage();
+                        $message
+                            ->setGameSessionId($this->getGameSessionId())
+                            ->setWatchdog($watchdog)
+                            ->setGameSessionApi($apiRoot)
+                            ->setGameState($newWatchdogGameState)
+                            // sets an array keyed by the simulation name with the corresponding version
+                            ->setRequiredSimulations(
+                                collect($watchdog->getSimulations()->toArray())
+                                    ->mapWithKeys(fn(Simulation $sim) => [$sim->getName() => $sim->getVersion()])
+                                    ->toArray()
+                            )
+                            ->setApiAccessToken(new Token($tokens['token'], new DateTime('+1 hour')))
+                            ->setApiAccessRenewToken(new Token(
+                                $tokens['api_refresh_token'],
+                                DateTime::createFromFormat('U', $tokens['exp'])
+                            ))
+                            ->setMonth($game->GetCurrentMonthAsId());
+                        SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch($message);
+                    }
+                });
             });
     }
 }

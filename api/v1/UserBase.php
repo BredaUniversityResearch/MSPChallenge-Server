@@ -421,7 +421,7 @@ abstract class UserBase extends Base implements JWTUserInterface
         );
 
         try {
-            $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
+            $legacyHelper->getMessageBus()->dispatch($analyticsMessage);
         } catch (Exception $e) {
             $analyticsLogger->error(
                 "Exception occurred while dispatching user log ".

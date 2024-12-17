@@ -326,44 +326,47 @@ class Geometry
 
     public function setGeometryType(string|array|null $geometryType): Geometry
     {
-        if (is_array($geometryType)) {
-            // assume $geometryType is actually a downloaded feature properties array
-            $featureProperties = $geometryType;
-            if (!empty($this->getLayer()->getLayerPropertyAsType())) {
-                $type = '-1';
-                if (!empty($featureProperties[$this->getLayer()->getLayerPropertyAsType()])) {
-                    $featureTypeProperty = $featureProperties[$this->getLayer()->getLayerPropertyAsType()];
-                    foreach ($this->getLayer()->getLayerType() as $typeValue => $layerTypeMetaData) {
-                        if (!empty($layerTypeMetaData["map_type"])) {
-                            // identify the 'other' category
-                            if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                                $typeOther = $typeValue;
-                            }
-                            if (str_contains($layerTypeMetaData["map_type"], '-')) {
-                                // assumes a range of minimum to maximum (but not including) integer or float values
-                                $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
-                                if ((float) $featureTypeProperty >= (float) $typeValues[0]
-                                    && (float) $featureTypeProperty < (float) $typeValues[1]) {
-                                    $type = $typeValue;
-                                }
-                            } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
-                                // translate the found $featureProperties value to the type value (int, float, string)
-                                $type = $typeValue;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if ($type == '-1') {
-                    $type = $typeOther ?? 0;
-                }
-                $this->geometryType = $type;
-                return $this;
-            }
+        if (!is_array($geometryType)) {
+            $this->geometryType = $geometryType;
+            return $this;
+        }
+        // assume $geometryType is actually a downloaded feature properties array
+        $featureProperties = $geometryType;
+        if (empty($this->getLayer()->getLayerPropertyAsType())) {
             $this->geometryType = !empty($featureProperties['type']) ? $featureProperties['type'] : '0';
             return $this;
         }
-        $this->geometryType = $geometryType;
+        if (empty($featureProperties[$this->getLayer()->getLayerPropertyAsType()])) {
+            $this->geometryType = $typeOther ?? 0;
+            return $this;
+        }
+        $type = '-1';
+        $featureTypeProperty = $featureProperties[$this->getLayer()->getLayerPropertyAsType()];
+        foreach ($this->getLayer()->getLayerType() as $typeValue => $layerTypeMetaData) {
+            if (empty($layerTypeMetaData["map_type"])) {
+                continue;
+            }
+            // identify the 'other' category
+            if (strtolower($layerTypeMetaData["map_type"]) == "other") {
+                $typeOther = $typeValue;
+            }
+            if (str_contains($layerTypeMetaData["map_type"], '-')) {
+                // assumes a range of minimum to maximum (but not including) integer or float values
+                $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
+                if ((float) $featureTypeProperty >= (float) $typeValues[0]
+                    && (float) $featureTypeProperty < (float) $typeValues[1]) {
+                    $type = $typeValue;
+                }
+            } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+                // translate the found $featureProperties value to the type value (int, float, string)
+                $type = $typeValue;
+                break;
+            }
+        }
+        if ($type == '-1') {
+            $type = $typeOther ?? 0;
+        }
+        $this->geometryType = $type;
         return $this;
     }
 

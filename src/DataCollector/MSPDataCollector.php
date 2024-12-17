@@ -55,10 +55,7 @@ class MSPDataCollector extends AbstractDataCollector
         }
         $simulations = new Simulations();
         $simulations->setGameSessionId($session);
-        if (null === $promise = $simulations->changeWatchdogState($gameState)) {
-            return new Response('Could not change watchdog state', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-        $arrResult = await($promise);
-        return new Response(json_encode($arrResult));
+        await($simulations->changeWatchdogState($gameState));
+        return new Response('Simulations started requested', Response::HTTP_OK);
     }
 }
