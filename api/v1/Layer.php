@@ -599,7 +599,7 @@ class Layer extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateRaster(string $layer_name, string $image_data, array $raster_bounds = null): void
+    public function UpdateRaster(string $layer_name, string $image_data, array $raster_bounds = null): array
     {
         $layerData = $this->getDatabase()->query(
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
@@ -608,28 +608,13 @@ class Layer extends Base
         if (count($layerData) != 1) {
             throw new Exception("Could not find layer with name " . $layer_name . " to update the raster image");
         }
+        $this->log('Updating raster for layer '.$layer_name);
 
         $rasterData = json_decode($layerData[0]['layer_raster'], true);
         $rasterDataUpdated = false;
         if (empty($rasterData['url'])) {
             throw new Exception("Could not update raster for layer ".$layer_name.
                 " raster file name was not specified in raster metadata");
-        }
-
-        if (file_exists(Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'])) {
-            $gameData = $this->getDatabase()->query("SELECT game_currentmonth FROM game")[0];
-            Store::EnsureFolderExists(Store::GetRasterArchiveFolder($this->getGameSessionId()));
-
-            $layerPathInfo = pathinfo($rasterData['url']);
-            $layerFileName = $layerPathInfo["filename"];
-            $layerFileExt = $layerPathInfo["extension"];
-            $prevMonth = intval($gameData['game_currentmonth']) - 1;
-            $newFileName = $layerFileName."_".$prevMonth.".".$layerFileExt;
-
-            file_put_contents(
-                Store::GetRasterArchiveFolder($this->getGameSessionId()).$newFileName,
-                file_get_contents(Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'])
-            );
         }
 
         if (!empty($raster_bounds)) {
@@ -639,7 +624,29 @@ class Layer extends Base
 
         $imageData = base64_decode($image_data);
         Store::EnsureFolderExists(Store::GetRasterStoreFolder($this->getGameSessionId()));
-        file_put_contents(Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'], $imageData);
+        $f = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
+        if (false ===
+            file_put_contents($f, $imageData)) {
+            $this->log('Failed to save given image_data to '.$f, self::LOG_LEVEL_ERROR);
+        } else {
+            $this->log('Stored image_data to file '.$f);
+        }
+
+        // Pre-archive the raster file
+        Store::EnsureFolderExists(Store::GetRasterArchiveFolder($this->getGameSessionId()));
+        $layerPathInfo = pathinfo($rasterData['url']);
+        $layerFileName = $layerPathInfo["filename"];
+        $layerFileExt = $layerPathInfo["extension"];
+        $gameData = $this->getDatabase()->query("SELECT game_currentmonth FROM game")[0];
+        $curMonth = intval($gameData['game_currentmonth']);
+        $newFileName = $layerFileName."_".$curMonth.".".$layerFileExt;
+        $archivedFile = Store::GetRasterArchiveFolder($this->getGameSessionId()).$newFileName;
+        if (false ===
+            copy($f, $archivedFile)) {
+            $this->log(sprintf('Failed to copy %s to file %s for archiving', $f, $archivedFile), self::LOG_LEVEL_ERROR);
+        } else {
+            $this->log(sprintf('Copied %s to file %s for archiving', $f, $archivedFile));
+        }
 
         if ($rasterDataUpdated) {
             $this->getDatabase()->query(
@@ -653,6 +660,13 @@ class Layer extends Base
                 array($layerData[0]['layer_id'])
             );
         }
+        $this->log(sprintf(
+            'Updated layer record%s with id %d',
+            ($rasterDataUpdated ? ' incl. raster data' : ''),
+            $layerData[0]['layer_id']
+        ));
+
+        return ['logs' => $this->getLogMessages()];
     }
 
     /**
