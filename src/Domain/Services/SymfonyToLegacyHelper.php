@@ -34,7 +34,6 @@ class SymfonyToLegacyHelper
     private EntityManagerInterface $em;
 
     private VersionsProvider $provider;
-    private MessageBusInterface $analyticsMessageBus;
     private LoggerInterface $analyticsLogger;
 
     private WatchdogCommunicator $watchdogCommunicator;

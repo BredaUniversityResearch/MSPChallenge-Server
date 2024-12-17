@@ -14,7 +14,7 @@ abstract class WatchdogMessageBase
         return $this->gameSessionId;
     }
 
-    public function setGameSessionId(int $gameSessionId): self
+    public function setGameSessionId(int $gameSessionId): static
     {
         $this->gameSessionId = $gameSessionId;
         return $this;
@@ -25,7 +25,7 @@ abstract class WatchdogMessageBase
         return $this->watchdog;
     }
 
-    public function setWatchdog(?Watchdog $watchdog): self
+    public function setWatchdog(?Watchdog $watchdog): static
     {
         $this->watchdog = $watchdog;
         return $this;

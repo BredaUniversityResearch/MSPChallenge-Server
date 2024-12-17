@@ -143,8 +143,8 @@ class WatchdogCommunicationMessageHandler
 
     private function createWatchdogBaseUrlFromMessage(WatchdogMessageBase $message): string
     {
-        $scheme = $message->getWatchdog()->getScheme() ?? 'http';
-        $port = $message->getWatchdog()->getPort() ?? $_ENV['WATCHDOG_PORT'] ?? 80;
+        $scheme = $message->getWatchdog()->getScheme();
+        $port = $_ENV['WATCHDOG_PORT'] ?? $message->getWatchdog()->getPort();
         return "{$scheme}://{$message->getWatchdog()->getAddress()}:{$port}";
     }
 

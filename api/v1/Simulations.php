@@ -411,11 +411,11 @@ class Simulations extends Base
                 return $this->getAsyncDatabase()->query($qb)->then(fn() => $apiRoot);
             })
             ->then(function (string $apiRoot) use ($newWatchdogGameState) {
-                /** @var Watchdog[] $watchdogs */
                 return $this->getWatchdogs()->then(function (array $watchdogs) use (
                     $apiRoot,
                     $newWatchdogGameState
                 ) {
+                    /** @var Watchdog[] $watchdogs */
                     foreach ($watchdogs as $watchdog) {
                         $simulationsHelper = new Simulations();
                         $this->asyncDataTransferTo($simulationsHelper);

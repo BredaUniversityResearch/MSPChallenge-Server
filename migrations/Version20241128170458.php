@@ -144,7 +144,7 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
                 `id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 `server_id` binary(16) NOT NULL COMMENT '(DC2Type:uuid)',
                 `address` varchar(255) NOT NULL,
-                `port` int NOT NULL DEFAULT '80',
+                `port` int unsigned NOT NULL DEFAULT '80',
                 `scheme` varchar(255) NOT NULL DEFAULT 'http',
                 `status` enum('registered','ready','unresponsive','unregistered') NOT NULL DEFAULT 'registered',
                 `token` bigint(20) NOT NULL,

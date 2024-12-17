@@ -337,7 +337,7 @@ class Geometry
             return $this;
         }
         if (empty($featureProperties[$this->getLayer()->getLayerPropertyAsType()])) {
-            $this->geometryType = $typeOther ?? 0;
+            $this->geometryType = '0';
             return $this;
         }
         $type = '-1';
@@ -364,7 +364,7 @@ class Geometry
             }
         }
         if ($type == '-1') {
-            $type = $typeOther ?? 0;
+            $type = $typeOther ?? '0';
         }
         $this->geometryType = $type;
         return $this;
