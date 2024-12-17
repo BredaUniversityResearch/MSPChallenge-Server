@@ -661,10 +661,10 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                 fn(Country $country) => $country->getCountryIsManager() == 0
             );
             foreach ($config["fishing"] as $fleet) {
-                if (isset($fleet["initialFishingDistribution"])) {
+                if (isset($fleet["initial_fishing_distribution"])) {
                     foreach ($countries as $country) {
                         $foundCountry = false;
-                        foreach ($fleet["initialFishingDistribution"] as $distribution) {
+                        foreach ($fleet["initial_fishing_distribution"] as $distribution) {
                             if ($distribution["country_id"] == $country->getCountryId()) {
                                 $foundCountry = true;
                                 break;
@@ -673,7 +673,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                         if (!$foundCountry) {
                             $this->error(
                                 "Country with ID {$country->getCountryId()} is missing a distribution entry ".
-                                "in the initialFishingDistribution table for fleet {$fleet["name"]} for MEL."
+                                "in the initial_fishing_distribution table for fleet {$fleet["name"]} for MEL."
                             );
                         }
                     }

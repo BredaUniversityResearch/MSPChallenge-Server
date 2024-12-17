@@ -73,4 +73,10 @@ else
 fi
 MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec ${DATABASE_CONTAINER} bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
 alias drg="${MY2_SETUP} && docker stop grafana ; docker rm grafana ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana --label com.docker.compose.project=mspchallenge --network=mspchallenge_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
+# docker (d) + stop (s) + all containers (a)
+alias dsa='docker stop $(docker ps -a -q)'
+# docker (d) + system (s) + prune (p)
+alias dsp='docker system prune -a -f'
+# docker (d) + clean
+alias dclean='dsa ; dsp'
 

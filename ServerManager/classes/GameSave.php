@@ -176,9 +176,8 @@ class GameSave extends Base
     {
         $urlBase = ServerManager::getInstance()->getAbsoluteUrlBase();
         if (getenv('DOCKER') !== false) {
-            // this is always called from inside the docker environment,so just use http://caddy:80/ or
-            //   http://mitmproxy:8080/
-            $urlBase = 'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).
+            // this is always called from inside the docker environment, so php:80 or mitmproxy:8080 for dev
+            $urlBase = 'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).
                 ServerManager::getInstance()->getAbsolutePathBase();
         }
         $server_call = self::callServer(
