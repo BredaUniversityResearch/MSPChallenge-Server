@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "9/17/2024",
-    "data_model_hash": "F7070A550525BB778B0428F57606BD31FCAC6BA389A9808E1609F0779FA78B4E",
+    "date_modified": "10/10/2024",
+    "data_model_hash": "1F713DC817F81DE124D29382DC3C3D3182D1637C17E99FD4B454A1678A34767F",
     "errors": 0,
-    "editor_version": "1.1.1",
-    "config_version": "1.1.1"
+    "editor_version": "2.0.0",
+    "config_version": "2.0.0"
   },
   "datamodel": {
     "restrictions": {
@@ -22833,10 +22833,132 @@
     "policy_settings": {
       "fishing": {
         "all_country_approval": true,
-        "stakeholder_pressure_cool_down": 0.1,
+        "stakeholder_pressure_cool_down": 0.0,
         "fleet_info": {
-          "gear_types": [],
-          "fleets": []
+          "gear_types": [
+            "Bottom trawl (otter, beam, seine)",
+            "Industrial and pelagic trawl",
+            "Drift and fixed nets"
+          ],
+          "fleets": [
+            {
+              "//comment": "0 Bottom trawl (otter, beam, seine)",
+              "gear_type": "0",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 54.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 54.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 16.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 32.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 15.0
+                },
+                {
+                  "country_id": 8,
+                  "effort_weight": 2.0
+                },
+                {
+                  "country_id": 9,
+                  "effort_weight": 55.0
+                },
+                {
+                  "country_id": 10,
+                  "effort_weight": 780.0
+                }
+              ]
+            },
+            {
+              "//comment": "1 Industrial and pelagic trawl",
+              "gear_type": "1",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 406.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 406.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 538.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 597.0
+                },
+                {
+                  "country_id": 8,
+                  "effort_weight": 2.0
+                },
+                {
+                  "country_id": 9,
+                  "effort_weight": 4328.0
+                },
+                {
+                  "country_id": 10,
+                  "effort_weight": 1936.0
+                }
+              ]
+            },
+            {
+              "//comment": "2 Drift and fixed nets",
+              "gear_type": "2",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 127.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 127.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 6.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 57.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 29.0
+                },
+                {
+                  "country_id": 8,
+                  "effort_weight": 2.0
+                },
+                {
+                  "country_id": 9,
+                  "effort_weight": 97.0
+                },
+                {
+                  "country_id": 10,
+                  "effort_weight": 1255.0
+                }
+              ]
+            }
+          ]
         },
         "policy_type": "fishing",
         "enabled": true
@@ -23090,7 +23212,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Protection Industrial Trawl",
@@ -23140,7 +23267,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Protection Nets",
@@ -23185,120 +23317,38 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         }
       ],
       "fishing": [
         {
           "name": "Bottom Trawl",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 54.0
-            },
-            {
-              "country_id": 4,
-              "weight": 54.0
-            },
-            {
-              "country_id": 5,
-              "weight": 16.0
-            },
-            {
-              "country_id": 6,
-              "weight": 32.0
-            },
-            {
-              "country_id": 7,
-              "weight": 15.0
-            },
-            {
-              "country_id": 8,
-              "weight": 2.0
-            },
-            {
-              "country_id": 9,
-              "weight": 55.0
-            },
-            {
-              "country_id": 10,
-              "weight": 780.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Industrial and Pelagic Trawl",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 406.0
-            },
-            {
-              "country_id": 4,
-              "weight": 406.0
-            },
-            {
-              "country_id": 5,
-              "weight": 1.0
-            },
-            {
-              "country_id": 6,
-              "weight": 538.0
-            },
-            {
-              "country_id": 7,
-              "weight": 597.0
-            },
-            {
-              "country_id": 8,
-              "weight": 2.0
-            },
-            {
-              "country_id": 9,
-              "weight": 4328.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1936.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Drift and Fixed Nets",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 127.0
-            },
-            {
-              "country_id": 4,
-              "weight": 127.0
-            },
-            {
-              "country_id": 5,
-              "weight": 6.0
-            },
-            {
-              "country_id": 6,
-              "weight": 57.0
-            },
-            {
-              "country_id": 7,
-              "weight": 29.0
-            },
-            {
-              "country_id": 8,
-              "weight": 2.0
-            },
-            {
-              "country_id": 9,
-              "weight": 97.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1255.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         }
       ],
       "outcomes": [
@@ -38287,7 +38337,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "NS_Elasmobranch_abundance_abs_4326_DT",
+        "layer_name": "NS_Elasmobranch_abundance_abs_4326",
         "layer_geotype": "raster",
         "layer_entity_value_max": 1000.0,
         "layer_short": "Sharks and Rays Abundance (Static)",
