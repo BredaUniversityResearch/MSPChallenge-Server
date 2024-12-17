@@ -1,13 +1,13 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v6.0/debian.12-x64",
+    "name": ".NETCoreApp,Version=v6.0/debian.11-x64",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {},
-    ".NETCoreApp,Version=v6.0/debian.12-x64": {
-      "MSW/1.0.0": {
+    ".NETCoreApp,Version=v6.0/debian.11-x64": {
+      "CEL/1.0.0": {
         "dependencies": {
           "Newtonsoft.Json": "13.0.3",
           "System.Security.Permissions": "5.0.0",
@@ -15,7 +15,7 @@
           "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64": "6.0.33"
         },
         "runtime": {
-          "MSW.dll": {}
+          "CEL.dll": {}
         }
       },
       "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64/6.0.33": {
@@ -814,7 +814,7 @@
     }
   },
   "libraries": {
-    "MSW/1.0.0": {
+    "CEL/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -897,8 +897,8 @@
     }
   },
   "runtimes": {
-    "debian.12-x64": [
-      "debian.12",
+    "debian.11-x64": [
+      "debian.11",
       "debian-x64",
       "debian",
       "linux-x64",

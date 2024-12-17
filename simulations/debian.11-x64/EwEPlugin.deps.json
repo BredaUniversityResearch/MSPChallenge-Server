@@ -1,19 +1,19 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v6.0/debian.12-x64",
+    "name": ".NETCoreApp,Version=v6.0/debian.11-x64",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {},
-    ".NETCoreApp,Version=v6.0/debian.12-x64": {
-      "EwEUtils/1.0.0": {
+    ".NETCoreApp,Version=v6.0/debian.11-x64": {
+      "EwEPlugin/1.0.0": {
         "dependencies": {
-          "Microsoft.Windows.Compatibility": "8.0.8",
+          "EwEUtils": "1.0.0",
           "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64": "6.0.33"
         },
         "runtime": {
-          "EwEUtils.dll": {}
+          "EwEPlugin.dll": {}
         }
       },
       "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64/6.0.33": {
@@ -1329,11 +1329,22 @@
             "fileVersion": "8.0.23.53103"
           }
         }
+      },
+      "EwEUtils/1.0.0": {
+        "dependencies": {
+          "Microsoft.Windows.Compatibility": "8.0.8"
+        },
+        "runtime": {
+          "EwEUtils.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "6.7.0.18992"
+          }
+        }
       }
     }
   },
   "libraries": {
-    "EwEUtils/1.0.0": {
+    "EwEPlugin/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -1748,11 +1759,16 @@
       "sha512": "sha512-Obg3a90MkOw9mYKxrardLpY2u0axDMrSmy4JCdq2cYbelM2cUwmUir5Bomvd1yxmPL9h5LVHU1tuKBZpUjfASg==",
       "path": "system.windows.extensions/8.0.0",
       "hashPath": "system.windows.extensions.8.0.0.nupkg.sha512"
+    },
+    "EwEUtils/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     }
   },
   "runtimes": {
-    "debian.12-x64": [
-      "debian.12",
+    "debian.11-x64": [
+      "debian.11",
       "debian-x64",
       "debian",
       "linux-x64",

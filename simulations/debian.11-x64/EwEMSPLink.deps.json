@@ -1,12 +1,12 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v6.0/debian.12-x64",
+    "name": ".NETCoreApp,Version=v6.0/debian.11-x64",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {},
-    ".NETCoreApp,Version=v6.0/debian.12-x64": {
+    ".NETCoreApp,Version=v6.0/debian.11-x64": {
       "EwEMSPLink/1.0.0": {
         "dependencies": {
           "EwECore": "1.0.0",
@@ -1927,8 +1927,8 @@
     }
   },
   "runtimes": {
-    "debian.12-x64": [
-      "debian.12",
+    "debian.11-x64": [
+      "debian.11",
       "debian-x64",
       "debian",
       "linux-x64",

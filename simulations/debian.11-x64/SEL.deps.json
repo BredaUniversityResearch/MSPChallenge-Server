@@ -1,21 +1,23 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v6.0/debian.12-x64",
+    "name": ".NETCoreApp,Version=v6.0/debian.11-x64",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {},
-    ".NETCoreApp,Version=v6.0/debian.12-x64": {
-      "CEL/1.0.0": {
+    ".NETCoreApp,Version=v6.0/debian.11-x64": {
+      "SEL/1.0.0": {
         "dependencies": {
           "Newtonsoft.Json": "13.0.3",
           "System.Security.Permissions": "5.0.0",
           "MSWSupport": "1.0.0.0",
+          "Poly2Tri": "1.0.1.0",
+          "SELRELBridge": "1.0.0.0",
           "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64": "6.0.33"
         },
         "runtime": {
-          "CEL.dll": {}
+          "SEL.dll": {}
         }
       },
       "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64/6.0.33": {
@@ -795,6 +797,22 @@
           }
         }
       },
+      "Poly2Tri/1.0.1.0": {
+        "runtime": {
+          "Poly2Tri.dll": {
+            "assemblyVersion": "1.0.1.0",
+            "fileVersion": "1.0.1.0"
+          }
+        }
+      },
+      "SELRELBridge/1.0.0.0": {
+        "runtime": {
+          "SELRELBridge.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "SmartFormat/3.0.0.0": {
         "runtime": {
           "SmartFormat.dll": {
@@ -814,7 +832,7 @@
     }
   },
   "libraries": {
-    "CEL/1.0.0": {
+    "SEL/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -885,6 +903,16 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Poly2Tri/1.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SELRELBridge/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "SmartFormat/3.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -897,8 +925,8 @@
     }
   },
   "runtimes": {
-    "debian.12-x64": [
-      "debian.12",
+    "debian.11-x64": [
+      "debian.11",
       "debian-x64",
       "debian",
       "linux-x64",
