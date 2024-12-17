@@ -9889,12 +9889,12 @@
             "innerGlowPixelSize": 0.0,
             "displayLines": 1,
             "lineColor": "#3A8745FF",
-            "lineWidth": 0.0,
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00000000",
-            "pointSize": 0.0,
+            "displayPoints": 1,
+            "pointColor": "#3A8745FF",
+            "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": null,
             "capacity": 0,
@@ -9903,7 +9903,38 @@
             "media": ""
           }
         },
-        "layer_info_properties": null,
+        "layer_info_properties": [
+		{
+            "property_name": "POLICY_BUFFER_ZONE",
+            "policy_type": "buffer_zone",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Buffer zone policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "SEASONAL_CLOSURE",
+            "policy_type": "seasonal_closure",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Seasonal closure policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          }
+		],
         "layer_tags": []
       },
       {
