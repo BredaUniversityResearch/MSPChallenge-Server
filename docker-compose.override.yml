@@ -1,7 +1,7 @@
 # Development environment override
 services:
   phpredisadmin:
-    image: 'mspserver-phpredisadmin-dev'
+    image: "${IMAGE_PREFIX:-}mspserver-phpredisadmin-dev"
     build:
       context: .
       target: phpredisadmin_base
@@ -26,7 +26,7 @@ services:
       - "${DATABASE_PORT:-3306}:${DATABASE_PORT:-3306}"
 
   adminer:
-    image: 'mspserver-adminer-dev'
+    image: "${IMAGE_PREFIX:-}mspserver-adminer-dev"
     build:
       context: .
       target: adminer_base
@@ -50,7 +50,7 @@ services:
       driver: "local"
 
   mitmproxy:
-    image: 'mspserver-mitmproxy-dev'
+    image: "${IMAGE_PREFIX:-}mspserver-mitmproxy-dev"
     build:
       context: .
       target: mitmproxy_base
@@ -69,7 +69,7 @@ services:
       driver: "local"
 
   php:
-    image: 'mspserver-php-dev'
+    image: "${IMAGE_PREFIX:-}mspserver-php-dev"
     build:
       context: .
       target: frankenphp_dev
@@ -87,6 +87,7 @@ services:
       - database
       - php
       - redis
+      - simulations
     environment:
       # this forces non-ssl
       SERVER_NAME: :80
@@ -98,7 +99,6 @@ services:
       MITMPROXY_PORT: ${MITMPROXY_PORT:-8080}
       URL_WEB_SERVER_PORT: ${MITMPROXY_PORT:-8080}
       URL_WS_SERVER_PORT: ${MITMPROXY_PORT:-8080}
-      MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
       WS_SERVER_PAYLOAD_DUMP: "${WS_SERVER_PAYLOAD_DUMP:-0}"
 
       # See https://xdebug.org/docs/all_settings#mode

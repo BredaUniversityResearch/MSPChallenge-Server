@@ -1,7 +1,7 @@
 # Production environment override
 services:
   php:
-    image: 'mspserver-php'
+    image: "${IMAGE_PREFIX:-}mspserver-php"
     build:
       context: .
       target: frankenphp_prod

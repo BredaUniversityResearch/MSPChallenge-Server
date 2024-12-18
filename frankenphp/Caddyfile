@@ -72,7 +72,7 @@ http://php:80, {$SERVER_NAME:localhost} {
         path /ws/*
     }
 
-    reverse_proxy @websocket http://php:45001 {
+    reverse_proxy @websocket http://php:{$WS_SERVER_PORT:45001} {
         # Additional reverse proxy options if needed
     }
 }
