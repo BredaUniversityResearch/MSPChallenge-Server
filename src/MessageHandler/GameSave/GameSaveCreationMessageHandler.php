@@ -9,7 +9,7 @@ use App\Domain\Services\ConnectionManager;
 use App\Entity\Layer;
 use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
-use App\MessageHandler\GameList\CommonSessionHandler;
+use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\Message\GameSave\GameSaveCreationMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -29,7 +29,7 @@ use Symfony\Component\Serializer\Serializer;
 use ZipArchive;
 
 #[AsMessageHandler]
-class GameSaveCreationMessageHandler extends CommonSessionHandler
+class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
 {
 
     private ?string $shapeFileTempStore = null;

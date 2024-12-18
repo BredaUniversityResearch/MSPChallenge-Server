@@ -4,13 +4,14 @@ namespace App\Domain\Communicator;
 
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Log\LogContainerInterface;
+use App\Domain\Log\LogContainerTrait;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
 use App\Entity\Simulation;
 use App\Entity\Watchdog;
 use App\Message\Watchdog\GameStateChangedMessage;
 use App\Message\Watchdog\Token;
-use App\VersionsProvider;
 use DateTime;
 use Doctrine\DBAL\Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
@@ -23,8 +24,10 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function React\Promise\resolve;
 
-class WatchdogCommunicator extends AbstractCommunicator
+class WatchdogCommunicator extends AbstractCommunicator implements LogContainerInterface
 {
+    use LogContainerTrait;
+
     private const DEFAULT_WATCHDOG_PORT = 45000;
     private GameList $gameList;
 
@@ -50,15 +53,23 @@ class WatchdogCommunicator extends AbstractCommunicator
         GameStateValue $newWatchdogState
     ): void {
         if ($_ENV['APP_ENV'] === 'test') {
+            $this->log('Watchdog request was canceled as you are in test mode.');
             return;
         }
         $this->gameList = $gameList;
         $em = $this->connectionManager->getGameSessionEntityManager($gameList->getId());
         $watchdogRepo = $em->getRepository(Watchdog::class);
         $watchdogs = $watchdogRepo->findAll();
+        /** @var Watchdog $watchdog */
         foreach ($watchdogs as $watchdog) {
+            $this->log(sprintf(
+                'Requesting watchdog state change for watchdog %s using url %s',
+                $watchdog->getServerId()->toRfc4122(),
+                $watchdog->createUrl()
+            ));
             $this->ensureWatchDogAlive($watchdog);
             $tokens = $this->getAPITokens();
+            $this->lastCompleteURLCalled = $watchdog->createUrl();
             $message = new GameStateChangedMessage();
             $message
                 ->setGameSessionId($gameList->getId())

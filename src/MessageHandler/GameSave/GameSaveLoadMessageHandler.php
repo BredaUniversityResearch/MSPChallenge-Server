@@ -11,7 +11,7 @@ use App\Entity\Game;
 use App\Entity\ServerManager\GameSave;
 use App\Entity\Watchdog;
 use App\Logger\GameSessionLogger;
-use App\MessageHandler\GameList\CommonSessionHandler;
+use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\Repository\GameRepository;
 use App\VersionsProvider;
@@ -38,7 +38,7 @@ use function App\rcopy;
 use function App\rrmdir;
 
 #[AsMessageHandler]
-class GameSaveLoadMessageHandler extends CommonSessionHandler
+class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
 {
 
     public function __construct(
@@ -113,11 +113,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
 
         $this->registerSimulations();
         $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('pause'));
-        if ($_ENV['APP_ENV'] !== 'test') {
-            $this->info("Watchdog called successfully at {$this->watchdogCommunicator->getLastCompleteURLCalled()}");
-        } else {
-            $this->info('Watchdog was not started as you are in test mode.');
-        }
+        $this->logContainer($this->watchdogCommunicator);
     }
 
     /**

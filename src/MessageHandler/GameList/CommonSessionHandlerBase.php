@@ -5,6 +5,7 @@ namespace App\MessageHandler\GameList;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Common\InternalSimulationName;
 use App\Domain\Communicator\WatchdogCommunicator;
+use App\Domain\Log\LogContainerInterface;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
@@ -33,7 +34,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
 
-class CommonSessionHandler
+abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
 {
     protected ObjectNormalizer $normalizer;
     protected ?string $phpBinary = null;
@@ -41,8 +42,6 @@ class CommonSessionHandler
     protected string $database;
 
     protected KernelInterface $kernel;
-
-    protected LoggerInterface $gameSessionLogger;
 
     protected GameList $gameSession;
 
@@ -76,8 +75,8 @@ class CommonSessionHandler
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider
     ) {
+        parent::__construct($gameSessionLogger);
         $this->kernel = $kernel;
-        $this->gameSessionLogger = $gameSessionLogger;
         $this->mspServerManagerEntityManager = $mspServerManagerEntityManager;
         $this->connectionManager = $connectionManager;
         $this->params = $params;
@@ -96,6 +95,7 @@ class CommonSessionHandler
         $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
             ?? throw new \Exception('Game session not found, so cannot continue.');
         $sessionId = $this->gameSession->getId();
+        $this->setGameSessionId($sessionId);
         $this->database = $this->connectionManager->getGameSessionDbName($sessionId);
         $this->entityManager = $this->connectionManager->getGameSessionEntityManager($sessionId);
     }
@@ -200,37 +200,6 @@ class CommonSessionHandler
             }
             $fileSystem->remove($sessionRasterStore);
         }
-    }
-
-    private function log(string $level, string $message, array $contextVars = []): void
-    {
-        $contextVars['gameSession'] = $this->gameSession->getId();
-        $this->gameSessionLogger->$level($message, $contextVars);
-    }
-
-    protected function info(string $message, array $contextVars = []): void
-    {
-        $this->log('info', $message, $contextVars);
-    }
-
-    protected function debug(string $message, array $contextVars = []): void
-    {
-        $this->log('debug', $message, $contextVars);
-    }
-
-    protected function notice(string $message, array $contextVars = []): void
-    {
-        $this->log('notice', $message, $contextVars);
-    }
-
-    protected function warning(string $message, array $contextVars = []): void
-    {
-        $this->log('warning', $message, $contextVars);
-    }
-
-    protected function error(string $message, array $contextVars = []): void
-    {
-        $this->log('error', $message, $contextVars);
     }
 
     /**
@@ -346,5 +315,26 @@ class CommonSessionHandler
             }
         }
         return $result;
+    }
+
+    protected function logContainer(LogContainerInterface $container): void
+    {
+        $logs = $container->getLogs();
+        foreach ($logs as $log) {
+            switch ($log[LogContainerInterface::LOG_FIELD_LEVEL]) {
+                case LogContainerInterface::LOG_LEVEL_DEBUG:
+                    $this->debug($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
+                    break;
+                case LogContainerInterface::LOG_LEVEL_WARNING:
+                    $this->warning($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
+                    break;
+                case LogContainerInterface::LOG_LEVEL_ERROR:
+                    $this->error($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
+                    break;
+                case LogContainerInterface::LOG_LEVEL_INFO:
+                default:
+                    $this->info($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
+            }
+        }
     }
 }

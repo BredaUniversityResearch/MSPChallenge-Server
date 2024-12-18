@@ -10,6 +10,7 @@ use App\Domain\Common\EntityEnums\RestrictionSort;
 use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
+use App\Domain\Log\LogContainerInterface;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
 use App\Entity\EnergyOutput;
@@ -60,10 +61,12 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
 #[AsMessageHandler]
-class GameListCreationMessageHandler extends CommonSessionHandler
+class GameListCreationMessageHandler extends CommonSessionHandlerBase
 {
     public function __construct(
         KernelInterface $kernel,
+        // https://symfony.com/doc/6.4/logging/channels_handlers.html#how-to-autowire-logger-channels:
+        //   $<camelCased channel name> + Logger
         LoggerInterface $gameSessionLogger,
         EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
@@ -1156,10 +1159,6 @@ class GameListCreationMessageHandler extends CommonSessionHandler
 
         $this->registerSimulations();
         $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('setup'));
-        if ($_ENV['APP_ENV'] !== 'test') {
-            $this->info("Watchdog called successfully at {$this->watchdogCommunicator->getLastCompleteURLCalled()}");
-        } else {
-            $this->info('User access set up successfully, but Watchdog was not started as you are in test mode.');
-        }
+        $this->logContainer($this->watchdogCommunicator);
     }
 }
