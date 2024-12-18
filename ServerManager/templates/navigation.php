@@ -27,7 +27,10 @@ $html =<<<"HTML"
             </ul>
           </li>
           <li id="user-menu-item">
-            <a href="https://auth2.mspchallenge.info">Account</a>
+            <a href="{$authBaseUrl}">Account</a>
+          </li>
+          <li id="user-menu-item">
+            <a href="/ServerManager/logout_php">Log out</a>
           </li>
         </ul>
       </div>
