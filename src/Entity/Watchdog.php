@@ -177,4 +177,11 @@ class Watchdog
 
         return $this;
     }
+
+    public function createUrl(): string
+    {
+        $scheme = $this->getScheme();
+        $port = $_ENV['WATCHDOG_PORT'] ?? $this->getPort();
+        return "{$scheme}://{$this->getAddress()}:{$port}";
+    }
 }
