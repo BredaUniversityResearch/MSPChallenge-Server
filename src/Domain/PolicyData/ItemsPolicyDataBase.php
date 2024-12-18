@@ -35,6 +35,9 @@ abstract class ItemsPolicyDataBase extends PolicyDataBase
         if (empty($requiredFilterClassNames)) {
             return null; // no filters for this policy
         }
+        if (empty($this->items)) {
+            return false; // no filters to match
+        }
         foreach ($this->items as $item) {
             foreach ($requiredFilterClassNames as $filterClassName) {
                 try {
