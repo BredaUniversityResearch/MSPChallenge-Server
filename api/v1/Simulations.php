@@ -91,7 +91,7 @@ class Simulations extends Base
     public function GetTokensForWatchdog(): array
     {
         $user = new User();
-		$this->asyncDataTransferTo($user);
+        $this->asyncDataTransferTo($user);
         $user->setUserId(999999);
         $user->setUsername('Watchdog_' . uniqid());
         $jsonResponse = SymfonyToLegacyHelper::getInstance()->getAuthenticationSuccessHandler()
