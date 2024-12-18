@@ -10,6 +10,7 @@ use App\Domain\Common\EntityEnums\RestrictionSort;
 use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
+use App\Domain\Log\LogContainerInterface;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
 use App\Entity\EnergyOutput;
@@ -44,16 +45,11 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
-use Swaggest\JsonSchema\Exception\Error;
-use Swaggest\JsonSchema\InvalidValue;
-use Swaggest\JsonSchema\Schema;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Process\Process;
-use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -65,21 +61,21 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
 #[AsMessageHandler]
-class GameListCreationMessageHandler extends CommonSessionHandler
+class GameListCreationMessageHandler extends CommonSessionHandlerBase
 {
-    private array $dataModel;
-
     public function __construct(
         KernelInterface $kernel,
+        // https://symfony.com/doc/6.4/logging/channels_handlers.html#how-to-autowire-logger-channels:
+        //   $<camelCased channel name> + Logger
         LoggerInterface $gameSessionLogger,
         EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
+        VersionsProvider $provider,
         private readonly MessageBusInterface $messageBus,
         private readonly HttpClientInterface $client,
-        private readonly VersionsProvider $provider,
         // e.g. used by GeoServerCommunicator
         private readonly CacheInterface $downloadsCache,
         private readonly CacheInterface $resultsCache
@@ -101,12 +97,11 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         }
         try {
             $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
-            $this->validateGameConfigComplete();
+            $this->validateGameConfig($this->createSessionRunningConfig());
             $this->notice("Session {$this->gameSession->getName()} creation initiated. Please wait.");
             $this->setupSessionDatabase();
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
-            $this->createSessionRunningConfig();
             $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
             $this->finaliseSession();
             $this->notice("Session {$this->gameSession->getName()} created and ready for use.");
@@ -151,7 +146,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    private function createSessionRunningConfig(): void
+    private function createSessionRunningConfig(): string
     {
         $sessionConfigStore = $this->params->get('app.session_config_dir').
             sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId());
@@ -163,6 +158,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             )
         );
         $this->info("Created the running session config file at {$sessionConfigStore}");
+        return $sessionConfigStore;
     }
 
     /**
@@ -1153,9 +1149,6 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         $qb->insert('game_session')
             ->values(
                 [
-                    'game_session_watchdog_address' =>
-                        $qb->createPositionalParameter($this->gameSession->getGameWatchdogServer()->getAddress()),
-                    'game_session_watchdog_token' => 'UUID_SHORT()',
                     'game_session_password_admin' =>
                         $qb->createPositionalParameter($this->gameSession->getPasswordAdmin()),
                     'game_session_password_player' =>
@@ -1163,42 +1156,9 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                 ]
             )
             ->executeStatement();
-        // end of backward compatibility code
-        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('setup'));
-        if ($_ENV['APP_ENV'] !== 'test') {
-            $this->info("Watchdog called successfully at {$this->watchdogCommunicator->getLastCompleteURLCalled()}");
-        } else {
-            $this->info('User access set up successfully, but Watchdog was not started as you are in test mode.');
-        }
-    }
 
-    /**
-     * @throws \Exception
-     */
-    private function validateGameConfigComplete(): void
-    {
-        $gameConfigContents = json_decode($this->gameSession->getGameConfigVersion()->getGameConfigCompleteRaw());
-        $schema = Schema::import(json_decode(
-            file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
-        ));
-        try {
-            $schema->in($gameConfigContents);
-        } catch (InvalidValue $e) {
-            $this->error(
-                "Session config file {$this->gameSession->getGameConfigVersion()->getGameConfigFile()->getFilename()} ".
-                "v{$this->gameSession->getGameConfigVersion()->getVersion()} failed to pass validation:"
-            );
-            $this->error($e->getMessage());
-            throw new \Exception('Session config file invalid, so not continuing.');
-        }
-        $this->info(
-            "Contents of config file ".
-            "{$this->gameSession->getGameConfigVersion()->getGameConfigFile()->getFilename()} ".
-            "v{$this->gameSession->getGameConfigVersion()->getVersion()} were successfully validated."
-        );
-        if (null === $gameConfig = $this->gameSession->getGameConfigVersion()->getGameConfigComplete()) {
-            throw new \Exception('Game config is null, so not continuing.');
-        }
-        $this->dataModel = $gameConfig['datamodel'];
+        $this->registerSimulations();
+        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('setup'));
+        $this->logContainer($this->watchdogCommunicator);
     }
 }

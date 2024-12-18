@@ -11,6 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: GameConfigVersionRepository::class)]
 class GameConfigVersion
 {
+    public const LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE_RAW = 'gameConfigCompleteRaw'; // value does not matter
+    public const LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE = 'gameConfigComplete'; // value does not matter
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -62,15 +65,11 @@ class GameConfigVersion
     #[ORM\Column(length: 45)]
     private ?string $clientVersions = null;
 
-    /**
-     * @param array $gameConfigCompleteRaw
-     */
     private ?string $gameConfigCompleteRaw = null;
 
-    /**
-     * @param array $gameConfigComplete
-     */
     private ?array $gameConfigComplete = null;
+
+    private array $lazyLoaders = [];
 
     public function getId(): ?int
     {
@@ -200,18 +199,12 @@ class GameConfigVersion
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
     public function getGameConfigComplete(): ?array
     {
+        $this->gameConfigComplete ??= $this->lazyLoaders[self::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE]();
         return $this->gameConfigComplete;
     }
 
-    /**
-     * @param array|null $gameConfigComplete
-     * @return GameConfigVersion
-     */
     public function setGameConfigComplete(?array $gameConfigComplete): self
     {
         $this->gameConfigComplete = $gameConfigComplete;
@@ -221,12 +214,24 @@ class GameConfigVersion
 
     public function getGameConfigCompleteRaw(): ?string
     {
+        $this->gameConfigCompleteRaw ??= $this->lazyLoaders[self::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE_RAW]();
         return $this->gameConfigCompleteRaw;
     }
 
-    public function setGameConfigCompleteRaw(?string $gameConfigCompleteRaw): GameConfigVersion
+    public function setGameConfigCompleteRaw(?string $gameConfigCompleteRaw): self
     {
         $this->gameConfigCompleteRaw = $gameConfigCompleteRaw;
+        return $this;
+    }
+
+    public function hasLazyLoader(string $propertyName): bool
+    {
+        return array_key_exists($propertyName, $this->lazyLoaders);
+    }
+
+    public function setLazyLoader(string $propertyName, callable $loader): self
+    {
+        $this->lazyLoaders[$propertyName] = $loader;
         return $this;
     }
 }

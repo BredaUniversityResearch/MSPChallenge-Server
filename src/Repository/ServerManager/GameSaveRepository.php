@@ -10,9 +10,7 @@ use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameSave;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
@@ -23,11 +21,6 @@ class GameSaveRepository extends EntityRepository
 {
     private ?ObjectNormalizer $normalizer = null; // to be created upon usage
     private ?Serializer $serializer = null; // to be created upon usage
-
-    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
-    {
-        parent::__construct($em, $class);
-    }
 
     public function save(GameSave $entity, bool $flush = false): void
     {

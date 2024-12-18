@@ -1825,7 +1825,6 @@
       "required": [
         "restrictions",
         "plans",
-        "policy_settings",
         "dependencies",
         "CEL",
         "SEL",

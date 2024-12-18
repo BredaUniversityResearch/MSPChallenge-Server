@@ -53,6 +53,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+      - ./var/docker/.bash_history:/root/.bash_history
     networks:
       - database
       - php

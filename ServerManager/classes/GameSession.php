@@ -755,7 +755,7 @@ class GameSession extends Base
         );
 
         try {
-            $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
+            $legacyHelper->getMessageBus()->dispatch($analyticsMessage);
         } catch (Exception $e) {
             $analyticsLogger->error(
                 "Exception occurred while dispatching game session creation message: ".

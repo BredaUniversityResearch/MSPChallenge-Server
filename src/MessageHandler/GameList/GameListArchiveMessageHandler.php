@@ -23,7 +23,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 #[AsMessageHandler]
-class GameListArchiveMessageHandler extends CommonSessionHandler
+class GameListArchiveMessageHandler extends CommonSessionHandlerBase
 {
     public function __construct(
         KernelInterface $kernel,

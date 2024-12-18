@@ -45,7 +45,7 @@ class GameSession extends Base
     const EXPORT_DIRECTORY = "export/";
     const SECONDS_PER_MINUTE = 60;
     const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE * 60;
-    
+
     public function __construct(string $method = '')
     {
         parent::__construct($method, self::ALLOWED);
@@ -221,7 +221,7 @@ class GameSession extends Base
         bool $allow_recreate = false
     ): void {
         $sessionId = $game_id;
-        
+
         if ($this->DoesSessionExist($sessionId)) {
             if (empty($allow_recreate)) {
                 throw new Exception("Session already exists.");
@@ -341,19 +341,28 @@ class GameSession extends Base
         $this->getDatabase()->query(
             "
             INSERT INTO game_session (
-                game_session_watchdog_address, game_session_watchdog_token, game_session_password_admin,
+                game_session_password_admin,
                 game_session_password_player
-            ) VALUES (?, UUID_SHORT(), ?, ?)
+            ) VALUES (?, ?)
             ",
-            array($watchdog_address, $password_admin, $password_player)
+            array($password_admin, $password_player)
+        );
+        $this->getDatabase()->query(
+            "
+            INSERT INTO watchdog (
+                address,
+                token
+            ) VALUES (?, UUID_SHORT())
+            ",
+            array($watchdog_address)
         );
 
         //Notify the simulation that the game has been setup so we start the simulations.
         //This is needed because MEL needs to be run before the game to setup the initial fishing values.
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
+        $simulations = new Simulations();
+        $this->asyncDataTransferTo($simulations);
         $watchdogSuccess = false;
-        if (null !== $promise = $game->changeWatchdogState("SETUP")) {
+        if (null !== $promise = $simulations->changeWatchdogState("SETUP")) {
             await($promise);
             $watchdogSuccess = true;
         };
@@ -417,7 +426,7 @@ class GameSession extends Base
         }
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query(
-            "UPDATE game_session SET game_session_watchdog_address = ?, game_session_watchdog_token = UUID_SHORT();",
+            "UPDATE watchdog SET address = ?, token = UUID_SHORT();",
             array($watchdog_address)
         );
     }
@@ -439,7 +448,7 @@ class GameSession extends Base
         if (!$this->DoesSessionExist($sessionId) || $sessionId == self::INVALID_SESSION_ID) {
             throw new Exception("Session ".$sessionId." does not exist.");
         }
-    
+
         $this->LocalApiRequest(
             "GameSession/ArchiveGameSessionInternal",
             $sessionId,
@@ -460,12 +469,12 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ArchiveGameSessionInternal(string $response_url): void
     {
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
-        await($game->changeWatchdogState('end'));
-        
+        $simulations = new Simulations();
+        $this->asyncDataTransferTo($simulations);
+        await($simulations->changeWatchdogState('end'));
+
         $zippath = $this->CreateGameSessionZip($response_url);
-        
+
         if (!empty($zippath)) {
             // ok, delete everything!
             $db = $this->getDatabase();
@@ -476,7 +485,7 @@ class GameSession extends Base
             }
 
             $db->DropSessionDatabase($db->GetDatabaseName());
-            
+
             self::RemoveDirectory(Store::GetRasterStoreFolder($this->getGameSessionId()));
         }
     }
@@ -848,7 +857,7 @@ class GameSession extends Base
 
         $postValues["session_id"] = self::GetGameSessionIdForCurrentRequest();
         $postValues["token"] = (new Security())->getServerManagerToken(); // to pass ServerManager security
-            
+
         if (!$result) {
             if (!empty($response_address)) {
                 $postValues["session_state"] = "failed";
@@ -859,10 +868,10 @@ class GameSession extends Base
 
         $this->ResetWatchdogAddress($watchdog_address);
 
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
-        await($game->changeWatchdogState("PAUSE")); // reloaded saves always start paused
-        
+        $simulations = new Simulations();
+        $this->asyncDataTransferTo($simulations);
+        await($simulations->changeWatchdogState("PAUSE")); // reloaded saves always start paused
+
         if (!empty($response_address)) {
             $postValues["session_state"] = "healthy";
             $this->updateServerManagerGameList($postValues);

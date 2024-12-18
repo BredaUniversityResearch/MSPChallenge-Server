@@ -31,11 +31,11 @@ services:
       target: adminer_base
     restart: always
     environment:
+      ADMINER_DEFAULT_DRIVER: MySQL
       ADMINER_DEFAULT_SERVER: database
-      ADMINER_PLUGINS: 'sql-log'
-      # dev enforced here otherwise you won't be able to log in if no password was set
-      APP_ENV: dev
-      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
+      ADMINER_PLUGINS: sql-log
+      ADMINER_DEFAULT_USER: ${DATABASE_USER:-}
+      ADMINER_DEFAULT_PASSWORD: ${DATABASE_PASSWORD:-}
     ports:
       # run Adminer on port 8082 since 8080 will be used by mitmproxy
       - 8082:8080
@@ -43,6 +43,7 @@ services:
       - database
     volumes:
       - ./docker/adminer/index.php:/var/www/html/index.php:ro
+      # see https://github.com/adminerevo/adminerevo/tree/main/designs
+      - ./docker/adminer/adminer.css:/var/www/html/adminer.css:ro
     logging:
       driver: "local"
-
