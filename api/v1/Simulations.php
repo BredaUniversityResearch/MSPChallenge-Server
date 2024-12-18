@@ -84,10 +84,14 @@ class Simulations extends Base
         return array("watchdog_token" => $token);
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetTokensForWatchdog(): array
     {
         $user = new User();
+		$this->asyncDataTransferTo($user);
         $user->setUserId(999999);
         $user->setUsername('Watchdog_' . uniqid());
         $jsonResponse = SymfonyToLegacyHelper::getInstance()->getAuthenticationSuccessHandler()
