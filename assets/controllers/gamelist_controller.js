@@ -29,7 +29,7 @@ export default class extends Controller {
     {
         let sessionId = event.currentTarget.dataset.session;
         let newName = prompt('Session name: ', event.currentTarget.dataset.name);
-        const response = await fetch(`/manager/game/${sessionId}/name`, {
+        const response = await fetch(`/manager/gamelist/${sessionId}/name`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ name: newName })
@@ -47,7 +47,7 @@ export default class extends Controller {
         let sessionId = event.currentTarget.dataset.session;
         let state = event.currentTarget.dataset.state;
         event.currentTarget.disabled = true;
-        const response = await fetch(`/manager/game/${sessionId}/state/${state}`);
+        const response = await fetch(`/manager/gamelist/${sessionId}/state/${state}`);
         if (response.status != 204) {
             errorNotification('Session state change failed.');
             return;
@@ -66,7 +66,7 @@ export default class extends Controller {
             return;
         }
         event.currentTarget.disabled = true;
-        const response = await fetch(`/manager/game/${sessionId}/recreate`);
+        const response = await fetch(`/manager/gamelist/${sessionId}/recreate`);
         if (response.status != 200) {
             errorNotification('Session recreation failed.');
             return;
@@ -91,7 +91,7 @@ export default class extends Controller {
             return;
         }
         event.currentTarget.disabled = true;
-        const response = await fetch(`/manager/game/${sessionId}/archive`);
+        const response = await fetch(`/manager/gamelist/${sessionId}/archive`);
         if (response.status != 204) {
             errorNotification('Session archival failed.');
             return;
@@ -104,7 +104,7 @@ export default class extends Controller {
     {
         let type = event.currentTarget.dataset.type;
         let sessionId = event.currentTarget.dataset.session;
-        const response = await fetch (`/manager/game/${sessionId}/save/${type}`);
+        const response = await fetch (`/manager/gamelist/${sessionId}/save/${type}`);
         if (response.status != 204) {
             errorNotification('Session save failed.');
             return;
@@ -114,7 +114,7 @@ export default class extends Controller {
 
     async sessionExport(event)
     {
-        const downloadURL = `/manager/game/${event.currentTarget.dataset.session}/export`;;
+        const downloadURL = `/manager/gamelist/${event.currentTarget.dataset.session}/export`;;
         const response = await fetch(downloadURL);
         if (response.status != 200) {
             errorNotification('Could not download exported config file.');
@@ -141,7 +141,7 @@ export default class extends Controller {
             }
         }
         event.currentTarget.disabled = true;
-        const response = await fetch (`/manager/game/${sessionId}/demo`);
+        const response = await fetch (`/manager/gamelist/${sessionId}/demo`);
         if (response.status != 204) {
             errorNotification('Demo mode switch failed.');
             return;

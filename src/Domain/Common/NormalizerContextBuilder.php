@@ -46,6 +46,23 @@ class NormalizerContextBuilder
     }
 
     /**
+     * Configures attributes to be skipped when normalizing an object tree.
+     *
+     * This list is applied to each element of nested structures.
+     *
+     * Eg: ['foo', 'bar']
+     *
+     * Note: The behaviour for nested structures is different from ATTRIBUTES
+     * for historical reason. Aligning the behaviour would be a BC break.
+     *
+     * @param list<string>|null $attributes
+     */
+    public function withIgnoredAttributes(?array $ignoredAttributes): static
+    {
+        return $this->with(AbstractNormalizer::IGNORED_ATTRIBUTES, $ignoredAttributes);
+    }
+
+    /**
      * @throws ReflectionException
      */
     private function validateCallbacks(?array $callbacks): void

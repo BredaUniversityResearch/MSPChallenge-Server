@@ -14,7 +14,6 @@ use App\Entity\ServerManager\GameList;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
-use Doctrine\Persistence\ConnectionRegistry;
 
 class GameListListener
 {

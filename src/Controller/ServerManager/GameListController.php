@@ -100,8 +100,8 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/game/{sessionId}/name',
-        name: 'manager_game_name',
+        '/manager/gamelist/{sessionId}/name',
+        name: 'manager_gamelist_name',
         requirements: ['sessionId' => '\d+'],
         methods: ['POST']
     )]
@@ -121,7 +121,7 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/game/{sessionId}/form', name: 'manager_game_form')]
+    #[Route('/manager/gamelist/{sessionId}/form', name: 'manager_gamelist_form')]
     public function gameSessionForm(
         EntityManagerInterface $entityManager,
         Request $request,
@@ -134,7 +134,7 @@ class GameListController extends BaseController
             ($sessionId == 0) ? new GameList() : $gameSession,
             [
                 'entity_manager' => $entityManager,
-                'action' => $this->generateUrl('manager_game_form', ['sessionId' => $sessionId])
+                'action' => $this->generateUrl('manager_gamelist_form', ['sessionId' => $sessionId])
             ]
         );
         $form->handleRequest($request);
@@ -160,7 +160,11 @@ class GameListController extends BaseController
         );
     }
 
-    #[Route('/manager/game/{sessionId}/details', name: 'manager_game_details', requirements: ['sessionId' => '\d+'])]
+    #[Route(
+        '/manager/gamelist/{sessionId}/details',
+        name: 'manager_gamelist_details',
+        requirements: ['sessionId' => '\d+']
+    )]
     public function gameSessionDetails(
         EntityManagerInterface $entityManager,
         int $sessionId = 1
@@ -172,7 +176,11 @@ class GameListController extends BaseController
         );
     }
 
-    #[Route('/manager/game/{sessionId}/log/{type}', name: 'manager_game_log', requirements: ['sessionId' => '\d+'])]
+    #[Route(
+        '/manager/gamelist/{sessionId}/log/{type}',
+        name: 'manager_gamelist_log',
+        requirements: ['sessionId' => '\d+']
+    )]
     public function gameSessionLog(
         KernelInterface $kernel,
         Request $request,
@@ -207,8 +215,8 @@ class GameListController extends BaseController
      * @throws \Exception
      */
     #[Route(
-        '/manager/game/{sessionId}/state/{state}',
-        name: 'manager_game_state',
+        '/manager/gamelist/{sessionId}/state/{state}',
+        name: 'manager_gamelist_state',
         requirements: ['sessionId' => '\d+', 'state' => '\w+']
     )]
     public function gameSessionState(
@@ -223,7 +231,11 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/game/{sessionId}/recreate', name: 'manager_game_recreate', requirements: ['sessionId' => '\d+'])]
+    #[Route(
+        '/manager/gamelist/{sessionId}/recreate',
+        name: 'manager_gamelist_recreate',
+        requirements: ['sessionId' => '\d+']
+    )]
     public function gameSessionRecreate(
         EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
@@ -234,7 +246,11 @@ class GameListController extends BaseController
         return new Response($gameSession->getId(), 200);
     }
 
-    #[Route('/manager/game/{sessionId}/archive', name: 'manager_game_archive', requirements: ['sessionId' => '\d+'])]
+    #[Route(
+        '/manager/gamelist/{sessionId}/archive',
+        name: 'manager_gamelist_archive',
+        requirements: ['sessionId' => '\d+']
+    )]
     public function gameSessionArchive(
         EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
@@ -247,7 +263,7 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/game/{sessionId}/demo', name: 'manager_game_demo', requirements: ['sessionId' => '\d+'])]
+    #[Route('/manager/gamelist/{sessionId}/demo', name: 'manager_gamelist_demo', requirements: ['sessionId' => '\d+'])]
     public function gameSessionDemo(
         EntityManagerInterface $entityManager,
         WatchdogCommunicator $watchdogCommunicator,
@@ -266,8 +282,8 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/game/{sessionId}/save/{type}',
-        name: 'manager_game_save',
+        '/manager/gamelist/{sessionId}/save/{type}',
+        name: 'manager_gamelist_save',
         requirements: ['sessionId' => '\d+', 'type' => '\w+']
     )]
     public function gameSessionSave(
@@ -295,8 +311,8 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/game/{sessionId}/export',
-        name: 'manager_game_export',
+        '/manager/gamelist/{sessionId}/export',
+        name: 'manager_gamelist_export',
         requirements: ['sessionId' => '\d+']
     )]
     public function gameSessionExport(

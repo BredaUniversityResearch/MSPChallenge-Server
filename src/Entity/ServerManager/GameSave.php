@@ -10,6 +10,7 @@ use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Repository\ServerManager\GameSaveRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use function App\isBase64Encoded;
 
 #[ORM\Table(name: 'game_saves')]
 #[ORM\Entity(repositoryClass: GameSaveRepository::class)]
@@ -141,7 +142,7 @@ class GameSave
         return $this->gameConfigFilesFilename;
     }
 
-    public function setGameConfigFilesFilename(string $gameConfigFilesFilename): self
+    public function setGameConfigFilesFilename(?string $gameConfigFilesFilename): self
     {
         $this->gameConfigFilesFilename = $gameConfigFilesFilename;
 
@@ -153,7 +154,7 @@ class GameSave
         return $this->gameConfigVersionsRegion;
     }
 
-    public function setGameConfigVersionsRegion(string $gameConfigVersionsRegion): self
+    public function setGameConfigVersionsRegion(?string $gameConfigVersionsRegion): self
     {
         $this->gameConfigVersionsRegion = $gameConfigVersionsRegion;
 
@@ -277,6 +278,30 @@ class GameSave
     {
         $this->passwordPlayer = $passwordPlayer;
 
+        return $this;
+    }
+
+    public function encodePasswords(): self
+    {
+        if (!isBase64Encoded($this->passwordAdmin)) {
+            $this->passwordAdmin = base64_encode($this->passwordAdmin);
+        }
+        if (!isBase64Encoded($this->passwordPlayer)) {
+            $this->passwordPlayer = base64_encode($this->passwordPlayer);
+        }
+
+        return $this;
+    }
+    
+    public function decodePasswords(): self
+    {
+        if (isBase64Encoded($this->passwordAdmin)) {
+            $this->passwordAdmin = base64_decode($this->passwordAdmin);
+        }
+        if (isBase64Encoded($this->passwordPlayer)) {
+            $this->passwordPlayer = base64_decode($this->passwordPlayer);
+        }
+        
         return $this;
     }
 
@@ -424,7 +449,7 @@ class GameSave
 
     public function getSaveTimestampPretty(): ?string
     {
-        return $this->getSaveTimestamp()->format('j M Y G:i');
+        return $this->getSaveTimestamp()?->format('j M Y G:i');
     }
 
     public function getSaveTimestamp(): ?\DateTimeInterface

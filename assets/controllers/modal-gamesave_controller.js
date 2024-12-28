@@ -4,7 +4,7 @@ import Modal from '../helpers/modal';
 
 export default class extends Controller {
 
-    static targets = ['modalSaveLoadForm', 'modalSaveEditForm'];
+    static targets = ['modalSaveLoadForm', 'modalSaveEditForm', 'modalSaveUploadForm'];
 
     modalHelper;
 
@@ -34,6 +34,14 @@ export default class extends Controller {
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
+    openSaveUploadModal(event)
+    {
+        this.setupSaveModal('Upload Save File');
+        let frame = this.modalHelper.prepAndGetTurboFrame();
+        frame.src = '/manager/saves/upload';
+        window.dispatchEvent(new CustomEvent("modal-opening"));
+    }
+
     async submitSaveLoadModalForm(event)
     {
         await submitFormGeneric(
@@ -57,6 +65,19 @@ export default class extends Controller {
             'Successfully saved your notes.',
             function (result) { 
                 window.dispatchEvent(new CustomEvent("modal-closing"));
+            }
+        )
+    }
+
+    async submitSaveUploadModalForm(event)
+    {
+        await submitFormGeneric(
+            event,
+            this.modalSaveUploadFormTarget,
+            'Successfully uploaded your save file. Ready for use.',
+            function (result) { 
+                window.dispatchEvent(new CustomEvent("modal-closing"));
+                document.querySelector('turbo-frame#savesTable').reload();
             }
         )
     }

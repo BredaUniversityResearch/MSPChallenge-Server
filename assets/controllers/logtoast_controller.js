@@ -8,7 +8,7 @@ export default class extends Controller {
     {
         let sessionId = this.element.dataset.session;
         document.getElementById('logToastTitle').innerHTML = `Log of session #${sessionId}`;
-        document.querySelector('turbo-frame#gameLogExcerpt').src = '/manager/game/' + sessionId +'/log/excerpt';
+        document.querySelector('turbo-frame#gameLogExcerpt').src = '/manager/gamelist/' + sessionId +'/log/excerpt';
         document.getElementById('logToast').style.display = 'block';
         this.timeout = setInterval(function () {
             document.querySelector('turbo-frame#gameLogExcerpt').reload();

@@ -14,10 +14,15 @@ use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Entity\ServerManager\GameSave;
 use App\Form\GameListAddBySaveLoadFormType;
 use App\Form\GameSaveEditFormType;
+use App\Form\GameSaveUploadFormType;
 use App\Message\GameSave\GameSaveLoadMessage;
+use App\Domain\Common\GameSaveZipFileValidator;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class GameSaveController extends BaseController
 {
@@ -30,7 +35,7 @@ class GameSaveController extends BaseController
     #[Route(
         '/manager/saves/{saveVisibility}',
         name: 'manager_gamesave',
-        requirements: ['saveVisibility' => '\w+']
+        requirements: ['saveVisibility' => '(active|archived)']
     )]
     public function gameSave(
         EntityManagerInterface $entityManager,
@@ -108,10 +113,7 @@ class GameSaveController extends BaseController
         $form = $this->createForm(
             GameSaveEditFormType::class,
             $gameSave,
-            [
-                'entity_manager' => $entityManager,
-                'action' => $this->generateUrl('manager_saves_details', ['saveId' => $saveId])
-            ]
+            ['action' => $this->generateUrl('manager_saves_details', ['saveId' => $saveId])]
         );
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -124,6 +126,51 @@ class GameSaveController extends BaseController
                 'gameSaveForm' => $form->createView(),
                 'gameSave' => $gameSave
             ],
+            new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
+        );
+    }
+
+    #[Route('/manager/saves/upload', name: 'manager_saves_upload')]
+    public function gameSaveUpload(
+        KernelInterface $kernel,
+        EntityManagerInterface $entityManager,
+        Request $request
+    ): Response {
+        $form = $this->createForm(
+            GameSaveUploadFormType::class,
+            new GameSave(),
+            ['action' => $this->generateUrl('manager_saves_upload')]
+        );
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $saveZip = $form->get('saveZip')->getData();
+            if (!$saveZip) {
+                return new Response(null, 422);
+            }
+            $gameSaveZip = new GameSaveZipFileValidator($saveZip->getRealPath(), $kernel, $entityManager);
+            if (!$gameSaveZip->isValid()) {
+                foreach ($gameSaveZip->getErrors() as $errorMessage) {
+                    $form->get('saveZip')->addError(new FormError($errorMessage));
+                }
+                return $this->render(
+                    'manager/GameSave/gamesave_upload.html.twig',
+                    ['gameSaveForm' => $form->createView()],
+                    new Response(null, 422)
+                );
+            }
+            $gameSave = $gameSaveZip->getGameSave();
+            $entityManager->persist($gameSave);
+            $entityManager->flush();
+            try {
+                $newFilename = sprintf($this->getParameter('app.server_manager_save_name'), $gameSave->getId());
+                $saveZip->move($this->getParameter('app.server_manager_save_dir'), $newFilename);
+            } catch (FileException $e) {
+                $form->get('saveZip')->addError(new FormError('Could not save ZIP file on the server.'));
+            }
+        }
+        return $this->render(
+            'manager/GameSave/gamesave_upload.html.twig',
+            ['gameSaveForm' => $form->createView()],
             new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
         );
     }

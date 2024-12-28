@@ -25,7 +25,7 @@ export default class extends Controller {
     {
         this.setupSessionModal('Create New Session');
         let frame = this.modalHelper.prepAndGetTurboFrame();
-        frame.src = '/manager/game/0/form';
+        frame.src = '/manager/gamelist/0/form';
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
@@ -33,10 +33,10 @@ export default class extends Controller {
     {
         this.setupSessionModal(`Session Details #${event.currentTarget.dataset.session}`);
         let frame = this.modalHelper.prepAndGetTurboFrame();
-        frame.src = `/manager/game/${event.currentTarget.dataset.session}/details`;
+        frame.src = `/manager/gamelist/${event.currentTarget.dataset.session}/details`;
         this.modalHelper.autoReloadModalDefaultBody();
         let frame2 = this.modalHelper.prepAndGetTurboFrame('gameLogComplete');
-        frame2.src = `/manager/game/${event.currentTarget.dataset.session}/log/complete`;
+        frame2.src = `/manager/gamelist/${event.currentTarget.dataset.session}/log/complete`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
@@ -44,7 +44,7 @@ export default class extends Controller {
     {
         this.setupSessionModal(`User Access Session #${event.currentTarget.dataset.session}`);
         let frame = this.modalHelper.prepAndGetTurboFrame();
-        frame.src = `/manager/game/${event.currentTarget.dataset.session}/form`;
+        frame.src = `/manager/gamelist/${event.currentTarget.dataset.session}/form`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 

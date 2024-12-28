@@ -1,7 +1,7 @@
 <?php
 namespace App\Security;
 
-use App\Domain\Communicators\Auth2Communicator;
+use App\Domain\Communicator\Auth2Communicator;
 use App\Entity\ServerManager\Setting;
 use App\Entity\ServerManager\User;
 use App\Exception\MSPAuth2RedirectException;

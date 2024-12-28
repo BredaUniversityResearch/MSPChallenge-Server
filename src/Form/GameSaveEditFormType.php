@@ -12,7 +12,6 @@ class GameSaveEditFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $entityManager = $options['entity_manager'];
         $builder
             ->add('saveNotes', TextareaType::class)
         ;
@@ -23,7 +22,5 @@ class GameSaveEditFormType extends AbstractType
         $resolver->setDefaults([
             'data_class' => GameSave::class,
         ]);
-
-        $resolver->setRequired('entity_manager');
     }
 }
