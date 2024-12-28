@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\GameListAndSaveSerializer;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave as GameSaveNew;
@@ -39,9 +40,8 @@ if ($action == 'load') {
     /** @var GameSaveRepository $gameSaveRepo */
     $gameSaveRepo = $em->getRepository(GameSave::class);
     $gameSave = $gameSaveRepo->find($gamesave->id);
-    /** @var GameListRepository $gameListRepo */
-    $gameListRepo = $em->getRepository(GameList::class);
-    $newGameSessionFromLoad = $gameListRepo->createGameListFromData($gameSaveRepo->createDataFromGameSave($gameSave));
+    $serializer = new GameListAndSaveSerializer($em);
+    $newGameSessionFromLoad = $serializer->createGameListFromData($serializer->createDataFromGameSave($gameSave));
     $newGameSessionFromLoad->setGameSave($gameSave);
     $newGameSessionFromLoad->setName($_POST['name']);
     $newGameSessionFromLoad->setGameWatchdogServer(

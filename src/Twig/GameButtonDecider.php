@@ -3,6 +3,7 @@ namespace App\Twig;
 
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\GameListAndSaveSerializer;
 use App\Entity\ServerManager\GameList;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig\Extension\AbstractExtension;
@@ -25,8 +26,8 @@ class GameButtonDecider extends AbstractExtension
     public function gameButtonDecide(string $buttonType, array|GameList $gameSession)
     {
         if (is_array($gameSession)) {
-            $gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)
-                ->createGameListFromData($gameSession);
+            $serializer = new GameListAndSaveSerializer($this->mspServerManagerEntityManager);
+            $gameSession = $serializer->createGameListFromData($gameSession);
         }
         switch ($buttonType) {
             case 'recreate':

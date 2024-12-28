@@ -55,7 +55,7 @@ class NormalizerContextBuilder
      * Note: The behaviour for nested structures is different from ATTRIBUTES
      * for historical reason. Aligning the behaviour would be a BC break.
      *
-     * @param list<string>|null $attributes
+     * @param list<string>|null $ignoredAttributes
      */
     public function withIgnoredAttributes(?array $ignoredAttributes): static
     {

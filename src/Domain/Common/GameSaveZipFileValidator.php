@@ -62,7 +62,7 @@ class GameSaveZipFileValidator
         return $this->saveZip->getFromName($this->configFileName);
     }
 
-    public function getGameListJsonContents(): string
+    public function getGameListJsonContents(): string|bool
     {
         return $this->saveZip->getFromName('game_list.json');
     }

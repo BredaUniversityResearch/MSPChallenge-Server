@@ -23,6 +23,7 @@ use App\Domain\API\v1\Plan;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\GameListAndSaveSerializer;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Version\Exception\InvalidVersionString;
 use App\Entity\ServerManager\Setting;
@@ -292,15 +293,14 @@ class GameListController extends BaseController
         int $sessionId,
         string $type = GameSaveTypeValue::FULL
     ): Response {
-        $gameListRepo = $entityManager->getRepository(GameList::class);
-        $gameSaveRepo = $entityManager->getRepository(GameSave::class);
-        $gameSession = $gameListRepo->find($sessionId);
+        $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         if ($gameSession->getSessionState() != GameSessionStateValue::HEALTHY
              || ($type != GameSaveTypeValue::FULL && $type != GameSaveTypeValue::LAYERS)) {
             return new Response(null, 422);
         }
-        $gameSave = $gameSaveRepo->createGameSaveFromData(
-            $gameListRepo->createDataFromGameList($gameSession)
+        $serializer = new GameListAndSaveSerializer($entityManager);
+        $gameSave = $serializer->createGameSaveFromData(
+            $serializer->createDataFromGameList($gameSession)
         );
         $gameSave->setSaveType(new GameSaveTypeValue($type));
         $gameSave->setSaveVisibility(new GameSaveVisibilityValue('active'));
