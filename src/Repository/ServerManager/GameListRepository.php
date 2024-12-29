@@ -48,7 +48,7 @@ class GameListRepository extends EntityRepository
                 'gcv.versionMessage as config_version_message', 'gcf.filename as config_file_name', 'gcv.region',
                 'gcf.description as config_file_description', 'gws.name as watchdog_name',
                 'gse.address as game_server_address', 'gws.address as watchdog_address', 'gsa.id as save_id',
-                'g.gameCreationTime as game_creation_time', 'ggs.name as geoserver_name',
+                'gsa.gameConfigFilesFilename', 'g.gameCreationTime as game_creation_time', 'ggs.name as geoserver_name',
                 'ggs.address as geoserver_address', 'g.gameStartYear as game_start_year',
                 'g.gameEndMonth as game_end_month', 'g.gameCurrentMonth as game_current_month',
                 'g.gameRunningTilTime as game_running_til_time', 'g.sessionState as session_state',
@@ -113,6 +113,10 @@ class GameListRepository extends EntityRepository
             $session['end_month_formatted'] = $gameList
                 ->setGameEndMonth($session['game_end_month'])
                 ->getGameEndMonthPretty();
+            if (empty($session['config_file_name'])) {
+                $session['config_file_name'] = $session['gameConfigFilesFilename'];
+            }
+            unset($session['gameConfigFilesFilename']);
             $sessionList[$key] = $session;
         }
     }

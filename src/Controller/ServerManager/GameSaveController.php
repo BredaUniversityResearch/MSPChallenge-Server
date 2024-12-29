@@ -17,6 +17,7 @@ use App\Form\GameSaveEditFormType;
 use App\Form\GameSaveUploadFormType;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\Domain\Common\GameSaveZipFileValidator;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -75,6 +76,7 @@ class GameSaveController extends BaseController
         EntityManagerInterface $entityManager,
         Request $request,
         MessageBusInterface $messageBus,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         int $saveId
     ): Response {
         $form = $this->createForm(

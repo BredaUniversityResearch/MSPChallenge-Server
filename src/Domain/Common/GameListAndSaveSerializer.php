@@ -41,20 +41,18 @@ class GameListAndSaveSerializer
 
     public function createDataFromGameList(GameList $gameList): array
     {
-        $gameList->encodePasswords();
         return $this->serializer->normalize(
             $gameList,
             null,
             (new NormalizerContextBuilder(GameList::class))
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
-                ->withCallbacks($this->getGenericNormalizeCallbacks())
+                ->withCallbacks($this->getGameListNormalizeCallbacks())
                 ->toArray()
         );
     }
 
     public function createDataFromGameSave(GameSave $gameSave): array
     {
-        $gameSave->encodePasswords();
         return $this->serializer->normalize(
             $gameSave,
             null,
@@ -73,10 +71,9 @@ class GameListAndSaveSerializer
             'json',
             (new NormalizerContextBuilder(GameSave::class))
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
-                ->withCallbacks($this->getGenericDenormalizeCallbacks())
+                ->withCallbacks($this->getGameListJsonDenormalizeCallbacks())
                 ->toArray()
         );
-        $gameSave->decodePasswords();
         return $gameSave;
     }
 
@@ -93,10 +90,9 @@ class GameListAndSaveSerializer
             null,
             (new NormalizerContextBuilder(GameList::class))
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
-                ->withCallbacks($this->getGenericDenormalizeCallbacks())
+                ->withCallbacks($this->getGameListDenormalizeCallbacks())
                 ->toArray()
         );
-        $gameList->decodePasswords();
         return $gameList;
     }
 
@@ -116,7 +112,6 @@ class GameListAndSaveSerializer
                 ->withCallbacks($this->getGenericDenormalizeCallbacks())
                 ->toArray()
         );
-        $gameSave->decodePasswords();
         return $gameSave;
     }
 
@@ -124,7 +119,7 @@ class GameListAndSaveSerializer
     {
         return [
             'gameCreationTimePretty', 'gameEndMonthPretty', 'gameCurrentMonthPretty', 'gameRunningTilTimePretty',
-            'gameSave', 'gameGeoServer', 'gameServer', 'gameWatchdogServer', 'runningGame', 'countries',
+            'gameGeoServer', 'gameServer', 'gameWatchdogServer', 'runningGame', 'countries',
             'saveType', 'saveNotes', 'saveVisibility', 'saveTimestampPretty', 'saveTimestamp'
         ];
     }
@@ -142,12 +137,36 @@ class GameListAndSaveSerializer
     private function getGenericDenormalizeCallbacks(): array
     {
         return [
-            'gameConfigVersion' => fn($innerObject) => $this->em->getRepository(
+            'gameConfigVersion' => fn($innerObject) => (!is_null($innerObject)) ? $this->em->getRepository(
                 GameConfigVersion::class
-            )->find($innerObject),
+            )->find($innerObject) : null,
             'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
             'gameState' => fn($innerObject) => new GameStateValue($innerObject),
             'gameVisibility' => fn($innerObject) => new GameVisibilityValue($innerObject)
         ];
+    }
+
+    private function getGameListDenormalizeCallbacks(): array
+    {
+        $callbacks = $this->getGenericDenormalizeCallbacks();
+        $callbacks['gameSave'] = fn($innerObject) => (!is_null($innerObject)) ? $this->em->getRepository(
+            GameSave::class
+        )->find($innerObject) : null;
+        return $callbacks;
+    }
+
+    private function getGameListNormalizeCallbacks(): array
+    {
+        $callbacks = $this->getGenericNormalizeCallbacks();
+        $callbacks['gameSave'] = fn($innerObject) => (!is_null($innerObject)) ? $innerObject->getId() : null;
+        return $callbacks;
+    }
+
+    private function getGameListJsonDenormalizeCallbacks(): array
+    {
+        $callbacks = $this->getGenericDenormalizeCallbacks();
+        $callbacks['passwordAdmin'] = fn($innerObject) => base64_decode($innerObject);
+        $callbacks['passwordPlayer'] = fn($innerObject) => base64_decode($innerObject);
+        return $callbacks;
     }
 }

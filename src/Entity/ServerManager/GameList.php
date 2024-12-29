@@ -25,7 +25,10 @@ class GameList
     #[ORM\Column(length: 128)]
     private ?string $name = null;
 
-    #[Assert\NotNull]
+    #[Assert\Expression(
+        "this.getGameConfigVersion() !== null or this.getGameSave() !== null",
+        "When creating a new session, a config file needs to be chosen."
+    )]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
     private ?GameConfigVersion $gameConfigVersion = null;

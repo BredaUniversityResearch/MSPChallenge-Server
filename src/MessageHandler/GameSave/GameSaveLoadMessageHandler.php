@@ -130,15 +130,16 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
         $this->resetSessionRasterStore();
         $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
         $sessionRasterStoreTemp = $this->params->get('app.session_raster_dir').'temp';
-        $this->info("Unpacking raster files... This could take a bit longer.");
+        $this->info("Unpacking raster files...");
         if (!$this->validator->getZipArchive()->extractTo($sessionRasterStoreTemp)) {
             throw new \Exception('ExtractTo failed.');
         } else {
             $this->debug('ExtractTo succeeded.');
         }
-        $this->info("Now moving all raster files to their proper place...");
+        $this->info("Now moving all raster files to their proper place... This could take a bit longer.");
         rcopy($sessionRasterStoreTemp."/raster", $sessionRasterStore);
         rrmdir($sessionRasterStoreTemp);
+        $this->info("Raster files moved.");
     }
 
     /**
@@ -196,7 +197,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $this->resetSessionDatabase();
             return;
         }
-        $this->notice('This is a save reload into a new session..');
+        $this->notice('This is a save reload into a new session.');
         $this->createSessionDatabase();
     }
 
@@ -205,6 +206,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
      */
     private function importSessionDatabase(): void
     {
+        $this->debug('Session database dump import attempt starting... This might take a while.');
         $tempDumpFile = $this->tempStoreDbExportInSaveZip();
         $mysqlBinary = (new ExecutableFinder)->find('mysql');
         $process = new Process([

@@ -64,12 +64,23 @@ class GameSaveZipFileValidator
 
     public function getGameListJsonContents(): string|bool
     {
-        return $this->saveZip->getFromName('game_list.json');
+        $jsonString = $this->saveZip->getFromName('game_list.json');
+        //self::convertOldGameListJsonContents($jsonString);
+        return $jsonString;
     }
 
     public function getDbDumpContents(): string
     {
         return $this->saveZip->getFromName($this->dbDumpFileName);
+    }
+
+    private static function convertOldGameListJsonContents(string &$jsonString): void
+    {
+        $jsonArray = json_decode($jsonString, true);
+        if (!isset($jsonArray['game_config_version']) && isset($jsonArray['game_config_version_id'])) {
+            $jsonArray['game_config_version'] = $jsonArray['game_config_version_id'];
+            unset($jsonArray['game_config_version_id']);
+        }
     }
 
     private function setError(string $message): void

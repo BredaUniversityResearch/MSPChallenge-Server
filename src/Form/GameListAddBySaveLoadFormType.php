@@ -3,11 +3,11 @@
 namespace App\Form;
 
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\GameListAndSaveSerializer;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
 use App\Entity\ServerManager\GameWatchdogServer;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Event\PreSubmitEvent;
 use Symfony\Component\Form\Event\SubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -52,8 +52,10 @@ class GameListAddBySaveLoadFormType extends AbstractType
         $em = $event->getForm()->getConfig()->getOptions()['entity_manager'];
         $submittedGameSession = $event->getData();
         $gameSave = $submittedGameSession->getGameSave();
-        $normalizedGameSave = $em->getRepository(GameSave::class)->createDataFromGameSave($gameSave);
-        $newGameSessionFromSave = $em->getRepository(GameList::class)->createGameListFromData($normalizedGameSave);
+        $serializer = new GameListAndSaveSerializer($em);
+        $newGameSessionFromSave = $serializer->createGameListFromData(
+            $serializer->createDataFromGameSave($gameSave)
+        );
         $newGameSessionFromSave->setName($submittedGameSession->getName());
         $newGameSessionFromSave->setGameSave($gameSave);
         $newGameSessionFromSave->setGameWatchdogServer($submittedGameSession->getGameWatchdogServer());

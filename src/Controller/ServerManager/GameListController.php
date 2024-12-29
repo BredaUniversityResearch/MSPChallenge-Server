@@ -127,6 +127,7 @@ class GameListController extends BaseController
         EntityManagerInterface $entityManager,
         Request $request,
         MessageBusInterface $messageBus,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         int $sessionId = 0
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
@@ -302,6 +303,21 @@ class GameListController extends BaseController
         $gameSave = $serializer->createGameSaveFromData(
             $serializer->createDataFromGameList($gameSession)
         );
+        if (!is_null($gameSession->getGameConfigVersion())) {
+            $gameSave->setGameConfigFilesFilename(
+                $gameSession->getGameConfigVersion()->getGameConfigFile()->getFilename()
+            );
+            $gameSave->setGameConfigVersionsRegion(
+                $gameSession->getGameConfigVersion()->getRegion()
+            );
+        } elseif (!is_null($gameSession->getGameSave())) {
+            $gameSave->setGameConfigFilesFilename(
+                $gameSession->getGameSave()->getGameConfigFilesFilename()
+            );
+            $gameSave->setGameConfigVersionsRegion(
+                $gameSession->getGameSave()->getGameConfigVersionsRegion()
+            );
+        }
         $gameSave->setSaveType(new GameSaveTypeValue($type));
         $gameSave->setSaveVisibility(new GameSaveVisibilityValue('active'));
         $entityManager->persist($gameSave);

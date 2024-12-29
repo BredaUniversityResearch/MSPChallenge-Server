@@ -55,8 +55,12 @@
                 <tr>
                     <th scope="col">Config File</th>
                     <td class="text-right">
+                    {% if gameSession.gameSave is not null %}
+                        {{ gameSession.gameSave.gameConfigFilesFilename }} (through a reloaded save)
+                    {% else %}
                         {{ gameSession.gameConfigVersion.gameConfigFile.fileName }}
                         version {{ gameSession.gameConfigVersion.version }}
+                    {% endif %}
                     </td>
                     <th scope="col">Simulation Server</th>
                     <td class="text-right">

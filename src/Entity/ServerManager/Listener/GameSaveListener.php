@@ -26,14 +26,6 @@ class GameSaveListener
 
     public function prePersist(GameSave $gameSave, PrePersistEventArgs $event): void
     {
-        if (is_null($gameSave->getGameConfigFilesFilename())) {
-            $gameSave->setGameConfigFilesFilename(
-                $gameSave->getGameConfigVersion()?->getGameConfigFile()?->getFilename()
-            );
-        }
-        if (is_null($gameSave->getGameConfigVersionsRegion())) {
-            $gameSave->setGameConfigVersionsRegion($gameSave->getGameConfigVersion()?->getRegion());
-        }
         if (is_null($gameSave->getSaveType())) {
             $gameSave->setSaveType(new GameSaveTypeValue('full'));
         }
