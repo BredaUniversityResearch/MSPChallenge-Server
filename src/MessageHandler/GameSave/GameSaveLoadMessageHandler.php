@@ -236,8 +236,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             // umask issues in prod can prevent mkdir to create with default 0777
             $fileSystem->chmod($outputDirectory, 0777);
         }
-        $dbFileName = $outputDirectory.'db_export_1.sql';
-        file_put_contents($dbFileName, $this->validator->getDbDumpContents());
-        return $dbFileName;
+        $this->validator->getZipArchive()->extractTo($outputDirectory, $this->validator->getDbDumpFilename());
+        return $outputDirectory.$this->validator->getDbDumpFilename();
     }
 }
