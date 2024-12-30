@@ -1,0 +1,37 @@
+<turbo-frame id="configsTable">
+    <table class="table table-hover table-striped">
+        <thead>
+        <tr>
+            <th>Configuration name</th>
+            <th>Version</th>
+            <th>Date uploaded</th>
+            <th>Uploaded by</th>
+            <th>Last used</th>
+            <th class="text-center" style="width: 125px;">Quick Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if configslist is empty %}
+            <tr>
+                <td colspan="8">No configurations (of this type) yet.</td>
+            </tr>
+        {% endif %}
+        {% for config in configslist %}
+            <tr>
+                <td>{{ config.gameConfigFile.filename }}</td>
+                <td>{{ config.version }}</td>
+                <td>{{ config.uploadTime|date("Y-m-d H:i") }} </td>
+                <td>{{ config.uploadUserName }}</td>
+                <td>{{ config.lastPlayedTime == 0 ? "Never" : config.lastPlayedTime|date("Y-m-d H:i") }}</td>
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm" 
+                        data-config="{{ config.id }}" 
+                        data-action="modal-gameconfig#openConfigDetailsModal">
+                        <i class="fa fa-info-circle" title= "Configuration details"></i>
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</turbo-frame>

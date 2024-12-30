@@ -4,7 +4,6 @@ namespace App\Controller\ServerManager;
 
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Entity\ServerManager\GameList;
-use App\Entity\ServerManager\GameSave;
 use App\Form\GameListAddFormType;
 use App\Form\GameListUserAccessFormType;
 use Doctrine\ORM\EntityManagerInterface;

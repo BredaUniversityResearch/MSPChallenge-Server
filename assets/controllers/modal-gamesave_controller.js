@@ -22,7 +22,7 @@ export default class extends Controller {
     {
         this.setupSaveModal('Create New Session');
         let frame = this.modalHelper.prepAndGetTurboFrame();
-        frame.src = `/manager/saves/${event.currentTarget.dataset.save}/form`;
+        frame.src = `/manager/gamesave/${event.currentTarget.dataset.save}/form`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
@@ -30,7 +30,7 @@ export default class extends Controller {
     {
         this.setupSaveModal('Save Details');
         let frame = this.modalHelper.prepAndGetTurboFrame();
-        frame.src = `/manager/saves/${event.currentTarget.dataset.save}/details`;
+        frame.src = `/manager/gamesave/${event.currentTarget.dataset.save}/details`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
@@ -38,7 +38,7 @@ export default class extends Controller {
     {
         this.setupSaveModal('Upload Save File');
         let frame = this.modalHelper.prepAndGetTurboFrame();
-        frame.src = '/manager/saves/upload';
+        frame.src = '/manager/gamesave/upload';
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 

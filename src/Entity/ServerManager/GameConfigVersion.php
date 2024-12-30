@@ -32,8 +32,10 @@ class GameConfigVersion
     #[ORM\Column(type: Types::BIGINT)]
     private ?string $uploadTime = null;
 
+    private ?string $uploadUserName = null;
+
     /**
-     * User ID from UserSpice.
+     * User ID from MSP Challenge Authoriser.
      */
     #[ORM\Column]
     private ?int $uploadUser = null;
@@ -227,6 +229,27 @@ class GameConfigVersion
     public function setGameConfigCompleteRaw(?string $gameConfigCompleteRaw): GameConfigVersion
     {
         $this->gameConfigCompleteRaw = $gameConfigCompleteRaw;
+        
+        return $this;
+    }
+
+    /**
+     * Get the value of uploadUserName
+     */
+    public function getUploadUserName(): ?string
+    {
+        return $this->uploadUserName;
+    }
+
+    /**
+     * Set the value of uploadUserName
+     *
+     * @return  self
+     */
+    public function setUploadUserName(?string $uploadUserName): self
+    {
+        $this->uploadUserName = $uploadUserName;
+
         return $this;
     }
 }

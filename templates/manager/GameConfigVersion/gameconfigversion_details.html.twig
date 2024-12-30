@@ -1,0 +1,48 @@
+<turbo-frame id="modalDefaultBody">
+    <div class="modal-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-border-left">
+                <tr class="bg-primary">
+                    <td colspan="2"><h1>{{ gameConfigVersion.gameConfigFile.filename }} version {{ gameConfigVersion.version }}</h1></td>
+                </tr>
+                <tr>
+                    <th>Date Uploaded</th>
+                    <td class="text-right">{{ gameConfigVersion.uploadTime|date("Y-m-d H:i:s") }}</td>
+                </tr>
+                <tr>
+                    <th>Uploaded By</th>
+                    <td class="text-right">{{ gameConfigVersion.uploadUserName }}</td>
+                </tr>
+                <tr>
+                    <th>Last Used</th>
+                    <td class="text-right">{{ gameConfigVersion.lastPlayedTime == 0 ? "Never" : gameConfigVersion.lastPlayedTime|date("Y-m-d H:i") }}</td>
+                </tr>
+                <tr>
+                    <th>Filename</th>
+                    <td class="text-right">{{ gameConfigVersion.gameConfigFile.filename }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td class="text-right">{{ gameConfigVersion.gameConfigFile.description }}</td>
+                </tr>
+                <tr>
+                    <th>Version</th>
+                    <td class="text-right">{{ gameConfigVersion.version }}</td>
+                </tr>
+                <tr>
+                    <th>Change Message</th>
+                    <td class="text-right">{{ gameConfigVersion.versionMessage }}</td>
+                </tr>
+                <tr class="table-info">
+                    <td class="text-center" colspan="2">
+                        <button class="btn btn-secondary btn-sm"><i class="fa fa-download" title="Download config file"></i> Download</button>
+                        <button class="btn btn-info btn-sm"><i class="fa fa-archive" title="Archive config file"></i> Archive</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Close</button>
+    </div>
+</turbo-frame>

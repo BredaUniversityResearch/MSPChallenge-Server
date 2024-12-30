@@ -14,7 +14,7 @@ export default class extends Controller {
 
     async saveDownload(event)
     {
-        const downloadURL = `/manager/saves/${event.currentTarget.dataset.save}/download`;
+        const downloadURL = `/manager/gamesave/${event.currentTarget.dataset.save}/download`;
         const response = await fetch(downloadURL);
         if (response.status != 200) {
             errorNotification('Could not download save file. It might still be in the process of being created.');
@@ -36,7 +36,7 @@ export default class extends Controller {
             return;
         }
         event.currentTarget.disabled = true;
-        const response = await fetch(`/manager/saves/${saveId}/archive`);
+        const response = await fetch(`/manager/gamesave/${saveId}/archive`);
         if (response.status != 204) {
             errorNotification('Save archival failed.');
             return;

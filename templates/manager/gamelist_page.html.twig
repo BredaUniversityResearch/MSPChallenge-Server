@@ -6,9 +6,9 @@
 <div {{ stimulus_controller('gamelist')|stimulus_controller('modal-game') }}
     data-action="user-access-saving@window->modal-game#submitUserAccessModalForm">
     <div class="py-1">
-        <button type="button" id="modalNewSession" class="btn btn-primary" data-action="modal-game#openNewSessionModal">
+        <button type="button" class="btn btn-primary" data-action="modal-game#openNewSessionModal">
             <i class="fa fa-plus-circle" title="Create new session"></i>
-            New session
+            Create new session
         </button>
     </div>
     <div class="col-md-12 py-2">

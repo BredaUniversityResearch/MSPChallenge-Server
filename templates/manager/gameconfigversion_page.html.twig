@@ -1,163 +1,42 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Server Manager{% endblock %}
+{% block subtitle %}Configurations{% endblock %}
 
 {% block body %}
-
-<div class="tab-pane fade" id="tabConfigVersions" role="tabConfigVersions" aria-labelledby="tabConfigVersions-tab">
+<div {{ stimulus_controller('modal-gameconfig') }}>
     <div class="row">
-        <div class="col-md-12 flex-row">
-            <button type="button" class="btn btn-primary pull-left" data-toggle="modal" data-target="#modalNewConfigFile"><i class="fa fa-plus-circle" title="Create a new Configuration"></i> New Configuration</button>
-            <button id="buttonRefreshConfigVersionsList" class="btn btn-primary"><i class="fa fa-refresh" title="Refresh" id="buttonRefreshConfigVersionsListIcon"></i> Refresh</button>
+        <div class="py-1">
+            <button type="button" class="btn btn-primary" data-action="modal-gameconfig#openNewConfigModal">
+                <i class="fa fa-plus-circle" title="Upload new configuration"></i>
+                Upload new configuration
+            </button>
         </div>
-        <div class="col-md-12" id="configVersionsList">
-            <div class="float-left">
-                Here you can upload a new MSP Challenge session configuration file, and administer existing ones.
-            </div>
-            <div class="well well-sm float-right" style="text-align: end;">
-                Filter:
-                <span id="radioFilterConfigVersionsList">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="radioOptionConfig" id="radioOptionConfig1" value="active" checked>
-                                <label class="form-check-label" for="radioOptionConfig1">Active</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="radioOptionConfig" id="radioOptionConfig2" value="archived">
-                                <label class="form-check-label" for="radioOptionConfig2">Archived</label>
-                            </div>
-
-                        </span>
-
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="table-responsive">
-                <table id="configVersionsTable" class="table table-hover">
-                    <thead>
-                    <tr>
-                        <th></th>
-                        <th>Name</th>
-                        <th>Version</th>
-                        <th>Date uploaded</th>
-                        <th>Uploaded by</th>
-                        <th>Last used</th>
-                        <th class="text-center">Quick Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody id="configVersionsListtbody">
-                    <tr>
-                        <td id="configVersionsListtd" colspan="7" class="text-center"><span><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span> waiting for data...</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div> <!-- /tabConfigVersions -->
-</div>
-
-<!-- Modal Config info -->
-<button type="button" id="btnConfigInfo" class="btn btn-primary" data-toggle="modal" data-target="#configInfo" style="display: none;"></button>
-<div class="modal fade" id="configInfo" tabindex="-1" role="dialog" aria-labelledby="configModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="configModalCenterTitle">Configuration Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-border-left" id="configInfoTable">
-                        <tr class="bg-primary">
-                            <td class="text-center" colspan="2" style="color: #FFFFFF" id="ConfigInfoFilenameVersion"></td> <!--'+data.gameconfig.filename+' version '+data.gameconfig.version+'-->
-                        </tr>
-                        <tr>
-                            <th>Date Uploaded</th>
-                            <td class="text-right" id="ConfigInfoUploadTime"></td> <!-- '+data.gameconfig.upload_time+' -->
-                        </tr>
-                        <tr>
-                            <th>Uploaded By</th>
-                            <td class="text-right" id="ConfigInfoUploadUser"></td> <!-- '+data.gameconfig.upload_user+' -->
-                        </tr>
-                        <tr>
-                            <th>Last Used</th>
-                            <td class="text-right" id="ConfigInfoLastPlayedTime"></td> <!--'+data.gameconfig.last_played_time+'-->
-                        </tr>
-                        <tr>
-                            <th>Filename</th>
-                            <td class="text-right" id="ConfigInfoFilename"></td> <!--'+data.gameconfig.filename+'-->
-                        </tr>
-                        <tr>
-                            <th>Description</th>
-                            <td class="text-right" id="ConfigInfoDescription"></td> <!--'+data.gameconfig.description+'-->
-                        </tr>
-                        <tr>
-                            <th>Version</th>
-                            <td class="text-right" id="ConfigInfoVersion"></td> <!--'+data.gameconfig.version+'-->
-                        </tr>
-                        <tr>
-                            <th>Change Message</th>
-                            <td class="text-right" id="ConfigInfoVersionMessage"></td> <!-- '+data.gameconfig.version_message+'-->
-                        </tr>
-                        <tr class="table-info">
-                            <td class="text-center" colspan="2">
-                                <button id="buttonConfigDownload" class="btn btn-secondary btn-sm" onClick=""><i class="fa fa-download" title="Download config file"></i> Download</button>
-                                <button id="buttonConfigArchive" class="btn btn-info btn-sm" onClick=""></button>
-                            </td>
-                        </tr>
-                    </table>
+        <div class="col-md-12 py-2">
+        <div class="pull-right">Filter:
+            <span id="radioFilter">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" value="active" checked
+                            data-action="list-default#applyFilter" data-frame="turbo-frame#configsTable" data-href="{{ path('manager_gameconfig_list', {'visibility': 'active'}) }}">
+                    <label class="form-check-label" for="inlineRadio1">Active</label>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
+                <div class="form-check form-check-inline mx-0">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" value="archived"
+                           data-action="list-default#applyFilter" data-frame="turbo-frame#configsTable" data-href="{{ path('manager_gameconfig_list', {'visibility': 'archived'}) }}">
+                    <label class="form-check-label" for="inlineRadio3">Archived</label>
+                </div>
+            </span>
+        </div>
+        <div>
+            Here you can upload a new MSP Challenge session configuration file, and administer existing ones.
         </div>
     </div>
-</div>
-
-<!-- Modal: New Config -->
-<div class="modal fade" id="modalNewConfigFile" tabindex="-1" role="dialog" aria-labelledby="newconfigfileModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="newconfigfileModalLabel">Upload New Configuration File</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form class="form-horizontal" role="form" data-toggle="validator" id="formNewConfig" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="newConfigFileUpload">Select a Configuration file to upload</label>
-                        <input type="file" class="form-control-file" id="newConfigFileContent" accept=".json" required="required">
-                    </div>
-                    <div class="form-group">
-                        <label for="newConfigFileOriginal" >New version of existing configuration, or completely new configuration?</label>
-                        <select class="form-control" id="newConfigFileOriginal" required="required">
-
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="newConfigFileName" >New configuration file name</label>
-                        <input type="text" class="form-control" id="newConfigFileName" disabled="true" placeholder="Change if uploading a completely new configuration file">
-                    </div>
-                    <div class="form-group">
-                        <label for="newConfigDescription">Description</label>
-                        <textarea class="form-control" rows="5" id="newConfigDescription" required="required"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="newConfigChangeMessage">Description of the changes in the new or first version</label>
-                        <textarea class="form-control" rows="5" id="newConfigChangeMessage" required="required"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onClick="submitNewConfigFile();">Upload Configuration File</button>
-            </div>
+        <div class="col-md-12">
+        <div class="table-responsive">
+            <turbo-frame id="configsTable" src="{{ path('manager_gameconfig_list', {'visibility': 'active'}) }}">
+                <h1>Loading... <i class="fa fa-spinner fa-pulse"></i></h1>
+            </turbo-frame>
         </div>
     </div>
+    {{ include('manager/modal_default.html.twig') }}
 </div>
-
 {% endblock %}

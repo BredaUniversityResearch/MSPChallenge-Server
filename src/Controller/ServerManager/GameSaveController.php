@@ -27,15 +27,15 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class GameSaveController extends BaseController
 {
-    #[Route('/manager/saves', name: 'manager_saves')]
+    #[Route('/manager/gamesave', name: 'manager_gamesave')]
     public function index(): Response
     {
         return $this->render('manager/gamesave_page.html.twig');
     }
 
     #[Route(
-        '/manager/saves/{saveVisibility}',
-        name: 'manager_gamesave',
+        '/manager/gamesave/{saveVisibility}',
+        name: 'manager_gamesave_list',
         requirements: ['saveVisibility' => '(active|archived)']
     )]
     public function gameSave(
@@ -46,7 +46,11 @@ class GameSaveController extends BaseController
         return $this->render('manager/GameSave/gamesave.html.twig', ['gameSaves' => $gameSaves]);
     }
 
-    #[Route('/manager/saves/{saveId}/download', name: 'manager_saves_download', requirements: ['saveId' => '\d+'])]
+    #[Route(
+        '/manager/gamesave/{saveId}/download',
+        name: 'manager_gamesave_download',
+        requirements: ['saveId' => '\d+']
+    )]
     public function gameSaveDownload(
         EntityManagerInterface $entityManager,
         ContainerBagInterface $containerBag,
@@ -71,7 +75,7 @@ class GameSaveController extends BaseController
         return $response;
     }
 
-    #[Route('/manager/saves/{saveId}/form', name: 'manager_saves_form', requirements: ['saveId' => '\d+'])]
+    #[Route('/manager/gamesave/{saveId}/form', name: 'manager_gamesave_form', requirements: ['saveId' => '\d+'])]
     public function gameSaveForm(
         EntityManagerInterface $entityManager,
         Request $request,
@@ -85,7 +89,7 @@ class GameSaveController extends BaseController
             [
                 'save' => $saveId,
                 'entity_manager' => $entityManager,
-                'action' => $this->generateUrl('manager_saves_form', ['saveId' => $saveId])
+                'action' => $this->generateUrl('manager_gamesave_form', ['saveId' => $saveId])
             ]
         );
         $form->handleRequest($request);
@@ -105,7 +109,7 @@ class GameSaveController extends BaseController
         );
     }
 
-    #[Route('/manager/saves/{saveId}/details', name: 'manager_saves_details', requirements: ['saveId' => '\d+'])]
+    #[Route('/manager/gamesave/{saveId}/details', name: 'manager_gamesave_details', requirements: ['saveId' => '\d+'])]
     public function gameSaveDetails(
         EntityManagerInterface $entityManager,
         Request $request,
@@ -115,7 +119,7 @@ class GameSaveController extends BaseController
         $form = $this->createForm(
             GameSaveEditFormType::class,
             $gameSave,
-            ['action' => $this->generateUrl('manager_saves_details', ['saveId' => $saveId])]
+            ['action' => $this->generateUrl('manager_gamesave_details', ['saveId' => $saveId])]
         );
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -132,7 +136,7 @@ class GameSaveController extends BaseController
         );
     }
 
-    #[Route('/manager/saves/upload', name: 'manager_saves_upload')]
+    #[Route('/manager/gamesave/upload', name: 'manager_gamesave_upload')]
     public function gameSaveUpload(
         KernelInterface $kernel,
         EntityManagerInterface $entityManager,
@@ -141,7 +145,7 @@ class GameSaveController extends BaseController
         $form = $this->createForm(
             GameSaveUploadFormType::class,
             new GameSave(),
-            ['action' => $this->generateUrl('manager_saves_upload')]
+            ['action' => $this->generateUrl('manager_gamesave_upload')]
         );
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -177,7 +181,7 @@ class GameSaveController extends BaseController
         );
     }
 
-    #[Route('/manager/saves/{saveId}/archive', name: 'manager_save_archive', requirements: ['saveId' => '\d+'])]
+    #[Route('/manager/gamesave/{saveId}/archive', name: 'manager_gamesave_archive', requirements: ['saveId' => '\d+'])]
     public function gameSaveArchive(
         EntityManagerInterface $entityManager,
         int $saveId

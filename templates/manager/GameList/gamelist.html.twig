@@ -6,10 +6,10 @@
             <th>Session Name</th>
             <th>Configuration</th>
             <th>Players</th>
-            <th>State</th>
+            <th style="width: 80px;">State</th>
             <th>Current Month</th>
             <th>Ending Month</th>
-            <th>Quick Actions</th>
+            <th class="text-center" style="width: 125px;">Quick Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -39,7 +39,7 @@
                 </td>
                 <td>{{ game.current_month_formatted }} </td>
                 <td>{{ game.end_month_formatted }}</td>
-                <td class="text-cemter">
+                <td class="text-center">
                 {% if showGameButton('pause', game) %}
                     <button class="btn btn-secondary btn-sm"
                         data-session="{{ game.id }}"

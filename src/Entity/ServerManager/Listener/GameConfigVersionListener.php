@@ -3,6 +3,7 @@
 namespace App\Entity\ServerManager\Listener;
 
 use App\Entity\ServerManager\GameConfigVersion;
+use App\Entity\ServerManager\User;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -28,5 +29,10 @@ class GameConfigVersionListener
         }
         $gameConfigVersion->setGameConfigCompleteRaw($gameConfigContentCompleteRaw);
         $gameConfigVersion->setGameConfigComplete($gameConfigContentComplete);
+        $gameConfigVersion->setUploadUserName(
+            $gameConfigVersion->getUploadUser() == 1 ? 'BUas (at installation)' :
+            $event->getObjectManager()->getRepository(User::class)
+                ->find($gameConfigVersion->getUploadUser())->getUsername()
+        );
     }
 }
