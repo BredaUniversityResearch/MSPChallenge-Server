@@ -15,10 +15,10 @@ export default class extends Controller {
 
     setupSessionModal(title)
     {
-        document.getElementById('modalDefaultTitle').innerHTML = title;
+        this.modalHelper.setModalDefaultTitle(title);
+        this.modalHelper.stopReloadModalDefaultBody();
         document.getElementById('sessionInfoLog').innerHTML = '<turbo-frame id="gameLogComplete" src=""></turbo-frame>';
         document.getElementById('sessionInfoLog').style.display = 'none';
-        this.modalHelper.stopReloadModalDefaultBody();
     }
 
     openNewSessionModal()

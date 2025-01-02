@@ -1,43 +1,65 @@
-<!-- Modal: New Config -->
-<div class="modal fade" id="modalNewConfigFile" tabindex="-1" role="dialog" aria-labelledby="newconfigfileModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="newconfigfileModalLabel">Upload New Configuration File</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<turbo-frame id="modalDefaultBody">
+<div data-modal-gameconfig-target="modalGameConfigVersionUploadForm">
+    {{ form_start(gameConfigVersionForm) }}
+    <div class="modal-body">
+    {{ form_errors(gameConfigVersionForm) }}
+        <div class="form-group">
+            {{ form_label(gameConfigVersionForm.gameConfigFileActual, 'Select a Configuration file to upload', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(gameConfigVersionForm.gameConfigFileActual) }}
             </div>
-            <div class="modal-body">
-                <form class="form-horizontal" role="form" data-toggle="validator" id="formNewConfig" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="newConfigFileUpload">Select a Configuration file to upload</label>
-                        <input type="file" class="form-control-file" id="newConfigFileContent" accept=".json" required="required">
-                    </div>
-                    <div class="form-group">
-                        <label for="newConfigFileOriginal" >New version of existing configuration, or completely new configuration?</label>
-                        <select class="form-control" id="newConfigFileOriginal" required="required">
-
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="newConfigFileName" >New configuration file name</label>
-                        <input type="text" class="form-control" id="newConfigFileName" disabled="true" placeholder="Change if uploading a completely new configuration file">
-                    </div>
-                    <div class="form-group">
-                        <label for="newConfigDescription">Description</label>
-                        <textarea class="form-control" rows="5" id="newConfigDescription" required="required"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="newConfigChangeMessage">Description of the changes in the new or first version</label>
-                        <textarea class="form-control" rows="5" id="newConfigChangeMessage" required="required"></textarea>
-                    </div>
-                </form>
+            {{ form_widget(gameConfigVersionForm.gameConfigFileActual, {'attr': {'class': 'form-control'}}) }}
+            <div class="small text-muted">
+                {{ form_help(gameConfigVersionForm.gameConfigFileActual) }}
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onClick="submitNewConfigFile();">Upload Configuration File</button>
+        </div>
+        <div class="form-group">
+            {{ form_label(gameConfigVersionForm.gameConfigFile, 'Is this a completely new configuration, or new version of an existing configuration?', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(gameConfigVersionForm.gameConfigFile) }}
+            </div>
+            {{ form_widget(
+                gameConfigVersionForm.gameConfigFile, {'attr': {'class': 'form-control', 'data-action': 'modal-gameconfig#onConfigFileSelection'}}
+            ) }}
+            <div class="small text-muted">
+                {{ form_help(gameConfigVersionForm.gameConfigFile) }}
+            </div>
+        </div>
+        <div class="form-group">
+            {{ form_label(gameConfigVersionForm.filename, 'Configuration file name', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(gameConfigVersionForm.filename) }}
+            </div>
+            {{ form_widget(gameConfigVersionForm.filename, {'attr': {'class': 'form-control', 'data-modal-gameconfig-target' : 'modalGameConfigFilename'}}) }}
+            <div class="small text-muted">
+                {{ form_help(gameConfigVersionForm.filename) }}
+            </div>
+        </div>
+        <div class="form-group">
+            {{ form_label(gameConfigVersionForm.description, 'Configuration file description', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(gameConfigVersionForm.description) }}
+            </div>
+            {{ form_widget(gameConfigVersionForm.description, {'attr': {'class': 'form-control', 'data-modal-gameconfig-target' : 'modalGameConfigFileDescription'}}) }}
+            <div class="small text-muted">
+                {{ form_help(gameConfigVersionForm.description) }}
+            </div>
+        </div>
+        <div class="form-group">
+            {{ form_label(gameConfigVersionForm.versionMessage, 'Description of the changes in the new or first version', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(gameConfigVersionForm.versionMessage) }}
+            </div>
+            {{ form_widget(gameConfigVersionForm.versionMessage, {'attr': {'class': 'form-control'}}) }}
+            <div class="small text-muted">
+                {{ form_help(gameConfigVersionForm.versionMessage) }}
             </div>
         </div>
     </div>
-</div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+        <button type="submit" class="btn btn-primary" data-action="modal-gameconfig#submitGameConfigVersionUploadModalForm">Upload</button>
+    </div>
+    {{ form_end(gameConfigVersionForm) }}
+    </div>
+</turbo-frame>

@@ -150,9 +150,6 @@ class GameSaveController extends BaseController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $saveZip = $form->get('saveZip')->getData();
-            if (!$saveZip) {
-                return new Response(null, 422);
-            }
             $gameSaveZip = new GameSaveZipFileValidator($saveZip->getRealPath(), $kernel, $entityManager);
             if (!$gameSaveZip->isValid()) {
                 foreach ($gameSaveZip->getErrors() as $errorMessage) {

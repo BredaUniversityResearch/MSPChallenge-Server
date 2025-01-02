@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import { successNotification } from './notification';
 
 export async function submitFormGeneric(event, target, successMessage, successCallback = null)
@@ -7,14 +6,6 @@ export async function submitFormGeneric(event, target, successMessage, successCa
     var form = document.querySelector('form');
     var data = new FormData(form);
 
-    var input = document.querySelector('input[type="file"]')
-    if (input) {
-        var headers = { };
-    } else {
-        var data = new URLSearchParams(data).toString();
-        var headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
-    }
-    
     let button = document.querySelector('button[type=submit]');
     if (button) {
         var oldHtml = button.innerHTML;
@@ -24,7 +15,7 @@ export async function submitFormGeneric(event, target, successMessage, successCa
     
     const response = await fetch(form.getAttribute('action'), {
         method: form.getAttribute('method'),
-        headers: headers,
+        headers: {},
         body: data
     });
     const responseText = await response.text();
@@ -36,8 +27,9 @@ export async function submitFormGeneric(event, target, successMessage, successCa
             successCallback(responseText);
         }
     }
+
     if (button) {
         button.innerHTML = oldHtml;
-        button.setAttribute('disabled', false);
+        button.removeAttribute('disabled');
     }
 }

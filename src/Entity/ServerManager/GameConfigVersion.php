@@ -6,6 +6,7 @@ use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
 use App\Repository\ServerManager\GameConfigVersionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\UniqueConstraint(name: 'uq_game_config_version', columns: ['game_config_files_id', 'version'])]
 #[ORM\Entity(repositoryClass: GameConfigVersionRepository::class)]
@@ -23,6 +24,7 @@ class GameConfigVersion
     #[ORM\Column]
     private ?int $version = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $versionMessage = null;
 

@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class GameSaveUploadFormType extends AbstractType
 {
@@ -23,7 +24,8 @@ class GameSaveUploadFormType extends AbstractType
                             'application/zip'
                         ],
                         'mimeTypesMessage' => 'Please upload a valid ZIP archive',
-                    ])
+                    ]),
+                    new NotBlank()
                 ],
             ])
         ;

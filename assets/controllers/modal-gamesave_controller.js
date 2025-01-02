@@ -12,15 +12,10 @@ export default class extends Controller {
     {
         this.modalHelper = new Modal;
     }
-    
-    setupSaveModal(title)
-    {
-        document.getElementById('modalDefaultTitle').innerHTML = title;
-    }
 
     openSaveLoadModal(event)
     {
-        this.setupSaveModal('Create New Session');
+        this.modalHelper.setModalDefaultTitle('Create New Session');
         let frame = this.modalHelper.prepAndGetTurboFrame();
         frame.src = `/manager/gamesave/${event.currentTarget.dataset.save}/form`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
@@ -28,7 +23,7 @@ export default class extends Controller {
 
     openSaveDetailsModal(event)
     {
-        this.setupSaveModal('Save Details');
+        this.modalHelper.setModalDefaultTitle('Save Details');
         let frame = this.modalHelper.prepAndGetTurboFrame();
         frame.src = `/manager/gamesave/${event.currentTarget.dataset.save}/details`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
@@ -36,7 +31,7 @@ export default class extends Controller {
 
     openSaveUploadModal(event)
     {
-        this.setupSaveModal('Upload Save File');
+        this.modalHelper.setModalDefaultTitle('Upload Save File');
         let frame = this.modalHelper.prepAndGetTurboFrame();
         frame.src = '/manager/gamesave/upload';
         window.dispatchEvent(new CustomEvent("modal-opening"));

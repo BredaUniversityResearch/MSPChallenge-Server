@@ -16,9 +16,14 @@
                 <td colspan="8">No configurations (of this type) yet.</td>
             </tr>
         {% endif %}
+        {% set previous = '' %}
         {% for config in configslist %}
             <tr>
-                <td>{{ config.gameConfigFile.filename }}</td>
+                <td>
+                    {% if previous != config.gameConfigFile.filename %}
+                        {{ config.gameConfigFile.filename }}
+                    {% endif %}
+                </td>
                 <td>{{ config.version }}</td>
                 <td>{{ config.uploadTime|date("Y-m-d H:i") }} </td>
                 <td>{{ config.uploadUserName }}</td>
@@ -31,6 +36,7 @@
                     </button>
                 </td>
             </tr>
+            {% set previous = config.gameConfigFile.filename %}
         {% endfor %}
         </tbody>
     </table>

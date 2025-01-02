@@ -23,4 +23,9 @@ export default class Modal {
         frame.innerHTML = '<div class="modal-body"><h3>Loading...</h3></div>';
         return frame;
     }
+
+    setModalDefaultTitle(title)
+    {
+        document.getElementById('modalDefaultTitle').innerHTML = title;
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Entity\ServerManager;
 use App\Repository\ServerManager\GameConfigFileRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Table(name: 'game_config_files')]
 #[ORM\Entity(repositoryClass: GameConfigFileRepository::class)]
