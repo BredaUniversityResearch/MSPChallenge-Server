@@ -9,19 +9,12 @@
         </thead>
         <tbody>
             <tr>
-                <td>Server address</td>
-                <td>{{ gameServer.address }}
-                <td class="text-center" style="width: 125px;">
-                    <button class="btn btn-secondary btn-sm">
-                        <i class="fa fa-info-circle" title= "More details"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr>
                 <td>Server description</td>
                 <td>{{ setting.value|slice(0, 90) }}...
                 <td class="text-center" style="width: 125px;">
-                    <button class="btn btn-secondary btn-sm">
+                    <button class="btn btn-secondary btn-sm"
+                        data-setting="{{ setting.id }}"
+                        data-action="modal-setting#openSettingDescriptionModal">
                         <i class="fa fa-info-circle" title= "More details"></i>
                     </button>
                 </td>
@@ -48,7 +41,8 @@
                 <td>User access</td>
                 <td>Note that only this server's administrator(s) can change this.
                 <td class="text-center" style="width: 125px;">
-                    <button class="btn btn-secondary btn-sm">
+                    <button class="btn btn-secondary btn-sm"
+                        data-action="modal-setting#openSettingUsersModal">
                         <i class="fa fa-info-circle" title= "More details"></i>
                     </button>
                 </td>

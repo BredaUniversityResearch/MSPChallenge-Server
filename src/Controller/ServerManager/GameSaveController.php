@@ -149,17 +149,19 @@ class GameSaveController extends BaseController
             ['action' => $this->generateUrl('manager_gamesave_upload')]
         );
         $form->handleRequest($request);
-        $saveZip = $form->get('saveZip')->getData();
-        $gameSaveZip = new GameSaveZipFileValidator($saveZip->getRealPath(), $kernel, $entityManager);
-        if ($form->isSubmitted() && $form->isValid() && self::isGameSaveZipValid($gameSaveZip, $form)) {
-            $gameSave = $gameSaveZip->getGameSave();
-            $entityManager->persist($gameSave);
-            $entityManager->flush();
-            try {
-                $newFilename = sprintf($this->getParameter('app.server_manager_save_name'), $gameSave->getId());
-                $saveZip->move($this->getParameter('app.server_manager_save_dir'), $newFilename);
-            } catch (FileException $e) {
-                $form->get('saveZip')->addError(new FormError('Could not save ZIP file on the server.'));
+        if ($form->isSubmitted()) {
+            $saveZip = $form->get('saveZip')->getData();
+            $gameSaveZip = new GameSaveZipFileValidator($saveZip->getRealPath(), $kernel, $entityManager);
+            if ($form->isValid() && self::isGameSaveZipValid($gameSaveZip, $form)) {
+                $gameSave = $gameSaveZip->getGameSave();
+                $entityManager->persist($gameSave);
+                $entityManager->flush();
+                try {
+                    $newFilename = sprintf($this->getParameter('app.server_manager_save_name'), $gameSave->getId());
+                    $saveZip->move($this->getParameter('app.server_manager_save_dir'), $newFilename);
+                } catch (FileException $e) {
+                    $form->get('saveZip')->addError(new FormError('Could not save ZIP file on the server.'));
+                }
             }
         }
         return $this->render(

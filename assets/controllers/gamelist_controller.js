@@ -29,10 +29,11 @@ export default class extends Controller {
     {
         let sessionId = event.currentTarget.dataset.session;
         let newName = prompt('Session name: ', event.currentTarget.dataset.name);
+        let formData = new FormData;
+        formData.append('name', newName);
         const response = await fetch(`/manager/gamelist/${sessionId}/name`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ name: newName })
+            body: formData
         });
         if (response.status != 204) {
             errorNotification('Session name change failed. Please make sure it is not empty.');

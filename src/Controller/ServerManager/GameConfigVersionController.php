@@ -153,7 +153,6 @@ class GameConfigVersionController extends BaseController
             );
             $entityManager->persist($gameConfigVersion);
             $entityManager->flush();
-            return new Response(null, 200);
         }
         return $this->render(
             'manager/GameConfigVersion/gameconfigversion_form.html.twig',
