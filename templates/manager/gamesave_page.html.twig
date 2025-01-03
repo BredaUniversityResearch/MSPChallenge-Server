@@ -15,12 +15,12 @@
             <span id="radioFilter">
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" value="active" checked
-                            data-action="list-default#applyFilter" data-frame="turbo-frame#savesTable" data-href="{{ path('manager_gamesave', { saveVisibility: 'active' }) }}">
+                            data-action="list-default#applyFilter" data-frame="turbo-frame#savesTable" data-href="{{ path('manager_gamesave_list', { saveVisibility: 'active' }) }}">
                     <label class="form-check-label" for="inlineRadio1">Active</label>
                 </div>
                 <div class="form-check form-check-inline mx-0">
                     <input class="form-check-input" type="radio" name="inlineRadioOptions" value="archived"
-                           data-action="list-default#applyFilter" data-frame="turbo-frame#savesTable" data-href="{{ path('manager_gamesave', { saveVisibility: 'archived' }) }}">
+                           data-action="list-default#applyFilter" data-frame="turbo-frame#savesTable" data-href="{{ path('manager_gamesave_list', { saveVisibility: 'archived' }) }}">
                     <label class="form-check-label" for="inlineRadio3">Archived</label>
                 </div>
             </span>
