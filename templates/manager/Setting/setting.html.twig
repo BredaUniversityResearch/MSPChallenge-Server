@@ -1,0 +1,67 @@
+<turbo-frame id="settingsTable">
+    <table class="table table-hover table-striped">
+        <thead>
+        <tr>
+            <th>Setting</th>
+            <th>Description</th>
+            <th class="text-center" style="width: 125px;">More details</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Server address</td>
+                <td>{{ gameServer.address }}
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>Server description</td>
+                <td>{{ setting.value|slice(0, 90) }}...
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>GeoServers</td>
+                <td>Currently {{ gameGeoServers }} defined.
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>Watchdog servers</td>
+                <td>Currently {{ gameWatchdogServers }} defined.
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>User access</td>
+                <td>Note that only this server's administrator(s) can change this.
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>Factory reset</td>
+                <td>Note that only this server's administrator(s) can do this.
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</turbo-frame>
