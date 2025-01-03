@@ -20,6 +20,7 @@ use App\Domain\Common\GameSaveZipFileValidator;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\Test\FormInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -148,19 +149,9 @@ class GameSaveController extends BaseController
             ['action' => $this->generateUrl('manager_gamesave_upload')]
         );
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $saveZip = $form->get('saveZip')->getData();
-            $gameSaveZip = new GameSaveZipFileValidator($saveZip->getRealPath(), $kernel, $entityManager);
-            if (!$gameSaveZip->isValid()) {
-                foreach ($gameSaveZip->getErrors() as $errorMessage) {
-                    $form->get('saveZip')->addError(new FormError($errorMessage));
-                }
-                return $this->render(
-                    'manager/GameSave/gamesave_upload.html.twig',
-                    ['gameSaveForm' => $form->createView()],
-                    new Response(null, 422)
-                );
-            }
+        $saveZip = $form->get('saveZip')->getData();
+        $gameSaveZip = new GameSaveZipFileValidator($saveZip->getRealPath(), $kernel, $entityManager);
+        if ($form->isSubmitted() && $form->isValid() && self::isGameSaveZipValid($gameSaveZip, $form)) {
             $gameSave = $gameSaveZip->getGameSave();
             $entityManager->persist($gameSave);
             $entityManager->flush();
@@ -187,5 +178,16 @@ class GameSaveController extends BaseController
         $gameSave->setSaveVisibility(new GameSaveVisibilityValue('archived'));
         $entityManager->flush();
         return new Response(null, 204);
+    }
+
+    private static function isGameSaveZipValid(GameSaveZipFileValidator $gameSaveZip, FormInterface $form): bool
+    {
+        if (!$gameSaveZip->isValid()) {
+            foreach ($gameSaveZip->getErrors() as $errorMessage) {
+                $form->get('saveZip')->addError(new FormError($errorMessage));
+            }
+            return false;
+        }
+        return true;
     }
 }

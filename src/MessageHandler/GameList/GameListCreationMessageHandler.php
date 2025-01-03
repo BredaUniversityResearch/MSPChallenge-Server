@@ -116,6 +116,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $state = 'failed';
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
+        $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
         $this->mspServerManagerEntityManager->flush();
     }
 

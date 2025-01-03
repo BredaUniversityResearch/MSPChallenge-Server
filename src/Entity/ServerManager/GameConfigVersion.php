@@ -32,7 +32,7 @@ class GameConfigVersion
     private ?string $visibility = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $uploadTime = null;
+    private ?int $uploadTime = null;
 
     private ?string $uploadUserName = null;
 
@@ -46,7 +46,7 @@ class GameConfigVersion
      * Unix timestamp
      */
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $lastPlayedTime = null;
+    private ?int $lastPlayedTime = null;
 
     /**
      * File path relative to the root config directory
@@ -132,12 +132,12 @@ class GameConfigVersion
         return $this;
     }
 
-    public function getUploadTime(): ?string
+    public function getUploadTime(): ?int
     {
         return $this->uploadTime;
     }
 
-    public function setUploadTime(string $uploadTime): self
+    public function setUploadTime(int $uploadTime): self
     {
         $this->uploadTime = $uploadTime;
 
@@ -156,12 +156,12 @@ class GameConfigVersion
         return $this;
     }
 
-    public function getLastPlayedTime(): ?string
+    public function getLastPlayedTime(): ?int
     {
         return $this->lastPlayedTime;
     }
 
-    public function setLastPlayedTime(string $lastPlayedTime): self
+    public function setLastPlayedTime(int $lastPlayedTime): self
     {
         $this->lastPlayedTime = $lastPlayedTime;
 

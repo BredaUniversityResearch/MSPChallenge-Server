@@ -1,5 +1,5 @@
 <turbo-frame id="configsTable">
-    <table class="table table-hover table-striped">
+    <table class="table table-hover">
         <thead>
         <tr>
             <th>Configuration name</th>
@@ -17,8 +17,18 @@
             </tr>
         {% endif %}
         {% set previous = '' %}
+        {% set primaryBackgroundColorClass = '' %}
+        {% set secondaryBackgroundColorClass = 'bg-secondary-subtle' %}
+        {% set backgroundColorClass = primaryBackgroundColorClass %}
         {% for config in configslist %}
-            <tr>
+            {% if previous != config.gameConfigFile.filename %}
+                {% if backgroundColorClass == primaryBackgroundColorClass %}
+                    {% set backgroundColorClass = secondaryBackgroundColorClass %}
+                {% else %}
+                    {% set backgroundColorClass = primaryBackgroundColorClass %}
+                {% endif %}
+            {% endif %}
+            <tr class="{{ backgroundColorClass }}">
                 <td>
                     {% if previous != config.gameConfigFile.filename %}
                         {{ config.gameConfigFile.filename }}
@@ -29,6 +39,11 @@
                 <td>{{ config.uploadUserName }}</td>
                 <td>{{ config.lastPlayedTime == 0 ? "Never" : config.lastPlayedTime|date("Y-m-d H:i") }}</td>
                 <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm" 
+                        data-config="{{ config.id }}" 
+                        data-action="gameconfig#configDownload">
+                        <i class="fa fa-download" title= "Download configuration file"></i>
+                    </button>
                     <button class="btn btn-secondary btn-sm" 
                         data-config="{{ config.id }}" 
                         data-action="modal-gameconfig#openConfigDetailsModal">

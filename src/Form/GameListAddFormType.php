@@ -21,7 +21,9 @@ class GameListAddFormType extends AbstractType
             ->add('name')
             ->add('gameConfigVersion', ChoiceType::class, [
                 'placeholder' => 'Choose an option by clicking here...',
-                'choices' => [$entityManager->getRepository(GameConfigVersion::class)->findAll()],
+                'choices' => [
+                    $entityManager->getRepository(GameConfigVersion::class)->findBy(['visibility' => 'active'])
+                ],
                 'choice_value' => 'id',
                 'choice_label' => function (?GameConfigVersion $gameConfigVersion) {
                     return $gameConfigVersion->getGameConfigFile()->getFilename().

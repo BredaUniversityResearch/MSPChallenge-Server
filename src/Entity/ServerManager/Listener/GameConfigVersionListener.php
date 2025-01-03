@@ -39,7 +39,7 @@ class GameConfigVersionListener
             $gameConfigVersion->setVisibility(new GameConfigVersionVisibilityValue('active'));
         }
         if (is_null($gameConfigVersion->getUploadTime())) {
-            $gameConfigVersion->setUploadTime((string) time());
+            $gameConfigVersion->setUploadTime(time());
         }
         if (is_null($gameConfigVersion->getUploadUser())) {
             // @phpstan-ignore-next-line "Call to an undefined method"
@@ -63,7 +63,7 @@ class GameConfigVersionListener
             $gameConfigVersion->setClientVersions('Any');
         }
         if (is_null($gameConfigVersion->getLastPlayedTime())) {
-            $gameConfigVersion->setLastPlayedTime('0');
+            $gameConfigVersion->setLastPlayedTime(0);
         }
     }
 

@@ -3,7 +3,7 @@
 {% block subtitle %}Configurations{% endblock %}
 
 {% block body %}
-<div {{ stimulus_controller('modal-gameconfig') }}>
+<div {{ stimulus_controller('modal-gameconfig')|stimulus_controller('gameconfig') }}>
     <div class="row">
         <div class="py-1">
             <button type="button" class="btn btn-primary" data-action="modal-gameconfig#openNewConfigModal">

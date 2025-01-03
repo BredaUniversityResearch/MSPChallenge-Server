@@ -34,28 +34,26 @@
                             {{ form_widget(gameSaveForm.saveNotes, {'attr': {'class': 'form-control'}}) }}
                         </td>
                     </tr>
-                    <tr>
-                        <td colspan="2">
-                            <button class="btn btn-secondary btn-sm"
-                                data-save="{{ gameSave.id }}"
-                                data-action="gamesave#saveDownload">
-                                <i class="fa fa-download" title="Download save file"></i> Download
-                            </button>
-                            {% if gameSave.saveVisibility == 'active' %}
-                            <button class="btn btn-secondary btn-sm"
-                                data-save="{{ gameSave.id }}"
-                                data-action="modal-gamesave#openSaveLoadModal">
-                                <i class="fa fa-plus-circle" title="Load into new session"></i> Load</button>
-                            </button>
-                            <button class="btn btn-secondary btn-sm" 
-                                data-save="{{ gameSave.id }}" 
-                                data-action="gamesave#saveArchive">
-                                <i class="fa fa-archive" title="Archive save file"></i> Archive
-                            </button>
-                            {% endif %}
-                        </td>
-                    </tr>
                 </table>
+            </div>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-secondary btn-sm"
+                    data-save="{{ gameSave.id }}"
+                    data-action="gamesave#saveDownload">
+                    <i class="fa fa-download" title="Download save file"></i> Download
+                </button> &nbsp;
+                {% if gameSave.saveVisibility == 'active' %}
+                <button class="btn btn-secondary btn-sm"
+                    data-save="{{ gameSave.id }}"
+                    data-action="modal-gamesave#openSaveLoadModal">
+                    <i class="fa fa-plus-circle" title="Load into new session"></i> Load</button>
+                </button>
+                <button class="btn btn-secondary btn-sm ms-auto" 
+                    data-save="{{ gameSave.id }}" 
+                    data-action="gamesave#saveArchive">
+                    <i class="fa fa-archive" title="Archive save file"></i> Archive
+                </button>
+                {% endif %}
             </div>
         </div>
         <div class="modal-footer">

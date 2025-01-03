@@ -3,7 +3,6 @@ import { successNotification, errorNotification } from '../helpers/notification'
 
 export default class extends Controller {
 
-
     connect()
     {
         for (var i = 1; i < 99999; i++) {
