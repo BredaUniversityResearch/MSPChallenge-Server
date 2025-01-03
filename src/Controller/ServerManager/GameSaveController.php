@@ -20,7 +20,7 @@ use App\Domain\Common\GameSaveZipFileValidator;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\Test\FormInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\HeaderUtils;
