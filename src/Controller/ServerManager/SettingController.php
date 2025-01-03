@@ -81,12 +81,10 @@ class SettingController extends BaseController
         $auth2Result = $auth2Communicator->getResource(
             "servers/{$settingRepo->findOneBy(['name' => 'server_uuid'])->getValue()}/server_users"
         );
-        if (!empty($auth2Result['hydra:member'])) {
-            return $this->render(
-                'manager/Setting/setting_users_list.html.twig',
-                ['returns' => $auth2Result['hydra:member']]
-            );
-        }
+        return $this->render(
+            'manager/Setting/setting_users_list.html.twig',
+            ['returns' => $auth2Result['hydra:member']]
+        );
     }
 
     #[Route('manager/setting/users/delete', name: 'manager_setting_users_delete')]
