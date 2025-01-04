@@ -13,7 +13,6 @@ use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Validator;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -68,12 +67,21 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             $request->getSession()->remove('token');
             throw new MSPAuth2RedirectException();
         }
-        $this->auth2Communicator->setToken($apiToken);
         // retrieve some user details from the token
-        $user = new User();
-        $user->setUsername($unencryptedToken->claims()->get('username'));
-        $user->setId($unencryptedToken->claims()->get('id'));
+        $user = $this->mspServerManagerEntityManager->getRepository(User::class)->find(
+            $unencryptedToken->claims()->get('id')
+        );
+        if (is_null($user)) {
+            $user = new User();
+            $user->setUsername($unencryptedToken->claims()->get('username'));
+            $user->setId($unencryptedToken->claims()->get('id'));
+            $user->setToken($apiToken);
+            // even though authorization further down might still fail
+            $this->mspServerManagerEntityManager->persist($user);
+            $this->mspServerManagerEntityManager->flush();
+        }
         // authorization through auth2.mspchallenge.info using the token, but only when first obtained through GET
+        $this->auth2Communicator->setToken($apiToken);
         if (empty($request->getSession()->get('token')) && !$this->authorized($user, $request)) {
             throw new AccessDeniedHttpException(
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
@@ -83,8 +91,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         if ($request->getSession()->get('token') !== $apiToken) {
             $request->getSession()->set('token', $apiToken);
         }
-        // UserBadge parameters are purely to get Symfony to continue
-        // first is a user identifier, second is the UserInterface object with which user is actually identified
+        // UserBadge parameters are to get Symfony to continue, second is the actual user object
         return new SelfValidatingPassport(
             new UserBadge($user->getUserIdentifier(), fn() => $user),
             [new PreAuthenticatedUserBadge()]
@@ -108,7 +115,8 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                     )
                 ))->pull('hydra:member')
             )->filter(function ($value) use ($user) {
-                return $value['user']['username'] === $user->getUserIdentifier();
+                // when true, only that array item is filtered out of the collection
+                return (int) str_replace('/api/users/', '', $value['user']['@id']) === $user->getUserIdentifier();
             });
             return !$response->isEmpty();
         } catch (\Exception $e) {
@@ -153,7 +161,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         // @phpstan-ignore-next-line "Call to an undefined method"
         $request->getSession()->getFlashBag()->add(
             'notice',
-            'You, '.$user->getUserIdentifier().', are now the primary user of this Server Manager. '.
+            'You are now the primary user of this Server Manager. '.
             'This means that you can use this application, and optionally add other users to it through '.
             '"Settings" - "User Access". Set up your first MSP Challenge session through the "New Session" button.'
         );

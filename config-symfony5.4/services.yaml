@@ -147,10 +147,6 @@ services:
 
     App\Security\MSPAuth2Authenticator:
 
-    App\EventSubscriber\StoreUserUponLogin:
-        tags:
-            - 'kernel.event_subscriber'
-
     App\Twig\GameButtonDecider:
         tags:
             - 'twig.extension'

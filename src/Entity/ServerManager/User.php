@@ -142,8 +142,8 @@ class User implements UserInterface
         return;
     }
 
-    public function getUserIdentifier(): string
+    public function getUserIdentifier(): ?int
     {
-        return (string) (null !== $this->username) ? $this->username : Uuid::v4();
+        return $this->id;
     }
 }

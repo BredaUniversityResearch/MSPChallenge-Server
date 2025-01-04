@@ -10,7 +10,6 @@ use App\Entity\ServerManager\GameGeoServer;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\ServerManager\Setting;
-use App\Entity\ServerManager\User;
 use App\Form\SettingEditFormType;
 use App\Form\SettingUsersFormType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -73,13 +72,13 @@ class SettingController extends BaseController
         HttpClientInterface $client,
         Security $security
     ): Response {
-        $settingRepo = $entityManager->getRepository(Setting::class);
         $auth2Communicator = new Auth2Communicator($client);
-        // @phpstan-ignore-next-line "Call to an undefined method"
-        $completeUser = $entityManager->getRepository(User::class)->find($security->getUser()->getId());
-        $auth2Communicator->setToken($completeUser->getToken());
+        // @var App\Entity\ServerManager\User
+        $user = $security->getUser();
+        $auth2Communicator->setToken($user->getToken());
         $auth2Result = $auth2Communicator->getResource(
-            "servers/{$settingRepo->findOneBy(['name' => 'server_uuid'])->getValue()}/server_users"
+            "servers/{$entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid'])->getValue()}
+                /server_users"
         );
         return $this->render(
             'manager/Setting/setting_users_list.html.twig',
@@ -89,15 +88,14 @@ class SettingController extends BaseController
 
     #[Route('manager/setting/users/delete', name: 'manager_setting_users_delete')]
     public function settingUsersDelete(
-        EntityManagerInterface $entityManager,
         HttpClientInterface $client,
         Security $security,
         Request $request
     ): Response {
         $auth2Communicator = new Auth2Communicator($client);
-        // @phpstan-ignore-next-line "Call to an undefined method"
-        $completeUser = $entityManager->getRepository(User::class)->find($security->getUser()->getId());
-        $auth2Communicator->setToken($completeUser->getToken());
+        // @var App\Entity\ServerManager\User
+        $user = $security->getUser();
+        $auth2Communicator->setToken($user->getToken());
         try {
             $auth2Communicator->delResource(str_replace('/api/', '', $request->get('delurl')));
         } catch (Throwable $e) {
@@ -125,9 +123,9 @@ class SettingController extends BaseController
                 "users?email={$submittedUser}" :
                 "users?username={$submittedUser}";
             $auth2Communicator = new Auth2Communicator($client);
-            // @phpstan-ignore-next-line "Call to an undefined method"
-            $completeUser = $entityManager->getRepository(User::class)->find($security->getUser()->getId());
-            $auth2Communicator->setToken($completeUser->getToken());
+            // @var App\Entity\ServerManager\User
+            $user = $security->getUser();
+            $auth2Communicator->setToken($user->getToken());
             try {
                 $auth2Result = $auth2Communicator->getResource($endPoint);
                 if (!empty($auth2Result['hydra:member'])) {
