@@ -166,9 +166,9 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         if ($session instanceof Session) {
             $session->getFlashBag()->add(
                 'notice',
-                "Welcome {$user->getUserName()}! You are now the primary user of this Server Manager ".
-                'with full administrator privileges. You can use this application and optionally allow other users '.
-                'too through Settings > User Access. Create your first MSP Challenge session by clicking on the button.'
+                "Welcome! You are now the primary user of this Server Manager with full administrator privileges. ".
+                'You can use this application and optionally allow other users too through Settings > User Access. '.
+                'Create your first MSP Challenge session by clicking on the button.'
             );
         }
         return $serverUuid;
