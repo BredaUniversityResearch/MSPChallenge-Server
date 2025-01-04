@@ -5,6 +5,7 @@ use App\Domain\Communicator\Auth2Communicator;
 use App\Entity\ServerManager\Setting;
 use App\Entity\ServerManager\User;
 use App\Exception\MSPAuth2RedirectException;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Lcobucci\Clock\FrozenClock;
 use Lcobucci\JWT\Encoding\JoseEncoder;
@@ -15,6 +16,7 @@ use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Validator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -76,6 +78,8 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             $user->setUsername($unencryptedToken->claims()->get('username'));
             $user->setId($unencryptedToken->claims()->get('id'));
             $user->setToken($apiToken);
+            $user->setRefreshToken('unused');
+            $user->setRefreshTokenExpiration(new DateTime());
             // even though authorization further down might still fail
             $this->mspServerManagerEntityManager->persist($user);
             $this->mspServerManagerEntityManager->flush();
@@ -158,13 +162,15 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
         }
-        // @phpstan-ignore-next-line "Call to an undefined method"
-        $request->getSession()->getFlashBag()->add(
-            'notice',
-            'You are now the primary user of this Server Manager. '.
-            'This means that you can use this application, and optionally add other users to it through '.
-            '"Settings" - "User Access". Set up your first MSP Challenge session through the "New Session" button.'
-        );
+        $session = $request->getSession();
+        if ($session instanceof Session) {
+            $session->getFlashBag()->add(
+                'notice',
+                "Welcome {$user->getUserName()}! You are now the primary user of this Server Manager ".
+                'with full administrator privileges. You can use this application and optionally allow other users '.
+                'too through Settings > User Access. Create your first MSP Challenge session by clicking on the button.'
+            );
+        }
         return $serverUuid;
     }
 
