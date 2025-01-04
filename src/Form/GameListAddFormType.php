@@ -34,7 +34,7 @@ class GameListAddFormType extends AbstractType
                 },
             ])
             ->add('gameGeoServer', ChoiceType::class, [
-                'choices' => [$entityManager->getRepository(GameGeoServer::class)->findAll()],
+                'choices' => [$entityManager->getRepository(GameGeoServer::class)->findBy(['available' => true])],
                 'choice_value' => 'id',
                 'choice_label' => 'name',
                 'group_by' => function () {

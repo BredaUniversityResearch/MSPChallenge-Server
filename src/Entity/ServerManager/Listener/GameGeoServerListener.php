@@ -6,7 +6,7 @@ use App\Domain\Communicator\Auth2Communicator;
 use App\Entity\ServerManager\GameGeoServer;
 use App\Entity\ServerManager\Setting;
 use Doctrine\ORM\Event\PostLoadEventArgs;
-use Doctrine\ORM\Event\PrePersistEventArgs;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GameGeoServerListener
@@ -16,7 +16,7 @@ class GameGeoServerListener
     ) {
     }
 
-    public function prePersist(GameGeoServer $geoServer, PrePersistEventArgs $event): void
+    public function preFlush(GameGeoServer $geoServer, PreFlushEventArgs $event): void
     {
         $geoServer->setUsername(base64_encode($geoServer->getUsername()));
         $geoServer->setPassword(base64_encode($geoServer->getPassword()));

@@ -5,9 +5,12 @@ namespace App\Entity\ServerManager;
 use App\Repository\ServerManager\GameGeoServerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Table(name: 'game_geoservers')]
 #[ORM\Entity(repositoryClass: GameGeoServerRepository::class)]
+#[UniqueEntity('address')]
 class GameGeoServer
 {
     #[ORM\Id]
@@ -15,20 +18,25 @@ class GameGeoServer
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 128)]
     private ?string $name = null;
 
+    #[Assert\NotBlank]
+    #[Assert\Url]
     #[ORM\Column(length: 255, unique: true)]
     private ?string $address = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 255, unique: true)]
     private ?string $username = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
     #[ORM\Column(type: Types::SMALLINT, options: ['default' => 1])]
-    private int $available = 1;
+    private ?bool $available;
 
     public function getId(): ?int
     {
@@ -64,7 +72,7 @@ class GameGeoServer
         return $this->username;
     }
 
-    public function setUsername(string $username): self
+    public function setUsername(?string $username): self
     {
         $this->username = $username;
 
@@ -76,19 +84,19 @@ class GameGeoServer
         return $this->password;
     }
 
-    public function setPassword(string $password): self
+    public function setPassword(?string $password): self
     {
         $this->password = $password;
 
         return $this;
     }
 
-    public function getAvailable(): int
+    public function getAvailable(): ?bool
     {
         return $this->available;
     }
 
-    public function setAvailable(int $available): self
+    public function setAvailable(?bool $available): self
     {
         $this->available = $available;
 

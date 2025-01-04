@@ -3,7 +3,7 @@
 {% block subtitle %}Settings{% endblock %}
 
 {% block body %}
-<div {{ stimulus_controller('modal-setting') }}>
+<div {{ stimulus_controller('modal-setting')|stimulus_controller('modal-gamegeoserver') }}>
     <div class="col-md-12 py-2">
         Here you can change various settings of this MSP Challenge server.
     </div>
