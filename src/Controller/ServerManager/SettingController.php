@@ -10,6 +10,7 @@ use App\Entity\ServerManager\GameGeoServer;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\ServerManager\Setting;
+use App\Entity\ServerManager\User;
 use App\Form\SettingEditFormType;
 use App\Form\SettingUsersFormType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -73,13 +74,11 @@ class SettingController extends BaseController
         Security $security
     ): Response {
         $auth2Communicator = new Auth2Communicator($client);
-        // @var App\Entity\ServerManager\User
+        /** @var User $user */
         $user = $security->getUser();
         $auth2Communicator->setToken($user->getToken());
-        $auth2Result = $auth2Communicator->getResource(
-            "servers/{$entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid'])->getValue()}
-                /server_users"
-        );
+        $serverUUID = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid'])->getValue();
+        $auth2Result = $auth2Communicator->getResource("servers/{$serverUUID}/server_users");
         return $this->render(
             'manager/Setting/setting_users_list.html.twig',
             ['returns' => $auth2Result['hydra:member']]
@@ -93,7 +92,7 @@ class SettingController extends BaseController
         Request $request
     ): Response {
         $auth2Communicator = new Auth2Communicator($client);
-        // @var App\Entity\ServerManager\User
+        /** @var User $user */
         $user = $security->getUser();
         $auth2Communicator->setToken($user->getToken());
         try {
@@ -123,7 +122,7 @@ class SettingController extends BaseController
                 "users?email={$submittedUser}" :
                 "users?username={$submittedUser}";
             $auth2Communicator = new Auth2Communicator($client);
-            // @var App\Entity\ServerManager\User
+            /** @var User $user */
             $user = $security->getUser();
             $auth2Communicator->setToken($user->getToken());
             try {
