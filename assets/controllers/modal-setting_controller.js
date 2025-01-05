@@ -1,6 +1,6 @@
 import { Controller } from 'stimulus';
 import { submitFormGeneric } from '../helpers/form';
-import { successNotification, errorNotification } from '../helpers/notification';
+import { noticeNotification, successNotification, errorNotification } from '../helpers/notification';
 import Modal from '../helpers/modal';
 
 export default class extends Controller {
@@ -31,6 +31,44 @@ export default class extends Controller {
         let frame2 = this.modalHelper.prepAndGetTurboFrame('settingForm');
         frame2.src = `/manager/setting/users/form`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
+    }
+
+    openSettingResetModal(event)
+    {
+        this.modalHelper.setModalDefaultTitle('Wipe the slate clean');
+        let frame = this.modalHelper.prepAndGetTurboFrame();
+        frame.src = `/manager/setting/reset/0`;
+        window.dispatchEvent(new CustomEvent("modal-opening"));
+    }
+
+    async doSoftReset(event) {
+        if (confirm('You are about to execute a SOFT reset! Are you sure you want to do this?')) {
+            event.currentTarget.setAttribute('disabled', true);
+            const response = await fetch(`/manager/setting/reset/1`);
+            const responseText = await response.text();
+            if (response.status != 200) {
+                errorNotification(responseText);
+                event.currentTarget.removeAttribute('disabled');
+                return;
+            } 
+            noticeNotification(responseText);
+            window.dispatchEvent(new CustomEvent("modal-closing"));
+        }
+    }
+
+    async doHardReset(event) {
+        if (confirm('You are about to execute a HARD reset! Are you sure you want to do this?')) {
+            event.currentTarget.setAttribute('disabled', true);
+            const response = await fetch(`/manager/setting/reset/2`);
+            const responseText = await response.text();
+            if (response.status != 200) {
+                errorNotification(responseText);
+                event.currentTarget.removeAttribute('disabled');
+                return;
+            } 
+            noticeNotification(responseText);
+            window.dispatchEvent(new CustomEvent("modal-closing"));
+        }
     }
 
     async deleteSettingUser(event)

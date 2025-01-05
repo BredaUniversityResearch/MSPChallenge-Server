@@ -17,7 +17,7 @@ class GameConfigVersion
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(cascade: ['persist'])]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'gameConfigVersion')]
     #[ORM\JoinColumn(name: 'game_config_files_id', nullable: false)]
     private ?GameConfigFile $gameConfigFile = null;
 

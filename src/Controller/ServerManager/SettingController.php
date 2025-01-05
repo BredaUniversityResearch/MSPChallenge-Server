@@ -14,8 +14,12 @@ use App\Entity\ServerManager\User;
 use App\Form\SettingEditFormType;
 use App\Form\SettingUsersFormType;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Throwable;
@@ -26,6 +30,26 @@ class SettingController extends BaseController
     public function index(): Response
     {
         return $this->render('manager/setting_page.html.twig');
+    }
+
+    #[Route('/manager/setting/reset/{type}', name: 'manager_setting_reset', requirements: ['type' => '\d+'])]
+    public function settingReset(
+        KernelInterface $kernel,
+        int $type = 0
+    ): Response {
+        if ($type == 0) {
+            return $this->render('manager/Setting/setting_reset.html.twig');
+        }
+        $command = ['command' => 'app:reset', '--force' => true];
+        if ($type == 1) {
+            $command['sessions'] = '1-999';
+        }
+        $app = new Application($kernel);
+        $app->setAutoExit(false);
+        $input = new ArrayInput($command);
+        $output = new BufferedOutput();
+        $statusCode = $app->run($input, $output);
+        return new Response($output->fetch(), $statusCode === 0 ? 200 : 422);
     }
 
     #[Route('manager/setting/list', name: 'manager_setting_list')]

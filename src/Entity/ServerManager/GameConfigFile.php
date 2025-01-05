@@ -3,9 +3,11 @@
 namespace App\Entity\ServerManager;
 
 use App\Repository\ServerManager\GameConfigFileRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\ORM\Mapping\OneToMany;
 
 #[ORM\Table(name: 'game_config_files')]
 #[ORM\Entity(repositoryClass: GameConfigFileRepository::class)]
@@ -24,6 +26,14 @@ class GameConfigFile
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
+
+    #[OneToMany(targetEntity: GameConfigVersion::class, mappedBy: 'gameConfigFile', cascade: ['persist'])]
+    private Collection $gameConfigVersion;
+
+    public function __construct()
+    {
+        $this->gameConfigVersion = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -50,6 +60,33 @@ class GameConfigFile
     public function setDescription(?string $description): self
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getGameConfigVersion(): Collection
+    {
+        return $this->gameConfigVersion;
+    }
+
+    public function addGameConfigVersion(GameConfigVersion $gameConfigVersion): self
+    {
+        if (!$this->gameConfigVersion->contains($gameConfigVersion)) {
+            $this->gameConfigVersion->add($gameConfigVersion);
+            $gameConfigVersion->setGameConfigFile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGameConfigVersion(GameConfigVersion $gameConfigVersion): self
+    {
+        if ($this->gameConfigVersion->removeElement($gameConfigVersion)) {
+            // set the owning side to null (unless already changed)
+            if ($gameConfigVersion->getGameConfigFile() === $this) {
+                $gameConfigVersion->setGameConfigFile(null);
+            }
+        }
 
         return $this;
     }

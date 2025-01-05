@@ -18,7 +18,6 @@ use App\Form\GameSaveUploadFormType;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\Domain\Common\GameSaveZipFileValidator;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -54,16 +53,16 @@ class GameSaveController extends BaseController
     )]
     public function gameSaveDownload(
         EntityManagerInterface $entityManager,
-        ContainerBagInterface $containerBag,
         int $saveId
     ): Response {
         $gameSave = $entityManager->getRepository(GameSave::class)->find($saveId);
         if (is_null($gameSave)) {
             return new Response(null, 422);
         }
-        $fileSystem = new FileSystem();
-        $saveFileName = sprintf($containerBag->get('app.server_manager_save_name'), $saveId);
-        $saveFilePath = $containerBag->get('app.server_manager_save_dir').$saveFileName;
+        $fileSystem = new Filesystem();
+        
+        $saveFileName = sprintf($this->getParameter('app.server_manager_save_name'), $saveId);
+        $saveFilePath = $this->getParameter('app.server_manager_save_dir').$saveFileName;
         if (!$fileSystem->exists($saveFilePath)) {
             return new Response(null, 422);
         }

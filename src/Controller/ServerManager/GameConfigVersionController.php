@@ -11,7 +11,6 @@ use App\Entity\ServerManager\GameConfigVersion;
 use App\Form\GameConfigVersionUploadFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonSchema\Validator;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
@@ -71,7 +70,7 @@ class GameConfigVersionController extends BaseController
         int $configFileId
     ): Response {
         return $this->json(
-            $entityManager->getRepository(GameConfigFile::class)->find($configFileId)
+            $entityManager->getRepository(GameConfigFile::class)->findAllSimple($configFileId)
         );
     }
 
@@ -82,7 +81,6 @@ class GameConfigVersionController extends BaseController
     )]
     public function gameConfigVersionDownload(
         EntityManagerInterface $entityManager,
-        ContainerBagInterface $containerBag,
         int $configId
     ): Response {
         $gameConfigVersion = $entityManager->getRepository(GameConfigVersion::class)->find($configId);
@@ -90,7 +88,7 @@ class GameConfigVersionController extends BaseController
             return new Response(null, 422);
         }
         $fileSystem = new FileSystem();
-        $gameConfigFilePath = $containerBag->get('app.server_manager_config_dir').$gameConfigVersion->getFilePath();
+        $gameConfigFilePath = $this->getParameter('app.server_manager_config_dir').$gameConfigVersion->getFilePath();
         if (!$fileSystem->exists($gameConfigFilePath)) {
             return new Response(null, 422);
         }
