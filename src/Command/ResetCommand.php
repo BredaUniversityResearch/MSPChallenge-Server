@@ -42,7 +42,6 @@ class ResetCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $mspServerManagerEntityManager,
         private readonly KernelInterface $kernel,
-        private readonly ConnectionManager $connectionManager,
         private readonly MessageBusInterface $messageBus,
         private readonly ParameterBagInterface $params
     ) {
@@ -138,7 +137,8 @@ class ResetCommand extends Command
         $this->removeEntities($watchdogservers, 'Watchdogs');
     }
 
-    private function removeGameLists(array|AbstractLazyCollection $sessions): void
+    /** @param Collection[] $sessions */
+    private function removeGameLists(array $sessions): void
     {
         if (count($sessions) === 0) {
             $this->io->info("No game sessions to remove.");
@@ -208,7 +208,8 @@ class ResetCommand extends Command
         }
     }
 
-    private function removeEntities(array|AbstractLazyCollection $entities, string $className): void
+    /** @param Collection[] $entities */
+    private function removeEntities(array $entities, string $className): void
     {
         if (count($entities) === 0) {
             $this->io->info("No {$className} entities to remove.");
