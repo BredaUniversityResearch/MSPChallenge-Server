@@ -80,9 +80,9 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             $user->setToken($apiToken);
             $user->setRefreshToken('unused');
             $user->setRefreshTokenExpiration(new DateTime());
-            // even though authorization further down might still fail
             $this->mspServerManagerEntityManager->persist($user);
-            $this->mspServerManagerEntityManager->flush();
+        } else {
+            $user->setToken($apiToken);
         }
         // authorization through auth2.mspchallenge.info using the token, but only when first obtained through GET
         $this->auth2Communicator->setToken($apiToken);
@@ -91,6 +91,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
         }
+        $this->mspServerManagerEntityManager->flush();
         // add token to session storage if still required
         if ($request->getSession()->get('token') !== $apiToken) {
             $request->getSession()->set('token', $apiToken);
