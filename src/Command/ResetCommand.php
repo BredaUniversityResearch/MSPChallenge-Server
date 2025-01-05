@@ -2,24 +2,20 @@
 
 namespace App\Command;
 
-use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameGeoServer;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Message\GameList\GameListArchiveMessage;
-use Doctrine\Common\Collections\AbstractLazyCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -137,7 +133,7 @@ class ResetCommand extends Command
         $this->removeEntities($watchdogservers, 'Watchdogs');
     }
 
-    /** @param Collection[] $sessions */
+    /** @param Collection<int, GameList> $sessions */
     private function removeGameLists(array $sessions): void
     {
         if (count($sessions) === 0) {
@@ -165,6 +161,7 @@ class ResetCommand extends Command
         }
     }
 
+    /** @param array<int, GameSave> $saves */
     private function removeGameSaves(array $saves): void
     {
         if (count($saves) === 0) {
@@ -182,6 +179,7 @@ class ResetCommand extends Command
         }
     }
 
+    /** @param array<int, GameConfigFile> $saves */
     private function removeGameConfigs(array $configs): void
     {
         foreach ($configs as $config) {
@@ -208,7 +206,7 @@ class ResetCommand extends Command
         }
     }
 
-    /** @param Collection[] $entities */
+    /** @param Collection<int, object> $entities */
     private function removeEntities(array $entities, string $className): void
     {
         if (count($entities) === 0) {
