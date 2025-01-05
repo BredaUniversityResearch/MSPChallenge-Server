@@ -134,7 +134,7 @@ class ResetCommand extends Command
     }
 
     /** @param Collection<int, GameList> $sessions */
-    private function removeGameLists(array $sessions): void
+    private function removeGameLists($sessions): void
     {
         if (count($sessions) === 0) {
             $this->io->info("No game sessions to remove.");
@@ -162,7 +162,7 @@ class ResetCommand extends Command
     }
 
     /** @param array<int, GameSave> $saves */
-    private function removeGameSaves(array $saves): void
+    private function removeGameSaves($saves): void
     {
         if (count($saves) === 0) {
             $this->io->info("No game saves to remove.");
@@ -180,7 +180,7 @@ class ResetCommand extends Command
     }
 
     /** @param array<int, GameConfigFile> $saves */
-    private function removeGameConfigs(array $configs): void
+    private function removeGameConfigs($configs): void
     {
         foreach ($configs as $config) {
             foreach ($config->getGameConfigVersion() as $configVersion) {
@@ -207,7 +207,7 @@ class ResetCommand extends Command
     }
 
     /** @param Collection<int, object> $entities */
-    private function removeEntities(array $entities, string $className): void
+    private function removeEntities($entities, string $className): void
     {
         if (count($entities) === 0) {
             $this->io->info("No {$className} entities to remove.");
