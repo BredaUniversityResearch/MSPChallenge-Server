@@ -32,7 +32,6 @@
             <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
             <button type="submit" class="btn btn-primary" data-action="modal-gamegeoserver#submitGameGeoServerModalForm">Save</button>
         </div>
-        {{ form_widget(gameGeoServerForm._token) }}
-        {{ form_end(gameGeoServerForm, {render_rest: false}) }}
+        {{ form_end(gameGeoServerForm) }}
     </div>
 </turbo-frame>

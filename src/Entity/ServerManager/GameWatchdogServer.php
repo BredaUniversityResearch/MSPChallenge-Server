@@ -5,9 +5,12 @@ namespace App\Entity\ServerManager;
 use App\Repository\ServerManager\GameWatchdogServerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Table(name: 'game_watchdog_servers')]
 #[ORM\Entity(repositoryClass: GameWatchdogServerRepository::class)]
+#[UniqueEntity('address')]
 class GameWatchdogServer
 {
     #[ORM\Id]
@@ -15,17 +18,20 @@ class GameWatchdogServer
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(length: 128, unique: true)]
     private ?string $name = null;
 
     /**
      * with trailing slash
      */
+    #[Assert\NotBlank]
+    #[Assert\Url]
     #[ORM\Column(length: 255, unique: true)]
     private ?string $address = null;
 
     #[ORM\Column(type: Types::SMALLINT, options: ['default' => 1])]
-    private int $available = 1;
+    private ?bool $available = true;
 
     public function getId(): ?int
     {
@@ -56,12 +62,12 @@ class GameWatchdogServer
         return $this;
     }
 
-    public function getAvailable(): int
+    public function getAvailable(): ?bool
     {
         return $this->available;
     }
 
-    public function setAvailable(int $available): self
+    public function setAvailable(?bool $available): self
     {
         $this->available = $available;
 

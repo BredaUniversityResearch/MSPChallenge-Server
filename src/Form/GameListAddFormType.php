@@ -41,7 +41,7 @@ class GameListAddFormType extends AbstractType
                 }
             ])
             ->add('gameWatchdogServer', ChoiceType::class, [
-                'choices' => [$entityManager->getRepository(GameWatchdogServer::class)->findAll()],
+                'choices' => [$entityManager->getRepository(GameWatchdogServer::class)->findBy(['available' => true])],
                 'choice_value' => 'id',
                 'choice_label' => 'name',
                 'group_by' => function () {

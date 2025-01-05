@@ -33,15 +33,21 @@ class SettingController extends BaseController
     {
         $setting = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         $gameServer = $entityManager->getRepository(GameServer::class)->find(1);
-        $gameGeoServers = count($entityManager->getRepository(GameGeoServer::class)->findAll());
-        $gameWatchdogServers = count($entityManager->getRepository(GameWatchdogServer::class)->findAll());
+        $gameGeoServersAll = count($entityManager->getRepository(GameGeoServer::class)->findAll());
+        $gameGeoServersAvailable = count(
+            $entityManager->getRepository(GameGeoServer::class)->findBy(['available' => 1])
+        );
+        $gameWatchdogServersAll = count($entityManager->getRepository(GameWatchdogServer::class)->findAll());
+        $gameWatchdogServersAvailable = count(
+            $entityManager->getRepository(GameWatchdogServer::class)->findBy(['available' => 1])
+        );
         return $this->render(
             'manager/Setting/setting.html.twig',
             [
                 'setting' => $setting,
                 'gameServer' => $gameServer,
-                'gameGeoServers' => $gameGeoServers,
-                'gameWatchdogServers' => $gameWatchdogServers
+                'gameGeoServers' => [$gameGeoServersAll, $gameGeoServersAvailable],
+                'gameWatchdogServers' => [$gameWatchdogServersAll, $gameWatchdogServersAvailable]
             ]
         );
     }

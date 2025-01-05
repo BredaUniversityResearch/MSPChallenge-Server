@@ -5,7 +5,7 @@ import { errorNotification } from '../helpers/notification';
 
 export default class extends Controller {
 
-    static targets = ['modalGameGeoServerForm'];
+    static targets = ['modalGameWatchdogServerForm'];
 
     modalHelper;
 
@@ -14,43 +14,43 @@ export default class extends Controller {
         this.modalHelper = new Modal;
     }
 
-    openGameGeoServerModal(event)
+    openGameWatchdogServerModal(event)
     {
-        this.modalHelper.setModalDefaultTitle('GeoServers');
+        this.modalHelper.setModalDefaultTitle('Watchdog servers');
         let frame = this.modalHelper.prepAndGetTurboFrame();
-        frame.src = `/manager/gamegeoserver/list`;
+        frame.src = `/manager/gamewatchdogserver/list`;
         let frame2 = this.modalHelper.prepAndGetTurboFrame('settingForm');
-        frame2.src = `/manager/gamegeoserver/0/form`;
+        frame2.src = `/manager/gamewatchdogserver/0/form`;
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
-    editGameGeoServerInModal(event)
+    editGameWatchdogServerInModal(event)
     {
         let frame = this.modalHelper.prepAndGetTurboFrame('settingForm');
-        frame.src = `/manager/gamegeoserver/${event.currentTarget.dataset.geoserver}/form`;
+        frame.src = `/manager/gamewatchdogserver/${event.currentTarget.dataset.geoserver}/form`;
     }
     
-    async submitGameGeoServerModalForm(event)
+    async submitGameWatchdogServerModalForm(event)
     {
         await submitFormGeneric(
             event,
-            this.modalGameGeoServerFormTarget,
-            'Successfully added or updated GeoServer.',
+            this.modalGameWatchdogServerFormTarget,
+            'Successfully added or updated Watchdog server.',
             function (result) {
                 document.querySelector('turbo-frame#modalDefaultBody').reload();
-                document.querySelector('turbo-frame#settingForm').src = `/manager/gamegeoserver/0/form`;
+                document.querySelector('turbo-frame#settingForm').src = `/manager/gamewatchdogserver/0/form`;
                 document.querySelector('turbo-frame#settingsTable').reload();
             }
         );
     }
 
-    async toggleGameGeoServerAvailability(event)
+    async toggleGameWatchdogServerAvailability(event)
     {
         event.currentTarget.innerHTML = '<i class="fa fa-refresh fa-spin"></i>';
         event.currentTarget.setAttribute('disabled', true);
-        const response = await fetch(`/manager/gamegeoserver/${event.currentTarget.dataset.geoserver}/availability`);
+        const response = await fetch(`/manager/gamewatchdogserver/${event.currentTarget.dataset.geoserver}/availability`);
         if (response.status != 204) {
-            errorNotification('GeoServer availability change failed.');
+            errorNotification('WatchdogServer availability change failed.');
             return;
         }
         document.querySelector('turbo-frame#modalDefaultBody').reload();
