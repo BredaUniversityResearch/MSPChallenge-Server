@@ -133,7 +133,7 @@ class ResetCommand extends Command
         $this->removeEntities($watchdogservers, 'Watchdogs');
     }
 
-    /** @param Collection<int, GameList> $sessions */
+    /** @param Collection<int, object> $sessions */
     private function removeGameLists($sessions): void
     {
         if (count($sessions) === 0) {
@@ -179,7 +179,7 @@ class ResetCommand extends Command
         }
     }
 
-    /** @param array<int, GameConfigFile> $saves */
+    /** @param array<int, GameConfigFile> $configs */
     private function removeGameConfigs($configs): void
     {
         foreach ($configs as $config) {
