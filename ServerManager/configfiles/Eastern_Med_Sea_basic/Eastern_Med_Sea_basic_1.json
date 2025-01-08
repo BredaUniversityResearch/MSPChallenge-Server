@@ -759,7 +759,110 @@
         }
       ]
     },
-    "plans": [],
+    "plans": [
+      {
+        "plan_id": 1,
+        "plan_country_id": 1,
+        "plan_name": "shipping starting plan",
+        "plan_gametime": -1,
+        "plan_type": "0",
+        "plan_alters_energy_distribution": 0,
+        "layers": [
+          {
+            "layer_id": 84,
+            "name": "ems_IMO_Routes",
+            "layer_editing_type": "multitype",
+            "geometry": [
+              {
+                "geometry_id": 8077,
+                "FID": "",
+                "geometry_persistent": 8077,
+                "geometry": "[[6038144.5,1511472.63],[5989545.0,1530912.38],[5915525.0,1569044.0]]",
+                "data": {
+                  "ShippingWidth": "3"
+                },
+                "country": 3,
+                "type": "0,1,2,3",
+                "base_geometry_info": {
+                  "geometry_id": 8077,
+                  "geometry_mspid": 0,
+                  "geometry_persistent": 8077
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 8078,
+                "FID": "",
+                "geometry_persistent": 8078,
+                "geometry": "[[5878140.5,1332029.63],[5692716.5,1331282.0]]",
+                "data": {
+                  "ShippingWidth": "5"
+                },
+                "country": 3,
+                "type": "0,1,2,3",
+                "base_geometry_info": {
+                  "geometry_id": 8078,
+                  "geometry_mspid": 0,
+                  "geometry_persistent": 8078
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 8079,
+                "FID": "",
+                "geometry_persistent": 8079,
+                "geometry": "[[6498715.0,1563810.25],[6379086.0,1454649.0]]",
+                "data": {
+                  "ShippingWidth": "2"
+                },
+                "country": 3,
+                "type": "0,1,2,3",
+                "base_geometry_info": {
+                  "geometry_id": 8079,
+                  "geometry_mspid": 0,
+                  "geometry_persistent": 8079
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 8080,
+                "FID": "",
+                "geometry_persistent": 8080,
+                "geometry": "[[6367871.0,1341749.38],[6408993.0,1258009.25]]",
+                "data": {
+                  "ShippingWidth": "7"
+                },
+                "country": 3,
+                "type": "0,1,2,3",
+                "base_geometry_info": {
+                  "geometry_id": 8080,
+                  "geometry_mspid": 0,
+                  "geometry_persistent": 8080
+                },
+                "cable": null,
+                "energy_output": null
+              }
+            ],
+            "warnings": [],
+            "deleted": []
+          }
+        ],
+        "grids": [],
+        "fishing": [],
+        "messages": [
+          {
+            "country_id": 1,
+            "user_name": "magali",
+            "text": "Changed the plans status to: Approved",
+            "time": 1704971755.1206269
+          }
+        ],
+        "restriction_settings": []
+      }
+    ],
     "dependencies": {
       "groups": [
         {
@@ -1034,7 +1137,7 @@
               "link": ""
             },
             {
-              "name": "European sardine and anchovy",
+              "name": "European sardine & anchovy",
               "id": 62,
               "multiline": true,
               "link": ""
@@ -1094,7 +1197,7 @@
               "link": ""
             },
             {
-              "name": "Ray and skate",
+              "name": "Rays and skates",
               "id": 71,
               "multiline": false,
               "link": ""
@@ -1112,7 +1215,7 @@
               "link": ""
             },
             {
-              "name": "Cephalopod",
+              "name": "Cephalopods",
               "id": 74,
               "multiline": false,
               "link": ""
@@ -1165,7 +1268,7 @@
           "name": "Birds, Mammals, Benthos",
           "entries": [
             {
-              "name": "Seabird",
+              "name": "Seabirds",
               "id": 47,
               "multiline": false,
               "link": "Birds"
@@ -1784,19 +1887,19 @@
           "fromId": 47,
           "toId": 82,
           "severity": -1,
-          "description": "Seabirds prey on Zooplankton. "
+          "description": "Seabirds prey on zooplankton. "
         },
         {
           "fromId": 57,
           "toId": 79,
           "severity": -2,
-          "description": "Turtles prey on Mobile benthos. "
+          "description": "Turtles prey on mobile benthos. "
         },
         {
           "fromId": 57,
           "toId": 81,
           "severity": -1,
-          "description": "Turtles prey on Jellyfish and salp. "
+          "description": "Turtles prey on jellyfish and salp. "
         },
         {
           "fromId": 33,
@@ -1820,7 +1923,7 @@
           "fromId": 62,
           "toId": 82,
           "severity": -3,
-          "description": "European sardine and anchovy prey on Zooplankton."
+          "description": "European sardine & anchovy prey on Zooplankton."
         },
         {
           "fromId": 60,
@@ -1838,7 +1941,7 @@
           "fromId": 63,
           "toId": 81,
           "severity": -1,
-          "description": "Benthopelagic fish prey on Jellyfish and salp. "
+          "description": "Benthopelagic fish prey on jellyfish and salp. "
         },
         {
           "fromId": 63,
@@ -1868,7 +1971,7 @@
           "fromId": 65,
           "toId": 80,
           "severity": -1,
-          "description": "European hake feeds on Sessile benthos. "
+          "description": "European hake feeds on sessile benthos. "
         },
         {
           "fromId": 65,
@@ -2618,37 +2721,37 @@
           "fromId": 20,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Bottom trawlers. "
+          "description": "Cephalopods are caught by Bottom trawlers. "
         },
         {
           "fromId": 53,
           "toId": 74,
           "severity": -2,
-          "description": "Cephalopod are caught by Purse seiners. "
+          "description": "Cephalopods are caught by Purse seiners. "
         },
         {
           "fromId": 50,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Small-scale coastal fleets."
+          "description": "Cephalopods are caught by Small-scale coastal fleets."
         },
         {
           "fromId": 51,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Recreational fleets."
+          "description": "Cephalopods are caught by Recreational fleets."
         },
         {
           "fromId": 52,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Trawl fleets."
+          "description": "Cephalopods are caught by Trawl fleets."
         },
         {
           "fromId": 54,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Artisanal fleets. "
+          "description": "Cephalopods are caught by Artisanal fleets. "
         },
         {
           "fromId": 20,
@@ -8442,7 +8545,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Seabird",
+          "name": "Seabirds",
           "subcategory": "Biomass"
         },
         {
@@ -8462,7 +8565,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "European Sardine and Anchovy",
+          "name": "European Sardine & Anchovy",
           "subcategory": "Biomass"
         },
         {
@@ -8506,7 +8609,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Ray & Skate",
+          "name": "Rays & Skates",
           "subcategory": "Biomass"
         },
         {
@@ -8518,7 +8621,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Cephalopod",
+          "name": "Cephalopods",
           "subcategory": "Biomass"
         },
         {
@@ -8546,7 +8649,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Jellyfish and Salp",
+          "name": "Jellyfish & Salp",
           "subcategory": "Biomass"
         },
         {
@@ -8578,7 +8681,7 @@
           "subcategory": "Fishery"
         },
         {
-          "name": "Ray & Skate Bycatch",
+          "name": "Rays & Skates Bycatch",
           "subcategory": "Bycatch"
         },
         {
@@ -8594,7 +8697,7 @@
           "subcategory": "Fishery"
         },
         {
-          "name": "Cephalopod Catch",
+          "name": "Cephalopods Catch",
           "subcategory": "Fishery"
         },
         {
@@ -8610,7 +8713,7 @@
           "subcategory": "Fishery"
         },
         {
-          "name": "European Sardine and Anchovy Catch",
+          "name": "European Sardine & Anchovy Catch",
           "subcategory": "Fishery"
         },
         {
@@ -8691,7 +8794,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Seabird",
+              "valueName": "Seabirds",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8721,7 +8824,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "European Sardine and Anchovy",
+              "valueName": "European Sardine & Anchovy",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8799,7 +8902,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Cephalopod",
+              "valueName": "Cephalopods",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8841,13 +8944,13 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Jellyfish and Salp",
+              "valueName": "Jellyfish & Salp",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Ray & Skate",
+              "valueName": "Rays & Skates",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8908,7 +9011,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Cephalopod Catch",
+              "valueName": "Cephalopods Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8932,7 +9035,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "European Sardine and Anchovy Catch",
+              "valueName": "European Sardine & Anchovy Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -9023,7 +9126,7 @@
           "unit": "t/km2",
           "valueDefinitions": [
             {
-              "valueName": "Ray & Skate Bycatch",
+              "valueName": "Rays & Skates Bycatch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -13673,7 +13776,7 @@
         "layer_short": "Quality of Bathing Waters",
         "layer_category": "activities",
         "layer_subcategory": "recreational",
-        "layer_download_from_geoserver": 1,
+        "layer_download_from_geoserver": 0,
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELNew",
@@ -13853,7 +13956,7 @@
         },
         "layer_info_properties": [
           {
-            "property_name": "Name",
+            "property_name": "bwname",
             "enabled": 0,
             "editable": 0,
             "display_name": "",
@@ -13876,7 +13979,7 @@
         "layer_short": "Treatment Plants",
         "layer_category": "management",
         "layer_subcategory": "governance",
-        "layer_download_from_geoserver": 1,
+        "layer_download_from_geoserver": 0,
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELNew",
@@ -14000,7 +14103,7 @@
         },
         "layer_info_properties": [
           {
-            "property_name": "Name",
+            "property_name": "uwwname",
             "enabled": 0,
             "editable": 0,
             "display_name": "",
@@ -24266,7 +24369,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Dolphins (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "fish",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -24454,7 +24557,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Whales (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "fish",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -24637,10 +24740,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Seabird",
+        "layer_name": "mel_Seabirds",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Seabird (Simulated)",
+        "layer_short": "Seabirds (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
@@ -25577,10 +25680,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_European_Sardine_and_Anchovy",
+        "layer_name": "mel_European_Sardine_&_Anchovy",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "European sardine and anchovy (Simulated)",
+        "layer_short": "European Sardine & Anchovy (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -26708,7 +26811,7 @@
         "layer_name": "mel_Medium_Demersal_Fish",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Medium demersal fish (Simulated)",
+        "layer_short": "Medium Demersal Fish (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -27460,7 +27563,7 @@
         "layer_name": "mel_Demersal_Sharks",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Demersal sharks (Simulated)",
+        "layer_short": "Demersal Sharks (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -27645,10 +27748,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Ray_&_Skate",
+        "layer_name": "mel_Rays_&_Skates",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Ray and skate (Simulated)",
+        "layer_short": "Rays & Skates (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -27665,7 +27768,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Modelled biomass distribution of ray and skate",
+        "layer_tooltip": "Modelled biomass distribution of rays and skates",
         "layer_information": "",
         "layer_media": "wiki://Rays_and_Skates",
         "layer_text_info": null,
@@ -28021,10 +28124,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Invasive_decapods",
+        "layer_name": "mel_Invasive_Decapods",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Invasive decapods (Simulated)",
+        "layer_short": "Invasive Decapods (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
@@ -28209,10 +28312,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Cephalopod",
+        "layer_name": "mel_Cephalopods",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cephalopod (Simulated)",
+        "layer_short": "Cephalopods (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
@@ -29337,10 +29440,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Sessile_benthos",
+        "layer_name": "mel_Sessile_Benthos",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Sessile benthos (Simulated)",
+        "layer_short": "Sessile Benthos (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
@@ -29525,10 +29628,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Jellyfish_and_salp",
+        "layer_name": "mel_Jellyfish_&_Salp",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Jellyfish and salp (Simulated)",
+        "layer_short": "Jellyfish & Salp (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
@@ -31781,7 +31884,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_European_Sardine_and_Anchovy_Catch",
+        "layer_name": "mel_European_Sardine_&_Anchovy_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "European Sardine & Anchovy Catch (Simulated)",
@@ -33661,10 +33764,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Cephalopod_Catch",
+        "layer_name": "mel_Cephalopods_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cephalopod Catch (Simulated)",
+        "layer_short": "Cephalopods Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -34601,10 +34704,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Ray_&_Skate_Bycatch",
+        "layer_name": "mel_Rays_&_Skates_Bycatch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Ray & Skate Bycatch (Simulated)",
+        "layer_short": "Rays & Skates Bycatch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -34621,7 +34724,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Ray & Skate Bycatch",
+        "layer_tooltip": "Rays & Skates Bycatch",
         "layer_information": "",
         "layer_media": "wiki://Bycatch",
         "layer_text_info": null,
