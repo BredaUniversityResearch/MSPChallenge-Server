@@ -1265,7 +1265,7 @@
           ]
         },
         {
-          "name": "Birds, Mammals, Benthos",
+          "name": "Other Species",
           "entries": [
             {
               "name": "Seabirds",
@@ -13776,7 +13776,7 @@
         "layer_short": "Quality of Bathing Waters",
         "layer_category": "activities",
         "layer_subcategory": "recreational",
-        "layer_download_from_geoserver": 0,
+        "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELNew",
@@ -13979,7 +13979,7 @@
         "layer_short": "Treatment Plants",
         "layer_category": "management",
         "layer_subcategory": "governance",
-        "layer_download_from_geoserver": 0,
+        "layer_download_from_geoserver": 1,
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELNew",
