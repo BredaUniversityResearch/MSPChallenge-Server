@@ -38,7 +38,7 @@ $action = $_POST["action"] ?? "";
 if ($action == 'load') {
     $em = SymfonyToLegacyHelper::getInstance()->getEntityManager();
     /** @var GameSaveRepository $gameSaveRepo */
-    $gameSaveRepo = $em->getRepository(GameSave::class);
+    $gameSaveRepo = $em->getRepository(GameSaveNew::class);
     $gameSave = $gameSaveRepo->find($gamesave->id);
     $serializer = new GameListAndSaveSerializer($em);
     $newGameSessionFromLoad = $serializer->createGameListFromData($serializer->createDataFromGameSave($gameSave));

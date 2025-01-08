@@ -293,7 +293,7 @@ class ConfigCreator
     {
         $targetRasterLayers = array_filter(
             $rasterLayers,
-            fn($x) => !array_key_exists('scale', $x) && in_array('ValueMap', $x['tags'])
+            fn($x) => !array_key_exists('scale', $x) && in_array('ValueMap', $x['tags'] ?? [])
         );
         foreach ($targetRasterLayers as $key => &$layer) {
             // create a scale based on the SELs heatmap range data, if available

@@ -137,6 +137,21 @@ class CommonSessionHandler
         $process->mustRun(fn($type, $buffer) => $this->info($buffer));
     }
 
+    protected function migrateSessionDatabase(): void
+    {
+        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
+        $process = new Process([
+            $this->phpBinary,
+            'bin/console',
+            'doctrine:migrations:migrate',
+            '-vv',
+            '--em='.$this->database,
+            '--no-interaction',
+            '--env='.$_ENV['APP_ENV']
+        ], $this->kernel->getProjectDir());
+        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
+    }
+
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
