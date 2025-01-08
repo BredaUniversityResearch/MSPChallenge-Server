@@ -13869,7 +13869,7 @@
             "availability": -12,
             "media": ""
           },
-          "3": {
+          "2": {
             "displayName": "Sufficient Quality",
             "approval": "NotDependent",
             "value": 0,
@@ -13897,7 +13897,7 @@
             "availability": -12,
             "media": ""
           },
-          "4": {
+          "3": {
             "displayName": "Poor Quality",
             "approval": "NotDependent",
             "value": 0,
@@ -13925,7 +13925,7 @@
             "availability": -12,
             "media": ""
           },
-          "5": {
+          "4": {
             "displayName": "Other",
             "approval": "NotDependent",
             "value": 0,
