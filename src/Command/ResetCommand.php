@@ -145,12 +145,6 @@ class ResetCommand extends Command
                 $this->io->info("Dispatching archive message for session #{$session->getId()}");
             }
             $this->messageBus->dispatch(new GameListArchiveMessage($session->getId()));
-        }
-        if ($this->io->isDebug()) {
-            $this->io->info("Waiting 20 seconds before removing all game sessions from the database...");
-        }
-        sleep(20);
-        foreach ($sessions as $session) {
             if ($this->io->isDebug()) {
                 $this->io->info("Removing log and game_list record of session #{$session->getId()}");
             }
