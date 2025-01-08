@@ -29,6 +29,8 @@ $html =<<<"HTML"
           <li id="user-menu-item">
             <a href="https://auth2.mspchallenge.info">Account</a>
           </li>
+          <li id="user-menu-item">
+            <a href="/manager">Try the new Server Manager!</a>
         </ul>
       </div>
     </nav>
