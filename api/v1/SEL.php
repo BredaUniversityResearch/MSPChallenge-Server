@@ -728,7 +728,6 @@ class SEL extends Base
                     );
                 } else {
                     $melConfig = &$globalConfig["MEL"];
-                    // @phpstan-ignore-next-line "Result of || is always false." ??
                     if (!array_key_exists("x_min", $melConfig) || !array_key_exists("y_min", $melConfig) ||
                         !array_key_exists("x_max", $melConfig) || !array_key_exists("y_max", $melConfig)) {
                         throw new Exception(
