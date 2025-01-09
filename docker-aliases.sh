@@ -29,6 +29,7 @@ ALIAS_DL_BASE="docker logs"
 [[ -z "${COMPOSE_PROJECT_NAME}" ]] && COMPOSE_PROJECT_NAME="mspchallenge"
 [[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER="${COMPOSE_PROJECT_NAME}-php-1"
 [[ -z "${DATABASE_CONTAINER}" ]] && DATABASE_CONTAINER="${COMPOSE_PROJECT_NAME}-database-1"
+[[ -z "${SIMULATIONS_CONTAINER}" ]] && SIMULATIONS_CONTAINER="${COMPOSE_PROJECT_NAME}-simulations-1"
 # dl = docker(d) logs(l) with default container mspchallenge-server-php-1
 alias dl="${ALIAS_DL_BASE} ${PHP_CONTAINER}"
 # dl + blackfire (b)
@@ -37,6 +38,8 @@ alias dlb="${ALIAS_DL_BASE} ${COMPOSE_PROJECT_NAME}-blackfire-1"
 alias dlc="${ALIAS_DL_BASE} ${COMPOSE_PROJECT_NAME}-caddy-1"
 # dl + database (d)
 alias dld="${ALIAS_DL_BASE} ${DATABASE_CONTAINER}"
+# dl + simulations (s)
+alias dls="${ALIAS_DL_BASE} ${SIMULATIONS_CONTAINER}"
 # de = docker(d) execute(e) with container php
 ALIAS_DE_BASE='MSYS_NO_PATHCONV=1 docker exec'
 alias de="${ALIAS_DE_BASE} ${PHP_CONTAINER}"
@@ -50,8 +53,6 @@ alias dells="de ls -l /var/log/supervisor/"
 alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files names:" && dells && exit 1)) && (echo "press Ctrl+C to exit tail log"; de tail -f /var/log/supervisor/$1 ; de pkill -f "tail -f /var/log/supervisor/$1"); unset -f f; } ; f'
 # de + tail log (tl) + websocket server (w)
 alias detlw="detl app-ws-server.log"
-# de + tail log (tl) + msw (m)
-alias detlm="detl msw.log"
 # de + top (t)
 alias det='de top; de pkill -f top'
 # de + phpstan (p)
@@ -79,4 +80,3 @@ alias dsa='docker stop $(docker ps -a -q)'
 alias dsp='docker system prune -a -f'
 # docker (d) + clean
 alias dclean='dsa ; dsp'
-
