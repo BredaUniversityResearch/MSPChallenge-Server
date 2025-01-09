@@ -71,6 +71,12 @@ class Watchdog
         return $this->id;
     }
 
+    public function setId(int $id): static
+    {
+        $this->id = $id;
+        return $this;
+    }
+
     public function getServerId(): ?Uuid
     {
         return $this->serverId;
@@ -181,7 +187,7 @@ class Watchdog
     public function createUrl(): string
     {
         $scheme = $this->getScheme();
-        $port = $_ENV['WATCHDOG_PORT'] ?? $this->getPort();
+        $port = ($this->getServerId() == self::INTERNAL_SERVER_ID ? $_ENV['WATCHDOG_PORT'] : null) ?? $this->getPort();
         return "{$scheme}://{$this->getAddress()}:{$port}";
     }
 }

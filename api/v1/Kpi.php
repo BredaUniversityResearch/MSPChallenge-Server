@@ -3,6 +3,7 @@
 namespace App\Domain\API\v1;
 
 use Exception;
+use http\Exception\InvalidArgumentException;
 
 class Kpi extends Base
 {
@@ -73,6 +74,10 @@ class Kpi extends Base
         string $kpiUnit,
         int $kpiCountry = -1
     ): int {
+        if (!in_array($kpiType, array('ECOLOGY', 'ENERGY', 'SHIPPING'))) {
+            throw new InvalidArgumentException('Invalid KPI type: '.$kpiType.
+                '. Allowed values are ECOLOGY, ENERGY, SHIPPING.');
+        }
         return (int)$this->getDatabase()->query(
             "
             INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 

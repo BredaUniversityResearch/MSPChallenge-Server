@@ -138,6 +138,7 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
     protected function onUp(Schema $schema): void
     {
         // retrieve required SymfonyToLegacyHelper service
+        // phpcs:disable Generic.Files.LineLength.TooLong
         $this->container->get(SymfonyToLegacyHelper::class);
         $this->addSql(<<<'SQL'
             CREATE TABLE `watchdog` (
@@ -151,11 +152,12 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
                 `deleted_at` datetime DEFAULT NULL,
                 `created_at` datetime NOT NULL DEFAULT current_timestamp(),
                 `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-                `archived` tinyint(1) GENERATED ALWAYS AS (if(`deleted_at` is null,0,1)) VIRTUAL,
+                `archived` tinyint(1) GENERATED ALWAYS AS (if(`deleted_at` is null,0,1)) VIRTUAL COMMENT 'GENERATED ALWAYS AS (if(`deleted_at` is null,0,1)) VIRTUAL',
                 UNIQUE KEY `watchdog_id_name_archived` (`server_id`,`archived`)
             )
             SQL
         );
+        // phpcs:enable Generic.Files.LineLength.TooLong
 
         // phpcs:disable Generic.Files.LineLength.TooLong
         $this->addSql(<<<'SQL'
