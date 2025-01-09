@@ -3,7 +3,7 @@
 namespace App\Domain\API\v1;
 
 use Exception;
-use http\Exception\InvalidArgumentException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Kpi extends Base
 {
@@ -75,7 +75,7 @@ class Kpi extends Base
         int $kpiCountry = -1
     ): int {
         if (!in_array($kpiType, array('ECOLOGY', 'ENERGY', 'SHIPPING'))) {
-            throw new InvalidArgumentException('Invalid KPI type: '.$kpiType.
+            throw new BadRequestHttpException('Invalid KPI type: '.$kpiType.
                 '. Allowed values are ECOLOGY, ENERGY, SHIPPING.');
         }
         return (int)$this->getDatabase()->query(
