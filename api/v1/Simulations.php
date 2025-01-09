@@ -334,6 +334,7 @@ class Simulations extends Base
         }
         $w = new Watchdog();
         $w
+            ->setId($watchdog['w_id'])
             ->setServerId(Uuid::fromBinary($watchdog['server_id']))
             ->setScheme($watchdog['scheme'])
             ->setAddress($address)
