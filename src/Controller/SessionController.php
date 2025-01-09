@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Domain\Services\ConnectionManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,6 +31,13 @@ class SessionController extends AbstractController
     ): Response {
         // Clone the original attributes and add the session ID
         $attributes = $request->attributes->all();
+
+        try {
+            ConnectionManager::getInstance()->getCachedGameSessionDbConnection($session)->connect();
+        } catch (\Exception $e) {
+            throw $this->createNotFoundException('Session database does not exist.');
+        }
+
         $attributes['sessionId'] = $session;
         // Merge the route information into the attributes
         $routeInfo = $router->match('/api/'.$query);
