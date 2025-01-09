@@ -30,6 +30,23 @@ class LayerController extends BaseController
     )]
     #[OA\Post(
         summary: 'Provides a list of raster layers and vector layers that have active geometry',
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(
+                            property: 'layer_tags',
+                            description: 'Optional array of layer tags to filter the layers',
+                            type: 'array',
+                            items: new OA\Items(type: 'string'),
+                            nullable: true
+                        )
+                    ]
+                )
+            )
+        ),
         responses: [
             new OA\Response(
                 response: 200,
@@ -87,10 +104,12 @@ class LayerController extends BaseController
     public function list(
         Request $request
     ): JsonResponse {
+        $layerTags = $request->request->get('layer_tags', ''); // comma separated string
+        $layerTags = empty($layerTags) ? [] : array_filter(explode(',', $layerTags));
         $layer = new Layer();
         $layer->setGameSessionId($this->getSessionIdFromRequest($request));
         try {
-            $layers = $layer->list();
+            $layers = $layer->list($layerTags);
             return new JsonResponse(self::wrapPayloadForResponse(true, $layers));
         } catch (Exception $e) {
             return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);

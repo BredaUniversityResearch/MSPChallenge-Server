@@ -3,11 +3,14 @@
 namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
+use App\Domain\API\APIHelper;
+use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Router;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use Exception;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -198,5 +201,155 @@ class GameController extends BaseController
         $response->headers->set('Content-Length', (string)filesize($zipFilepath));
 
         return $response;
+    }
+
+    #[Route(
+        path: '/GetCountries',
+        name: 'session_api_game_get_countries',
+        methods: ['GET']
+    )]
+    #[OA\Get(
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'List of countries',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(
+                                    property: 'payload',
+                                    type: 'array',
+                                    items: new OA\Items(
+                                        properties: [
+                                            new OA\Property(
+                                                property: 'country_id',
+                                                type: 'integer'
+                                            ),
+                                            new OA\Property(
+                                                property: 'country_name',
+                                                type: 'string'
+                                            ),
+                                            new OA\Property(
+                                                property: 'country_colour',
+                                                type: 'string'
+                                            ),
+                                            new OA\Property(
+                                                property: 'country_is_manager',
+                                                type: 'boolean'
+                                            )
+                                        ],
+                                        type: 'object'
+                                    )
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Internal server error',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'exception',
+                            summary: 'Exception response',
+                            value: [
+                                'success' => false,
+                                'message' => 'Error message'
+                            ]
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    public function getCountries(
+        Request $request,
+        // below is required by legacy to be auto-wired
+        APIHelper $apiHelper
+    ): JsonResponse {
+        $game = new Game();
+        $game->setGameSessionId($this->getSessionIdFromRequest($request));
+        try {
+            $countries = $game->GetCountries();
+            return new JsonResponse(self::wrapPayloadForResponse(true, $countries));
+        } catch (Exception $e) {
+            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+        }
+    }
+
+    #[Route(
+        path: '/GetActualDateForSimulatedMonth',
+        name: 'session_api_game_get_actual_date_for_simulated_month',
+        methods: ['POST']
+    )]
+    #[OA\Post(
+        summary: 'Get actual date for given simulated month',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    required: [
+                        'simulated_month'
+                    ],
+                    properties: [
+                        new OA\Property(property: 'simulated_month', type: 'number', example: 16)
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Year and month of the requested simulated month identifier',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'year', type: 'integer', example: 2019),
+                        new OA\Property(property: 'month_of_year', type: 'integer', example: 5)
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Internal server error',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'exception',
+                            summary: 'Exception response',
+                            value: [
+                                'success' => false,
+                                'message' => 'Error message'
+                            ]
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    public function getActualDateForSimulatedMonth(
+        Request $request,
+        // below is required by legacy to be auto-wired
+        APIHelper $apiHelper
+    ): JsonResponse {
+        $simulatedMonth = $request->request->get('simulated_month');
+        if (!is_numeric($simulatedMonth)) {
+            return new JsonResponse(
+                Router::formatResponse(false, 'Invalid or missing simulated month', null, __CLASS__, __FUNCTION__),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        $game = new Game();
+        $game->setGameSessionId($this->getSessionIdFromRequest($request));
+        try {
+            $actualDate = $game->GetActualDateForSimulatedMonth($simulatedMonth);
+            return new JsonResponse(self::wrapPayloadForResponse(true, $actualDate));
+        } catch (Exception $e) {
+            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+        }
     }
 }

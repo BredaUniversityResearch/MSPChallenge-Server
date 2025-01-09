@@ -2,11 +2,8 @@
 
 namespace App\Domain\API\v1;
 
-use Drift\DBAL\Result;
+use App\Domain\Services\ConnectionManager;
 use Exception;
-use React\Promise\PromiseInterface;
-use function App\parallel;
-use function App\tpf;
 
 class Layer extends Base
 {
@@ -484,19 +481,25 @@ class Layer extends Base
      * @throws Exception
      * @api {POST} /layer/List
      * @apiDescription List Provides a list of raster layers and vector layers that have active geometry.
+     * @apiParam {array} layer_tags Optional array of tags to filter the layers by.
      * @apiSuccess Returns an array of layers, with layer_id, layer_name and layer_geotype objects defined per layer.
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function List(): array
+    public function List(?array $layer_tags = null): array
     {
-        return $this->getDatabase()->query("SELECT 
-									layer.layer_id,
-									layer.layer_name,
-									layer.layer_geotype
-								FROM layer 
-								LEFT JOIN geometry ON layer.layer_id = geometry.geometry_layer_id
-								WHERE layer.layer_name <> ''
-								GROUP BY layer.layer_name");
+        $db = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $qb = $db->createQueryBuilder()
+            ->select('l.layer_id', 'l.layer_name', 'l.layer_geotype')
+            ->from('layer', 'l')
+            ->leftJoin('l', 'geometry', 'g', 'l.layer_id = g.geometry_layer_id')
+            ->where('l.layer_name <> ""')
+            ->andWhere('g.geometry_active = 1')
+            ->groupBy('l.layer_name');
+        if (!empty($layer_tags)) {
+            $qb->andWhere('JSON_CONTAINS(l.layer_tags, :layer_tags)')
+                ->setParameter('layer_tags', json_encode($layer_tags));
+        }
+        return $db->executeQuery($qb->getSQL(), $qb->getParameters())->fetchAllAssociative();
     }
 
     /**
@@ -525,11 +528,10 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function MetaByName(string $name): array
     {
-        $result = array(); //"[]";
+        $result = [];
         $layerID = $this->getDatabase()->query("SELECT layer_id FROM layer where layer_name=?", array($name));
         if (count($layerID) > 0) {
-            //self::JSON($this->GetMetaForLayerById($layerID[0]["layer_id"])[0]);
-            $result = $this->GetMetaForLayerById($layerID[0]["layer_id"])[0];
+            $result = $this->GetMetaForLayerById($layerID[0]["layer_id"]);
         } else {
             self::Debug("Could not find layer with name ".$name);
         }
@@ -780,8 +782,11 @@ class Layer extends Base
     private function GetMetaForLayerById(int $layerId): array
     {
         $data = $this->getDatabase()->query("SELECT * FROM layer WHERE layer_id=?", array($layerId));
+        if (empty($data)) {
+            return [];
+        }
         Layer::FixupLayerMetaData($data[0]);
-        return $data;
+        return $data[0];
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
