@@ -80,7 +80,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     {
         return $this->getServerManager()->getGameSessionIds()
             ->then(function (Result $result) {
-                $gameSessionIds = collect($result->fetchAllRows() ?? [])
+                $gameSessionIds = collect(($result->fetchAllRows() ?? []) ?: [])
                     ->keyBy('id')
                     ->map(function ($row) {
                         return $row['id'];
@@ -206,8 +206,8 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                                 'payload' => null
                             ];
                             PluginHelper::getInstance()->dump($connResourceId, $data);
-                            $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)
-                                ->sendAsJson($data);
+                            $conn = $this->getClientConnectionResourceManager()->getClientConnection($connResourceId);
+                            $conn?->sendAsJson($data); // check if connection is alive
                             return $this->setBatchToCommunicated(
                                 $connResourceId,
                                 $batchGuid,
@@ -286,7 +286,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                 )
         )
         ->then(function (Result $result) use ($connection) {
-            $batches = collect($result->fetchAllRows() ?? [])
+            $batches = collect(($result->fetchAllRows() ?? []) ?: [])
                 ->keyBy('api_batch_guid')
                 ->all();
             if (empty($batches)) {

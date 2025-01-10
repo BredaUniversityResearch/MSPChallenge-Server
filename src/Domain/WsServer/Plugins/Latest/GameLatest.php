@@ -4,6 +4,9 @@ namespace App\Domain\WsServer\Plugins\Latest;
 
 use App\Domain\API\v1\Game;
 use App\Domain\Common\CommonBase;
+use App\Domain\Common\ToPromiseFunction;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\PlanPolicy;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -15,6 +18,11 @@ use function App\tpf;
 
 class GameLatest extends CommonBase
 {
+    private const CONTEXT_PARAM_NEW_TIME = 'newTime';
+    private const CONTEXT_PARAM_LAST_UPDATE_TIME = 'lastUpdateTime';
+    private const CONTEXT_PARAM_TEAM_ID = 'teamId';
+    private const CONTEXT_PARAM_USER = 'user';
+
     private bool $allowEnergyKpiUpdate = true;
 
     private function newSimulationDataAvailable(array $tickData, float $lastUpdateTime): bool
@@ -25,6 +33,73 @@ class GameLatest extends CommonBase
             return true;
         }
         return false;
+    }
+
+    /**
+     * @param array $context
+     * @param array $data
+     * @return ToPromiseFunction[]
+     * @throws Exception
+     */
+    private function parallelTasks(array $context, array &$data): array
+    {
+        $latestMessages = $this->getLatestMessages($context)
+            ->then(function (array $result) use (&$data) {
+                $data['planmessages'] = $result;
+            });
+        $latestRaster = $this->getLatestRaster($context)
+            ->then(function (Result $result) use (&$data) {
+                $data['raster'] = $result->fetchAllRows();
+            });
+        $latestEnergyPolicy = $this->getLatestEnergy($context)
+            ->then(function (array $energyData) use (&$data) {
+                $data['policy_updates'][] = array_merge([
+                    'policy_type' => 'energy',
+                ], $energyData);
+            });
+        $latestKpi = $this->getLatestKpi($context)
+            ->then(function (array $results) use (&$data) {
+                $data['simulation_updates'] = [
+                    ['simulation_type' => 'CEL', 'kpi' => $results['energy']],
+                    ['simulation_type' => 'MEL', 'kpi' => $results['ecology']],
+                    ['simulation_type' => 'SEL', 'kpi' => $results['shipping']]
+                ];
+            });
+        $latestWarning = $this->getLatestWarning($context)
+            ->then(function (Result $queryResult) use (&$data) {
+                $data['simulation_updates'][2]['shipping_issues'] = $queryResult->fetchAllRows();
+            });
+        $latestObjective = $this->getLatestObjective($context)
+            ->then(function (Result $result) use (&$data) {
+                $data['objectives'] = $result->fetchAllRows();
+            });
+        $latestPlan = $this->getLatestPlan($context)
+            ->then(function (array $planData) use ($context, &$data) {
+                $data['plan'] = $planData;
+                return $this->getLatestPlanLayers($planData, $context)
+                ->then(function (array $layersContainer) use ($context, &$data) {
+                    foreach ($data['plan'] as $key => &$p) {
+                        //only send the geometry when it's required
+                        $p['layers'] = $layersContainer[$key];
+                        if ((
+                            $p['state'] == "DESIGN" && $p['previousstate'] == "CONSULTATION" &&
+                            $p['country'] != $context[self::CONTEXT_PARAM_TEAM_ID]
+                        )) {
+                            $p['active'] = 0;
+                        }
+                    }
+                    unset($p);
+                });
+            });
+        return [
+            tpf(fn() => $latestPlan),
+            tpf(fn() => $latestMessages),
+            tpf(fn() => $latestRaster),
+            tpf(fn() => $latestEnergyPolicy),
+            tpf(fn() => $latestKpi),
+            tpf(fn() => $latestWarning),
+            tpf(fn() => $latestObjective)
+        ];
     }
 
     /**
@@ -51,122 +126,47 @@ class GameLatest extends CommonBase
                     $this->newSimulationDataAvailable($tick, $lastUpdateTime)
                 ) ||
                 $lastUpdateTime < PHP_FLOAT_EPSILON; // first client update
-            $newTime = microtime(true);
+            $context = [
+                self::CONTEXT_PARAM_NEW_TIME => microtime(true),
+                self::CONTEXT_PARAM_LAST_UPDATE_TIME => $lastUpdateTime,
+                self::CONTEXT_PARAM_TEAM_ID => $teamId,
+                self::CONTEXT_PARAM_USER => $user
+            ];
             $data = array();
+            $data['tick'] = $tick;
             $data['prev_update_time'] = $lastUpdateTime;
-            return $this->latestLevel2(
-                $tick,
-                $lastUpdateTime,
-                $newTime,
-                $data
-            )
-            ->then(function (array $planData) use (
-                $teamId,
-                $lastUpdateTime,
-                $user,
-                $newTime,
-                &$data
-            ) {
-                return $this->latestLevel3(
-                    $planData,
-                    $lastUpdateTime,
-                    $newTime,
-                    $data
-                )
-                ->then(function (array $layersContainer) use (
-                    $teamId,
-                    $lastUpdateTime,
-                    $user,
-                    $newTime,
-                    &$data
-                ) {
-                    return $this->latestLevel4(
-                        $layersContainer,
-                        $teamId,
-                        $lastUpdateTime,
-                        $newTime,
-                        $data
-                    )
-                    ->then(function (array $result) use (
-                        $teamId,
-                        $lastUpdateTime,
-                        $user,
-                        $newTime,
-                        &$data
-                    ) {
-                        return $this->latestLevel5(
-                            $result,
-                            $lastUpdateTime,
-                            $newTime,
-                            $data
-                        )
-                        ->then(function (Result $result) use (
-                            $teamId,
-                            $lastUpdateTime,
-                            $user,
-                            $newTime,
-                            &$data
-                        ) {
-                            return $this->latestLevel6( // energy
-                                $result,
-                                $newTime,
-                                $data
-                            )
-                            ->then(function (array $results) use (
-                                $teamId,
-                                $lastUpdateTime,
-                                $user,
-                                $newTime,
-                                &$data
-                            ) {
-                                return $this->latestLevel7(
-                                    $results,
-                                    $teamId,
-                                    $lastUpdateTime,
-                                    $newTime,
-                                    $data
-                                )
-                                ->then(function (array $results) use (
-                                    $lastUpdateTime,
-                                    $user,
-                                    $newTime,
-                                    &$data
-                                ) {
-                                    return $this->latestLevel8(
-                                        $results,
-                                        $lastUpdateTime,
-                                        $newTime,
-                                        $data
-                                    )
-                                    ->then(function (Result $queryResult) use (
-                                        $lastUpdateTime,
-                                        $user,
-                                        $newTime,
-                                        &$data
-                                    ) {
-                                        return $this->latestLevel9(
-                                            $queryResult,
-                                            $lastUpdateTime,
-                                            $newTime,
-                                            $data
-                                        )
-                                        ->then(function (Result $result) use (
-                                            $user,
-                                            $newTime,
-                                            &$data
-                                        ) {
-                                            return $this->latestLevel10($result, $user, $newTime, $data)
-                                                ->then(function (/*?Result $result */) use ($data) {
-                                                    return $data;
-                                                });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+            //Add a slight fudge of 1ms to the update times to avoid rounding issues.
+            $data['update_time'] = $context[self::CONTEXT_PARAM_NEW_TIME] - 0.001;
+            return parallel($this->parallelTasks($context, $data))
+                ->then(function (/* array $results */) use ($context, &$data) {
+                    // send an empty string if nothing was updated
+                    if (empty($data['energy']['connections']) &&
+                        empty($data['energy']['output']) &&
+                        empty($data['geometry']) &&
+                        empty($data['plan']) &&
+                        empty($data['messages']) &&
+                        empty($data['planmessages']) &&
+                        empty($data['kpi']) &&
+                        empty($data['warning']) &&
+                        empty($data['raster']) &&
+                        empty($data['objectives'])) {
+                        return resolveOnFutureTick(new Deferred(), [])->promise();
+                    }
+                    return $this->getAsyncDatabase()->update(
+                        'user',
+                        [
+                            'user_id' => $context[self::CONTEXT_PARAM_USER]
+                        ],
+                        [
+                            'user_lastupdate' => $context[self::CONTEXT_PARAM_NEW_TIME]
+                        ]
+                    );
+                })
+                ->then(
+                    function (/* array $result */) use (&$data) {
+                        return $data;
+                    }
+                );
         })
         // add debug data to payload, only to be dumped to log, see PluginHelper::dump()
         ->then(function (array &$data) use ($lastUpdateTime) {
@@ -184,7 +184,7 @@ class GameLatest extends CommonBase
                     ->where($qb->expr()->gt('api_batch_lastupdate', $qb->createPositionalParameter($lastUpdateTime)))
             )
             ->then(function (Result $result) use (&$data) {
-                $data['debug']['batches'] = $result->fetchAllRows() ?: [];
+                $data['debug']['batches'] = ($result->fetchAllRows() ?? []) ?: [];
                 return $data;
             });
         });
@@ -291,114 +291,92 @@ class GameLatest extends CommonBase
     }
 
     /**
+     * get plan incl. its layers
+     *
      * @throws Exception
      */
-    private function latestLevel2(array $tick, float $lastUpdateTime, float $newTime, array &$data): PromiseInterface
+    private function getLatestPlan(array $context): PromiseInterface
     {
-        $data['tick'] = $tick;
-        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after tick');
-        }
         $plan = new PlanLatest();
         $this->asyncDataTransferTo($plan);
-        return $plan->latest((int)$lastUpdateTime);
+        return $plan->latest((int)$context[self::CONTEXT_PARAM_LAST_UPDATE_TIME])
+            ->then(function (array $planData) use ($context) {
+                if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
+                    wdo((microtime(true) - $context[self::CONTEXT_PARAM_NEW_TIME]) . ' elapsed after plan<br />');
+                }
+                return $planData;
+            });
     }
 
     /**
+     * get all the plan's additional layer data incl. geometry
+     *
      * @throws Exception
      */
-    private function latestLevel3(
-        array $planData,
-        float $lastUpdateTime,
-        float $newTime,
-        array &$data
-    ): PromiseInterface {
-        $data['plan'] = $planData;
-        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after plan');
-        }
-
+    private function getLatestPlanLayers(array $planData, array $context): PromiseInterface
+    {
         $layer = new LayerLatest();
         $this->asyncDataTransferTo($layer);
         $toPromiseFunctions = [];
-        foreach ($data['plan'] as $p) {
-            $toPromiseFunctions[] = tpf(function () use ($layer, $p, $lastUpdateTime) {
-                return $layer->latest($p['layers'], $lastUpdateTime, $p['id']);
+        foreach ($planData as $p) {
+            $toPromiseFunctions[] = tpf(function () use ($layer, $p, $context) {
+                return $layer->latest($p['layers'], $context[self::CONTEXT_PARAM_LAST_UPDATE_TIME], $p['id']);
             });
         }
         return parallel(
             $toPromiseFunctions
-        );
+        )
+        ->then(function (array $layersContainer) use ($context) {
+            if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
+                wdo((microtime(true) - $context[self::CONTEXT_PARAM_NEW_TIME]) . ' elapsed after plan layers<br />');
+            }
+            return $layersContainer;
+        });
     }
 
     /**
      * @throws Exception
      */
-    private function latestLevel4(
-        array $layersContainer,
-        int $teamId,
-        float $lastUpdateTime,
-        float $newTime,
-        array &$data
-    ): PromiseInterface {
-        foreach ($data['plan'] as $key => &$p) {
-            //only send the geometry when it's required
-            $p['layers'] = $layersContainer[$key];
-            if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-                wdo((microtime(true) - $newTime) . ' elapsed after layers<br />');
-            }
-
-            if ((
-                $p['state'] == "DESIGN" && $p['previousstate'] == "CONSULTATION" &&
-                $p['country'] != $teamId
-            )) {
-                $p['active'] = 0;
-            }
-        }
-        unset($p);
-
+    private function getLatestMessages(array $context): PromiseInterface
+    {
         $plan = new PlanLatest();
         $this->asyncDataTransferTo($plan);
         return $plan->getMessages(
-            $lastUpdateTime
-        );
+            $context[self::CONTEXT_PARAM_LAST_UPDATE_TIME]
+        )
+        ->then(function (array $result) use ($context) {
+            if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
+                wdo((microtime(true) - $context[self::CONTEXT_PARAM_NEW_TIME]) . ' elapsed after plan messages<br />');
+            }
+            return $result;
+        });
     }
 
     /**
      * @throws Exception
      */
-    private function latestLevel5(
-        array $queryResultRows,
-        float $lastUpdateTime,
-        float $newTime,
-        array &$data
-    ): PromiseInterface {
-        $data['planmessages'] = $queryResultRows;
-        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after plan messages');
-        }
-
+    private function getLatestRaster(array $context): PromiseInterface
+    {
         //return any raster layers that need to be updated
         $layer = new LayerLatest();
         $this->asyncDataTransferTo($layer);
         return $layer->latestRaster(
-            $lastUpdateTime
-        );
+            $context[self::CONTEXT_PARAM_LAST_UPDATE_TIME]
+        )
+        ->then(function (Result $result) use ($context) {
+            if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
+                wdo((microtime(true) - $context[self::CONTEXT_PARAM_NEW_TIME]) . ' elapsed after raster<br />');
+            }
+            return $result;
+        });
     }
 
     /**
      * @throws Exception
      */
-    private function latestLevel6(
-        Result $queryResult,
-        float $newTime,
-        array &$data
-    ): PromiseInterface {
-        $data['raster'] = $queryResult->fetchAllRows();
-        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after raster<br />');
-        }
-
+    private function getLatestEnergy(array $context): PromiseInterface
+    {
+        ;
         $energy = new EnergyLatest();
         $this->asyncDataTransferTo($energy);
         $deferred = new Deferred();
@@ -407,36 +385,30 @@ class GameLatest extends CommonBase
             $energyData['output'] = $queryResults[1]->fetchAllRows();
             $deferred->resolve($energyData);
         });
-        return $deferred->promise();
+        return $deferred->promise()
+            ->then(function (array $energyData) use ($context) {
+                if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
+                    wdo((microtime(true) - $context[self::CONTEXT_PARAM_NEW_TIME]) . ' elapsed after energy<br />');
+                }
+                return $energyData;
+            });
     }
 
     /**
-     * @param array $energyData
-     * @param int $teamId
-     * @param float $newTime
-     * @param array $data
+     * @param array $context
      * @return PromiseInterface
      * @throws Exception
      */
-    private function latestLevel7(
-        array $energyData,
-        int $teamId,
-        float $lastUpdateTime,
-        float $newTime,
-        array &$data
-    ): PromiseInterface {
-        $data['policy_updates'][] = array_merge([
-            'policy_type' => 'energy',
-        ], $energyData);
-        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after energy');
-        }
-
+    private function getLatestKpi(array $context): PromiseInterface
+    {
         $kpi = new KpiLatest();
         $this->asyncDataTransferTo($kpi);
         $deferred = new Deferred();
         $this->allowEnergyKpiUpdate ?
-            $kpi->latest((int)$lastUpdateTime, $teamId)->then(function (array $queryResultRows) use ($deferred) {
+            $kpi->latest(
+                (int)$context[self::CONTEXT_PARAM_LAST_UPDATE_TIME],
+                $context[self::CONTEXT_PARAM_TEAM_ID]
+            )->then(function (array $queryResultRows) use ($deferred) {
                 $deferred->resolve($queryResultRows);
             }) :
             resolveOnFutureTick($deferred, [
@@ -444,102 +416,44 @@ class GameLatest extends CommonBase
                 'shipping' => [],
                 'energy' => []
             ]);
-        return $deferred->promise();
+        return $deferred->promise()
+            ->then(function (array $results) use ($context) {
+                if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
+                    wdo((microtime(true) - $context[self::CONTEXT_PARAM_NEW_TIME]) . ' elapsed after kpi<br />');
+                }
+                return $results;
+            });
     }
 
     /**
      * @throws Exception
      */
-    private function latestLevel8(
-        array $queryResultRows,
-        float $lastUpdateTime,
-        float $newTime,
-        array &$data
-    ): PromiseInterface {
-        $data['simulation_updates'][0] = [
-            'simulation_type' => 'CEL',
-            'kpi' => $queryResultRows['energy']
-        ];
-        $data['simulation_updates'][1] = [
-            'simulation_type' => 'MEL',
-            'kpi' => $queryResultRows['ecology']
-        ];
-        $data['simulation_updates'][2] = [
-            'simulation_type' => 'SEL',
-            'kpi' => $queryResultRows['shipping']
-        ];
-
-        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after kpi<br />');
-        }
-
+    private function getLatestWarning(array $context): PromiseInterface
+    {
         $warning = new WarningLatest();
         $this->asyncDataTransferTo($warning);
-        return $warning->latest();
+        return $warning->latest()
+            ->then(function (Result $queryResult) use ($context) {
+                if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
+                    wdo((microtime(true) - $context[self::CONTEXT_PARAM_NEW_TIME]) . ' elapsed after warning<br />');
+                }
+                return $queryResult;
+            });
     }
 
     /**
      * @throws Exception
      */
-    private function latestLevel9(
-        Result $queryResult,
-        float $lastUpdateTime,
-        float $newTime,
-        array &$data
-    ): PromiseInterface {
-        $data['simulation_updates'][2]['shipping_issues'] = $queryResult->fetchAllRows();
-
-        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after warning<br />');
-        }
-
+    private function getLatestObjective(array $context): PromiseInterface
+    {
         $objective = new ObjectiveLatest();
         $this->asyncDataTransferTo($objective);
-        return $objective->latest(
-            $lastUpdateTime
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function latestLevel10(
-        Result $result,
-        int $user,
-        float $newTime,
-        array &$data
-    ): PromiseInterface {
-        $data['objectives'] = $result->fetchAllRows();
-
-        if (defined('DEBUG_PREF_TIMING') && DEBUG_PREF_TIMING === true) {
-            wdo((microtime(true) - $newTime) . ' elapsed after objective<br />');
-        }
-
-        //Add a slight fudge of 1ms to the update times to avoid rounding issues.
-        $data['update_time'] = $newTime - 0.001;
-
-        // send an empty string if nothing was updated
-        if (empty($data['energy']['connections']) &&
-            empty($data['energy']['output']) &&
-            empty($data['geometry']) &&
-            empty($data['plan']) &&
-            empty($data['messages']) &&
-            empty($data['planmessages']) &&
-            empty($data['kpi']) &&
-            empty($data['warning']) &&
-            empty($data['raster']) &&
-            empty($data['objectives'])) {
-            return resolveOnFutureTick(new Deferred(), '')->promise();
-        }
-
-        return $this->getAsyncDatabase()->update(
-            'user',
-            [
-                'user_id' => $user
-            ],
-            [
-                'user_lastupdate' => $newTime
-            ]
-        );
+        return $objective->latest($context[self::CONTEXT_PARAM_LAST_UPDATE_TIME])
+            ->then(function (Result $result) use ($context) {
+                if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
+                    wdo((microtime(true) - $context[self::CONTEXT_PARAM_NEW_TIME]) . ' elapsed after objective<br />');
+                }
+                return $result;
+            });
     }
 }

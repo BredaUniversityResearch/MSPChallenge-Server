@@ -32,7 +32,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
             return $this->getServerManager()->getGameSessionIds()
                 ->then(function (Result $result) {
                     // collect
-                    $gameSessionIds = collect($result->fetchAllRows() ?? [])
+                    $gameSessionIds = collect(($result->fetchAllRows() ?? []) ?: [])
                         ->keyBy('id')
                         ->map(function ($row) {
                             return $row['id'];

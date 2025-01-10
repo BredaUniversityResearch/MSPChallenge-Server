@@ -44,6 +44,9 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
+use Swaggest\JsonSchema\Exception\Error;
+use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\Schema;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -144,21 +147,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         $this->notice('Creating a new session database, as this is a brand new session.');
         $this->createSessionDatabase();
     }
-
-    private function migrateSessionDatabase(): void
-    {
-        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
-        $process = new Process([
-            $this->phpBinary,
-            'bin/console',
-            'doctrine:migrations:migrate',
-            '--em='.$this->database,
-            '--no-interaction',
-            '--env='.$_ENV['APP_ENV']
-        ], $this->kernel->getProjectDir());
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
-    }
-
+    
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -673,10 +662,10 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                 fn(Country $country) => $country->getCountryIsManager() == 0
             );
             foreach ($config["fishing"] as $fleet) {
-                if (isset($fleet["initialFishingDistribution"])) {
+                if (isset($fleet["initial_fishing_distribution"])) {
                     foreach ($countries as $country) {
                         $foundCountry = false;
-                        foreach ($fleet["initialFishingDistribution"] as $distribution) {
+                        foreach ($fleet["initial_fishing_distribution"] as $distribution) {
                             if ($distribution["country_id"] == $country->getCountryId()) {
                                 $foundCountry = true;
                                 break;
@@ -685,7 +674,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                         if (!$foundCountry) {
                             $this->error(
                                 "Country with ID {$country->getCountryId()} is missing a distribution entry ".
-                                "in the initialFishingDistribution table for fleet {$fleet["name"]} for MEL."
+                                "in the initial_fishing_distribution table for fleet {$fleet["name"]} for MEL."
                             );
                         }
                     }
@@ -1191,21 +1180,17 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     private function validateGameConfigComplete(): void
     {
         $gameConfigContents = json_decode($this->gameSession->getGameConfigVersion()->getGameConfigCompleteRaw());
-        $validator = new Validator();
-        $validator->validate(
-            $gameConfigContents,
-            json_decode(
-                file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
-            )
-        );
-        if (!$validator->isValid()) {
+        $schema = Schema::import(json_decode(
+            file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
+        ));
+        try {
+            $schema->in($gameConfigContents);
+        } catch (InvalidValue $e) {
             $this->error(
                 "Session config file {$this->gameSession->getGameConfigVersion()->getGameConfigFile()->getFilename()} ".
                 "v{$this->gameSession->getGameConfigVersion()->getVersion()} failed to pass validation:"
             );
-            foreach ($validator->getErrors() as $error) {
-                $this->error(sprintf("[%s] %s", $error['property'], $error['message']));
-            }
+            $this->error($e->getMessage());
             throw new \Exception('Session config file invalid, so not continuing.');
         }
         $this->info(
