@@ -141,8 +141,8 @@ class User implements UserInterface
         return;
     }
 
-    public function getUserIdentifier(): ?int
+    public function getUserIdentifier(): string
     {
-        return $this->id;
+        return (string) $this->id;
     }
 }

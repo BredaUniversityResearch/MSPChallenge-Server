@@ -88,7 +88,6 @@ class Game extends Base
                 unset($data[$key]);
             }
         }
-        // @phpstan-ignore-next-line "Offset 'wiki_base_url' does not exist" ??
         if (!isset($data['wiki_base_url'])) {
             $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
         }

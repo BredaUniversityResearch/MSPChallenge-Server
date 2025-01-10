@@ -7,8 +7,8 @@ use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\User;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Security\Core\Security;
 
 class GameConfigVersionListener
 {
