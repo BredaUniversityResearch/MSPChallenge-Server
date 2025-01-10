@@ -383,7 +383,7 @@ class User extends Base implements JWTUserInterface
         return $this;
     }
 
-    public static function createFromPayload($username, array $payload): UserBase
+    public static function createFromPayload($username, array $payload): User
     {
         $user = new static;
         $user->setUserId($payload['uid']);

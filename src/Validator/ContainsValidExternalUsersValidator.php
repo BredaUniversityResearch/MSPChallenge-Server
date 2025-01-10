@@ -2,7 +2,7 @@
 
 namespace App\Validator;
 
-use App\Domain\API\v1\UserBase;
+use App\Domain\API\v1\User;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -58,12 +58,12 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
     {
         if ($providerValueArray['provider'] != 'local' && !empty($providerValueArray['value'])) {
             $originalUsersArray = explode('|', $providerValueArray['value']);
-            $result = UserBase::checkExists($providerValueArray['provider'], $providerValueArray['value']);
+            $result = User::checkExists($providerValueArray['provider'], $providerValueArray['value']);
             if (!empty($result['notfound'])) {
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ submittedUsers }}', implode(', ', $originalUsersArray))
                     ->setParameter('{{ knownUsers }}', 'none')
-                    ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueArray['provider']))
+                    ->setParameter('{{ provider }}', User::getProviderName($providerValueArray['provider']))
                     ->addViolation();
                 return;
             }
@@ -72,7 +72,7 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ submittedUsers }}', implode(', ', $originalUsersArray))
                     ->setParameter('{{ knownUsers }}', implode(', ', $foundUsersArray))
-                    ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueArray['provider']))
+                    ->setParameter('{{ provider }}', User::getProviderName($providerValueArray['provider']))
                     ->addViolation();
                 return;
             }
@@ -82,7 +82,7 @@ class ContainsValidExternalUsersValidator extends ConstraintValidator
                 $this->context->buildViolation($constraint->messageAlternate)
                     ->setParameter('{{ userToCorrect }}', implode(', ', $originalUsersWithAlternativeArray))
                     ->setParameter('{{ knownUsers }}', implode(', ', $foundAlternativeUsersArray))
-                    ->setParameter('{{ provider }}', UserBase::getProviderName($providerValueArray['provider']))
+                    ->setParameter('{{ provider }}', User::getProviderName($providerValueArray['provider']))
                     ->addViolation();
             }
         }

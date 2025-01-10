@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Domain\API\v1\UserBase;
+use App\Domain\API\v1\User;
 use App\Entity\ServerManager\GameList;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -17,7 +17,7 @@ class GameListUserAccessFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $providerChoices['Should log in with a password'] = 'local';
-        $providers = UserBase::getProviders();
+        $providers = User::getProviders();
         foreach ($providers as $provider) {
             $providerChoices['Should login with '.$provider['name'].' account'] = $provider['id'];
         }
