@@ -102,17 +102,30 @@ services:
     App\Entity\ServerManager\Listener\GameListListener:
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameList' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameList' }
+
+    App\Entity\ServerManager\Listener\GameSaveListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameSave' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameSave' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameSave' }
 
     App\Entity\ServerManager\Listener\GameConfigVersionListener:
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameConfigVersion' }
 
     App\Entity\ServerManager\Listener\GameGeoServerListener:
         arguments:
             $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer' }
-            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameGeoServer' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameGeoServer' }
+    
+    App\Entity\ServerManager\Listener\GameWatchdogServerListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameWatchdogServer' }
 
     App\EventListener\SessionEntityListener:
         tags:
@@ -128,6 +141,23 @@ services:
     App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
 
     App\Domain\Communicator\WatchdogCommunicator:
+
+    app.menu_builder:
+        class: App\Menu\Builder
+        arguments: [ "@knp_menu.factory" ]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: mainMenu }
+            - { name: knp_menu.menu_builder, method: createSubMenu, alias: subMenu }
+
+    App\Security\MSPAuth2Authenticator:
+
+    App\Twig\GameButtonDecider:
+        tags:
+            - 'twig.extension'
+
+    App\Twig\VersionsReturner:
+        tags:
+            - 'twig.extension'
 
 when@dev:
     parameters:

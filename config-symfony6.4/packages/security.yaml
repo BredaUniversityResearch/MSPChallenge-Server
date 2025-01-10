@@ -4,6 +4,10 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
+        local_users:
+            entity:
+                class: 'App\Entity\ServerManager\User'
+                property: 'username'
         jwt:
             lexik_jwt:
                 class: App\Domain\API\v1\User
@@ -13,16 +17,20 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        login:
-            pattern: ^/\d+/api/User/RequestSession$
-            stateless: true
-            json_login:
-                check_path: session_api_user_controller
-        main:
+        open:
+            pattern: ^/(manager/gamelist|\d+/api/User/RequestSession)
+            security: false
+        api:
             pattern: ^/\d+/api/\w+/\w+
             stateless: true
             jwt: ~
             provider: jwt
+        manager:
+            pattern: ^/manager
+            provider: local_users
+            lazy: true
+            custom_authenticators:
+                - App\Security\MSPAuth2Authenticator
 
     access_control:
         - { path: ^/\d+/api/(User/RequestToken|User/RequestSession|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName|Game/CreatePOVConfig), roles: PUBLIC_ACCESS }
