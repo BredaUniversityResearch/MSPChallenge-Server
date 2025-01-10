@@ -121,9 +121,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                 ))->pull('hydra:member')
             )->filter(function ($value) use ($user) {
                 // when true, only that array item is filtered out of the collection
-                // todo: use strict comparison, once we fully moved to Symfony 6.4
-                //   (In Symfony 6.4 getUserIdentifier() returns string)
-                return (int) str_replace('/api/users/', '', $value['user']['@id']) == $user->getUserIdentifier();
+                return (string) str_replace('/api/users/', '', $value['user']['@id']) === $user->getUserIdentifier();
             });
             return !$response->isEmpty();
         } catch (\Exception $e) {

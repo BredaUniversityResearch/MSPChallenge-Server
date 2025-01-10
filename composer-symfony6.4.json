@@ -23,6 +23,7 @@
         "clue/http-proxy-react": "^1.8",
         "doctrine/annotations": "^2.0",
         "doctrine/doctrine-bundle": "^2.11",
+        "doctrine/doctrine-fixtures-bundle": "*",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^2.18",
         "drift/dbal": "dev-master",
@@ -41,13 +42,17 @@
         "react/http": "^1.5",
         "react/mysql": "^0.5.6",
         "react/promise": "2.10.*",
+        "runtime/frankenphp-symfony": "^0.2.0",
         "shivas/versioning-bundle": "^4.0",
         "swaggest/json-schema": "^0.12.42",
         "symfony/asset": "6.4.*",
+        "symfony/browser-kit": "6.4.*",
         "symfony/console": "6.4.*",
+        "symfony/css-selector": "6.4.*",
         "symfony/doctrine-messenger": "6.4.*",
         "symfony/dotenv": "6.4.*",
         "symfony/expression-language": "6.4.*",
+        "symfony/filesystem": "6.4.*",
         "symfony/finder": "6.4.*",
         "symfony/flex": "^2",
         "symfony/form": "6.4.*",
@@ -59,6 +64,7 @@
         "symfony/mime": "6.4.*",
         "symfony/monolog-bundle": "^3.8",
         "symfony/notifier": "6.4.*",
+        "symfony/phpunit-bridge": "^7.0",
         "symfony/process": "6.4.*",
         "symfony/property-access": "6.4.*",
         "symfony/property-info": "6.4.*",
@@ -156,7 +162,7 @@
             ],
             "pre-push": [
                 "bash test.sh",
-                "vendor/bin/phpstan analyse"
+                "vendor/bin/phpstan analyse --memory-limit=1G"
             ]
         },
         "symfony": {

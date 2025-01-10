@@ -15,7 +15,7 @@ use ServerManager\ServerManager;
 use Symfony\Component\Uid\Uuid;
 use function App\await;
 
-abstract class UserBase extends Base implements JWTUserInterface
+class User extends Base implements JWTUserInterface
 {
     private const ALLOWED = array(
         ["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE],
@@ -438,5 +438,10 @@ abstract class UserBase extends Base implements JWTUserInterface
                 " message : ". $e->getMessage()
             );
         }
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string)$this->getUserId();
     }
 }

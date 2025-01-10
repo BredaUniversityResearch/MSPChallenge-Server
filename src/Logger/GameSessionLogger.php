@@ -6,8 +6,9 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Monolog\LogRecord;
 
-abstract class GameSessionLoggerBase extends AbstractProcessingHandler
+class GameSessionLogger extends AbstractProcessingHandler
 {
     public function __construct(
         private readonly ContainerBagInterface $params
@@ -46,5 +47,12 @@ abstract class GameSessionLoggerBase extends AbstractProcessingHandler
     {
         return $this->params->get('app.server_manager_log_dir').
             sprintf($this->params->get('app.server_manager_log_name'), $gameListId);
+    }
+
+    protected function write(LogRecord $record): void
+    {
+        $arr = $record->toArray();
+        $arr['formatted'] = $record->formatted;
+        $this->handleWriteByArray($arr);
     }
 }

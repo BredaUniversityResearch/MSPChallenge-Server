@@ -9,7 +9,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Table(name: 'users')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-abstract class UserBase implements UserInterface
+class User implements UserInterface
 {
     #[ORM\Id]
     #[ORM\Column]
@@ -139,5 +139,10 @@ abstract class UserBase implements UserInterface
     {
         // irrelevant
         return;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string)$this->getId();
     }
 }
