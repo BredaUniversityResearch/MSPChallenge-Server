@@ -52,7 +52,7 @@ class CreatePolicyPlanCommand extends Command
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         private readonly SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
-        parent::__construct();
+        parent::__construct(self::$defaultName);
     }
 
     protected function configure(): void
