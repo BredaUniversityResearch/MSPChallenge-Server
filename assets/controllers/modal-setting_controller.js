@@ -41,11 +41,11 @@ export default class extends Controller {
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
-    async doSoftReset(event) {
+    doSoftReset(event) {
         this.doReset(event, 'You are about to execute a SOFT reset! Are you sure you want to do this?', 1);
     }
 
-    async doHardReset(event) {
+    doHardReset(event) {
         this.doReset(event, 'You are about to execute a HARD reset! Are you sure you want to do this?', 2);
     }
 
@@ -55,7 +55,6 @@ export default class extends Controller {
             const response = await fetch(`/manager/setting/reset/${type}`);
             const responseText = await response.text();
             this.modalResetTarget.innerHTML = responseText;
-            event.currentTarget.removeAttribute('disabled');
         }
     }
 
