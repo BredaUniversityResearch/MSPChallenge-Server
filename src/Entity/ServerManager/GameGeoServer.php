@@ -35,7 +35,7 @@ class GameGeoServer
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 1])]
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 1])]
     private ?bool $available = true;
 
     public function getId(): ?int

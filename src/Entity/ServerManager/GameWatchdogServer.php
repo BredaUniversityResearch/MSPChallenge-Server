@@ -30,7 +30,7 @@ class GameWatchdogServer
     #[ORM\Column(length: 255, unique: true)]
     private ?string $address = null;
 
-    #[ORM\Column(type: Types::SMALLINT, options: ['default' => 1])]
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 1])]
     private ?bool $available = true;
 
     public function getId(): ?int
