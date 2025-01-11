@@ -5,7 +5,7 @@ import Modal from '../helpers/modal';
 
 export default class extends Controller {
 
-    static targets = ['modalSettingDescriptionForm', 'modalSettingUsersForm'];
+    static targets = ['modalSettingDescriptionForm', 'modalSettingUsersForm', 'modalReset'];
 
     modalHelper;
 
@@ -42,32 +42,20 @@ export default class extends Controller {
     }
 
     async doSoftReset(event) {
-        if (confirm('You are about to execute a SOFT reset! Are you sure you want to do this?')) {
-            event.currentTarget.setAttribute('disabled', true);
-            const response = await fetch(`/manager/setting/reset/1`);
-            const responseText = await response.text();
-            if (response.status != 200) {
-                errorNotification(responseText);
-                event.currentTarget.removeAttribute('disabled');
-                return;
-            } 
-            noticeNotification(responseText);
-            window.dispatchEvent(new CustomEvent("modal-closing"));
-        }
+        this.doReset(event, 'You are about to execute a SOFT reset! Are you sure you want to do this?', 1);
     }
 
     async doHardReset(event) {
-        if (confirm('You are about to execute a HARD reset! Are you sure you want to do this?')) {
+        this.doReset(event, 'You are about to execute a HARD reset! Are you sure you want to do this?', 2);
+    }
+
+    async doReset(event, text, type) {
+        if (confirm(text)) {
             event.currentTarget.setAttribute('disabled', true);
-            const response = await fetch(`/manager/setting/reset/2`);
+            const response = await fetch(`/manager/setting/reset/${type}`);
             const responseText = await response.text();
-            if (response.status != 200) {
-                errorNotification(responseText);
-                event.currentTarget.removeAttribute('disabled');
-                return;
-            } 
-            noticeNotification(responseText);
-            window.dispatchEvent(new CustomEvent("modal-closing"));
+            this.modalResetTarget.innerHTML = responseText;
+            event.currentTarget.removeAttribute('disabled');
         }
     }
 

@@ -48,8 +48,10 @@ class SettingController extends BaseController
         $app->setAutoExit(false);
         $input = new ArrayInput($command);
         $output = new BufferedOutput();
-        $statusCode = $app->run($input, $output);
-        return new Response($output->fetch(), $statusCode === 0 ? 200 : 422);
+        $app->run($input, $output);
+        return $this->render('manager/Setting/setting_reset.html.twig', [
+            'resetReturn' => $output->fetch(),
+        ]);
     }
 
     #[Route('manager/setting/list', name: 'manager_setting_list')]
