@@ -70,8 +70,10 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             throw new MSPAuth2RedirectException();
         }
         // retrieve some user details from the token
-        $user = $this->mspServerManagerEntityManager->getRepository(User::class)->find(
-            $unencryptedToken->claims()->get('id')
+        $user = $this->mspServerManagerEntityManager->getRepository(User::class)->findOneBy(
+            [
+                'username' => $unencryptedToken->claims()->get('username')
+            ]
         );
         if (is_null($user)) {
             $user = new User();
@@ -121,7 +123,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                 ))->pull('hydra:member')
             )->filter(function ($value) use ($user) {
                 // when true, only that array item is filtered out of the collection
-                return (string) str_replace('/api/users/', '', $value['user']['@id']) === $user->getUserIdentifier();
+                return (string) str_replace('/api/users/', '', $value['user']['username']) === $user->getUsername();
             });
             return !$response->isEmpty();
         } catch (\Exception $e) {
