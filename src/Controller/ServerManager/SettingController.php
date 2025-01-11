@@ -40,7 +40,7 @@ class SettingController extends BaseController
         if ($type == 0) {
             return $this->render('manager/Setting/setting_reset.html.twig');
         }
-        $command = ['command' => 'app:reset', '--force' => true, '--no-debug' => true];
+        $command = ['command' => 'app:reset', '--force' => true];
         if ($type == 1) {
             $command['sessions'] = '1-999';
         }

@@ -187,7 +187,9 @@ class ResetCommand extends Command
                     $config->removeGameConfigVersion($configVersion);
                     $this->removeEntity($configVersion);
                 } else {
-                    $this->io->info("Skipping pre-installed config version #{$configVersion->getId()}");
+                    if ($this->io->isDebug()) {
+                        $this->io->info("Skipping pre-installed config version #{$configVersion->getId()}");
+                    }
                 }
             }
             if (count($config->getGameConfigVersion()) === 0) {
