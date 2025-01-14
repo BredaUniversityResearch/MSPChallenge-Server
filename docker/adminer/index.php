@@ -9,35 +9,16 @@ namespace docker {
         {
             public function login($login, $password)
             {
-                // allow empty root password on dev.
-                if (($_ENV['APP_ENV'] ?? 'prod') == 'dev' &&
-                    empty($_ENV['MYSQL_ROOT_PASSWORD'])) {
-                    return true;
-                }
-                return parent::credentials();
+                return true;
             }
             public function credentials()
             {
-                // allow empty root password on dev.
-                if (($_ENV['APP_ENV'] ?? 'prod') == 'dev' &&
-                    empty($_ENV['MYSQL_ROOT_PASSWORD'])) {
-                    return ['database:3306', 'root', ''];
-                }
-                return parent::credentials();
-            }
-            function _callParent($function, $args)
-            {
-                if ($function === 'loginForm') {
-                    ob_start();
-                    $return = \Adminer::loginForm();
-                    $form = ob_get_clean();
-
-                    echo str_replace('name="auth[server]" value="" title="hostname[:port]"', 'name="auth[server]" value="'.($_ENV['ADMINER_DEFAULT_SERVER'] ?: 'db').'" title="hostname[:port]"', $form);
-
-                    return $return;
-                }
-
-                return parent::_callParent($function, $args);
+                // server, username and password for connecting to database
+                return array(
+                    getenv('ADMINER_DEFAULT_SERVER') ?? 'database',
+                    getenv('ADMINER_DEFAULT_USER') ?? 'root',
+                    getenv('ADMINER_DEFAULT_PASSWORD') ?? ''
+                );
             }
         }
 
@@ -51,12 +32,6 @@ namespace docker {
 }
 
 namespace {
-    if (basename($_SERVER['DOCUMENT_URI'] ?? $_SERVER['REQUEST_URI']) === 'adminer.css' && is_readable('adminer.css')) {
-        header('Content-Type: text/css');
-        readfile('adminer.css');
-        exit;
-    }
-
     function adminer_object()
     {
         return \docker\adminer_object();
