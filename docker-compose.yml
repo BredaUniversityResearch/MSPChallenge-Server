@@ -1,6 +1,6 @@
 services:
   redis:
-    image: 'mspserver-redis'
+    container_name: 'mspserver-redis'
     build:
       context: .
       target: redis_base
@@ -12,7 +12,7 @@ services:
 
   database:
     # check https://hub.docker.com/_/mariadb for info.
-    image: 'mspserver-mariadb'
+    container_name: 'mspserver-mariadb'
     build:
       context: .
       target: mariadb_base
@@ -45,7 +45,7 @@ services:
       driver: "local"
 
   php:
-    image: 'mspserver-php'
+    container_name: 'mspserver-php'
     depends_on:
       - database
       - redis
@@ -114,7 +114,7 @@ services:
       driver: "local"
 
   blackfire:
-    image: 'mspserver-blackfire'
+    container_name: 'mspserver-blackfire'
     build:
       context: .
       target: blackfire_base
