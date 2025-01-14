@@ -35,7 +35,7 @@ class AccessTokenAuthenticatedListener
     public function __invoke(JWTAuthenticatedEvent $event): void
     {
         $token = str_replace('Bearer ', '', $this->request->headers->get('Authorization'));
-        $gameSessionId = $this->request->attributes->get('sessionId');
+        $gameSessionId = $this->request->attributes->get('session');
         // temporary fallback while we continue migrating legacy code to Symfony...
         if (is_null($gameSessionId)) {
             throw new BadRequestHttpException('Missing or invalid session ID');
