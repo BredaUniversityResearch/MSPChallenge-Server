@@ -350,14 +350,19 @@ class Geometry
             if (strtolower($layerTypeMetaData["map_type"]) == "other") {
                 $typeOther = $typeValue;
             }
+            // if the map_type is a range, check if the featureTypeProperty is within that range
             if (str_contains($layerTypeMetaData["map_type"], '-')) {
                 // assumes a range of minimum to maximum (but not including) integer or float values
                 $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
-                if ((float) $featureTypeProperty >= (float) $typeValues[0]
+                if (is_numeric($typeValues[0]) && is_numeric($typeValues[1]) &&
+                    (float) $featureTypeProperty >= (float) $typeValues[0]
                     && (float) $featureTypeProperty < (float) $typeValues[1]) {
                     $type = $typeValue;
+                    break;
                 }
-            } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+            }
+            // check if the featureTypeProperty matches the map_type value
+            if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
                 // translate the found $featureProperties value to the type value (int, float, string)
                 $type = $typeValue;
                 break;
