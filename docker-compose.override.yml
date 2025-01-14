@@ -1,7 +1,7 @@
 # Development environment override
 services:
   phpredisadmin:
-    image: 'mspserver-phpredisadmin-dev'
+    container_name: 'mspserver-phpredisadmin'
     build:
       context: .
       target: phpredisadmin_base
@@ -21,36 +21,11 @@ services:
       driver: "local"
 
   database:
-    image: 'mspserver-mariadb-dev'
     ports:
       - "${DATABASE_PORT:-3306}:${DATABASE_PORT:-3306}"
 
-  adminer:
-    image: 'mspserver-adminer-dev'
-    build:
-      context: .
-      target: adminer_base
-    restart: always
-    environment:
-      ADMINER_DEFAULT_DRIVER: MySQL
-      ADMINER_DEFAULT_SERVER: database
-      ADMINER_PLUGINS: sql-log
-      ADMINER_DEFAULT_USER: ${DATABASE_USER:-}
-      ADMINER_DEFAULT_PASSWORD: ${DATABASE_PASSWORD:-}
-    ports:
-      # run Adminer on port 8082 since 8080 will be used by mitmproxy
-      - ${ADMINER_PORT:-8082}:8080
-    networks:
-      - database
-    volumes:
-      - ./docker/adminer/index.php:/var/www/html/index.php:ro
-      # see https://github.com/adminerevo/adminerevo/tree/main/designs
-      - ./docker/adminer/adminer.css:/var/www/html/adminer.css:ro
-    logging:
-      driver: "local"
-
   mitmproxy:
-    image: 'mspserver-mitmproxy-dev'
+    container_name: 'mspserver-mitmproxy'
     build:
       context: .
       target: mitmproxy_base
@@ -69,7 +44,6 @@ services:
       driver: "local"
 
   php:
-    image: 'mspserver-php-dev'
     build:
       context: .
       target: frankenphp_dev
