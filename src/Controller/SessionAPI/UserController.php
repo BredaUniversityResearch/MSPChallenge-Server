@@ -39,10 +39,10 @@ class UserController extends BaseController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse(self::wrapPayloadForResponse($payload));
+            return new JsonResponse(self::wrapPayloadForResponse(true, $payload));
         } catch (\Exception $e) {
             return new JsonResponse(
-                self::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                self::wrapPayloadForResponse(false, message: $e->getMessage().PHP_EOL.$e->getTraceAsString()),
                 500
             );
         }
@@ -89,10 +89,10 @@ class UserController extends BaseController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse(self::wrapPayloadForResponse($payload));
+            return new JsonResponse(self::wrapPayloadForResponse(true, $payload));
         } catch (\Exception $e) {
             return new JsonResponse(
-                self::wrapPayloadForResponse([], $e->getMessage().PHP_EOL.$e->getTraceAsString()),
+                self::wrapPayloadForResponse(false, message: $e->getMessage().PHP_EOL.$e->getTraceAsString()),
                 500
             );
         }

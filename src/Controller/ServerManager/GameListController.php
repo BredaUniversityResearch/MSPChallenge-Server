@@ -34,6 +34,7 @@ class GameListController extends BaseController
         } catch (IncompatibleClientException $e) {
             return new JsonResponse(
                 self::wrapPayloadForResponse(
+                    false,
                     [
                         'clients_url' => $this->getParameter('app.clients_url'),
                         'server_version' => $provider->getVersion()
@@ -43,18 +44,21 @@ class GameListController extends BaseController
                 403
             );
         } catch (InvalidVersionString $e) {
-            return new JsonResponse(self::wrapPayloadForResponse([], $e->getMessage()), 400);
+            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 400);
         }
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         return is_null($request->headers->get('Turbo-Frame')) ?
-            $this->json(self::wrapPayloadForResponse([
+            $this->json(self::wrapPayloadForResponse(
+                true,
+                [
                 'sessionslist' => $gameList,
                 'server_description' => $serverDesc->getValue(),
                 'clients_url' => $this->getParameter('app.clients_url'),
                 'server_version' => $provider->getVersion(),
                 'server_components_versions' => $provider->getComponentsVersions()
-            ])) :
+                ]
+            )) :
             new Response('', 500); // for later! MSP-3820
     }
 }
