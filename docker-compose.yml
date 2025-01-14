@@ -1,6 +1,6 @@
 services:
   redis:
-    image: "${IMAGE_PREFIX:-}mspserver-redis"
+    container_name: "${IMAGE_PREFIX:-}mspserver-redis"
     build:
       context: .
       target: redis_base
@@ -12,7 +12,7 @@ services:
 
   database:
     # check https://hub.docker.com/_/mariadb for info.
-    image: "${IMAGE_PREFIX:-}mspserver-mariadb"
+    container_name: "${IMAGE_PREFIX:-}mspserver-mariadb"
     build:
       context: .
       target: mariadb_base
@@ -45,7 +45,7 @@ services:
       driver: "local"
 
   php:
-    image: "${IMAGE_PREFIX:-}mspserver-php"
+    container_name: "${IMAGE_PREFIX:-}mspserver-php"
     depends_on:
       - database
       - redis
@@ -113,7 +113,7 @@ services:
       driver: "local"
 
   simulations:
-    image: "${IMAGE_PREFIX:-}mspserver-simulations"
+    container_name: "${IMAGE_PREFIX:-}mspserver-simulations"
     build:
       context: .
       dockerfile: simulations/debian.11-x64/Dockerfile
@@ -131,7 +131,7 @@ services:
       - php
 
   blackfire:
-    image: "${IMAGE_PREFIX:-}mspserver-blackfire"
+    container_name: "${IMAGE_PREFIX:-}mspserver-blackfire"
     build:
       context: .
       target: blackfire_base

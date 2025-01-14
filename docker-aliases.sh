@@ -16,15 +16,15 @@ fi
 # ede = export (e) dotenv (d) environmental variables (e)
 alias ede='unset $(bash docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(bash docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
-PRE_DCU="bash set_symfony_version.sh"
+PRE_DCU="bash set_symfony_version.sh && mkdir -p ./var/docker/ && touch ./var/docker/.bash_history"
 DCU_BASE="MSYS_NO_PATHCONV=1 docker compose"
-alias dcu="ede && $PRE_DCU && ${DCU_BASE} up -d --remove-orphans"
+alias dcu="ede && $PRE_DCU && COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev" ${DCU_BASE} -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 # dcu + xdebug (x)
-alias dcux="ede && $PRE_DCU && XDEBUG_MODE=debug ${DCU_BASE} up -d --remove-orphans"
+alias dcux="ede && $PRE_DCU && COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev" XDEBUG_MODE=debug ${DCU_BASE} up -d --remove-orphans"
 # dcu + production (p)}
 alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 # dcu + hybrid (h)}
-alias dcus='ede && '"$PRE_DCU && APP_ENV=prod ${DCU_BASE} -f docker-compose.yml -f docker-compose.staging.yml up -d --remove-orphans"
+alias dcus='ede && '"$PRE_DCU && APP_ENV=prod COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-staging" ${DCU_BASE} -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
 [[ -z "${COMPOSE_PROJECT_NAME}" ]] && COMPOSE_PROJECT_NAME="mspchallenge"
 [[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER="${COMPOSE_PROJECT_NAME}-php-1"
