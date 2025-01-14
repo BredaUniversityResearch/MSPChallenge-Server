@@ -13826,7 +13826,7 @@
             "displayName": "Other",
             "approval": "NotDependent",
             "value": 0,
-            "map_type": "",
+            "map_type": "other",
             "displayPolygon": 0,
             "polygonColor": "#00590DFF",
             "polygonPatternName": "27",
