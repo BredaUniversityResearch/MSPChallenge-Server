@@ -13,6 +13,9 @@ fi
 if [ "${OS}" == "Windows_NT" ]; then
   alias php=php.exe
 fi
+[[ -z "${COMPOSE_PROJECT_NAME}" ]] && COMPOSE_PROJECT_NAME="mspchallenge"
+[[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER="${COMPOSE_PROJECT_NAME}-php-1"
+[[ -z "${DATABASE_CONTAINER}" ]] && DATABASE_CONTAINER="${COMPOSE_PROJECT_NAME}-database-1"
 # ede = export (e) dotenv (d) environmental variables (e)
 alias ede='unset $(bash docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(bash docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
@@ -26,9 +29,6 @@ alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_EN
 # dcu + hybrid (h)}
 alias dcus='ede && '"$PRE_DCU && APP_ENV=prod COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-staging" ${DCU_BASE} -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
-[[ -z "${COMPOSE_PROJECT_NAME}" ]] && COMPOSE_PROJECT_NAME="mspchallenge"
-[[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER="${COMPOSE_PROJECT_NAME}-php-1"
-[[ -z "${DATABASE_CONTAINER}" ]] && DATABASE_CONTAINER="${COMPOSE_PROJECT_NAME}-database-1"
 # dl = docker(d) logs(l) with default container mspchallenge-server-php-1
 alias dl="${ALIAS_DL_BASE} ${PHP_CONTAINER}"
 # dl + blackfire (b)
