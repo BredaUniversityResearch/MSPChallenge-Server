@@ -15,19 +15,19 @@ security:
             security: false
         # so if an invalid token is present in the header, it will still be shown
         public:
-            pattern: ^/api/(doc|User/RequestToken|User/RequestSession|Game/CreatePOVConfig)
+            pattern: ^/api/doc(\.json)?|^/\d+/api/(User/RequestToken|User/RequestSession|Game/CreatePOVConfig)
             security: false
         login:
-            pattern: ^/api/User/RequestSession$
+            pattern: ^/\d+/api/User/RequestSession$
             stateless: true
             json_login:
                 check_path: session_api_user_controller
         main:
-            pattern: ^/api/.*
+            pattern: ^/\d+/api/.*
             stateless: true
             jwt: ~
             provider: jwt
 
     access_control:
         - { path: ^/\d+/api/(GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
-        - { path: ^/api/.*, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/\d+/api/.*, roles: IS_AUTHENTICATED_FULLY }

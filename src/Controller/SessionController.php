@@ -29,23 +29,17 @@ class SessionController extends AbstractController
         int $session,
         string $query
     ): Response {
-        // Clone the original attributes and add the session ID
-        $attributes = $request->attributes->all();
-
         try {
             ConnectionManager::getInstance()->getCachedGameSessionDbConnection($session)->connect();
         } catch (\Exception $e) {
             throw $this->createNotFoundException('Session database does not exist.');
         }
 
-        $attributes['sessionId'] = $session;
         // Merge the route information into the attributes
         $routeInfo = $router->match('/api/'.$query);
-        $attributes = array_merge($attributes, $routeInfo);
+        $attributes = array_merge($request->attributes->all(), $routeInfo);
         // Create a sub-request with the modified attributes, and leave the rest of the original request untouched
         $subRequest = $request->duplicate(attributes: $attributes);
-        $subRequest->attributes->set('sessionId', $session);
-
         return $httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 }

@@ -11,7 +11,7 @@ class BaseController extends AbstractController
     protected function getSessionIdFromRequest(Request $request): int
     {
         // check query parameter session
-        $sessionId = $request->attributes->get('sessionId');
+        $sessionId = $request->attributes->get('session');
         if (!$sessionId || !is_numeric($sessionId)) {
             // this should not happen, since the CheckApiSessionIdListener should have already checked this
             throw new BadRequestHttpException('Missing or invalid session ID');
