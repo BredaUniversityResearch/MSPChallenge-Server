@@ -22,7 +22,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class SymfonyToLegacyHelper
 {
     private static ?SymfonyToLegacyHelper $instance = null;
-
     private string $projectDir;
     private UrlGeneratorInterface $urlGenerator;
     private UrlMatcherInterface $urlMatcher;
@@ -32,12 +31,9 @@ class SymfonyToLegacyHelper
     private ?Closure $fnControllerForwarder = null;
     private MessageBusInterface $messageBus;
     private EntityManagerInterface $em;
-
     private VersionsProvider $provider;
     private LoggerInterface $analyticsLogger;
-
     private WatchdogCommunicator $watchdogCommunicator;
-
     private AuthenticationSuccessHandler $authenticationSuccessHandler;
 
     public function __construct(

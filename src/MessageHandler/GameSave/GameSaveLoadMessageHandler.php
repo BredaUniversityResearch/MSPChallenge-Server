@@ -5,6 +5,7 @@ namespace App\MessageHandler\GameSave;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\GameSaveZipFileValidator;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Game;
@@ -33,13 +34,13 @@ use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use ZipArchive;
 use function App\rcopy;
 use function App\rrmdir;
 
 #[AsMessageHandler]
 class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
 {
+    private GameSaveZipFileValidator $validator;
 
     public function __construct(
         KernelInterface $kernel,
@@ -126,15 +127,16 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $this->resetSessionRasterStore();
         $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
         $sessionRasterStoreTemp = $this->params->get('app.session_raster_dir').'temp';
-        $this->info("Unpacking raster files... This could take a bit longer.");
-        if (!$this->saveZip->extractTo($sessionRasterStoreTemp)) {
+        $this->info("Unpacking raster files...");
+        if (!$this->validator->getZipArchive()->extractTo($sessionRasterStoreTemp)) {
             throw new \Exception('ExtractTo failed.');
         } else {
             $this->debug('ExtractTo succeeded.');
         }
-        $this->info("Now moving all raster files to their proper place...");
+        $this->info("Now moving all raster files to their proper place... This could take a bit longer.");
         rcopy($sessionRasterStoreTemp."/raster", $sessionRasterStore);
         rrmdir($sessionRasterStoreTemp);
+        $this->info("Raster files moved.");
     }
 
     /**
@@ -150,9 +152,13 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         if (!$fileSystem->exists($saveZipStore)) {
             throw new \Exception("Wasn't able to find ZIP file: {$saveZipStore}");
         }
-        $this->saveZip = new ZipArchive();
-        if ($this->saveZip->open($saveZipStore) !== true) {
-            throw new \Exception("Wasn't able to open the ZIP file: {$saveZipStore}");
+        $this->validator = new GameSaveZipFileValidator(
+            $saveZipStore,
+            $this->kernel,
+            $this->mspServerManagerEntityManager
+        );
+        if (!$this->validator->isValid()) {
+            throw new \Exception("ZIP file {$saveZipStore} is invalid: {$this->validator->getErrorsAsString()}.");
         }
     }
 
@@ -162,16 +168,8 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
      */
     private function importSessionRunningConfig(): string
     {
+        $sessionConfigContents = $this->validator->getSessionConfigContents();
         $sessionConfigFileName = $this->params->get('app.session_config_name');
-        $sessionConfigFileNamePrefix = explode("%", $sessionConfigFileName)[0];
-        $sessionConfigContents = '';
-        for ($i = 0; $i < $this->saveZip->numFiles; $i++) {
-            $stat = $this->saveZip->statIndex($i);
-            if (str_contains($stat['name'], $sessionConfigFileNamePrefix)) {
-                $sessionConfigContents = $this->saveZip->getFromIndex($i);
-                break;
-            }
-        }
         $sessionConfigStore = $this->params->get('app.session_config_dir').
             sprintf($sessionConfigFileName, $this->gameSession->getId());
         file_put_contents($sessionConfigStore, $sessionConfigContents);
@@ -206,6 +204,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
      */
     private function importSessionDatabase(): void
     {
+        $this->debug('Session database dump import attempt starting... This might take a while.');
         $tempDumpFile = $this->tempStoreDbExportInSaveZip();
         $mysqlBinary = (new ExecutableFinder)->find('mysql');
         $process = new Process([
@@ -235,13 +234,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             // umask issues in prod can prevent mkdir to create with default 0777
             $fileSystem->chmod($outputDirectory, 0777);
         }
-        for ($i = 0; $i < $this->saveZip->numFiles; $i++) {
-            $stat = $this->saveZip->statIndex($i);
-            if (str_contains($stat['name'], 'db_export_')) {
-                $this->saveZip->extractTo($outputDirectory, $stat['name']);
-                return $outputDirectory.$stat['name'];
-            }
-        }
-        throw new \Exception('Unable to locate the db_export SQL file in the save Zip');
+        $this->validator->getZipArchive()->extractTo($outputDirectory, $this->validator->getDbDumpFilename());
+        return $outputDirectory.$this->validator->getDbDumpFilename();
     }
 }

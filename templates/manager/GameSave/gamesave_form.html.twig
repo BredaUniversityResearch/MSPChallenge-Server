@@ -1,0 +1,36 @@
+<turbo-frame id="modalDefaultBody">
+    <div data-modal-gamesave-target="modalSaveLoadForm">
+        {{ form_start(gameSaveForm) }}
+        <div class="modal-body">
+            <div class="form-group">
+                {{ form_label(gameSaveForm.name, 'Session Name', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(gameSaveForm.name) }}
+                </div>
+                {{ form_widget(gameSaveForm.name, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameSaveForm.name) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameSaveForm.gameWatchdogServer, 'Simulation Server', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(gameSaveForm.gameWatchdogServer) }}
+                </div>
+                {{ form_widget(gameSaveForm.gameWatchdogServer, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameSaveForm.gameWatchdogServer) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameSaveForm.gameSave, 'Select the Session Save you wish to load', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">
+                    {{ form_errors(gameSaveForm.gameSave) }}
+                </div>
+                {{ form_widget(gameSaveForm.gameSave, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameSaveForm.gameSave) }}</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-gamesave#submitSaveLoadModalForm">Create session</button>
+        </div>
+        {{ form_end(gameSaveForm) }}
+    </div>
+</turbo-frame>

@@ -1,19 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <meta name="turbo-cache-control" content="no-cache">
+        <title>{% block title %}Server Manager{% endblock %} - {% block subtitle %}Main page{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
-        {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cabin">
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
-
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <div id="header-wrapper">
+            <div id="header">
+                <div id="logo-wrapper">
+                    <div id="logo">
+                        <img src="{{ asset('build/images/MSP_Challenge_Icon-037c7c.png') }}"  alt="MSP Challenge logo"/>
+                    </div>
+                </div>
+                <div id="menu">
+                    {{ knp_menu_render('mainMenu') }}
+                </div>
+            </div>
+        </div>
+        <div id="alert-wrapper">
+        {% for message in app.flashes('success') %}
+            <div {{ stimulus_controller('flashes', {
+                success: message,
+            }) }}
+            ></div>
+        {%  endfor %}
+        {% for message in app.flashes('error') %}
+            <div {{ stimulus_controller('flashes', {
+                error: message,
+            }) }}
+            ></div>
+        {%  endfor %}
+        {% for message in app.flashes('notice') %}
+            <div {{ stimulus_controller('flashes', {
+                notice: message,
+            }) }}
+            ></div>
+        {%  endfor %}
+        </div>
+        <div id="content-wrapper">
+            <div id="content" {{ stimulus_controller('modal-default')|stimulus_controller('list-default') }}>
+                <div id="menu-user">
+                    {{ knp_menu_render('subMenu') }}
+                </div>
+            {% if block('title') is defined %}
+                <h1>{{ block('title') }}</h1>
+            {% endif %}
+            {% if block('subtitle') is defined %}
+                <h2>{{ block('subtitle') }}</h2>
+            {% endif %}
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+        <div id="footer-wrapper">
+            <div id="footer">
+                <div>MSP Challenge Server version {{ version }}</div>
+                <div>Server address: {{ address }}</div>
+            </div>
+            <div id="footer">
+                MSP Challenge is a community-based, open source and not for profit initiative, since 2011.
+            </div>
+            <div id="footer-extra">
+                <img src="{{ asset('build/images/EU_flag_yellow_high.jpg') }}" />
+                Co-funded by the European Union.
+            </div>
+        </div>
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="logToast" role="status" aria-live="polite" aria-atomic="true" class="toast hide"
+                data-session=""
+                 {{ stimulus_controller('logtoast') }} data-action="session-changing@window->logtoast#showToast">
+                <div class="toast-header">
+                    <strong class="me-auto" id="logToastTitle"></strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" data-action="logtoast#hideToast">
+                    </button>
+                </div>
+                <div class="toast-body" id="logToastBody">
+                    <turbo-frame id="gameLogExcerpt" src="">
+                    </turbo-frame>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

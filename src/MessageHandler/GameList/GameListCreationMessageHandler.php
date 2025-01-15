@@ -114,6 +114,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $state = 'failed';
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
+        $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
         $this->mspServerManagerEntityManager->flush();
     }
 
@@ -130,7 +131,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
             $this->notice('Resetting the session database, as this is a session recreate.');
             if ($this->gameSession->getSessionState() != GameSessionStateValue::FAILED) {
-                $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+                $this->watchdogCommunicator->changeState($this->gameSession->getId(), new GameStateValue('end'));
             }
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->gameSession->setGameState(new GameStateValue('setup'));
@@ -1145,6 +1146,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     {
         // not turning game_session into a Doctrine Entity as the whole table will be deprecated
         // as soon as the session API has been ported to Symfony, so this is just for backward compatibility
+        $this->gameSession->encodePasswords();
         $qb = $this->entityManager->getConnection()->createQueryBuilder();
         $qb->insert('game_session')
             ->values(

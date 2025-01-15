@@ -4,6 +4,7 @@ namespace App\MessageHandler\GameSave;
 
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\GameListAndSaveSerializer;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\Layer;
@@ -23,9 +24,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Serializer;
 use ZipArchive;
 
 #[AsMessageHandler]
@@ -233,23 +231,8 @@ class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
 
     private function addGameListRecordToZip(): void
     {
-        $encoder = new JsonEncoder();
-        $serializer = new Serializer([$this->normalizer], [$encoder]);
-        $normalizeContext = [
-            AbstractNormalizer::CALLBACKS => [
-                'id' => fn() => $this->gameSession->getId(),
-                'gameConfigVersion' => fn($innerObject) => (!is_null($innerObject)) ? $innerObject->getId() : null,
-                'gameServer' => fn($innerObject) => $innerObject->getId(),
-                'gameWatchdogServer' => fn($innerObject) => $innerObject->getId(),
-                'sessionState' => fn($innerObject) => ((string) $innerObject),
-                'gameState' => fn($innerObject) => ((string) $innerObject),
-                'gameVisibility' => fn($innerObject) => ((string) $innerObject),
-                'saveType' => fn() => null,
-                'saveVisibility' => fn() => null,
-                'saveTimestamp' => fn() => null
-            ]
-        ];
-        $gameList = $serializer->serialize($this->gameSave, 'json', $normalizeContext);
+        $serializer = new GameListAndSaveSerializer($this->mspServerManagerEntityManager);
+        $gameList = $serializer->createJsonFromGameSave($this->gameSave);
         $this->saveZip->addFromString('game_list.json', $gameList);
     }
 

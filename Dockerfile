@@ -145,3 +145,4 @@ FROM shyim/adminerevo AS adminer_base
 FROM mitmproxy/mitmproxy:10.3.1 as mitmproxy_base
 FROM redis:7.2.4-alpine AS redis_base
 FROM erikdubbelboer/phpredisadmin as phpredisadmin_base
+FROM node:22.6

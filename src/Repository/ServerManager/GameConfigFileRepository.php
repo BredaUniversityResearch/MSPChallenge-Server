@@ -25,4 +25,15 @@ class GameConfigFileRepository extends EntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    public function findAllSimple(int $id): array
+    {
+        return $this->createQueryBuilder('gcf')
+            ->select('gcf.filename', 'gcf.description')
+            ->where('gcf.id = :val')
+            ->setParameter('val', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 }

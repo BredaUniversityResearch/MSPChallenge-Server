@@ -2,16 +2,19 @@
 
 namespace App\Controller\SessionAPI;
 
+use App\Domain\Services\ConnectionManager;
 use App\Controller\BaseController;
+use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Router;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
-use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use OpenApi\Attributes as OA;
 use App\Entity\Watchdog;
 use App\Repository\WatchdogRepository;
+use App\Entity\Game;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,12 +24,44 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
+use App\Domain\Communicator\WatchdogCommunicator;
+
+use function App\await;
 
 class GameController extends BaseController
 {
     public function __construct(
         private readonly string $projectDir
     ) {
+    }
+
+    // not a route yet, should replace /[sessionId]/api/Game/State one day
+    public function state(
+        int $sessionId,
+        string $state,
+        WatchdogCommunicator $watchdogCommunicator,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
+    ): void {
+        $state = new GameStateValue(strtolower($state));
+        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
+        $game = $em->getRepository(Game::class)->retrieve();
+        $currentState = $game->getGameState();
+        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
+            throw new \Exception("Invalid current state of ".$currentState);
+        }
+        if ($currentState == GameStateValue::SETUP) {
+            //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
+            $plan = new Plan();
+            $plan->setGameSessionId($sessionId);
+            await($plan->updateLayerState(0));
+            if ($state == GameStateValue::PAUSE) {
+                $game->setGameCurrentMonth(0);
+            }
+        }
+        $game->setGameLastUpdate(microtime(true)); // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
+        $game->setGameState($state);
+        $em->flush();
+        $watchdogCommunicator->changeState($sessionId, $state);
     }
 
     public function createPOVConfig(

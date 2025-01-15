@@ -45,9 +45,17 @@ class WatchdogCommunicator extends AbstractCommunicator implements LogContainerI
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
-     * @throws Exception
      * @throws \Exception
      */
+    public function changeStateBySessionId(int $sessionId, GameStateValue $newWatchdogState): void
+    {
+        if (null === $gameList = ConnectionManager::getInstance()->getServerManagerEntityManager()
+            ->getRepository(GameList::class)->find($sessionId)) {
+            throw new \Exception('Could not find GameList entity with id: '.$sessionId);
+        }
+        $this->changeState($gameList, $newWatchdogState);
+    }
+
     public function changeState(
         GameList $gameList,
         GameStateValue $newWatchdogState
