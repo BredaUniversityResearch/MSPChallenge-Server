@@ -33,7 +33,9 @@ return static function (DoctrineConfig $doctrineConfig, StofDoctrineExtensionsCo
     ];
     $serverManagerDbName = $connectionManager->getServerManagerDbName();
     $ormConfig
-        ->defaultEntityManager($serverManagerDbName);
+        ->defaultEntityManager($serverManagerDbName)
+        # https://stackoverflow.com/questions/79131843/how-to-set-auto-generate-proxy-classes-to-autogenerate-eval-when-using-doctrine
+        ->autoGenerateProxyClasses(Doctrine\ORM\Proxy\ProxyFactory::AUTOGENERATE_EVAL);
     foreach ($dbNames as $dbName) {
         $dbalConfig->connection($dbName, $connectionManager->getConnectionConfig($dbName));
         $ormConfig->entityManager($dbName, $connectionManager->getEntityManagerConfig($dbName))->dql($dqlConfig);
