@@ -10,6 +10,7 @@ use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use Exception;
 use OpenApi\Attributes as OA;
 use App\Entity\Watchdog;
 use App\Repository\WatchdogRepository;
@@ -26,6 +27,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
 use App\Domain\Communicator\WatchdogCommunicator;
 
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use function App\await;
 
 class GameController extends BaseController
@@ -36,6 +40,13 @@ class GameController extends BaseController
     }
 
     // not a route yet, should replace /[sessionId]/api/Game/State one day
+
+    /**
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws Exception
+     */
     public function state(
         int $sessionId,
         string $state,
@@ -47,7 +58,7 @@ class GameController extends BaseController
         $game = $em->getRepository(Game::class)->retrieve();
         $currentState = $game->getGameState();
         if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
-            throw new \Exception("Invalid current state of ".$currentState);
+            throw new Exception("Invalid current state of ".$currentState);
         }
         if ($currentState == GameStateValue::SETUP) {
             //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
@@ -61,7 +72,7 @@ class GameController extends BaseController
         $game->setGameLastUpdate(microtime(true)); // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
         $game->setGameState($state);
         $em->flush();
-        $watchdogCommunicator->changeState($sessionId, $state);
+        $watchdogCommunicator->changeStateBySessionId($sessionId, $state);
     }
 
     public function createPOVConfig(
@@ -107,7 +118,7 @@ class GameController extends BaseController
                 ));
             }
             $zipFilepath = $configCreator->createAndZip($region);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new JsonResponse(
                 Router::formatResponse(false, $e->getMessage(), null, __CLASS__, __FUNCTION__),
                 Response::HTTP_INTERNAL_SERVER_ERROR
@@ -286,7 +297,7 @@ class GameController extends BaseController
                 (int)$port,
                 $scheme
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new JsonResponse(
                 self::wrapPayloadForResponse(
                     false,

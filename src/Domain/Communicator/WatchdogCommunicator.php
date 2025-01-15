@@ -56,6 +56,9 @@ class WatchdogCommunicator extends AbstractCommunicator implements LogContainerI
         $this->changeState($gameList, $newWatchdogState);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function changeState(
         GameList $gameList,
         GameStateValue $newWatchdogState

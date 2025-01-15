@@ -39,11 +39,12 @@ class GameConfigVersionListener
             GameConfigVersion::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE_RAW,
             function () use ($gameConfigVersion) {
                 $path = $this->kernel->getProjectDir().'/ServerManager/configfiles/'.$gameConfigVersion->getFilePath();
-                if (false === file_get_contents($path)) {
+                if (false === $contents = file_get_contents($path)) {
                     throw new Exception(
                         "Cannot read contents of the session's chosen configuration file: {$path}"
                     );
                 }
+                return $contents;
             }
         );
         $gameConfigVersion->hasLazyLoader(

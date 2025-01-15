@@ -8,7 +8,6 @@ use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListArchiveMessage;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -18,10 +17,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 #[AsMessageHandler]
 class GameListArchiveMessageHandler extends CommonSessionHandlerBase
@@ -42,19 +39,16 @@ class GameListArchiveMessageHandler extends CommonSessionHandlerBase
      * @throws \Exception
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
-     * @throws Exception
      */
     public function __invoke(GameListArchiveMessage $gameList): void
     {
         $this->database = $this->connectionManager->getGameSessionDbName($gameList->id);
         $this->entityManager = $this->connectionManager->getGameSessionEntityManager($gameList->id);
         $this->gameSession = new GameList($gameList->id);
-        $this->watchdogCommunicator->changeState($this->gameSession->getId(), new GameStateValue('end'));
+        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
         $this->removeSessionRasterStore();
         (new Filesystem())->remove($this->params->get('app.session_config_dir').
             sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));

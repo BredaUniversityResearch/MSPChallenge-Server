@@ -10,7 +10,6 @@ use App\Domain\Common\EntityEnums\RestrictionSort;
 use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
-use App\Domain\Log\LogContainerInterface;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
 use App\Entity\EnergyOutput;
@@ -39,7 +38,6 @@ use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use JsonSchema\Validator;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -119,19 +117,17 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
-     * @throws Exception
+     * @throws \Exception
      */
     private function setupSessionDatabase(): void
     {
         if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
             $this->notice('Resetting the session database, as this is a session recreate.');
             if ($this->gameSession->getSessionState() != GameSessionStateValue::FAILED) {
-                $this->watchdogCommunicator->changeState($this->gameSession->getId(), new GameStateValue('end'));
+                $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
             }
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->gameSession->setGameState(new GameStateValue('setup'));
@@ -1135,10 +1131,8 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
 
     /**
      * @throws \Exception
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      * @throws Exception
      */
