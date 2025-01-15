@@ -372,6 +372,9 @@ class Layer extends Base
     private function metaValueValidation(string $key, $val)
     {
         // all key-based validation first
+        if ($key == 'layer_type') {
+            return json_encode($val, JSON_FORCE_OBJECT);
+        }
         $convertZeroToNull = [
             'layer_entity_value_max' // float - used to convert 0.0 to null
         ];

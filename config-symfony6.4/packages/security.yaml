@@ -4,6 +4,10 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
+        local_users:
+            entity:
+                class: 'App\Entity\ServerManager\User'
+                property: 'username'
         jwt:
             lexik_jwt:
                 class: App\Domain\API\v1\User
@@ -14,20 +18,21 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         # so if an invalid token is present in the header, it will still be shown
-        public:
-            pattern: ^/api/doc(\.json)?|^/\d+/api/(User/RequestToken|User/RequestSession|Game/CreatePOVConfig)
+        open:
+            pattern: ^/(api/doc(\.json)?|manager/gamelist|\d+/api/(User/RequestToken|User/RequestSession|Game/CreatePOVConfig))
             security: false
-        login:
-            pattern: ^/\d+/api/User/RequestSession$
-            stateless: true
-            json_login:
-                check_path: session_api_user_controller
-        main:
-            pattern: ^/\d+/api/.*
+        api:
+            pattern: ^/\d+/api/\w+/\w+
             stateless: true
             jwt: ~
             provider: jwt
+        manager:
+            pattern: ^/manager
+            provider: local_users
+            lazy: true
+            custom_authenticators:
+                - App\Security\MSPAuth2Authenticator
 
     access_control:
         - { path: ^/\d+/api/(GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
-        - { path: ^/\d+/api/.*, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/\d+/api/\w+/\w+$, roles: IS_AUTHENTICATED_FULLY }

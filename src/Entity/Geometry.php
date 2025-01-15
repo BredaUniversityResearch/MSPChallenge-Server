@@ -48,7 +48,7 @@ class Geometry
     private Collection $geometrySubtractives;
 
     /** Many Categories have One Category. */
-    #[ORM\ManyToOne(targetEntity: Geometry::class, cascade: ['persist'], inversedBy: 'geometrySubtractive')]
+    #[ORM\ManyToOne(targetEntity: Geometry::class, cascade: ['persist'], inversedBy: 'geometrySubtractives')]
     #[ORM\JoinColumn(name: 'geometry_subtractive', referencedColumnName: 'geometry_id')]
     private ?Geometry $geometryToSubtractFrom = null;
 

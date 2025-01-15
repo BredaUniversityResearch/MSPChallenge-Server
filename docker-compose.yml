@@ -1,4 +1,18 @@
 services:
+  node:
+    image: "node:22.6"
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      NODE_ENV: ${APP_ENV:-dev}
+    volumes:
+      - ./:/home/node/app
+    expose:
+      - "8081"
+    ports: # use if it is necessary to expose the container to the host machine
+      - "8008:8008"
+    command: bash -c "yarn install && yarn encore ${APP_ENV:-dev}"
+
   redis:
     container_name: "${IMAGE_PREFIX:-}mspserver-redis"
     build:
@@ -156,8 +170,6 @@ services:
       driver: "local"
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
 
 volumes:
   caddy_data:

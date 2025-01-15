@@ -10,7 +10,6 @@ use App\Domain\Common\EntityEnums\RestrictionSort;
 use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
-use App\Domain\Log\LogContainerInterface;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
 use App\Entity\EnergyOutput;
@@ -39,7 +38,6 @@ use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use JsonSchema\Validator;
 use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -114,16 +112,15 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $state = 'failed';
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
+        $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
         $this->mspServerManagerEntityManager->flush();
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
-     * @throws Exception
+     * @throws \Exception
      */
     private function setupSessionDatabase(): void
     {
@@ -1134,10 +1131,8 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
 
     /**
      * @throws \Exception
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      * @throws Exception
      */
@@ -1145,6 +1140,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     {
         // not turning game_session into a Doctrine Entity as the whole table will be deprecated
         // as soon as the session API has been ported to Symfony, so this is just for backward compatibility
+        $this->gameSession->encodePasswords();
         $qb = $this->entityManager->getConnection()->createQueryBuilder();
         $qb->insert('game_session')
             ->values(

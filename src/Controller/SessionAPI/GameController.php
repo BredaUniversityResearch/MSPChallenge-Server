@@ -2,19 +2,21 @@
 
 namespace App\Controller\SessionAPI;
 
+use App\Domain\Services\ConnectionManager;
 use App\Controller\BaseController;
 use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Game;
+use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Router;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
-use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 use OpenApi\Attributes as OA;
 use App\Entity\Watchdog;
 use App\Repository\WatchdogRepository;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +26,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
+use App\Domain\Communicator\WatchdogCommunicator;
+
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use function App\await;
 
 #[Route('/api/Game')]
 #[OA\Tag(name: 'Game', description: 'Operations related to game management')]
@@ -32,6 +40,42 @@ class GameController extends BaseController
     public function __construct(
         private readonly string $projectDir
     ) {
+    }
+
+    // not a route yet, should replace /[sessionId]/api/Game/State one day
+
+    /**
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws Exception
+     */
+    public function state(
+        int $sessionId,
+        string $state,
+        WatchdogCommunicator $watchdogCommunicator,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
+    ): void {
+        $state = new GameStateValue(strtolower($state));
+        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
+        $game = $em->getRepository(Game::class)->retrieve();
+        $currentState = $game->getGameState();
+        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
+            throw new Exception("Invalid current state of ".$currentState);
+        }
+        if ($currentState == GameStateValue::SETUP) {
+            //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
+            $plan = new Plan();
+            $plan->setGameSessionId($sessionId);
+            await($plan->updateLayerState(0));
+            if ($state == GameStateValue::PAUSE) {
+                $game->setGameCurrentMonth(0);
+            }
+        }
+        $game->setGameLastUpdate(microtime(true)); // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
+        $game->setGameState($state);
+        $em->flush();
+        $watchdogCommunicator->changeStateBySessionId($sessionId, $state);
     }
 
     #[Route(
@@ -173,7 +217,7 @@ class GameController extends BaseController
         ));
         try {
             $zipFilepath = $configCreator->createAndZip($region);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new JsonResponse(
                 Router::formatResponse(
                     false,
@@ -508,7 +552,7 @@ class GameController extends BaseController
                 (int)$port,
                 $scheme
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new JsonResponse(
                 self::wrapPayloadForResponse(
                     false,

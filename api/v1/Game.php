@@ -79,7 +79,6 @@ class Game extends Base
                 unset($data[$key]);
             }
         }
-
         if (!isset($data['wiki_base_url'])) {
             $data['wiki_base_url'] = $_ENV['DEFAULT_WIKI_BASE_URL'];
         }

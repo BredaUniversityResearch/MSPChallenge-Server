@@ -173,6 +173,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
      */
     protected function resetSessionRasterStore(): void
     {
+        $this->info("Resetting the session raster store...");
         $this->removeSessionRasterStore();
         $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
         $fileSystem = new Filesystem();
