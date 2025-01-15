@@ -112,8 +112,7 @@ phpstan.neon
 ###< symfony/phpunit-bridge ###
 
 ###> lexik/jwt-authentication-bundle ###
-/config/jwt/*.pem
-/config-symfony5.4/jwt/*.pem
+/config*/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
 
 # to solve issues with GitHub: https://chipperci.com/docs/issues/composer-github-authentication/
