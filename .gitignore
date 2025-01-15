@@ -123,8 +123,3 @@ yarn-error.log
 # to solve issues with GitHub: https://chipperci.com/docs/issues/composer-github-authentication/
 # which creates this file, which should be ignored
 auth.json
-
-###> php-cs-fixer/shim ###
-/.php-cs-fixer.php
-/.php-cs-fixer.cache
-###< php-cs-fixer/shim ###
