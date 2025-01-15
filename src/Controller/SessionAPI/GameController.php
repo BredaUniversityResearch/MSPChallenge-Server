@@ -16,6 +16,7 @@ use Exception;
 use OpenApi\Attributes as OA;
 use App\Entity\Watchdog;
 use App\Repository\WatchdogRepository;
+use App\Entity\Game as GameEntity;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -58,7 +59,7 @@ class GameController extends BaseController
     ): void {
         $state = new GameStateValue(strtolower($state));
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
-        $game = $em->getRepository(Game::class)->retrieve();
+        $game = $em->getRepository(GameEntity::class)->retrieve();
         $currentState = $game->getGameState();
         if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
             throw new Exception("Invalid current state of ".$currentState);

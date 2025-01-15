@@ -7,7 +7,6 @@ use ServerManager\ServerManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Attribute\Route;
 
 class LegacyController extends LegacyControllerBase
 {
