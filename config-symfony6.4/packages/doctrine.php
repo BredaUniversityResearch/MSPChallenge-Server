@@ -25,7 +25,9 @@ return static function (DoctrineConfig $doctrineConfig) {
         'enable_lazy_ghost_objects' => false
     ]);
     $ormConfig
-        ->defaultEntityManager($connectionManager->getServerManagerDbName());
+        ->defaultEntityManager($connectionManager->getServerManagerDbName())
+        # https://stackoverflow.com/questions/79131843/how-to-set-auto-generate-proxy-classes-to-autogenerate-eval-when-using-doctrine
+        ->autoGenerateProxyClasses(Doctrine\ORM\Proxy\ProxyFactory::AUTOGENERATE_EVAL);
     foreach ($dbNames as $dbName) {
         $dbalConfig->connection($dbName, $connectionManager->getConnectionConfig($dbName));
         $ormConfig->entityManager($dbName, $connectionManager->getEntityManagerConfig($dbName));
