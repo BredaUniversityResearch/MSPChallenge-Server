@@ -111,11 +111,6 @@ phpstan.neon
 ###< phpunit/phpunit ###
 ###< symfony/phpunit-bridge ###
 
-###> lexik/jwt-authentication-bundle ###
-/config/jwt/*.pem
-/config-symfony5.4/jwt/*.pem
-###< lexik/jwt-authentication-bundle ###
-
 # to solve issues with GitHub: https://chipperci.com/docs/issues/composer-github-authentication/
 # which creates this file, which should be ignored
 auth.json
