@@ -21,6 +21,7 @@ services:
       driver: "local"
 
   database:
+    ports:
       - "${DATABASE_PORT:-3306}:${DATABASE_PORT:-3306}"
 
   mitmproxy:
