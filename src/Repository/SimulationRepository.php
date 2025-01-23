@@ -3,14 +3,10 @@
 namespace App\Repository;
 
 use App\Domain\Common\InternalSimulationName;
-use App\Domain\Services\ConnectionManager;
 use App\Entity\Watchdog;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Shivas\VersioningBundle\Provider\VersionProvider;
 use Symfony\Component\Uid\Uuid;
 
 class SimulationRepository extends EntityRepository
