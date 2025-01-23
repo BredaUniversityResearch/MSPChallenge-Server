@@ -1,0 +1,32 @@
+<turbo-frame id="modalDefaultBody">
+    <div class="modal-body" data-modal-setting-target="modalSettingUsersList">
+        <p>
+            Note: if you are not an administrator for this Server Manager, then you'll only see your own
+            account in the list below, and you won't be able to add other users to this Server Manager.
+        </p>
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Administrator?</th>
+                    <th>Remove access</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for return in returns %}
+                <tr>
+                    <td>{{ return.user.username }}</td>
+                    <td>{{ return.isAdmin ? 'Yes' : 'No' }}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm"
+                            data-delurl="{{ return['@id'] }}"
+                            data-action="modal-setting#deleteSettingUser">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</turbo-frame>

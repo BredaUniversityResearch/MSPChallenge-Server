@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Form;
+
+use App\Entity\ServerManager\GameWatchdogServer;
+
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UuidType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+class GameWatchdogServerFormType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder
+            ->add('name', TextType::class)
+            ->add('server_id', UuidType::class)
+            ->add('scheme', TextType::class)
+            ->add('address', TextType::class)
+            ->add('port', TextType::class)
+        ;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'data_class' => GameWatchdogServer::class,
+        ]);
+    }
+}

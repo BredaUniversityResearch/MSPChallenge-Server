@@ -17,9 +17,7 @@ class WsServerConnection implements ConnectionInterface
     public function __construct(ConnectionInterface $conn)
     {
         $this->conn = $conn;
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->httpRequest = $conn->httpRequest;
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->resourceId = $conn->resourceId;
     }
 

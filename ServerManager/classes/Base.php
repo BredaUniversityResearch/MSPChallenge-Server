@@ -88,7 +88,7 @@ class Base
             "POST",
             $url,
             $data2send,
-            array(ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.': '.$api_access_token),
+            array(ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN.':Bearer '.$api_access_token),
             false
         );
         return json_decode($call_return, true);

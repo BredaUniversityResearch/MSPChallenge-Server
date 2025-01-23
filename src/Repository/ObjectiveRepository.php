@@ -9,11 +9,6 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 
 class ObjectiveRepository extends EntityRepository
 {
-    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
-    {
-        parent::__construct($em, $class);
-    }
-
     public function save(Objective $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);

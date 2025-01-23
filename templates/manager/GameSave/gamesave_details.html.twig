@@ -1,0 +1,65 @@
+<turbo-frame id="modalDefaultBody">
+    <div data-modal-gamesave-target="modalSaveEditForm">
+        {{ form_start(gameSaveForm) }}
+        <div class="modal-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-border-left">
+                    <tr>
+                        <td colspan="2"><h1>{{ gameSave.name }}</h1></td>
+                    </tr>
+                    <tr>
+                        <th>Saved on</th>
+                        <td class="text-right">{{ gameSave.saveTimestampPretty }} </td>
+                    </tr>
+                    <tr>
+                        <th>Month &amp; Year of the Simulation</th>
+                        <td class="text-right">{{ gameSave.gameCurrentMonthPretty }}</td>
+                    </tr>
+                    <tr>
+                        <th>Configuration</th>
+                        <td class="text-right">{{ gameSave.gameConfigFilesFilename }}</td>
+                    </tr>
+                    <tr>
+                        <th>Type</th>
+                        <td class="text-right">{{ gameSave.saveType }}</td>
+                    </tr>
+                    <tr>
+                        <th>Visibility</th>
+                        <td class="text-right">{{ gameSave.saveVisibility }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="text-left">
+                            <h3>Notes</h3>
+                            {{ form_errors(gameSaveForm.saveNotes) }}
+                            {{ form_widget(gameSaveForm.saveNotes, {'attr': {'class': 'form-control'}}) }}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-secondary btn-sm"
+                    data-save="{{ gameSave.id }}"
+                    data-action="gamesave#saveDownload">
+                    <i class="fa fa-download" title="Download save file"></i> Download
+                </button> &nbsp;
+                {% if gameSave.saveVisibility == 'active' %}
+                <button class="btn btn-secondary btn-sm"
+                    data-save="{{ gameSave.id }}"
+                    data-action="modal-gamesave#openSaveLoadModal">
+                    <i class="fa fa-plus-circle" title="Load into new session"></i> Load</button>
+                </button>
+                <button class="btn btn-secondary btn-sm ms-auto" 
+                    data-save="{{ gameSave.id }}" 
+                    data-action="gamesave#saveArchive">
+                    <i class="fa fa-archive" title="Archive save file"></i> Archive
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-gamesave#submitSaveEditModalForm">Save Notes</button>
+        </div>
+        {{ form_end(gameSaveForm) }}
+    </div>
+</turbo-frame>
