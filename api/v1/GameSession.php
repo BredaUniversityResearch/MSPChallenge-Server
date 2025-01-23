@@ -90,7 +90,7 @@ class GameSession extends Base
 
         $_SERVER['HTTPS'] ??= 'off';
         /** @noinspection HttpUrlsUsage */
-        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
+        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
 
         $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
         return $connection->query(
@@ -137,14 +137,14 @@ class GameSession extends Base
         $serverName = $_SERVER["SERVER_NAME"] ?? gethostname();
 
         /** @noinspection HttpUrlsUsage */
-        $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? "http://");
+        $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
         $apiFolder = "/ServerManager/api/";
 
         if ($forDocker) {
-            // this is always called from inside the docker environment,so just use http://caddy:80/ or
+            // this is always called from inside the docker environment,so just use http://php:80/ or
             //   http://mitmproxy:8080/
             $GLOBALS['ServerManagerApiRoot'][1] = 'http://'.
-                ($_ENV['WEB_SERVER_HOST'] ?? 'localhost').':'.($_ENV['WEB_SERVER_PORT'] ?? 80).$apiFolder;
+                ($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).$apiFolder;
             return $GLOBALS['ServerManagerApiRoot'][1];
         }
 

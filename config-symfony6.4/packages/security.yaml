@@ -18,7 +18,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         open:
-            pattern: ^/(manager/gamelist|\d+/api/User/RequestSession)
+            pattern: ^/(api/doc(\.json)?|manager/gamelist|\d+/api/(User/RequestToken|User/RequestSession|Game/CreatePOVConfig))
             security: false
         api:
             pattern: ^/\d+/api/\w+/\w+
@@ -33,5 +33,5 @@ security:
                 - App\Security\MSPAuth2Authenticator
 
     access_control:
-        - { path: ^/\d+/api/(User/RequestToken|User/RequestSession|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName|Game/CreatePOVConfig), roles: PUBLIC_ACCESS }
-        - { path: ^/\d+/api/\w+/\w+$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/\d+/api/(GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
+        - { path: ^/\d+/api/.*, roles: IS_AUTHENTICATED_FULLY }
