@@ -16,10 +16,16 @@ class SessionController extends AbstractController
      * @throws \Exception
      */
     #[Route(
-        path: '/{slashes}{session}/{slashes2}api/{query}',
+        path: '/{slashes}{session}/{slashes2}api/{slashes3}{query}',
         name: 'api_session',
-        requirements: ['session' => '\d+', 'query' => '.*', 'slashes' => '(\/+)?', 'slashes2' => '(\/+)?'],
-        defaults: ['slashes' => '', 'slashes2' => ''],
+        requirements: [
+            'session' => '\d+', // the session id
+            'query' => '.*', // everything after /api/,
+            'slashes' => '\/*',
+            'slashes2' => '\/*',
+            'slashes3' => '\/*'
+        ],
+        defaults: ['slashes' => '', 'slashes2' => '', 'slashes3' => ''],
         methods: ['GET', 'POST']
     )]
     public function __invoke(

@@ -169,7 +169,7 @@ class GameController extends BaseController
         ));
         try {
             $zipFilepath = $configCreator->createAndZip($region);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new JsonResponse(
                 Router::formatResponse(
                     false,
@@ -261,7 +261,8 @@ class GameController extends BaseController
                                 'message' => 'Error message'
                             ]
                         )
-                    ]
+                    ],
+                    ref: '#/components/schemas/ResponseStructure'
                 )
             )
         ]
@@ -304,12 +305,18 @@ class GameController extends BaseController
         ),
         responses: [
             new OA\Response(
+                ref: '#/components/schemas/ResponseStructure',
                 response: 200,
                 description: 'Year and month of the requested simulated month identifier',
                 content: new OA\JsonContent(
-                    properties: [
-                        new OA\Property(property: 'year', type: 'integer', example: 2019),
-                        new OA\Property(property: 'month_of_year', type: 'integer', example: 5)
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(property: 'year', type: 'integer', example: 2019),
+                                new OA\Property(property: 'month_of_year', type: 'integer', example: 5)
+                            ]
+                        )
                     ]
                 )
             ),
@@ -326,7 +333,8 @@ class GameController extends BaseController
                                 'message' => 'Error message'
                             ]
                         )
-                    ]
+                    ],
+                    ref: '#/components/schemas/ResponseStructure'
                 )
             )
         ]
