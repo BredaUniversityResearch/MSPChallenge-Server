@@ -100,7 +100,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function startStateRegisterPlugins()
+    private function startStateRegisterPlugins(): void
     {
         // create plugins
         $ticksHandlerPlugin = new TicksHandlerWsServerPlugin();
@@ -110,7 +110,8 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
         ]);
 
         // then create & register blackfire plugin
-        if (extension_loaded('pcntl')) {
+        if (($_ENV['BLACKFIRE_APM_ENABLED'] ?? false) &&
+            extension_loaded('pcntl')) {
             $blackfirePlugin = new BlackfireWsServerPlugin();
             $sequencerPlugin->addSubscriber($blackfirePlugin);
             $ticksHandlerPlugin->addSubscriber($blackfirePlugin);
