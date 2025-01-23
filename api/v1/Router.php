@@ -312,11 +312,23 @@ class Router
     public static function formatResponse(
         bool $success,
         ?string $message,
-        $payload = null,
+        mixed $payload = null,
         string $className = '',
         string $method = '',
         array $data = []
     ): array {
+        if (($_ENV['APP_ENV'] ?? 'prod') !== 'dev') {
+            return [
+                // no need for header information from api, only needed for websocket server communication.
+                "header_type" => null,
+                "header_data" => null,
+                "success" => $success,
+                "message" => $message,
+                "payload" => $payload
+            ];
+        }
+
+        // everything for dev (debug) below
         if (!$success) {
             $message .= PHP_EOL .
             "Request: " . $className . "/" . $method . PHP_EOL .
@@ -330,14 +342,14 @@ class Router
             unset($payload['debug-message']);
         }
 
-        return array(
+        return [
             // no need for header information from api, only needed for websocket server communication.
             "header_type" => null,
             "header_data" => null,
             "success" => $success,
             "message" => $message,
             "payload" => $payload
-        );
+        ];
     }
 
     /**

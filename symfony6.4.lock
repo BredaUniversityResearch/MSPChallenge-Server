@@ -72,13 +72,17 @@
         ]
     },
     "nelmio/api-doc-bundle": {
-        "version": "4.34",
+        "version": "4.33",
         "recipe": {
             "repo": "github.com/symfony/recipes-contrib",
             "branch": "main",
             "version": "3.0",
             "ref": "c8e0c38e1a280ab9e37587a8fa32b251d5bc1c94"
-        }
+        },
+        "files": [
+            "./config/packages/nelmio_api_doc.yaml",
+            "./config/routes/nelmio_api_doc.yaml"
+        ]
     },
     "phpstan/phpstan": {
         "version": "1.10",
@@ -122,16 +126,13 @@
         ]
     },
     "stof/doctrine-extensions-bundle": {
-        "version": "1.12",
+        "version": "1.13",
         "recipe": {
             "repo": "github.com/symfony/recipes-contrib",
             "branch": "main",
             "version": "1.2",
             "ref": "e805aba9eff5372e2d149a9ff56566769e22819d"
-        },
-        "files": [
-            "./config/packages/stof_doctrine_extensions.yaml"
-        ]
+        }
     },
     "symfony/console": {
         "version": "6.2",
