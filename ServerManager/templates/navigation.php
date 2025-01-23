@@ -32,6 +32,8 @@ $html =<<<"HTML"
           <li id="user-menu-item">
             <a href="/ServerManager/logout_php">Log out</a>
           </li>
+          <li id="user-menu-item">
+            <a href="/manager">Try the new Server Manager!</a>
         </ul>
       </div>
     </nav>

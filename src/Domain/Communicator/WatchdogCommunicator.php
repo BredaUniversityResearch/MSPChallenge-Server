@@ -4,80 +4,111 @@ namespace App\Domain\Communicator;
 
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Log\LogContainerInterface;
+use App\Domain\Log\LogContainerTrait;
 use App\Domain\Services\ConnectionManager;
-use App\Entity\Game;
 use App\Entity\ServerManager\GameList;
-use App\VersionsProvider;
+use App\Entity\Simulation;
+use App\Entity\Watchdog;
+use App\Message\Watchdog\GameStateChangedMessage;
+use App\Message\Watchdog\Token;
+use DateTime;
 use Doctrine\DBAL\Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use function React\Promise\resolve;
 
-class WatchdogCommunicator extends AbstractCommunicator
+class WatchdogCommunicator extends AbstractCommunicator implements LogContainerInterface
 {
+    use LogContainerTrait;
+
     private const DEFAULT_WATCHDOG_PORT = 45000;
     private GameList $gameList;
 
     public function __construct(
         HttpClientInterface $client,
-        private readonly VersionsProvider $versionsProvider,
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
         private readonly string $projectDir,
-        private readonly ConnectionManager $connectionManager
+        private readonly ConnectionManager $connectionManager,
+        private MessageBusInterface $watchdogMessageBus
     ) {
         parent::__construct($client);
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
-     * @throws Exception
+     * @throws \Exception
+     */
+    public function changeStateBySessionId(int $sessionId, GameStateValue $newWatchdogState): void
+    {
+        if (null === $gameList = ConnectionManager::getInstance()->getServerManagerEntityManager()
+            ->getRepository(GameList::class)->find($sessionId)) {
+            throw new \Exception('Could not find GameList entity with id: '.$sessionId);
+        }
+        $this->changeState($gameList, $newWatchdogState);
+    }
+
+    /**
      * @throws \Exception
      */
     public function changeState(
         GameList $gameList,
         GameStateValue $newWatchdogState
-    ): array {
+    ): void {
         if ($_ENV['APP_ENV'] === 'test') {
-            return [];
+            $this->log('Watchdog request was canceled as you are in test mode.');
+            return;
         }
         $this->gameList = $gameList;
-        $this->ensureWatchDogAlive();
-        $tokens = $this->getAPITokens();
-        $this->lastCompleteURLCalled = $this->getWatchdogUrl();
-        $postValues = [
-            'game_session_api' => $this->getSessionAPIBaseUrl(),
-            'game_session_token' => ConnectionManager::getInstance()
-                ->getCachedGameSessionDbConnection($this->gameList->getId())->createQueryBuilder()
-                ->select('game_session_watchdog_token')->from('game_session')->fetchOne(),
-            'game_state' => strtoupper($newWatchdogState),
-            'required_simulations' => $this->getRequiredSimulations(),
-            'api_access_token' => json_encode([
-                'token' => $tokens['token'],
-                'valid_until' => (new \DateTime('+1 hour'))->format('Y-m-d H:i:s')
-            ]),
-            'api_access_renew_token' => json_encode([
-                'token' => $tokens['api_refresh_token'],
-                'valid_until' => \DateTime::createFromFormat('U', $tokens['exp'])->format('Y-m-d H:i:s')
-            ]),
-            'month' => $gameList->getGameCurrentMonth()
-        ];
-        $response = $this->client->request("POST", $this->lastCompleteURLCalled, [
-            'body' => http_build_query($postValues)
-        ]);
-        return $response->toArray();
+        $em = $this->connectionManager->getGameSessionEntityManager($gameList->getId());
+        $watchdogRepo = $em->getRepository(Watchdog::class);
+        $watchdogs = $watchdogRepo->findAll();
+        /** @var Watchdog $watchdog */
+        foreach ($watchdogs as $watchdog) {
+            $this->log(sprintf(
+                'Requesting watchdog state change for watchdog %s using url %s',
+                $watchdog->getServerId()->toRfc4122(),
+                $watchdog->createUrl()
+            ));
+            $this->ensureWatchDogAlive($watchdog);
+            $tokens = $this->getAPITokens();
+            $this->lastCompleteURLCalled = $watchdog->createUrl();
+            $message = new GameStateChangedMessage();
+            $message
+                ->setGameSessionId($gameList->getId())
+                ->setWatchdog($watchdog)
+                ->setGameSessionApi($this->getSessionAPIBaseUrl())
+                ->setGameState($newWatchdogState)
+                // sets an array keyed by the simulation name with the corresponding version
+                ->setRequiredSimulations(
+                    collect($watchdog->getSimulations()->toArray())
+                        ->mapWithKeys(fn(Simulation $sim) => [$sim->getName() => $sim->getVersion()])
+                        ->toArray()
+                )
+                ->setApiAccessToken(new Token($tokens['token'], new DateTime('+1 hour')))
+                ->setApiAccessRenewToken(new Token(
+                    $tokens['api_refresh_token'],
+                    DateTime::createFromFormat('U', $tokens['exp'])
+                ))
+                ->setMonth($gameList->getGameCurrentMonth());
+            $this->watchdogMessageBus->dispatch($message);
+        }
+        resolve();
     }
 
-    private function ensureWatchDogAlive(): void
+    private function ensureWatchDogAlive(Watchdog $watchdog): void
     {
+        if ($watchdog->getServerId() !== Watchdog::getInternalServerId()) {
+            return;
+        }
         if (getenv('DOCKER') !== false) {
             return;
         }
@@ -129,29 +160,6 @@ class WatchdogCommunicator extends AbstractCommunicator
             gethostname();
         $port = $_ENV['URL_WEB_SERVER_PORT'] ?? 80;
         return $protocol.$address.':'.$port.'/'.$sessionId.'/';
-    }
-
-    /**
-     * @throws \Exception
-     */
-    private function getRequiredSimulations(): string
-    {
-        $result = [];
-        $possibleSims = $this->versionsProvider->getComponentsVersions();
-        $em = $this->connectionManager->getGameSessionEntityManager($this->gameList->getId());
-        $game = $em->getRepository(Game::class)->retrieve();
-        $em->refresh($game); // don't really know why, but without this the postLoad event isn't initiated
-        $config = $game->getRunningGameConfigFileContents()['datamodel'];
-        foreach ($possibleSims as $possibleSim => $possibleSimVersion) {
-            if (array_key_exists($possibleSim, $config) && is_array($config[$possibleSim])) {
-                $versionString = $possibleSimVersion;
-                if (array_key_exists("force_version", $config[$possibleSim])) {
-                    $versionString = $config[$possibleSim]["force_version"];
-                }
-                $result[$possibleSim] = $versionString;
-            }
-        }
-        return json_encode($result, JSON_FORCE_OBJECT);
     }
 
     private function getAPITokens(): array

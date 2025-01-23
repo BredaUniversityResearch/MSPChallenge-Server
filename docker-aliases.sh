@@ -43,15 +43,23 @@ alias de="${ALIAS_DE_BASE} ${PHP_CONTAINER}"
 # de + supervisor (s)
 alias des="de /usr/bin/supervisord -c /etc/supervisord.conf"
 # de + supervisorctl (sc)
-alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw]\n'; de supervisorctl"
+alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw|messenger-consume|messenger-watchdog:*]\n'; de supervisorctl"
 # de + list (l) + log (l) + supervisor (s)
 alias dells="de ls -l /var/log/supervisor/"
+detl_finish() {
+  de sh -c "pgrep -af \"tail -f /var/log/supervisor/\" | grep -E '[0-9]+\\stail' | awk '{print \$1}' | xargs kill > /dev/null 2>&1"
+}
 # de + tail log (tl)
-alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files names:" && dells && exit 1)) && (echo "press Ctrl+C to exit tail log"; de tail -f /var/log/supervisor/$1 ; de pkill -f "tail -f /var/log/supervisor/$1"); unset -f f; } ; f'
+alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files names:" && dells && exit 1)) && (echo "press Ctrl+C to exit tail log"; de sh -c "tail -f /var/log/supervisor/$1" ; detl_finish); unset -f f; } ; f'
+# shellcheck disable=SC2142
 # de + tail log (tl) + websocket server (w)
 alias detlw="detl app-ws-server.log"
 # de + tail log (tl) + msw (m)
 alias detlm="detl msw.log"
+# de + tail log (tl) + messenger-consume (mc)
+alias detlmc="detl messenger-consume.log"
+# de + tail log (tl) + messenger watchdog (mw)
+alias detlmw='detl messenger-watchdog-*.log'
 # de + top (t)
 alias det='de top; de pkill -f top'
 # de + phpstan (p)

@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block subtitle %}Saves{% endblock %}
+
+{% block body %}
+<div {{ stimulus_controller('gamesave')|stimulus_controller('modal-gamesave') }}>
+    <div class="py-1">
+        <button type="button" id="modalUploadSave" class="btn btn-primary" data-action="modal-gamesave#openSaveUploadModal">
+            <i class="fa fa-plus-circle" title="Upload session save"></i>
+            Upload session save
+        </button>
+    </div>
+    <div class="col-md-12 py-2">
+        <div class="pull-right">Filter:
+            <span id="radioFilter">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" value="active" checked
+                            data-action="list-default#applyFilter" data-frame="turbo-frame#savesTable" data-href="{{ path('manager_gamesave_list', { saveVisibility: 'active' }) }}">
+                    <label class="form-check-label" for="inlineRadio1">Active</label>
+                </div>
+                <div class="form-check form-check-inline mx-0">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" value="archived"
+                           data-action="list-default#applyFilter" data-frame="turbo-frame#savesTable" data-href="{{ path('manager_gamesave_list', { saveVisibility: 'archived' }) }}">
+                    <label class="form-check-label" for="inlineRadio3">Archived</label>
+                </div>
+            </span>
+        </div>
+        <div>
+            Here you can review and reuse saves of MSP Challenge sessions.
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <turbo-frame id="savesTable" src="{{ path('manager_gamesave_list', { saveVisibility: 'active' }) }}">
+                <h1>Loading... <i class="fa fa-spinner fa-pulse"></i></h1>
+            </turbo-frame>
+        </div>
+    </div>
+    {{ include('manager/modal_default.html.twig') }}
+</div>
+
+{% endblock %}

@@ -6,23 +6,28 @@ use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
 use App\Repository\ServerManager\GameConfigVersionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\UniqueConstraint(name: 'uq_game_config_version', columns: ['game_config_files_id', 'version'])]
 #[ORM\Entity(repositoryClass: GameConfigVersionRepository::class)]
 class GameConfigVersion
 {
+    public const LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE_RAW = 'gameConfigCompleteRaw'; // value does not matter
+    public const LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE = 'gameConfigComplete'; // value does not matter
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(cascade: ['persist'])]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'gameConfigVersion')]
     #[ORM\JoinColumn(name: 'game_config_files_id', nullable: false)]
     private ?GameConfigFile $gameConfigFile = null;
 
     #[ORM\Column]
     private ?int $version = null;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $versionMessage = null;
 
@@ -30,10 +35,12 @@ class GameConfigVersion
     private ?string $visibility = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $uploadTime = null;
+    private ?int $uploadTime = null;
+
+    private ?string $uploadUserName = null;
 
     /**
-     * User ID from UserSpice.
+     * User ID from MSP Challenge Authoriser.
      */
     #[ORM\Column]
     private ?int $uploadUser = null;
@@ -42,7 +49,7 @@ class GameConfigVersion
      * Unix timestamp
      */
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $lastPlayedTime = null;
+    private ?int $lastPlayedTime = null;
 
     /**
      * File path relative to the root config directory
@@ -62,15 +69,11 @@ class GameConfigVersion
     #[ORM\Column(length: 45)]
     private ?string $clientVersions = null;
 
-    /**
-     * @param array $gameConfigCompleteRaw
-     */
     private ?string $gameConfigCompleteRaw = null;
 
-    /**
-     * @param array $gameConfigComplete
-     */
     private ?array $gameConfigComplete = null;
+
+    private array $lazyLoaders = [];
 
     public function getId(): ?int
     {
@@ -128,12 +131,12 @@ class GameConfigVersion
         return $this;
     }
 
-    public function getUploadTime(): ?string
+    public function getUploadTime(): ?int
     {
         return $this->uploadTime;
     }
 
-    public function setUploadTime(string $uploadTime): self
+    public function setUploadTime(int $uploadTime): self
     {
         $this->uploadTime = $uploadTime;
 
@@ -152,12 +155,12 @@ class GameConfigVersion
         return $this;
     }
 
-    public function getLastPlayedTime(): ?string
+    public function getLastPlayedTime(): ?int
     {
         return $this->lastPlayedTime;
     }
 
-    public function setLastPlayedTime(string $lastPlayedTime): self
+    public function setLastPlayedTime(int $lastPlayedTime): self
     {
         $this->lastPlayedTime = $lastPlayedTime;
 
@@ -200,18 +203,12 @@ class GameConfigVersion
         return $this;
     }
 
-    /**
-     * @return array|null
-     */
     public function getGameConfigComplete(): ?array
     {
+        $this->gameConfigComplete ??= $this->lazyLoaders[self::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE]();
         return $this->gameConfigComplete;
     }
 
-    /**
-     * @param array|null $gameConfigComplete
-     * @return GameConfigVersion
-     */
     public function setGameConfigComplete(?array $gameConfigComplete): self
     {
         $this->gameConfigComplete = $gameConfigComplete;
@@ -221,12 +218,45 @@ class GameConfigVersion
 
     public function getGameConfigCompleteRaw(): ?string
     {
+        $this->gameConfigCompleteRaw ??= $this->lazyLoaders[self::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE_RAW]();
         return $this->gameConfigCompleteRaw;
     }
 
-    public function setGameConfigCompleteRaw(?string $gameConfigCompleteRaw): GameConfigVersion
+    public function setGameConfigCompleteRaw(?string $gameConfigCompleteRaw): self
     {
         $this->gameConfigCompleteRaw = $gameConfigCompleteRaw;
+        
+        return $this;
+    }
+
+    /**
+     * Get the value of uploadUserName
+     */
+    public function getUploadUserName(): ?string
+    {
+        return $this->uploadUserName;
+    }
+
+    /**
+     * Set the value of uploadUserName
+     *
+     * @return  self
+     */
+    public function setUploadUserName(?string $uploadUserName): self
+    {
+        $this->uploadUserName = $uploadUserName;
+
+        return $this;
+    }
+
+    public function hasLazyLoader(string $propertyName): bool
+    {
+        return array_key_exists($propertyName, $this->lazyLoaders);
+    }
+
+    public function setLazyLoader(string $propertyName, callable $loader): self
+    {
+        $this->lazyLoaders[$propertyName] = $loader;
         return $this;
     }
 }

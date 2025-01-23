@@ -22,7 +22,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class SymfonyToLegacyHelper
 {
     private static ?SymfonyToLegacyHelper $instance = null;
-
     private string $projectDir;
     private UrlGeneratorInterface $urlGenerator;
     private UrlMatcherInterface $urlMatcher;
@@ -32,13 +31,9 @@ class SymfonyToLegacyHelper
     private ?Closure $fnControllerForwarder = null;
     private MessageBusInterface $messageBus;
     private EntityManagerInterface $em;
-
     private VersionsProvider $provider;
-    private MessageBusInterface $analyticsMessageBus;
     private LoggerInterface $analyticsLogger;
-
     private WatchdogCommunicator $watchdogCommunicator;
-
     private AuthenticationSuccessHandler $authenticationSuccessHandler;
 
     public function __construct(
@@ -51,7 +46,6 @@ class SymfonyToLegacyHelper
         EntityManagerInterface $em,
         MessageBusInterface $messageBus,
         VersionsProvider $provider,
-        MessageBusInterface $analyticsMessageBus,
         LoggerInterface $analyticsLogger,
         WatchdogCommunicator $watchdogCommunicator,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
@@ -68,7 +62,6 @@ class SymfonyToLegacyHelper
         $this->em = $em;
         $this->messageBus = $messageBus;
         $this->provider = $provider;
-        $this->analyticsMessageBus = $analyticsMessageBus;
         $this->analyticsLogger = $analyticsLogger;
         $this->watchdogCommunicator = $watchdogCommunicator;
         $this->authenticationSuccessHandler = $authenticationSuccessHandler;
@@ -114,11 +107,6 @@ class SymfonyToLegacyHelper
     public function getProvider(): VersionsProvider
     {
         return $this->provider;
-    }
-
-    public function getAnalyticsMessageBus(): MessageBusInterface
-    {
-        return $this->analyticsMessageBus;
     }
 
     public function getAnalyticsLogger(): LoggerInterface

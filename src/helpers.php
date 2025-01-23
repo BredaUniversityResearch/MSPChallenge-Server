@@ -29,6 +29,11 @@ function isJsonObject($string): bool
     return is_object(json_decode($string));
 }
 
+function isBase64Encoded($string): bool
+{
+    return base64_encode(base64_decode($string, true)) === $string;
+}
+
 function rrmdir($src): void
 {
     if (false === $dir = opendir($src)) {

@@ -2,16 +2,22 @@
 
 namespace App\Controller\SessionAPI;
 
+use App\Domain\Services\ConnectionManager;
 use App\Controller\BaseController;
 use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Game;
+use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Router;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\Game as GameEntity;
 use Exception;
 use OpenApi\Attributes as OA;
+use App\Entity\Watchdog;
+use App\Repository\WatchdogRepository;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +26,13 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Uid\Uuid;
+use App\Domain\Communicator\WatchdogCommunicator;
+
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use function App\await;
 
 #[Route('/api/Game')]
 #[OA\Tag(name: 'Game', description: 'Operations related to game management')]
@@ -28,6 +41,42 @@ class GameController extends BaseController
     public function __construct(
         private readonly string $projectDir
     ) {
+    }
+
+    // not a route yet, should replace /[sessionId]/api/Game/State one day
+
+    /**
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws Exception
+     */
+    public function state(
+        int $sessionId,
+        string $state,
+        WatchdogCommunicator $watchdogCommunicator,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
+    ): void {
+        $state = new GameStateValue(strtolower($state));
+        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
+        $game = $em->getRepository(GameEntity::class)->retrieve();
+        $currentState = $game->getGameState();
+        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
+            throw new Exception("Invalid current state of ".$currentState);
+        }
+        if ($currentState == GameStateValue::SETUP) {
+            //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
+            $plan = new Plan();
+            $plan->setGameSessionId($sessionId);
+            await($plan->updateLayerState(0));
+            if ($state == GameStateValue::PAUSE) {
+                $game->setGameCurrentMonth(0);
+            }
+        }
+        $game->setGameLastUpdate(microtime(true)); // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
+        $game->setGameState($state);
+        $em->flush();
+        $watchdogCommunicator->changeStateBySessionId($sessionId, $state);
     }
 
     #[Route(
@@ -359,5 +408,168 @@ class GameController extends BaseController
         } catch (Exception $e) {
             return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
         }
+    }
+
+    #[Route(
+        path: '/RegisterWatchdog',
+        name: 'session_api_game_register_watchdog',
+        methods: ['POST']
+    )]
+    #[OA\Post(
+        summary: 'Register a new watchdog',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    required: ['server_id', 'address'],
+                    properties: [
+                        new OA\Property(
+                            property: 'server_id',
+                            type: 'string',
+                            example: '9eec31f5-8701-474a-95c4-8f8f9ebe2785'
+                        ),
+                        new OA\Property(property: 'address', type: 'string', example: 'example.com'),
+                        new OA\Property(property: 'port', type: 'integer', default: 80, example: 80),
+                        new OA\Property(property: 'scheme', type: 'string', default: 'http', example: 'http')
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Watchdog registered successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true)
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Invalid request parameters',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Invalid value for field address.'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Internal server error',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Could not register watchdog. Error message'
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    public function registerWatchdog(
+        Request $request,
+        ConnectionManager $connectionManager
+    ): JsonResponse {
+        // check required POST parameters: server_id, address
+        if ((null === $serverId = $request->request->get('server_id'))) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(false, message: 'Missing required parameter server_id.'),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        // convert server_id field to Symfony UUID
+        try {
+            is_string($serverId) or throw new \InvalidArgumentException(
+                'String value is required.'
+            );
+            if ($serverId == Watchdog::getInternalServerId()->toRfc4122()) {
+                return new JsonResponse(
+                    self::wrapPayloadForResponse(
+                        false,
+                        message: 'Internal server ID is reserved.'
+                    ),
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            $serverId = Uuid::fromString($serverId);
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(
+                    false,
+                    message: 'Invalid value for field server_id. '.$e->getMessage()
+                ),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        if ((null === $address = $request->request->get('address'))) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(false, message: 'Missing required parameter address.'),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        if (!(is_string($address) &&
+            (
+                filter_var($address, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) ||
+                filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6)
+            )
+        )) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(
+                    false,
+                    message: 'Invalid value for field address. Needs to be a valid domain or IP address.'
+                ),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        // check optional POST parameters: port and scheme
+        if (($port = $request->request->get('port', 80)) && !is_numeric($port)) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(
+                    false,
+                    message: 'Invalid value for field port. Numeric value is required.'
+                ),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        if (($scheme = $request->request->get('scheme', 'http')) && !in_array($scheme, ['http', 'https'])) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(
+                    false,
+                    message: 'Invalid value for field scheme. Allowed values are http or https.'
+                ),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        try {
+            $em = $connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
+            /** @var WatchdogRepository $repo */
+            $repo = $em->getRepository(Watchdog::class);
+            $repo->registerWatchdog(
+                $serverId,
+                $address,
+                (int)$port,
+                $scheme
+            );
+        } catch (Exception $e) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(
+                    false,
+                    message: 'Could not register watchdog. '.$e->getMessage()
+                ),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+        return new JsonResponse(self::wrapPayloadForResponse(true, message: 'Watchdog registered successfully'));
     }
 }

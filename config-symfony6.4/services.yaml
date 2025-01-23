@@ -41,8 +41,8 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         public: false       # Allows optimizing the container by removing unused services; this also means
-          # fetching services directly from the container via $container->get() won't work.
-        # The best practice is to be explicit about your dependencies anyway.
+                            # fetching services directly from the container via $container->get() won't work.
+                            # The best practice is to be explicit about your dependencies anyway.
         bind:
             string $projectDir: '%kernel.project_dir%'
 
@@ -63,6 +63,7 @@ services:
             - { name: messenger.message_handler, handles: App\Message\Analytics\UserLogOnOffSessionMessage }
 
     App\Domain\Services\SymfonyToLegacyHelper:
+        public: true
         arguments:
             $analyticsLogger: '@monolog.logger.analytics'
 
@@ -108,17 +109,30 @@ services:
     App\Entity\ServerManager\Listener\GameListListener:
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameList' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameList' }
+
+    App\Entity\ServerManager\Listener\GameSaveListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameSave' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameSave' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameSave' }
 
     App\Entity\ServerManager\Listener\GameConfigVersionListener:
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameConfigVersion' }
 
     App\Entity\ServerManager\Listener\GameGeoServerListener:
         arguments:
             $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer' }
-            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameGeoServer' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameGeoServer' }
+
+    App\Entity\ServerManager\Listener\GameWatchdogServerListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameWatchdogServer' }
 
     App\EventListener\SessionEntityListener:
         tags:
@@ -134,6 +148,25 @@ services:
     App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
 
     App\Domain\Communicator\WatchdogCommunicator:
+
+    app.menu_builder:
+        class: App\Menu\Builder
+        arguments: [ "@knp_menu.factory" ]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: mainMenu }
+            - { name: knp_menu.menu_builder, method: createSubMenu, alias: subMenu }
+
+    App\Security\MSPAuth2Authenticator:
+
+    App\Twig\GameButtonDecider:
+        tags:
+            - 'twig.extension'
+
+    App\Twig\VersionsReturner:
+        tags:
+            - 'twig.extension'
+
+    App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
 
     App\EventListener\CheckApiSessionIdListener:
         arguments:

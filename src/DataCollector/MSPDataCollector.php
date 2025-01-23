@@ -2,8 +2,7 @@
 
 namespace App\DataCollector;
 
-use App\Domain\API\APIHelper;
-use App\Domain\API\v1\Game;
+use App\Domain\API\v1\Simulations;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
@@ -14,7 +13,7 @@ use function App\await;
 
 class MSPDataCollector extends AbstractDataCollector
 {
-    public function collect(Request $request, Response $response, \Throwable $exception = null)
+    public function collect(Request $request, Response $response, \Throwable $exception = null): void
     {
         try {
             $serverManager = \ServerManager\ServerManager::getInstance();
@@ -39,6 +38,10 @@ class MSPDataCollector extends AbstractDataCollector
         return $this->data;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
     public function startSimulations(
         int $session,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
@@ -50,12 +53,9 @@ class MSPDataCollector extends AbstractDataCollector
         } catch (\Exception $e) {
             return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        $game = new Game();
-        $game->setGameSessionId($session);
-        if (null === $promise = $game->changeWatchdogState($gameState)) {
-            return new Response('Could not change watchdog state', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-        $arrResult = await($promise);
-        return new Response(json_encode($arrResult));
+        $simulations = new Simulations();
+        $simulations->setGameSessionId($session);
+        await($simulations->changeWatchdogState($gameState));
+        return new Response('Simulations started requested', Response::HTTP_OK);
     }
 }
