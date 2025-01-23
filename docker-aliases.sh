@@ -14,8 +14,6 @@ if [ "${OS}" == "Windows_NT" ]; then
   alias php=php.exe
 fi
 [[ -z "${COMPOSE_PROJECT_NAME}" ]] && COMPOSE_PROJECT_NAME="mspchallenge"
-[[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER="${COMPOSE_PROJECT_NAME}-php-1"
-[[ -z "${DATABASE_CONTAINER}" ]] && DATABASE_CONTAINER="${COMPOSE_PROJECT_NAME}-database-1"
 # ede = export (e) dotenv (d) environmental variables (e)
 alias ede='unset $(bash docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(bash docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
@@ -23,23 +21,23 @@ PRE_DCU="bash set_symfony_version.sh && mkdir -p ./var/docker/ && touch ./var/do
 DCU_BASE="MSYS_NO_PATHCONV=1 docker compose"
 alias dcu="ede && $PRE_DCU && COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev" ${DCU_BASE} -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 # dcu + xdebug (x)
-alias dcux="ede && $PRE_DCU && COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev" XDEBUG_MODE=debug ${DCU_BASE} up -d --remove-orphans"
+alias dcux="ede && $PRE_DCU && COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-dev" XDEBUG_MODE=debug ${DCU_BASE} -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 # dcu + production (p)}
 alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 # dcu + hybrid (h)}
 alias dcus='ede && '"$PRE_DCU && APP_ENV=prod COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME}-staging" ${DCU_BASE} -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
-# dl = docker(d) logs(l) with default container mspchallenge-server-php-1
-alias dl="${ALIAS_DL_BASE} ${PHP_CONTAINER}"
+# dl = docker(d) logs(l) with default container mspserver-php
+alias dl="${ALIAS_DL_BASE} mspserver-php"
 # dl + blackfire (b)
-alias dlb="${ALIAS_DL_BASE} ${COMPOSE_PROJECT_NAME}-blackfire-1"
-# dl + caddy (c)
-alias dlc="${ALIAS_DL_BASE} ${COMPOSE_PROJECT_NAME}-caddy-1"
+alias dlb="${ALIAS_DL_BASE} mspserver-blackfire"
 # dl + database (d)
-alias dld="${ALIAS_DL_BASE} ${DATABASE_CONTAINER}"
-# de = docker(d) execute(e) with container php
+alias dld="${ALIAS_DL_BASE} mspserver-mariadb"
+# dl + simulations (s)
+alias dls="${ALIAS_DL_BASE} mspserver-simulations"
+# de = docker(d) execute(e) with container mspserver-php
 ALIAS_DE_BASE='MSYS_NO_PATHCONV=1 docker exec'
-alias de="${ALIAS_DE_BASE} ${PHP_CONTAINER}"
+alias de="${ALIAS_DE_BASE} mspserver-php"
 # de + supervisor (s)
 alias des="de /usr/bin/supervisord -c /etc/supervisord.conf"
 # de + supervisorctl (sc)
@@ -54,8 +52,6 @@ alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files 
 # shellcheck disable=SC2142
 # de + tail log (tl) + websocket server (w)
 alias detlw="detl app-ws-server.log"
-# de + tail log (tl) + msw (m)
-alias detlm="detl msw.log"
 # de + tail log (tl) + messenger-consume (mc)
 alias detlmc="detl messenger-consume.log"
 # de + tail log (tl) + messenger watchdog (mw)
@@ -72,14 +68,14 @@ alias derpf='de pkill -SIGUSR2 -f "php bin/console app:ws-server"'
 ALIAS_WSS='php /app/bin/console app:ws-server'
 alias dewss="de ${ALIAS_WSS}"
 # dewss + xdebug (x)
-alias dewssx="${ALIAS_DE_BASE} -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" ${PHP_CONTAINER} ${ALIAS_WSS}"
+alias dewssx="${ALIAS_DE_BASE} -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" mspserver-php ${ALIAS_WSS}"
 # docker (d) run (r) grafana (g)
 if [ -z "${DATABASE_PASSWORD}" ]; then
     MYSQL_PARAMS=""
 else
     MYSQL_PARAMS="-p${DATABASE_PASSWORD}"
 fi
-MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec ${DATABASE_CONTAINER} bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
+MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec mspserver-mariadb bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
 alias drg="${MY2_SETUP} && docker stop grafana ; docker rm grafana ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana --label com.docker.compose.project=mspchallenge --network=mspchallenge_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
 # docker (d) + stop (s) + all containers (a)
 alias dsa='docker stop $(docker ps -a -q)'

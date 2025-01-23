@@ -2,14 +2,18 @@
 
 namespace App\MessageHandler\GameList;
 
+use App\Domain\API\v1\Simulation;
+use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Common\InternalSimulationName;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Log\LogContainerInterface;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SimulationHelper;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
-use App\Entity\Simulation;
+use App\Entity\ServerManager\GameWatchdogServer;
+use App\Entity\Simulation as SimulationEntity;
 use App\Entity\Watchdog;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListArchiveMessage;
@@ -19,6 +23,7 @@ use App\Message\GameSave\GameSaveLoadMessage;
 use App\Repository\WatchdogRepository;
 use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
@@ -33,6 +38,7 @@ use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
+use Symfony\Component\Uid\Uuid;
 
 abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
 {
@@ -73,7 +79,8 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
-        VersionsProvider $provider
+        VersionsProvider $provider,
+        private readonly SimulationHelper $simulationHelper
     ) {
         parent::__construct($gameSessionLogger);
         $this->kernel = $kernel;
@@ -87,13 +94,13 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function setGameSessionAndDatabase(
         GameSaveLoadMessage|GameListCreationMessage|GameSaveCreationMessage|GameListArchiveMessage $gameList
     ): void {
         $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
-            ?? throw new \Exception('Game session not found, so cannot continue.');
+            ?? throw new Exception('Game session not found, so cannot continue.');
         $sessionId = $this->gameSession->getId();
         $this->setGameSessionId($sessionId);
         $this->database = $this->connectionManager->getGameSessionDbName($sessionId);
@@ -169,7 +176,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     protected function resetSessionRasterStore(): void
     {
@@ -204,18 +211,18 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function validateGameConfig(string $gameConfigFilepath): void
     {
         if (false === $gameConfigContent = file_get_contents($gameConfigFilepath)) {
-            throw new \Exception(
+            throw new Exception(
                 "Cannot read contents of the session's chosen configuration file: {$gameConfigFilepath}"
             );
         }
         $gameConfigContents = json_decode($gameConfigContent);
         if ($gameConfigContents === false) {
-            throw new \Exception(
+            throw new Exception(
                 "Cannot decode contents of the session's chosen configuration file: {$gameConfigFilepath}"
             );
         }
@@ -230,7 +237,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
                     json_encode($gameConfigContents->metadata)
             );
             $this->error($e->getMessage());
-            throw new \Exception('Session config file invalid, so not continuing.');
+            throw new Exception('Session config file invalid, so not continuing.');
         }
         $this->info(
             "Contents of config file {$gameConfigFilepath} were successfully validated, having meta data: ".
@@ -241,11 +248,61 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
         $this->dataModel = $gameConfigContents['datamodel'];
     }
 
+    private function upsertSessionWatchdog(Uuid $serverId): void
+    {
+        /** @var WatchdogRepository $watchdogRepo */
+        $watchdogRepo = $this->entityManager->getRepository(Watchdog::class);
+        $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId]);
+        $watchdog ??= new Watchdog();
+        $watchdog
+            ->setServerId($serverId)
+            ->setToken(0) // this is temporary and will be updated later
+            ->setStatus(WatchdogStatus::READY);
+        $this->entityManager->persist($watchdog);
+        $this->entityManager->flush();
+
+        // update watchdog record with token using DQL
+        $qb = $this->entityManager->getRepository(Watchdog::class)->createQueryBuilder('w');
+        $qb
+            ->update()
+            ->set('w.token', 'UUID_SHORT()')
+            ->where($qb->expr()->eq('w.serverId', ':serverId'))
+            ->setParameter('serverId', $serverId->toBinary())
+            ->getQuery()
+            ->execute();
+    }
+
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function registerSimulations(): void
     {
+        $serverWatchdogRepo = $this->mspServerManagerEntityManager->getRepository(GameWatchdogServer::class);
+        $serverWatchdogs = collect($serverWatchdogRepo->findAll())->keyBy(
+            fn(GameWatchdogServer $s) => $s->getServerId()->toRfc4122()
+        )->all();
+
+        /** @var WatchdogRepository $watchdogRepo */
+        $watchdogRepo = $this->entityManager->getRepository(Watchdog::class);
+        /** @var Watchdog[] $watchdogs */
+        $watchdogs = $watchdogRepo->findAll();
+        foreach ($watchdogs as $watchdog) {
+            if (null !== $watchdog->getGameWatchdogServer()) {
+                continue;
+            }
+            $message = 'no server assigned. Watchdog was removed';
+            $this->entityManager->persist(Simulation::createEventLogForWatchdog(
+                $message,
+                EventLogSeverity::ERROR,
+                $watchdog
+            ));
+            $this->warning(sprintf('Watchdog %s: %s', $watchdog->getServerId()->toRfc4122(), $message));
+            $this->entityManager->remove($watchdog);
+        }
+        foreach ($serverWatchdogs as $serverWatchdog) {
+            $this->upsertSessionWatchdog($serverWatchdog->getServerId());
+        }
+
         // filter possible internal simulations with the ones present in the config
         $simNames = array_keys(array_intersect_key(
             array_flip(array_map(
@@ -259,63 +316,27 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
             return; // no configured simulations
         }
 
-        $versions = $this->getConfiguredSimulationTypes();
+        $versions = $this->simulationHelper->getConfiguredSimulationTypes(
+            $this->gameSession->getId(),
+            $this->dataModel
+        );
         /** @var WatchdogRepository $watchdogRepo */
         $watchdogRepo = $this->entityManager->getRepository(Watchdog::class);
-        if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => Watchdog::getInternalServerId()])) {
-            $watchdog = new Watchdog();
-            $watchdog
-                ->setAddress(
-                    $_ENV['WATCHDOG_ADDRESS'] ?? $this->gameSession->getGameWatchdogServer()->getAddress() ??
-                        'localhost'
-                )
-                ->setPort((int)($_ENV['WATCHDOG_PORT'] ?? 45000))
-                ->setToken(0) // this is temporary and will be updated later
-                ->setStatus(WatchdogStatus::READY)
-                ->setServerId(Watchdog::getInternalServerId());
-            $this->entityManager->persist($watchdog);
-            $this->entityManager->flush();
-
-            // update watchdog record with token using DQL
-            $qb = $this->entityManager->getRepository(Watchdog::class)->createQueryBuilder('w');
-            $qb
-                ->update()
-                ->set('w.token', 'UUID_SHORT()')
-                ->where($qb->expr()->eq('w.serverId', ':serverId'))
-                ->setParameter('serverId', Watchdog::getInternalServerId()->toBinary())
-                ->getQuery()
-                ->execute();
-        }
-        $simulations = collect($watchdog->getSimulations()->toArray())->keyBy(fn(Simulation $s) => $s->getName())
+        $watchdog = $watchdogRepo->findOneBy(['serverId' => Watchdog::getInternalServerId()]);
+        $simulations = collect($watchdog->getSimulations()->toArray())->keyBy(fn(SimulationEntity $s) => $s->getName())
             ->all();
         foreach ($simNames as $simName) {
             if (array_key_exists($simName, $simulations)) {
                 $this->info("Simulation {$simName} already registered, skipping.");
                 continue;
             }
-            $sim = new Simulation();
+            $sim = new SimulationEntity();
             $sim->setName($simName);
             $sim->setVersion($versions[$simName]);
             $sim->setWatchdog($watchdog);
             $this->entityManager->persist($sim);
         }
         $this->entityManager->flush();
-    }
-
-    private function getConfiguredSimulationTypes(): array
-    {
-        $result = array();
-        $possibleSims = $this->provider->getComponentsVersions();
-        foreach ($possibleSims as $possibleSim => $possibleSimVersion) {
-            if (array_key_exists($possibleSim, $this->dataModel) && is_array($this->dataModel[$possibleSim])) {
-                $versionString = $possibleSimVersion;
-                if (array_key_exists("force_version", $this->dataModel[$possibleSim])) {
-                    $versionString = $this->dataModel[$possibleSim]["force_version"];
-                }
-                $result[$possibleSim] = $versionString;
-            }
-        }
-        return $result;
     }
 
     protected function logContainer(LogContainerInterface $container): void

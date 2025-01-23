@@ -8,18 +8,18 @@ use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\GameSaveZipFileValidator;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SimulationHelper;
 use App\Entity\Game;
 use App\Entity\ServerManager\GameSave;
-use App\Entity\Watchdog;
 use App\Logger\GameSessionLogger;
 use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\Repository\GameRepository;
 use App\VersionsProvider;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
@@ -30,10 +30,8 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use function App\rcopy;
 use function App\rrmdir;
 
@@ -50,22 +48,23 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
-        VersionsProvider $provider
+        VersionsProvider $provider,
+        SimulationHelper $simulationHelper
     ) {
         parent::__construct(...func_get_args());
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function __invoke(GameSaveLoadMessage $gameSave): void
     {
         $this->setGameSessionAndDatabase($gameSave);
         $this->gameSave = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->find(
             $gameSave->gameSaveId
-        ) ?? throw new \Exception('Game save not found, so cannot continue.');
+        ) ?? throw new Exception('Game save not found, so cannot continue.');
         if ($this->gameSave->getSaveType() != GameSaveTypeValue::FULL) {
-            throw new \Exception("Cannot reload a save of type {$this->gameSave->getSaveType()}");
+            throw new Exception("Cannot reload a save of type {$this->gameSave->getSaveType()}");
         }
         try {
             $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
@@ -93,15 +92,12 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
     /**
      * @throws ClientExceptionInterface
      * @throws ContainerExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws Exception
      * @throws NotFoundExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
     private function finaliseSaveLoad(): void
     {
@@ -113,14 +109,18 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $this->entityManager->flush();
 
         $this->registerSimulations();
-        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('pause'));
+        $this->watchdogCommunicator->changeState(
+            $this->gameSession->getId(),
+            new GameStateValue('pause'),
+            $this->gameSession->getGameCurrentMonth()
+        );
         $this->logContainer($this->watchdogCommunicator);
     }
 
     /**
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function importRasterStore(): void
     {
@@ -129,7 +129,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $sessionRasterStoreTemp = $this->params->get('app.session_raster_dir').'temp';
         $this->info("Unpacking raster files...");
         if (!$this->validator->getZipArchive()->extractTo($sessionRasterStoreTemp)) {
-            throw new \Exception('ExtractTo failed.');
+            throw new Exception('ExtractTo failed.');
         } else {
             $this->debug('ExtractTo succeeded.');
         }
@@ -142,7 +142,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function openSaveZip(): void
     {
@@ -150,7 +150,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             sprintf($this->params->get('app.server_manager_save_name'), $this->gameSave->getId());
         $fileSystem = new Filesystem();
         if (!$fileSystem->exists($saveZipStore)) {
-            throw new \Exception("Wasn't able to find ZIP file: {$saveZipStore}");
+            throw new Exception("Wasn't able to find ZIP file: {$saveZipStore}");
         }
         $this->validator = new GameSaveZipFileValidator(
             $saveZipStore,
@@ -158,7 +158,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             $this->mspServerManagerEntityManager
         );
         if (!$this->validator->isValid()) {
-            throw new \Exception("ZIP file {$saveZipStore} is invalid: {$this->validator->getErrorsAsString()}.");
+            throw new Exception("ZIP file {$saveZipStore} is invalid: {$this->validator->getErrorsAsString()}.");
         }
     }
 
@@ -178,18 +178,20 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function setupSessionDatabase(): void
     {
         if ($this->gameSession->getSessionState() == GameSessionStateValue::HEALTHY) {
             $this->notice('This is a save reload into an existing session.');
-            $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+            $this->watchdogCommunicator->changeState(
+                $this->gameSession->getId(),
+                new GameStateValue('end'),
+                $this->gameSession->getGameCurrentMonth()
+            );
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->mspServerManagerEntityManager->flush();
             $this->resetSessionDatabase();
@@ -200,7 +202,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function importSessionDatabase(): void
     {
@@ -223,7 +225,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function tempStoreDbExportInSaveZip(): string
     {

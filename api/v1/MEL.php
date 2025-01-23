@@ -23,24 +23,6 @@ class MEL extends Base
 {
     private ?\PDO $pdo = null;
 
-    private const ALLOWED = array(
-        "OnReimport",
-        "Config",
-        "UpdateLayer",
-        "ShouldUpdate",
-        "Update",
-        "TickDone",
-        "GetFishing",
-        "GeometryExportName",
-        "GetEcoGearFleets",
-        "InitialFishing"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * @throws Exception
      */
@@ -636,7 +618,7 @@ SUBQUERY,
         $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
             ->getRepository(Simulation::class);
         $game = new Game();
-        $repo->notifyUpdateFinished(InternalSimulationName::MEL, $game->GetCurrentMonthAsId());
+        $repo->notifyMonthFinishedForInternal(InternalSimulationName::MEL, $game->GetCurrentMonthAsId());
     }
 
     /**

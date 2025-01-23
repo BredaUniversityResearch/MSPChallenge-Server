@@ -107,12 +107,12 @@ class Game
         return $this;
     }
 
-    public function getGameCurrentmonth(): ?int
+    public function getGameCurrentMonth(): ?int
     {
         return $this->gameCurrentmonth;
     }
 
-    public function setGameCurrentmonth(?int $gameCurrentmonth): Game
+    public function setGameCurrentMonth(?int $gameCurrentmonth): Game
     {
         $this->gameCurrentmonth = $gameCurrentmonth;
         return $this;

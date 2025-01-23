@@ -10,6 +10,7 @@ use App\Domain\Common\EntityEnums\RestrictionSort;
 use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
+use App\Domain\Services\SimulationHelper;
 use App\Entity\Country;
 use App\Entity\EnergyConnection;
 use App\Entity\EnergyOutput;
@@ -72,6 +73,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider,
+        SimulationHelper $simulationHelper,
         private readonly MessageBusInterface $messageBus,
         private readonly HttpClientInterface $client,
         // e.g. used by GeoServerCommunicator
@@ -127,7 +129,11 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
             $this->notice('Resetting the session database, as this is a session recreate.');
             if ($this->gameSession->getSessionState() != GameSessionStateValue::FAILED) {
-                $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('end'));
+                $this->watchdogCommunicator->changeState(
+                    $this->gameSession->getId(),
+                    new GameStateValue('end'),
+                    $this->gameSession->getGameCurrentMonth()
+                );
             }
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->gameSession->setGameState(new GameStateValue('setup'));
@@ -147,13 +153,11 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     {
         $sessionConfigStore = $this->params->get('app.session_config_dir').
             sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId());
-        file_put_contents(
-            $sessionConfigStore,
-            file_get_contents(
-                $this->params->get('app.server_manager_config_dir').
-                $this->gameSession->getGameConfigVersion()->getFilePath()
-            )
-        );
+        $gameConfigFilePath = $this->params->get('app.server_manager_config_dir').
+            $this->gameSession->getGameConfigVersion()->getFilePath();
+        $content = file_get_contents($gameConfigFilePath);
+        is_dir(dirname($sessionConfigStore)) or mkdir(dirname($sessionConfigStore), 0777, true);
+        file_put_contents($sessionConfigStore, $content);
         $this->info("Created the running session config file at {$sessionConfigStore}");
         return $sessionConfigStore;
     }
@@ -214,7 +218,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $game->setGamePlanningRealtime($this->dataModel['era_planning_realtime']);
         $game->setGamePlanningEraRealtimeComplete();
         $game->setGameEratime($this->dataModel['era_total_months']);
-        $game->setGameCurrentmonth(-1);
+        $game->setGameCurrentMonth(-1);
         $this->entityManager->persist($game);
         $this->info('Basic game parameters set up.');
     }
@@ -647,8 +651,6 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     {
         $this->info('Setting up simulation MEL...');
         $config = $this->dataModel['MEL'];
-
-        // todo: this just shows an error message ? no action ?
         if (isset($config["fishing"])) {
             $countries = $context->getCountries(
                 fn(Country $country) => $country->getCountryIsManager() == 0
@@ -1154,7 +1156,11 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             ->executeStatement();
 
         $this->registerSimulations();
-        $this->watchdogCommunicator->changeState($this->gameSession, new GameStateValue('setup'));
+        $this->watchdogCommunicator->changeState(
+            $this->gameSession->getId(),
+            new GameStateValue('setup'),
+            $this->gameSession->getGameCurrentMonth()
+        );
         $this->logContainer($this->watchdogCommunicator);
     }
 }

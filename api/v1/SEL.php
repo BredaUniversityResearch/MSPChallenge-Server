@@ -13,35 +13,6 @@ use stdClass;
 
 class SEL extends Base
 {
-    private const ALLOWED = array(
-        "GetAreaOutputConfiguration",
-        "GetConfiguredRouteIntensities",
-        "GetCountryBorderGeometry",
-        "GetRestrictionGeometry",
-        "GetShippingLaneGeometry",
-        "GetShippingPortGeometry",
-        "GetPortIntensities",
-        "GetSELConfig",
-        "GetShipTypes",
-        "GetShipRestrictionGroups",
-        "GetShipRestrictionGroupExceptions",
-        "GetHeatmapOutputSettings",
-        "GetHeatmapSettings",
-        "SetRastersUpdated",
-        "SetShippingIntensityValues",
-        "StartExe",
-        "GetKPIDefinition",
-        "NotifyUpdateFinished",
-        "GetUpdatePackage",
-        "GetSELGameClientConfig"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
-    //SEL Input Queries
     /**
      * @apiGroup SEL
      * @throws Exception
@@ -661,12 +632,25 @@ class SEL extends Base
             );
             $baseGeometryData = json_decode($queryResult[0]["geometry_data"], true);
             $baseGeometryData["Shipping_Intensity"] = $intensityValue;
-            $newGeometryData = Base::JSON($baseGeometryData);
+            $newGeometryData = self::JSON($baseGeometryData);
             $this->getDatabase()->query(
                 "UPDATE geometry SET geometry_data = ? WHERE geometry_id = ?",
                 array($newGeometryData, $geometryId)
             );
         }
+    }
+
+    /**
+     * @param array $data
+     * @return false|string
+     */
+    private static function JSON(array $data): false|string
+    {
+        if (self::$more) {
+            self::Debug($data);
+            return '';
+        }
+        return json_encode($data);
     }
 
     /**
@@ -908,7 +892,7 @@ class SEL extends Base
         /** @var SimulationRepository $repo */
         $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
             ->getRepository(Simulation::class);
-        $repo->notifyUpdateFinished(InternalSimulationName::SEL, $month);
+        $repo->notifyMonthFinishedForInternal(InternalSimulationName::SEL, $month);
     }
 
     /**

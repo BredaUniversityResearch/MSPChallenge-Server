@@ -3,6 +3,7 @@
 namespace App\Entity\ServerManager;
 
 use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
+use App\Entity\Trait\LazyLoadersTrait;
 use App\Repository\ServerManager\GameConfigVersionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,6 +13,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: GameConfigVersionRepository::class)]
 class GameConfigVersion
 {
+    use LazyLoadersTrait;
+
     public const LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE_RAW = 'gameConfigCompleteRaw'; // value does not matter
     public const LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE = 'gameConfigComplete'; // value does not matter
 
@@ -72,8 +75,6 @@ class GameConfigVersion
     private ?string $gameConfigCompleteRaw = null;
 
     private ?array $gameConfigComplete = null;
-
-    private array $lazyLoaders = [];
 
     public function getId(): ?int
     {
@@ -205,7 +206,9 @@ class GameConfigVersion
 
     public function getGameConfigComplete(): ?array
     {
-        $this->gameConfigComplete ??= $this->lazyLoaders[self::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE]();
+        if (null !== $ll = $this->getLazyLoader(self::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE)) {
+            $this->gameConfigComplete ??= $ll();
+        }
         return $this->gameConfigComplete;
     }
 
@@ -218,7 +221,9 @@ class GameConfigVersion
 
     public function getGameConfigCompleteRaw(): ?string
     {
-        $this->gameConfigCompleteRaw ??= $this->lazyLoaders[self::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE_RAW]();
+        if (null !== $ll = $this->getLazyLoader(self::LAZY_LOADING_PROPERTY_GAME_CONFIG_COMPLETE_RAW)) {
+            $this->gameConfigCompleteRaw ??= $ll();
+        }
         return $this->gameConfigCompleteRaw;
     }
 
@@ -240,23 +245,13 @@ class GameConfigVersion
     /**
      * Set the value of uploadUserName
      *
+     * @param string|null $uploadUserName
      * @return  self
      */
     public function setUploadUserName(?string $uploadUserName): self
     {
         $this->uploadUserName = $uploadUserName;
 
-        return $this;
-    }
-
-    public function hasLazyLoader(string $propertyName): bool
-    {
-        return array_key_exists($propertyName, $this->lazyLoaders);
-    }
-
-    public function setLazyLoader(string $propertyName, callable $loader): self
-    {
-        $this->lazyLoaders[$propertyName] = $loader;
         return $this;
     }
 }

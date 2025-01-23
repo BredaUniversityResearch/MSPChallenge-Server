@@ -16,45 +16,6 @@ use function App\await;
 
 class Plan extends Base
 {
-    private const ALLOWED = array(
-        "Get",
-        "All",
-        "Post",
-        "Message",
-        "GetMessages",
-        "DeleteLayer",
-        "Lock",
-        "Unlock",
-        "SetState",
-        "Name",
-        "Description",
-        "Date",
-        "Layer",
-        "Restrictions",
-        "ImportRestrictions",
-        ["ExportPlansToJson",  Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        "Export",
-        "Import",
-        "Fishing",
-        "GetInitialFishingValues",
-        "Type",
-        "SetRestrictionAreas",
-        "DeleteFishing",
-        "DeleteEnergy",
-        "SetEnergyError",
-        "AddApproval",
-        "Vote",
-        "DeleteApproval",
-        "SetEnergyDistribution",
-        "DeleteGeneralPolicy",
-        "SetGeneralPolicyData"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     public static function convertToNewPlanType(string $planType): int
     {
         $newPlanType = (int)$planType; // assuming a correct db value, which is int of bit flags.

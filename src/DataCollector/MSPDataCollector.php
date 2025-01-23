@@ -2,14 +2,15 @@
 
 namespace App\DataCollector;
 
-use App\Domain\API\v1\Simulations;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
-use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\Game;
+use App\Entity\ServerManager\GameList;
+use App\Repository\GameRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use function App\await;
 
 class MSPDataCollector extends AbstractDataCollector
 {
@@ -39,23 +40,24 @@ class MSPDataCollector extends AbstractDataCollector
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
     public function startSimulations(
         int $session,
-        // below is required by legacy to be auto-wire, has its own ::getInstance()
-        SymfonyToLegacyHelper $helper
+        WatchdogCommunicator $watchdogCommunicator
     ): Response {
-        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($session)->createQueryBuilder();
         try {
-            $gameState = $qb->select('game_state')->from('game')->fetchOne();
-        } catch (\Exception $e) {
+            $gameListRepo = ConnectionManager::getInstance()->getServerManagerEntityManager()
+                ->getRepository(GameList::class);
+            $gameList = $gameListRepo->find($session);
+            $em = ConnectionManager::getInstance()->getGameSessionEntityManager($session);
+            /** @var GameRepository $gameRepo */
+            $gameRepo = $em->getRepository(Game::class);
+            $game = $gameRepo->retrieve();
+            $watchdogCommunicator->changeState($session, $game->getGameState(), $gameList->getGameCurrentMonth());
+        } catch (Exception $e) {
             return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        $simulations = new Simulations();
-        $simulations->setGameSessionId($session);
-        await($simulations->changeWatchdogState($gameState));
         return new Response('Simulations started requested', Response::HTTP_OK);
     }
 }

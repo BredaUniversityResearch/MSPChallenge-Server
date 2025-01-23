@@ -91,7 +91,7 @@ class GameListRepository extends EntityRepository
             // get session's config file contents and decode the json
             $game = new Game();
             $game->setGameSessionId($session['id']);
-            $configContents = $game->Config();
+            $configContents = $game->Config(); // todo: can't we use GameList::getGameConfig()->getGameConfigComplete()
             $session['edition_name'] = $configContents['edition_name'];
             $session['edition_colour'] = $configContents['edition_colour'];
             $session['edition_letter'] = $configContents['edition_letter'];

@@ -3,11 +3,17 @@
 namespace App\Entity;
 
 use App\Domain\Common\EntityEnums\WatchdogStatus;
+use App\Entity\Interface\WatchdogInterface;
+use App\Entity\Listener\WatchdogListener;
+use App\Entity\ServerManager\GameWatchdogServer;
+use App\Entity\Trait\LazyLoadersTrait;
+use App\Entity\Trait\WatchdogTrait;
 use App\Repository\WatchdogRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -15,18 +21,19 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: WatchdogRepository::class)]
 #[ORM\Table(uniqueConstraints: [
-    new ORM\UniqueConstraint(name: 'uq_server_id_archived', columns: ['server_id', 'archived'])
+    new ORM\UniqueConstraint(
+        name: 'uq_server_id_archived',
+        columns: ['server_id', 'archived']
+    )
 ])]
-class Watchdog
+// timeAware: set a date of deletion in the future and never worry about cleaning up at expiration time. default false
+// hardDelete: to enable hard delete after soft delete has already been done. default true
+#[Gedmo\SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: false)]
+class Watchdog implements WatchdogInterface
 {
-    use SoftDeleteableEntity, TimestampableEntity;
+    use WatchdogTrait, SoftDeleteableEntity, TimestampableEntity, LazyLoadersTrait;
 
-    private const INTERNAL_SERVER_ID = '019373cc-aa68-7d95-882f-9248ea338014';
-
-    public static function getInternalServerId(): Uuid
-    {
-        return Uuid::fromString(self::INTERNAL_SERVER_ID);
-    }
+    public const LAZY_LOADING_PROPERTY_GAME_WATCHDOG_SERVER = 'gameWatchdogServer'; // value does not matter
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -36,23 +43,17 @@ class Watchdog
     #[ORM\Column(type: UuidType::NAME)]
     private ?Uuid $serverId = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $address = null;
-
-    #[ORM\Column(options: ['default' => 80])]
-    private int $port = 80;
-
-    #[ORM\Column(length: 255, options: ['default' => 'http'])]
-    private string $scheme = 'http';
-
     #[ORM\Column(enumType: WatchdogStatus::class, options: ['default' => WatchdogStatus::REGISTERED])]
     private ?WatchdogStatus $status = WatchdogStatus::REGISTERED;
 
     #[ORM\Column(type: Types::BIGINT)]
     private ?int $token = null;
 
-    #[ORM\Column(type: 'boolean', options: ['generated' => 'ALWAYS', 'as' => 'IF(deleted_at IS NULL, 0, 1)'])]
-    private bool $archived;
+    #[ORM\Column(type: Types::BIGINT, options: [
+        'generated' => 'ALWAYS',
+        'as' => 'if(`deleted_at` is null,0,UNIX_TIMESTAMP(deleted_at))'])
+    ]
+    private int $archived;
 
     /**
      * @var Collection<int, Simulation>
@@ -63,68 +64,8 @@ class Watchdog
     public function __construct()
     {
         $this->simulations = new ArrayCollection();
-        $this->archived = false;
+        $this->archived = 0;
     }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function setId(int $id): static
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    public function getServerId(): ?Uuid
-    {
-        return $this->serverId;
-    }
-
-    public function setServerId(Uuid $serverId): static
-    {
-        $this->serverId = $serverId;
-
-        return $this;
-    }
-
-    public function getAddress(): ?string
-    {
-        return $this->address;
-    }
-
-    public function setAddress(string $address): static
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    public function getPort(): int
-    {
-        return $this->port;
-    }
-
-    public function setPort(int $port): static
-    {
-        $this->port = $port;
-
-        return $this;
-    }
-
-    public function getScheme(): string
-    {
-        return $this->scheme;
-    }
-
-    public function setScheme(string $scheme): static
-    {
-        $this->scheme = $scheme;
-
-        return $this;
-    }
-
     public function getStatus(): WatchdogStatus
     {
         return $this->status;
@@ -151,7 +92,7 @@ class Watchdog
 
     public function isArchived(): bool
     {
-        return $this->archived;
+        return $this->archived !== 0;
     }
 
     /**
@@ -184,10 +125,14 @@ class Watchdog
         return $this;
     }
 
-    public function createUrl(): string
+    public function getGameWatchdogServer(): ?GameWatchdogServer
     {
-        $scheme = $this->getScheme();
-        $port = ($this->getServerId() == self::INTERNAL_SERVER_ID ? $_ENV['WATCHDOG_PORT'] : null) ?? $this->getPort();
-        return "{$scheme}://{$this->getAddress()}:{$port}";
+        // fail-safe: Trigger post load to ensure the serialized watchdog has its lazy loaders set
+        //  Eg. after serialization into a message and handled by the message handler.
+        WatchdogListener::getInstance()->triggerPostLoad($this);
+        if (null !== $ll = $this->getLazyLoader(self::LAZY_LOADING_PROPERTY_GAME_WATCHDOG_SERVER)) {
+            return $ll();
+        }
+        return null;
     }
 }

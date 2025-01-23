@@ -14,32 +14,6 @@ class Game extends Base
 {
     const MIN_GAME_ERATIME = 12;
 
-    private const ALLOWED = array(
-        "AutoSaveDatabase",
-        ["Config", Security::ACCESS_LEVEL_FLAG_NONE], //Required for login
-        "FutureRealtime",
-        "GetActualDateForSimulatedMonth",
-        "GetCountries",
-        "GetCurrentMonth",
-        ["GetGameDetails", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
-        "GetWatchdogAddress",
-        "IsOnline",
-        "Meta",
-        "NextMonth",
-        "Planning",
-        "Realtime",
-        ["Setupfilename", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER], // nominated for full security
-        "Speed",
-        ["StartWatchdog", Security::ACCESS_LEVEL_FLAG_NONE], // nominated for full security
-        ["State", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        "PolicySimSettings"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * @apiGroup Game
      * @throws Exception
@@ -49,7 +23,7 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AutoSaveDatabase(): void
     {
-        if (strstr($_SERVER['REQUEST_URI'], 'dev')) {
+        if (str_contains($_SERVER['REQUEST_URI'], 'dev')) {
             return; //Don't create database dumps on dev.
         }
 
@@ -96,7 +70,7 @@ class Game extends Base
             $data['edition_letter'] = $_ENV['DEFAULT_EDITION_LETTER'];
         }
 
-        $passwordchecks = (new GameSession)->CheckGameSessionPasswords();
+        $passwordchecks = (new GameSession())->CheckGameSessionPasswords();
         $data["user_admin_has_password"] = $passwordchecks["adminhaspassword"];
         $data["user_common_has_password"] = $passwordchecks["playerhaspassword"];
 
@@ -578,24 +552,9 @@ class Game extends Base
      */
     private function onGameStateUpdated(string $newGameState): PromiseInterface
     {
-        $simulations = new Simulations();
-        $this->asyncDataTransferTo($simulations);
-        return $simulations->changeWatchdogState($newGameState);
-    }
-
-    /**
-     * @deprected use Simulations::StartWatchdog instead
-     *
-     * @ForceNoTransaction
-     * @noinspection PhpUnused
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function StartWatchdog(): void
-    {
-        $simulations = new Simulations();
-        $this->asyncDataTransferTo($simulations);
-        $simulations->StartWatchdog();
+        $simulation = new Simulation();
+        $this->asyncDataTransferTo($simulation);
+        return $simulation->changeWatchdogState($newGameState);
     }
 
     /**

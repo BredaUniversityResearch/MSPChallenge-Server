@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace DoctrineMigrations;
 
 use App\Domain\API\v1\Game;
-use App\Domain\API\v1\Simulations;
+use App\Domain\API\v1\Simulation;
 use App\Domain\Common\InternalSimulationName;
+use App\Domain\Services\SimulationHelper;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\Watchdog;
 use Doctrine\DBAL\Schema\Schema;
@@ -42,9 +43,9 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
             $result !== 1,
             'Database name does not match the expected format: msp_session_{id}'
         );
-
+        $sessionId = (int)$matches[1];
         $game = new Game();
-        $game->setGameSessionId((int)$matches);
+        $game->setGameSessionId($sessionId);
         try {
             $config = $game->GetGameConfigValues();
         } catch (Exception $e) {
@@ -65,9 +66,11 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
             $this->warnIf(true, 'No simulations found to register in game configuration');
             return; // no configured simulations
         }
-        $sim = new Simulations();
-        $sim->setGameSessionId((int)$matches);
-        $versions = $sim->GetConfiguredSimulationTypes();
+        $sim = new Simulation();
+        $sim->setGameSessionId($sessionId);
+        /** @var SimulationHelper $simulationHelper */
+        $simulationHelper = $this->container->get(SimulationHelper::class);
+        $versions = $simulationHelper->getConfiguredSimulationTypes($sessionId);
         foreach ($versions as $name => $version) {
             $nameLowered = strtolower($name);
             $sql = <<<"SQL"
@@ -103,25 +106,19 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
     {
         // insert watchdog record given the data from game_session, if it is there
         $watchdogServerId = Watchdog::getInternalServerId()->toBinary();
-        $watchdogPort = (int)($_ENV['WATCHDOG_PORT'] ?? 45000);
-        $watchdogAddress = $_ENV['WATCHDOG_ADDRESS'] ?? '';
         $sql = <<<"SQL"
-            INSERT INTO watchdog (`server_id`, `address`, `port`, `status`, `token`)
+            INSERT INTO watchdog (`server_id`, `status`, `token`)
             SELECT 
                 '{$watchdogServerId}' as `server_id`,
-                IF('{$watchdogAddress}'='',`game_session_watchdog_address`,'{$watchdogAddress}') as `address`,
-                {$watchdogPort} as `port`,
                 'ready' as `status`,
                 UUID_SHORT() as `token`
             FROM game_session
             SQL;
         $this->addSql($sql);
 
-        // insert watchdog record based on environment variables if the previous query did not insert anything
-        $watchdogAddress = $_ENV['WATCHDOG_ADDRESS'] ?? 'localhost';
         // phpcs:disable Generic.Files.LineLength.TooLong
         $this->addSql(<<<"SQL"
-            INSERT IGNORE INTO watchdog (`server_id`, `address`, `port`, `status`, `token`) VALUES ('{$watchdogServerId}', '{$watchdogAddress}', {$watchdogPort}, 'ready', UUID_SHORT())
+            INSERT IGNORE INTO watchdog (`server_id`, `status`, `token`) VALUES ('{$watchdogServerId}', 'ready', UUID_SHORT())
             SQL
         );
         // phpcs:enable Generic.Files.LineLength.TooLong
@@ -144,16 +141,13 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
             CREATE TABLE `watchdog` (
                 `id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 `server_id` binary(16) NOT NULL COMMENT '(DC2Type:uuid)',
-                `address` varchar(255) NOT NULL,
-                `port` int unsigned NOT NULL DEFAULT '80',
-                `scheme` varchar(255) NOT NULL DEFAULT 'http',
-                `status` enum('registered','ready','unresponsive','unregistered') NOT NULL DEFAULT 'registered',
+                `status` enum('registered','ready','unresponsive') NOT NULL DEFAULT 'registered',
                 `token` bigint(20) NOT NULL,
                 `deleted_at` datetime DEFAULT NULL,
                 `created_at` datetime NOT NULL DEFAULT current_timestamp(),
                 `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-                `archived` tinyint(1) GENERATED ALWAYS AS (if(`deleted_at` is null,0,1)) VIRTUAL COMMENT 'GENERATED ALWAYS AS (if(`deleted_at` is null,0,1)) VIRTUAL',
-                UNIQUE KEY `watchdog_id_name_archived` (`server_id`,`archived`)
+                `archived` bigint GENERATED ALWAYS AS (if(`deleted_at` is null,0,UNIX_TIMESTAMP(deleted_at))) VIRTUAL COMMENT 'GENERATED ALWAYS AS (if(`deleted_at` is null,0,UNIX_TIMESTAMP(deleted_at))) VIRTUAL',
+                UNIQUE KEY `uq_server_id_archived` (`server_id`,`archived`)
             )
             SQL
         );
@@ -170,7 +164,7 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
               `created_at` datetime NOT NULL DEFAULT current_timestamp(),
               `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
               PRIMARY KEY (`id`),
-              UNIQUE KEY `watchdog_id_name_archived` (`watchdog_id`,`name`),
+              UNIQUE KEY `uq_watchdog_id_name` (`watchdog_id`,`name`),
               CONSTRAINT `fk_watchdog_id` FOREIGN KEY (`watchdog_id`) REFERENCES `watchdog` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             SQL

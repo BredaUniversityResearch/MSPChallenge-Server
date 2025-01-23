@@ -33,5 +33,5 @@ security:
                 - App\Security\MSPAuth2Authenticator
 
     access_control:
-        - { path: ^/\d+/api/(GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
+        - { path: ^/\d+/api/(GameSession/\w+|Plan/ExportPlansToJson|Simulation/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
         - { path: ^/\d+/api/.*, roles: IS_AUTHENTICATED_FULLY }

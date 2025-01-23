@@ -66,7 +66,7 @@ class EventLog
         return $this;
     }
 
-    public function getSeverity(): ?EventLogSeverity
+    public function getSeverity(): EventLogSeverity
     {
         return $this->severity;
     }

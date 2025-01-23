@@ -10,10 +10,28 @@
                 <div class="small text-muted">{{ form_help(gameWatchdogServerForm.name) }}</div>
             </div>
             <div class="form-group">
-                {{ form_label(gameWatchdogServerForm.address, 'Fully-qualified base URL', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_label(gameWatchdogServerForm.server_id, 'Watchdog server id', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.server_id) }}</div>
+                {{ form_widget(gameWatchdogServerForm.server_id, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.server_id) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.scheme, 'Scheme', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.scheme) }}</div>
+                {{ form_widget(gameWatchdogServerForm.scheme, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.scheme) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.address, '', {'label_attr': {'class': 'form-label'}}) }}
                 <div class="text-danger">{{ form_errors(gameWatchdogServerForm.address) }}</div>
                 {{ form_widget(gameWatchdogServerForm.address, {'attr': {'class': 'form-control'}}) }}
                 <div class="small text-muted">{{ form_help(gameWatchdogServerForm.address) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.port, '', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.port) }}</div>
+                {{ form_widget(gameWatchdogServerForm.port, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.port) }}</div>
             </div>
         </div>
         <div class="modal-footer">

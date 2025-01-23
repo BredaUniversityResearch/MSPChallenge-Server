@@ -7,16 +7,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Kpi extends Base
 {
-    private const ALLOWED = array(
-        "Post",
-        "BatchPost",
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * called from MEL
      * @apiGroup KPI

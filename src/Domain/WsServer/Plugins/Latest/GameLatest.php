@@ -2,7 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\Simulations;
+use App\Domain\API\v1\Simulation;
 use App\Domain\Common\CommonBase;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Common\ToPromiseFunction;
@@ -106,9 +106,9 @@ class GameLatest extends CommonBase
                 $this->allowEnergyKpiUpdate = true;
                 return $tick;
             }
-            $simulations = new Simulations();
-            $this->asyncDataTransferTo($simulations);
-            return $simulations->getSimulations(
+            $simulation = new Simulation();
+            $this->asyncDataTransferTo($simulation);
+            return $simulation->getSimulations(
                 statusFilter: WatchdogStatus::READY,
                 lastMonthFilter: $tick['month'], // the last month was simulated, so up-to-date
                 afterUpdateTimestamp: $lastUpdateTime // new simulation data available

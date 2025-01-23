@@ -93,7 +93,7 @@ class CreatePolicyPlanCommand extends Command
             $io->error('Game start year not set');
             return Command::FAILURE;
         }
-        $gameCurrentMonth = $game->getGameCurrentmonth();
+        $gameCurrentMonth = $game->getGameCurrentMonth();
         // show info to the user
         $io->note(
             'Press CTRL+C (+enter) to exit at any time'.PHP_EOL.

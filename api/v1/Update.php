@@ -12,34 +12,6 @@ use Throwable;
 
 class Update extends Base
 {
-    private const ALLOWED = array(
-        "Meta",
-        "Reimport",
-        "ImportMeta",
-        "Newfiles",
-        "Clear",
-        "ImportRestrictions",
-        "EmptyDatabase",
-        "ImportLayerMeta",
-        "RebuildDatabase",
-        "ClearRasterStorage",
-        "ClearEnergy",
-        "ClearPlans",
-        "SetupSimulations",
-        "ImportScenario",
-        "ManualExportDatabase",
-        ["From40beta7To40beta8", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["From40beta7To40beta9", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["From40beta7To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["From40beta8To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["From40beta9To40beta10", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * @throws Exception
      */
@@ -51,7 +23,7 @@ class Update extends Base
         string $geoserver_password
     ): void {
         Log::LogInfo("ImportLayerMeta -> Starting import meta for all layers...");
-        $layer = new Layer("");
+        $layer = new Layer();
         $layer->ImportMeta($configFilename, $geoserver_url, $geoserver_username, $geoserver_password);
         Log::LogInfo("ImportLayerMeta -> Done.");
     }
@@ -68,8 +40,8 @@ class Update extends Base
         $data = $game->GetGameConfigValues($configFileName);
 
         $game->SetupGameTime($data);
-        $sims = new Simulations();
-        $configuredSimulations = $sims->GetConfiguredSimulationTypes();
+        $configuredSimulations = SymfonyToLegacyHelper::getInstance()->getSimulationHelper()->
+            getConfiguredSimulationTypes($this->getGameSessionId());
         if (array_key_exists("MEL", $configuredSimulations)) {
             Log::LogInfo("SetupSimulations -> Setting up MEL tables...");
             $mel = new MEL();
@@ -206,11 +178,12 @@ class Update extends Base
         Log::LogInfo("ImportLayerGeometry -> Starting Import Layer Meta...");
 
         $store = new Store();
-        $store->geoserver->baseurl = $geoserver_url;
-        $store->geoserver->username = $geoserver_username;
-        $store->geoserver->password = $geoserver_password;
-        $game = new Game();
+        $store->getGeoServer()
+            ->setBaseurl($geoserver_url)
+            ->setUsername($geoserver_username)
+            ->setPassword($geoserver_password);
 
+        $game = new Game();
         $config = $game->GetGameConfigValues($configFilename);
         $game->SetupCountries($config);
 
@@ -235,7 +208,7 @@ class Update extends Base
     {
         Log::LogInfo("ClearEnergy -> Starting Clear Energy ...");
 
-        $energy = new Energy("");
+        $energy = new Energy();
         $energy->Clear();
 
         Log::LogInfo("ClearEnergy -> Energy data cleared.");
@@ -249,8 +222,7 @@ class Update extends Base
     {
         Log::LogInfo("ImportRestrictions -> Starting Import Restrictions ...");
 
-        $plan = new Plan("");
-
+        $plan = new Plan();
         $plan->ImportRestrictions();
 
         Log::LogInfo("ImportRestrictions -> Restrictions imported.");
@@ -271,6 +243,10 @@ class Update extends Base
         Log::LogInfo("EmptyDatabase -> Deleted database.");
     }
 
+
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ClearRasterStorage(): void
     {

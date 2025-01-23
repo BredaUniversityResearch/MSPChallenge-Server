@@ -2,6 +2,8 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\API\APIHelper;
+use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Message\Analytics\UserLogOnOffSessionMessage;
@@ -17,22 +19,13 @@ use function App\await;
 
 class User extends Base implements JWTUserInterface
 {
-    private const ALLOWED = array(
-        ["RequestSession", Security::ACCESS_LEVEL_FLAG_NONE],
-        "CloseSession",
-        ["getProviders", Security::ACCESS_LEVEL_FLAG_NONE],
-        ["checkExists", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        "List"
-    );
-
     private ?string $user_name;
     private ?int $user_id;
 
     // @note "Make the constructor final to prevent the class from being extended"
     //  see https://phpstan.org/blog/solving-phpstan-error-unsafe-usage-of-new-static
-    final public function __construct(string $method = '')
+    final public function __construct()
     {
-        parent::__construct($method, self::ALLOWED);
     }
 
     /**
@@ -271,6 +264,9 @@ class User extends Base implements JWTUserInterface
         return is_subclass_of($provider, Auths::class);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function getProviders(): array
     {
         $return = array();
@@ -284,6 +280,26 @@ class User extends Base implements JWTUserInterface
             }
         }
         return $return;
+    }
+
+    /**
+     * @throws Exception
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    private static function AutoloadAllClasses(): void
+    {
+        $classmap = require(APIHelper::getInstance()->GetBaseFolder() . 'vendor/composer/autoload_classmap.php');
+        foreach ($classmap as $class => $file) {
+            $refClass = new \ReflectionClass(__CLASS__);
+            if (!Util::hasPrefix($class, str_replace($refClass->getShortName(), '', __CLASS__))) {
+                continue;
+            }
+            $refClass = new \ReflectionClass($class);
+            if (!$refClass->isSubclassOf(Auths::class)) {
+                continue;
+            }
+            require_once($file);
+        }
     }
 
     /**
@@ -403,6 +419,9 @@ class User extends Base implements JWTUserInterface
         // irrelevant, but required function
     }
 
+    /**
+     * @throws Exception
+     */
     private function logUserLogOnOrOff(
         bool $logOn,
         int $sessionId,

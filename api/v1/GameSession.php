@@ -12,7 +12,6 @@ use Drift\DBAL\Result;
 use Exception;
 use FilesystemIterator;
 use React\EventLoop\Loop;
-use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -20,36 +19,15 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Throwable;
 use ZipArchive;
-use function App\resolveOnFutureTick;
 use function App\await;
+use function React\Promise\resolve;
 
 class GameSession extends Base
 {
-    private const ALLOWED = array(
-        ["CreateGameSession", Security::ACCESS_LEVEL_FLAG_NONE],
-        ["CreateGameSessionAndSignal", Security::ACCESS_LEVEL_FLAG_NONE],
-        ["ArchiveGameSession", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["ArchiveGameSessionInternal", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["SaveSession", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["LoadGameSave", Security::ACCESS_LEVEL_FLAG_NONE],
-        ["LoadGameSaveAndSignal", Security::ACCESS_LEVEL_FLAG_NONE],
-        ["CreateGameSessionZip", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["CreateGameSessionLayersZip", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["ResetWatchdogAddress", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        ["SetUserAccess", Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER]
-    );
-
     const INVALID_SESSION_ID = -1;
     const ARCHIVE_DIRECTORY = "session_archive/";
     private const CONFIG_DIRECTORY = "running_session_config/";
     const EXPORT_DIRECTORY = "export/";
-    const SECONDS_PER_MINUTE = 60;
-    const SECONDS_PER_HOUR = self::SECONDS_PER_MINUTE * 60;
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
 
     public static function getConfigDirectory(): string
     {
@@ -60,6 +38,9 @@ class GameSession extends Base
     public static function GetGameSessionIdForCurrentRequest(): int
     {
         $sessionId = $_POST['game_id'] ?? $_GET['session'] ?? self::INVALID_SESSION_ID;
+        if (1 === preg_match('/^\/(?:\/)*(\d+)\/(?:\/)*api\/(?:\/)*(.*)/', $_SERVER["REQUEST_URI"], $matches)) {
+            $sessionId = (int)$matches[1];
+        }
         return intval($sessionId) < 1 ? self::INVALID_SESSION_ID : (int)$sessionId;
     }
 
@@ -69,100 +50,31 @@ class GameSession extends Base
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public static function getRequestApiRootAsync(bool $forDocker = false): PromiseInterface
+    public static function getSessionAPIBaseUrl(int $sessionId): PromiseInterface
     {
-        if (isset($GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0])) {
-            $deferred = new Deferred();
-            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][$forDocker ? 1 : 0])->promise();
+        if (getenv('DOCKER') !== false) {
+            return resolve(
+                'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).'/'.$sessionId. '/'
+            );
         }
-        $apiRoot = preg_replace('/(.*)\/(api|_profiler)\/(.*)/', '$1/', $_SERVER["REQUEST_URI"]);
-        $apiRoot = str_replace("//", "/", $apiRoot);
-
-
-        if ($forDocker) {
-            $deferred = new Deferred();
-            // this is always called from inside the docker environment,so just use http://php:80/ or
-            //   http://mitmproxy:8080/
-            $GLOBALS['RequestApiRoot'][1] = 'http://'.
-                ($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).$apiRoot;
-            return resolveOnFutureTick($deferred, $GLOBALS['RequestApiRoot'][1])->promise();
-        }
-
-        $_SERVER['HTTPS'] ??= 'off';
-        /** @noinspection HttpUrlsUsage */
-        $protocol = ($_SERVER['HTTPS'] == 'on') ? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
-
+        $protocol = ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
         $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
         return $connection->query(
             $connection->createQueryBuilder()
-                ->select('address')
-                ->from('game_servers')
-                ->setMaxResults(1)
+                ->select('gs.address')
+                ->from('game_list', 'gl')
+                ->innerJoin('gl', 'game_servers', 'gs', 'gl.game_server_id = gs.id')
+                ->where('gl.id = :sessionId')
+                ->setParameter('sessionId', $sessionId)
         )
         ->then(
-            function (Result $result) use ($protocol, $apiRoot) {
+            function (Result $result) use ($protocol, $sessionId) {
                 $row = $result->fetchFirstRow() ?? [];
-                $serverName = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $row['address'] ?? $_SERVER["SERVER_NAME"] ??
-                    gethostname();
-                $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
-                $apiRoot = $protocol.$serverName.$port.$apiRoot;
-                $GLOBALS['RequestApiRoot'][0] = $apiRoot;
-                return $apiRoot;
+                $address = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $row['address'] ?? gethostname();
+                $port = ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+                return $protocol.$address.':'.$port.'/'.$sessionId.'/';
             }
         );
-    }
-
-    /**
-     * returns the base API endpoint. e.g. http://localhost/1/
-     *
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetRequestApiRoot(): string
-    {
-        return await(self::getRequestApiRootAsync());
-    }
-
-    /**
-     * Used by GameTick to generate a server manager URL towards editGameSession.php
-     *
-     * @return string
-     */
-    public static function getServerManagerApiRoot(bool $forDocker = false): string
-    {
-        if (isset($GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0])) {
-            return $GLOBALS['ServerManagerApiRoot'][$forDocker ? 1 : 0];
-        }
-
-        $serverName = $_SERVER["SERVER_NAME"] ?? gethostname();
-
-        /** @noinspection HttpUrlsUsage */
-        $protocol = isset($_SERVER['HTTPS'])? "https://" : ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
-        $apiFolder = "/ServerManager/api/";
-
-        if ($forDocker) {
-            // this is always called from inside the docker environment,so just use http://php:80/ or
-            //   http://mitmproxy:8080/
-            $GLOBALS['ServerManagerApiRoot'][1] = 'http://'.
-                ($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).$apiFolder;
-            return $GLOBALS['ServerManagerApiRoot'][1];
-        }
-
-        $dbConfig = Config::GetInstance()->DatabaseConfig();
-        $temporaryConnection = Database::CreateTemporaryDBConnection(
-            $dbConfig["host"],
-            $dbConfig["user"],
-            $dbConfig["password"],
-            $dbConfig["database"]
-        );
-        $port = ':' . ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
-        $apiRoot = $protocol.$serverName.$port.$apiFolder;
-        foreach ($temporaryConnection->query("SELECT address FROM game_servers LIMIT 1") as $row) {
-            $serverName = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $row["address"];
-            $apiRoot = $protocol.$serverName.$port.$apiFolder;
-        }
-        $GLOBALS['ServerManagerApiRoot'][0] = $apiRoot;
-        return $apiRoot;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -359,21 +271,21 @@ class GameSession extends Base
 
         //Notify the simulation that the game has been setup so we start the simulations.
         //This is needed because MEL needs to be run before the game to setup the initial fishing values.
-        $simulations = new Simulations();
-        $this->asyncDataTransferTo($simulations);
-        $watchdogSuccess = false;
-        if (null !== $promise = $simulations->changeWatchdogState("SETUP")) {
-            await($promise);
-            $watchdogSuccess = true;
-        };
+        $simulation = new Simulation();
+        $this->asyncDataTransferTo($simulation);
+        await($simulation->changeWatchdogState("SETUP"));
 
+        // todo(harald): can this method be removed? we have the game list creation message handler now?
+        // todo: setting the healthy state should be done after the simulation, not here
         if (!empty($response_address)) {
-            $postValues["session_state"] = $watchdogSuccess ?
-                new GameSessionStateValue('healthy') : new GameSessionStateValue('failed');
+            $postValues["session_state"] = new GameSessionStateValue('healthy');
             $this->updateServerManagerGameList($postValues);
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function updateServerManagerGameList($postValues): void
     {
         $manager = SymfonyToLegacyHelper::getInstance()->getEntityManager();
@@ -419,15 +331,11 @@ class GameSession extends Base
      * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function ResetWatchdogAddress(string $watchdog_address): void
+    public function ResetWatchdogTokens(): void
     {
-        if (empty($watchdog_address)) {
-            throw new Exception("Watchdog address cannot be empty.");
-        }
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query(
-            "UPDATE watchdog SET address = ?, token = UUID_SHORT();",
-            array($watchdog_address)
+            "UPDATE watchdog token = UUID_SHORT()"
         );
     }
 
@@ -469,9 +377,9 @@ class GameSession extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ArchiveGameSessionInternal(string $response_url): void
     {
-        $simulations = new Simulations();
-        $this->asyncDataTransferTo($simulations);
-        await($simulations->changeWatchdogState('end'));
+        $simulation = new Simulation();
+        $this->asyncDataTransferTo($simulation);
+        await($simulation->changeWatchdogState('end'));
 
         $zippath = $this->CreateGameSessionZip($response_url);
 
@@ -508,7 +416,7 @@ class GameSession extends Base
     ): void {
         $sessionId = self::GetGameSessionIdForCurrentRequest();
         if ($preferredfolder == self::ARCHIVE_DIRECTORY) {
-            $preferredfolder = self::Dir().$preferredfolder;
+            $preferredfolder = self::dir().$preferredfolder;
         }
         $zippath = $preferredfolder.$preferredname.$save_id.".zip";
         
@@ -546,6 +454,25 @@ class GameSession extends Base
 
     /**
      * @throws       Exception
+     */
+    private static function dir(): string
+    {
+        $abs_app_root = SymfonyToLegacyHelper::getInstance()->getProjectDir();
+        $url_app_root = '';
+        $self_path = explode("/", $_SERVER['PHP_SELF']);
+        $self_path_length = count($self_path);
+        for ($i = 1; $i < $self_path_length; $i++) {
+            array_splice($self_path, $self_path_length - $i, $i);
+            $url_app_root = implode("/", $self_path) . "/";
+            if (file_exists($abs_app_root . $url_app_root . 'api_config.php')) {
+                break;
+            }
+        }
+        return $abs_app_root . $url_app_root;
+    }
+
+    /**
+     * @throws       Exception
      * @noinspection SpellCheckingInspection
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -562,10 +489,10 @@ class GameSession extends Base
             $preferredid = $save_id;
         }
         if ($preferredfolder == self::ARCHIVE_DIRECTORY) {
-            $preferredfolder = self::Dir().$preferredfolder;
+            $preferredfolder = self::dir().$preferredfolder;
         }
         $zippath = $preferredfolder.$preferredname.$preferredid.".zip";
-        $sqlDumpPath = self::Dir().self::EXPORT_DIRECTORY."db_export_".$sessionId.".sql";
+        $sqlDumpPath = self::dir().self::EXPORT_DIRECTORY."db_export_".$sessionId.".sql";
 
         Store::EnsureFolderExists($preferredfolder);
         
@@ -635,7 +562,7 @@ class GameSession extends Base
     ): string {
         $sessionId = self::GetGameSessionIdForCurrentRequest();
         if ($preferredfolder == self::ARCHIVE_DIRECTORY) {
-            $preferredfolder = self::Dir().$preferredfolder;
+            $preferredfolder = self::dir().$preferredfolder;
         }
         $zippath = $preferredfolder.$preferredname.$save_id.".zip";
 
@@ -841,7 +768,7 @@ class GameSession extends Base
         string $config_file_path,
         string $dbase_file_path,
         string $raster_files_path,
-        string $watchdog_address,
+        string $watchdog_address, // unused, deprecated
         string $response_address
     ): void {
         $configDir = self::getConfigDirectory();
@@ -866,11 +793,11 @@ class GameSession extends Base
             throw new Exception("Reload of save failed");
         }
 
-        $this->ResetWatchdogAddress($watchdog_address);
+        $this->ResetWatchdogTokens();
 
-        $simulations = new Simulations();
-        $this->asyncDataTransferTo($simulations);
-        await($simulations->changeWatchdogState("PAUSE")); // reloaded saves always start paused
+        $simulation = new Simulation();
+        $this->asyncDataTransferTo($simulation);
+        await($simulation->changeWatchdogState("PAUSE")); // reloaded saves always start paused
 
         if (!empty($response_address)) {
             $postValues["session_state"] = "healthy";

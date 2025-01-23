@@ -4,7 +4,7 @@ namespace App\Domain\Common\EntityEnums;
 
 enum EventLogSeverity : string
 {
-    case WARNING = 'warning';
-    case ERROR = 'error';
-    case FATAL = 'fatal';
+    case WARNING = 'Warning';
+    case ERROR = 'Error';
+    case FATAL = 'Fatal';
 }

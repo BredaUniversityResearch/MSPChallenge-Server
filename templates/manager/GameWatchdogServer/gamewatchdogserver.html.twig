@@ -12,7 +12,7 @@
                 {% for gameWatchdogServer in gameWatchdogServers %}
                 <tr>
                     <td>{{ gameWatchdogServer.name }}</td>
-                    <td>{{ gameWatchdogServer.address }}</td>
+                    <td>{{ gameWatchdogServer.createUrl }}</td>
                     <td>
                         {% if gameWatchdogServer.id != 1 %}
                         <button type="button" class="btn btn-primary btn-sm"

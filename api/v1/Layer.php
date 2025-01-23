@@ -4,32 +4,19 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Services\ConnectionManager;
 use Exception;
-use React\Promise\PromiseInterface;
-use function App\await;
 
 class Layer extends Base
 {
-    public GeoServer $geoserver;
+    private GeoServer $geoServer;
 
-    private const ALLOWED = array(
-        "Delete",
-        "Export",
-        "Get",
-        "GetRaster",
-        "GetRasterAtMonth",
-        "ImportMeta",
-        "List",
-        "Meta",
-        ["MetaByName", Security::ACCESS_LEVEL_FLAG_NONE],
-        "Post",
-        "UpdateMeta",
-        "UpdateRaster"
-    );
-
-    public function __construct(string $method = '')
+    public function __construct()
     {
-        parent::__construct($method, self::ALLOWED);
-        $this->geoserver = new GeoServer();
+        $this->geoServer = new GeoServer();
+    }
+
+    public function getGeoServer(): GeoServer
+    {
+        return $this->geoServer;
     }
 
     /**
@@ -296,8 +283,12 @@ class Layer extends Base
         $metaData = $data['meta'];
         $region = $data['region'];
 
-        $geoserver = new GeoServer($geoserver_url, $geoserver_username, $geoserver_password);
-        $allLayers = $geoserver->GetAllRemoteLayers($region);
+        $geoServer = new GeoServer();
+        $geoServer
+            ->setBaseurl($geoserver_url)
+            ->setUsername($geoserver_username)
+            ->setPassword($geoserver_password);
+        $allLayers = $geoServer->GetAllRemoteLayers($region);
 
         foreach ($metaData as $layerMetaData) {
             $dbLayerId = $this->VerifyLayerExists($layerMetaData["layer_name"], $allLayers);
@@ -683,7 +674,7 @@ class Layer extends Base
         string $workspace,
         string $layer
     ): array {
-        $response = $this->geoserver->ows(
+        $response = $this->geoServer->ows(
             $workspace
             . "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers="
             . urlencode($workspace)
@@ -751,7 +742,7 @@ class Layer extends Base
         } else {
             throw new Exception("Incorrect format, use GML, CSV, JSON or PNG");
         }
-        return $this->geoserver->ows($url);
+        return $this->geoServer->ows($url);
     }
 
     /**
