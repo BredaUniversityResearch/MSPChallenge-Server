@@ -1,29 +1,19 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v6.0/debian.12-x64",
+    "name": ".NETCoreApp,Version=v6.0/debian.11-x64",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {},
-    ".NETCoreApp,Version=v6.0/debian.12-x64": {
-      "EwECore/1.0.0": {
+    ".NETCoreApp,Version=v6.0/debian.11-x64": {
+      "EwEUtils/1.0.0": {
         "dependencies": {
-          "EwEPlugin": "1.0.0",
-          "EwEUtils": "1.0.0",
           "Microsoft.Windows.Compatibility": "8.0.8",
-          "System.Data.DataSetExtensions": "4.5.0",
-          "System.ServiceModel.Primitives": "6.2.0",
-          "EPPlus": "4.1.0.0",
-          "EwELicense": "6.7.0.18060",
-          "Interop.JRO": "2.6.0.0",
-          "Microsoft.Office.interop.access.dao": "12.0.0.0",
-          "ProjNet": "1.2.3432.30659",
-          "TreeksLicensingLibrary2": "2.1.7916.36068",
           "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64": "6.0.33"
         },
         "runtime": {
-          "EwECore.dll": {}
+          "EwEUtils.dll": {}
         }
       },
       "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64/6.0.33": {
@@ -742,11 +732,11 @@
           }
         }
       },
-      "Microsoft.Extensions.ObjectPool/6.0.16": {
+      "Microsoft.Extensions.ObjectPool/5.0.10": {
         "runtime": {
-          "lib/net6.0/Microsoft.Extensions.ObjectPool.dll": {
-            "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.1623.17406"
+          "lib/net5.0/Microsoft.Extensions.ObjectPool.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.1021.41022"
           }
         }
       },
@@ -808,7 +798,7 @@
           "System.ServiceModel.Duplex": "4.10.0",
           "System.ServiceModel.Http": "4.10.0",
           "System.ServiceModel.NetTcp": "4.10.0",
-          "System.ServiceModel.Primitives": "6.2.0",
+          "System.ServiceModel.Primitives": "4.10.0",
           "System.ServiceModel.Security": "4.10.0",
           "System.ServiceModel.Syndication": "8.0.0",
           "System.ServiceProcess.ServiceController": "8.0.0",
@@ -884,14 +874,6 @@
           "lib/net6.0/System.Configuration.ConfigurationManager.dll": {
             "assemblyVersion": "8.0.0.0",
             "fileVersion": "8.0.23.53103"
-          }
-        }
-      },
-      "System.Data.DataSetExtensions/4.5.0": {
-        "runtime": {
-          "lib/netstandard2.0/System.Data.DataSetExtensions.dll": {
-            "assemblyVersion": "4.0.0.0",
-            "fileVersion": "4.6.26515.6"
           }
         }
       },
@@ -1032,7 +1014,7 @@
       "System.Private.ServiceModel/4.10.0": {
         "dependencies": {
           "Microsoft.Bcl.AsyncInterfaces": "5.0.0",
-          "Microsoft.Extensions.ObjectPool": "6.0.16",
+          "Microsoft.Extensions.ObjectPool": "5.0.10",
           "System.Numerics.Vectors": "4.5.0",
           "System.Reflection.DispatchProxy": "4.7.1",
           "System.Security.Cryptography.Xml": "8.0.1",
@@ -1185,7 +1167,7 @@
       "System.ServiceModel.Duplex/4.10.0": {
         "dependencies": {
           "System.Private.ServiceModel": "4.10.0",
-          "System.ServiceModel.Primitives": "6.2.0"
+          "System.ServiceModel.Primitives": "4.10.0"
         },
         "runtime": {
           "lib/net6.0/System.ServiceModel.Duplex.dll": {
@@ -1197,7 +1179,7 @@
       "System.ServiceModel.Http/4.10.0": {
         "dependencies": {
           "System.Private.ServiceModel": "4.10.0",
-          "System.ServiceModel.Primitives": "6.2.0"
+          "System.ServiceModel.Primitives": "4.10.0"
         },
         "runtime": {
           "lib/net6.0/System.ServiceModel.Http.dll": {
@@ -1209,7 +1191,7 @@
       "System.ServiceModel.NetTcp/4.10.0": {
         "dependencies": {
           "System.Private.ServiceModel": "4.10.0",
-          "System.ServiceModel.Primitives": "6.2.0"
+          "System.ServiceModel.Primitives": "4.10.0"
         },
         "runtime": {
           "lib/net6.0/System.ServiceModel.NetTcp.dll": {
@@ -1218,63 +1200,25 @@
           }
         }
       },
-      "System.ServiceModel.Primitives/6.2.0": {
+      "System.ServiceModel.Primitives/4.10.0": {
         "dependencies": {
-          "Microsoft.Extensions.ObjectPool": "6.0.16",
-          "System.Security.Cryptography.Xml": "8.0.1"
+          "System.Private.ServiceModel": "4.10.0"
         },
         "runtime": {
           "lib/net6.0/System.ServiceModel.Primitives.dll": {
-            "assemblyVersion": "6.2.0.0",
-            "fileVersion": "6.200.23.55602"
-          }
-        },
-        "resources": {
-          "lib/net6.0/cs/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "cs"
+            "assemblyVersion": "4.10.0.0",
+            "fileVersion": "4.1000.22.41602"
           },
-          "lib/net6.0/de/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "de"
-          },
-          "lib/net6.0/es/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "es"
-          },
-          "lib/net6.0/fr/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "fr"
-          },
-          "lib/net6.0/it/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "it"
-          },
-          "lib/net6.0/ja/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "ja"
-          },
-          "lib/net6.0/ko/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "ko"
-          },
-          "lib/net6.0/pl/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "pl"
-          },
-          "lib/net6.0/pt-BR/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "pt-BR"
-          },
-          "lib/net6.0/ru/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "ru"
-          },
-          "lib/net6.0/tr/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "tr"
-          },
-          "lib/net6.0/zh-Hans/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "zh-Hans"
-          },
-          "lib/net6.0/zh-Hant/System.ServiceModel.Primitives.resources.dll": {
-            "locale": "zh-Hant"
+          "lib/net6.0/System.ServiceModel.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "4.1000.22.41602"
           }
         }
       },
       "System.ServiceModel.Security/4.10.0": {
         "dependencies": {
           "System.Private.ServiceModel": "4.10.0",
-          "System.ServiceModel.Primitives": "6.2.0"
+          "System.ServiceModel.Primitives": "4.10.0"
         },
         "runtime": {
           "lib/net6.0/System.ServiceModel.Security.dll": {
@@ -1385,81 +1329,11 @@
             "fileVersion": "8.0.23.53103"
           }
         }
-      },
-      "EwEPlugin/1.0.0": {
-        "dependencies": {
-          "EwEUtils": "1.0.0"
-        },
-        "runtime": {
-          "EwEPlugin.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "6.7.0.18992"
-          }
-        }
-      },
-      "EwEUtils/1.0.0": {
-        "dependencies": {
-          "Microsoft.Windows.Compatibility": "8.0.8"
-        },
-        "runtime": {
-          "EwEUtils.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "6.7.0.18992"
-          }
-        }
-      },
-      "EPPlus/4.1.0.0": {
-        "runtime": {
-          "EPPlus.dll": {
-            "assemblyVersion": "4.1.0.0",
-            "fileVersion": "4.1.0.0"
-          }
-        }
-      },
-      "EwELicense/6.7.0.18060": {
-        "runtime": {
-          "EwELicense.dll": {
-            "assemblyVersion": "6.7.0.18060",
-            "fileVersion": "6.7.0.18060"
-          }
-        }
-      },
-      "Interop.JRO/2.6.0.0": {
-        "runtime": {
-          "Interop.JRO.dll": {
-            "assemblyVersion": "2.6.0.0",
-            "fileVersion": "2.6.0.0"
-          }
-        }
-      },
-      "Microsoft.Office.interop.access.dao/12.0.0.0": {
-        "runtime": {
-          "Microsoft.Office.interop.access.dao.dll": {
-            "assemblyVersion": "12.0.0.0",
-            "fileVersion": "12.0.4518.1014"
-          }
-        }
-      },
-      "ProjNet/1.2.3432.30659": {
-        "runtime": {
-          "ProjNet.dll": {
-            "assemblyVersion": "1.2.3432.30659",
-            "fileVersion": "1.2.0.0"
-          }
-        }
-      },
-      "TreeksLicensingLibrary2/2.1.7916.36068": {
-        "runtime": {
-          "TreeksLicensingLibrary2.dll": {
-            "assemblyVersion": "2.1.7916.36068",
-            "fileVersion": "2.1.0.0"
-          }
-        }
       }
     }
   },
   "libraries": {
-    "EwECore/1.0.0": {
+    "EwEUtils/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -1476,12 +1350,12 @@
       "path": "microsoft.bcl.asyncinterfaces/5.0.0",
       "hashPath": "microsoft.bcl.asyncinterfaces.5.0.0.nupkg.sha512"
     },
-    "Microsoft.Extensions.ObjectPool/6.0.16": {
+    "Microsoft.Extensions.ObjectPool/5.0.10": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-OVX5tlKg6LY+XKqlUn7i9KY+6Liut0iewWff2DNr7129i/NJ8rpUzbmxavPydZgcLREEWHklXZiPKCS895tNIQ==",
-      "path": "microsoft.extensions.objectpool/6.0.16",
-      "hashPath": "microsoft.extensions.objectpool.6.0.16.nupkg.sha512"
+      "sha512": "sha512-pp9tbGqIhdEXL6Q1yJl+zevAJSq4BsxqhS1GXzBvEsEz9DDNu9GLNzgUy2xyFc4YjB4m4Ff2YEWTnvQvVYdkvQ==",
+      "path": "microsoft.extensions.objectpool/5.0.10",
+      "hashPath": "microsoft.extensions.objectpool.5.0.10.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/3.1.0": {
       "type": "package",
@@ -1615,13 +1489,6 @@
       "sha512": "sha512-JlYi9XVvIREURRUlGMr1F6vOFLk7YSY4p1vHo4kX3tQ0AGrjqlRWHDi66ImHhy6qwXBG3BJ6Y1QlYQ+Qz6Xgww==",
       "path": "system.configuration.configurationmanager/8.0.0",
       "hashPath": "system.configuration.configurationmanager.8.0.0.nupkg.sha512"
-    },
-    "System.Data.DataSetExtensions/4.5.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-221clPs1445HkTBZPL+K9sDBdJRB8UN8rgjO3ztB0CQ26z//fmJXtlsr6whGatscsKGBrhJl5bwJuKSA8mwFOw==",
-      "path": "system.data.datasetextensions/4.5.0",
-      "hashPath": "system.data.datasetextensions.4.5.0.nupkg.sha512"
     },
     "System.Data.Odbc/8.0.0": {
       "type": "package",
@@ -1819,12 +1686,12 @@
       "path": "system.servicemodel.nettcp/4.10.0",
       "hashPath": "system.servicemodel.nettcp.4.10.0.nupkg.sha512"
     },
-    "System.ServiceModel.Primitives/6.2.0": {
+    "System.ServiceModel.Primitives/4.10.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ro+c4JKNuX6dDpTWh9ZICYr4pIe7uJToauPPgZt2qqFPjVB78ZDUz3rPCZX89dA+IoRZ+9T1ngLBKsgkTmx7UA==",
-      "path": "system.servicemodel.primitives/6.2.0",
-      "hashPath": "system.servicemodel.primitives.6.2.0.nupkg.sha512"
+      "sha512": "sha512-BtrvvpgU2HolcC0tUf1g+n4Fk5kLhfbIBgRibcGe7TDHXcy6zTfkyXxR88rl2tO4KEPLkJXxWf/HW/LJmsI0Ew==",
+      "path": "system.servicemodel.primitives/4.10.0",
+      "hashPath": "system.servicemodel.primitives.4.10.0.nupkg.sha512"
     },
     "System.ServiceModel.Security/4.10.0": {
       "type": "package",
@@ -1881,51 +1748,11 @@
       "sha512": "sha512-Obg3a90MkOw9mYKxrardLpY2u0axDMrSmy4JCdq2cYbelM2cUwmUir5Bomvd1yxmPL9h5LVHU1tuKBZpUjfASg==",
       "path": "system.windows.extensions/8.0.0",
       "hashPath": "system.windows.extensions.8.0.0.nupkg.sha512"
-    },
-    "EwEPlugin/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "EwEUtils/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "EPPlus/4.1.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "EwELicense/6.7.0.18060": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Interop.JRO/2.6.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Microsoft.Office.interop.access.dao/12.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "ProjNet/1.2.3432.30659": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "TreeksLicensingLibrary2/2.1.7916.36068": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
     }
   },
   "runtimes": {
-    "debian.12-x64": [
-      "debian.12",
+    "debian.11-x64": [
+      "debian.11",
       "debian-x64",
       "debian",
       "linux-x64",

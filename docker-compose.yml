@@ -14,7 +14,7 @@ services:
     command: bash -c "yarn install && yarn encore ${APP_ENV:-dev}"
 
   redis:
-    container_name: 'mspserver-redis'
+    container_name: "${IMAGE_PREFIX:-}mspserver-redis"
     build:
       context: .
       target: redis_base
@@ -26,7 +26,7 @@ services:
 
   database:
     # check https://hub.docker.com/_/mariadb for info.
-    container_name: 'mspserver-mariadb'
+    container_name: "${IMAGE_PREFIX:-}mspserver-mariadb"
     build:
       context: .
       target: mariadb_base
@@ -59,7 +59,7 @@ services:
       driver: "local"
 
   php:
-    container_name: 'mspserver-php'
+    container_name: "${IMAGE_PREFIX:-}mspserver-php"
     depends_on:
       - database
       - redis
@@ -72,6 +72,7 @@ services:
       - database
       - php
       - redis
+      - simulations
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
@@ -113,8 +114,6 @@ services:
       WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
       WATCHDOG_SCHEME: ${WATCHDOG_SCHEME:-http}
     ports:
-      # Watchdog
-      - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
       # HTTP needs to be defined in the override/prod/staging/... yml files
@@ -129,8 +128,26 @@ services:
     logging:
       driver: "local"
 
+  simulations:
+    container_name: "${IMAGE_PREFIX:-}mspserver-simulations"
+    build:
+      context: .
+      dockerfile: simulations/debian.11-x64/Dockerfile
+      args:
+        source_dir: simulations/debian.11-x64
+    ports:
+      - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
+    restart: always
+    environment:
+      WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
+      MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
+    logging:
+      driver: "local"
+    networks:
+      - php
+
   blackfire:
-    container_name: 'mspserver-blackfire'
+    container_name: "${IMAGE_PREFIX:-}mspserver-blackfire"
     build:
       context: .
       target: blackfire_base
@@ -170,3 +187,4 @@ networks:
   database:
   php:
   redis:
+  simulations:

@@ -1,7 +1,7 @@
 # Development environment override
 services:
   phpredisadmin:
-    container_name: 'mspserver-phpredisadmin'
+    container_name: "${IMAGE_PREFIX:-}mspserver-phpredisadmin"
     build:
       context: .
       target: phpredisadmin_base
@@ -24,8 +24,9 @@ services:
     ports:
       - "${DATABASE_PORT:-3306}:${DATABASE_PORT:-3306}"
 
+
   mitmproxy:
-    container_name: 'mspserver-mitmproxy'
+    container_name: "${IMAGE_PREFIX:-}mspserver-mitmproxy"
     build:
       context: .
       target: mitmproxy_base
@@ -61,6 +62,7 @@ services:
       - database
       - php
       - redis
+      - simulations
     environment:
       # this forces non-ssl
       SERVER_NAME: :80
@@ -72,7 +74,6 @@ services:
       MITMPROXY_PORT: ${MITMPROXY_PORT:-8080}
       URL_WEB_SERVER_PORT: ${MITMPROXY_PORT:-8080}
       URL_WS_SERVER_PORT: ${MITMPROXY_PORT:-8080}
-      MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
       WS_SERVER_PAYLOAD_DUMP: "${WS_SERVER_PAYLOAD_DUMP:-0}"
 
       # See https://xdebug.org/docs/all_settings#mode
