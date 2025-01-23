@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Uid\Uuid;
 
-#[Route('/api/Simulation?')]
+#[Route('/api/Simulation')]
 #[OA\Tag(name: 'Simulation', description: 'Operations related to simulation management')]
 class SimulationController extends BaseController
 {

@@ -119,7 +119,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             ->toArray();
         $postValues = [
             'game_session_api' => await(GameSession::getSessionAPIBaseUrl($message->getGameSessionId())),
-            'game_session_token' => $message->getWatchdog()->getToken(),
+            'game_session_token' => (string)$message->getWatchdog()->getToken(),
             'game_state' => $message->getGameState()->__toString(),
             'required_simulations' => json_encode($requiredSimulations, JSON_FORCE_OBJECT),
             'api_access_token' => json_encode([
@@ -247,8 +247,9 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
                 "POST",
                 $watchdog->getGameWatchdogServer()->createUrl().$uri,
                 [
-                    'body' => $postValues,
-                    'timeout' => 10.0
+                    'json' => $postValues,
+                    'timeout' => 10.0,
+                    'proxy' => 'http://host.docker.internal:8888'
                 ]
             );
             $decodedResponse = json_decode(

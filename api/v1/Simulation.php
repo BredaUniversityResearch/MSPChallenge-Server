@@ -132,14 +132,17 @@ class Simulation extends Base
                 's.created_at as s_created_at',
                 's.updated_at as s_updated_at'
             )
-            ->from('simulation', 's')
-            ->innerJoin('s', 'watchdog', 'w', 's.watchdog_id = w.id')
+            ->from('watchdog', 'w')
+            ->leftJoin('w', 'simulation', 's', 's.watchdog_id = w.id')
             ->where('w.deleted_at IS NULL'); // only active simulations
         return $this->getAsyncDatabase()->query($qb)->then(function (Result $result) {
             $sims = ($result->fetchAllRows() ?? []) ?: [];
             $watchdogs = [];
             foreach ($sims as $sim) {
                 $watchdogs[$sim['w_id']] ??= $this->createWatchdogEntityFromAssociative($sim);
+                if ($sim['name'] === null) {
+                    continue;
+                }
                 $simEntity = $this->createSimulationEntityFromAssociative($sim);
                 // this will also assign the watchdog to the simulation
                 $watchdogs[$sim['w_id']]->getSimulations()->add($simEntity);
