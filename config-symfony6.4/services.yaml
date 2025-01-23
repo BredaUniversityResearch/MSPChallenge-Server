@@ -151,9 +151,11 @@ services:
     App\MessageHandler\GameSave\GameSaveCreationMessageHandler:
     App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
     App\Domain\Communicator\WatchdogCommunicator:
-    App\Domain\Services\SimulationHelper:
     App\Security\MSPAuth2Authenticator:
     App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
+
+    App\Domain\Services\SimulationHelper:
+        public: true
 
     app.menu_builder:
         class: App\Menu\Builder

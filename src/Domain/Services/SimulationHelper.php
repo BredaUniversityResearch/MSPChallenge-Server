@@ -28,7 +28,7 @@ class SimulationHelper
             if (null === $config = $gameList->getGameConfigVersion()->getGameConfigComplete()) {
                 throw new Exception('Game config not found');
             }
-            if (null === $dataModel = ($config['data_model'] ?? null)) {
+            if (null === $dataModel = ($config['datamodel'] ?? null)) {
                 throw new Exception('Data model not found');
             }
         }
