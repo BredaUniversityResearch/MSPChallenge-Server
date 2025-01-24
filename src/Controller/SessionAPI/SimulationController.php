@@ -32,39 +32,34 @@ class SimulationController extends BaseController
      */
     #[Route('/Upsert', name: 'session_api_simulation_upsert', methods: ['POST'])]
     #[OA\Post(
-        summary: 'Update or insert a simulation for given watchdog server',
+        summary: 'Update or insert simulations for given watchdog server',
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
                 mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(
-                    required: [
-                        'server_id', 'name'
-                    ],
-                    properties: [
-                        new OA\Property(
-                            property: 'server_id',
-                            description: 'Watchdog server ID',
-                            type: 'string',
-                            format: 'uuid',
-                            example: '123e4567-e89b-12d3-a456-426614174000'
-                        ),
-                        new OA\Property(
-                            property: 'name',
-                            description: 'Simulation name',
-                            type: 'string',
-                            example: 'Simulation Name'
-                        ),
-                        new OA\Property(
-                            property: 'version',
-                            description: 'Simulation version',
-                            type: 'string',
-                            example: '1.0.0'
-                        )
+                    type: 'object',
+                    description: 'Array of simulation names and versions',
+                    additionalProperties: new OA\AdditionalProperties(
+                        type: 'string',
+                        description: 'The version of the simulation'
+                    ),
+                    example: [
+                        'SunHours' => '1.0.0',
+                        'MoonHours' => '1.0.0'
                     ]
                 )
             )
         ),
+        parameters: [
+            new OA\Parameter(
+                name: 'x-server-id',
+                description: 'Watchdog server ID',
+                in: 'header',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
         responses: [
             new OA\Response(
                 response: 404,
@@ -86,11 +81,6 @@ class SimulationController extends BaseController
                 content: new OA\JsonContent(
                     examples: [
                         new OA\Examples(
-                            example: 'missing_name',
-                            summary: 'Name is required',
-                            value: ['status' => 'Name is required']
-                        ),
-                        new OA\Examples(
                             example: 'missing_server_id',
                             summary: 'Server ID is required',
                             value: ['status' => 'Server ID is required']
@@ -101,13 +91,13 @@ class SimulationController extends BaseController
             ),
             new OA\Response(
                 response: 201,
-                description: 'Simulation created',
+                description: 'Simulations created',
                 content: new OA\JsonContent(
                     examples: [
                         new OA\Examples(
-                            example: 'simulation_created',
-                            summary: 'Simulation created',
-                            value: ['status' => 'Simulation created']
+                            example: 'simulations_created',
+                            summary: 'Simulations created',
+                            value: ['status' => 'Simulations created']
                         )
                     ],
                     ref: '#/components/schemas/ResponseStructure'
@@ -115,13 +105,13 @@ class SimulationController extends BaseController
             ),
             new OA\Response(
                 response: 200,
-                description: 'Simulation updated',
+                description: 'Simulations updated',
                 content: new OA\JsonContent(
                     examples: [
                         new OA\Examples(
-                            example: 'simulation_updated',
-                            summary: 'Simulation updated',
-                            value: ['status' => 'Simulation updated']
+                            example: 'simulations_updated',
+                            summary: 'Simulations updated',
+                            value: ['status' => 'Simulations updated']
                         )
                     ],
                     ref: '#/components/schemas/ResponseStructure'
@@ -147,25 +137,27 @@ class SimulationController extends BaseController
                 Response::HTTP_NOT_FOUND
             );
         }
-        if (null == $name = $request->request->get('name')) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Name is required'),
-                Response::HTTP_BAD_REQUEST
-            );
-        }
+
         $simRepo = $em->getRepository(Simulation::class);
-        $isUpdate = (null == $sim = $simRepo->findOneBy(['watchdog' => $watchdog, 'name' => $name]));
-        $sim ??= new Simulation();
-        $sim
-            ->setName($name)
-            ->setVersion($request->request->get('version'))
-            ->setWatchdog($watchdog);
-        $em->persist($sim);
+        $simulations = $request->request->all();
+        $isUpdate = false;
+
+        foreach ($simulations as $name => $version) {
+            $sim = $simRepo->findOneBy(['watchdog' => $watchdog, 'name' => $name]) ?? new Simulation();
+            $sim
+                ->setName($name)
+                ->setVersion($version ?: null)
+                ->setWatchdog($watchdog);
+            $em->persist($sim);
+            $isUpdate = $isUpdate || $sim->getId() !== null;
+        }
+
         $em->flush();
+
         return new JsonResponse(
             self::wrapPayloadForResponse(
                 true,
-                message: $isUpdate ? 'Simulation updated' : 'Simulation created'
+                message: $isUpdate ? 'Simulations updated' : 'Simulations created'
             ),
             $isUpdate ? Response::HTTP_OK : Response::HTTP_CREATED
         );
@@ -173,7 +165,7 @@ class SimulationController extends BaseController
 
     private function getServerIdFromRequest(Request $request): Uuid
     {
-        $serverId = $request->headers->get(strtolower('X-Server-Id'));
+        $serverId = $request->headers->get('x-server-id');
         if (!$serverId || !Uuid::isValid($serverId)) {
             throw new BadRequestHttpException('Missing or invalid header X-Server-Id. Must be a valid UUID');
         }
@@ -190,6 +182,15 @@ class SimulationController extends BaseController
     )]
     #[OA\Get(
         summary: 'Get all simulations for given watchdog server',
+        parameters: [
+            new OA\Parameter(
+                name: 'x-server-id',
+                description: 'Watchdog server ID',
+                in: 'header',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
         responses: [
             new OA\Response(
                 response: 404,
@@ -272,33 +273,32 @@ class SimulationController extends BaseController
      */
     #[Route('/Delete', name: 'session_api_simulation_delete', methods: ['POST'])]
     #[OA\Post(
-        summary: 'Delete a simulation for given watchdog server',
+        summary: 'Delete simulations for given watchdog server',
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
                 mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(
-                    required: [
-                        'server_id', 'name'
-                    ],
                     properties: [
                         new OA\Property(
-                            property: 'server_id',
-                            description: 'Watchdog server ID',
-                            type: 'string',
-                            format: 'uuid',
-                            example: '123e4567-e89b-12d3-a456-426614174000'
-                        ),
-                        new OA\Property(
-                            property: 'name',
-                            description: 'Simulation name',
-                            type: 'string',
-                            example: 'Simulation Name'
+                            property: 'names',
+                            description: 'Array of simulation names',
+                            type: 'array',
+                            items: new OA\Items(type: 'string', example: 'Simulation Name')
                         )
                     ]
                 )
             )
         ),
+        parameters: [
+            new OA\Parameter(
+                name: 'x-server-id',
+                description: 'Watchdog server ID',
+                in: 'header',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
         responses: [
             new OA\Response(
                 response: 404,
@@ -320,9 +320,9 @@ class SimulationController extends BaseController
                 content: new OA\JsonContent(
                     examples: [
                         new OA\Examples(
-                            example: 'missing_name',
-                            summary: 'Name is required',
-                            value: ['status' => 'Name is required']
+                            example: 'missing_names',
+                            summary: 'Names are required',
+                            value: ['status' => 'Names are required']
                         ),
                         new OA\Examples(
                             example: 'missing_server_id',
@@ -335,13 +335,13 @@ class SimulationController extends BaseController
             ),
             new OA\Response(
                 response: 200,
-                description: 'Simulation deleted',
+                description: 'Simulations deleted',
                 content: new OA\JsonContent(
                     examples: [
                         new OA\Examples(
-                            example: 'simulation_deleted',
-                            summary: 'Simulation deleted',
-                            value: ['status' => 'Simulation deleted']
+                            example: 'simulations_deleted',
+                            summary: 'Simulations deleted',
+                            value: ['status' => 'Simulations deleted']
                         )
                     ],
                     ref: '#/components/schemas/ResponseStructure'
@@ -359,12 +359,15 @@ class SimulationController extends BaseController
                 Response::HTTP_BAD_REQUEST
             );
         }
-        if (null == $name = $request->request->get('name')) {
+
+        $names = array_filter($request->request->all());
+        if (empty($names)) {
             return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Name is required'),
+                self::wrapPayloadForResponse(false, message: 'Names are required'),
                 Response::HTTP_BAD_REQUEST
             );
         }
+
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $watchdogRepo = $em->getRepository(Watchdog::class);
         if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId])) {
@@ -373,17 +376,109 @@ class SimulationController extends BaseController
                 Response::HTTP_NOT_FOUND
             );
         }
+
         $simRepo = $em->getRepository(Simulation::class);
-        if (null === $sim = $simRepo->findOneBy(['watchdog' => $watchdog, 'name' => $name])) {
+        foreach ($names as $name) {
+            if (null !== $sim = $simRepo->findOneBy(['watchdog' => $watchdog, 'name' => $name])) {
+                $em->remove($sim);
+            }
+        }
+
+        $em->flush();
+        return new JsonResponse(
+            self::wrapPayloadForResponse(true, message: 'Simulations deleted')
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/DeleteAll', name: 'session_api_simulation_delete_all', methods: ['POST'])]
+    #[OA\Post(
+        summary: 'Delete all simulations for given watchdog server',
+        parameters: [
+            new OA\Parameter(
+                name: 'x-server-id',
+                description: 'Watchdog server ID',
+                in: 'header',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 404,
+                description: 'Internal server error',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'watchdog_server_not_found',
+                            summary: 'Watchdog server not found',
+                            value: ['status' => 'Watchdog server not found']
+                        )
+                    ],
+                    ref: '#/components/schemas/ResponseStructure'
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Bad request',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'missing_server_id',
+                            summary: 'Server ID is required',
+                            value: ['status' => 'Server ID is required']
+                        )
+                    ],
+                    ref: '#/components/schemas/ResponseStructure'
+                )
+            ),
+            new OA\Response(
+                response: 200,
+                description: 'All simulations deleted',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'all_simulations_deleted',
+                            summary: 'All simulations deleted',
+                            value: ['status' => 'All simulations deleted']
+                        )
+                    ],
+                    ref: '#/components/schemas/ResponseStructure'
+                )
+            )
+        ]
+    )]
+    public function deleteAll(Request $request): JsonResponse
+    {
+        try {
+            $serverId = $this->getServerIdFromRequest($request);
+        } catch (BadRequestHttpException $e) {
             return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Simulation not found'),
+                self::wrapPayloadForResponse(false, message: $e->getMessage()),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+
+        $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
+        $watchdogRepo = $em->getRepository(Watchdog::class);
+        if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId])) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(false, message: 'Watchdog server not found'),
                 Response::HTTP_NOT_FOUND
             );
         }
-        $em->remove($sim);
+
+        $simRepo = $em->getRepository(Simulation::class);
+        $simulations = $simRepo->findBy(['watchdog' => $watchdog]);
+        foreach ($simulations as $simulation) {
+            $em->remove($simulation);
+        }
+
         $em->flush();
         return new JsonResponse(
-            self::wrapPayloadForResponse(true, message: 'Simulation deleted')
+            self::wrapPayloadForResponse(true, message: 'All simulations deleted')
         );
     }
 
