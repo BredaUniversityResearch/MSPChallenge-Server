@@ -38,16 +38,16 @@ class SimulationController extends BaseController
             content: new OA\MediaType(
                 mediaType: 'application/x-www-form-urlencoded',
                 schema: new OA\Schema(
-                    type: 'object',
                     description: 'Array of simulation names and versions',
-                    additionalProperties: new OA\AdditionalProperties(
-                        type: 'string',
-                        description: 'The version of the simulation'
-                    ),
+                    type: 'object',
                     example: [
                         'SunHours' => '1.0.0',
                         'MoonHours' => '1.0.0'
-                    ]
+                    ],
+                    additionalProperties: new OA\AdditionalProperties(
+                        description: 'The version of the simulation',
+                        type: 'string'
+                    )
                 )
             )
         ),
@@ -58,6 +58,13 @@ class SimulationController extends BaseController
                 in: 'header',
                 required: true,
                 schema: new OA\Schema(type: 'string', format: 'uuid')
+            ),
+            new OA\Parameter(
+                name: 'x-remove-previous',
+                description: 'Remove all previous simulations for this server',
+                in: 'header',
+                required: false,
+                schema: new OA\Schema(type: 'boolean')
             )
         ],
         responses: [
@@ -138,20 +145,28 @@ class SimulationController extends BaseController
             );
         }
 
-        $simRepo = $em->getRepository(Simulation::class);
         $simulations = $request->request->all();
+        $simRepo = $em->getRepository(Simulation::class);
+        $sims = collect($simRepo->findBy(['watchdog' => $watchdog]))
+            ->keyBy(fn(Simulation $sim) => $sim->getName());
+        $simsToUpdate = $sims->only(array_keys($simulations));
+        $removePrevious = $request->headers->get('x-remove-previous');
+        if ($removePrevious && filter_var($removePrevious, FILTER_VALIDATE_BOOLEAN)) {
+            $simsToDelete = $sims->forget(array_keys($simulations))->all();
+            foreach ($simsToDelete as $sim) {
+                $em->remove($sim);
+            }
+        }
         $isUpdate = false;
-
         foreach ($simulations as $name => $version) {
-            $sim = $simRepo->findOneBy(['watchdog' => $watchdog, 'name' => $name]) ?? new Simulation();
+            $sim = $simsToUpdate->get($name) ?? new Simulation();
             $sim
                 ->setName($name)
-                ->setVersion($version ?: null)
+                ->setVersion($simulations[$sim->getName()] ?: null)
                 ->setWatchdog($watchdog);
             $em->persist($sim);
-            $isUpdate = $isUpdate || $sim->getId() !== null;
+            $isUpdate |= $sim->getId() !== null;
         }
-
         $em->flush();
 
         return new JsonResponse(
