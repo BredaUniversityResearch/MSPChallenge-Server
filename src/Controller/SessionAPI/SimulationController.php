@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Uid\Uuid;
 
 #[Route('/api/Simulation')]
 #[OA\Tag(name: 'Simulation', description: 'Operations related to simulation management')]
@@ -176,15 +175,6 @@ class SimulationController extends BaseController
             ),
             $isUpdate ? Response::HTTP_OK : Response::HTTP_CREATED
         );
-    }
-
-    private function getServerIdFromRequest(Request $request): Uuid
-    {
-        $serverId = $request->headers->get('x-server-id');
-        if (!$serverId || !Uuid::isValid($serverId)) {
-            throw new BadRequestHttpException('Missing or invalid header X-Server-Id. Must be a valid UUID');
-        }
-        return Uuid::fromString($serverId);
     }
 
     /**
@@ -505,11 +495,89 @@ class SimulationController extends BaseController
         name: 'session_api_simulation_notify_month_simulation_finished',
         methods: ['POST']
     )]
+    #[OA\Post(
+        summary: 'Notify that the monthly simulation has finished',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    required: ['simulation_name', 'month'],
+                    properties: [
+                        new OA\Property(
+                            property: 'simulation_name',
+                            description: 'The name of the simulation',
+                            type: 'string',
+                            example: 'Simulation Name'
+                        ),
+                        new OA\Property(
+                            property: 'month',
+                            description: 'The month for which the simulation has finished',
+                            type: 'integer',
+                            example: 1
+                        )
+                    ]
+                )
+            )
+        ),
+        parameters: [
+            new OA\Parameter(
+                name: 'x-server-id',
+                description: 'Watchdog server ID',
+                in: 'header',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Month simulation finish has been noted',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'status', type: 'boolean', example: true),
+                        new OA\Property(
+                            property: 'message',
+                            type: 'string',
+                            example: 'Month simulation finished notified'
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Bad request',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'status', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Simulation name is required')
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Not Found',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'status', type: 'boolean', example: false),
+                        new OA\Property(property: 'message', type: 'string', example: 'Entity not found')
+                    ]
+                )
+            )
+        ]
+    )]
     public function notifyMonthSimulationFinished(Request $request): JsonResponse
     {
+        try {
+            $watchdogServerId = $this->getServerIdFromRequest($request);
+        } catch (BadRequestHttpException $e) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(false, message: $e->getMessage()),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $repo = $em->getRepository(Simulation::class);
-        $watchdogServerId = Uuid::fromString($request->request->get('watchdog_server_id'));
         if (null === $simName = $request->request->get('simulation_name')) {
             return new JsonResponse(
                 self::wrapPayloadForResponse(false, message: 'Simulation name is required'),
@@ -540,7 +608,7 @@ class SimulationController extends BaseController
             );
         }
         return new JsonResponse(
-            self::wrapPayloadForResponse(true, message: 'Month simulation finish has been noted')
+            self::wrapPayloadForResponse(true, message: 'Month simulation finished notified')
         );
     }
 

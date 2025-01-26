@@ -4,21 +4,16 @@ namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
 use App\Domain\API\APIHelper;
-use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Kpi;
 use App\Domain\API\v1\Router;
-use App\Domain\POV\ConfigCreator;
-use App\Domain\POV\LayerTags;
-use App\Domain\POV\Region;
-use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\Simulation;
+use App\Entity\Watchdog;
+use App\Repository\SimulationRepository;
 use Exception;
 use OpenApi\Attributes as OA;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -57,6 +52,23 @@ class KPIController extends BaseController
                 )
             )
         ),
+        parameters: [
+            new OA\Parameter(
+                name: 'x-server-id',
+                description: 'Watchdog server ID',
+                in: 'header',
+                required: false,
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            ),
+            new OA\Parameter(
+                name: 'x-notify-monthly-simulation-finished',
+                description: 'If set to true, all simulations for the watchdog server - given by x-server-id header - '.
+                    'will be notified that the monthly simulation is finished',
+                in: 'header',
+                required: false,
+                schema: new OA\Schema(type: 'boolean')
+            )
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -92,7 +104,8 @@ class KPIController extends BaseController
     public function batchPost(
         Request $request,
         // below is required by legacy to be auto-wired
-        APIHelper $apiHelper
+        APIHelper $apiHelper,
+        ConnectionManager $connectionManager
     ): JsonResponse {
         $kpiValues = $request->request->get('kpiValues');
         if (empty($kpiValues)) {
@@ -114,9 +127,31 @@ class KPIController extends BaseController
         $kpi->setGameSessionId($this->getSessionIdFromRequest($request));
         try {
             $kpi->BatchPost($kpiValues);
-            return new JsonResponse(self::wrapPayloadForResponse(true, 'KPI values posted successfully'));
         } catch (Exception $e) {
             return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
         }
+
+        $message = 'KPI values posted successfully';
+        $notify = $request->headers->get('x-notify-monthly-simulation-finished');
+        if (!($notify && filter_var($notify, FILTER_VALIDATE_BOOLEAN))) {
+            return new JsonResponse(self::wrapPayloadForResponse(true, $message));
+        }
+
+        try {
+            $serverId = $this->getServerIdFromRequest($request);
+            $em = $connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
+            if (null === $watchdog = $em->getRepository(Watchdog::class)->findOneBy(['serverId' => $serverId])) {
+                throw new Exception(sprintf('Watchdog with server id %s not found', $serverId->toRfc4122()));
+            }
+            /** @var SimulationRepository $repo */
+            $repo = $em->getRepository(Simulation::class);
+            foreach ($watchdog->getSimulations() as $simulation) {
+                $repo->notifyMonthSimulationFinished($serverId, $simulation->getName(), $kpiValues[0]['month']);
+            }
+            $message .= '. Monthly simulation finished notified';
+        } catch (Exception $e) {
+            $message .= '. ' . $e->getMessage();
+        }
+        return new JsonResponse(self::wrapPayloadForResponse(true, $message));
     }
 }

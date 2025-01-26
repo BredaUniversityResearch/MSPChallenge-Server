@@ -80,7 +80,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         try {
             if ($message instanceof GameMonthChangedMessage) {
                 $this->requestWatchdog($em, $message->getWatchdog(), '/Watchdog/SetMonth', [
-                    'game_session_token' => $message->getWatchdog()->getToken(),
+                    'game_session_token' => (string) $message->getWatchdog()->getToken(),
                     'month' => $message->getMonth()
                 ]);
             } else {
@@ -132,7 +132,10 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             ]),
             'month' => $message->getMonth()
         ];
-        if ($message->getGameState() == GameStateValue::SETUP) {
+        if ($message->getGameState() == GameStateValue::SETUP &&
+            // only add game_info if not the internal watchdog. This is because the internal watchdog does not handle it
+            $message->getWatchdog()->getServerId() != Watchdog::getInternalServerId()
+        ) {
             $postValues['game_session_info'] = $this->getSessionInfo($message);
         }
         $this->requestWatchdog($em, $message->getWatchdog(), '/Watchdog/UpdateState', $postValues);

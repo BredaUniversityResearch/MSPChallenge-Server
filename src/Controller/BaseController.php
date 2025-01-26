@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Uid\Uuid;
 
 class BaseController extends AbstractController
 {
@@ -18,6 +19,16 @@ class BaseController extends AbstractController
         }
         return (int)$sessionId;
     }
+
+    protected function getServerIdFromRequest(Request $request): Uuid
+    {
+        $serverId = $request->headers->get('x-server-id');
+        if (!$serverId || !Uuid::isValid($serverId)) {
+            throw new BadRequestHttpException('Missing or invalid header X-Server-Id. Must be a valid UUID');
+        }
+        return Uuid::fromString($serverId);
+    }
+
 
     public static function wrapPayloadForResponse(
         bool $success,
