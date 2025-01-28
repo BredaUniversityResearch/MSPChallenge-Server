@@ -13,9 +13,7 @@ framework:
                     table_name: 'messenger_watchdog'
                     queue_name: 'watchdog'
                 retry_strategy:
-                    max_retries: 3
-                    delay: 2000
-                    multiplier: 2 # so retry delays are 2s, 4s, 8s
+                    service: App\MessageHandler\Retry\WatchdogMessageRetryStrategy
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             analytics:
                 dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
@@ -44,5 +42,5 @@ framework:
             'App\Message\GameList\GameListArchiveMessage': async
             'App\Message\GameSave\GameSaveCreationMessage': async
             'App\Message\GameSave\GameSaveLoadMessage': async
-            'App\Message\Watchdog\WatchdogMessageBase': watchdog
+            'App\Message\Watchdog\Message\WatchdogMessageBase': watchdog
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Message\Watchdog;
+namespace App\Message\Watchdog\Message;
 
 use App\Domain\Common\EntityEnums\GameStateValue;
 
-class GameStateChangedMessage extends WatchdogMessageBase
+class GameStateChangedMessage extends GameMonthChangedMessage
 {
     private GameStateValue $gameState;
 

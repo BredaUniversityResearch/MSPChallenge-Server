@@ -58,7 +58,7 @@ class Watchdog implements WatchdogInterface
     /**
      * @var Collection<int, Simulation>
      */
-    #[ORM\OneToMany(mappedBy: 'watchdog', targetEntity: Simulation::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'watchdog', targetEntity: Simulation::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $simulations;
 
     public function __construct()

@@ -9,7 +9,8 @@ use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\EventLog;
 use App\Entity\Simulation as SimulationEntity;
 use App\Entity\Watchdog;
-use App\Message\Watchdog\GameStateChangedMessage;
+use App\Message\Watchdog\Message\GameStateChangedMessage;
+use App\Message\Watchdog\Message\WatchdogPingMessage;
 use DateMalformedStringException;
 use DateTime;
 use Doctrine\DBAL\Query\Expression\CompositeExpression;
@@ -145,7 +146,7 @@ class Simulation extends Base
                 }
                 $simEntity = $this->createSimulationEntityFromAssociative($sim);
                 // this will also assign the watchdog to the simulation
-                $watchdogs[$sim['w_id']]->getSimulations()->add($simEntity);
+                $watchdogs[$sim['w_id']]->addSimulation($simEntity);
             }
             return $watchdogs;
         });
@@ -176,7 +177,7 @@ class Simulation extends Base
                 $message = new GameStateChangedMessage();
                 $message
                     ->setGameSessionId($this->getGameSessionId())
-                    ->setWatchdog($watchdog)
+                    ->setWatchdogId($watchdog->getId())
                     ->setGameState(new GameStateValue($newWatchdogGameState))
                     ->setMonth($currentMonth);
                 SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch($message);
@@ -221,5 +222,26 @@ class Simulation extends Base
                 ->setReferenceId($w->getId());
         }
         return $eventLog;
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function pingWatchdogs(): PromiseInterface
+    {
+        return $this->getWatchdogs()->then(function (array $watchdogs) {
+            /**  @var Watchdog[] $watchdogs */
+            foreach ($watchdogs as $watchdog) {
+                // special case: no need to ping the internal watchdog
+                if ($watchdog->getServerId() == Watchdog::getInternalServerId()) {
+                    continue;
+                }
+                $message = new WatchdogPingMessage();
+                $message
+                    ->setGameSessionId($this->getGameSessionId())
+                    ->setWatchdogId($watchdog->getId());
+                SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch($message);
+            }
+        });
     }
 }

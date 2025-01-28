@@ -108,6 +108,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
             ExecuteBatchesWsServerPlugin::class,
             LatestWsServerPlugin::class
         ]);
+        $watchdogPingPlugin = new WatchdogPingWsServerPlugin();
 
         // then create & register blackfire plugin
         if (($_ENV['BLACKFIRE_APM_ENABLED'] ?? false) &&
@@ -124,6 +125,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
         }
         $this->getWsServer()->registerPlugin($sequencerPlugin);
         $this->getWsServer()->registerPlugin($ticksHandlerPlugin);
+        $this->getWsServer()->registerPlugin($watchdogPingPlugin);
 
         // set state ready on next tick
         $this->getLoop()->futureTick(function () {

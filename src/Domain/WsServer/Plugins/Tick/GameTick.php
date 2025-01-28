@@ -8,7 +8,7 @@ use App\Domain\API\v1\Simulation;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\Watchdog;
-use App\Message\Watchdog\GameMonthChangedMessage;
+use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
@@ -187,7 +187,7 @@ class GameTick extends TickBase
                                 $message = new GameMonthChangedMessage();
                                 $message
                                     ->setGameSessionId($this->getGameSessionId())
-                                    ->setWatchdog($watchdog)
+                                    ->setWatchdogId($watchdog->getId())
                                     ->setMonth($currentMonth);
                                 SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch($message);
                             }

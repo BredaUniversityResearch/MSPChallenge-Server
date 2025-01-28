@@ -19,7 +19,7 @@ class Simulation
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'simulations')]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'simulations')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Watchdog $watchdog = null;
 
@@ -52,7 +52,6 @@ class Simulation
     public function setWatchdog(?Watchdog $watchdog): static
     {
         $this->watchdog = $watchdog;
-
         return $this;
     }
 

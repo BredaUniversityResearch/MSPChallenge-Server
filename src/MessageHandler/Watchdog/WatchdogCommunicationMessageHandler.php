@@ -13,8 +13,9 @@ use App\Entity\EventLog;
 use App\Entity\ServerManager\GameList;
 use App\Entity\Simulation as SimulationEntity;
 use App\Entity\Watchdog;
-use App\Message\Watchdog\GameMonthChangedMessage;
-use App\Message\Watchdog\GameStateChangedMessage;
+use App\Message\Watchdog\Message\GameMonthChangedMessage;
+use App\Message\Watchdog\Message\GameStateChangedMessage;
+use App\Message\Watchdog\Message\WatchdogPingMessage;
 use App\Message\Watchdog\Token;
 use App\MessageHandler\GameList\SessionLogHandlerBase;
 use App\VersionsProvider;
@@ -28,6 +29,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -60,12 +62,18 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
      * @throws Exception
      */
     public function __invoke(
-        GameMonthChangedMessage|GameStateChangedMessage $message
+        GameMonthChangedMessage|GameStateChangedMessage|WatchdogPingMessage $message
     ): void {
         $this->setGameSessionId($message->getGameSessionId());
         $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
 
-        $watchdog = $message->getWatchdog();
+        // instead of using $message->getWatchdog() directly, we need to fetch it through doctrine,
+        //   such that the entity is loaded into the the current persistence context
+        if (null === $watchdog = $em->find(Watchdog::class, $message->getWatchdogId())) {
+            $this->warning('Watchdog not found. Id: '.$message->getWatchdogId());
+            return;
+        }
+
         if (null === $watchdog->getGameWatchdogServer()) {
             $em->persist($this->log(
                 'no server assigned. Watchdog was removed.',
@@ -78,17 +86,28 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         }
 
         try {
-            if ($message instanceof GameMonthChangedMessage) {
-                $this->requestWatchdog($em, $message->getWatchdog(), '/Watchdog/SetMonth', [
-                    'game_session_token' => (string) $message->getWatchdog()->getToken(),
-                    'month' => $message->getMonth()
-                ]);
-            } else {
-                assert($message instanceof GameStateChangedMessage);
-                $this->requestWatchdogUpdateState($message, $em);
+            switch (get_class($message)) {
+                case GameMonthChangedMessage::class:
+                    $this->requestWatchdog($em, $watchdog, '/Watchdog/SetMonth', [
+                        'game_session_token' => (string) $watchdog->getToken(),
+                        'month' => $message->getMonth()
+                    ]);
+                    break;
+                case GameStateChangedMessage::class:
+                    $this->requestWatchdogUpdateState($message, $watchdog, $em);
+                    break;
+                case WatchdogPingMessage::class:
+                    // fail-safe: no need to ping the internal watchdog
+                    if ($watchdog->getServerId() != Watchdog::getInternalServerId()) {
+                        $this->requestWatchdog($em, $watchdog, '/Watchdog/Ping', [
+                            'game_session_token' => (string)$watchdog->getToken()
+                        ]);
+                    }
+                    break;
+                default:
+                    throw new Exception('Unknown message type');
             }
         } catch (Exception $e) {
-            // we still need to flush the log messages on exception
             $em->flush();
             throw $e;
         }
@@ -106,6 +125,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
      */
     private function requestWatchdogUpdateState(
         GameStateChangedMessage $message,
+        Watchdog $watchdog,
         EntityManagerInterface $em
     ): void {
         $tokens = $this->getTokensForWatchdog($message->getGameSessionId());
@@ -114,12 +134,12 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             $tokens['api_refresh_token'],
             DateTime::createFromFormat('U', $tokens['exp'])
         );
-        $requiredSimulations = collect($message->getWatchdog()->getSimulations()->toArray())
+        $requiredSimulations = collect($watchdog->getSimulations()->toArray())
             ->mapWithKeys(fn(SimulationEntity $sim) => [$sim->getName() => $sim->getVersion()])
             ->toArray();
         $postValues = [
             'game_session_api' => await(GameSession::getSessionAPIBaseUrl($message->getGameSessionId())),
-            'game_session_token' => (string)$message->getWatchdog()->getToken(),
+            'game_session_token' => (string)$watchdog->getToken(),
             'game_state' => $message->getGameState()->__toString(),
             'required_simulations' => json_encode($requiredSimulations, JSON_FORCE_OBJECT),
             'api_access_token' => json_encode([
@@ -134,11 +154,11 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         ];
         if ($message->getGameState() == GameStateValue::SETUP &&
             // only add game_info if not the internal watchdog. This is because the internal watchdog does not handle it
-            $message->getWatchdog()->getServerId() != Watchdog::getInternalServerId()
+            $watchdog->getServerId() != Watchdog::getInternalServerId()
         ) {
             $postValues['game_session_info'] = $this->getSessionInfo($message);
         }
-        $this->requestWatchdog($em, $message->getWatchdog(), '/Watchdog/UpdateState', $postValues);
+        $this->requestWatchdog($em, $watchdog, '/Watchdog/UpdateState', $postValues);
     }
 
     /**
@@ -182,7 +202,8 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
                 EventLogSeverity::WARNING,
                 $watchdog
             ));
-            return;
+            // do not repeat this message anymore
+            throw new UnrecoverableMessageHandlingException('Watchdog does not want to join this session.');
         }
         $errorMsg = sprintf(
             'Watchdog responded with failure on requesting %s. Error message: "%s".',
@@ -246,21 +267,24 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             )
         );
         try {
+            $options = [
+                'json' => $postValues,
+                'timeout' => $_ENV['WATCHDOG_RESPONSE_TIMEOUT_SEC'] ?? 20
+            ];
+            if (null !== ($_ENV['WATCHDOG_PROXY_URL'] ?? null)) {
+                $options['proxy'] = $_ENV['WATCHDOG_PROXY_URL'];
+            }
             $response = $this->client->request(
                 "POST",
                 $watchdog->getGameWatchdogServer()->createUrl().$uri,
-                [
-                    'json' => $postValues,
-                    'timeout' => 10.0,
-                    'proxy' => 'http://host.docker.internal:8888'
-                ]
+                $options
             );
             $decodedResponse = json_decode(
                 json: $response->getContent(),
                 associative: true,
                 flags: JSON_THROW_ON_ERROR
             );
-        } catch (TransportExceptionInterface $e) {
+        } catch (TransportExceptionInterface $e) { // response timeout exception
             $em->persist($watchdog->setStatus(WatchdogStatus::UNRESPONSIVE));
             $em->persist($this->log($e->getMessage(), EventLogSeverity::ERROR, $watchdog, $e->getTraceAsString()));
             throw $e; // Re-throw the exception to trigger the retry mechanism
@@ -269,6 +293,9 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             RedirectionExceptionInterface | // 3xx errors max redirects reached
             ClientExceptionInterface $e // 4xx errors
         ) {
+            if ($e->getCode() == 502) { // handle 502 Bad Gateway
+                $em->persist($watchdog->setStatus(WatchdogStatus::UNRESPONSIVE));
+            }
             $em->persist($this->log($e->getMessage(), EventLogSeverity::ERROR, $watchdog, $e->getTraceAsString()));
             throw $e; // Re-throw the exception to trigger the retry mechanism
         }

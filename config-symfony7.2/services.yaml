@@ -191,6 +191,19 @@ services:
     Symfony\Component\Uid\Command\InspectUlidCommand: ~
     Symfony\Component\Uid\Command\InspectUuidCommand: ~
 
+    App\MessageHandler\Retry\WatchdogMessageRetryStrategy:
+        arguments:
+            $maxRetries: 3          # The maximum number of times to retry
+            $initialDelay: 2000     # Amount of time to delay (or the initial value when multiplier is used)
+            $multiplier: 2          # Multiplier to apply to the delay each time a retry occurs
+            $maxDelay: 0            # Maximum delay to allow (0 means no maximum)
+        tags:
+            - { name: messenger.retry_strategy }
+
+    App\EventListener\FailedMessageListener:
+        tags:
+            - { name: 'kernel.event_listener' }
+
 when@dev:
     parameters:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'

@@ -54,9 +54,10 @@ abstract class CommonBase implements LogContainerInterface
         return $this->asyncDatabase;
     }
 
-    public function setAsyncDatabase(Connection $asyncDatabase): void
+    public function setAsyncDatabase(Connection $asyncDatabase): self
     {
         $this->asyncDatabase = $asyncDatabase;
+        return $this;
     }
 
     public function getGameSessionId(): int
@@ -69,9 +70,10 @@ abstract class CommonBase implements LogContainerInterface
         return GameSession::GetGameSessionIdForCurrentRequest();
     }
 
-    public function setGameSessionId(?int $gameSessionId): void
+    public function setGameSessionId(?int $gameSessionId): self
     {
         $this->gameSessionId = $gameSessionId;
+        return $this;
     }
 
     public function getToken(): ?string
@@ -79,9 +81,10 @@ abstract class CommonBase implements LogContainerInterface
             return $this->token;
     }
 
-    public function setToken(?string $token): void
+    public function setToken(?string $token): self
     {
         $this->token = $token;
+        return $this;
     }
 
     public function isAsync(): bool
@@ -89,9 +92,10 @@ abstract class CommonBase implements LogContainerInterface
         return $this->async;
     }
 
-    public function setAsync(bool $async): void
+    public function setAsync(bool $async): self
     {
         $this->async = $async;
+        return $this;
     }
 
     /**
