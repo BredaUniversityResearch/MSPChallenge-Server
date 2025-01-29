@@ -111,7 +111,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $this->registerSimulations();
         $this->watchdogCommunicator->changeState(
             $this->gameSession->getId(),
-            new GameStateValue('pause'),
+            new GameStateValue($this->gameSession->getGameState()),
             $this->gameSession->getGameCurrentMonth()
         );
         $this->logContainer($this->watchdogCommunicator);

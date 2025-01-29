@@ -408,4 +408,65 @@ class GameController extends BaseController
             return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
         }
     }
+
+    #[Route(
+        path: '/PolicySimSettings',
+        name: 'session_api_game_get_actual_date_for_simulated_month',
+        methods: ['GET']
+    )]
+    #[OA\Get(
+        summary: 'Get policy and simulation settings',
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Policy and simulation settings retrieved successfully',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(
+                                    property: 'payload',
+                                    type: 'object',
+                                    // phpcs:ignore
+                                    example: '{"policy_settings":[{"all_country_approval":true,"stakeholder_pressure_cool_down":0.1,"fleet_info":{"gear_types":["Bottom trawl (otter, beam, seine)","Industrial and pelagic trawl","Drift and fixed nets"],"fleets":[{"//comment":"0 Bottom trawl (otter, beam, seine)","gear_type":"0","country_id":"-1","initial_fishing_distribution":[{"country_id":3,"effort_weight":54},{"country_id":4,"effort_weight":54}]},{"//comment":"1 Industrial and pelagic trawl","gear_type":"1","country_id":"-1","initial_fishing_distribution":[{"country_id":3,"effort_weight":406},{"country_id":4,"effort_weight":406}]},{"//comment":"2 Drift and fixed nets","gear_type":"2","country_id":"-1","initial_fishing_distribution":[{"country_id":3,"effort_weight":127},{"country_id":4,"effort_weight":127}]}]},"policy_type":"fishing"},{"policy_type":"shipping"},{"policy_type":"energy"}],"simulation_settings":[{"simulation_type":"MEL","content":{"modelfile":"MELdata/North Sea model for MSP.eiixml","mode":null,"rows":114,"columns":85,"cellsize":10000,"x_min":3463000,"y_min":3117000,"x_max":4313000,"y_max":4257000,"initialFishingMapping":0.5,"fishingDisplayScale":100,"pressures":[{"name":"Protection Bottom Trawl","layers":[{"name":"NS_Oil_Gas_Offshore_Instalations","influence":1,"construction":false},{"name":"NS_Pipelines","influence":1,"construction":false}],"policy_filters":{"fleets":["0"]}},{"name":"Protection Industrial Trawl","layers":[{"name":"NS_Oil_Gas_Offshore_Instalations","influence":1,"construction":false},{"name":"NS_Pipelines","influence":1,"construction":true}],"policy_filters":{"fleets":["1"]}},{"name":"Protection Nets","layers":[{"name":"NS_Pipelines","influence":1,"construction":true},{"name":"NS_Tidal_Farms","influence":1,"construction":true}],"policy_filters":{"fleets":["2"]}}],"fishing":[{"name":"Bottom Trawl","policy_filters":{"fleets":["0"]}},{"name":"Industrial and Pelagic Trawl","policy_filters":{"fleets":["1"]}},{"name":"Drift and Fixed Nets","policy_filters":{"fleets":["2"]}}],"outcomes":[{"name":"Flatfish","subcategory":"Biomass"},{"name":"Cod","subcategory":"Biomass"}],"ecologyCategories":[{"categoryName":"Biomass","categoryColor":"#4575B4FF","unit":"t/km2","valueDefinitions":[{"valueName":"Flatfish","valueColor":"#FF7272FF","unit":"t/km2","valueDependentCountry":-1},{"valueName":"Cod","valueColor":"#FFC773FF","unit":"t/km2","valueDependentCountry":-1}]},{"categoryName":"Fishery","categoryColor":"#FDAE61FF","unit":"t/km2","valueDefinitions":[{"valueName":"Drift and Fixed Nets Catch","valueColor":"#73FFBCFF","unit":"t/km2","valueDependentCountry":-1},{"valueName":"Industrial and Pelagic Trawl Catch","valueColor":"#73D9FFFF","unit":"t/km2","valueDependentCountry":-1},{"valueName":"Bottom Trawl Catch","valueColor":"#FF0079FF","unit":"t/km2","valueDependentCountry":-1}]}]}},{"simulation_type":"SEL","kpis":[{"categoryName":"General","categoryColor":"#00FF00FF","unit":"ship","generateValuesPerPort":null,"categoryValueType":"Sum","valueDefinitions":[{"valueName":"ShippingIntensity","valueColor":"#00FF00FF","unit":null,"valueDependentCountry":0},{"valueName":"ShippingRisk","valueColor":"#00FF00FF","unit":null,"valueDependentCountry":0}]},{"categoryName":"Shipping Income","categoryColor":"#00FFFFFF","unit":"ship","generateValuesPerPort":"ShippingIncome_","categoryValueType":"Sum","valueDefinitions":[{"valueName":"ShippingIncome_Aalborg","valueDisplayName":"Aalborg","valueColor":"0x0000ff","graphZero":0,"graphOne":1500,"unit":"ship","valueDependentCountry":9},{"valueName":"ShippingIncome_Aberdeen","valueDisplayName":"Aberdeen","valueColor":"0x0000ff","graphZero":0,"graphOne":1500,"unit":"ship","valueDependentCountry":3}],"countryDependentValues":true},{"categoryName":"Route Efficiency","categoryColor":"#00FFFFFF","unit":"%","generateValuesPerPort":"ShippingRouteEfficiency_","categoryValueType":"Average","valueDefinitions":[{"valueName":"ShippingRouteEfficiency_Aalborg","valueDisplayName":"Aalborg","valueColor":"0x0000ff","graphZero":0,"graphOne":1500,"unit":"%","valueDependentCountry":9},{"valueName":"ShippingRouteEfficiency_Aberdeen","valueDisplayName":"Aberdeen","valueColor":"0x0000ff","graphZero":0,"graphOne":1500,"unit":"%","valueDependentCountry":3}],"countryDependentValues":true}]},{"simulation_type":"CEL","grey_centerpoint_color":"#3D1C04FF","grey_centerpoint_sprite":"oilbarrel","green_centerpoint_color":"#18840AFF","green_centerpoint_sprite":"lightning"}]}'
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Internal server error',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'exception',
+                            summary: 'Exception response',
+                            value: [
+                                'success' => false,
+                                'message' => 'Error message'
+                            ]
+                        )
+                    ],
+                    ref: '#/components/schemas/ResponseStructure'
+                )
+            )
+        ]
+    )]
+    public function policySimSettings(
+        Request $request,
+        // below is required by legacy to be auto-wired
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
+    ): JsonResponse {
+        $game = new Game();
+        $game->setGameSessionId($this->getSessionIdFromRequest($request));
+        try {
+            $settings = $game->PolicySimSettings();
+            return new JsonResponse(self::wrapPayloadForResponse(true, $settings));
+        } catch (Exception $e) {
+            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+        }
+    }
 }
