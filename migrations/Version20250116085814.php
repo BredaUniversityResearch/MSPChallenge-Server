@@ -15,7 +15,7 @@ final class Version20250116085814 extends MSPMigration
 {
     public function getDescription(): string
     {
-        return 'Extend game_watchdog_servers table with: server_id, port, scheme';
+        return 'Extend game_watchdog_servers table with: server_id, port, scheme, simulation_settings';
     }
 
     protected function getDatabaseType(): ?MSPDatabaseType
@@ -30,6 +30,7 @@ final class Version20250116085814 extends MSPMigration
         ADD `server_id` binary(16) NOT NULL COMMENT '(DC2Type:uuid)' AFTER `id`,
         ADD `port` int unsigned NOT NULL DEFAULT '80' AFTER `address`,
         ADD `scheme` varchar(255) COLLATE 'utf8mb4_unicode_ci' NOT NULL DEFAULT 'http' AFTER `port`,
+        ADD `simulation_settings` longtext COLLATE 'utf8mb4_unicode_ci' NULL COMMENT '(DC2Type:json)' AFTER `scheme`,
         DROP INDEX `UNIQ_C35754DF5E237E06`,
         DROP INDEX `UNIQ_C35754DFD4E6F81`,
         ADD UNIQUE `uq_server_id` (`server_id`),
@@ -60,6 +61,7 @@ final class Version20250116085814 extends MSPMigration
         DROP `server_id`,
         DROP `port`,
         DROP `scheme`,
+        DROP `simulation_settings`,
         ADD UNIQUE `UNIQ_C35754DF5E237E06` (`name`),
         ADD UNIQUE `UNIQ_C35754DFD4E6F81` (`address`)
         SQL

@@ -4,6 +4,8 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\GameWatchdogServer;
+use App\Entity\Watchdog;
 use Drift\DBAL\Result;
 use Exception;
 
@@ -540,7 +542,18 @@ class Game extends Base
                 'simulation_type' => 'CEL'
             ], $cel->GetCELConfig());
         }
-
+        $em = ConnectionManager::getInstance()->getServerManagerEntityManager();
+        $serverWatchdogs = $em->getRepository(GameWatchdogServer::class)->findAll();
+        foreach ($serverWatchdogs as $watchdog) {
+            if ($watchdog->getServerId() == Watchdog::getInternalServerId()) {
+                continue;
+            }
+            $watchdogSimSettings = $watchdog->getSimulationSettings();
+            if (empty($watchdogSimSettings)) {
+                continue;
+            }
+            $simulationSettings[] = json_decode($watchdogSimSettings, true);
+        }
         return [
             'policy_settings' => $policySettings,
             'simulation_settings' => $simulationSettings

@@ -44,6 +44,15 @@ class GameWatchdogServer implements WatchdogInterface
      #[ORM\Column(length: 255, options: ['default' => 'http'])]
     private string $scheme = 'http';
 
+    /**
+     * see https://github.com/dunglas/doctrine-json-odm
+     * see https://www.doctrine-project.org/projects/doctrine-dbal/en/4.0/reference/types.html#json
+     */
+    #[Assert\NotBlank]
+    #[AcmeAssert\SimulationSettings]
+    #[ORM\Column(type: 'json_document', nullable: true, options: ['default' => 'NULL'])]
+    private mixed $simulationSettings = null;
+
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 1])]
     private ?bool $available = true;
 
@@ -91,6 +100,18 @@ class GameWatchdogServer implements WatchdogInterface
     public function setScheme(string $scheme): static
     {
         $this->scheme = $scheme;
+
+        return $this;
+    }
+
+    public function getSimulationSettings(): mixed
+    {
+        return $this->simulationSettings;
+    }
+
+    public function setSimulationSettings(mixed $simulationSettings): static
+    {
+        $this->simulationSettings = $simulationSettings;
 
         return $this;
     }

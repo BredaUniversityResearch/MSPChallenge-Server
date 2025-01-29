@@ -33,6 +33,16 @@
                 {{ form_widget(gameWatchdogServerForm.port, {'attr': {'class': 'form-control'}}) }}
                 <div class="small text-muted">{{ form_help(gameWatchdogServerForm.port) }}</div>
             </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.simulation_settings, '', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.simulation_settings) }}</div>
+                {{ form_widget(gameWatchdogServerForm.simulation_settings, {
+                    'attr': {
+                        'class': 'form-control'
+                    }
+                }) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.simulation_settings) }}</div>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
