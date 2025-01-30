@@ -181,8 +181,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         Watchdog $watchdog,
         EntityManagerInterface $em,
         string $uri,
-        array $decodedResponse,
-        int $statusCode
+        array $decodedResponse
     ): void {
         if (($decodedResponse["success"] ?? 0) == 1) {
             $this->info(
@@ -193,17 +192,6 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
                 )
             );
             return; // success!
-        }
-        if ($statusCode == Response::HTTP_METHOD_NOT_ALLOWED) {
-            // the watchdog does not want to join this session
-            $em->remove($watchdog);
-            $em->persist($this->log(
-                'Watchdog does not want to join this session. Watchdog was removed.',
-                EventLogSeverity::WARNING,
-                $watchdog
-            ));
-            // do not repeat this message anymore
-            throw new UnrecoverableMessageHandlingException('Watchdog does not want to join this session.');
         }
         $errorMsg = sprintf(
             'Watchdog responded with failure on requesting %s. Error message: "%s".',
@@ -293,13 +281,24 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             RedirectionExceptionInterface | // 3xx errors max redirects reached
             ClientExceptionInterface $e // 4xx errors
         ) {
-            if ($e->getCode() == 502) { // handle 502 Bad Gateway
+            if ($e->getCode() == Response::HTTP_METHOD_NOT_ALLOWED) {
+                // the watchdog does not want to join this session
+                $em->remove($watchdog);
+                $em->persist($this->log(
+                    'Watchdog does not want to join this session. Watchdog was removed.',
+                    EventLogSeverity::WARNING,
+                    $watchdog
+                ));
+                // do not repeat this message anymore
+                throw new UnrecoverableMessageHandlingException('Watchdog does not want to join this session.');
+            }
+            if ($e->getCode() == Response::HTTP_BAD_GATEWAY) {
                 $em->persist($watchdog->setStatus(WatchdogStatus::UNRESPONSIVE));
             }
             $em->persist($this->log($e->getMessage(), EventLogSeverity::ERROR, $watchdog, $e->getTraceAsString()));
             throw $e; // Re-throw the exception to trigger the retry mechanism
         }
-        $this->checkResponseSuccess($watchdog, $em, $uri, $decodedResponse, $response->getStatusCode());
+        $this->checkResponseSuccess($watchdog, $em, $uri, $decodedResponse);
     }
 
     /**

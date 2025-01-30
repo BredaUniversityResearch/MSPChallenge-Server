@@ -51,7 +51,8 @@ class GameLatest extends CommonBase
                 $data['simulation_updates'] = [
                     ['simulation_type' => 'CEL', 'kpi' => $results['energy']],
                     ['simulation_type' => 'MEL', 'kpi' => $results['ecology']],
-                    ['simulation_type' => 'SEL', 'kpi' => $results['shipping']]
+                    ['simulation_type' => 'SEL', 'kpi' => $results['shipping']],
+                    ['simulation_type' => 'External', 'kpi' => $results['external']]
                 ];
             });
         $latestWarning = $this->getLatestWarning($context)
@@ -416,7 +417,8 @@ class GameLatest extends CommonBase
             resolveOnFutureTick($deferred, [
                 'ecology' => [],
                 'shipping' => [],
-                'energy' => []
+                'energy' => [],
+                'external' => []
             ]);
         return $deferred->promise()
             ->then(function (array $results) use ($context) {
