@@ -694,6 +694,15 @@ class SimulationController extends BaseController
     #[OA\Post(
         description: 'Get the watchdog token for the current server. Used for setting up debug bridge in simulations.',
         summary: 'Get Watchdog Token For Server',
+        parameters: [
+            new OA\Parameter(
+                name: 'x-server-id',
+                description: 'Watchdog server ID',
+                in: 'header',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid')
+            )
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -727,12 +736,23 @@ class SimulationController extends BaseController
     )]
     public function getWatchdogTokenForServer(Request $request): JsonResponse
     {
+        try {
+            $watchdogServerId = $this->getServerIdFromRequest($request);
+        } catch (BadRequestHttpException $e) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(false, message: $e->getMessage()),
+                Response::HTTP_BAD_REQUEST
+            );
+        }
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         if (null === $watchdog =
-            $em->getRepository(Watchdog::class)->findOneBy(['serverId' => Watchdog::getInternalServerId()])
+            $em->getRepository(Watchdog::class)->findOneBy(['serverId' => $watchdogServerId])
         ) {
             return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Internal watchdog server not found'),
+                self::wrapPayloadForResponse(
+                    false,
+                    message: 'Could not find watchdog with server id: ' . $watchdogServerId->toRfc4122()
+                ),
                 Response::HTTP_NOT_FOUND
             );
         }
