@@ -181,21 +181,24 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         Watchdog $watchdog,
         EntityManagerInterface $em,
         string $uri,
+        array $context,
         array $decodedResponse
     ): void {
         if (($decodedResponse["success"] ?? 0) == 1) {
             $this->info(
                 sprintf(
-                    'Watchdog %s: responded with success on requesting %s.',
+                    'Watchdog %s: responded with success on requesting %s: %s.',
                     $watchdog->getServerId()->toRfc4122(),
-                    $uri
+                    $uri,
+                    json_encode($context)
                 )
             );
             return; // success!
         }
         $errorMsg = sprintf(
-            'Watchdog responded with failure on requesting %s. Error message: "%s".',
+            'Watchdog responded with failure on requesting %s: %s. Error message: "%s".',
             $uri,
+            json_encode($context),
             ($decodedResponse["message"] ?? '') ?: 'No message'
         );
         $em->persist($this->log(
@@ -298,7 +301,18 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             $em->persist($this->log($e->getMessage(), EventLogSeverity::ERROR, $watchdog, $e->getTraceAsString()));
             throw $e; // Re-throw the exception to trigger the retry mechanism
         }
-        $this->checkResponseSuccess($watchdog, $em, $uri, $decodedResponse);
+        $this->checkResponseSuccess(
+            $watchdog,
+            $em,
+            $uri,
+            array_filter($postValues, fn($k) => in_array($k, [
+                'game_session_token',
+                'game_state',
+                'required_simulations',
+                'month'
+            ]), ARRAY_FILTER_USE_KEY),
+            $decodedResponse
+        );
     }
 
     /**
