@@ -64,7 +64,7 @@ class Kpi extends Base
         string $kpiUnit,
         int $kpiCountry = -1
     ): int {
-        if (!in_array($kpiType, array('ECOLOGY', 'ENERGY', 'SHIPPING'))) {
+        if (!in_array($kpiType, array('ECOLOGY', 'ENERGY', 'SHIPPING', 'EXTERNAL'))) {
             throw new BadRequestHttpException('Invalid KPI type: '.$kpiType.
                 '. Allowed values are ECOLOGY, ENERGY, SHIPPING.');
         }
