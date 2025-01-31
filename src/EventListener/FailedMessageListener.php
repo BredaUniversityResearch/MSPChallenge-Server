@@ -8,6 +8,7 @@ use App\Message\Watchdog\Message\WatchdogMessageBase;
 use App\Repository\WatchdogRepository;
 use Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Event\WorkerMessageFailedEvent;
 
 readonly class FailedMessageListener implements EventSubscriberInterface
@@ -27,7 +28,6 @@ readonly class FailedMessageListener implements EventSubscriberInterface
         }
         $envelope = $event->getEnvelope();
         $message = $envelope->getMessage();
-
         if (!($message instanceof WatchdogMessageBase)) {
             return;
         }
@@ -36,6 +36,12 @@ readonly class FailedMessageListener implements EventSubscriberInterface
         /** @var WatchdogRepository $repo */
         $repo = $em->getRepository(Watchdog::class);
         $repo->removeUnresponsiveWatchdogs();
+        if ($event->getThrowable()->getCode() != Response::HTTP_METHOD_NOT_ALLOWED) {
+            return;
+        }
+        // the watchdog does not want to join this session, remove it
+        $em->remove($repo->find($message->getWatchdogId()));
+        $em->flush();
     }
 
     /**

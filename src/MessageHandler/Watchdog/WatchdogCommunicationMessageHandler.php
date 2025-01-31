@@ -286,14 +286,11 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         ) {
             if ($e->getCode() == Response::HTTP_METHOD_NOT_ALLOWED) {
                 // the watchdog does not want to join this session
-                $em->remove($watchdog);
                 $em->persist($this->log(
-                    'Watchdog does not want to join this session. Watchdog was removed.',
+                    'Watchdog does not want to join this session.',
                     EventLogSeverity::WARNING,
                     $watchdog
                 ));
-                // do not repeat this message anymore
-                throw new UnrecoverableMessageHandlingException('Watchdog does not want to join this session.');
             }
             if ($e->getCode() == Response::HTTP_BAD_GATEWAY) {
                 $em->persist($watchdog->setStatus(WatchdogStatus::UNRESPONSIVE));

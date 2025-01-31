@@ -12,10 +12,10 @@ class WatchdogMessageRetryStrategy implements RetryStrategyInterface
     private RetryStrategyInterface $defaultRetryStrategy;
 
     public function __construct(
-        int $maxRetries = 3,
-        int $initialDelay = 1000,
+        int $maxRetries = 5, // 2, 4, 8, 16, 32 . summing up to 62 seconds
+        int $initialDelay = 2000,
         float $multiplier = 2.0,
-        int $maxDelay = 30000
+        int $maxDelay = 70000
     ) {
         // Initialize Symfony's MultiplierRetryStrategy with our own parameters
         $this->defaultRetryStrategy = new MultiplierRetryStrategy($maxRetries, $initialDelay, $multiplier, $maxDelay);

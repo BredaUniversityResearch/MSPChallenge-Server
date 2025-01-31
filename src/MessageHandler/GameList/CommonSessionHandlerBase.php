@@ -248,95 +248,18 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
         $this->dataModel = $gameConfigContents['datamodel'];
     }
 
-    private function upsertSessionWatchdog(Uuid $serverId): void
-    {
-        /** @var WatchdogRepository $watchdogRepo */
-        $watchdogRepo = $this->entityManager->getRepository(Watchdog::class);
-        $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId]);
-        $watchdog ??= new Watchdog();
-        $watchdog
-            ->setServerId($serverId)
-            ->setToken(0) // this is temporary and will be updated later
-            ->setStatus(WatchdogStatus::READY);
-        $this->entityManager->persist($watchdog);
-        $this->entityManager->flush();
-
-        // update watchdog record with token using DQL
-        $qb = $this->entityManager->getRepository(Watchdog::class)->createQueryBuilder('w');
-        $qb
-            ->update()
-            ->set('w.token', 'UUID_SHORT()')
-            ->where($qb->expr()->eq('w.serverId', ':serverId'))
-            ->setParameter('serverId', $serverId->toBinary())
-            ->getQuery()
-            ->execute();
-    }
-
     /**
      * @throws Exception
      */
     protected function registerSimulations(): void
     {
-        $serverWatchdogRepo = $this->mspServerManagerEntityManager->getRepository(GameWatchdogServer::class);
-        $serverWatchdogs = collect($serverWatchdogRepo->findAll())->keyBy(
-            fn(GameWatchdogServer $s) => $s->getServerId()->toRfc4122()
-        )->all();
-
         /** @var WatchdogRepository $watchdogRepo */
         $watchdogRepo = $this->entityManager->getRepository(Watchdog::class);
-        /** @var Watchdog[] $watchdogs */
-        $watchdogs = $watchdogRepo->findAll();
-        foreach ($watchdogs as $watchdog) {
-            if (null !== $watchdog->getGameWatchdogServer()) {
-                continue;
-            }
-            $message = 'no server assigned. Watchdog was removed';
-            $this->entityManager->persist(Simulation::createEventLogForWatchdog(
-                $message,
-                EventLogSeverity::ERROR,
-                $watchdog
-            ));
-            $this->warning(sprintf('Watchdog %s: %s', $watchdog->getServerId()->toRfc4122(), $message));
-            $this->entityManager->remove($watchdog);
-        }
-        foreach ($serverWatchdogs as $serverWatchdog) {
-            $this->upsertSessionWatchdog($serverWatchdog->getServerId());
-        }
-
-        // filter possible internal simulations with the ones present in the config
-        $simNames = array_keys(array_intersect_key(
-            array_flip(array_map(
-                fn(InternalSimulationName $e) => $e->value,
-                InternalSimulationName::cases()
-            )),
-            $this->dataModel
-        ));
-        if (empty($simNames)) {
-            $this->warning('No simulations found to register in game configuration');
-            return; // no configured simulations
-        }
-
-        $versions = $this->simulationHelper->getConfiguredSimulationTypes(
+        $watchdogRepo->registerSimulations($this->simulationHelper->getInternalSims(
             $this->gameSession->getId(),
             $this->dataModel
-        );
-        /** @var WatchdogRepository $watchdogRepo */
-        $watchdogRepo = $this->entityManager->getRepository(Watchdog::class);
-        $watchdog = $watchdogRepo->findOneBy(['serverId' => Watchdog::getInternalServerId()]);
-        $simulations = collect($watchdog->getSimulations()->toArray())->keyBy(fn(SimulationEntity $s) => $s->getName())
-            ->all();
-        foreach ($simNames as $simName) {
-            if (array_key_exists($simName, $simulations)) {
-                $this->info("Simulation {$simName} already registered, skipping.");
-                continue;
-            }
-            $sim = new SimulationEntity();
-            $sim->setName($simName);
-            $sim->setVersion($versions[$simName]);
-            $sim->setWatchdog($watchdog);
-            $this->entityManager->persist($sim);
-        }
-        $this->entityManager->flush();
+        ));
+        $this->logContainer($watchdogRepo);
     }
 
     protected function logContainer(LogContainerInterface $container): void
