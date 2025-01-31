@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\ServerManager\GameList;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,14 +33,24 @@ class SessionController extends AbstractController
     public function __invoke(
         HttpKernelInterface $httpKernel,
         RouterInterface $router,
+        ConnectionManager $connectionManager,
         Request $request,
         int $session,
         string $query
     ): Response {
         try {
-            ConnectionManager::getInstance()->getCachedGameSessionDbConnection($session)->connect();
+            $connectionManager->getCachedGameSessionDbConnection($session)->connect();
         } catch (\Exception $e) {
             throw $this->createNotFoundException('Session database does not exist.');
+        }
+        if (null === $gameList = $connectionManager->getServerManagerEntityManager()->find(
+            GameList::class,
+            $session
+        )) {
+            throw $this->createNotFoundException('Session not found.');
+        }
+        if ($gameList->getSessionState() != GameSessionStateValue::HEALTHY) {
+            throw $this->createNotFoundException('Unable to use session.');
         }
 
         // Merge the route information into the attributes
