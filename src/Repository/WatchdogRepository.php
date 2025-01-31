@@ -28,7 +28,7 @@ class WatchdogRepository extends LoggableEntityRepository implements LogContaine
     }
 
     /**
-     * @var array{string, string} $internalSims all internal simulations,
+     * @param array<'CEL'|'MEL'|'SEL', mixed> $internalSims all internal simulations,
      *   the key being the name the value being the version string.
      * @throws Exception
      */
