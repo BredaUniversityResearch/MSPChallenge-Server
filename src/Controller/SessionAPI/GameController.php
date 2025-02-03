@@ -411,7 +411,7 @@ class GameController extends BaseController
 
     #[Route(
         path: '/PolicySimSettings',
-        name: 'session_api_game_get_actual_date_for_simulated_month',
+        name: 'session_api_game_policy_sim_settings',
         methods: ['GET']
     )]
     #[OA\Get(
