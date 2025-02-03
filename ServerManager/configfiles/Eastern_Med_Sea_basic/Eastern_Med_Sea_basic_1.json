@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "date_modified": "12/17/2024",
+    "date_modified": "01/28/2024",
     "data_model_hash": "748F6BD9368E12517CE26D41358E5BBAA78D0383926CFB82CB4267A0041E2104",
     "errors": 0,
     "editor_version": "2.0.0",
@@ -759,7 +759,110 @@
         }
       ]
     },
-    "plans": [],
+    "plans": [
+      {
+        "plan_id": 1,
+        "plan_country_id": 1,
+        "plan_name": "shipping starting plan",
+        "plan_gametime": -1,
+        "plan_type": "0",
+        "plan_alters_energy_distribution": 0,
+        "layers": [
+          {
+            "layer_id": 84,
+            "name": "ems_IMO_Routes",
+            "layer_editing_type": "multitype",
+            "geometry": [
+              {
+                "geometry_id": 8077,
+                "FID": "",
+                "geometry_persistent": 8077,
+                "geometry": "[[6038144.5,1511472.63],[5989545.0,1530912.38],[5915525.0,1569044.0]]",
+                "data": {
+                  "ShippingWidth": "3"
+                },
+                "country": 3,
+                "type": "0,1,2,3",
+                "base_geometry_info": {
+                  "geometry_id": 8077,
+                  "geometry_mspid": 0,
+                  "geometry_persistent": 8077
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 8078,
+                "FID": "",
+                "geometry_persistent": 8078,
+                "geometry": "[[5878140.5,1332029.63],[5692716.5,1331282.0]]",
+                "data": {
+                  "ShippingWidth": "5"
+                },
+                "country": 3,
+                "type": "0,1,2,3",
+                "base_geometry_info": {
+                  "geometry_id": 8078,
+                  "geometry_mspid": 0,
+                  "geometry_persistent": 8078
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 8079,
+                "FID": "",
+                "geometry_persistent": 8079,
+                "geometry": "[[6498715.0,1563810.25],[6379086.0,1454649.0]]",
+                "data": {
+                  "ShippingWidth": "2"
+                },
+                "country": 3,
+                "type": "0,1,2,3",
+                "base_geometry_info": {
+                  "geometry_id": 8079,
+                  "geometry_mspid": 0,
+                  "geometry_persistent": 8079
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 8080,
+                "FID": "",
+                "geometry_persistent": 8080,
+                "geometry": "[[6367871.0,1341749.38],[6408993.0,1258009.25]]",
+                "data": {
+                  "ShippingWidth": "7"
+                },
+                "country": 3,
+                "type": "0,1,2,3",
+                "base_geometry_info": {
+                  "geometry_id": 8080,
+                  "geometry_mspid": 0,
+                  "geometry_persistent": 8080
+                },
+                "cable": null,
+                "energy_output": null
+              }
+            ],
+            "warnings": [],
+            "deleted": []
+          }
+        ],
+        "grids": [],
+        "fishing": [],
+        "messages": [
+          {
+            "country_id": 1,
+            "user_name": "magali",
+            "text": "Changed the plans status to: Approved",
+            "time": 1704971755.1206269
+          }
+        ],
+        "restriction_settings": []
+      }
+    ],
     "dependencies": {
       "groups": [
         {
@@ -1034,7 +1137,7 @@
               "link": ""
             },
             {
-              "name": "European sardine and anchovy",
+              "name": "European sardine & anchovy",
               "id": 62,
               "multiline": true,
               "link": ""
@@ -1094,7 +1197,7 @@
               "link": ""
             },
             {
-              "name": "Ray and skate",
+              "name": "Rays and skates",
               "id": 71,
               "multiline": false,
               "link": ""
@@ -1112,7 +1215,7 @@
               "link": ""
             },
             {
-              "name": "Cephalopod",
+              "name": "Cephalopods",
               "id": 74,
               "multiline": false,
               "link": ""
@@ -1162,10 +1265,10 @@
           ]
         },
         {
-          "name": "Birds, Mammals, Benthos",
+          "name": "Other Species",
           "entries": [
             {
-              "name": "Seabird",
+              "name": "Seabirds",
               "id": 47,
               "multiline": false,
               "link": "Birds"
@@ -1622,13 +1725,13 @@
           "fromId": 15,
           "toId": 27,
           "severity": 1,
-          "description": "Specialised construction and maintenance vessels for e.g. wind farms and Oil & Gas Platforms. "
+          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas platforms. "
         },
         {
           "fromId": 15,
           "toId": 28,
           "severity": 1,
-          "description": "Specialised construction and maintenance vessels for e.g. wind farms and Oil & Gas Platforms. "
+          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas platforms. "
         },
         {
           "fromId": 16,
@@ -1694,7 +1797,7 @@
           "fromId": 24,
           "toId": 20,
           "severity": -3,
-          "description": "If desired, bottom trawling can be banned from operating in a particular Marine Protected Area. "
+          "description": "If desired, bottom trawling can be banned from operating in a particular marine protected area. "
         },
         {
           "fromId": 26,
@@ -1760,187 +1863,187 @@
           "fromId": 55,
           "toId": 60,
           "severity": -1,
-          "description": "Dolphins prey on Small pelagic fish. "
+          "description": "Dolphins prey on small pelagic fish. "
         },
         {
           "fromId": 55,
           "toId": 64,
           "severity": -1,
-          "description": "Dolphins prey on Mesopelagic fish."
+          "description": "Dolphins prey on mesopelagic fish."
         },
         {
           "fromId": 55,
           "toId": 65,
           "severity": -1,
-          "description": "Dolphins prey on European hake. "
+          "description": "Dolphins prey on european hake. "
         },
         {
           "fromId": 56,
           "toId": 82,
           "severity": -1,
-          "description": "Whales mainly feed on Zooplankton. "
+          "description": "Whales mainly feed on zooplankton. "
         },
         {
           "fromId": 47,
           "toId": 82,
           "severity": -1,
-          "description": "Seabirds prey on Zooplankton. "
+          "description": "Seabirds prey on zooplankton. "
         },
         {
           "fromId": 57,
           "toId": 79,
           "severity": -2,
-          "description": "Turtles prey on Mobile benthos. "
+          "description": "Turtles prey on mobile benthos. "
         },
         {
           "fromId": 57,
           "toId": 81,
           "severity": -1,
-          "description": "Turtles prey on Jellyfish and salp. "
+          "description": "Turtles prey on jellyfish and salp. "
         },
         {
           "fromId": 33,
           "toId": 82,
           "severity": -3,
-          "description": "Mackerel mainly feeds on Zooplankton. "
+          "description": "Mackerel mainly feeds on zooplankton. "
         },
         {
           "fromId": 61,
           "toId": 82,
           "severity": -3,
-          "description": "Horse mackerel mainly feeds on Zooplankton. "
+          "description": "Horse mackerel mainly feeds on zooplankton. "
         },
         {
           "fromId": 59,
           "toId": 79,
           "severity": -1,
-          "description": "Medium pelagic fish prey on Mobile benthos. "
+          "description": "Medium pelagic fish prey on mobile benthos. "
         },
         {
           "fromId": 62,
           "toId": 82,
           "severity": -3,
-          "description": "European sardine and anchovy prey on Zooplankton."
+          "description": "European sardine and anchovy prey on zooplankton."
         },
         {
           "fromId": 60,
           "toId": 82,
           "severity": -1,
-          "description": "Small pelagic fish feed on Zooplankton."
+          "description": "Small pelagic fish feed on zooplankton."
         },
         {
           "fromId": 63,
           "toId": 79,
           "severity": -1,
-          "description": "Benthopelagic fish feed prey on Mobile benthos."
+          "description": "Benthopelagic fish feed prey on mobile benthos."
         },
         {
           "fromId": 63,
           "toId": 81,
           "severity": -1,
-          "description": "Benthopelagic fish prey on Jellyfish and salp. "
+          "description": "Benthopelagic fish prey on jellyfish and salp. "
         },
         {
           "fromId": 63,
           "toId": 82,
           "severity": -2,
-          "description": "Benthopelagic fish feed on Zooplankton."
+          "description": "Benthopelagic fish feed on zooplankton."
         },
         {
           "fromId": 64,
           "toId": 82,
           "severity": -1,
-          "description": "Mesopelagic fish feed on Zooplankton."
+          "description": "Mesopelagic fish feed on zooplankton."
         },
         {
           "fromId": 64,
           "toId": 83,
           "severity": -1,
-          "description": "Mesopelagic fish feed on Seagrass & Seaweed. "
+          "description": "Mesopelagic fish feed on seagrass & seaweed. "
         },
         {
           "fromId": 65,
           "toId": 79,
           "severity": -1,
-          "description": "European hake prey on Mobile benthos. "
+          "description": "European hake prey on mobile benthos. "
         },
         {
           "fromId": 65,
           "toId": 80,
           "severity": -1,
-          "description": "European hake feeds on Sessile benthos. "
+          "description": "European hake feeds on sessile benthos. "
         },
         {
           "fromId": 65,
           "toId": 82,
           "severity": -2,
-          "description": "European hake feeds on Zooplankton."
+          "description": "European hake feeds on zooplankton."
         },
         {
           "fromId": 66,
           "toId": 82,
           "severity": -3,
-          "description": "Large demersal fish mainly feed on Zooplankton. "
+          "description": "Large demersal fish mainly feed on zooplankton. "
         },
         {
           "fromId": 67,
           "toId": 79,
           "severity": -1,
-          "description": "Medium demersal fish prey on Mobile benthos."
+          "description": "Medium demersal fish prey on mobile benthos."
         },
         {
           "fromId": 67,
           "toId": 82,
           "severity": -1,
-          "description": "Medium demersal fish feed on Zooplankton. "
+          "description": "Medium demersal fish feed on zooplankton. "
         },
         {
           "fromId": 31,
           "toId": 64,
           "severity": -1,
-          "description": "Flatfish prey on  Mesopelagic fish. "
+          "description": "Flatfish prey on  mesopelagic fish. "
         },
         {
           "fromId": 31,
           "toId": 79,
           "severity": -1,
-          "description": "Flatfish prey on Mobile benthos. "
+          "description": "Flatfish prey on mobile benthos. "
         },
         {
           "fromId": 31,
           "toId": 82,
           "severity": -1,
-          "description": "Flatfish feed on Zooplankton. "
+          "description": "Flatfish feed on zooplankton. "
         },
         {
           "fromId": 68,
           "toId": 79,
           "severity": -1,
-          "description": "Mullets prey on Mobile benthos. "
+          "description": "Mullets prey on mobile benthos. "
         },
         {
           "fromId": 68,
           "toId": 82,
           "severity": -2,
-          "description": "Mullets feed on Zooplankton. "
+          "description": "Mullets feed on zooplankton. "
         },
         {
           "fromId": 85,
           "toId": 82,
           "severity": -1,
-          "description": "Small demersal fish feed on Zooplankton. "
+          "description": "Small demersal fish feed on zooplankton. "
         },
         {
           "fromId": 69,
           "toId": 79,
           "severity": -1,
-          "description": "Bathydemersal fish prey on Mobile benthos."
+          "description": "Bathydemersal fish prey on mobile benthos."
         },
         {
           "fromId": 70,
           "toId": 79,
           "severity": -1,
-          "description": "Demersal sharks prey on Mobile benthos."
+          "description": "Demersal sharks prey on mobile benthos."
         },
         {
           "fromId": 70,
@@ -2618,37 +2721,37 @@
           "fromId": 20,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Bottom trawlers. "
+          "description": "Cephalopods are caught by Bottom trawlers. "
         },
         {
           "fromId": 53,
           "toId": 74,
           "severity": -2,
-          "description": "Cephalopod are caught by Purse seiners. "
+          "description": "Cephalopods are caught by Purse seiners. "
         },
         {
           "fromId": 50,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Small-scale coastal fleets."
+          "description": "Cephalopods are caught by Small-scale coastal fleets."
         },
         {
           "fromId": 51,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Recreational fleets."
+          "description": "Cephalopods are caught by Recreational fleets."
         },
         {
           "fromId": 52,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Trawl fleets."
+          "description": "Cephalopods are caught by Trawl fleets."
         },
         {
           "fromId": 54,
           "toId": 74,
           "severity": -1,
-          "description": "Cephalopod are caught by Artisanal fleets. "
+          "description": "Cephalopods are caught by Artisanal fleets. "
         },
         {
           "fromId": 20,
@@ -6081,21 +6184,21 @@
     },
     "policy_settings": {
       "fishing": {
-        "all_country_approval": true,
+        "all_country_approval": false,
         "stakeholder_pressure_cool_down": 0.1,
         "fleet_info": {
           "gear_types": [
-            "Bottom trawlers",
-            "Purse seiners",
-            "Beach seiners",
-            "Small-scale coastal",
-            "Recreation",
-            "Trawl",
-            "Artisanal"
+            "Artisanal",
+            "Industrial",
+            "Recreational",
+            "Subsistence"
+						 
+					
+					   
           ],
           "fleets": [
             {
-              "//comment": "0 Gr-Bottom trawlers",
+              "//comment": "0 Gr- Artisanal",
               "gear_type": "0",
               "country_id": "5",
               "initial_fishing_distribution": [
@@ -6106,7 +6209,7 @@
               ]
             },
             {
-              "//comment": "1 Gr- purse seiners",
+              "//comment": "1 Gr- Industrial",
               "gear_type": "1",
               "country_id": "5",
               "initial_fishing_distribution": [
@@ -6115,9 +6218,9 @@
                   "effort_weight": 0.026
                 }
               ]
-            },
+			},
             {
-              "//comment": "2 Gr-beach seiners",
+              "//comment": "2 Gr- Recreational",
               "gear_type": "2",
               "country_id": "5",
               "initial_fishing_distribution": [
@@ -6128,7 +6231,7 @@
               ]
             },
             {
-              "//comment": "3 Gr-small-scale coastal",
+              "//comment": "3 Gr- Subsistence",
               "gear_type": "3",
               "country_id": "5",
               "initial_fishing_distribution": [
@@ -6139,18 +6242,18 @@
               ]
             },
             {
-              "//comment": "4 Tu-Bottom trawlers",
+              "//comment": "4 Tu- Artisanal",
               "gear_type": "0",
               "country_id": "11",
-              "initial_fishing_distribution": [
+                          "initial_fishing_distribution": [
                 {
                   "country_id": 11,
                   "effort_weight": 0.026
                 }
               ]
-            },
+			},
             {
-              "//comment": "5 Tu-purse seiners",
+              "//comment": "5 Tu- Industrial",
               "gear_type": "1",
               "country_id": "11",
               "initial_fishing_distribution": [
@@ -6159,12 +6262,12 @@
                   "effort_weight": 0.026
                 }
               ]
-            },
+			},
             {
-              "//comment": "6 Tu-beach seiners",
+              "//comment": "6 Tu- Recreational",
               "gear_type": "2",
               "country_id": "11",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 11,
                   "effort_weight": 0.026
@@ -6172,10 +6275,10 @@
               ]
             },
             {
-              "//comment": "7 Tu-small-scale coastal",
+              "//comment": "7 Tu- Subsistence",
               "gear_type": "3",
               "country_id": "11",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 11,
                   "effort_weight": 0.026
@@ -6183,10 +6286,54 @@
               ]
             },
             {
-              "//comment": "8 Cy-Bottom trawlers",
+              "//comment": "8 Cr -Artisanal",
+              "gear_type": "0",
+              "country_id": "5",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 5,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "9 Cr- Industrial",
+              "gear_type": "1",
+              "country_id": "5",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 5,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "10 Cr- Recreational",
+              "gear_type": "2",
+              "country_id": "5",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 5,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "11 Cr- Subsistence",
+              "gear_type": "3",
+              "country_id": "5",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 5,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "12 Cy- Artisanal",
               "gear_type": "0",
               "country_id": "3",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 3,
                   "effort_weight": 0.026
@@ -6194,10 +6341,10 @@
               ]
             },
             {
-              "//comment": "9 Cy-purse seiners",
+              "//comment": "13 Cy- Industrial",
               "gear_type": "1",
               "country_id": "3",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 3,
                   "effort_weight": 0.026
@@ -6205,10 +6352,21 @@
               ]
             },
             {
-              "//comment": "10 Cy-small-scale coastal",
+              "//comment": "14 Cy- Recreational",
+              "gear_type": "2",
+              "country_id": "3",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "15 Cy- Subsistence",
               "gear_type": "3",
               "country_id": "3",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 3,
                   "effort_weight": 0.026
@@ -6216,10 +6374,10 @@
               ]
             },
             {
-              "//comment": "11 Cy-Recreation",
-              "gear_type": "4",
+              "//comment": "16 Cy South-Artisanal",
+              "gear_type": "0",
               "country_id": "3",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 3,
                   "effort_weight": 0.026
@@ -6227,10 +6385,43 @@
               ]
             },
             {
-              "//comment": "12 Sy-Trawl",
-              "gear_type": "5",
+              "//comment": "17 Cy South -Industrial",
+              "gear_type": "1",
+              "country_id": "3",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "18 Cy South -Recreational",
+              "gear_type": "2",
+              "country_id": "3",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "19 Cy South -Subsistence",
+              "gear_type": "3",
+              "country_id": "3",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "20 Sy- Artisanal",
+              "gear_type": "0",
               "country_id": "4",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 4,
                   "effort_weight": 0.026
@@ -6238,10 +6429,10 @@
               ]
             },
             {
-              "//comment": "13 Sy-Purse seine",
+              "//comment": "21 Sy- Industrial",
               "gear_type": "1",
               "country_id": "4",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 4,
                   "effort_weight": 0.026
@@ -6249,10 +6440,10 @@
               ]
             },
             {
-              "//comment": "14 Sy-Artisanal",
-              "gear_type": "6",
+              "//comment": "22 Sy-Recreational",
+              "gear_type": "2",
               "country_id": "4",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 4,
                   "effort_weight": 0.026
@@ -6260,10 +6451,10 @@
               ]
             },
             {
-              "//comment": "15 Sy-Recreation",
-              "gear_type": "4",
+              "//comment": "23 Sy-Subsistence",
+              "gear_type": "3",
               "country_id": "4",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 4,
                   "effort_weight": 0.026
@@ -6271,10 +6462,10 @@
               ]
             },
             {
-              "//comment": "16 Le-Purse seine",
-              "gear_type": "1",
+              "//comment": "24 Le- Artisanal",
+              "gear_type": "0",
               "country_id": "10",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 10,
                   "effort_weight": 0.026
@@ -6282,10 +6473,10 @@
               ]
             },
             {
-              "//comment": "17 Le-Artisanal",
-              "gear_type": "6",
+              "//comment": "25 Le- Industrial",
+              "gear_type": "1",
               "country_id": "10",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 10,
                   "effort_weight": 0.026
@@ -6293,10 +6484,10 @@
               ]
             },
             {
-              "//comment": "18 Le-Recreation",
-              "gear_type": "4",
+              "//comment": "26 Le- Recreational",
+              "gear_type": "2",
               "country_id": "10",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 10,
                   "effort_weight": 0.026
@@ -6304,10 +6495,21 @@
               ]
             },
             {
-              "//comment": "19 IL-Trawl",
-              "gear_type": "5",
+              "//comment": "27 Le- Subsistence",
+              "gear_type": "3",
+              "country_id": "10",
+			  "initial_fishing_distribution": [
+                {
+                  "country_id": 10,
+                  "effort_weight": 0.026
+                }
+              ]
+            },
+            {
+              "//comment": "28 IL-Artisanal",
+              "gear_type": "0",
               "country_id": "7",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 7,
                   "effort_weight": 0.026
@@ -6315,10 +6517,10 @@
               ]
             },
             {
-              "//comment": "20 IL-Purse seine",
+              "//comment": "29 IL-Industrial",
               "gear_type": "1",
               "country_id": "7",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 7,
                   "effort_weight": 0.026
@@ -6326,10 +6528,10 @@
               ]
             },
             {
-              "//comment": "21 IL-Artisanal",
-              "gear_type": "6",
+              "//comment": "30 IL-Recreational",
+              "gear_type": "2",
               "country_id": "7",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 7,
                   "effort_weight": 0.026
@@ -6337,10 +6539,10 @@
               ]
             },
             {
-              "//comment": "22 IL-Recreation",
-              "gear_type": "4",
+              "//comment": "31 IL-Subsistence",
+              "gear_type": "3",
               "country_id": "7",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 7,
                   "effort_weight": 0.026
@@ -6348,10 +6550,10 @@
               ]
             },
             {
-              "//comment": "23 Eg-Trawl",
-              "gear_type": "5",
+              "//comment": "32 Eg-Artisanal",
+              "gear_type": "0",
               "country_id": "8",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 8,
                   "effort_weight": 0.026
@@ -6359,10 +6561,10 @@
               ]
             },
             {
-              "//comment": "24 Eg-Purse seine",
+              "//comment": "33 Eg-Industrial",
               "gear_type": "1",
               "country_id": "8",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 8,
                   "effort_weight": 0.026
@@ -6370,10 +6572,10 @@
               ]
             },
             {
-              "//comment": "25 Eg-Artisanal",
-              "gear_type": "6",
+              "//comment": "34 Eg-Recreational",
+              "gear_type": "2",
               "country_id": "8",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 8,
                   "effort_weight": 0.026
@@ -6381,10 +6583,10 @@
               ]
             },
             {
-              "//comment": "26 Eg-Recreation",
-              "gear_type": "4",
+              "//comment": "35 Eg-Subsistence",
+              "gear_type": "3",
               "country_id": "8",
-              "initial_fishing_distribution": [
+			  "initial_fishing_distribution": [
                 {
                   "country_id": 8,
                   "effort_weight": 0.026
@@ -6645,7 +6847,7 @@
           }
         },
         {
-          "name": "Protection Gr-Bottom trawlers",
+          "name": "Protection Gr- Industrial",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -6716,61 +6918,6 @@
               "name": "ems_Electricity_cables_edit",
               "influence": 1.0,
               "construction": true
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "0"
-            ]
-          }
-        },
-        {
-          "name": "Protection Gr- purse seiners",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
@@ -6785,7 +6932,62 @@
           }
         },
         {
-          "name": "Protection Gr-beach seiners",
+          "name": "Protection Gr- Artisanal",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
+        },
+        {
+          "name": "Protection Gr- Recreational",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -6840,7 +7042,7 @@
           }
         },
         {
-          "name": "Protection Gr-small-scale coastal",
+          "name": "Protection Gr- Subsistence",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -6881,91 +7083,6 @@
               "name": "ems_marine_protected_areas",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "7"
-            ]
-          }
-        },
-        {
-          "name": "Protection Tu-Bottom trawlers",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_pipelines",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_pipelines",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "EMS_all_cables_emodnet",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_all_cables_emodnet",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Electricity_cables_edit",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Electricity_cables_edit",
-              "influence": 1.0,
-              "construction": true
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
@@ -6980,7 +7097,92 @@
           }
         },
         {
-          "name": "Protection Tu-purse seiners",
+          "name": "Protection Tu- Industrial",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "5"
+            ]
+          }
+        },
+        {
+          "name": "Protection Tu- Artisanal",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7035,192 +7237,7 @@
           }
         },
         {
-          "name": "Protection Tu-beach seiners",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "8"
-            ]
-          }
-        },
-        {
-          "name": "Protection Tu-small-scale coastal",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "9"
-            ]
-          }
-        },
-        {
-          "name": "Protection Cy-Bottom trawlers",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_pipelines",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_pipelines",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "EMS_all_cables_emodnet",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_all_cables_emodnet",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "5"
-            ]
-          }
-        },
-        {
-          "name": "Protection Cy-purse seiners",
+          "name": "Protection Tu- Recreational",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7275,7 +7292,7 @@
           }
         },
         {
-          "name": "Protection Cy-small-scale coastal",
+          "name": "Protection Tu- Subsistence",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7325,122 +7342,12 @@
           ],
           "policy_filters": {
             "fleets": [
-              "10"
+              "7"
             ]
           }
         },
         {
-          "name": "Protection Cy-Recreation",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "11"
-            ]
-          }
-        },
-        {
-          "name": "Protection Sy-Trawl",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "12"
-            ]
-          }
-        },
-        {
-          "name": "Protection Sy-Purse seine",
+          "name": "Protection Cy- Industrial",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7476,6 +7383,26 @@
               "name": "ems_IMO_Routes",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "ems_pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": true
             },
             {
               "name": "ems_marine_protected_areas",
@@ -7495,7 +7422,7 @@
           }
         },
         {
-          "name": "Protection Sy-Artisanal",
+          "name": "Protection Cy- Artisanal",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7513,11 +7440,6 @@
               "construction": false
             },
             {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "ems_Wind_Farms",
               "influence": 1.0,
               "construction": true
@@ -7533,6 +7455,11 @@
               "construction": true
             },
             {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "ems_marine_protected_areas",
               "influence": 1.0,
               "construction": false
@@ -7545,12 +7472,12 @@
           ],
           "policy_filters": {
             "fleets": [
-              "14"
+              "12"
             ]
           }
         },
         {
-          "name": "Protection Sy-Recreation",
+          "name": "Protection Cy- Subsistence",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7605,7 +7532,137 @@
           }
         },
         {
-          "name": "Protection Le-Purse seine",
+          "name": "Protection Cy-Recreation",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "14"
+            ]
+          }
+        },
+        {
+          "name": "Protection Cy South -Industrial",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_pipelines",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_pipelines",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "17"
+            ]
+          }
+        },
+        {
+          "name": "Protection Cy South-Artisanal",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7660,117 +7717,7 @@
           }
         },
         {
-          "name": "Protection Le-Artisanal",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "17"
-            ]
-          }
-        },
-        {
-          "name": "Protection Le-Recreation",
-          "layers": [
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "ems_Wind_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Wave_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_Tidal_Farms",
-              "influence": 1.0,
-              "construction": true
-            },
-            {
-              "name": "ems_marine_protected_areas",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            }
-          ],
-          "policy_filters": {
-            "fleets": [
-              "18"
-            ]
-          }
-        },
-        {
-          "name": "Protection IL-Trawl",
+          "name": "Protection Cy South -Subsistence",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7825,7 +7772,7 @@
           }
         },
         {
-          "name": "Protection IL-Purse seine",
+          "name": "Protection Cy South -Recreational",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7843,6 +7790,11 @@
               "construction": false
             },
             {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "ems_Wind_Farms",
               "influence": 1.0,
               "construction": true
@@ -7858,11 +7810,6 @@
               "construction": true
             },
             {
-              "name": "ems_IMO_Routes",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
               "name": "ems_marine_protected_areas",
               "influence": 1.0,
               "construction": false
@@ -7875,12 +7822,12 @@
           ],
           "policy_filters": {
             "fleets": [
-              "20"
+              "18"
             ]
           }
         },
         {
-          "name": "Protection IL-Artisanal",
+          "name": "Protection Sy- Industrial",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7935,7 +7882,62 @@
           }
         },
         {
-          "name": "Protection IL-Recreation",
+          "name": "Protection Sy- Artisanal",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "20"
+            ]
+          }
+        },
+        {
+          "name": "Protection Sy-Recreational",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -7990,7 +7992,7 @@
           }
         },
         {
-          "name": "Protection Eg-Trawl",
+          "name": "Protection Sy-Subsistence",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -8045,7 +8047,7 @@
           }
         },
         {
-          "name": "Protection Eg-Purse seine",
+          "name": "Protection Le- Artisanal",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -8100,7 +8102,7 @@
           }
         },
         {
-          "name": "Protection Eg-Artisanal",
+          "name": "Protection Le- Industrial",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -8155,7 +8157,7 @@
           }
         },
         {
-          "name": "Protection Eg-Recreation",
+          "name": "Protection Le-Recreation",
           "layers": [
             {
               "name": "ems_Wind_Farms",
@@ -8206,6 +8208,721 @@
           "policy_filters": {
             "fleets": [
               "26"
+            ]
+          }
+        },
+        {
+          "name": "Protection Le- Subsistence",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "27"
+            ]
+          }
+        },
+        {
+          "name": "Protection IL-Industrial",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "29"
+            ]
+          }
+        },
+        {
+          "name": "Protection IL-Artisanal",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "28"
+            ]
+          }
+        },
+        {
+          "name": "Protection IL-Recreational",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "30"
+            ]
+          }
+        },
+        {
+          "name": "Protection IL-Subsistence",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "31"
+            ]
+          }
+        },
+        {
+          "name": "Protection Eg-Industrial",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "33"
+            ]
+          }
+        },
+        {
+          "name": "Protection Eg-Artisanal",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "32"
+            ]
+          }
+        },
+        {
+          "name": "Protection Eg-Recreational",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "34"
+            ]
+          }
+        },
+        {
+          "name": "Protection Eg-Subsistence",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "35"
+            ]
+          }
+        },
+        {
+          "name": "Protection Cr- Subsistence",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "11"
+            ]
+          }
+        },
+        {
+          "name": "Protection Cr- Recreational",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "10"
+            ]
+          }
+        },
+        {
+          "name": "Protection Cr- Industrial",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "9"
+            ]
+          }
+        },
+        {
+          "name": "Protection Cr -Artisanal",
+          "layers": [
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_IMO_Routes",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Wind_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_marine_protected_areas",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "Ems_Shipping_Intensity_raster",
+              "influence": 1.0,
+              "construction": false
+            }
+          ],
+          "policy_filters": {
+            "fleets": [
+              "8"
             ]
           }
         }
@@ -8442,7 +9159,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Seabird",
+          "name": "Seabirds",
           "subcategory": "Biomass"
         },
         {
@@ -8462,7 +9179,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "European Sardine and Anchovy",
+          "name": "European Sardine & Anchovy",
           "subcategory": "Biomass"
         },
         {
@@ -8506,7 +9223,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Ray & Skate",
+          "name": "Rays & Skates",
           "subcategory": "Biomass"
         },
         {
@@ -8518,7 +9235,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Cephalopod",
+          "name": "Cephalopods",
           "subcategory": "Biomass"
         },
         {
@@ -8546,7 +9263,7 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Jellyfish and Salp",
+          "name": "Jellyfish & Salp",
           "subcategory": "Biomass"
         },
         {
@@ -8578,7 +9295,7 @@
           "subcategory": "Fishery"
         },
         {
-          "name": "Ray & Skate Bycatch",
+          "name": "Rays & Skates Bycatch",
           "subcategory": "Bycatch"
         },
         {
@@ -8586,15 +9303,11 @@
           "subcategory": "Bycatch"
         },
         {
-          "name": "Whales Bycatch",
-          "subcategory": "Bycatch"
-        },
-        {
           "name": "Benthopelagic Fish Catch",
           "subcategory": "Fishery"
         },
         {
-          "name": "Cephalopod Catch",
+          "name": "Cephalopods Catch",
           "subcategory": "Fishery"
         },
         {
@@ -8610,7 +9323,7 @@
           "subcategory": "Fishery"
         },
         {
-          "name": "European Sardine and Anchovy Catch",
+          "name": "European Sardine & Anchovy Catch",
           "subcategory": "Fishery"
         },
         {
@@ -8691,7 +9404,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Seabird",
+              "valueName": "Seabirds",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8721,7 +9434,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "European Sardine and Anchovy",
+              "valueName": "European Sardine & Anchovy",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8799,7 +9512,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Cephalopod",
+              "valueName": "Cephalopods",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8841,13 +9554,13 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Jellyfish and Salp",
+              "valueName": "Jellyfish & Salp",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Ray & Skate",
+              "valueName": "Rays & Skates",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8908,7 +9621,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Cephalopod Catch",
+              "valueName": "Cephalopods Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -8932,7 +9645,7 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "European Sardine and Anchovy Catch",
+              "valueName": "European Sardine & Anchovy Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -9023,19 +9736,13 @@
           "unit": "t/km2",
           "valueDefinitions": [
             {
-              "valueName": "Ray & Skate Bycatch",
+              "valueName": "Rays & Skates Bycatch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
               "valueName": "Sessile Benthos Bycatch",
-              "valueColor": "#73FFBCFF",
-              "unit": "t/km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Whales Bycatch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -9552,36 +10259,7 @@
             "lineColor": "#FF7B2CFF",
             "lineWidth": 2.0,
             "lineIcon": null,
-            "linePatternType": "ShortDash",
-            "displayPoints": 0,
-            "pointColor": "#FFC86FFF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Orange",
-            "countryCode": "Cy"
-          },
-          "1": {
-            "displayName": "Red",
-            "approval": "NotDependent",
-            "value": 4,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#DC2D2AFF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
-            "innerGlowRadius": 2,
-            "innerGlowIterations": 8,
-            "innerGlowMultiplier": 3.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#DC2D2AFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "ShortDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FF6E77FF",
             "pointSize": 0.4,
@@ -9610,7 +10288,7 @@
             "lineColor": "#007A03FF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "ShortDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#00A854FF",
             "pointSize": 0.4,
@@ -9639,7 +10317,7 @@
             "lineColor": "#ACACACFF",
             "lineWidth": 2.0,
             "lineIcon": null,
-            "linePatternType": "ShortDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#000000FF",
             "pointSize": 0.4,
@@ -9663,11 +10341,11 @@
             "innerGlowIterations": 8,
             "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#932385FF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "ShortDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#AB5FFFFF",
             "pointSize": 0.4,
@@ -9696,7 +10374,7 @@
             "lineColor": "#E252BBFF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "ShortDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#E252BBFF",
             "pointSize": 0.4,
@@ -9725,7 +10403,7 @@
             "lineColor": "#FECC2FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "ShortDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FFF071FF",
             "pointSize": 0.4,
@@ -9753,7 +10431,7 @@
             "lineColor": "#4778F8FF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "ShortDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#FFFFFFFF",
             "pointSize": 0.4,
@@ -9782,7 +10460,7 @@
             "lineColor": "#0B2B81FF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "ShortDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#95FF22FF",
             "pointSize": 0.4,
@@ -10475,7 +11153,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "1": {
@@ -10503,7 +11181,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "2": {
@@ -10531,7 +11209,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "3": {
@@ -10559,7 +11237,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "4": {
@@ -10587,7 +11265,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "5": {
@@ -10615,7 +11293,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "6": {
@@ -10643,7 +11321,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "7": {
@@ -10671,7 +11349,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           }
         },
@@ -11956,7 +12634,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Electricity Cables",
         "layer_category": "activities",
-        "layer_subcategory": "energy",
+        "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 0,
         "layer_width": 1024,
         "layer_height": 1024,
@@ -13766,7 +14444,7 @@
             "availability": -12,
             "media": ""
           },
-          "3": {
+          "2": {
             "displayName": "Sufficient Quality",
             "approval": "NotDependent",
             "value": 0,
@@ -13794,7 +14472,7 @@
             "availability": -12,
             "media": ""
           },
-          "4": {
+          "3": {
             "displayName": "Poor Quality",
             "approval": "NotDependent",
             "value": 0,
@@ -13822,7 +14500,7 @@
             "availability": -12,
             "media": ""
           },
-          "5": {
+          "4": {
             "displayName": "Other",
             "approval": "NotDependent",
             "value": 0,
@@ -13853,7 +14531,7 @@
         },
         "layer_info_properties": [
           {
-            "property_name": "Name",
+            "property_name": "bwname",
             "enabled": 0,
             "editable": 0,
             "display_name": "",
@@ -14000,7 +14678,7 @@
         },
         "layer_info_properties": [
           {
-            "property_name": "Name",
+            "property_name": "uwwname",
             "enabled": 0,
             "editable": 0,
             "display_name": "",
@@ -24266,7 +24944,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Dolphins (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "fish",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -24454,7 +25132,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Whales (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "fish",
+        "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -24637,10 +25315,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Seabird",
+        "layer_name": "mel_Seabirds",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Seabird (Simulated)",
+        "layer_short": "Seabirds (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
@@ -25577,10 +26255,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_European_Sardine_and_Anchovy",
+        "layer_name": "mel_European_Sardine_&_Anchovy",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "European sardine and anchovy (Simulated)",
+        "layer_short": "European Sardine & Anchovy (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -26708,7 +27386,7 @@
         "layer_name": "mel_Medium_Demersal_Fish",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Medium demersal fish (Simulated)",
+        "layer_short": "Medium Demersal Fish (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -27460,7 +28138,7 @@
         "layer_name": "mel_Demersal_Sharks",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Demersal sharks (Simulated)",
+        "layer_short": "Demersal Sharks (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -27645,10 +28323,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Ray_&_Skate",
+        "layer_name": "mel_Rays_&_Skates",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Ray and skate (Simulated)",
+        "layer_short": "Rays & Skates (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -27665,7 +28343,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Modelled biomass distribution of ray and skate",
+        "layer_tooltip": "Modelled biomass distribution of rays and skates",
         "layer_information": "",
         "layer_media": "wiki://Rays_and_Skates",
         "layer_text_info": null,
@@ -28021,12 +28699,12 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Invasive_decapods",
+        "layer_name": "mel_Invasive_Decapods",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Invasive decapods (Simulated)",
+        "layer_short": "Invasive Decapods (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "other",
+        "layer_subcategory": "macrobenthos",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -28209,10 +28887,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Cephalopod",
+        "layer_name": "mel_Cephalopods",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cephalopod (Simulated)",
+        "layer_short": "Cephalopods (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
@@ -28400,7 +29078,7 @@
         "layer_name": "mel_Bivalve",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Bivalve (Simulated)",
+        "layer_short": "Bivalves (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "macrobenthos",
         "layer_download_from_geoserver": 0,
@@ -29337,10 +30015,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Sessile_benthos",
+        "layer_name": "mel_Sessile_Benthos",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Sessile benthos (Simulated)",
+        "layer_short": "Sessile Benthos (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
@@ -29525,10 +30203,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Jellyfish_and_salp",
+        "layer_name": "mel_Jellyfish_&_Salp",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Jellyfish and salp (Simulated)",
+        "layer_short": "Jellyfish & Salp (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
@@ -31781,7 +32459,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_European_Sardine_and_Anchovy_Catch",
+        "layer_name": "mel_European_Sardine_&_Anchovy_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "European Sardine & Anchovy Catch (Simulated)",
@@ -32161,8 +32839,8 @@
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Benthopelagic Fish Catch (Simulated)",
-        "layer_category": "ecology",
-        "layer_subcategory": "fish",
+        "layer_category": "activities",
+        "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -33661,10 +34339,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Cephalopod_Catch",
+        "layer_name": "mel_Cephalopods_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cephalopod Catch (Simulated)",
+        "layer_short": "Cephalopods Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -34601,10 +35279,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Ray_&_Skate_Bycatch",
+        "layer_name": "mel_Rays_&_Skates_Bycatch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Ray & Skate Bycatch (Simulated)",
+        "layer_short": "Rays & Skates Bycatch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -34621,7 +35299,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Ray & Skate Bycatch",
+        "layer_tooltip": "Rays & Skates Bycatch",
         "layer_information": "",
         "layer_media": "wiki://Bycatch",
         "layer_text_info": null,
@@ -34810,194 +35488,6 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Sessile Benthos Bycatch",
-        "layer_information": "",
-        "layer_media": "wiki://Bycatch",
-        "layer_text_info": null,
-        "layer_states": [
-          {
-            "state": "ASSEMBLY",
-            "time": 0
-          },
-          {
-            "state": "ACTIVE",
-            "time": 10
-          },
-          {
-            "state": "DISMANTLE",
-            "time": 2
-          }
-        ],
-        "layer_editing_type": "",
-        "layer_special_entity_type": "Default",
-        "layer_depth": -2,
-        "layer_property_as_type": null,
-        "layer_type": {
-          "0": {
-            "displayName": "Very Low Density",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#4320FFFF",
-            "polygonPatternName": "1",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#4320FFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#4320FFFF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "1": {
-            "displayName": "Low Density",
-            "approval": "EEZ",
-            "value": 200,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#15BBDBFF",
-            "polygonPatternName": "1",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#15BBDBFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#15BBDBFF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "2": {
-            "displayName": "Medium Density",
-            "approval": "EEZ",
-            "value": 400,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00FF21FF",
-            "polygonPatternName": "1",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#00FF21FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00FF21FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "3": {
-            "displayName": "High Density",
-            "approval": "EEZ",
-            "value": 600,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#F9BE21FF",
-            "polygonPatternName": "1",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#F9BE21FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#F9BE21FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "4": {
-            "displayName": "Very High Density",
-            "approval": "EEZ",
-            "value": 800,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#DF2727FF",
-            "polygonPatternName": "1",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#DF2727FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#DF2727FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          }
-        },
-        "layer_info_properties": null,
-        "layer_tags": []
-      },
-      {
-        "layer_name": "mel_Whales_Bycatch",
-        "layer_geotype": "raster",
-        "layer_entity_value_max": null,
-        "layer_short": "Whales Bycatch (Simulated)",
-        "layer_category": "activities",
-        "layer_subcategory": "fishing",
-        "layer_download_from_geoserver": 0,
-        "layer_width": 131,
-        "layer_height": 113,
-        "layer_raster_material": "RasterMELCustomizable",
-        "layer_raster_filter_mode": 1,
-        "layer_raster_color_interpolation": 0,
-        "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 1,
-        "layer_selectable": 1,
-        "layer_editable": 0,
-        "layer_toggleable": 1,
-        "layer_active_on_start": 0,
-        "layer_green": 0,
-        "layer_tooltip": "Whales bycatch",
         "layer_information": "",
         "layer_media": "wiki://Bycatch",
         "layer_text_info": null,
