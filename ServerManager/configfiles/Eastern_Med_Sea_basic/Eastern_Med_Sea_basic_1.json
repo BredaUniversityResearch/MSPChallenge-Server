@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "01/28/2024",
-    "data_model_hash": "748F6BD9368E12517CE26D41358E5BBAA78D0383926CFB82CB4267A0041E2104",
+    "date_modified": "2/5/2025",
+    "data_model_hash": "6CC9853983B3694EEE76A3FBAEAF97B4BCFBF90212C3111A90C79DE1140ED1E2",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -6192,9 +6192,6 @@
             "Industrial",
             "Recreational",
             "Subsistence"
-						 
-					
-					   
           ],
           "fleets": [
             {
@@ -6218,7 +6215,7 @@
                   "effort_weight": 0.141
                 }
               ]
-			},
+            },
             {
               "//comment": "2 Gr- Recreational",
               "gear_type": "2",
@@ -6245,13 +6242,13 @@
               "//comment": "4 Tu- Artisanal",
               "gear_type": "0",
               "country_id": "11",
-                          "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 11,
                   "effort_weight": 0.065
                 }
               ]
-			},
+            },
             {
               "//comment": "5 Tu- Industrial",
               "gear_type": "1",
@@ -6262,12 +6259,12 @@
                   "effort_weight": 0.197
                 }
               ]
-			},
+            },
             {
               "//comment": "6 Tu- Recreational",
               "gear_type": "2",
               "country_id": "11",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 11,
                   "effort_weight": 0.013
@@ -6278,7 +6275,7 @@
               "//comment": "7 Tu- Subsistence",
               "gear_type": "3",
               "country_id": "11",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 11,
                   "effort_weight": 0.002
@@ -6289,7 +6286,7 @@
               "//comment": "12 Cy- Artisanal",
               "gear_type": "0",
               "country_id": "3",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
                   "effort_weight": 0.003
@@ -6300,7 +6297,7 @@
               "//comment": "13 Cy- Industrial",
               "gear_type": "1",
               "country_id": "3",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
                   "effort_weight": 0.004
@@ -6311,7 +6308,7 @@
               "//comment": "14 Cy- Recreational",
               "gear_type": "2",
               "country_id": "3",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
                   "effort_weight": 0.001
@@ -6322,7 +6319,7 @@
               "//comment": "15 Cy- Subsistence",
               "gear_type": "3",
               "country_id": "3",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 3,
                   "effort_weight": 0.001
@@ -6333,7 +6330,7 @@
               "//comment": "20 Sy- Artisanal",
               "gear_type": "0",
               "country_id": "4",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 4,
                   "effort_weight": 0.007
@@ -6344,7 +6341,7 @@
               "//comment": "21 Sy- Industrial",
               "gear_type": "1",
               "country_id": "4",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 4,
                   "effort_weight": 0.004
@@ -6355,7 +6352,7 @@
               "//comment": "22 Sy-Recreational",
               "gear_type": "2",
               "country_id": "4",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 4,
                   "effort_weight": 0.0003
@@ -6366,7 +6363,7 @@
               "//comment": "23 Sy-Subsistence",
               "gear_type": "3",
               "country_id": "4",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 4,
                   "effort_weight": 0.00017
@@ -6377,7 +6374,7 @@
               "//comment": "24 Le- Artisanal",
               "gear_type": "0",
               "country_id": "10",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 10,
                   "effort_weight": 0.015
@@ -6388,10 +6385,10 @@
               "//comment": "25 Le- Industrial",
               "gear_type": "1",
               "country_id": "10",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 10,
-                  "effort_weight": 0.000022
+                  "effort_weight": 2.2E-05
                 }
               ]
             },
@@ -6399,7 +6396,7 @@
               "//comment": "26 Le- Recreational",
               "gear_type": "2",
               "country_id": "10",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 10,
                   "effort_weight": 0.000105
@@ -6410,7 +6407,7 @@
               "//comment": "27 Le- Subsistence",
               "gear_type": "3",
               "country_id": "10",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 10,
                   "effort_weight": 0.005
@@ -6421,7 +6418,7 @@
               "//comment": "28 IL-Artisanal",
               "gear_type": "0",
               "country_id": "7",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 7,
                   "effort_weight": 0.003
@@ -6432,7 +6429,7 @@
               "//comment": "29 IL-Industrial",
               "gear_type": "1",
               "country_id": "7",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 7,
                   "effort_weight": 0.003
@@ -6443,7 +6440,7 @@
               "//comment": "30 IL-Recreational",
               "gear_type": "2",
               "country_id": "7",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 7,
                   "effort_weight": 0.002
@@ -6454,7 +6451,7 @@
               "//comment": "31 IL-Subsistence",
               "gear_type": "3",
               "country_id": "7",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 7,
                   "effort_weight": 0.00012
@@ -6465,7 +6462,7 @@
               "//comment": "32 Eg-Artisanal",
               "gear_type": "0",
               "country_id": "8",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 8,
                   "effort_weight": 0.026
@@ -6476,7 +6473,7 @@
               "//comment": "33 Eg-Industrial",
               "gear_type": "1",
               "country_id": "8",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 8,
                   "effort_weight": 0.097
@@ -6487,7 +6484,7 @@
               "//comment": "34 Eg-Recreational",
               "gear_type": "2",
               "country_id": "8",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 8,
                   "effort_weight": 0.0003
@@ -6498,7 +6495,7 @@
               "//comment": "35 Eg-Subsistence",
               "gear_type": "3",
               "country_id": "8",
-			  "initial_fishing_distribution": [
+              "initial_fishing_distribution": [
                 {
                   "country_id": 8,
                   "effort_weight": 0.004
@@ -7325,6 +7322,16 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": false
             }
           ],
           "policy_filters": {
@@ -7545,6 +7552,26 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -7765,6 +7792,11 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": null,
+              "influence": 0.0,
+              "construction": false
             }
           ],
           "policy_filters": {
@@ -7820,6 +7852,26 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -7985,6 +8037,26 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -8205,6 +8277,26 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "EMS_all_cables_emodnet",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "ems_Electricity_cables_edit",
+              "influence": 1.0,
+              "construction": true
             }
           ],
           "policy_filters": {
@@ -9044,8 +9136,8 @@
               "unit": "t/km2",
               "valueDependentCountry": -1
             }
-		  ]
-		},
+          ]
+        },
         {
           "categoryName": "Species Catch",
           "categoryColor": "#FDAE61FF",
@@ -10056,7 +10148,7 @@
           }
         },
         "layer_info_properties": [
-		{
+          {
             "property_name": "POLICY_BUFFER_ZONE",
             "policy_type": "buffer_zone",
             "enabled": 1,
@@ -10086,7 +10178,7 @@
             "unit": null,
             "default_value": null
           }
-		],
+        ],
         "layer_tags": []
       },
       {
