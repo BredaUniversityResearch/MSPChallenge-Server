@@ -1,7 +1,7 @@
 {
   "metadata": {
     "date_modified": "2/5/2025",
-    "data_model_hash": "6CC9853983B3694EEE76A3FBAEAF97B4BCFBF90212C3111A90C79DE1140ED1E2",
+    "data_model_hash": "1472409705A369DB8537D5C7B0F01DA3EFCD51933C1AB77656759F7970FE4032",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -7791,11 +7791,6 @@
             {
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": null,
-              "influence": 0.0,
               "construction": false
             }
           ],
