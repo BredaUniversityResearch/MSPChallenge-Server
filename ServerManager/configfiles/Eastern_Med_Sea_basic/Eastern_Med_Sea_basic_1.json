@@ -1,7 +1,7 @@
 {
   "metadata": {
     "date_modified": "2/5/2025",
-    "data_model_hash": "1472409705A369DB8537D5C7B0F01DA3EFCD51933C1AB77656759F7970FE4032",
+    "data_model_hash": "0BCFE5E0A694C82E7DC47CB0AA18902186F978C496F8E324CA7C458E4F833664",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -30914,7 +30914,7 @@
         "layer_green": 0,
         "layer_tooltip": "Industrial Catch",
         "layer_information": "",
-        "layer_media": "wiki://",
+        "layer_media": "wiki://Industrial_and_Pelagic_Trawl_Catch",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -31102,7 +31102,7 @@
         "layer_green": 0,
         "layer_tooltip": "Artisanal Catch",
         "layer_information": "",
-        "layer_media": "wiki://",
+        "layer_media": "wiki://Artisanal_Catch",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -31290,7 +31290,7 @@
         "layer_green": 0,
         "layer_tooltip": "Subsistence Catch",
         "layer_information": "",
-        "layer_media": "wiki://",
+        "layer_media": "",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -31478,7 +31478,7 @@
         "layer_green": 0,
         "layer_tooltip": "Recreation Catch",
         "layer_information": "",
-        "layer_media": "wiki://",
+        "layer_media": "wiki://Recreational_Fleet_Catch",
         "layer_text_info": null,
         "layer_states": [
           {
