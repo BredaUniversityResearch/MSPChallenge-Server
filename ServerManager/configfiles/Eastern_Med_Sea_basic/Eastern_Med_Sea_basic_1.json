@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "2/6/2025",
-    "data_model_hash": "EE86E817EE26F333950A9F4B1BDB8DFC93F8916B088C0EF9F0DDC0085B541389",
+    "date_modified": "2/5/2025",
+    "data_model_hash": "0BCFE5E0A694C82E7DC47CB0AA18902186F978C496F8E324CA7C458E4F833664",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -6832,46 +6832,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -6925,46 +6885,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
               "influence": 1.0,
               "construction": false
             }
@@ -7022,46 +6942,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -7115,46 +6995,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
               "influence": 1.0,
               "construction": false
             }
@@ -7242,46 +7082,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -7335,46 +7135,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -7432,46 +7192,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -7525,46 +7245,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -7652,46 +7332,6 @@
               "name": "ems_Electricity_cables_edit",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -7745,46 +7385,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -7842,46 +7442,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -7935,46 +7495,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -8052,46 +7572,6 @@
               "name": "EMS_all_cables_emodnet",
               "influence": 1.0,
               "construction": true
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -8145,46 +7625,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -8242,46 +7682,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -8337,46 +7737,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -8430,46 +7790,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -8547,46 +7867,6 @@
               "name": "EMS_all_cables_emodnet",
               "influence": 1.0,
               "construction": true
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -8642,46 +7922,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -8735,46 +7975,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -8852,46 +8052,6 @@
               "name": "EMS_all_cables_emodnet",
               "influence": 1.0,
               "construction": true
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -8945,46 +8105,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -9042,46 +8162,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -9135,46 +8215,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|5",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -9252,46 +8292,6 @@
               "name": "ems_Electricity_cables_edit",
               "influence": 1.0,
               "construction": true
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -9345,46 +8345,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -9442,46 +8402,6 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 1.0,
               "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
-              "influence": 1.0,
-              "construction": false
             }
           ],
           "policy_filters": {
@@ -9535,46 +8455,6 @@
             },
             {
               "name": "Ems_Shipping_Intensity_raster",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|8",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|3",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|7",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|4",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|6",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|1",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "EMS_EEZ_type|2",
               "influence": 1.0,
               "construction": false
             }
@@ -10982,7 +9862,7 @@
             "countryCode": "Gr"
           },
           "3": {
-            "displayName": "Grey",
+            "displayName": "Disputed area",
             "approval": "NotDependent",
             "value": 6,
             "map_type": null,
@@ -22445,6 +21325,758 @@
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Protection Cy- Subsistence",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 0
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -3,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very Low Density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "1": {
+            "displayName": "Low Density",
+            "approval": "EEZ",
+            "value": 200,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "2": {
+            "displayName": "Medium Density",
+            "approval": "EEZ",
+            "value": 400,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "3": {
+            "displayName": "High Density",
+            "approval": "EEZ",
+            "value": 600,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "4": {
+            "displayName": "Very High Density",
+            "approval": "EEZ",
+            "value": 800,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Protection_Cy_South-Artisanal",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Protection Cy South-Artisanal (Simulated)",
+        "layer_category": "ecology",
+        "layer_subcategory": "protected_areas",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 131,
+        "layer_height": 113,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Protection Cy South-Artisanal",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 0
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -3,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very Low Density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "1": {
+            "displayName": "Low Density",
+            "approval": "EEZ",
+            "value": 200,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "2": {
+            "displayName": "Medium Density",
+            "approval": "EEZ",
+            "value": 400,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "3": {
+            "displayName": "High Density",
+            "approval": "EEZ",
+            "value": 600,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "4": {
+            "displayName": "Very High Density",
+            "approval": "EEZ",
+            "value": 800,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Protection_Cy_South_-Industrial",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Protection Cy South -Industrial (Simulated)",
+        "layer_category": "ecology",
+        "layer_subcategory": "protected_areas",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 131,
+        "layer_height": 113,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Protection Cy South -Industrial",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 0
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -3,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very Low Density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "1": {
+            "displayName": "Low Density",
+            "approval": "EEZ",
+            "value": 200,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "2": {
+            "displayName": "Medium Density",
+            "approval": "EEZ",
+            "value": 400,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "3": {
+            "displayName": "High Density",
+            "approval": "EEZ",
+            "value": 600,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "4": {
+            "displayName": "Very High Density",
+            "approval": "EEZ",
+            "value": 800,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Protection_Cy_South_-Recreational",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Protection Cy South -Recreational (Simulated)",
+        "layer_category": "ecology",
+        "layer_subcategory": "protected_areas",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 131,
+        "layer_height": 113,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Protection Cy South -Recreational",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 0
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -3,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Very Low Density",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4320FFFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#4320FFFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#4320FFFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "1": {
+            "displayName": "Low Density",
+            "approval": "EEZ",
+            "value": 200,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#15BBDBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#15BBDBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#15BBDBFF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "2": {
+            "displayName": "Medium Density",
+            "approval": "EEZ",
+            "value": 400,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#00FF21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#00FF21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00FF21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "3": {
+            "displayName": "High Density",
+            "approval": "EEZ",
+            "value": 600,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#F9BE21FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#F9BE21FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#F9BE21FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          },
+          "4": {
+            "displayName": "Very High Density",
+            "approval": "EEZ",
+            "value": 800,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#DF2727FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.2,
+            "displayLines": 1,
+            "lineColor": "#DF2727FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#DF2727FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": null
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": []
+      },
+      {
+        "layer_name": "mel_Protection_Cy_South_-Subsistence",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": null,
+        "layer_short": "Protection Cy South -Subsistence (Simulated)",
+        "layer_category": "ecology",
+        "layer_subcategory": "protected_areas",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 131,
+        "layer_height": 113,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "Protection Cy South -Subsistence",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
