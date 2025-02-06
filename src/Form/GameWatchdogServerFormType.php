@@ -21,12 +21,10 @@ class GameWatchdogServerFormType extends AbstractType
           "kpis": [
             {
               "categoryName": "...kpi category here...",
-              "categoryColor": "{$this->generateRandomHexColor()}",
-              "unit": "hour",
+              "unit": "...kpi unit here...",
               "valueDefinitions": [
                 {
-                  "valueName": "...kpi name here...",
-                  "valueColor": "{$this->generateRandomHexColor()}"
+                  "valueName": "...kpi name here..."
                 }
               ]
             }
@@ -35,11 +33,11 @@ class GameWatchdogServerFormType extends AbstractType
         JSON;
         $builder
             ->add('name', TextType::class)
-            ->add('server_id', UuidType::class)
+            ->add('serverId', UuidType::class)
             ->add('scheme', TextType::class)
             ->add('address', TextType::class)
             ->add('port', TextType::class)
-            ->add('simulation_settings', TextareaType::class, [
+            ->add('simulationSettings', TextareaType::class, [
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 10,
@@ -48,20 +46,6 @@ class GameWatchdogServerFormType extends AbstractType
                 ],
                 'required' => true
             ]);
-    }
-
-    private function generateRandomHexColor(): string
-    {
-        $red = dechex(rand(0, 255));
-        $green = dechex(rand(0, 255));
-        $blue = dechex(rand(0, 255));
-
-        // Ensure each component is two characters long
-        $red = str_pad($red, 2, '0', STR_PAD_LEFT);
-        $green = str_pad($green, 2, '0', STR_PAD_LEFT);
-        $blue = str_pad($blue, 2, '0', STR_PAD_LEFT);
-
-        return "#{$red}{$green}{$blue}";
     }
 
     public function configureOptions(OptionsResolver $resolver): void

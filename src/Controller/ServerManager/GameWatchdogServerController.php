@@ -63,9 +63,10 @@ class GameWatchdogServerController extends BaseController
             }
             $entityManager->flush();
         }
+        $f = $form->createView();
         return $this->render(
             'manager/GameWatchdogServer/gamewatchdogserver_form.html.twig',
-            ['gameWatchdogServerForm' => $form->createView()],
+            ['gameWatchdogServerForm' => $f],
             new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
         );
     }

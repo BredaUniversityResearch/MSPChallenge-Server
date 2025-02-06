@@ -26,9 +26,6 @@ class SimulationSettingsValidator extends ConstraintValidator
                             "categoryName": {
                                 "type": "string"
                             },
-                            "categoryColor": {
-                                "type": "string"
-                            },
                             "unit": {
                                 "type": "string"
                             },
@@ -40,14 +37,10 @@ class SimulationSettingsValidator extends ConstraintValidator
                                         "properties": {
                                             "valueName": {
                                                 "type": "string"
-                                            },
-                                            "valueColor": {
-                                                "type": "string"
                                             }
                                         },
                                         "required": [
-                                            "valueName",
-                                            "valueColor"
+                                            "valueName"
                                         ]
                                     }
                                 ]
@@ -55,7 +48,6 @@ class SimulationSettingsValidator extends ConstraintValidator
                         },
                         "required": [
                             "categoryName",
-                            "categoryColor",
                             "unit",
                             "valueDefinitions"
                         ]

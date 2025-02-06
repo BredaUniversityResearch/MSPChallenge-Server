@@ -10,10 +10,10 @@
                 <div class="small text-muted">{{ form_help(gameWatchdogServerForm.name) }}</div>
             </div>
             <div class="form-group">
-                {{ form_label(gameWatchdogServerForm.server_id, 'Watchdog server id', {'label_attr': {'class': 'form-label'}}) }}
-                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.server_id) }}</div>
-                {{ form_widget(gameWatchdogServerForm.server_id, {'attr': {'class': 'form-control'}}) }}
-                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.server_id) }}</div>
+                {{ form_label(gameWatchdogServerForm.serverId, 'Watchdog server id', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.serverId) }}</div>
+                {{ form_widget(gameWatchdogServerForm.serverId, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.serverId) }}</div>
             </div>
             <div class="form-group">
                 {{ form_label(gameWatchdogServerForm.scheme, 'Scheme', {'label_attr': {'class': 'form-label'}}) }}
@@ -34,14 +34,14 @@
                 <div class="small text-muted">{{ form_help(gameWatchdogServerForm.port) }}</div>
             </div>
             <div class="form-group">
-                {{ form_label(gameWatchdogServerForm.simulation_settings, '', {'label_attr': {'class': 'form-label'}}) }}
-                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.simulation_settings) }}</div>
-                {{ form_widget(gameWatchdogServerForm.simulation_settings, {
+                {{ form_label(gameWatchdogServerForm.simulationSettings, '', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.simulationSettings) }}</div>
+                {{ form_widget(gameWatchdogServerForm.simulationSettings, {
                     'attr': {
                         'class': 'form-control'
                     }
                 }) }}
-                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.simulation_settings) }}</div>
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.simulationSettings) }}</div>
             </div>
         </div>
         <div class="modal-footer">
