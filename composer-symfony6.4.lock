@@ -206,17 +206,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/BredaUniversityResearch/Ratchet.git",
-                "reference": "062d386402b4db4e42d3b4d69f3478a84ff4784e"
+                "reference": "1fdbd5d0b8fe25f4b43a4d03d6a1cf4cf379264c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BredaUniversityResearch/Ratchet/zipball/062d386402b4db4e42d3b4d69f3478a84ff4784e",
-                "reference": "062d386402b4db4e42d3b4d69f3478a84ff4784e",
+                "url": "https://api.github.com/repos/BredaUniversityResearch/Ratchet/zipball/1fdbd5d0b8fe25f4b43a4d03d6a1cf4cf379264c",
+                "reference": "1fdbd5d0b8fe25f4b43a4d03d6a1cf4cf379264c",
                 "shasum": ""
             },
             "require": {
                 "guzzlehttp/psr7": "^1.7|^2.0",
-                "php": ">=5.4.2",
+                "php": ">=8.0",
                 "ratchet/rfc6455": "^0.3.1",
                 "react/event-loop": ">=0.4",
                 "react/socket": "^1.0 || ^0.8 || ^0.7 || ^0.6 || ^0.5",
@@ -261,7 +261,7 @@
                 "chat": "https://gitter.im/reactphp/reactphp",
                 "source": "https://github.com/BredaUniversityResearch/Ratchet/tree/master"
             },
-            "time": "2025-02-06T19:42:47+00:00"
+            "time": "2025-02-07T10:12:50+00:00"
         },
         {
             "name": "clue/http-proxy-react",
