@@ -1008,46 +1008,28 @@
           "name": "Fishing",
           "entries": [
             {
-              "name": "Bottom Trawl",
-              "id": 20,
-              "multiline": false,
-              "link": "Bottom_Trawl_Catch"
-            },
-            {
-              "name": "Beach Seiners",
-              "id": 49,
-              "multiline": false,
-              "link": "Protection_Seine"
-            },
-            {
-              "name": "Small-Scale Coastal",
-              "id": 50,
-              "multiline": true,
-              "link": "Protection_Small-scale_Coastal"
-            },
-            {
               "name": "Recreational ",
               "id": 51,
               "multiline": false,
               "link": "null"
             },
             {
-              "name": "Trawl",
-              "id": 52,
-              "multiline": false,
-              "link": "null"
-            },
-            {
-              "name": "Purse Seiners",
-              "id": 53,
-              "multiline": false,
-              "link": "Protection_Seine"
-            },
-            {
               "name": "Artisanal",
               "id": 54,
               "multiline": false,
               "link": "null"
+            },
+            {
+              "name": "Industrial",
+              "id": 87,
+              "multiline": false,
+              "link": ""
+            },
+            {
+              "name": "Subsistence",
+              "id": 86,
+              "multiline": false,
+              "link": ""
             }
           ]
         },
@@ -1137,7 +1119,7 @@
               "link": ""
             },
             {
-              "name": "European sardine & anchovy",
+              "name": "European sardine and anchovy",
               "id": 62,
               "multiline": true,
               "link": ""
@@ -1173,12 +1155,6 @@
               "link": ""
             },
             {
-              "name": "Small demersal fish",
-              "id": 85,
-              "multiline": true,
-              "link": ""
-            },
-            {
               "name": "Mullet",
               "id": 68,
               "multiline": false,
@@ -1197,7 +1173,7 @@
               "link": ""
             },
             {
-              "name": "Rays and skates",
+              "name": "Ray and skate",
               "id": 71,
               "multiline": false,
               "link": ""
@@ -1209,13 +1185,66 @@
               "link": ""
             },
             {
+              "name": "Small demersal fish",
+              "id": 85,
+              "multiline": true,
+              "link": ""
+            }
+          ]
+        },
+        {
+          "name": "Birds, Mammals, Benthos",
+          "entries": [
+            {
+              "name": "Seabird",
+              "id": 47,
+              "multiline": false,
+              "link": "Birds"
+            },
+            {
+              "name": "Dolphins",
+              "id": 55,
+              "multiline": false,
+              "link": ""
+            },
+            {
+              "name": "Whales",
+              "id": 56,
+              "multiline": false,
+              "link": ""
+            },
+            {
+              "name": "Turtles",
+              "id": 57,
+              "multiline": false,
+              "link": ""
+            },
+            {
+              "name": "Zooplankton",
+              "id": 82,
+              "multiline": false,
+              "link": ""
+            },
+            {
+              "name": "Seagrass & Seaweed",
+              "id": 83,
+              "multiline": true,
+              "link": ""
+            },
+            {
+              "name": "Phytoplankton",
+              "id": 84,
+              "multiline": false,
+              "link": ""
+            },
+            {
               "name": "Invasive decapods",
               "id": 73,
               "multiline": false,
               "link": ""
             },
             {
-              "name": "Cephalopods",
+              "name": "Cephalopod",
               "id": 74,
               "multiline": false,
               "link": ""
@@ -1263,104 +1292,9 @@
               "link": ""
             }
           ]
-        },
-        {
-          "name": "Other Species",
-          "entries": [
-            {
-              "name": "Seabirds",
-              "id": 47,
-              "multiline": false,
-              "link": "Birds"
-            },
-            {
-              "name": "Dolphins",
-              "id": 55,
-              "multiline": false,
-              "link": ""
-            },
-            {
-              "name": "Whales",
-              "id": 56,
-              "multiline": false,
-              "link": ""
-            },
-            {
-              "name": "Turtles",
-              "id": 57,
-              "multiline": false,
-              "link": ""
-            },
-            {
-              "name": "Zooplankton",
-              "id": 82,
-              "multiline": false,
-              "link": ""
-            },
-            {
-              "name": "Seagrass & Seaweed",
-              "id": 83,
-              "multiline": true,
-              "link": ""
-            },
-            {
-              "name": "Phytoplankton",
-              "id": 84,
-              "multiline": false,
-              "link": ""
-            }
-          ]
         }
       ],
       "links": [
-        {
-          "fromId": 1,
-          "toId": 13,
-          "severity": -3,
-          "description": "Cargo vessels not allowed in wind farms "
-        },
-        {
-          "fromId": 1,
-          "toId": 14,
-          "severity": -3,
-          "description": "Ferries not allowed in wind farms "
-        },
-        {
-          "fromId": 1,
-          "toId": 16,
-          "severity": -3,
-          "description": "Passenger vessels not allowed in wind farms "
-        },
-        {
-          "fromId": 1,
-          "toId": 17,
-          "severity": -3,
-          "description": "Tanker vessels not allowed in wind farms "
-        },
-        {
-          "fromId": 1,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. "
-        },
-        {
-          "fromId": 1,
-          "toId": 15,
-          "severity": 1,
-          "description": "The existance of wind farms increases maintenance shipping "
-        },
-        {
-          "fromId": 1,
-          "toId": 25,
-          "severity": 2,
-          "description": "Wind turbine pylons in the water as well as their foundations on the seabed. "
-        },
-        {
-          "fromId": 1,
-          "toId": 26,
-          "severity": 2,
-          "description": "Wind energy turbine construction on the seabed. Non-existent once completed. "
-        },
         {
           "fromId": 1,
           "toId": 28,
@@ -1374,52 +1308,52 @@
           "description": "Wind energy turbine construction in water and on the seabed. Diminished once completed. "
         },
         {
-          "fromId": 2,
-          "toId": 13,
-          "severity": -3,
-          "description": "Cargo vessels not allowed in wave farms "
-        },
-        {
-          "fromId": 2,
-          "toId": 14,
-          "severity": -3,
-          "description": "Ferries not allowed in wave farms "
-        },
-        {
-          "fromId": 2,
-          "toId": 16,
-          "severity": -3,
-          "description": "Passenger vessels not allowed in wave farms "
-        },
-        {
-          "fromId": 2,
-          "toId": 17,
-          "severity": -3,
-          "description": "Tanker Vessels not allowed in wave farms "
-        },
-        {
-          "fromId": 2,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over the seabed at a wave farm is dangerous. "
-        },
-        {
-          "fromId": 2,
-          "toId": 15,
-          "severity": 1,
-          "description": "The existance of wave farms increases maintenance shipping "
-        },
-        {
-          "fromId": 2,
-          "toId": 25,
-          "severity": 1,
-          "description": "Wave energy turbine on the seabed. "
-        },
-        {
-          "fromId": 2,
+          "fromId": 1,
           "toId": 26,
           "severity": 2,
-          "description": "Wave energy turbine being constructed on the seabed. Non-existent once completed. "
+          "description": "Wind energy turbine construction on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 25,
+          "severity": 2,
+          "description": "Wind turbine pylons in the water as well as their foundations on the seabed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 17,
+          "severity": -3,
+          "description": "Tanker vessels not allowed in wind farms "
+        },
+        {
+          "fromId": 1,
+          "toId": 16,
+          "severity": -3,
+          "description": "Passenger vessels not allowed in wind farms "
+        },
+        {
+          "fromId": 1,
+          "toId": 15,
+          "severity": 1,
+          "description": "The existance of wind farms increases maintenance shipping "
+        },
+        {
+          "fromId": 1,
+          "toId": 14,
+          "severity": -3,
+          "description": "Ferries not allowed in wind farms "
+        },
+        {
+          "fromId": 1,
+          "toId": 13,
+          "severity": -3,
+          "description": "Cargo vessels not allowed in wind farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 28,
+          "severity": 2,
+          "description": "Wave energy turbine construction on the seabed. Non-existent once completed. "
         },
         {
           "fromId": 2,
@@ -1429,57 +1363,51 @@
         },
         {
           "fromId": 2,
-          "toId": 28,
-          "severity": 2,
-          "description": "Wave energy turbine construction on the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 3,
-          "toId": 13,
-          "severity": -3,
-          "description": "Cargo vessels not allowed in tidal farms "
-        },
-        {
-          "fromId": 3,
-          "toId": 14,
-          "severity": -3,
-          "description": "Ferries not allowed in tidal farms "
-        },
-        {
-          "fromId": 3,
-          "toId": 16,
-          "severity": -3,
-          "description": "Passenger vessels not allowed in tidal farms "
-        },
-        {
-          "fromId": 3,
-          "toId": 17,
-          "severity": -3,
-          "description": "Tanker Vessels not allowed in tidal farms "
-        },
-        {
-          "fromId": 3,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over the seabed at a tidal farm is dangerous. "
-        },
-        {
-          "fromId": 3,
-          "toId": 15,
-          "severity": 1,
-          "description": "The existance of tidal farms increases maintenance shipping "
-        },
-        {
-          "fromId": 3,
-          "toId": 25,
-          "severity": 1,
-          "description": "Tidal energy turbine on the seabed. "
-        },
-        {
-          "fromId": 3,
           "toId": 26,
           "severity": 2,
-          "description": "Tidal energy turbine being constructed on the seabed. Non-existent once completed. "
+          "description": "Wave energy turbine being constructed on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 2,
+          "toId": 25,
+          "severity": 1,
+          "description": "Wave energy turbine on the seabed. "
+        },
+        {
+          "fromId": 2,
+          "toId": 17,
+          "severity": -3,
+          "description": "Tanker Vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 16,
+          "severity": -3,
+          "description": "Passenger vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 15,
+          "severity": 1,
+          "description": "The existance of wave farms increases maintenance shipping "
+        },
+        {
+          "fromId": 2,
+          "toId": 14,
+          "severity": -3,
+          "description": "Ferries not allowed in wave farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 13,
+          "severity": -3,
+          "description": "Cargo vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 3,
+          "toId": 28,
+          "severity": 2,
+          "description": "Tidal energy turbine construction on the seabed. Non-existent once completed. "
         },
         {
           "fromId": 3,
@@ -1489,57 +1417,51 @@
         },
         {
           "fromId": 3,
-          "toId": 28,
+          "toId": 26,
           "severity": 2,
-          "description": "Tidal energy turbine construction on the seabed. Non-existent once completed. "
+          "description": "Tidal energy turbine being constructed on the seabed. Non-existent once completed. "
         },
         {
-          "fromId": 4,
-          "toId": 13,
-          "severity": -3,
-          "description": "Cargo Vessels Not Allowed To Cross Oil & Gas Platforms "
-        },
-        {
-          "fromId": 4,
-          "toId": 14,
-          "severity": -3,
-          "description": "Ferry Vessels Not Allowed To Cross Oil & Gas Platforms"
-        },
-        {
-          "fromId": 4,
-          "toId": 16,
-          "severity": -3,
-          "description": "Passenger  vessels not allowed to cross Oil & Gas Platforms"
-        },
-        {
-          "fromId": 4,
-          "toId": 17,
-          "severity": -3,
-          "description": "Tanker  vessels not allowed to cross Oil & Gas Platforms "
-        },
-        {
-          "fromId": 4,
-          "toId": 20,
-          "severity": -3,
-          "description": "Fishing nets in the water column and over the seabed at an operational oil or gas extraction platform are dangerous. "
-        },
-        {
-          "fromId": 4,
-          "toId": 15,
-          "severity": 1,
-          "description": "The existance of oil and gas instalations increases maintenance shipping "
-        },
-        {
-          "fromId": 4,
+          "fromId": 3,
           "toId": 25,
           "severity": 1,
-          "description": "Oil & gas rig pylons in the water as well as their foundations on the seabed. "
+          "description": "Tidal energy turbine on the seabed. "
+        },
+        {
+          "fromId": 3,
+          "toId": 17,
+          "severity": -3,
+          "description": "Tanker Vessels not allowed in tidal farms "
+        },
+        {
+          "fromId": 3,
+          "toId": 16,
+          "severity": -3,
+          "description": "Passenger vessels not allowed in tidal farms "
+        },
+        {
+          "fromId": 3,
+          "toId": 15,
+          "severity": 1,
+          "description": "The existance of tidal farms increases maintenance shipping "
+        },
+        {
+          "fromId": 3,
+          "toId": 14,
+          "severity": -3,
+          "description": "Ferries not allowed in tidal farms "
+        },
+        {
+          "fromId": 3,
+          "toId": 13,
+          "severity": -3,
+          "description": "Cargo vessels not allowed in tidal farms "
         },
         {
           "fromId": 4,
-          "toId": 26,
+          "toId": 28,
           "severity": 1,
-          "description": "Oil & gas rig drilling and extraction operations on the seabed. "
+          "description": "Drill pipes in the water and drill bits on the surface. Non-existent once completed. "
         },
         {
           "fromId": 4,
@@ -1549,21 +1471,51 @@
         },
         {
           "fromId": 4,
-          "toId": 28,
+          "toId": 26,
           "severity": 1,
-          "description": "Drill pipes in the water and drill bits on the surface. Non-existent once completed. "
+          "description": "Oil & gas rig drilling and extraction operations on the seabed. "
         },
         {
-          "fromId": 5,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over an electricity cable laid on or in the seabed is dangerous. "
-        },
-        {
-          "fromId": 5,
+          "fromId": 4,
           "toId": 25,
           "severity": 1,
-          "description": "Electricity cable laid on the seabed (so not dug into it). "
+          "description": "Oil & gas rig pylons in the water as well as their foundations on the seabed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 17,
+          "severity": -3,
+          "description": "Tanker  vessels not allowed to cross Oil & Gas Platforms "
+        },
+        {
+          "fromId": 4,
+          "toId": 16,
+          "severity": -3,
+          "description": "Passenger  vessels not allowed to cross Oil & Gas Platforms"
+        },
+        {
+          "fromId": 4,
+          "toId": 15,
+          "severity": 1,
+          "description": "The existance of oil and gas instalations increases maintenance shipping "
+        },
+        {
+          "fromId": 4,
+          "toId": 14,
+          "severity": -3,
+          "description": "Ferry Vessels Not Allowed To Cross Oil & Gas Platforms"
+        },
+        {
+          "fromId": 4,
+          "toId": 13,
+          "severity": -3,
+          "description": "Cargo Vessels Not Allowed To Cross Oil & Gas Platforms "
+        },
+        {
+          "fromId": 5,
+          "toId": 27,
+          "severity": 2,
+          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
         },
         {
           "fromId": 5,
@@ -1573,26 +1525,20 @@
         },
         {
           "fromId": 5,
-          "toId": 27,
-          "severity": 2,
-          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 6,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over a pipeline laid on or in the seabed is dangerous. "
-        },
-        {
-          "fromId": 6,
           "toId": 25,
           "severity": 1,
-          "description": "Pipelines laid on the seabed (so not dug into it). "
+          "description": "Electricity cable laid on the seabed (so not dug into it). "
         },
         {
           "fromId": 6,
           "toId": 28,
           "severity": 1,
+          "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
+        },
+        {
+          "fromId": 6,
+          "toId": 27,
+          "severity": 2,
           "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
         },
         {
@@ -1603,21 +1549,15 @@
         },
         {
           "fromId": 6,
-          "toId": 27,
-          "severity": 2,
-          "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
-        },
-        {
-          "fromId": 7,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over a telecom cable laid on or in the seabed is dangerous. "
-        },
-        {
-          "fromId": 7,
           "toId": 25,
           "severity": 1,
-          "description": "Cable laid on the seabed (so not dug into it). "
+          "description": "Pipelines laid on the seabed (so not dug into it). "
+        },
+        {
+          "fromId": 7,
+          "toId": 27,
+          "severity": 2,
+          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
         },
         {
           "fromId": 7,
@@ -1627,21 +1567,15 @@
         },
         {
           "fromId": 7,
-          "toId": 27,
-          "severity": 2,
-          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 9,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers never fish right next to or just outside of ports, they sail out a bit first. "
-        },
-        {
-          "fromId": 9,
           "toId": 25,
+          "severity": 1,
+          "description": "Cable laid on the seabed (so not dug into it). "
+        },
+        {
+          "fromId": 9,
+          "toId": 28,
           "severity": 3,
-          "description": "All the port infrastructure in the water and on the seabed. "
+          "description": "All the port infrastructure in the water. "
         },
         {
           "fromId": 9,
@@ -1651,21 +1585,15 @@
         },
         {
           "fromId": 9,
-          "toId": 28,
+          "toId": 25,
           "severity": 3,
-          "description": "All the port infrastructure in the water. "
+          "description": "All the port infrastructure in the water and on the seabed. "
         },
         {
           "fromId": 12,
-          "toId": 13,
+          "toId": 17,
           "severity": -3,
-          "description": "There is no cargo shipping in no shipping zones for cargo vessels "
-        },
-        {
-          "fromId": 12,
-          "toId": 14,
-          "severity": -3,
-          "description": "There is no ferry shipping in no shipping zones for ferries "
+          "description": "There is no tanker shipping in no shipping zones for tanker vessels "
         },
         {
           "fromId": 12,
@@ -1675,111 +1603,81 @@
         },
         {
           "fromId": 12,
-          "toId": 17,
-          "severity": -3,
-          "description": "There is no tanker shipping in no shipping zones for tanker vessels "
-        },
-        {
-          "fromId": 13,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular cargo vessel routes. "
-        },
-        {
-          "fromId": 13,
-          "toId": 27,
-          "severity": 1,
-          "description": "Larger container or bulk cargo vessels sailing at sea. "
-        },
-        {
-          "fromId": 13,
-          "toId": 28,
-          "severity": 1,
-          "description": "Larger container or bulk cargo vessels sailing at sea. "
-        },
-        {
-          "fromId": 14,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular ferry routes. "
-        },
-        {
-          "fromId": 14,
-          "toId": 27,
-          "severity": 1,
-          "description": "Ferries making short-sea trips back and forth. "
-        },
-        {
-          "fromId": 14,
-          "toId": 28,
-          "severity": 1,
-          "description": "Ferries making short-sea trips back and forth. "
-        },
-        {
-          "fromId": 15,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular maintenance vessel routes. "
-        },
-        {
-          "fromId": 15,
-          "toId": 27,
-          "severity": 1,
-          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas platforms. "
-        },
-        {
-          "fromId": 15,
-          "toId": 28,
-          "severity": 1,
-          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas platforms. "
-        },
-        {
-          "fromId": 16,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular passenger vessel routes. "
-        },
-        {
-          "fromId": 16,
-          "toId": 27,
-          "severity": 1,
-          "description": "Ocean liners or cruise ships sailing at sea. "
-        },
-        {
-          "fromId": 16,
-          "toId": 28,
-          "severity": 1,
-          "description": "Ocean liners or cruise ships sailing at sea. "
-        },
-        {
-          "fromId": 17,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular tanker vessel routes. "
-        },
-        {
-          "fromId": 17,
-          "toId": 27,
-          "severity": 1,
-          "description": "Large tankers typically transporting oil or gas. "
-        },
-        {
-          "fromId": 17,
-          "toId": 28,
-          "severity": 1,
-          "description": "Large tankers typically transporting oil or gas. "
-        },
-        {
-          "fromId": 23,
-          "toId": 13,
-          "severity": -1,
-          "description": "Cargo shipping avoids shallow waters "
-        },
-        {
-          "fromId": 23,
           "toId": 14,
+          "severity": -3,
+          "description": "There is no ferry shipping in no shipping zones for ferries "
+        },
+        {
+          "fromId": 12,
+          "toId": 13,
+          "severity": -3,
+          "description": "There is no cargo shipping in no shipping zones for cargo vessels "
+        },
+        {
+          "fromId": 13,
+          "toId": 28,
+          "severity": 1,
+          "description": "Larger container or bulk cargo vessels sailing at sea. "
+        },
+        {
+          "fromId": 13,
+          "toId": 27,
+          "severity": 1,
+          "description": "Larger container or bulk cargo vessels sailing at sea. "
+        },
+        {
+          "fromId": 14,
+          "toId": 28,
+          "severity": 1,
+          "description": "Ferries making short-sea trips back and forth. "
+        },
+        {
+          "fromId": 14,
+          "toId": 27,
+          "severity": 1,
+          "description": "Ferries making short-sea trips back and forth. "
+        },
+        {
+          "fromId": 15,
+          "toId": 28,
+          "severity": 1,
+          "description": "Specialised construction and maintenance vessels for e.g. wind farms and Oil & Gas Platforms. "
+        },
+        {
+          "fromId": 15,
+          "toId": 27,
+          "severity": 1,
+          "description": "Specialised construction and maintenance vessels for e.g. wind farms and Oil & Gas Platforms. "
+        },
+        {
+          "fromId": 16,
+          "toId": 28,
+          "severity": 1,
+          "description": "Ocean liners or cruise ships sailing at sea. "
+        },
+        {
+          "fromId": 16,
+          "toId": 27,
+          "severity": 1,
+          "description": "Ocean liners or cruise ships sailing at sea. "
+        },
+        {
+          "fromId": 17,
+          "toId": 28,
+          "severity": 1,
+          "description": "Large tankers typically transporting oil or gas. "
+        },
+        {
+          "fromId": 17,
+          "toId": 27,
+          "severity": 1,
+          "description": "Large tankers typically transporting oil or gas. "
+        },
+        {
+          "fromId": 23,
+          "toId": 17,
           "severity": -1,
-          "description": "Ferries avoid shallow waters "
+          "description": "Tanker vessels avoid shallow waters "
         },
         {
           "fromId": 23,
@@ -1789,15 +1687,15 @@
         },
         {
           "fromId": 23,
-          "toId": 17,
+          "toId": 14,
           "severity": -1,
-          "description": "Tanker vessels avoid shallow waters "
+          "description": "Ferries avoid shallow waters "
         },
         {
-          "fromId": 24,
-          "toId": 20,
-          "severity": -3,
-          "description": "If desired, bottom trawling can be banned from operating in a particular marine protected area. "
+          "fromId": 23,
+          "toId": 13,
+          "severity": -1,
+          "description": "Cargo shipping avoids shallow waters "
         },
         {
           "fromId": 26,
@@ -1807,15 +1705,15 @@
         },
         {
           "fromId": 27,
-          "toId": 31,
-          "severity": -1,
-          "description": "Flatfish avoids noisy areas "
-        },
-        {
-          "fromId": 27,
           "toId": 33,
           "severity": -1,
           "description": "Mackerel avoids noisy areas "
+        },
+        {
+          "fromId": 27,
+          "toId": 31,
+          "severity": -1,
+          "description": "Flatfish avoids noisy areas "
         },
         {
           "fromId": 28,
@@ -1825,15 +1723,51 @@
         },
         {
           "fromId": 31,
-          "toId": 31,
+          "toId": 82,
+          "severity": -2,
+          "description": "Flatfish feed on Zooplankton. "
+        },
+        {
+          "fromId": 31,
+          "toId": 79,
           "severity": -1,
-          "description": "Flatfish prey on smaller flatfish "
+          "description": "Flatfish prey on Mobile benthos. "
+        },
+        {
+          "fromId": 31,
+          "toId": 64,
+          "severity": -1,
+          "description": "Flatfish prey on Mesopelagic fish. "
+        },
+        {
+          "fromId": 31,
+          "toId": 71,
+          "severity": -1,
+          "description": "Flatfish prey on Bivalve."
+        },
+        {
+          "fromId": 33,
+          "toId": 82,
+          "severity": -2,
+          "description": "Mackerel mainly feeds on Zooplankton. "
+        },
+        {
+          "fromId": 33,
+          "toId": 74,
+          "severity": -1,
+          "description": "Mackerel feeds on Cephalopod."
+        },
+        {
+          "fromId": 33,
+          "toId": 60,
+          "severity": -1,
+          "description": "Mackerel feeds on Small pelagic fish. "
         },
         {
           "fromId": 42,
-          "toId": 13,
+          "toId": 17,
           "severity": 2,
-          "description": "Cargo vessels prefer IMO Routes "
+          "description": "Tanker vessels prefer IMO Routes "
         },
         {
           "fromId": 42,
@@ -1843,15 +1777,21 @@
         },
         {
           "fromId": 42,
-          "toId": 17,
+          "toId": 13,
           "severity": 2,
-          "description": "Tanker vessels prefer IMO Routes "
+          "description": "Cargo vessels prefer IMO Routes "
         },
         {
-          "fromId": 48,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over the seabed at an ammunition dump is dangerous. "
+          "fromId": 47,
+          "toId": 82,
+          "severity": -1,
+          "description": "Seabirds prey on Zooplankton. "
+        },
+        {
+          "fromId": 47,
+          "toId": 33,
+          "severity": -1,
+          "description": "Seabirds feed on Mackerel."
         },
         {
           "fromId": 48,
@@ -1860,190 +1800,340 @@
           "description": "Dumping of military ammunition on the seabed. "
         },
         {
-          "fromId": 55,
-          "toId": 60,
-          "severity": -1,
-          "description": "Dolphins prey on small pelagic fish. "
+          "fromId": 54,
+          "toId": 85,
+          "severity": -2,
+          "description": "Small demersal fish are caught by Artisanal fleets. "
         },
         {
-          "fromId": 55,
-          "toId": 64,
-          "severity": -1,
-          "description": "Dolphins prey on mesopelagic fish."
+          "fromId": 54,
+          "toId": 80,
+          "severity": -2,
+          "description": "Sessile benthos are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 79,
+          "severity": -2,
+          "description": "Mobile benthos are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 78,
+          "severity": -2,
+          "description": "Decapods are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 77,
+          "severity": -2,
+          "description": "Shrimp are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 76,
+          "severity": -2,
+          "description": "Gastropod are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 74,
+          "severity": -2,
+          "description": "Cephalopod are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 72,
+          "severity": -2,
+          "description": "Invasive fish are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 71,
+          "severity": -2,
+          "description": "Rays and skates are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 70,
+          "severity": -2,
+          "description": "Demersal sharks are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 68,
+          "severity": -2,
+          "description": "Mullets are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 67,
+          "severity": -2,
+          "description": "Medium demersal fish are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 66,
+          "severity": -2,
+          "description": "Large demersal fish are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 65,
+          "severity": -2,
+          "description": "European hake are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 63,
+          "severity": -2,
+          "description": "Benthopelagic fish are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 62,
+          "severity": -2,
+          "description": "European sardine & anchovy are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 61,
+          "severity": -2,
+          "description": "Horse mackerel are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 60,
+          "severity": -2,
+          "description": "Small pelagic fish are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 59,
+          "severity": -2,
+          "description": "Medium pelagic fish are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 58,
+          "severity": -2,
+          "description": "Large pelagic fish are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 33,
+          "severity": -2,
+          "description": "Mackerel are caught by Artisanal fleets. "
+        },
+        {
+          "fromId": 54,
+          "toId": 31,
+          "severity": -2,
+          "description": "Flatfish are caught by Artisanal fleets. "
         },
         {
           "fromId": 55,
           "toId": 65,
           "severity": -1,
-          "description": "Dolphins prey on european hake. "
+          "description": "Dolphins prey on European hake. "
+        },
+        {
+          "fromId": 55,
+          "toId": 64,
+          "severity": -1,
+          "description": "Dolphins prey on Mesopelagic fish."
+        },
+        {
+          "fromId": 55,
+          "toId": 60,
+          "severity": -1,
+          "description": "Dolphins prey on Small pelagic fish. "
         },
         {
           "fromId": 56,
           "toId": 82,
           "severity": -1,
-          "description": "Whales mainly feed on zooplankton. "
+          "description": "Whales mainly feed on Zooplankton. "
         },
         {
-          "fromId": 47,
-          "toId": 82,
+          "fromId": 56,
+          "toId": 63,
           "severity": -1,
-          "description": "Seabirds prey on zooplankton. "
+          "description": "Whales feed on Mesopelagic fish."
         },
         {
-          "fromId": 57,
-          "toId": 79,
-          "severity": -2,
-          "description": "Turtles prey on mobile benthos. "
+          "fromId": 56,
+          "toId": 74,
+          "severity": -1,
+          "description": "Whales feed on Cephalopod."
         },
         {
           "fromId": 57,
           "toId": 81,
           "severity": -1,
-          "description": "Turtles prey on jellyfish and salp. "
+          "description": "Turtles prey on Jellyfish and salp. "
         },
         {
-          "fromId": 33,
-          "toId": 82,
-          "severity": -3,
-          "description": "Mackerel mainly feeds on zooplankton. "
+          "fromId": 57,
+          "toId": 79,
+          "severity": -2,
+          "description": "Turtles prey on Mobile benthos. "
         },
         {
-          "fromId": 61,
-          "toId": 82,
-          "severity": -3,
-          "description": "Horse mackerel mainly feeds on zooplankton. "
+          "fromId": 57,
+          "toId": 83,
+          "severity": -1,
+          "description": "Turtles prey on Seagrass & Seaweed."
         },
         {
           "fromId": 59,
           "toId": 79,
           "severity": -1,
-          "description": "Medium pelagic fish prey on mobile benthos. "
+          "description": "Medium pelagic fish prey on Mobile benthos. "
         },
         {
-          "fromId": 62,
+          "fromId": 59,
+          "toId": 81,
+          "severity": -1,
+          "description": "Medium pelagic fish prey on Jellyfish and Salp."
+        },
+        {
+          "fromId": 59,
           "toId": 82,
-          "severity": -3,
-          "description": "European sardine and anchovy prey on zooplankton."
+          "severity": -1,
+          "description": "Medium pelagic fish feed on Zooplankton."
         },
         {
           "fromId": 60,
           "toId": 82,
+          "severity": -3,
+          "description": "Small pelagic fish mainly feed on Zooplankton."
+        },
+        {
+          "fromId": 60,
+          "toId": 79,
           "severity": -1,
-          "description": "Small pelagic fish feed on zooplankton."
+          "description": "Small pelagic fish feed on Decapods. "
+        },
+        {
+          "fromId": 61,
+          "toId": 82,
+          "severity": -3,
+          "description": "Horse mackerel mainly feeds on Zooplankton. "
+        },
+        {
+          "fromId": 62,
+          "toId": 82,
+          "severity": -1,
+          "description": "European sardine and anchovy feed on Zooplankton."
+        },
+        {
+          "fromId": 62,
+          "toId": 80,
+          "severity": -1,
+          "description": "European sardine and anchovy feed on Sessile benthos."
+        },
+        {
+          "fromId": 62,
+          "toId": 79,
+          "severity": -1,
+          "description": "European sardine and anchovy feed on Mobile benthos. "
+        },
+        {
+          "fromId": 62,
+          "toId": 78,
+          "severity": -1,
+          "description": "European sardine and anchovy feed on Decapods."
         },
         {
           "fromId": 63,
-          "toId": 79,
-          "severity": -1,
-          "description": "Benthopelagic fish feed prey on mobile benthos."
+          "toId": 82,
+          "severity": -2,
+          "description": "Benthopelagic fish feed on Zooplankton."
         },
         {
           "fromId": 63,
           "toId": 81,
           "severity": -1,
-          "description": "Benthopelagic fish prey on jellyfish and salp. "
+          "description": "Benthopelagic fish prey on Jellyfish and salp. "
         },
         {
           "fromId": 63,
-          "toId": 82,
-          "severity": -2,
-          "description": "Benthopelagic fish feed on zooplankton."
-        },
-        {
-          "fromId": 64,
-          "toId": 82,
+          "toId": 79,
           "severity": -1,
-          "description": "Mesopelagic fish feed on zooplankton."
+          "description": "Benthopelagic fish feed prey on Mobile benthos."
         },
         {
           "fromId": 64,
           "toId": 83,
           "severity": -1,
-          "description": "Mesopelagic fish feed on seagrass & seaweed. "
+          "description": "Mesopelagic fish feed on Seagrass & Seaweed. "
+        },
+        {
+          "fromId": 64,
+          "toId": 82,
+          "severity": -2,
+          "description": "Mesopelagic fish feed on Zooplankton."
         },
         {
           "fromId": 65,
-          "toId": 79,
-          "severity": -1,
-          "description": "European hake prey on mobile benthos. "
+          "toId": 82,
+          "severity": -3,
+          "description": "European hake feeds on Zooplankton."
         },
         {
           "fromId": 65,
           "toId": 80,
           "severity": -1,
-          "description": "European hake feeds on sessile benthos. "
+          "description": "European hake feeds on Sessile benthos. "
         },
         {
           "fromId": 65,
-          "toId": 82,
-          "severity": -2,
-          "description": "European hake feeds on zooplankton."
+          "toId": 79,
+          "severity": -1,
+          "description": "European hake prey on Mobile benthos. "
         },
         {
           "fromId": 66,
           "toId": 82,
           "severity": -3,
-          "description": "Large demersal fish mainly feed on zooplankton. "
+          "description": "Large demersal fish feed on Zooplankton. "
+        },
+        {
+          "fromId": 67,
+          "toId": 82,
+          "severity": -2,
+          "description": "Medium demersal fish feed on Zooplankton. "
         },
         {
           "fromId": 67,
           "toId": 79,
           "severity": -1,
-          "description": "Medium demersal fish prey on mobile benthos."
-        },
-        {
-          "fromId": 67,
-          "toId": 82,
-          "severity": -1,
-          "description": "Medium demersal fish feed on zooplankton. "
-        },
-        {
-          "fromId": 31,
-          "toId": 64,
-          "severity": -1,
-          "description": "Flatfish prey on  mesopelagic fish. "
-        },
-        {
-          "fromId": 31,
-          "toId": 79,
-          "severity": -1,
-          "description": "Flatfish prey on mobile benthos. "
-        },
-        {
-          "fromId": 31,
-          "toId": 82,
-          "severity": -1,
-          "description": "Flatfish feed on zooplankton. "
-        },
-        {
-          "fromId": 68,
-          "toId": 79,
-          "severity": -1,
-          "description": "Mullets prey on mobile benthos. "
+          "description": "Medium demersal fish prey on Mobile benthos."
         },
         {
           "fromId": 68,
           "toId": 82,
           "severity": -2,
-          "description": "Mullets feed on zooplankton. "
+          "description": "Mullets feed on Zooplankton. "
         },
         {
-          "fromId": 85,
-          "toId": 82,
-          "severity": -1,
-          "description": "Small demersal fish feed on zooplankton. "
+          "fromId": 68,
+          "toId": 79,
+          "severity": -2,
+          "description": "Mullets prey on Mobile benthos. "
         },
         {
           "fromId": 69,
           "toId": 79,
-          "severity": -1,
-          "description": "Bathydemersal fish prey on mobile benthos."
+          "severity": -2,
+          "description": "Bathydemersal fish prey on Mobile benthos."
         },
         {
-          "fromId": 70,
-          "toId": 79,
+          "fromId": 69,
+          "toId": 82,
           "severity": -1,
-          "description": "Demersal sharks prey on mobile benthos."
+          "description": "Bathydemersal fish prey on Zooplankton."
         },
         {
           "fromId": 70,
@@ -2052,10 +2142,16 @@
           "description": "Demersal sharks feed on Zooplankton. "
         },
         {
-          "fromId": 71,
-          "toId": 64,
+          "fromId": 70,
+          "toId": 79,
           "severity": -1,
-          "description": "Rays and skates prey on Mesopelagic fish. "
+          "description": "Demersal sharks prey on Mobile benthos."
+        },
+        {
+          "fromId": 71,
+          "toId": 82,
+          "severity": -1,
+          "description": "Rays and skates feed on Zooplankton. "
         },
         {
           "fromId": 71,
@@ -2065,15 +2161,21 @@
         },
         {
           "fromId": 71,
-          "toId": 82,
+          "toId": 64,
           "severity": -1,
-          "description": "Rays and skates feed on Zooplankton. "
+          "description": "Rays and skates prey on Mesopelagic fish. "
         },
         {
           "fromId": 72,
           "toId": 82,
-          "severity": -1,
+          "severity": -2,
           "description": "Invasive fish feed on Zooplankton."
+        },
+        {
+          "fromId": 72,
+          "toId": 79,
+          "severity": -1,
+          "description": "Invasive fish feed on Mobile benthos. "
         },
         {
           "fromId": 73,
@@ -2082,10 +2184,16 @@
           "description": "Invasive decapods feed on Zooplankton."
         },
         {
-          "fromId": 74,
-          "toId": 60,
+          "fromId": 73,
+          "toId": 64,
           "severity": -1,
-          "description": "Cephalopods prey on Small pelagic fish. "
+          "description": "Invasive decapods feed on Mesopelagic fish."
+        },
+        {
+          "fromId": 73,
+          "toId": 76,
+          "severity": -1,
+          "description": "Invasive decapods feed on Gastropod."
         },
         {
           "fromId": 74,
@@ -2094,34 +2202,88 @@
           "description": "Cephalopods feed on Zooplankton. "
         },
         {
-          "fromId": 77,
-          "toId": 79,
+          "fromId": 74,
+          "toId": 60,
           "severity": -1,
-          "description": "Shrimp prey on Mobile benthos."
+          "description": "Cephalopods prey on Small pelagic fish. "
+        },
+        {
+          "fromId": 75,
+          "toId": 82,
+          "severity": -3,
+          "description": "Bivalve mainly feeds on Zooplankton. "
+        },
+        {
+          "fromId": 76,
+          "toId": 82,
+          "severity": -3,
+          "description": "Gastropod mainly feeds on Zooplankton. "
         },
         {
           "fromId": 77,
           "toId": 82,
+          "severity": -2,
+          "description": "Shrimp mainly feed on Zooplankton."
+        },
+        {
+          "fromId": 77,
+          "toId": 83,
           "severity": -1,
-          "description": "Shrimp feed on Zooplankton."
+          "description": "Shrimp feed on Seagrass and Seaweed."
+        },
+        {
+          "fromId": 77,
+          "toId": 81,
+          "severity": -1,
+          "description": "Shrimp feed on Jellyfish and Salp."
         },
         {
           "fromId": 78,
           "toId": 82,
-          "severity": -1,
+          "severity": -2,
           "description": "Decapods feed on Zooplankton."
         },
         {
-          "fromId": 81,
-          "toId": 82,
+          "fromId": 78,
+          "toId": 81,
           "severity": -1,
-          "description": "Jellyfish & salp feed on Zooplankton."
+          "description": "Decapods feed on Jellyfish and Salp."
+        },
+        {
+          "fromId": 78,
+          "toId": 83,
+          "severity": -1,
+          "description": "Decapods feed on Seagrass and Seaweed. "
+        },
+        {
+          "fromId": 79,
+          "toId": 82,
+          "severity": -3,
+          "description": "Mobile benthos mainly feed on Zooplankton. "
+        },
+        {
+          "fromId": 80,
+          "toId": 82,
+          "severity": -3,
+          "description": "Sessile benthos mainly feed on Zooplankton. "
         },
         {
           "fromId": 81,
           "toId": 84,
-          "severity": -1,
+          "severity": -2,
           "description": "Jellyfish & salp feed on Phytoplankton. "
+        },
+        {
+          "fromId": 81,
+          "toId": 82,
+          "severity": -2,
+          "description": "Jellyfish & salp feed on Zooplankton."
+        },
+        {
+          "fromId": 81,
+          "toId": 65,
+          "severity": -1,
+          "description": "Jellyfish & salp feed on European hake. "
         },
         {
           "fromId": 82,
@@ -2130,844 +2292,172 @@
           "description": "Zooplankton feeds on Seagrass & seaweed. "
         },
         {
-          "fromId": 20,
-          "toId": 56,
+          "fromId": 85,
+          "toId": 82,
           "severity": -2,
-          "description": "Whales get caught by Bottom trawlers. "
+          "description": "Small demersal fish feed on Zooplankton. "
         },
         {
-          "fromId": 53,
-          "toId": 56,
-          "severity": -2,
-          "description": "Whales get caught by Purse seiners. "
-        },
-        {
-          "fromId": 20,
-          "toId": 58,
-          "severity": -1,
-          "description": "Large pelagic fish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 58,
-          "severity": -2,
-          "description": "Large pelagic fish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 58,
-          "severity": -1,
-          "description": "Large pelagic fish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 58,
-          "severity": -1,
-          "description": "Large pelagic fish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 58,
-          "severity": -1,
-          "description": "Large pelagic fish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 58,
-          "severity": -1,
-          "description": "Large pelagic fish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 33,
-          "severity": -1,
-          "description": "Mackerel are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 33,
-          "severity": -2,
-          "description": "Mackerel are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 33,
-          "severity": -1,
-          "description": "Mackerel are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 33,
-          "severity": -1,
-          "description": "Mackerel are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 33,
-          "severity": -1,
-          "description": "Mackerel are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 33,
-          "severity": -1,
-          "description": "Mackerel are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 61,
-          "severity": -1,
-          "description": "Horse mackerel are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 61,
-          "severity": -2,
-          "description": "Horse mackerel are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 61,
-          "severity": -1,
-          "description": "Horse mackerel are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 61,
-          "severity": -1,
-          "description": "Horse mackerel are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 61,
-          "severity": -1,
-          "description": "Horse mackerel are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 61,
-          "severity": -1,
-          "description": "Horse mackerel are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 59,
-          "severity": -1,
-          "description": "Medium pelagic fish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 59,
-          "severity": -2,
-          "description": "Medium pelagic fish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 59,
-          "severity": -1,
-          "description": "Medium pelagic fish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 59,
-          "severity": -1,
-          "description": "Medium pelagic fish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 59,
-          "severity": -1,
-          "description": "Medium pelagic fish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 59,
-          "severity": -1,
-          "description": "Medium pelagic fish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 62,
-          "severity": -1,
-          "description": "European sardine & anchovy are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 62,
-          "severity": -2,
-          "description": "European sardine & anchovy are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 62,
-          "severity": -1,
-          "description": "European sardine & anchovy are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 62,
-          "severity": -1,
-          "description": "European sardine & anchovy are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 62,
-          "severity": -1,
-          "description": "European sardine & anchovy are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 62,
-          "severity": -1,
-          "description": "European sardine & anchovy are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 60,
-          "severity": -1,
-          "description": "Small pelagic fish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 60,
-          "severity": -2,
-          "description": "Small pelagic fish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 60,
-          "severity": -1,
-          "description": "Small pelagic fish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 60,
-          "severity": -1,
-          "description": "Small pelagic fish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 60,
-          "severity": -1,
-          "description": "Small pelagic fish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 60,
-          "severity": -1,
-          "description": "Small pelagic fish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 63,
-          "severity": -1,
-          "description": "Benthopelagic fish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 63,
-          "severity": -2,
-          "description": "Benthopelagic fish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 63,
-          "severity": -1,
-          "description": "Benthopelagic fish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 63,
-          "severity": -1,
-          "description": "Benthopelagic fish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 63,
-          "severity": -1,
-          "description": "Benthopelagic fish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 63,
-          "severity": -1,
-          "description": "Benthopelagic fish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 65,
-          "severity": -1,
-          "description": "European hake are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 65,
-          "severity": -2,
-          "description": "European hake are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 65,
-          "severity": -1,
-          "description": "European hake are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 65,
-          "severity": -1,
-          "description": "European hake are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 65,
-          "severity": -1,
-          "description": "European hake are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 65,
-          "severity": -1,
-          "description": "European hake are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 66,
-          "severity": -1,
-          "description": "Large demersal fish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 66,
-          "severity": -2,
-          "description": "Large demersal fish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 66,
-          "severity": -1,
-          "description": "Large demersal fish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 66,
-          "severity": -1,
-          "description": "Large demersal fish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 66,
-          "severity": -1,
-          "description": "Large demersal fish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 66,
-          "severity": -1,
-          "description": "Large demersal fish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 67,
-          "severity": -1,
-          "description": "Medium demersal fish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 67,
-          "severity": -2,
-          "description": "Medium demersal fish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 67,
-          "severity": -1,
-          "description": "Medium demersal fish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 67,
-          "severity": -1,
-          "description": "Medium demersal fish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 67,
-          "severity": -1,
-          "description": "Medium demersal fish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 67,
-          "severity": -1,
-          "description": "Medium demersal fish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 31,
-          "severity": -1,
-          "description": "Flatfish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 31,
-          "severity": -2,
-          "description": "Flatfish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 31,
-          "severity": -1,
-          "description": "Flatfish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 31,
-          "severity": -1,
-          "description": "Flatfish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 31,
-          "severity": -1,
-          "description": "Flatfish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 31,
-          "severity": -1,
-          "description": "Flatfish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 68,
-          "severity": -1,
-          "description": "Mullets are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 68,
-          "severity": -2,
-          "description": "Mullets are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 68,
-          "severity": -1,
-          "description": "Mullets are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 68,
-          "severity": -1,
-          "description": "Mullets are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 68,
-          "severity": -1,
-          "description": "Mullets are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 68,
-          "severity": -1,
-          "description": "Mullets are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 85,
-          "severity": -1,
-          "description": "Small demersal fish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 85,
-          "severity": -2,
-          "description": "Small demersal fish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 85,
-          "severity": -1,
-          "description": "Small demersal fish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 85,
-          "severity": -1,
-          "description": "Small demersal fish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 85,
-          "severity": -1,
-          "description": "Small demersal fish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 85,
-          "severity": -1,
-          "description": "Small demersal fish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 70,
-          "severity": -1,
-          "description": "Demersal sharks are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 70,
-          "severity": -2,
-          "description": "Demersal sharks are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 70,
-          "severity": -1,
-          "description": "Demersal sharks are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 70,
-          "severity": -1,
-          "description": "Demersal sharks are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 70,
-          "severity": -1,
-          "description": "Demersal sharks are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 70,
-          "severity": -1,
-          "description": "Demersal sharks are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 71,
-          "severity": -1,
-          "description": "Rays and skates are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 71,
-          "severity": -2,
-          "description": "Rays and skates are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 71,
-          "severity": -1,
-          "description": "Rays and skates are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 71,
-          "severity": -1,
-          "description": "Rays and skates are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 71,
-          "severity": -1,
-          "description": "Rays and skates are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 71,
-          "severity": -1,
-          "description": "Rays and skates are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 72,
-          "severity": -1,
-          "description": "Invasive fish are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 72,
-          "severity": -2,
-          "description": "Invasive fish are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 72,
-          "severity": -1,
-          "description": "Invasive fish are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 72,
-          "severity": -1,
-          "description": "Invasive fish are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 72,
-          "severity": -1,
-          "description": "Invasive fish are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 72,
-          "severity": -1,
-          "description": "Invasive fish are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 74,
-          "severity": -1,
-          "description": "Cephalopods are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 74,
-          "severity": -2,
-          "description": "Cephalopods are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 74,
-          "severity": -1,
-          "description": "Cephalopods are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 74,
-          "severity": -1,
-          "description": "Cephalopods are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 74,
-          "severity": -1,
-          "description": "Cephalopods are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 74,
-          "severity": -1,
-          "description": "Cephalopods are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 76,
-          "severity": -1,
-          "description": "Gastropod are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 76,
-          "severity": -2,
-          "description": "Gastropod are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 76,
-          "severity": -1,
-          "description": "Gastropod are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 76,
-          "severity": -1,
-          "description": "Gastropod are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 76,
-          "severity": -1,
-          "description": "Gastropod are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 76,
-          "severity": -1,
-          "description": "Gastropod are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 77,
-          "severity": -1,
-          "description": "Shrimp are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 77,
-          "severity": -2,
-          "description": "Shrimp are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 77,
-          "severity": -1,
-          "description": "Shrimp are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 77,
-          "severity": -1,
-          "description": "Shrimp are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 77,
-          "severity": -1,
-          "description": "Shrimp are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 77,
-          "severity": -1,
-          "description": "Shrimp are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
-          "toId": 78,
-          "severity": -1,
-          "description": "Decapods are caught by Bottom trawlers. "
-        },
-        {
-          "fromId": 53,
-          "toId": 78,
-          "severity": -2,
-          "description": "Decapods are caught by Purse seiners. "
-        },
-        {
-          "fromId": 50,
-          "toId": 78,
-          "severity": -1,
-          "description": "Decapods are caught by Small-scale coastal fleets."
-        },
-        {
-          "fromId": 51,
-          "toId": 78,
-          "severity": -1,
-          "description": "Decapods are caught by Recreational fleets."
-        },
-        {
-          "fromId": 52,
-          "toId": 78,
-          "severity": -1,
-          "description": "Decapods are caught by Trawl fleets."
-        },
-        {
-          "fromId": 54,
-          "toId": 78,
-          "severity": -1,
-          "description": "Decapods are caught by Artisanal fleets. "
-        },
-        {
-          "fromId": 20,
+          "fromId": 85,
           "toId": 79,
           "severity": -1,
-          "description": "Mobile benthos are caught by Bottom trawlers. "
+          "description": "Small demersal fish feed on Mobile benthos. "
         },
         {
-          "fromId": 53,
+          "fromId": 87,
+          "toId": 85,
+          "severity": -3,
+          "description": "Small demersal fish are caught by Industrial fleets. "
+        },
+        {
+          "fromId": 87,
+          "toId": 80,
+          "severity": -3,
+          "description": "Sessile benthos are caught by Industrial fleets. "
+        },
+        {
+          "fromId": 87,
           "toId": 79,
-          "severity": -2,
-          "description": "Mobile benthos are caught by Purse seiners. "
+          "severity": -3,
+          "description": "Mobile benthos are caught by Industrial fleets. "
         },
         {
-          "fromId": 50,
-          "toId": 79,
-          "severity": -1,
-          "description": "Mobile benthos are caught by Small-scale coastal fleets."
+          "fromId": 87,
+          "toId": 78,
+          "severity": -3,
+          "description": "Decapods are caught by Industrial fleets. "
         },
         {
-          "fromId": 51,
-          "toId": 79,
-          "severity": -1,
-          "description": "Mobile benthos are caught by Recreational fleets."
+          "fromId": 87,
+          "toId": 77,
+          "severity": -3,
+          "description": "Shrimp are caught by Industrial fleets. "
         },
         {
-          "fromId": 52,
-          "toId": 79,
-          "severity": -1,
-          "description": "Mobile benthos are caught by Trawl fleets."
+          "fromId": 87,
+          "toId": 76,
+          "severity": -3,
+          "description": "Gastropod are caught by Industrial fleets. "
         },
         {
-          "fromId": 54,
-          "toId": 79,
-          "severity": -1,
-          "description": "Mobile benthos are caught by Artisanal fleets. "
+          "fromId": 87,
+          "toId": 74,
+          "severity": -3,
+          "description": "Cephalopod are caught by Industrial fleets. "
         },
         {
-          "fromId": 20,
-          "toId": 80,
-          "severity": -1,
-          "description": "Sessile benthos are caught by Bottom trawlers. "
+          "fromId": 87,
+          "toId": 72,
+          "severity": -3,
+          "description": "Invasive fish are caught by Industrial fleets. "
         },
         {
-          "fromId": 53,
-          "toId": 80,
-          "severity": -2,
-          "description": "Sessile benthos are caught by Purse seiners. "
+          "fromId": 87,
+          "toId": 71,
+          "severity": -3,
+          "description": "Rays and skates are caught by Industrial fleets. "
         },
         {
-          "fromId": 50,
-          "toId": 80,
-          "severity": -1,
-          "description": "Sessile benthos are caught by Small-scale coastal fleets."
+          "fromId": 87,
+          "toId": 70,
+          "severity": -3,
+          "description": "Demersal sharks are caught by Industrial fleets. "
         },
         {
-          "fromId": 51,
-          "toId": 80,
-          "severity": -1,
-          "description": "Sessile benthos are caught by Recreational fleets."
+          "fromId": 87,
+          "toId": 68,
+          "severity": -3,
+          "description": "Mullets are caught by Industrial fleets. "
         },
         {
-          "fromId": 52,
-          "toId": 80,
-          "severity": -1,
-          "description": "Sessile benthos are caught by Trawl fleets."
+          "fromId": 87,
+          "toId": 67,
+          "severity": -3,
+          "description": "Medium demersal fish are caught by Industrial fleets. "
         },
         {
-          "fromId": 54,
-          "toId": 80,
-          "severity": -1,
-          "description": "Sessile benthos are caught by Artisanal fleets. "
+          "fromId": 87,
+          "toId": 66,
+          "severity": -3,
+          "description": "Large demersal fish are caught by Industrial fleets. "
         },
         {
-          "fromId": 20,
-          "toId": 81,
-          "severity": -1,
-          "description": "Jellyfish and salp are caught by Bottom trawlers. "
+          "fromId": 87,
+          "toId": 65,
+          "severity": -3,
+          "description": "European hake are caught by Industrial fleets. "
         },
         {
-          "fromId": 53,
-          "toId": 81,
-          "severity": -2,
-          "description": "Jellyfish and salp are caught by Purse seiners. "
+          "fromId": 87,
+          "toId": 63,
+          "severity": -3,
+          "description": "Benthopelagic fish are caught by Industrial fleets. "
         },
         {
-          "fromId": 50,
-          "toId": 81,
-          "severity": -1,
-          "description": "Jellyfish and salp are caught by Small-scale coastal fleets."
+          "fromId": 87,
+          "toId": 62,
+          "severity": -3,
+          "description": "European sardine & anchovy are caught by Industrial fleets. "
         },
         {
-          "fromId": 51,
-          "toId": 81,
-          "severity": -1,
-          "description": "Jellyfish and salp are caught by Recreational fleets."
+          "fromId": 87,
+          "toId": 60,
+          "severity": -3,
+          "description": "Small pelagic fish are caught by Industrial fleets. "
         },
         {
-          "fromId": 52,
-          "toId": 81,
-          "severity": -1,
-          "description": "Jellyfish and salp are caught by Trawl fleets."
+          "fromId": 87,
+          "toId": 59,
+          "severity": -3,
+          "description": "Medium pelagic fish are caught by Industrial fleets. "
         },
         {
-          "fromId": 54,
-          "toId": 81,
-          "severity": -1,
-          "description": "Jellyfish and salp are caught by Artisanal fleets. "
+          "fromId": 87,
+          "toId": 58,
+          "severity": -3,
+          "description": "Large pelagic fish are caught by Industrial fleets. "
+        },
+        {
+          "fromId": 87,
+          "toId": 31,
+          "severity": -3,
+          "description": "Flatfish are caught by Industrial fleets. "
+        },
+        {
+          "fromId": 87,
+          "toId": 61,
+          "severity": -3,
+          "description": "Horse mackerel is caught by Industrial fleets. "
+        },
+        {
+          "fromId": 87,
+          "toId": 33,
+          "severity": -3,
+          "description": "Mackerel is caught by Industrial fleets. "
+        },
+        {
+          "fromId": 24,
+          "toId": 51,
+          "severity": -3,
+          "description": "Recreational fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 54,
+          "severity": -3,
+          "description": "Artisanal fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 87,
+          "severity": -3,
+          "description": "Industrial fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 86,
+          "severity": -3,
+          "description": "Subsistence fishing is not allowed in Marine Protected Areas. "
         }
       ]
     },
@@ -10001,6 +9491,10 @@
           "name": "Large Demersal Fish Catch",
           "subcategory": "Species Catch"
         },
+		{
+          "name": "Small Demersal Fish Catch",
+          "subcategory": "Species Catch"
+        },
         {
           "name": "Large Pelagic Fish Catch",
           "subcategory": "Species Catch"
@@ -10120,6 +9614,12 @@
             },
             {
               "valueName": "Large Demersal Fish",
+              "valueColor": "#FF7272FF",
+              "unit": "t/km2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Small Demersal Fish",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -10320,6 +9820,12 @@
             },
             {
               "valueName": "Large Demersal Fish Catch",
+              "valueColor": "#73FFBCFF",
+              "unit": "t/km2",
+              "valueDependentCountry": -1
+            },
+            {
+              "valueName": "Small Demersal Fish Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -10907,9 +10413,9 @@
             "innerGlowIterations": 8,
             "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#FF7B2CFF",
-            "lineWidth": 2.0,
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -10920,8 +10426,8 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Red",
-            "countryCode": "Sy"
+            "media": "wiki://Orange",
+            "countryCode": "Cy"
           },
           "1": {
             "displayName": "Red",
@@ -10965,7 +10471,7 @@
             "innerGlowIterations": 8,
             "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#007A03FF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -10994,9 +10500,9 @@
             "innerGlowIterations": 8,
             "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#ACACACFF",
-            "lineWidth": 2.0,
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -11051,7 +10557,7 @@
             "innerGlowIterations": 8,
             "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#E252BBFF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -11080,7 +10586,7 @@
             "innerGlowIterations": 8,
             "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#FECC2FFF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -11108,7 +10614,7 @@
             "innerGlowIterations": 8,
             "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#4778F8FF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -11137,7 +10643,7 @@
             "innerGlowIterations": 8,
             "innerGlowMultiplier": 3.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#0B2B81FF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -11781,9 +11287,9 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.01,
         "layer_active": 1,
-        "layer_selectable": 1,
+        "layer_selectable": 0,
         "layer_editable": 0,
-        "layer_toggleable": 1,
+        "layer_toggleable": 0,
         "layer_active_on_start": 1,
         "layer_green": 0,
         "layer_tooltip": "land cover type",
@@ -20359,7 +19865,7 @@
         "layer_name": "mel_Protection_Gr-_Artisanal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Gr- Artisanal (Simulated)",
+        "layer_short": "No Green Artisanal Fleet(Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -20376,7 +19882,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Gr- Artisanal",
+        "layer_tooltip": "Areas where Green artisanal fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -20400,7 +19906,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -20428,7 +19934,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -20456,7 +19962,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -20484,7 +19990,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -20512,7 +20018,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -20547,7 +20053,7 @@
         "layer_name": "mel_Protection_Gr-_Industrial",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Gr- Industrial (Simulated)",
+        "layer_short": "No Green Industrial Fleet (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -20564,7 +20070,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Gr- Industrial",
+        "layer_tooltip": "Areas where Green industrial fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -20588,7 +20094,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -20616,7 +20122,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -20644,7 +20150,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -20672,7 +20178,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -20700,7 +20206,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -20735,7 +20241,7 @@
         "layer_name": "mel_Protection_Gr-_Recreational",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Gr- Recreational (Simulated)",
+        "layer_short": "No Green Recreational Fleet (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -20752,7 +20258,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Gr- Recreational",
+        "layer_tooltip": "Areas where Green recreational fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -20776,7 +20282,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -20804,7 +20310,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -20832,7 +20338,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -20860,7 +20366,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -20888,7 +20394,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -20923,7 +20429,7 @@
         "layer_name": "mel_Protection_Gr-_Subsistence",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Gr- Subsistence (Simulated)",
+        "layer_short": "No Green Subsistence Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -20940,7 +20446,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Gr- Subsistence",
+        "layer_tooltip": "Areas where Green subsistence fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -21111,7 +20617,7 @@
         "layer_name": "mel_Protection_Tu-_Artisanal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Tu- Artisanal (Simulated)",
+        "layer_short": "No Navy Artisanal Fleets(Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -21128,7 +20634,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Tu- Artisanal",
+        "layer_tooltip": "Areas where navy artisanal fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -21152,7 +20658,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -21180,7 +20686,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -21208,7 +20714,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -21236,7 +20742,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -21264,7 +20770,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -21299,7 +20805,7 @@
         "layer_name": "mel_Protection_Tu-_Industrial",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Tu- Industrial (Simulated)",
+        "layer_short": "No Navy Industrial Fleet(Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -21316,7 +20822,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Tu- Industrial",
+        "layer_tooltip": "Areas where Navy industrial fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -21340,7 +20846,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -21368,7 +20874,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -21396,7 +20902,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -21424,7 +20930,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -21452,7 +20958,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -21487,7 +20993,7 @@
         "layer_name": "mel_Protection_Tu-_Recreational",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Tu- Recreational (Simulated)",
+        "layer_short": "No Navy Recreational (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -21504,7 +21010,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Tu- Recreational",
+        "layer_tooltip": "Areas where Navy recreational fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -21528,7 +21034,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -21556,7 +21062,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -21584,7 +21090,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -21612,7 +21118,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -21640,7 +21146,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -21675,7 +21181,7 @@
         "layer_name": "mel_Protection_Tu-_Subsistence",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Tu- Subsistence (Simulated)",
+        "layer_short": "No Navy Subsistence Fleets(Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -21692,7 +21198,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Tu- Subsistence",
+        "layer_tooltip": "Areas where Navy subsitence fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -21716,7 +21222,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -21744,7 +21250,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -21772,7 +21278,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -21800,7 +21306,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -21828,7 +21334,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -21863,7 +21369,7 @@
         "layer_name": "mel_Protection_Cy-_Artisanal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Cy- Artisanal (Simulated)",
+        "layer_short": "No Orange Artisanal (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -21880,7 +21386,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Cy- Artisanal",
+        "layer_tooltip": "Areas where Orange artisanal fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -21904,7 +21410,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -21932,7 +21438,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -21960,7 +21466,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -21988,7 +21494,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -22016,7 +21522,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -22051,7 +21557,7 @@
         "layer_name": "mel_Protection_Cy-_Industrial",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Cy- Industrial (Simulated)",
+        "layer_short": "No Orange Industrial Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -22068,7 +21574,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Cy- Industrial",
+        "layer_tooltip": "Areas where Orange Industrial fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -22092,7 +21598,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -22120,7 +21626,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -22148,7 +21654,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -22176,7 +21682,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -22204,7 +21710,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -22239,7 +21745,7 @@
         "layer_name": "mel_Protection_Cy-_Recreational",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Cy- Recreational (Simulated)",
+        "layer_short": "No Orange Recreational Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -22256,7 +21762,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Cy- Recreational",
+        "layer_tooltip": "Areas where Orange recreational fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -22280,7 +21786,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -22308,7 +21814,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -22336,7 +21842,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -22364,7 +21870,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -22392,7 +21898,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -22427,7 +21933,7 @@
         "layer_name": "mel_Protection_Cy-_Subsistence",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Cy- Subsistence (Simulated)",
+        "layer_short": "Protection Oranje Subsistence (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -22444,7 +21950,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Cy- Subsistence",
+        "layer_tooltip": "Areas where Orange subsistence fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -22468,7 +21974,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -22496,7 +22002,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -22524,7 +22030,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -22552,7 +22058,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -22580,7 +22086,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -22615,7 +22121,7 @@
         "layer_name": "mel_Protection_Sy-_Artisanal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Sy- Artisanal (Simulated)",
+        "layer_short": "No Red Artisanal Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -22632,7 +22138,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Sy- Artisanal",
+        "layer_tooltip": "Areas where Red artisanal fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -22656,7 +22162,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -22684,7 +22190,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -22712,7 +22218,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -22740,7 +22246,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -22768,7 +22274,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -22803,7 +22309,7 @@
         "layer_name": "mel_Protection_Sy-_Industrial",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Sy- Industrial (Simulated)",
+        "layer_short": "No Red Industrial Fleets(Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -22820,7 +22326,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Sy- Industrial",
+        "layer_tooltip": "Areas where Red industrial fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -22844,7 +22350,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -22872,7 +22378,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -22900,7 +22406,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -22928,7 +22434,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -22956,7 +22462,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -22991,7 +22497,7 @@
         "layer_name": "mel_Protection_Sy-Recreational",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Sy-Recreational (Simulated)",
+        "layer_short": "No Red Recreational (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -23008,7 +22514,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Sy-Recreational",
+        "layer_tooltip": "Areas where Red recreational fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -23032,7 +22538,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -23060,7 +22566,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -23088,7 +22594,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -23116,7 +22622,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -23144,7 +22650,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -23179,7 +22685,7 @@
         "layer_name": "mel_Protection_Sy-Subsistence",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Sy-Subsistence (Simulated)",
+        "layer_short": "No Red Subsistence Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -23196,7 +22702,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Sy-Subsistence",
+        "layer_tooltip": "Areas where Red subsistence fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -23220,7 +22726,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -23248,7 +22754,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -23276,7 +22782,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -23304,7 +22810,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -23332,7 +22838,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -23367,7 +22873,7 @@
         "layer_name": "mel_Protection_Le-_Artisanal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Le- Artisanal (Simulated)",
+        "layer_short": "No Blue Artisanal (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -23384,7 +22890,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Le- Artisanal",
+        "layer_tooltip": "Areas where Blue artisanal fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -23408,7 +22914,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -23436,7 +22942,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -23464,7 +22970,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -23492,7 +22998,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -23520,7 +23026,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -23555,7 +23061,7 @@
         "layer_name": "mel_Protection_Le-_Industrial",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Le- Industrial (Simulated)",
+        "layer_short": "No Blue Industrial Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -23572,7 +23078,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Le- Industrial",
+        "layer_tooltip": "Areas where Blue industrial fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -23596,7 +23102,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -23624,7 +23130,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -23652,7 +23158,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -23680,7 +23186,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -23708,7 +23214,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -23743,7 +23249,7 @@
         "layer_name": "mel_Protection_Le-_Recreational",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Le- Recreational (Simulated)",
+        "layer_short": "No Blue Recreational (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -23760,7 +23266,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Le- Recreational",
+        "layer_tooltip": "Areas where Blue recreational fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -23784,7 +23290,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -23812,7 +23318,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -23840,7 +23346,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -23868,7 +23374,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -23896,7 +23402,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -23931,7 +23437,7 @@
         "layer_name": "mel_Protection_Le-_Subsistence",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Le- Subsistence (Simulated)",
+        "layer_short": "No Blue Subsistence Fleets(Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -23948,7 +23454,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Le- Subsistence",
+        "layer_tooltip": "Areas where Blue subsistence fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -23972,7 +23478,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -24000,7 +23506,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -24028,7 +23534,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -24056,7 +23562,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -24084,7 +23590,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -24119,7 +23625,7 @@
         "layer_name": "mel_Protection_IL-Artisanal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection IL-Artisanal (Simulated)",
+        "layer_short": "No Purple Artisanal Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -24136,7 +23642,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection IL-Artisanal",
+        "layer_tooltip": "Areas where Purple artisanal fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -24160,7 +23666,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -24188,7 +23694,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -24216,7 +23722,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -24244,7 +23750,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -24272,7 +23778,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -24307,7 +23813,7 @@
         "layer_name": "mel_Protection_IL-Industrial",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection IL-Industrial (Simulated)",
+        "layer_short": "No Purple Industrial Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -24324,7 +23830,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection IL-Industrial",
+        "layer_tooltip": "Areas where Purple industrial fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -24348,7 +23854,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -24376,7 +23882,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -24404,7 +23910,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -24432,7 +23938,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -24460,7 +23966,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -24495,7 +24001,7 @@
         "layer_name": "mel_Protection_IL-Recreational",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection IL-Recreational (Simulated)",
+        "layer_short": "No Purple Recreational Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -24512,7 +24018,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection IL-Recreational",
+        "layer_tooltip": "Areas where Purple recreational fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -24536,7 +24042,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -24564,7 +24070,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -24592,7 +24098,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -24620,7 +24126,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -24648,7 +24154,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -24683,7 +24189,7 @@
         "layer_name": "mel_Protection_IL-Subsistence",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection IL-Subsistence (Simulated)",
+        "layer_short": "No Purple Subsistence Fleets(Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -24700,7 +24206,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection IL-Subsistence",
+        "layer_tooltip": "Areas where Purple subsistence fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -24724,7 +24230,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -24752,7 +24258,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -24780,7 +24286,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -24808,7 +24314,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -24836,7 +24342,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -24871,7 +24377,7 @@
         "layer_name": "mel_Protection_Eg-Artisanal",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Eg-Artisanal (Simulated)",
+        "layer_short": "No Pink Artisanal Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -24888,7 +24394,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Eg-Artisanal",
+        "layer_tooltip": "Areas where Pink artisanal fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -24912,7 +24418,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -24940,7 +24446,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -24968,7 +24474,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -24996,7 +24502,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -25024,7 +24530,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -25059,7 +24565,7 @@
         "layer_name": "mel_Protection_Eg-Industrial",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Eg-Industrial (Simulated)",
+        "layer_short": "No Pink Industrial Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -25076,7 +24582,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Eg-Industrial",
+        "layer_tooltip": "Areas where Pink industrial fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -25100,7 +24606,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -25128,7 +24634,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -25156,7 +24662,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -25184,7 +24690,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -25212,7 +24718,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -25247,7 +24753,7 @@
         "layer_name": "mel_Protection_Eg-Recreational",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Protection Eg-Recreational (Simulated)",
+        "layer_short": "No Pink Recreational Fleets (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 0,
@@ -25264,7 +24770,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Protection Eg-Recreational",
+        "layer_tooltip": "Areas where Pink recreational fleets are banned from",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
@@ -25288,7 +24794,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Very Low Density",
+            "displayName": "Very Low",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -25316,7 +24822,7 @@
             "media": null
           },
           "1": {
-            "displayName": "Low Density",
+            "displayName": "Low",
             "approval": "EEZ",
             "value": 200,
             "map_type": null,
@@ -25344,7 +24850,7 @@
             "media": null
           },
           "2": {
-            "displayName": "Medium Density",
+            "displayName": "Medium",
             "approval": "EEZ",
             "value": 400,
             "map_type": null,
@@ -25372,7 +24878,7 @@
             "media": null
           },
           "3": {
-            "displayName": "High Density",
+            "displayName": "High",
             "approval": "EEZ",
             "value": 600,
             "map_type": null,
@@ -25400,7 +24906,7 @@
             "media": null
           },
           "4": {
-            "displayName": "Very High Density",
+            "displayName": "Very High",
             "approval": "EEZ",
             "value": 800,
             "map_type": null,
@@ -29573,7 +29079,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Invasive Decapods (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "macrobenthos",
+        "layer_subcategory": "other",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -31275,12 +30781,12 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 1,
+        "layer_selectable":1,
         "layer_editable": 0,
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Industrial Catch",
+        "layer_tooltip": "Modelled catch distribution of industrial fleets",
         "layer_information": "",
         "layer_media": "wiki://Industrial_and_Pelagic_Trawl_Catch",
         "layer_text_info": null,
@@ -31468,7 +30974,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Artisanal Catch",
+        "layer_tooltip": "Modelled catch distribution of artisanal fleets",
         "layer_information": "",
         "layer_media": "wiki://Artisanal_Catch",
         "layer_text_info": null,
@@ -31656,7 +31162,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Subsistence Catch",
+        "layer_tooltip": "Modelled catch distribution of subsistence catch",
         "layer_information": "",
         "layer_media": "",
         "layer_text_info": null,
@@ -31844,7 +31350,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Recreation Catch",
+        "layer_tooltip": "Modelled catch distribution of recreation fleets",
         "layer_information": "",
         "layer_media": "wiki://Recreational_Fleet_Catch",
         "layer_text_info": null,
