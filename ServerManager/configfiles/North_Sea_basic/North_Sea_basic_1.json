@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "10/10/2024",
-    "data_model_hash": "94EA09BD1ABF3CF73D6F50F65D50A93E48B86209BADD1067249C95E65C62ECCB",
+    "date_modified": "1/21/2025",
+    "data_model_hash": "A7A64E07F232A4379B7AD710F51DB4A7881771AEC9F9A829295C0ACB07426FF6",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -236,14 +236,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Precautionary_Areas|NS_Marine_Protected_Areas": [
+      "NS_Precautionary_Areas|NS_MPA_fix": [
         {
           "message": "Precautionary areas are reserved for shipping.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Precautionary_Areas",
           "starttype": "",
-          "endlayer": "NS_Marine_Protected_Areas",
+          "endlayer": "NS_MPA_fix",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1158,14 +1158,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Fishing_Priority_Areas|NS_Marine_Protected_Areas": [
+      "NS_Fishing_Priority_Areas|NS_MPA_fix": [
         {
           "message": "Be aware that some fishing fleets are not allowed in Marine Protected Areas",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Fishing_Priority_Areas",
           "starttype": "",
-          "endlayer": "NS_Marine_Protected_Areas",
+          "endlayer": "NS_MPA_fix",
           "endtype": "1",
           "sort": "Inclusion"
         },
@@ -1175,7 +1175,7 @@
           "type": "WARNING",
           "startlayer": "NS_Fishing_Priority_Areas",
           "starttype": "",
-          "endlayer": "NS_Marine_Protected_Areas",
+          "endlayer": "NS_MPA_fix",
           "endtype": "2",
           "sort": "Inclusion"
         },
@@ -1185,7 +1185,7 @@
           "type": "WARNING",
           "startlayer": "NS_Fishing_Priority_Areas",
           "starttype": "",
-          "endlayer": "NS_Marine_Protected_Areas",
+          "endlayer": "NS_MPA_fix",
           "endtype": "3",
           "sort": "Inclusion"
         }
@@ -22728,7 +22728,7 @@
               "construction": false
             },
             {
-              "name": "NS_Marine_Protected_Areas",
+              "name": "NS_MPA_fix",
               "influence": 1.0,
               "construction": false
             }
@@ -22803,7 +22803,7 @@
               "construction": true
             },
             {
-              "name": "NS_Marine_Protected_Areas",
+              "name": "NS_MPA_fix",
               "influence": 1.0,
               "construction": false
             }
@@ -22873,7 +22873,7 @@
               "construction": false
             },
             {
-              "name": "NS_Marine_Protected_Areas",
+              "name": "NS_MPA_fix",
               "influence": 1.0,
               "construction": false
             }
@@ -35121,7 +35121,7 @@
             "lineColor": "#166AC7FF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "LongDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
             "pointColor": "#000000FF",
             "pointSize": 0.4,
@@ -36819,7 +36819,7 @@
         ]
       },
       {
-        "layer_name": "NS_Marine_Protected_Areas",
+        "layer_name": "NS_MPA_fix",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Marine Protected Areas",

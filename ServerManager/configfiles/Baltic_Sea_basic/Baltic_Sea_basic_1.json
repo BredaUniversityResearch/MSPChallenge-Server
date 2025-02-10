@@ -8404,7 +8404,7 @@
           "name": "Birds, Mammals, Benthos",
           "entries": [
             {
-              "name": "Seal",
+              "name": "Seals",
               "id": 33,
               "multiline": false,
               "link": "Seals"
@@ -20864,7 +20864,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA",
+              "name": "BS_MPA_new",
               "influence": 1.0,
               "construction": false
             },
@@ -20919,7 +20919,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA",
+              "name": "BS_MPA_new",
               "influence": 1.0,
               "construction": false
             },
@@ -20974,7 +20974,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA",
+              "name": "BS_MPA_new",
               "influence": 1.0,
               "construction": false
             },
@@ -22061,7 +22061,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           }
         },
@@ -23184,7 +23184,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "1": {
@@ -23212,7 +23212,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "2": {
@@ -23240,7 +23240,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "3": {
@@ -23268,7 +23268,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "4": {
@@ -23296,7 +23296,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "5": {
@@ -23324,7 +23324,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           }
         },
@@ -23861,7 +23861,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "1": {
@@ -23889,7 +23889,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "2": {
@@ -23917,7 +23917,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           }
         },
@@ -23993,7 +23993,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "1": {
@@ -24021,7 +24021,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "2": {
@@ -24049,7 +24049,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "3": {
@@ -24077,7 +24077,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "4": {
@@ -24105,7 +24105,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "5": {
@@ -24133,7 +24133,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           }
         },
@@ -24209,7 +24209,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           },
           "1": {
@@ -24237,7 +24237,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           },
           "2": {
@@ -24265,7 +24265,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           },
           "3": {
@@ -24293,7 +24293,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           },
           "4": {
@@ -24321,7 +24321,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           }
         },
@@ -24397,7 +24397,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "1": {
@@ -24425,7 +24425,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "2": {
@@ -24453,7 +24453,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "3": {
@@ -24481,7 +24481,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "4": {
@@ -24509,7 +24509,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "5": {
@@ -24537,7 +24537,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           }
         },
@@ -25544,7 +25544,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           }
         },
@@ -27746,7 +27746,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sand_and_Gravel_Extraction"
           }
         },
@@ -31121,7 +31121,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "1": {
@@ -31149,7 +31149,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "2": {
@@ -31177,7 +31177,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "3": {
@@ -31205,7 +31205,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "4": {
@@ -31233,7 +31233,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "5": {
@@ -31261,7 +31261,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "6": {
@@ -31289,7 +31289,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           }
         },
@@ -31758,7 +31758,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "1": {
@@ -31786,7 +31786,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "2": {
@@ -31814,7 +31814,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "3": {
@@ -31842,7 +31842,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "4": {
@@ -31870,7 +31870,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "5": {
@@ -31898,7 +31898,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           }
         },
@@ -32087,7 +32087,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Converter_Station"
           }
         },
@@ -32262,7 +32262,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Interconnectors_(electricity)"
           }
         },
@@ -32479,7 +32479,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           },
           "1": {
@@ -32507,7 +32507,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           },
           "2": {
@@ -32535,7 +32535,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           },
           "3": {
@@ -32563,7 +32563,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           },
           "4": {
@@ -32591,7 +32591,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           }
         },
@@ -32667,7 +32667,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           },
           "1": {
@@ -32695,7 +32695,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           },
           "2": {
@@ -32723,7 +32723,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           },
           "3": {
@@ -32751,7 +32751,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           },
           "4": {
@@ -32779,7 +32779,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           }
         },
@@ -33249,7 +33249,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "BS_MPA",
+        "layer_name": "BS_MPA_new",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Marine Protected Areas",
