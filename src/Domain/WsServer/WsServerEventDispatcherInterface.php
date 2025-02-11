@@ -12,6 +12,7 @@ interface WsServerEventDispatcherInterface
     const EVENT_ON_CLIENT_MESSAGE_RECEIVED = 'EVENT_ON_CLIENT_MESSAGE_RECEIVED';
     const EVENT_ON_CLIENT_MESSAGE_SENT = 'EVENT_ON_CLIENT_MESSAGE_SENT';
     const EVENT_ON_STATS_UPDATE = 'EVENT_ON_STATS_UPDATE';
+    const EVENT_ON_NEXT_VIEW = 'EVENT_ON_NEXT_VIEW';
 
     /**
      * @param object|NameAwareEvent $event

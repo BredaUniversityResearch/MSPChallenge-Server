@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins\Tick;
 
+use App\Domain\Common\Context;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\WsServer\Plugins\Plugin;
 use Exception;
@@ -29,8 +30,8 @@ class TickWsServerPlugin extends Plugin
 
     protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function () {
-            return $this->tick()
+        return tpf(function (Context $context) {
+            return $this->tick($context)
                 ->then(function (int $gameSessionId) {
                     $this->addOutput(
                         'just finished tick for game session id: ' . $gameSessionId,
@@ -43,7 +44,7 @@ class TickWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function tick(): PromiseInterface
+    private function tick(?Context $context): PromiseInterface
     {
         $gameSessionIdFilter = $this->getGameSessionIdFilter();
         if ($gameSessionIdFilter != null && $gameSessionIdFilter !== $this->gameSessionId) {
@@ -57,17 +58,11 @@ class TickWsServerPlugin extends Plugin
             'starting "tick" for game session: ' . $this->gameSessionId,
             OutputInterface::VERBOSITY_VERY_VERBOSE
         );
-        $tickTimeStart = microtime(true);
         return $this->getGameTick($this->gameSessionId)->Tick(
             $this->isDebugOutputEnabled()
         )
         ->then(
-            function () use ($tickTimeStart) {
-                $this->getMeasurementCollectionManager()->addToMeasurementCollection(
-                    $this->getName(),
-                    (string)$this->gameSessionId,
-                    microtime(true) - $tickTimeStart
-                );
+            function () {
                 return $this->gameSessionId; // just to identify this tick
             }
         );

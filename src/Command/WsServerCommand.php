@@ -3,11 +3,14 @@
 namespace App\Command;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Domain\WsServer\Console\DefaultView;
+use App\Domain\WsServer\Console\ProfilerView;
 use App\Domain\WsServer\Plugins\BootstrapWsServerPlugin;
 use App\Domain\WsServer\Plugins\PluginHelper;
 use App\Domain\WsServer\WsServer;
-use App\Domain\WsServer\WsServerConsoleHelper;
 use App\Domain\WsServer\WsServerOutput;
+use App\Domain\WsServer\Console\ClientsView;
+use App\Domain\WsServer\Console\WsServerConsoleHelper;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,22 +30,17 @@ class WsServerCommand extends Command
     const OPTION_ADDRESS = 'address';
     const OPTION_GAME_SESSION_ID = 'game-session-id';
     const OPTION_FIXED_TERMINAL_HEIGHT = 'fixed-terminal-height';
-    const OPTION_TABLE_OUTPUT = 'table-output';
-    const OPTION_MESSAGE_MAX_LINES = 'message-max-lines';
     const OPTION_MESSAGE_FILTER = 'message-filter';
     const OPTION_SERVER_ID = 'server-id';
 
     protected static $defaultName = 'app:ws-server';
 
-    private WsServer $wsServer;
-
     public function __construct(
-        WsServer $wsServer,
+        private readonly WsServer $wsServer,
         // below is required by legacy to be auto-wire, has its own ::getInstance()
         SymfonyToLegacyHelper $helper,
         PluginHelper $pluginHelper
     ) {
-        $this->wsServer = $wsServer;
         parent::__construct();
     }
 
@@ -74,18 +72,6 @@ class WsServerCommand extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'fixed terminal height, the number of rows allowed'
-            )
-            ->addOption(
-                self::OPTION_TABLE_OUTPUT,
-                't',
-                InputOption::VALUE_NONE,
-                'enable client connections table output with statistics'
-            )
-            ->addOption(
-                self::OPTION_MESSAGE_MAX_LINES,
-                'l',
-                InputOption::VALUE_REQUIRED,
-                'the maximum number of lines for each message'
             )
             ->addOption(
                 self::OPTION_MESSAGE_FILTER,
@@ -130,14 +116,16 @@ class WsServerCommand extends Command
 
         // the console helper will handle console output using events dispatched by the wsServer
         /** @var ConsoleOutput $output */
-        $consoleHelper = new WsServerConsoleHelper(
-            $this->wsServer,
-            $output,
-            $input->getOption(self::OPTION_TABLE_OUTPUT),
-            $input->getOption(self::OPTION_MESSAGE_MAX_LINES),
-            $input->getOption(self::OPTION_MESSAGE_FILTER),
-        );
-        $consoleHelper->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
+        $defaultView = new DefaultView($output);
+        $clientView = new ClientsView($output);
+        $clientView
+            ->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
+        $profilerView = new ProfilerView($output);
+        $consoleHelper = new WsServerConsoleHelper($this->wsServer);
+        $consoleHelper
+            ->registerView($defaultView)
+            ->registerView($clientView)
+            ->registerView($profilerView);
 
         $server = IoServer::factory(
             new HttpServer(new \Ratchet\WebSocket\WsServer($this->wsServer)),
@@ -147,7 +135,7 @@ class WsServerCommand extends Command
         $this->wsServer->registerLoop($server->loop);
 
         // plugins
-        $this->wsServer->registerPlugin(new BootstrapWsServerPlugin($input->getOption(self::OPTION_TABLE_OUTPUT)));
+        $this->wsServer->registerPlugin(new BootstrapWsServerPlugin());
 
         if (function_exists('\sapi_windows_set_ctrl_handler')) {
             \sapi_windows_set_ctrl_handler(function (int $event) use ($server) {

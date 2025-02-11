@@ -8,6 +8,7 @@ use React\Promise\ExtendedPromiseInterface;
 
 class ToPromiseFunction
 {
+    private ?Context $context = null;
     private Closure $function;
 
     public function __construct(Closure $function)
@@ -17,6 +18,16 @@ class ToPromiseFunction
 
     public function __invoke(): ExtendedPromiseInterface&CancellablePromiseInterface
     {
-        return ($this->function)();
+        return ($this->function)($this->getContext());
+    }
+
+    public function getContext(): ?Context
+    {
+        return $this->context;
+    }
+
+    public function setContext(Context $context): void
+    {
+        $this->context = $context;
     }
 }
