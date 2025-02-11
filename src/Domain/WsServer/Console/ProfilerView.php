@@ -39,7 +39,7 @@ class ProfilerView extends TableViewBase
                 Util::getHumanReadableSize(memory_get_usage()));
     }
 
-    private function printHierarchy(string $indent, string $parent = ''): array
+    private function printHierarchy(string $indent, string $parent = 'root'): array
     {
         $rows = [];
         $section = current($this->stopwatch->getSections());
@@ -84,7 +84,7 @@ class ProfilerView extends TableViewBase
             ];
 
             $newIndent = $indent . ($isLast ? '  ' : '│ ');
-            $this->printHierarchy($newIndent, $event->getName());
+            $rows = array_merge($rows, $this->printHierarchy($newIndent, $parent.'.'.$label));
         }
 
         return $rows;
@@ -92,12 +92,16 @@ class ProfilerView extends TableViewBase
 
     private function isChildOf($event, string $parent): bool
     {
-        return $parent === '' || str_starts_with($event->getName(), $parent . '.');
+        $prefix = $parent . '.';
+        return str_starts_with($event->getName(), $prefix) &&
+            (!str_contains(substr($event->getName(), strlen($prefix)), '.'));
     }
 
     private function getLabel($event, string $parent): string
     {
         $name = $event->getName();
-        return $parent === '' ? $name : substr($name, strlen($parent) + 1);
+        $relativeName = substr($name, strlen($parent) + 1);
+        $dotPosition = strpos($relativeName, '.');
+        return $dotPosition === false ? $relativeName : substr($relativeName, 0, $dotPosition);
     }
 }

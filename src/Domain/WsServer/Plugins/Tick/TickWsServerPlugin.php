@@ -58,8 +58,9 @@ class TickWsServerPlugin extends Plugin
             'starting "tick" for game session: ' . $this->gameSessionId,
             OutputInterface::VERBOSITY_VERY_VERBOSE
         );
-        return $this->getGameTick($this->gameSessionId)->Tick(
-            $this->isDebugOutputEnabled()
+        return $this->getGameTick($this->gameSessionId)->tick(
+            $this->isDebugOutputEnabled(),
+            $context
         )
         ->then(
             function () {
@@ -75,9 +76,11 @@ class TickWsServerPlugin extends Plugin
     {
         if ($this->gameTick === null) {
             $gameTick = new GameTick();
-            $gameTick->setAsync(true);
-            $gameTick->setGameSessionId($gameSessionId);
-            $gameTick->setAsyncDatabase($this->getServerManager()->getGameSessionDbConnection($gameSessionId));
+            $gameTick
+                ->setAsync(true)
+                ->setGameSessionId($gameSessionId)
+                ->setAsyncDatabase($this->getServerManager()->getGameSessionDbConnection($gameSessionId))
+                ->setStopwatch($this->getStopwatch());
             $this->gameTick = $gameTick;
         }
         return $this->gameTick;
