@@ -35,8 +35,8 @@ interface PluginInterface
 
     public function getGameSessionIdFilter(): ?int;
     public function setGameSessionIdFilter(?int $gameSessionIdFilter): self;
-    public function getStopwatch(): Stopwatch;
-    public function setStopwatch(Stopwatch $stopwatch): self;
+    public function getStopwatch(): ?Stopwatch;
+    public function setStopwatch(?Stopwatch $stopwatch): self;
     public function getClientConnectionResourceManager(): ClientConnectionResourceManagerInterface;
     public function setClientConnectionResourceManager(
         ClientConnectionResourceManagerInterface $clientConnectionResourceManager

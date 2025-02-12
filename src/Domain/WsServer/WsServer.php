@@ -61,10 +61,10 @@ class WsServer extends EventDispatcher implements
     /**
      * @var PluginInterface[]
      */
-    private array $pluginsUnregistered = [];
+    private array $pluginsToRegister = [];
 
     private DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper;
-    private Stopwatch $stopwatch;
+    private ?Stopwatch $stopwatch = null;
 
     public function getDoctrineMigrationsDependencyFactoryHelper(): DoctrineMigrationsDependencyFactoryHelper
     {
@@ -77,8 +77,6 @@ class WsServer extends EventDispatcher implements
         \App\Domain\API\APIHelper $apiHelper
     ) {
         $this->doctrineMigrationsDependencyFactoryHelper = $doctrineMigrationsDependencyFactoryHelper;
-        $this->stopwatch = new Stopwatch(true); // true = more precision
-        $this->stopwatch->start(Context::root()->getPath());
 
         // for backwards compatibility, to prevent missing request data errors
         $_SERVER['REQUEST_URI'] = '';
@@ -86,9 +84,15 @@ class WsServer extends EventDispatcher implements
         parent::__construct();
     }
 
-    public function getStopwatch(): Stopwatch
+    public function getStopwatch(): ?Stopwatch
     {
         return $this->stopwatch;
+    }
+
+    public function setStopwatch(?Stopwatch $stopwatch): self
+    {
+        $this->stopwatch = $stopwatch;
+        return $this;
     }
 
     public function setGameSessionIdFilter(?int $gameSessionIdFilter): self
@@ -220,7 +224,7 @@ class WsServer extends EventDispatcher implements
 
         // wait for loop to be registered
         if (null === $this->loop) {
-            $this->pluginsUnregistered[$plugin->getName()] = $plugin;
+            $this->pluginsToRegister[$plugin->getName()] = $plugin;
             return $this;
         }
 
@@ -232,7 +236,7 @@ class WsServer extends EventDispatcher implements
     public function unregisterPlugin(PluginInterface $plugin): void
     {
         unset($this->plugins[$plugin->getName()]);
-        unset($this->pluginsUnregistered[$plugin->getName()]);
+        unset($this->pluginsToRegister[$plugin->getName()]);
         if (null === $this->loop) {
             return;
         }
@@ -281,8 +285,8 @@ class WsServer extends EventDispatcher implements
         $this->loop = $loop;
 
         // register plugins to loop
-        while (!empty($this->pluginsUnregistered)) {
-            $plugin = array_pop($this->pluginsUnregistered);
+        while (!empty($this->pluginsToRegister)) {
+            $plugin = array_pop($this->pluginsToRegister);
             $plugin->registerToLoop($this->loop);
             $this->plugins[$plugin->getName()] = $plugin;
         }

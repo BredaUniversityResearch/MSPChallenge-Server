@@ -19,6 +19,10 @@ class ProfilerView extends TableViewBase
 
     protected function process(NameAwareEvent $event): void
     {
+        // stopwatch is required
+        if (!$this->stopwatch) {
+            return;
+        }
         $this->table
             ->setStyle('box')
             ->setHeaderTitle('Profiler')

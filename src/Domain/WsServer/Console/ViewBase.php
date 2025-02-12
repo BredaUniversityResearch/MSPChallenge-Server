@@ -12,7 +12,7 @@ abstract class ViewBase implements ViewInterface
 {
     protected ConsoleOutput $output;
     protected ClientConnectionResourceManagerInterface $clientConnectionResourceManager;
-    protected Stopwatch $stopwatch;
+    protected ?Stopwatch $stopwatch;
     protected bool $renderingEnabled = false;
 
     public function __construct(ConsoleOutput $output)
@@ -26,7 +26,7 @@ abstract class ViewBase implements ViewInterface
         $this->clientConnectionResourceManager = $clientConnectionResourceManager;
     }
 
-    public function setStopwatch(Stopwatch $stopwatch): void
+    public function setStopwatch(?Stopwatch $stopwatch): void
     {
         $this->stopwatch = $stopwatch;
     }

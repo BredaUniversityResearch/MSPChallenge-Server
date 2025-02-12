@@ -2,6 +2,8 @@
 
 namespace App\Command;
 
+use App\Domain\Common\Context;
+use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Domain\WsServer\Console\DefaultView;
 use App\Domain\WsServer\Console\ProfilerView;
@@ -30,6 +32,7 @@ class WsServerCommand extends Command
     const OPTION_ADDRESS = 'address';
     const OPTION_GAME_SESSION_ID = 'game-session-id';
     const OPTION_FIXED_TERMINAL_HEIGHT = 'fixed-terminal-height';
+    const OPTION_PROFILER = 'profiler-enabled';
     const OPTION_MESSAGE_FILTER = 'message-filter';
     const OPTION_SERVER_ID = 'server-id';
 
@@ -51,21 +54,21 @@ class WsServerCommand extends Command
                 self::OPTION_PORT,
                 'p',
                 InputOption::VALUE_REQUIRED,
-                'the server port to use',
+                '(p)ort: the server port to use',
                 (int)($_ENV['WS_SERVER_PORT'] ?? 45001)
             )
             ->addOption(
                 self::OPTION_ADDRESS,
                 'a',
                 InputOption::VALUE_REQUIRED,
-                'the server address to use',
+                '(a)ddress: the server address to use',
                 '0.0.0.0'
             )
             ->addOption(
                 self::OPTION_GAME_SESSION_ID,
                 's',
                 InputOption::VALUE_REQUIRED,
-                'only clients with this Game session ID will be allowed keep a connection'
+                '(s)ession id: only clients with this Game session ID will be allowed keep a connection'
             )
             ->addOption(
                 self::OPTION_FIXED_TERMINAL_HEIGHT,
@@ -74,16 +77,22 @@ class WsServerCommand extends Command
                 'fixed terminal height, the number of rows allowed'
             )
             ->addOption(
+                self::OPTION_PROFILER,
+                'm',
+                InputOption::VALUE_NONE,
+                '(m)easurements: start profiling'
+            )
+            ->addOption(
                 self::OPTION_MESSAGE_FILTER,
                 'f',
                 InputOption::VALUE_REQUIRED,
-                'only show messages containing this text'
+                '(f)ilter messages: only show messages containing this text'
             )
             ->addOption(
                 self::OPTION_SERVER_ID,
                 'i',
                 InputOption::VALUE_REQUIRED,
-                'the server identifier'
+                '(i)d for the server'
             );
     }
 
@@ -113,6 +122,11 @@ class WsServerCommand extends Command
         if (null !== $serverId = $input->getOption(self::OPTION_SERVER_ID)) {
             $this->wsServer->setId($serverId);
         }
+        if ($input->getOption(self::OPTION_PROFILER)) {
+            $stopwatch = new Stopwatch(true);
+            $stopwatch->start(Context::root()->getPath());
+            $this->wsServer->setStopwatch($stopwatch);
+        }
 
         // the console helper will handle console output using events dispatched by the wsServer
         /** @var ConsoleOutput $output */
@@ -120,12 +134,14 @@ class WsServerCommand extends Command
         $clientView = new ClientsView($output);
         $clientView
             ->setTerminalHeight($input->getOption(self::OPTION_FIXED_TERMINAL_HEIGHT));
-        $profilerView = new ProfilerView($output);
         $consoleHelper = new WsServerConsoleHelper($this->wsServer);
         $consoleHelper
             ->registerView($defaultView)
-            ->registerView($clientView)
-            ->registerView($profilerView);
+            ->registerView($clientView);
+        if ($input->getOption(self::OPTION_PROFILER)) {
+            $profilerView = new ProfilerView($output);
+            $consoleHelper->registerView($profilerView);
+        }
 
         $server = IoServer::factory(
             new HttpServer(new \Ratchet\WebSocket\WsServer($this->wsServer)),

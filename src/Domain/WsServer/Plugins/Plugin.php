@@ -154,15 +154,12 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     /**
      * @throws Exception
      */
-    public function getStopwatch(): Stopwatch
+    public function getStopwatch(): ?Stopwatch
     {
-        if (null === $this->stopwatch) {
-            throw new Exception('Attempt to retrieve unknown Stopwatch');
-        }
         return $this->stopwatch;
     }
 
-    public function setStopwatch(Stopwatch $stopwatch): self
+    public function setStopwatch(?Stopwatch $stopwatch): self
     {
         $this->stopwatch = $stopwatch;
         return $this;
@@ -232,10 +229,10 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
             $tpf = $this->onCreatePromiseFunction($executionId);
             $context = Context::root()->enter($this->getName());
             $tpf->setContext($context);
-            $this->getStopwatch()->start($context->getPath());
+            $this->getStopwatch()?->start($context->getPath());
             return ($tpf)()
                 ->then(function () use ($executionId, $context) {
-                    $this->getStopwatch()->stop($context->getPath());
+                    $this->getStopwatch()?->stop($context->getPath());
                     $this->addOutput(
                         'Plugin '.$this->getName().' just finished',
                         OutputInterface::VERBOSITY_DEBUG
