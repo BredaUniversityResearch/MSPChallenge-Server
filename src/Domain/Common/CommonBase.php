@@ -6,6 +6,7 @@ use App\Domain\API\v1\Database;
 use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Log;
 use App\Domain\API\v1\Security;
+use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Log\LogContainerInterface;
 use App\Domain\Log\LogContainerTrait;
@@ -32,6 +33,7 @@ abstract class CommonBase implements LogContainerInterface
     private bool $async = false;
     private ?Log $logger = null;
 
+    private ?Stopwatch $stopwatch = null;
     protected function getDatabase(): Database
     {
         return Database::GetInstance($this->getGameSessionId());
@@ -61,9 +63,10 @@ abstract class CommonBase implements LogContainerInterface
         return $this->asyncDatabase;
     }
 
-    public function setAsyncDatabase(Connection $asyncDatabase): void
+    public function setAsyncDatabase(Connection $asyncDatabase): static
     {
         $this->asyncDatabase = $asyncDatabase;
+        return $this;
     }
 
     public function getGameSessionId(): int
@@ -76,9 +79,10 @@ abstract class CommonBase implements LogContainerInterface
         return GameSession::GetGameSessionIdForCurrentRequest();
     }
 
-    public function setGameSessionId(?int $gameSessionId): void
+    public function setGameSessionId(?int $gameSessionId): static
     {
         $this->gameSessionId = $gameSessionId;
+        return $this;
     }
 
     public function getToken(): ?string
@@ -101,9 +105,10 @@ abstract class CommonBase implements LogContainerInterface
         return $this->async;
     }
 
-    public function setAsync(bool $async): void
+    public function setAsync(bool $async): static
     {
         $this->async = $async;
+        return $this;
     }
 
     /**
@@ -115,6 +120,7 @@ abstract class CommonBase implements LogContainerInterface
         $other->setAsyncDatabase($this->getAsyncDatabase());
         $other->setToken($this->getToken());
         $other->setAsync($this->isAsync());
+        $other->setStopwatch($this->getStopwatch());
     }
 
     /**
@@ -127,6 +133,17 @@ abstract class CommonBase implements LogContainerInterface
             $this->asyncDataTransferTo($this->logger);
         }
         return $this->logger;
+    }
+
+    public function getStopwatch(): ?Stopwatch
+    {
+        return $this->stopwatch;
+    }
+
+    public function setStopwatch(?Stopwatch $stopwatch): static
+    {
+        $this->stopwatch = $stopwatch;
+        return $this;
     }
 
     /**

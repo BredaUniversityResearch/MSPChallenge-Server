@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\Context;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use Blackfire\Client;
@@ -89,7 +90,7 @@ class BlackfireWsServerPlugin extends Plugin implements EventSubscriberInterface
 
     protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function () {
+        return tpf(function (?Context $context) {
             return resolveOnFutureTick(new Deferred())->promise()->then(function () {
                 // nothing to do here.
             });

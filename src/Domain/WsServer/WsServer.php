@@ -2,9 +2,10 @@
 namespace App\Domain\WsServer;
 
 use App\Domain\API\v1\Security;
+use App\Domain\Common\Context;
 use App\Domain\Common\GetConstantsTrait;
+use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Event\NameAwareEvent;
-use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\DoctrineMigrationsDependencyFactoryHelper;
 use App\Domain\WsServer\Plugins\PluginInterface;
@@ -14,17 +15,17 @@ use Exception;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Collection;
 use PDOException;
-use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
+use Ratchet\MessageComponentInterface;
 use React\EventLoop\LoopInterface;
 use React\Promise\PromiseInterface;
+use React\Stream\ReadableResourceStream;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class WsServer extends EventDispatcher implements
     WsServerEventDispatcherInterface,
     ClientHeaderKeys,
     MessageComponentInterface,
-    MeasurementCollectionManagerInterface,
     ClientConnectionResourceManagerInterface,
     ServerManagerInterface,
     WsServerInterface
@@ -37,8 +38,6 @@ class WsServer extends EventDispatcher implements
 
     private ?string $id = null;
     private ?int $gameSessionIdFilter = null;
-    private array $stats = [];
-    private array $medianValues = [];
 
     private ?LoopInterface $loop = null;
 
@@ -62,18 +61,14 @@ class WsServer extends EventDispatcher implements
     /**
      * @var PluginInterface[]
      */
-    private array $pluginsUnregistered = [];
+    private array $pluginsToRegister = [];
 
     private DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper;
+    private ?Stopwatch $stopwatch = null;
 
     public function getDoctrineMigrationsDependencyFactoryHelper(): DoctrineMigrationsDependencyFactoryHelper
     {
         return $this->doctrineMigrationsDependencyFactoryHelper;
-    }
-
-    public function getStats(): array
-    {
-        return $this->stats;
     }
 
     public function __construct(
@@ -87,6 +82,17 @@ class WsServer extends EventDispatcher implements
         $_SERVER['REQUEST_URI'] = '';
 
         parent::__construct();
+    }
+
+    public function getStopwatch(): ?Stopwatch
+    {
+        return $this->stopwatch;
+    }
+
+    public function setStopwatch(?Stopwatch $stopwatch): self
+    {
+        $this->stopwatch = $stopwatch;
+        return $this;
     }
 
     public function setGameSessionIdFilter(?int $gameSessionIdFilter): self
@@ -122,7 +128,7 @@ class WsServer extends EventDispatcher implements
         return $this->clientInfoContainer[$connResourceId];
     }
 
-    public function onOpen(ConnectionInterface $conn)
+    public function onOpen(ConnectionInterface $conn): void
     {
         $conn = new WsServerConnection($conn);
         $conn->setEventDispatcher($this);
@@ -166,7 +172,7 @@ class WsServer extends EventDispatcher implements
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_CONNECTED, $conn->resourceId, $headers));
     }
 
-    public function onMessage(ConnectionInterface $from, $msg)
+    public function onMessage(ConnectionInterface $from, $msg): void
     {
         $from = new WsServerConnection($from);
         if (!array_key_exists($from->resourceId, $this->clientHeaders)) {
@@ -179,7 +185,7 @@ class WsServer extends EventDispatcher implements
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_MESSAGE_RECEIVED, $from->resourceId, $clientInfo));
     }
 
-    public function onClose(ConnectionInterface $conn)
+    public function onClose(ConnectionInterface $conn): void
     {
         $conn = new WsServerConnection($conn);
         unset($this->clients[$conn->resourceId]);
@@ -190,7 +196,7 @@ class WsServer extends EventDispatcher implements
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_DISCONNECTED, $conn->resourceId));
     }
 
-    public function onError(ConnectionInterface $conn, Exception $e)
+    public function onError(ConnectionInterface $conn, Exception $e): void
     {
         $conn = new WsServerConnection($conn);
         // detect PDOException, could also be a previous exception
@@ -207,50 +213,18 @@ class WsServer extends EventDispatcher implements
         $conn->close();
     }
 
-    public function addToMeasurementCollection(string $name, string $measurementId, float $measurementTime)
-    {
-        // init
-        $this->stats[$name.'.worst'] ??= 0;
-        $this->stats[$name.'.median'] ??= 0;
-
-        $this->medianValues[$name][$measurementId] = $measurementTime;
-        // only keep the last 20 measures
-        foreach ($this->medianValues as &$medianValues) {
-            $medianValues = array_slice($medianValues, -20, null, true);
-        }
-        unset($medianValues);
-
-        // reset "worst" after 10 s
-        static $startTime = null;
-        if ($startTime == null) {
-            $startTime = microtime(true);
-        }
-        if (microtime(true) - $startTime > 10) {
-            $startTime = microtime(true);
-            $this->stats[$name.'.worst'] = 0;
-        }
-
-        // update measurements
-        $this->stats[$name.'.worst'] = max(
-            $this->stats[$name.'.worst'] ?? 0,
-            $measurementTime
-        );
-        $this->stats[$name.'.worst_ever'] = max($this->stats[$name.'.worst_ever'] ?? 0, $measurementTime);
-        $this->stats[$name.'.median'] = Util::getMedian($this->medianValues[$name]);
-    }
-
     public function registerPlugin(PluginInterface $plugin): self
     {
         $plugin
             ->setGameSessionIdFilter($this->gameSessionIdFilter)
-            ->setMeasurementCollectionManager($this)
+            ->setStopwatch($this->stopwatch)
             ->setClientConnectionResourceManager($this)
             ->setServerManager($this)
             ->setWsServer($this);
 
         // wait for loop to be registered
         if (null === $this->loop) {
-            $this->pluginsUnregistered[$plugin->getName()] = $plugin;
+            $this->pluginsToRegister[$plugin->getName()] = $plugin;
             return $this;
         }
 
@@ -259,10 +233,10 @@ class WsServer extends EventDispatcher implements
         return $this;
     }
 
-    public function unregisterPlugin(PluginInterface $plugin)
+    public function unregisterPlugin(PluginInterface $plugin): void
     {
         unset($this->plugins[$plugin->getName()]);
-        unset($this->pluginsUnregistered[$plugin->getName()]);
+        unset($this->pluginsToRegister[$plugin->getName()]);
         if (null === $this->loop) {
             return;
         }
@@ -311,14 +285,21 @@ class WsServer extends EventDispatcher implements
         $this->loop = $loop;
 
         // register plugins to loop
-        while (!empty($this->pluginsUnregistered)) {
-            $plugin = array_pop($this->pluginsUnregistered);
+        while (!empty($this->pluginsToRegister)) {
+            $plugin = array_pop($this->pluginsToRegister);
             $plugin->registerToLoop($this->loop);
             $this->plugins[$plugin->getName()] = $plugin;
         }
 
         $loop->addPeriodicTimer(2, function () {
             $this->dispatch(new NameAwareEvent(WsServerEventDispatcherInterface::EVENT_ON_STATS_UPDATE));
+        });
+
+        $stdin = new ReadableResourceStream(STDIN, $loop);
+        $stdin->on('data', function ($input) {
+            if ($input === 'n'.PHP_EOL) {
+                $this->dispatch(new NameAwareEvent(WsServerEventDispatcherInterface::EVENT_ON_NEXT_VIEW));
+            }
         });
 
         return $this;

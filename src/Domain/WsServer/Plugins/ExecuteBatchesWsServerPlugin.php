@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\Context;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\API\v1\Batch;
 use App\Domain\Event\NameAwareEvent;
@@ -42,7 +43,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
 
     protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function () use ($executionId) {
+        return tpf(function (Context $context) use ($executionId) {
             if ($this->firstStart) {
                 // allow clients to connect in the next 10 sec. todo: can we improve this?
                 $this->getLoop()->addTimer(10, function () {
@@ -51,7 +52,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                 $this->firstStart = false;
             }
 
-            return $this->executeBatches($executionId)
+            return $this->executeBatches($executionId, $context)
                 ->then(function (array $clientToBatchResultContainer) {
                     $this->addOutput(
                         'just finished "executeBatches" for connections: ' .
@@ -103,7 +104,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function executeBatches(string $executionId): PromiseInterface
+    private function executeBatches(string $executionId, Context $context): PromiseInterface
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();
@@ -114,11 +115,6 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
             foreach ($clientInfoContainer as $connResourceId => $clientInfo) {
-                $timeStart = microtime(true);
-                $this->addOutput(
-                    'Starting "executeBatches" for: ' . $connResourceId,
-                    OutputInterface::VERBOSITY_VERY_VERBOSE
-                );
                 $promises[$connResourceId] = $this->getBatch($connResourceId)
                     ->executeNextQueuedBatchFor(
                         $clientInfo['team_id'],
@@ -136,15 +132,10 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                         }
                     )
                 ->then(
-                    function (array $batchResultContainer) use ($connResourceId, $timeStart) {
+                    function (array $batchResultContainer) use ($connResourceId) {
                         $this->addOutput(
                             'Created "executeBatches" payload for: ' . $connResourceId,
                             OutputInterface::VERBOSITY_VERY_VERBOSE
-                        );
-                        $this->getMeasurementCollectionManager()->addToMeasurementCollection(
-                            $this->getName(),
-                            $connResourceId,
-                            microtime(true) - $timeStart
                         );
                         if (empty($batchResultContainer)) {
                             return [];

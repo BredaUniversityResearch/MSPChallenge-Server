@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\Context;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\Plugins\Latest\LatestWsServerPlugin;
@@ -30,7 +31,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
         return 0; // 0 meaning no interval, no repeating
     }
 
-    public function __construct(private readonly bool $tableOutput = false)
+    public function __construct()
     {
         parent::__construct('bootstrap');
         $this->setMessageVerbosity(OutputInterface::VERBOSITY_NORMAL);
@@ -40,7 +41,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
 
     protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function () {
+        return tpf(function (?Context $context) {
             $this->changeState(self::STATE_AWAIT_PREREQUISITES);
             // meaning bootstrap plugin itself will not register any promises, but since it calls registerPlugin
             //   on other plugins, those will be registered
@@ -119,9 +120,6 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
         }
 
         // register other plugins
-        if ($this->tableOutput) {
-            $this->getWsServer()->registerPlugin(new LoopStatsWsServerPlugin());
-        }
         $this->getWsServer()->registerPlugin($sequencerPlugin);
         $this->getWsServer()->registerPlugin($ticksHandlerPlugin);
 

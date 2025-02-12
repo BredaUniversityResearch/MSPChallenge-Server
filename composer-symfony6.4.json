@@ -19,7 +19,7 @@
         "ext-sodium": "*",
         "ext-zip": "*",
         "blackfire/php-sdk": "^1.33",
-        "cboden/ratchet": "^0.4",
+        "cboden/ratchet": "dev-master",
         "clue/http-proxy-react": "^1.8",
         "doctrine/annotations": "^2.0",
         "doctrine/doctrine-bundle": "^2.11",
@@ -37,7 +37,7 @@
         "phpunit/phpunit": "^9.5",
         "predis/predis": "^2.2",
         "react/http": "^1.5",
-        "react/mysql": "^0.5.6",
+        "react/mysql": "^0.6",
         "react/promise": "2.10.*",
         "shivas/versioning-bundle": "^4.0",
         "swaggest/json-schema": "^0.12.42",
@@ -181,6 +181,10 @@
         {
             "type": "vcs",
             "url": "git@github.com:BredaUniversityResearch/composer-git-hooks.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:BredaUniversityResearch/Ratchet.git"
         }
     ]    
 }

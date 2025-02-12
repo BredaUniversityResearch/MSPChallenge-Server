@@ -4,6 +4,7 @@ namespace App\Domain\WsServer\Plugins\Tick;
 
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
+use App\Domain\Common\Context;
 use App\Domain\Common\MSPBrowserFactory;
 use App\Domain\Services\ConnectionManager;
 use App\SilentFailException;
@@ -22,26 +23,51 @@ class GameTick extends TickBase
      * Tick the game server, updating the plans if required
      *
      * @param bool $showDebug
+     * @param Context|null $context
      * @return PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public function tick(bool $showDebug = false): PromiseInterface
+    public function tick(bool $showDebug = false, ?Context $context = null): PromiseInterface
     {
+        if (null === $context) {
+            throw new Exception('Context is required');
+        }
         // fetch game information, incl. state name
+        $context = $context->enter('GameTick::tick');
+        $this->getStopwatch()?->start($context->getPath());
         return $this->getTickData()
-            ->then(function (Result $result) use ($showDebug) {
+            ->then(function (Result $result) use ($showDebug, $context) {
+                $this->getStopwatch()?->stop($context->getPath());
                 if (null !== $tickData = $result->fetchFirstRow()) {
-                    if (null !== $promise = $this->tryTickServer($tickData, $showDebug)) {
+                    $contextTryTickServer = $context->enter('tryTickServer');
+                    $promise = $this->tryTickServer($tickData, $showDebug, $contextTryTickServer);
+                    if (null !== $promise) {
+                        $this->getStopwatch()?->start($contextTryTickServer->getPath());
                         return $promise
-                            ->then(function () {
+                            ->then(function () use ($contextTryTickServer) {
+                                $this->getStopwatch()?->stop($contextTryTickServer->getPath());
                                 // only activate this after the Tick call has moved out of the client and into the
                                 //   Watchdog
-                                return $this->updateGameDetailsAtServerManager();
+                                $contextUpdateGameDetails =
+                                    $contextTryTickServer->enter('updateGameDetailsAtServerManager');
+                                $this->getStopwatch()?->start($contextUpdateGameDetails->getPath());
+                                return $this->updateGameDetailsAtServerManager()
+                                    ->then(function ($result) use ($contextUpdateGameDetails) {
+                                        $this->getStopwatch()?->stop($contextUpdateGameDetails->getPath());
+                                        return $result;
+                                    });
                             });
                     }
                 }
+                $context = $context->enter('updateGameDetailsAtServerManager');
+                $this->getStopwatch()?->start($context->getPath());
                 // only activate this after the Tick call has moved out of the client and into the Watchdog
-                return $this->updateGameDetailsAtServerManager();
+                return $this->updateGameDetailsAtServerManager()
+                    ->then(function ($result) use ($context) {
+                        $this->getStopwatch()?->stop($context->getPath());
+                        return $result;
+                    });
             });
     }
 
@@ -71,7 +97,7 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    private function tryTickServer(array $tickData, bool $showDebug): ?PromiseInterface
+    private function tryTickServer(array $tickData, bool $showDebug, Context $context): ?PromiseInterface
     {
         $state = $tickData['state'];
         // no "tick" required for these state names
@@ -107,7 +133,7 @@ class GameTick extends TickBase
             return null;
         }
 
-        return $this->serverTickInternal($showDebug)
+        return $this->serverTickInternal($showDebug, $context)
             ->otherwise(function (SilentFailException $e) {
                 // Handle the rejection, and don't propagate. This is like catch without a rethrow
                 return null;
@@ -137,8 +163,10 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    private function serverTickInternal(bool $showDebug): Promise
+    private function serverTickInternal(bool $showDebug, Context $context): Promise
     {
+        $context = $context->enter('serverTickInternal');
+        $this->getStopwatch()?->start($context->getPath());
         if ($showDebug) {
             wdo('Ticking server.', OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
@@ -158,7 +186,8 @@ class GameTick extends TickBase
                 ->from('game')
                 ->setMaxResults(1)
         )
-        ->then(function (Result $result) {
+        ->then(function (Result $result) use ($context) {
+            $this->getStopwatch()?->stop($context->getPath());
             $tick = $result->fetchFirstRow();
             $state = $tick['state'];
 
@@ -168,16 +197,36 @@ class GameTick extends TickBase
             //update all the plans which ticks the server.
             $plan = new Plan();
             $this->asyncDataTransferTo($plan);
+            $contextUpdateLayerState = $context->enter('updateLayerState');
+            $this->getStopwatch()?->start($contextUpdateLayerState->getPath());
             return $plan->updateLayerState($currentMonth)
-                ->then(function (/* array $results */) use ($currentMonth, $monthsDone, $state, $tick) {
-                    return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick);
+                ->then(function (/* array $results */) use (
+                    $currentMonth,
+                    $monthsDone,
+                    $state,
+                    $tick,
+                    $contextUpdateLayerState
+                ) {
+                    $this->getStopwatch()?->stop($contextUpdateLayerState->getPath());
+                    $context = $contextUpdateLayerState->enter('advanceGameTime');
+                    $this->getStopwatch()?->start($context->getPath());
+                    return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick)
+                        ->then(function ($result) use ($context) {
+                            $this->getStopwatch()?->stop($context->getPath());
+                            return $result;
+                        });
                 })
-                ->then(function () use ($currentMonth) {
+                ->then(function () use ($currentMonth, $contextUpdateLayerState) {
+                    $contextGetWatchdogToken = $contextUpdateLayerState->enter('getWatchdogSessionUniqueToken');
+                    $this->getStopwatch()?->start($contextGetWatchdogToken->getPath());
                     // no return! so we don't wait for the response
                     $this->getWatchdogSessionUniqueToken()->then(
-                        function (string $watchdogSessionUniqueToken) use ($currentMonth) {
+                        function (string $watchdogSessionUniqueToken) use ($currentMonth, $contextGetWatchdogToken) {
+                            $this->getStopwatch()?->stop($contextGetWatchdogToken->getPath());
                             // note(MH): GetWatchdogAddress is not async, but it is cached once it
                             //   has been retrieved once, so that's "fine"
+                            $contextWatchdogSetMonth = $contextGetWatchdogToken->enter('watchdogSetMonth');
+                            $this->getStopwatch()?->start($contextWatchdogSetMonth->getPath());
                             $url = $this->GetWatchdogAddress()."/Watchdog/SetMonth";
                             MSPBrowserFactory::create($url)->post(
                                 $url,
@@ -189,8 +238,15 @@ class GameTick extends TickBase
                                     'month' => $currentMonth
                                 ])
                             )
-                            ->then(function (ResponseInterface $response) use ($url) {
-                                return $this->logWatchdogResponse($url, $response);
+                            ->then(function (ResponseInterface $response) use ($url, $contextWatchdogSetMonth) {
+                                $this->getStopwatch()?->stop($contextWatchdogSetMonth->getPath());
+                                $contextLogWatchdogResponse = $contextWatchdogSetMonth->enter('logWatchdogResponse');
+                                $this->getStopwatch()?->start($contextLogWatchdogResponse->getPath());
+                                return $this->logWatchdogResponse($url, $response)
+                                    ->then(function ($result) use ($contextLogWatchdogResponse) {
+                                        $this->getStopwatch()?->stop($contextLogWatchdogResponse->getPath());
+                                        return $result;
+                                    });
                             });
                         }
                     );

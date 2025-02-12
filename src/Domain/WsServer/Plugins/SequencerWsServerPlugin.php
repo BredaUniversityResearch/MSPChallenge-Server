@@ -65,7 +65,7 @@ class SequencerWsServerPlugin extends Plugin implements EventSubscriberInterface
                 $p
                     ->setLoop($this->getLoop())
                     ->setGameSessionIdFilter($this->getGameSessionIdFilter())
-                    ->setMeasurementCollectionManager($this->getMeasurementCollectionManager())
+                    ->setStopwatch($this->getStopwatch())
                     ->setClientConnectionResourceManager($this->getClientConnectionResourceManager())
                     ->setServerManager($this->getServerManager())
                     ->setWsServer($this->getWsServer());
