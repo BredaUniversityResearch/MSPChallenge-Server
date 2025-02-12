@@ -30,7 +30,7 @@ class TickWsServerPlugin extends Plugin
 
     protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function (Context $context) {
+        return tpf(function (?Context $context) {
             return $this->tick($context)
                 ->then(function (int $gameSessionId) {
                     $this->addOutput(
