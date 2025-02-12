@@ -2,7 +2,6 @@
 namespace App\Domain\WsServer;
 
 use App\Domain\API\v1\Security;
-use App\Domain\Common\Context;
 use App\Domain\Common\GetConstantsTrait;
 use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Event\NameAwareEvent;
