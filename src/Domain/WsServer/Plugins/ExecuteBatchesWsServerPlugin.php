@@ -43,7 +43,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
 
     protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function (Context $context) use ($executionId) {
+        return tpf(function (?Context $context) use ($executionId) {
             if ($this->firstStart) {
                 // allow clients to connect in the next 10 sec. todo: can we improve this?
                 $this->getLoop()->addTimer(10, function () {
@@ -104,7 +104,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
     /**
      * @throws Exception
      */
-    private function executeBatches(string $executionId, Context $context): PromiseInterface
+    private function executeBatches(string $executionId, ?Context $context): PromiseInterface
     {
         $clientInfoPerSessionContainer = $this->getClientConnectionResourceManager()
             ->getClientInfoPerSessionCollection();

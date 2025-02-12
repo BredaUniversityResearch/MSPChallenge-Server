@@ -94,7 +94,7 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    private function tryTickServer(array $tickData, bool $showDebug, Context $context): ?PromiseInterface
+    private function tryTickServer(array $tickData, bool $showDebug, ?Context $context): ?PromiseInterface
     {
         $state = $tickData['state'];
         // no "tick" required for these state names
