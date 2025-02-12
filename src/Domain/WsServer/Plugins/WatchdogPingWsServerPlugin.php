@@ -3,6 +3,7 @@
 namespace App\Domain\WsServer\Plugins;
 
 use App\Domain\API\v1\Simulation;
+use App\Domain\Common\Context;
 use App\Domain\Common\ToPromiseFunction;
 use Drift\DBAL\Result;
 use Exception;
@@ -25,7 +26,7 @@ class WatchdogPingWsServerPlugin extends Plugin
 
     protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function () {
+        return tpf(function (?Context $context) {
             return $this->getServerManager()->getGameSessionIds()
                 ->then(function (Result $result) {
                     // collect

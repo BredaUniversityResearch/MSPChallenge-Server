@@ -2,15 +2,16 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\Context;
+use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Common\ToPromiseFunction;
+use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
-use App\Domain\WsServer\MeasurementCollectionManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
 use App\Domain\WsServer\WsServerOutput;
 use Exception;
 use React\EventLoop\LoopInterface;
-use App\Domain\Event\NameAwareEvent;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use function App\tpf;
@@ -25,7 +26,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     private bool $registeredToLoop = false;
 
     private ?LoopInterface $loop = null;
-    private ?MeasurementCollectionManagerInterface $measurementCollectionManager = null;
+    private ?Stopwatch $stopwatch = null;
     private ?ClientConnectionResourceManagerInterface $clientConnectionResourceManager = null;
     private ?ServerManagerInterface $serverManager = null;
     private ?WsServerInterface $wsServer = null;
@@ -88,7 +89,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     /**
      * @throws Exception
      */
-    final public function registerToLoop(LoopInterface $loop)
+    final public function registerToLoop(LoopInterface $loop): void
     {
         $this->dispatch(
             new NameAwareEvent(self::EVENT_PLUGIN_REGISTERED, $this),
@@ -114,7 +115,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         );
     }
 
-    final public function unregisterFromLoop(LoopInterface $loop)
+    final public function unregisterFromLoop(LoopInterface $loop): void
     {
         $this->dispatch(
             new NameAwareEvent(self::EVENT_PLUGIN_UNREGISTERED, $this),
@@ -153,18 +154,14 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     /**
      * @throws Exception
      */
-    public function getMeasurementCollectionManager(): MeasurementCollectionManagerInterface
+    public function getStopwatch(): ?Stopwatch
     {
-        if (null === $this->measurementCollectionManager) {
-            throw new Exception('Attempt to retrieve unknown MeasurementCollectionManagerInterface');
-        }
-        return $this->measurementCollectionManager;
+        return $this->stopwatch;
     }
 
-    public function setMeasurementCollectionManager(
-        MeasurementCollectionManagerInterface $measurementCollectionManager
-    ): self {
-        $this->measurementCollectionManager = $measurementCollectionManager;
+    public function setStopwatch(?Stopwatch $stopwatch): self
+    {
+        $this->stopwatch = $stopwatch;
         return $this;
     }
 
@@ -230,8 +227,12 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
                 self::EVENT_PLUGIN_EXECUTION_STARTED
             );
             $tpf = $this->onCreatePromiseFunction($executionId);
+            $context = Context::root()->enter($this->getName());
+            $tpf->setContext($context);
+            $this->getStopwatch()?->start($context->getPath());
             return ($tpf)()
-                ->then(function () use ($executionId) {
+                ->then(function () use ($executionId, $context) {
+                    $this->getStopwatch()?->stop($context->getPath());
                     $this->addOutput(
                         'Plugin '.$this->getName().' just finished',
                         OutputInterface::VERBOSITY_DEBUG
