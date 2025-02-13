@@ -1,7 +1,6 @@
 # Development environment override
 services:
   phpredisadmin:
-    container_name: "${IMAGE_PREFIX:-}mspserver-phpredisadmin"
     build:
       context: .
       target: phpredisadmin_base
@@ -24,9 +23,7 @@ services:
     ports:
       - "${DATABASE_PORT:-3306}:${DATABASE_PORT:-3306}"
 
-
   mitmproxy:
-    container_name: "${IMAGE_PREFIX:-}mspserver-mitmproxy"
     build:
       context: .
       target: mitmproxy_base

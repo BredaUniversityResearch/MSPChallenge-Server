@@ -1,6 +1,5 @@
 services:
   adminer:
-    container_name: "${IMAGE_PREFIX:-}mspserver-adminer"
     build:
       context: .
       target: adminer_base

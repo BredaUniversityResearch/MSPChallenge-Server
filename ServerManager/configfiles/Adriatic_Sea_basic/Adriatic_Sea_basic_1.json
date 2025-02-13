@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "1/23/2025",
-    "data_model_hash": "11C434B89C69B070039FB7F7255865C76A02D3181F67A3817CDC67736D555639",
+    "date_modified": "2/13/2025",
+    "data_model_hash": "9FBED07B8C18A9FF77F50BBD20222AE93DF26291F795C910F4A52EDAED00CA11",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -33554,7 +33554,7 @@
     },
     "policy_settings": {
       "fishing": {
-        "all_country_approval": true,
+        "all_country_approval": false,
         "stakeholder_pressure_cool_down": 0.1,
         "fleet_info": {
           "gear_types": [
@@ -33569,7 +33569,7 @@
           ]
         },
         "policy_type": "fishing",
-        "enabled": true
+        "enabled": false
       },
       "shipping": {
         "policy_type": "shipping",
@@ -33845,7 +33845,7 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 0,
+        "layer_selectable": 1,
         "layer_editable": 0,
         "layer_toggleable": 0,
         "layer_active_on_start": 1,
@@ -39882,7 +39882,7 @@
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
         "layer_selectable": 1,
-        "layer_editable": 1,
+        "layer_editable": 0,
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
@@ -39904,7 +39904,7 @@
             "time": 0
           }
         ],
-        "layer_editing_type": "cable",
+        "layer_editing_type": "",
         "layer_special_entity_type": "Default",
         "layer_depth": 1,
         "layer_property_as_type": null,

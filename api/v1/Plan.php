@@ -1019,23 +1019,21 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function AddApproval(int $id, array $countries = []): ?PromiseInterface
     {
+        $countries = array_unique($countries);
         $deferred = new Deferred();
-        $plan = new Plan();
-        $this->asyncDataTransferTo($plan);
-        $plan->setAsync(true);
-        $plan->DeleteApproval($id)
-            ->then(function (/* Result $result */) use ($id, $countries) {
-                $toPromiseFunctions = [];
-                foreach ($countries as $country) {
-                    $toPromiseFunctions[] = tpf(function () use ($id, $country) {
-                        return $this->getAsyncDatabase()->insert('approval', [
-                            'approval_plan_id' => $id,
-                            'approval_country_id' => $country
-                        ]);
-                    });
-                }
-                return parallel($toPromiseFunctions);
-            })
+        $toPromiseFunctions = [];
+        foreach ($countries as $country) {
+            $toPromiseFunctions[] = tpf(function () use ($id, $country) {
+                return $this->getAsyncDatabase()->queryBySQL(
+                    'INSERT IGNORE INTO approval VALUES (?, ?, -1)',
+                    [
+                        'approval_plan_id' => $id,
+                        'approval_country_id' => $country
+                    ]
+                );
+            });
+        }
+        parallel($toPromiseFunctions)
             ->done(
                 /** @var Result[] $results */
                 function (/* array $results */) use ($deferred) {

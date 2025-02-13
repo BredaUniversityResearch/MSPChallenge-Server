@@ -14,7 +14,6 @@ services:
     command: bash -c "yarn install && yarn encore ${APP_ENV:-dev}"
 
   redis:
-    container_name: "${IMAGE_PREFIX:-}mspserver-redis"
     build:
       context: .
       target: redis_base
@@ -26,7 +25,6 @@ services:
 
   database:
     # check https://hub.docker.com/_/mariadb for info.
-    container_name: "${IMAGE_PREFIX:-}mspserver-mariadb"
     build:
       context: .
       target: mariadb_base
@@ -59,7 +57,6 @@ services:
       driver: "local"
 
   php:
-    container_name: "${IMAGE_PREFIX:-}mspserver-php"
     depends_on:
       - database
       - redis
@@ -129,7 +126,6 @@ services:
       driver: "local"
 
   simulations:
-    container_name: "${IMAGE_PREFIX:-}mspserver-simulations"
     build:
       context: .
       dockerfile: simulations/debian.11-x64/Dockerfile
@@ -147,7 +143,6 @@ services:
       - php
 
   blackfire:
-    container_name: "${IMAGE_PREFIX:-}mspserver-blackfire"
     build:
       context: .
       target: blackfire_base
