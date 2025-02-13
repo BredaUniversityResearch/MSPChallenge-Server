@@ -615,6 +615,7 @@ CREATE TABLE IF NOT EXISTS `approval` (
   `approval_vote` INT NULL DEFAULT -1,
   INDEX `fk_table1_plan2_idx` (`approval_plan_id` ASC),
   INDEX `fk_approval_plan_id_country1_idx` (`approval_country_id` ASC),
+  UNIQUE `fk_approval_plan_id_country1_UNIQUE` (`approval_plan_id`, `approval_country_id`),
   CONSTRAINT `fk_table1_plan2`
     FOREIGN KEY (`approval_plan_id`)
     REFERENCES `plan` (`plan_id`)
