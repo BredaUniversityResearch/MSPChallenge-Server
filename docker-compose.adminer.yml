@@ -1,6 +1,5 @@
 services:
   adminer:
-    container_name: 'mspserver-adminer'
     build:
       context: .
       target: adminer_base
