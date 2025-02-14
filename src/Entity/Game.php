@@ -86,7 +86,7 @@ class Game
         if (null === $this->gameState) {
             return null;
         }
-        return new GameStateValue(strtolower($this->gameState));
+        return new GameStateValue($this->gameState);
     }
 
     public function setGameState(GameStateValue $gameState): self
