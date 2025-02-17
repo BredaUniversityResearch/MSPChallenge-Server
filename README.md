@@ -1,105 +1,114 @@
 # MSPChallenge-Server 
 
-## Contribution rules
-- Any contribution to the project must be proposed through a Pull Request.
-- The branch you are creating the PR from, shall have the same name of the Jira issue you are working on.
-- All Pull Requests need to be reviewed by at least one member of the MSP development team before being merged.
-- All Pull Requests shall contain only 1 commit possibly. If you have more than consider squashing them.
-- Remember to put the Jira issue number in the commit message.
-- Set _.gitmessage_ as your commit message template by running the following command from git bash:
-```sh
- git config commit.template .gitmessage
-```
-
 ## Getting Started using Symfony Docker
 
 MSP Challenge's Docker configuration is based on [Symfony Docker](https://github.com/dunglas/symfony-docker).
-Make sure you do not run XAMPP Services, to free up port 80/443 (the web server) and 3306 (database server), such that they can be run by Docker
 
-1. If not already done, install either:
+Before starting docker compose, make sure to close any services running on one of the ports listed below.
+Otherwise, the container services will not be able to start.
+
+Default ports used by the containers per environment:
+
+| Container       | Service       | Port        | Prod | Staging | Dev | remarks                             | 
+|-----------------|---------------|-------------|------|---------|-----|-------------------------------------|
+| php-1           | caddy http    | 80          | *    | *       | *   | web server / api                    |
+|                 | caddy https   | 443         | *    | *       | *   |
+|                 | watchdog      | 45000       | *    | *       | *   | to run simulations                  |
+|                 | websocket     | 45001       | *    | *       | *   | direct client-server communication  |
+| database-1      | mariadb       | 3306        | *    | *       | *   | to store data                       |
+| blackfire-1     | blackfire     | random port | *    | *       | *   | to profile, disabled by default     |
+|                 |               |             |      |         |     | ! only enabled given req. env. vars |
+| redis-1         | redis         | not exposed | *    | *       | *   | to cache                            |
+| adminer-1       | adminer       | 8082        |      | *       | *   | web interface for databases         |
+| phpredisadmin-1 | redis admin   | random port |      |         | *   | web interface for redis             |
+| mitmproxy-1     | proxy         | 8080        |      |         | *   | to monitor network traffic          |
+|                 | web interface | 8081        |      |         | *   | web interface for mitmproxy         |
+
+If you want to change the ports used by the containers, you can do by defining environmental variables. Either:
+- define them in your environment, e.g. in your `.bashrc` or `.bash_profile` file
+- in the [`.env`](.env) file in the root of the project
+- or by defining them in the command line when running `docker compose up` like so, e.g.:
+  `WEB_SERVER_PORT=80 DATABASE_PORT=3306 WS_SERVER_PORT=45001 WATCHDOG_PORT=45000 ADMINER_PORT=8082 MITMPROXY_POR=8080 MITMPROXY_WEB_PORT=8081 docker compose up`
+- using a `.env.local` file and starting docker compose using aliases, see [Aliases for development](#aliases-for-development).
+
+## Installation
+
+1. Either clone the repository or download the zip file from the [release page](https://github.com/BredaUniversityResearch/MSPChallenge-Server/releases).
+   If you want to contribute to the project, you also can fork the repository. Read more about contributing [here](https://community.mspchallenge.info/wiki/Community_Contribution).
+2. If not already done, install either:
    - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended)
    - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --pull --no-cache` to build fresh images
-3. Run `docker compose up` (the logs will be displayed in the current shell) <br />
-   Run `docker compose up -d` (so with -d) to detach from the compose process. <br />
-   You can view the logs by running `docker logs mspchallenge-server-php-1`, or in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details" <br />
-   - For dev, to disable HTTPS:<br/>
-     Add environmental variable SERVER_NAME with value :80, e.g. like this: Run `SERVER_NAME=:80 docker compose up -d`
-4. Wait for the logs to show "NOTICE: ready to handle connection"
-5. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
-6. Run `docker compose down --remove-orphans` to stop the Docker containers.
+3. Run `docker compose build --pull --no-cache` to build fresh images
+
+4. Then, to create the server docker containers, and starting it up, run:
+   - for prod: `CADDY_MERCURE_JWT_SECRET=... APP_ENV=prod docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`
+     (replace `...` with a random string, e.g. `openssl rand -base64 32`)
+   - for staging: `APP_ENV=prod  docker compose -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d`
+   - for dev: `docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d`
+
+   The `-d` flag is optional and stands for detached mode, meaning the containers will run in the background.   
+   Tip: By adding `--remove-orphans` you make sure that no old containers are left running.
+
+   In the table above you can see the differences between the environments.
+
+5. You can view the logs by running `docker logs mspchallenge-php-1`, or in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details"
+6. Wait for the logs to show "INFO    FrankenPHP started 🐘    {"php_version": "x.x.x"}"
+7. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
+8. Run `docker compose down --remove-orphans` to stop the Docker containers.
 
 ## Blackfire
 
 Fill-in your Blackfire Server id+token and client id+token below and run:<br/>
-`BLACKFIRE_SERVER_ID=... BLACKFIRE_SERVER_TOKEN=... BLACKFIRE_CLIENT_ID=... BLACKFIRE_CLIENT_TOKEN=... docker compose up -d`
-For dev also prepend with:<br/>
-`SERVER_NAME=:80`
+`BLACKFIRE_APM_ENABLED=1 BLACKFIRE_SERVER_ID=... BLACKFIRE_SERVER_TOKEN=... BLACKFIRE_CLIENT_ID=... BLACKFIRE_CLIENT_TOKEN=... docker compose up -d --remove-orphans`
 
 Now you can simply profile from CLI using `blackfire run php script.php`
 
 ## Supervisor
 
-To start supervisor, run:<br/>
-`docker exec mspchallenge-server-php-1 /usr/bin/supervisord -c /etc/supervisord.conf`<br/>
-Or, from Git bash:<br/>
-`MSYS_NO_PATHCONV=1 docker exec mspchallenge-server-php-1 /usr/bin/supervisord -c /etc/supervisord.conf`<br/>
+In below commands, replace CONTAINER with the full name of the php container, e.g.`mspchallenge-dev-php-1`,
+`mspchallenge-staging-php-1` or `mspchallenge-php-1` (prod). 
+You can list all container names (last column) by running `docker ps`.
 
 To start/stop/restart supervisor services, see some examples here:<br/>
-`docker exec mspchallenge-server-php-1 supervisorctl start all`<br/>
-`docker exec mspchallenge-server-php-1 supervisorctl start app-ws-server`<br/>
-`docker exec mspchallenge-server-php-1 supervisorctl start msw`<br/>
-`docker exec mspchallenge-server-php-1 supervisorctl stop all`<br/>
-`docker exec mspchallenge-server-php-1 supervisorctl restart all`<br/>
+`docker exec CONTAINER supervisorctl start all`<br/>
+`docker exec CONTAINER supervisorctl start app-ws-server`<br/>
+`docker exec CONTAINER supervisorctl start msw`<br/>
+`docker exec CONTAINER supervisorctl stop all`<br/>
+`docker exec CONTAINER supervisorctl restart all`<br/>
 
 To check their status:<br/>
-`docker exec mspchallenge-server-php-1 supervisorctl status all`<br/>
+`docker exec CONTAINER supervisorctl status all`<br/>
 
 ## Aliases for development
 
-If the host machine running Docker is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you can add aliases in the .bashrc file in your home directory using below lines.
-Note that we use SERVER_NAME=:80 in alias dcu to disable https.
+If the host machine, running Docker, is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you
+can create aliases to simplify docker container management and interaction.
 
-Once you have created the .bashrc file you need to log-out and -in, reboot the system, or restart the terminal. Then, just type "alias" to see a list of them.
+Simply run: `source docker-aliases.sh` in your terminal to create the aliases.
+Or if you want them to be available all the time, you can add this command in the `.bashrc` file in your home directory.
+Once you have created the `.bashrc` file, you need to log-out and -in, reboot the system, or restart the terminal once.
 
-```
-## BEGIN Docker stuff
-# export settings
-export CODEDIR=
-# you can leave the Blackfire ids and tokens empty if you do not intend to use it
-export BLACKFIRE_CLIENT_ID=
-export BLACKFIRE_CLIENT_TOKEN=
-export BLACKFIRE_SERVER_ID=
-export BLACKFIRE_SERVER_TOKEN=
-# for production
-export CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey
+You can type `alias` to see a list of all defined aliases. Or check the [docker-aliases.sh](docker-aliases.sh) file.
+The most important aliases being:
 
-# docker aliases
-source "$CODEDIR/MSPCHallenge-Server/docker-aliases.sh"
-## END Docker stuff
-```
-
-## Symfony Docker features
-
-* Production, development and CI ready
-* [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-* Automatic HTTPS (in dev and in prod!)
-* HTTP/2, HTTP/3 and [Preload](https://symfony.com/doc/current/web_link.html) support
-* Built-in [Mercure](https://symfony.com/doc/current/mercure.html) hub
-* [Vulcain](https://vulcain.rocks) support
-* Native [XDebug](docs/xdebug.md) integration
-* Just 2 services (PHP FPM and Caddy server)
-* Super-readable configuration
-
-## More docs on Symfony Docker
-
-1. [Build options](docs/build.md)
-2. [Support for extra services](docs/extra-services.md)
-3. [Deploying in production](docs/production.md), and also how to disable https
-4. [Debugging with Xdebug](docs/xdebug.md)
-5. [TLS Certificates](docs/tls.md)
-6. [Using a Makefile](docs/makefile.md)
-7. [Troubleshooting](docs/troubleshooting.md)
+| Alias   | Description                                                      |
+|---------|------------------------------------------------------------------|
+| dcu     | docker(d) compose(c) up(u). This is the dev environment          |
+| dcux    | docker(d) compose(c) up(u) xdebug(x). Xdebug enabled             |
+| dcus    | docker(d) compose(c) up(u) staging(s)                            |
+| dcup    | docker(d) compose(c) up(u) production(p)                         |
+| dl      | docker(d) logs(l). Show logs of the php container                |
+| dlb     | docker(d) logs(l) blackfire(b). Logs of the blackfire container  |
+| dld     | docker(d) logs(l) database(d). Logs of the database container    |
+| desc    | docker(d) exec(e) supervisorctl (sc). Manage supervisor services |
+| detlw   | docker(d) exec(e) tail log (tl) websocket server (w)             |
+| detlm   | docker(d) exec(e) tail log (tl) msw server (m) = watchdog        |
+| det     | docker(d) exec(e) top (t). show processes running                |
+| dep     | docker(d) exec(e) phpstan (p). Run static analysis with phpstan  |
+| drg     | docker (d) run (r) grafana (g). Create a grafana container       |
+| dsa     | docker (d) stop (s) all containers (a)                           |
+| dsp     | docker (d) system (s) prune (p)                                  |
+| dclean  | dsa + dsp. Stop all containers and prune the system              | 
 
 ## Sponsors and credits
 
@@ -111,3 +120,8 @@ Thanks to all of them for their great support:
 ## License
 
 [Symfony Docker](https://github.com/dunglas/symfony-docker) is available under the MIT License.
+
+The MSP Challenge Simulation Platform, all its Editions (including but not limited to the North Sea Edition,
+Baltic Sea Edition, Clyde Marine Region Edition) and their source codes are provided under the GNU General Public
+License Version 3 (GPL-3.0-only) license: https://www.gnu.org/licenses/gpl-3.0.en.html.
+Read more about MSP Challenge's Terms & Conditions [here](https://community.mspchallenge.info/wiki/Terms_%26_Conditions).
