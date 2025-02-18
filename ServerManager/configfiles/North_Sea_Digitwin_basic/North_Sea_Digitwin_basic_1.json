@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "2/17/2025",
-    "data_model_hash": "3C2F07E0A7E4E15730D3EDC54B3C25413379D198DF45EF9044AFDECC47F19215",
+    "date_modified": "2/18/2025",
+    "data_model_hash": "73ED9A9CA73DA2C1580C36DB3058A84B361243DA64DF6E54DB1B6393A46C5C16",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -22378,16 +22378,18 @@
         {
           "layer_name": "NS_Separation_Zones_DT",
           "layer_types": [
-            "Areas to be Avoided"
+            "Inshore Traffic Zone"
           ],
           "allowed_ships": [
             {
               "ship_type_ids": [
                 1,
                 2,
+                3,
+                4,
                 5
               ],
-              "cost_multiplier": 3.0
+              "cost_multiplier": 1.0
             }
           ]
         },
@@ -22403,6 +22405,20 @@
                 2,
                 3,
                 4,
+                5
+              ],
+              "cost_multiplier": 1.0
+            }
+          ]
+        },
+        {
+          "layer_name": "NS_Separation_Zones_DT",
+          "layer_types": [
+            "Areas to be Avoided"
+          ],
+          "allowed_ships": [
+            {
+              "ship_type_ids": [
                 5
               ],
               "cost_multiplier": 1.0
@@ -30616,7 +30632,7 @@
             "View": "name",
             "Edit": "name"
           },
-          "text_color": "#0504AAFF",
+		  "text_color": "#0504AAFF",
           "text_size": "M",
           "zoom_cutoff": 0.1,
           "x": 0.0,
