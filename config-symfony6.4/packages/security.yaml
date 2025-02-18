@@ -1,0 +1,29 @@
+security:
+    # Symfony 6+ The "enable_authenticator_manager" option at "security" is deprecated.
+    # enable_authenticator_manager: true
+
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    providers:
+        jwt:
+            lexik_jwt:
+                class: App\Domain\API\v1\User
+    firewalls:
+        # activate different ways to authenticate
+        # https://symfony.com/doc/current/security.html#the-firewall
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        login:
+            pattern: ^/\d+/api/User/RequestSession$
+            stateless: true
+            json_login:
+                check_path: session_api_user_controller
+        main:
+            pattern: ^/\d+/api/\w+/\w+
+            stateless: true
+            jwt: ~
+            provider: jwt
+
+    access_control:
+        - { path: ^/\d+/api/(User/RequestToken|User/RequestSession|GameSession/\w+|Plan/ExportPlansToJson|Simulations/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/State|Game/StartWatchdog|Game/Config|Layer/MetaByName|Game/CreatePOVConfig), roles: PUBLIC_ACCESS }
+        - { path: ^/\d+/api/\w+/\w+$, roles: IS_AUTHENTICATED_FULLY }

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "02/10/2023",
-    "data_model_hash": "7F64C5A2310F13BBAB118E2D5E53E3840FF8DBAD42BF5B6D57E5A4B80A863098",
+    "date_modified": "10/9/2024",
+    "data_model_hash": "1D8CFC3872C748CB588FBE7EF422D10209D5B4F8C69A0B5C343909C8B18DC6AC",
     "errors": 0,
-    "editor_version": "1.0.0",
-    "config_version": "1.0.0"
+    "editor_version": "2.0.0",
+    "config_version": "2.0.0"
   },
   "datamodel": {
     "restrictions": {
@@ -138,6 +138,90 @@
           "sort": "Inclusion"
         }
       ],
+      "BS_Shipping_Lanes|BS_Wave_Farms": [
+        {
+          "message": "There is a wave farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_Lanes",
+          "starttype": "0",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_Lanes",
+          "starttype": "1",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_Lanes",
+          "starttype": "3",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_Lanes",
+          "starttype": "4",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Shipping_Lanes|BS_Tidal_Farms": [
+        {
+          "message": "There is a tidal farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_Lanes",
+          "starttype": "0",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_Lanes",
+          "starttype": "1",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_Lanes",
+          "starttype": "3",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_Lanes",
+          "starttype": "4",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
       "BS_Fairways|BS_Countries": [
         {
           "message": "Can't place Fairways on land",
@@ -244,6 +328,90 @@
           "sort": "Inclusion"
         }
       ],
+      "BS_Fairways|BS_Wave_Farms": [
+        {
+          "message": "There is a wave farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Fairways",
+          "starttype": "0",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Fairways",
+          "starttype": "1",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Fairways",
+          "starttype": "3",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Fairways",
+          "starttype": "4",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Fairways|BS_Tidal_Farms": [
+        {
+          "message": "There is a tidal farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Fairways",
+          "starttype": "0",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Fairways",
+          "starttype": "1",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Fairways",
+          "starttype": "3",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm in the way",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Fairways",
+          "starttype": "4",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
       "BS_Shipping_National_Lanes|BS_Countries": [
         {
           "message": "Should not place national lanes on land",
@@ -346,6 +514,90 @@
           "startlayer": "BS_Shipping_National_Lanes",
           "starttype": "4",
           "endlayer": "BS_Wind_Farms_existing",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Shipping_National_Lanes|BS_Wave_Farms": [
+        {
+          "message": "There is a wave farm on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_National_Lanes",
+          "starttype": "0",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_National_Lanes",
+          "starttype": "1",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_National_Lanes",
+          "starttype": "3",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a wave farm on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_National_Lanes",
+          "starttype": "4",
+          "endlayer": "BS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Shipping_National_Lanes|BS_Tidal_Farms": [
+        {
+          "message": "There is a tidal farm on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_National_Lanes",
+          "starttype": "0",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_National_Lanes",
+          "starttype": "1",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_National_Lanes",
+          "starttype": "3",
+          "endlayer": "BS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a tidal farm on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Shipping_National_Lanes",
+          "starttype": "4",
+          "endlayer": "BS_Tidal_Farms",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -508,7 +760,7 @@
       ],
       "BS_Wind_Farms_existing|BS_Shipping_Lanes": [
         {
-          "message": "There is a wind farm in the way",
+          "message": "There is a shipping lane in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "BS_Wind_Farms_existing",
@@ -518,7 +770,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "There is a wind farm in the way",
+          "message": "There is a shipping lane in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "BS_Wind_Farms_existing",
@@ -528,7 +780,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "There is a wind farm in the way",
+          "message": "There is a shipping lane in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "BS_Wind_Farms_existing",
@@ -538,7 +790,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "There is a wind farm in the way",
+          "message": "There is a shipping lane in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "BS_Wind_Farms_existing",
@@ -548,9 +800,93 @@
           "sort": "Inclusion"
         }
       ],
+      "BS_Wave_Farms|BS_Shipping_Lanes": [
+        {
+          "message": "There is a shipping lane in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_Lanes",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a shipping lane in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_Lanes",
+          "endtype": "1",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a shipping lane in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_Lanes",
+          "endtype": "3",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a shipping lane in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_Lanes",
+          "endtype": "4",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Tidal_Farms|BS_Shipping_Lanes": [
+        {
+          "message": "There is a shipping lane in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_Lanes",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a shipping lane in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_Lanes",
+          "endtype": "1",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a shipping lane in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_Lanes",
+          "endtype": "3",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a shipping lane in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_Lanes",
+          "endtype": "4",
+          "sort": "Inclusion"
+        }
+      ],
       "BS_Wind_Farms_existing|BS_Fairways": [
         {
-          "message": "There is a wind farm in the way",
+          "message": "There is a fairway in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "BS_Wind_Farms_existing",
@@ -560,7 +896,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "There is a wind farm in the way",
+          "message": "There is a fairway in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "BS_Wind_Farms_existing",
@@ -570,7 +906,7 @@
           "sort": "Inclusion"
         },
         {
-          "message": "There is a wind farm in the way",
+          "message": "There is a fairway in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "BS_Wind_Farms_existing",
@@ -580,10 +916,94 @@
           "sort": "Inclusion"
         },
         {
-          "message": "There is a wind farm in the way",
+          "message": "There is a fairway in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "BS_Wind_Farms_existing",
+          "starttype": "",
+          "endlayer": "BS_Fairways",
+          "endtype": "4",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Wave_Farms|BS_Fairways": [
+        {
+          "message": "There is a fairway in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Fairways",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a fairway in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Fairways",
+          "endtype": "1",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a fairway in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Fairways",
+          "endtype": "3",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a fairway in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Fairways",
+          "endtype": "4",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Tidal_Farms|BS_Fairways": [
+        {
+          "message": "There is a fairway in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
+          "starttype": "",
+          "endlayer": "BS_Fairways",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a fairway in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
+          "starttype": "",
+          "endlayer": "BS_Fairways",
+          "endtype": "1",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a fairway in this location",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
+          "starttype": "",
+          "endlayer": "BS_Fairways",
+          "endtype": "3",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a fairway in this locationy",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
           "starttype": "",
           "endlayer": "BS_Fairways",
           "endtype": "4",
@@ -596,6 +1016,30 @@
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "BS_Wind_Farms_existing",
+          "starttype": "",
+          "endlayer": "BS_Countries",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Wave_Farms|BS_Countries": [
+        {
+          "message": "There is land in this position",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Countries",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Tidal_Farms|BS_Countries": [
+        {
+          "message": "There is land in this position",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "BS_Tidal_Farms",
           "starttype": "",
           "endlayer": "BS_Countries",
           "endtype": "",
@@ -641,6 +1085,30 @@
           "starttype": "",
           "endlayer": "BS_Shipping_National_Lanes",
           "endtype": "4",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Wave_Farms|BS_Shipping_National_Lanes": [
+        {
+          "message": "There is a shipping lane on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Wave_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_National_Lanes",
+          "endtype": "0",
+          "sort": "Inclusion"
+        }
+      ],
+      "BS_Tidal_Farms|BS_Shipping_National_Lanes": [
+        {
+          "message": "There is a shipping lane on this position",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "BS_Tidal_Farms",
+          "starttype": "",
+          "endlayer": "BS_Shipping_National_Lanes",
+          "endtype": "0",
           "sort": "Inclusion"
         }
       ],
@@ -7663,6 +8131,18 @@
               "link": null
             },
             {
+              "name": "Wave Farms",
+              "id": 40,
+              "multiline": true,
+              "link": "Energy:Oil_%26_Gas_Installations"
+            },
+            {
+              "name": "Tidal Farms",
+              "id": 41,
+              "multiline": true,
+              "link": null
+            },
+            {
               "name": "Oil & Gas Platforms",
               "id": 2,
               "multiline": true,
@@ -7706,7 +8186,7 @@
               "name": "Disposal Sites",
               "id": 7,
               "multiline": true,
-              "link": "Dumping_areas"
+              "link": "Disposal_sites"
             },
             {
               "name": "Sand & Gravel Extraction",
@@ -7924,7 +8404,7 @@
           "name": "Birds, Mammals, Benthos",
           "entries": [
             {
-              "name": "Seal",
+              "name": "Seals",
               "id": 33,
               "multiline": false,
               "link": "Seals"
@@ -7944,6 +8424,18 @@
           "toId": 25,
           "severity": 2,
           "description": "Wind turbine pylons in the water as well as their foundations on the seabed. "
+        },
+        {
+          "fromId": 40,
+          "toId": 25,
+          "severity": 2,
+          "description": "Wave turbine in the water as well as their foundations on the seabed. "
+        },
+        {
+          "fromId": 41,
+          "toId": 25,
+          "severity": 2,
+          "description": "Tidal turbine in the water as well as their foundations on the seabed. "
         },
         {
           "fromId": 2,
@@ -8018,6 +8510,30 @@
           "description": "Residual wind energy turbine vibrations in water and seabed. "
         },
         {
+          "fromId": 40,
+          "toId": 27,
+          "severity": 3,
+          "description": "Wave energy turbine construction in water and on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 40,
+          "toId": 27,
+          "severity": 1,
+          "description": "Residual wave energy turbine vibrations in water and seabed. "
+        },
+        {
+          "fromId": 41,
+          "toId": 27,
+          "severity": 3,
+          "description": "Tidal energy turbine construction in water and on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 41,
+          "toId": 27,
+          "severity": 1,
+          "description": "Residual tidal energy turbine vibrations in water and seabed. "
+        },
+        {
           "fromId": 10,
           "toId": 27,
           "severity": 3,
@@ -8076,6 +8592,30 @@
           "toId": 28,
           "severity": 1,
           "description": "Wind energy turbine operation. "
+        },
+        {
+          "fromId": 40,
+          "toId": 28,
+          "severity": 2,
+          "description": "Wave energy turbine construction on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 40,
+          "toId": 28,
+          "severity": 1,
+          "description": "Wave energy turbine operation. "
+        },
+        {
+          "fromId": 41,
+          "toId": 28,
+          "severity": 2,
+          "description": "Tidal energy turbine construction on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 41,
+          "toId": 28,
+          "severity": 1,
+          "description": "Tidal energy turbine operation. "
         },
         {
           "fromId": 10,
@@ -8180,6 +8720,30 @@
           "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. "
         },
         {
+          "fromId": 40,
+          "toId": 26,
+          "severity": 3,
+          "description": "Wave energy turbine construction on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 40,
+          "toId": 20,
+          "severity": -3,
+          "description": "Scraping fishing nets over the seabed at a wave farm is dangerous. "
+        },
+        {
+          "fromId": 41,
+          "toId": 26,
+          "severity": 3,
+          "description": "Tidal energy turbine construction on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 41,
+          "toId": 20,
+          "severity": -3,
+          "description": "Scraping fishing nets over the seabed at a tidal farm is dangerous. "
+        },
+        {
           "fromId": 35,
           "toId": 20,
           "severity": -3,
@@ -8214,6 +8778,18 @@
           "toId": 21,
           "severity": -3,
           "description": "Passive demersal catch in the water column at a wind farm are dangerous. "
+        },
+        {
+          "fromId": 40,
+          "toId": 21,
+          "severity": -3,
+          "description": "Passive demersal catch in the water column at a wave farm are dangerous. "
+        },
+        {
+          "fromId": 41,
+          "toId": 21,
+          "severity": -3,
+          "description": "Passive demersal catch in the water column at a tidal farm are dangerous. "
         },
         {
           "fromId": 38,
@@ -8258,6 +8834,18 @@
           "description": "Fishing in wind parks is not allowed. "
         },
         {
+          "fromId": 40,
+          "toId": 22,
+          "severity": -3,
+          "description": "Fishing in wave parks is not allowed. "
+        },
+        {
+          "fromId": 41,
+          "toId": 22,
+          "severity": -3,
+          "description": "Fishing in tidal parks is not allowed. "
+        },
+        {
           "fromId": 35,
           "toId": 22,
           "severity": -3,
@@ -8268,6 +8856,18 @@
           "toId": 12,
           "severity": 1,
           "description": "The existance of wind farms increases maintenance shipping "
+        },
+        {
+          "fromId": 40,
+          "toId": 12,
+          "severity": 1,
+          "description": "The existance of wave farms increases maintenance shipping "
+        },
+        {
+          "fromId": 41,
+          "toId": 12,
+          "severity": 1,
+          "description": "The existance of tidal farms increases maintenance shipping "
         },
         {
           "fromId": 1,
@@ -8292,6 +8892,54 @@
           "toId": 14,
           "severity": -3,
           "description": "Automated vessels not allowed in wind farms "
+        },
+        {
+          "fromId": 40,
+          "toId": 10,
+          "severity": -3,
+          "description": "Cargo vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 40,
+          "toId": 11,
+          "severity": -3,
+          "description": "Passenger ships not allowed in wave farms "
+        },
+        {
+          "fromId": 40,
+          "toId": 13,
+          "severity": -3,
+          "description": "Tanker vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 40,
+          "toId": 14,
+          "severity": -3,
+          "description": "Automated vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 41,
+          "toId": 10,
+          "severity": -3,
+          "description": "Cargo vessels not allowed in tidal farms "
+        },
+        {
+          "fromId": 41,
+          "toId": 11,
+          "severity": -3,
+          "description": "Passenger ships not allowed in tidal farms "
+        },
+        {
+          "fromId": 41,
+          "toId": 13,
+          "severity": -3,
+          "description": "Tanker vessels not allowed in tidal farms "
+        },
+        {
+          "fromId": 41,
+          "toId": 14,
+          "severity": -3,
+          "description": "Automated vessels not allowed in tidal farms "
         },
         {
           "fromId": 2,
@@ -8619,6 +9267,14 @@
         },
         {
           "layer_name": "BS_Wind_Farms_existing",
+          "port_type": "MaintenanceDestination"
+        },
+        {
+          "layer_name": "BS_Wave_Farms",
+          "port_type": "MaintenanceDestination"
+        },
+        {
+          "layer_name": "BS_Tidal_Farms",
           "port_type": "MaintenanceDestination"
         },
         {
@@ -19348,6 +20004,34 @@
           ]
         },
         {
+          "layer_name": "BS_Wave_Farms",
+          "layer_types": [
+            "3MW"
+          ],
+          "allowed_ships": [
+            {
+              "ship_type_ids": [
+                7
+              ],
+              "cost_multiplier": 1.0
+            }
+          ]
+        },
+        {
+          "layer_name": "BS_Tidal_Farms",
+          "layer_types": [
+            "3MW"
+          ],
+          "allowed_ships": [
+            {
+              "ship_type_ids": [
+                7
+              ],
+              "cost_multiplier": 1.0
+            }
+          ]
+        },
+        {
           "layer_name": "BS_bat_20_poly",
           "layer_types": [
             "default"
@@ -19375,7 +20059,6 @@
           ]
         }
       ],
-      "layer_type_restriction_group_mapping": null,
       "output_configuration": {
         "pixels_per_mel_cell": 20,
         "simulation_area_cell_size": 5000
@@ -19385,6 +20068,8 @@
           "BS_Countries",
           "BS_No_Shipping_Zones",
           "BS_Wind_Farms_existing",
+          "BS_Wave_Farms",
+          "BS_Tidal_Farms",
           "BS_bat_20_poly"
         ],
         "shipping_intensity_risk_value": 1000
@@ -19631,68 +20316,58 @@
         {
           "ship_type_id": 1,
           "ship_type_name": "Container",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 2,
           "ship_type_name": "Cruise",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 3,
           "ship_type_name": "DryBulk",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 4,
           "ship_type_name": "GeneralCargo",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 5,
           "ship_type_name": "LiquidBulk",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 6,
           "ship_type_name": "Passenger",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 7,
           "ship_type_name": "Maintenance",
-          "ship_restriction_group": null,
           "ship_routing_type": "Maintenance",
           "ship_agility": 0.99
         },
         {
           "ship_type_id": 8,
           "ship_type_name": "AutomatedVessels",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         },
         {
           "ship_type_id": 9,
           "ship_type_name": "Tanker",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.75
         }
       ],
-      "ship_restriction_groups": null,
       "layer_type_ship_type_mapping": [
         {
           "layer_type": "Cargo",
@@ -19769,6 +20444,164 @@
         }
       ]
     },
+    "policy_settings": {
+      "fishing": {
+        "all_country_approval": true,
+        "stakeholder_pressure_cool_down": 0.1,
+        "fleet_info": {
+          "gear_types": [
+            "Active Demersal",
+            "Passive Demersal",
+            "Pelagic"
+          ],
+          "fleets": [
+            {
+              "//comment": "0 Active Demersal",
+              "gear_type": "0",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 8,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 9,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 10,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 11,
+                  "effort_weight": 1.0
+                }
+              ]
+            },
+            {
+              "//comment": "1 Passive Demersal",
+              "gear_type": "1",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 8,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 9,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 10,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 11,
+                  "effort_weight": 1.0
+                }
+              ]
+            },
+            {
+              "//comment": "2 Pelagic",
+              "gear_type": "2",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 8,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 9,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 10,
+                  "effort_weight": 1.0
+                },
+                {
+                  "country_id": 11,
+                  "effort_weight": 1.0
+                }
+              ]
+            }
+          ]
+        },
+        "policy_type": "fishing",
+        "enabled": true
+      },
+      "shipping": {
+        "policy_type": "shipping",
+        "enabled": true
+      },
+      "energy": {
+        "policy_type": "energy",
+        "enabled": true
+      },
+      "eco_gear": {
+        "policy_type": "eco_gear",
+        "enabled": false
+      }
+    },
     "MEL": {
       "modelfile": "MELdata/Baltic sea model for MSP.eiixml",
       "mode": null,
@@ -19808,6 +20641,16 @@
             {
               "name": "BS_Wind_Farms_existing",
               "influence": 0.3,
+              "construction": false
+            },
+            {
+              "name": "BS_Wave_Farms",
+              "influence": 0.2,
+              "construction": false
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 0.2,
               "construction": false
             },
             {
@@ -19866,6 +20709,16 @@
               "construction": false
             },
             {
+              "name": "BS_Wave_Farms",
+              "influence": 0.2,
+              "construction": false
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 0.3,
+              "construction": false
+            },
+            {
               "name": "BS_Sand_Gravel_Extraction",
               "influence": 0.8,
               "construction": false
@@ -19899,6 +20752,26 @@
               "name": "BS_Wind_Farms_existing",
               "influence": 0.5,
               "construction": true
+            },
+            {
+              "name": "BS_Wave_Farms",
+              "influence": 0.5,
+              "construction": true
+            },
+            {
+              "name": "BS_Wave_Farms",
+              "influence": 0.2,
+              "construction": false
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 0.5,
+              "construction": true
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 0.2,
+              "construction": false
             },
             {
               "name": "BS_Military_Areas",
@@ -19951,6 +20824,16 @@
               "construction": true
             },
             {
+              "name": "BS_Wave_Farms",
+              "influence": 0.6,
+              "construction": true
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 0.8,
+              "construction": true
+            },
+            {
               "name": "BS_Sand_Gravel_Extraction",
               "influence": 1.0,
               "construction": false
@@ -19981,7 +20864,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA|1",
+              "name": "BS_MPA_new",
               "influence": 1.0,
               "construction": false
             },
@@ -19991,11 +20874,36 @@
               "construction": false
             },
             {
+              "name": "BS_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_Shipping_Lanes",
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Protection Passive Demersal",
@@ -20011,7 +20919,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA|2",
+              "name": "BS_MPA_new",
               "influence": 1.0,
               "construction": false
             },
@@ -20026,11 +20934,36 @@
               "construction": false
             },
             {
+              "name": "BS_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_Shipping_Lanes",
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Protection Pelagic",
@@ -20041,7 +20974,7 @@
               "construction": false
             },
             {
-              "name": "BS_MPA|3",
+              "name": "BS_MPA_new",
               "influence": 1.0,
               "construction": false
             },
@@ -20056,139 +20989,62 @@
               "construction": false
             },
             {
+              "name": "BS_Wave_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Wave_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "BS_Tidal_Farms",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
               "name": "BS_Shipping_Lanes",
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         }
       ],
-      "fishing_policy_settings": {
-        "all_country_approval": true
-      },
       "fishing": [
         {
           "name": "Fishing intensity Active Demersal",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 1.0
-            },
-            {
-              "country_id": 4,
-              "weight": 1.0
-            },
-            {
-              "country_id": 5,
-              "weight": 1.0
-            },
-            {
-              "country_id": 6,
-              "weight": 1.0
-            },
-            {
-              "country_id": 7,
-              "weight": 1.0
-            },
-            {
-              "country_id": 8,
-              "weight": 1.0
-            },
-            {
-              "country_id": 9,
-              "weight": 1.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1.0
-            },
-            {
-              "country_id": 11,
-              "weight": 1.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Fishing intensity Passive Demersal",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 1.0
-            },
-            {
-              "country_id": 4,
-              "weight": 1.0
-            },
-            {
-              "country_id": 5,
-              "weight": 1.0
-            },
-            {
-              "country_id": 6,
-              "weight": 1.0
-            },
-            {
-              "country_id": 7,
-              "weight": 1.0
-            },
-            {
-              "country_id": 8,
-              "weight": 1.0
-            },
-            {
-              "country_id": 9,
-              "weight": 1.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1.0
-            },
-            {
-              "country_id": 11,
-              "weight": 1.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Fishing intensity Pelagic",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 1.0
-            },
-            {
-              "country_id": 4,
-              "weight": 1.0
-            },
-            {
-              "country_id": 5,
-              "weight": 1.0
-            },
-            {
-              "country_id": 6,
-              "weight": 1.0
-            },
-            {
-              "country_id": 7,
-              "weight": 1.0
-            },
-            {
-              "country_id": 8,
-              "weight": 1.0
-            },
-            {
-              "country_id": 9,
-              "weight": 1.0
-            },
-            {
-              "country_id": 10,
-              "weight": 1.0
-            },
-            {
-              "country_id": 11,
-              "weight": 1.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         }
       ],
       "outcomes": [
@@ -20316,19 +21172,19 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Active Demersal Fleet Protection",
+              "valueName": "No Active Demersal Fleets",
               "valueColor": "#FFC773FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Passive Demersal Fleet Protection",
+              "valueName": "No Passive Demersal Fleets",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Pelagic Fleet Protection",
+              "valueName": "No Pelagic Fleets",
               "valueColor": "#CEFF73FF",
               "unit": "km2",
               "valueDependentCountry": -1
@@ -20444,7 +21300,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Countries",
@@ -20800,7 +21657,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_EEZ_BSH",
@@ -21128,6 +21986,10 @@
             "unit": null,
             "default_value": null
           }
+        ],
+        "layer_tags": [
+          "Polygon",
+          "EEZ"
         ]
       },
       {
@@ -21199,7 +22061,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           }
         },
@@ -21316,7 +22178,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Territorial_Waters_BSH",
@@ -21630,7 +22493,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Populated_Places",
@@ -21816,7 +22680,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Bathymetry",
@@ -22031,7 +22896,8 @@
             "media": "wiki://Bathymetry"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wind_Speed",
@@ -22246,7 +23112,8 @@
             "media": "wiki://Wind_Speed"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wave_Height",
@@ -22317,7 +23184,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "1": {
@@ -22345,7 +23212,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "2": {
@@ -22373,7 +23240,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "3": {
@@ -22401,7 +23268,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "4": {
@@ -22429,7 +23296,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           },
           "5": {
@@ -22457,11 +23324,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Height"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Sediments",
@@ -22705,7 +23573,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Currents",
@@ -22920,7 +23789,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Ecosystem_Health_Status",
@@ -22991,7 +23861,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "1": {
@@ -23019,7 +23889,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "2": {
@@ -23047,11 +23917,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Temperature",
@@ -23122,7 +23993,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "1": {
@@ -23150,7 +24021,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "2": {
@@ -23178,7 +24049,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "3": {
@@ -23206,7 +24077,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "4": {
@@ -23234,7 +24105,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           },
           "5": {
@@ -23262,11 +24133,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sea_Bottom_Temperature"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Salinity",
@@ -23337,7 +24209,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           },
           "1": {
@@ -23365,7 +24237,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           },
           "2": {
@@ -23393,7 +24265,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           },
           "3": {
@@ -23421,7 +24293,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           },
           "4": {
@@ -23449,11 +24321,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Salinity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Topography",
@@ -23524,7 +24397,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "1": {
@@ -23552,7 +24425,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "2": {
@@ -23580,7 +24453,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "3": {
@@ -23608,7 +24481,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "4": {
@@ -23636,7 +24509,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           },
           "5": {
@@ -23664,11 +24537,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Eutrophication_Status",
@@ -23870,7 +24744,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Recreational_Fishing",
@@ -24086,7 +24961,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Bathing_sites",
@@ -24111,7 +24987,7 @@
         "layer_green": 0,
         "layer_tooltip": "Water quality of bathing waters",
         "layer_information": "",
-        "layer_media": "wiki://Bathing_Sites",
+        "layer_media": "wiki://Bathing_Waters",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -24158,7 +25034,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bathing_Sites"
+            "media": "wiki://Bathing_Water"
           },
           "1": {
             "displayName": "Moderate Quality",
@@ -24186,7 +25062,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bathing_Sites"
+            "media": "wiki://Bathing_Water"
           },
           "2": {
             "displayName": "Good Quality",
@@ -24214,7 +25090,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Bathing_Sites"
+            "media": "wiki://Bathing_Water"
           }
         },
         "layer_info_properties": [
@@ -24330,7 +25206,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_ICE_Coverage",
@@ -24462,7 +25339,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Military_Areas",
@@ -24594,7 +25472,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_bat_20_poly",
@@ -24665,11 +25544,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Ports_Model",
@@ -24827,7 +25707,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_Lanes",
@@ -25141,7 +26022,8 @@
             "unit": "km",
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_National_Lanes",
@@ -25357,7 +26239,8 @@
             "unit": "km",
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Fairways",
@@ -25587,7 +26470,8 @@
             "unit": "km",
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_No_Shipping_Zones",
@@ -25873,7 +26757,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Connection_Lanes",
@@ -26061,7 +26946,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Connection_Points",
@@ -26221,7 +27107,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_Gates",
@@ -26311,7 +27198,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "10kpoints_in_sea",
@@ -26401,7 +27289,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "20kpoints_in_sea",
@@ -26491,7 +27380,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "40kpoints_in_sea",
@@ -26595,7 +27485,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Dredging_Sites",
@@ -26783,7 +27674,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Sand_Gravel_Extraction",
@@ -26854,11 +27746,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Sand_and_Gravel_Extraction"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Dredging_Deposit_Sites",
@@ -26883,7 +27776,7 @@
         "layer_green": 0,
         "layer_tooltip": "",
         "layer_information": "",
-        "layer_media": "wiki://Dumping_areas",
+        "layer_media": "wiki://Disposal_Sites",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -26930,7 +27823,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Dumping_areas"
+            "media": "wiki://Disposal_sites"
           }
         },
         "layer_info_properties": [
@@ -27060,7 +27953,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_Intensity_Total_Raster",
@@ -27247,7 +28141,8 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shipping_Intensity_raster",
@@ -27434,7 +28329,8 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cargo_Intensity_Raster",
@@ -27621,7 +28517,8 @@
             "media": "wiki://Cargo_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Passenger_Intensity_Raster",
@@ -27808,7 +28705,8 @@
             "media": "wiki://Passenger_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Maintenance_Intensity_Raster",
@@ -27995,7 +28893,8 @@
             "media": "wiki://Maintenance_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Tanker_Intensity_Raster",
@@ -28182,7 +29081,8 @@
             "media": "wiki://Tanker_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_AutomatedVessels_Intensity_Raster",
@@ -28369,7 +29269,8 @@
             "media": "wiki://Automated_Vessel_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wind_Farms_existing",
@@ -28653,7 +29554,354 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
+      },
+      {
+        "layer_name": "BS_Wave_Farms",
+        "layer_geotype": "polygon",
+        "layer_entity_value_max": null,
+        "layer_short": "Wave Farms",
+        "layer_category": "activities",
+        "layer_subcategory": "energy",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 1024,
+        "layer_height": 1024,
+        "layer_raster_material": "RasterMELNew",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 1,
+        "layer_tooltip": "Wave farms do not exist yet in the Baltic Sea but can be planned",
+        "layer_information": "",
+        "layer_media": "wiki://Wave_Farms",
+        "layer_text_info": {
+          "property_per_state": {
+            "Current": "UsedCapacity",
+            "View": "MaxCapacity",
+            "Edit": "MaxCapacity"
+          },
+          "text_color": "#000000FF",
+          "text_size": "M",
+          "zoom_cutoff": 0.15,
+          "x": 0.0,
+          "y": -0.75,
+          "z": -0.05
+        },
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 6
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "sourcepolygon",
+        "layer_special_entity_type": "Default",
+        "layer_depth": 1,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "3MW",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#FF8A00FF",
+            "polygonPatternName": "33",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#FFBF7FFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00000090",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 3000000,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Wave_Farms"
+          }
+        },
+        "layer_info_properties": [
+          {
+            "property_name": "Country",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Name",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Status",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Company",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Capacity_M",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "StartTime",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          }
+        ],
+        "layer_tags": []
+      },
+      {
+        "layer_name": "BS_Tidal_Farms",
+        "layer_geotype": "polygon",
+        "layer_entity_value_max": null,
+        "layer_short": "Tidal Farms",
+        "layer_category": "activities",
+        "layer_subcategory": "energy",
+        "layer_download_from_geoserver": 0,
+        "layer_width": 1024,
+        "layer_height": 1024,
+        "layer_raster_material": "RasterMELNew",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 0,
+        "layer_green": 1,
+        "layer_tooltip": "Tidal farms do not exist yet in the Baltic Sea but can be planned",
+        "layer_information": "",
+        "layer_media": "wiki://Tidal_Farms",
+        "layer_text_info": {
+          "property_per_state": {
+            "Current": "UsedCapacity",
+            "View": "MaxCapacity",
+            "Edit": "MaxCapacity"
+          },
+          "text_color": "#000000FF",
+          "text_size": "M",
+          "zoom_cutoff": 0.15,
+          "x": 0.0,
+          "y": -0.75,
+          "z": -0.05
+        },
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 6
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "sourcepolygon",
+        "layer_special_entity_type": "Default",
+        "layer_depth": 1,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "3MW",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#FF8A00FF",
+            "polygonPatternName": "38",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#FFBF7FFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 3000000,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Tidal_Farms"
+          }
+        },
+        "layer_info_properties": [
+          {
+            "property_name": "Country",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Name",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Status",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Company",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Capacity_M",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "StartTime",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          }
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cables_Edit",
@@ -28923,7 +30171,8 @@
             "unit": null,
             "default_value": "1"
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Sockets_Edit",
@@ -29053,7 +30302,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Transformers_Edit",
@@ -29183,7 +30433,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Oil_Gas_Platforms",
@@ -29371,7 +30622,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Oil_Gas_Terminals",
@@ -29475,7 +30727,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Pipelines_Edit",
@@ -29565,7 +30818,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Pipelines",
@@ -29642,8 +30896,8 @@
           "1": {
             "displayName": "Planned",
             "approval": "NotDependent",
-            "value": 1,
-            "map_type": null,
+            "value": 0,
+            "map_type": "3",
             "displayPolygon": 1,
             "polygonColor": "#FF00FFFF",
             "polygonPatternName": "5",
@@ -29670,8 +30924,8 @@
           "2": {
             "displayName": "Application submitted",
             "approval": "NotDependent",
-            "value": 2,
-            "map_type": null,
+            "value": 0,
+            "map_type": "2",
             "displayPolygon": 1,
             "polygonColor": "#FF00FFFF",
             "polygonPatternName": "5",
@@ -29698,8 +30952,8 @@
           "3": {
             "displayName": "Unused",
             "approval": "NotDependent",
-            "value": 2,
-            "map_type": null,
+            "value": 0,
+            "map_type": "1",
             "displayPolygon": 1,
             "polygonColor": "#5F5F5FFF",
             "polygonPatternName": "5",
@@ -29795,7 +31049,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wind_Farms_planned",
@@ -29866,7 +31121,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "1": {
@@ -29894,7 +31149,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "2": {
@@ -29922,7 +31177,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "3": {
@@ -29950,7 +31205,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "4": {
@@ -29978,7 +31233,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "5": {
@@ -30006,7 +31261,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           },
           "6": {
@@ -30034,7 +31289,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Wind_Farms"
           }
         },
@@ -30431,7 +31686,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cables_Wind_Farms_planned",
@@ -30502,7 +31758,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "1": {
@@ -30530,7 +31786,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "2": {
@@ -30558,7 +31814,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "3": {
@@ -30586,7 +31842,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "4": {
@@ -30614,7 +31870,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           },
           "5": {
@@ -30642,7 +31898,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Potential_Energy_Cables"
           }
         },
@@ -30759,7 +32015,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Energy_Transformers",
@@ -30830,7 +32087,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Converter_Station"
           }
         },
@@ -30933,13 +32190,14 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Main_Transmission_Lines",
         "layer_geotype": "line",
         "layer_entity_value_max": null,
-        "layer_short": "Interconnectors(Land Grid)",
+        "layer_short": "Interconnectors (Land Grid)",
         "layer_category": "activities",
         "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
@@ -30958,7 +32216,7 @@
         "layer_green": 0,
         "layer_tooltip": "",
         "layer_information": "",
-        "layer_media": "wiki://Interconnectors_(Land_Grid)",
+        "layer_media": "wiki://Interconnectors_(electricity)",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -31004,8 +32262,8 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
-            "media": "wiki://Interconnectors_(Land_Grid)"
+            "availability": -12,
+            "media": "wiki://Interconnectors_(electricity)"
           }
         },
         "layer_info_properties": [
@@ -31149,7 +32407,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wave_Resource_raster",
@@ -31220,7 +32479,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           },
           "1": {
@@ -31248,7 +32507,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           },
           "2": {
@@ -31276,7 +32535,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           },
           "3": {
@@ -31304,7 +32563,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           },
           "4": {
@@ -31332,11 +32591,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wave_Density"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Wind_Resource_raster",
@@ -31407,7 +32667,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           },
           "1": {
@@ -31435,7 +32695,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           },
           "2": {
@@ -31463,7 +32723,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           },
           "3": {
@@ -31491,7 +32751,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           },
           "4": {
@@ -31519,17 +32779,18 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": -12,
             "media": "wiki://Wind_Density"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cables_Other",
         "layer_geotype": "line",
         "layer_entity_value_max": null,
-        "layer_short": "Cables Other",
+        "layer_short": "Other Cables",
         "layer_category": "activities",
         "layer_subcategory": "cables_&_pipelines",
         "layer_download_from_geoserver": 1,
@@ -31781,13 +33042,14 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Natura_2000_new",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Natura 2000 Sites",
+        "layer_short": "Natura 2000",
         "layer_category": "ecology",
         "layer_subcategory": "protected_areas",
         "layer_download_from_geoserver": 1,
@@ -31828,7 +33090,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No protection",
+            "displayName": "Unspecified Directive",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
@@ -31983,10 +33245,11 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
-        "layer_name": "BS_MPA",
+        "layer_name": "BS_MPA_new",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Marine Protected Areas",
@@ -32030,7 +33293,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No protection against fisheries",
+            "displayName": "default",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
@@ -32044,90 +33307,6 @@
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
             "lineColor": "#004C12FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "1": {
-            "displayName": "Active Demersal Fleet Protection",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#009924FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "2": {
-            "displayName": "Passive Demersal Fleet Protection",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#33FF63FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "3": {
-            "displayName": "Pelagic Fleet Protection",
-            "approval": "NotDependent",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "18",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#80FF95FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -32226,8 +33405,39 @@
             "content_validation": 0,
             "unit": null,
             "default_value": null
+          },
+          {
+            "property_name": "POLICY_BUFFER_ZONE",
+            "policy_type": "buffer_zone",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Buffer zone policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "SEASONAL_CLOSURE",
+            "policy_type": "seasonal_closure",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Seasonal closure policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Unesco_Sites",
@@ -32415,7 +33625,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Shellfish_Farms",
@@ -32505,7 +33716,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Finfish_Farms",
@@ -32530,7 +33742,7 @@
         "layer_green": 0,
         "layer_tooltip": "Aquaculture sites (fish production)",
         "layer_information": "",
-        "layer_media": "wiki://Finfish_Farms",
+        "layer_media": "wiki://Fish_Farms",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -32577,7 +33789,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Finfish_Farms"
+            "media": "wiki://Fish_Farms"
           }
         },
         "layer_info_properties": [
@@ -32609,7 +33821,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Birds_Breeding_Areas",
@@ -32712,7 +33925,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Birds_Wintering_Areas",
@@ -32815,7 +34029,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Fisheries_closure",
@@ -32961,7 +34176,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cod_Fisheries_closure",
@@ -33107,7 +34323,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "BS_Cod_Spawning",
@@ -33238,7 +34455,8 @@
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Bottom_disturbance",
@@ -33425,7 +34643,8 @@
             "media": "wiki://Bottom_Disturbance"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Artificial_substrate",
@@ -33612,7 +34831,8 @@
             "media": "wiki://Artificial_Substrate"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Noise",
@@ -33799,7 +35019,8 @@
             "media": "wiki://Noise"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Surface_disturbance",
@@ -33986,7 +35207,8 @@
             "media": "wiki://Surface_Disturbance"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Active_Demersal",
@@ -34173,7 +35395,8 @@
             "media": "wiki://Protection_Active_Demersal"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Passive_Demersal",
@@ -34360,7 +35583,8 @@
             "media": "wiki://Protection_Passive_Demersal"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Pelagic",
@@ -34547,13 +35771,14 @@
             "media": "wiki://Protection_Pelagic"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Cod_Biomass",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Cod Biomass (Simulated)",
+        "layer_short": "Cod (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -34734,13 +35959,14 @@
             "media": "wiki://Cod"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Seals_Biomass",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Seal Biomass (Simulated)",
+        "layer_short": "Seals (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "birds_&_mammals",
         "layer_download_from_geoserver": 0,
@@ -34921,13 +36147,14 @@
             "media": "wiki://Seal"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Herring_Biomass_-_Baltic_Proper",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Herring Biomass - Baltic Proper (Simulated)",
+        "layer_short": "Herring - Baltic Proper (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -35108,13 +36335,14 @@
             "media": "wiki://Herring"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Herring_Biomass_-_Bothnian_Sea",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Herring Biomass - Bothnian Sea (Simulated)",
+        "layer_short": "Herring - Bothnian Sea (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -35295,7 +36523,8 @@
             "media": "wiki://Herring"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Benthos_Biomass",
@@ -35482,13 +36711,14 @@
             "media": "wiki://Benthic_invertebrates"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Sprat_Biomass",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Sprat Biomass (Simulated)",
+        "layer_short": "Sprat (Simulated)",
         "layer_category": "ecology",
         "layer_subcategory": "fish",
         "layer_download_from_geoserver": 0,
@@ -35669,7 +36899,8 @@
             "media": "wiki://Sprat"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Active_Demersal_Catch",
@@ -35856,7 +37087,8 @@
             "media": "wiki://Active_Demersal_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Passive_Demersal_Catch",
@@ -36043,7 +37275,8 @@
             "media": "wiki://Passive_Demersal_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Pelagic_Catch",
@@ -36230,7 +37463,8 @@
             "media": "wiki://Pelagic_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       }
     ],
     "expertise_definitions": null,

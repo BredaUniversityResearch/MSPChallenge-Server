@@ -1,31 +1,20 @@
-version: "3.7"
-
 # Production environment override
 services:
   php:
-    image: 'mspserver-php-staging'
     build:
       context: .
-      target: php_prod
+      target: frankenphp_prod
     volumes:
-      - ./:/srv/app
+      - ./:/app
       # If you develop on Mac or Windows you can remove the vendor/ directory
       #  from the bind-mount for better performance by enabling the next line:
-      - /srv/app/vendor
-      - /srv/app/var/cache
-      - /srv/app/var/log
-    environment:
-      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
-      APP_SECRET: ${APP_SECRET}
-      MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET}
-
-  caddy:
-    image: 'mspserver-caddy-staging'
-    build:
-      context: .
-      target: caddy_prod
+      - /app/vendor
+      - /app/var/cache
+      - /app/var/log
     environment:
       SERVER_NAME: ${SERVER_NAME:-:80}
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
+      APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
     ports:
@@ -34,22 +23,3 @@ services:
         published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
         protocol: tcp
 
-  adminer:
-    image: 'mspserver-adminer-staging'
-    build:
-      context: .
-      target: adminer_base
-    restart: always
-    environment:
-      ADMINER_DEFAULT_SERVER: database
-      ADMINER_PLUGINS: 'sql-log'
-      # dev enforced here otherwise you won't be able to log in if no password was set
-      APP_ENV: dev
-      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-}
-    ports:
-      # run Adminer on port 8082 since 8080 will be used by mitmproxy
-      - 8082:8080
-    networks:
-      - database
-    volumes:
-      - ./docker/adminer/index.php:/var/www/html/index.php:ro

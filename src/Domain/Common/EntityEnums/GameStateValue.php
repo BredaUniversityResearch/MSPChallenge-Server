@@ -6,6 +6,11 @@ use App\Domain\Common\Enum;
 
 class GameStateValue extends Enum
 {
+    public function __construct($value)
+    {
+        parent::__construct(strtolower($value));
+    }
+
     public const SETUP = 'setup';
     public const SIMULATION = 'simulation';
     public const PLAY = 'play';

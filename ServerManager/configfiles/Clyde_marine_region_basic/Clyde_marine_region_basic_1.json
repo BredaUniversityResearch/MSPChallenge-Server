@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "date_modified": "02/10/2023",
-    "data_model_hash": "A3486438AA6C8DD9810A7616ED69ABB4E3D14776CA4E05DF88395543B47EA74E",
+    "date_modified": "2/17/2025",
+    "data_model_hash": "6849A3670938690BB36CD9173A025CA42E6DC0B6B4F18F67509DF35072808765",
     "errors": 0,
-    "editor_version": "1.0.0",
-    "config_version": "1.0.0"
+    "editor_version": "2.0.0",
+    "config_version": "2.0.0"
   },
   "datamodel": {
     "restrictions": {
@@ -179,11 +179,11 @@
     },
     "plans": [
       {
-        "plan_id": 2,
+        "plan_id": 1,
         "plan_country_id": 1,
         "plan_name": "CR_ENERGY_STARTING_PLAN",
         "plan_gametime": -1,
-        "plan_type": "1,0,0",
+        "plan_type": "1",
         "plan_alters_energy_distribution": 0,
         "layers": [
           {
@@ -242,33 +242,6 @@
           },
           {
             "layer_id": 76,
-            "name": "CR_Sockets",
-            "layer_editing_type": "socket",
-            "geometry": [],
-            "warnings": [],
-            "deleted": [
-              {
-                "geometry_id": 1467,
-                "geometry_mspid": 0,
-                "base_geometry_info": {
-                  "geometry_id": 1467,
-                  "geometry_mspid": 1485,
-                  "geometry_persistent": 1467
-                }
-              },
-              {
-                "geometry_id": 1467,
-                "geometry_mspid": 0,
-                "base_geometry_info": {
-                  "geometry_id": 1467,
-                  "geometry_mspid": 1485,
-                  "geometry_persistent": 1467
-                }
-              }
-            ]
-          },
-          {
-            "layer_id": 77,
             "name": "CR_Transformers",
             "layer_editing_type": "transformer",
             "geometry": [],
@@ -293,11 +266,208 @@
                 }
               }
             ]
+          },
+          {
+            "layer_id": 77,
+            "name": "CR_Sockets",
+            "layer_editing_type": "socket",
+            "geometry": [],
+            "warnings": [],
+            "deleted": [
+              {
+                "geometry_id": 1467,
+                "geometry_mspid": 0,
+                "base_geometry_info": {
+                  "geometry_id": 1467,
+                  "geometry_mspid": 1485,
+                  "geometry_persistent": 1467
+                }
+              },
+              {
+                "geometry_id": 1467,
+                "geometry_mspid": 0,
+                "base_geometry_info": {
+                  "geometry_id": 1467,
+                  "geometry_mspid": 1485,
+                  "geometry_persistent": 1467
+                }
+              }
+            ]
           }
         ],
         "grids": [],
         "fishing": [],
         "messages": [],
+        "restriction_settings": []
+      },
+      {
+        "plan_id": 3,
+        "plan_country_id": 1,
+        "plan_name": "starting plan - protection",
+        "plan_gametime": -1,
+        "plan_type": "0",
+        "plan_alters_energy_distribution": 0,
+        "layers": [
+          {
+            "layer_id": 78,
+            "name": "CR_Marine_Protected_Areas",
+            "layer_editing_type": "protection",
+            "geometry": [
+              {
+                "geometry_id": 1469,
+                "FID": "",
+                "geometry_persistent": 1462,
+                "geometry": "[[3357359.25,3666011.5],[3359802.25,3658359.0],[3356150.75,3651346.5],[3357858.5,3648565.25],[3345784.75,3650223.0],[3326413.5,3686818.5],[3326567.25,3686831.25],[3327026.75,3686564.25],[3327318.25,3686142.5],[3327617.5,3685976.25],[3327777.0,3685816.75],[3328502.75,3685235.25],[3330271.0,3685234.25],[3331239.0,3685284.75],[3332173.5,3685818.5],[3333364.5,3686460.5],[3335210.0,3686041.0],[3335653.25,3686044.0],[3341367.75,3686236.5],[3341694.75,3686793.75],[3342025.25,3687156.25],[3342257.0,3687151.75],[3342420.5,3687253.0],[3342607.0,3687365.5],[3342944.25,3687839.75],[3343627.25,3688445.75],[3344034.0,3688574.25],[3349787.5,3682738.0]]",
+                "data": {
+                  "STATUS": "Current",
+                  "NAME": "Clyde Sea Sill",
+                  "LEAD": "SNH",
+                  "SITE_HA": "71163.21",
+                  "EUR_CODE": "555560461",
+                  "link": "http://gateway.snh.gov.uk/sitelink/siteinfo.jsp?pa_code=10414",
+                  "PA_CODE": "10414",
+                  "original_layer_name": "CR_Marine_Protected_Areas",
+                  "SEASONAL_CLOSURE": "{\"items\":[{\"fleets\":[2,1,0],\"months\":4095}],\"pressure\":0.0,\"policy_type\":\"seasonal_closure\"}"
+                },
+                "country": 6,
+                "type": "0",
+                "base_geometry_info": {
+                  "geometry_id": 1469,
+                  "geometry_mspid": 553,
+                  "geometry_persistent": 1462
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 1470,
+                "FID": "",
+                "geometry_persistent": 1460,
+                "geometry": "[[3403441.5,3780530.0],[3402840.25,3779969.75],[3401214.25,3779085.0],[3399129.0,3777873.0],[3393642.5,3775987.25],[3393597.25,3775433.75],[3392123.75,3773432.25],[3391508.5,3771225.75],[3388420.0,3770016.5],[3388147.0,3769450.5],[3383733.5,3769321.0],[3383011.0,3768598.0],[3382327.75,3766740.75],[3381368.5,3765678.5],[3378152.0,3763499.0],[3377594.0,3762846.0],[3376301.5,3761793.5],[3374652.25,3759101.75],[3373526.0,3757764.5],[3372652.75,3757496.75],[3372052.0,3756815.75],[3371749.5,3756670.75],[3368658.75,3757314.25],[3370501.5,3759752.25],[3371914.25,3760274.25],[3372727.5,3762281.25],[3373712.25,3764175.25],[3374090.5,3764267.5],[3374315.75,3763885.0],[3374178.75,3763438.25],[3374399.5,3763195.25],[3374663.75,3763021.5],[3375279.75,3763280.75],[3375833.5,3763622.0],[3376150.5,3764132.5],[3376378.0,3764853.25],[3377204.75,3765894.25],[3377516.0,3766046.0],[3378231.25,3766344.5],[3378985.75,3766475.75],[3379015.5,3767158.0],[3379538.5,3768430.5],[3381121.75,3769613.5],[3383276.0,3771061.0],[3384796.25,3771549.75],[3385738.75,3771592.0],[3386244.5,3771689.5],[3389289.5,3772782.5],[3389911.5,3773697.5],[3390518.25,3774905.75],[3390062.0,3775941.5],[3390746.25,3775965.5],[3391801.5,3777229.5],[3393435.0,3779472.0],[3395661.5,3780522.5],[3395322.25,3778715.0],[3397593.25,3779433.75],[3398282.5,3779033.5],[3399778.75,3779794.75],[3403005.75,3781125.25]]",
+                "data": {
+                  "STATUS": "Current",
+                  "NAME": "Upper Loch Fyne and Loch Goil",
+                  "LEAD": "SNH",
+                  "SITE_HA": "8765.26",
+                  "EUR_CODE": "555560475",
+                  "link": "http://gateway.snh.gov.uk/sitelink/siteinfo.jsp?pa_code=10424",
+                  "PA_CODE": "10424",
+                  "original_layer_name": "CR_Marine_Protected_Areas",
+                  "SEASONAL_CLOSURE": "{\"items\":[{\"fleets\":[0,1,2],\"months\":4095}],\"pressure\":0.0,\"policy_type\":\"seasonal_closure\"}"
+                },
+                "country": 4,
+                "type": "0",
+                "base_geometry_info": {
+                  "geometry_id": 1470,
+                  "geometry_mspid": 551,
+                  "geometry_persistent": 1460
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 1471,
+                "FID": "",
+                "geometry_persistent": 1461,
+                "geometry": "[[3402295.25,3769750.75],[3402379.25,3769714.0],[3402374.25,3769541.25],[3402300.0,3769332.25],[3402286.5,3769218.75],[3402374.75,3769074.5],[3402442.25,3768675.5],[3402450.0,3768442.25],[3402481.0,3768296.0],[3402674.5,3767828.25],[3402769.75,3767600.0],[3402826.25,3767483.5],[3402822.5,3767044.75],[3403028.25,3766550.5],[3402849.0,3766497.75],[3402745.0,3766013.5],[3402708.0,3765665.0],[3401986.75,3764379.5],[3402583.25,3762488.5],[3403232.25,3761757.5],[3403242.0,3761764.0],[3403244.0,3761763.75],[3403487.75,3761720.0],[3402994.25,3761200.5],[3402157.25,3760992.0],[3402074.5,3761235.5],[3401656.5,3761424.5],[3401404.5,3761859.5],[3401169.75,3762108.25],[3400985.25,3762372.75],[3400797.25,3762794.0],[3400773.5,3762821.0],[3400630.25,3763135.5],[3400523.5,3763739.0],[3400543.5,3764434.75],[3400899.75,3764906.5],[3400929.75,3765366.5],[3401096.25,3765373.25],[3401064.5,3765620.5],[3401473.75,3765783.5],[3401495.75,3765977.75],[3401808.25,3766929.75],[3401586.0,3768155.5],[3401434.0,3768524.5],[3401494.75,3768960.25],[3401440.0,3769030.0],[3401127.25,3769407.75],[3401662.75,3769745.75],[3401960.25,3769751.75],[3402142.0,3769709.0],[3402215.25,3769753.75]]",
+                "data": {
+                  "STATUS": "Current",
+                  "NAME": "Upper Loch Fyne and Loch Goil",
+                  "LEAD": "SNH",
+                  "SITE_HA": "8765.26",
+                  "EUR_CODE": "555560475",
+                  "link": "http://gateway.snh.gov.uk/sitelink/siteinfo.jsp?pa_code=10424",
+                  "PA_CODE": "10424",
+                  "original_layer_name": "CR_Marine_Protected_Areas",
+                  "SEASONAL_CLOSURE": "{\"items\":[{\"fleets\":[2,1],\"months\":4095}],\"pressure\":0.0,\"policy_type\":\"seasonal_closure\"}"
+                },
+                "country": 7,
+                "type": "0",
+                "base_geometry_info": {
+                  "geometry_id": 1471,
+                  "geometry_mspid": 552,
+                  "geometry_persistent": 1461
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 1472,
+                "FID": "",
+                "geometry_persistent": 1464,
+                "geometry": "[[3374993.75,3704012.5],[3375007.5,3704030.5],[3375030.25,3704037.0],[3375075.25,3704015.75],[3375133.0,3703977.25],[3375198.25,3703978.0],[3375219.75,3703994.75],[3375327.25,3704027.75],[3375335.25,3704063.25],[3375362.75,3704097.75],[3375421.0,3704118.5],[3375497.5,3704121.25],[3375544.5,3704140.0],[3375592.25,3704151.0],[3375671.25,3704188.75],[3375718.75,3704232.5],[3375731.75,3704255.25],[3375777.75,3704300.0],[3375840.5,3704397.5],[3375889.0,3704465.25],[3375933.5,3704506.0],[3375986.5,3704521.25],[3376077.5,3704522.75],[3376100.0,3704539.75],[3376171.25,3704541.5],[3376210.5,3704532.0],[3376260.75,3704529.75],[3376308.0,3704545.0],[3376348.25,3704547.5],[3376398.0,3704539.25],[3376463.5,3704555.25],[3376500.0,3704553.0],[3376559.5,3704489.75],[3376595.5,3704467.5],[3376640.75,3704464.75],[3376815.25,3702745.75],[3376809.0,3702766.0],[3376756.25,3702867.25],[3376634.0,3703018.0],[3376598.0,3703050.75],[3376560.0,3703076.0],[3376475.75,3703103.25],[3376401.25,3703114.75],[3376340.25,3703140.25],[3376295.75,3703140.5],[3376245.25,3703149.5],[3376184.5,3703145.5],[3376091.75,3703118.25],[3376065.75,3703119.75],[3375969.0,3703104.25],[3375907.5,3703082.5],[3375880.5,3703047.0],[3375872.25,3703022.5],[3375849.0,3702998.25],[3375816.25,3702908.25],[3375820.25,3702834.0],[3375834.75,3702663.25],[3375845.25,3702635.0],[3375841.5,3702575.75],[3375821.5,3702473.25],[3375811.25,3702449.0],[3375809.75,3702397.0],[3375785.25,3702259.75],[3375786.25,3702160.0],[3375781.0,3702077.5],[3375787.5,3702064.25],[3375780.25,3701982.0],[3375779.25,3701975.25]]",
+                "data": {
+                  "STATUS": "No Take Zone",
+                  "NAME": "Lamlash Bay No Take Zone",
+                  "LEAD": "",
+                  "SITE_HA": "",
+                  "EUR_CODE": "",
+                  "link": "",
+                  "PA_CODE": "",
+                  "original_layer_name": "CR_Marine_Protected_Areas",
+                  "SEASONAL_CLOSURE": "{\"items\":[{\"fleets\":[0,1,2,3,4],\"months\":4095}],\"pressure\":0.0,\"policy_type\":\"seasonal_closure\"}"
+                },
+                "country": 3,
+                "type": "0",
+                "base_geometry_info": {
+                  "geometry_id": 1472,
+                  "geometry_mspid": 555,
+                  "geometry_persistent": 1464
+                },
+                "cable": null,
+                "energy_output": null
+              },
+              {
+                "geometry_id": 1473,
+                "FID": "",
+                "geometry_persistent": 1463,
+                "geometry": "[[3382863.5,3699593.25],[3381069.25,3695373.25],[3378600.75,3690470.25],[3375597.25,3687566.0],[3372134.25,3686101.25],[3363515.0,3688589.0],[3360029.0,3690346.0],[3355618.5,3695108.25],[3353622.75,3701195.0],[3353319.25,3704731.25],[3359315.0,3705580.75],[3359749.5,3704197.5],[3359847.5,3702882.25],[3360485.75,3701961.75],[3360687.0,3700763.0],[3360156.75,3699116.25],[3361173.5,3697497.25],[3361474.5,3697007.5],[3362355.5,3696148.25],[3363122.75,3695544.25],[3363457.75,3694840.5],[3364768.25,3694103.75],[3365453.25,3693858.5],[3365825.25,3693733.75],[3366259.0,3693440.75],[3367053.5,3693201.5],[3367347.5,3693290.0],[3367882.75,3693182.0],[3368384.5,3693156.5],[3368932.5,3693320.25],[3369209.75,3693775.5],[3369714.0,3693657.5],[3369946.0,3693565.75],[3370577.0,3693569.5],[3371049.25,3693639.75],[3371846.25,3693146.5],[3372659.0,3693035.5],[3373167.0,3693325.5],[3373251.5,3693751.0],[3374221.75,3693993.5],[3374237.0,3694093.5],[3374617.5,3694805.75],[3374368.25,3695639.75],[3374445.5,3697005.75],[3374468.5,3698267.5],[3374900.5,3699565.5],[3375120.25,3700330.5],[3373735.75,3701713.5],[3373097.25,3702297.25],[3373732.75,3703494.0],[3374248.0,3703776.5],[3374432.75,3703944.75],[3374594.25,3703981.25],[3374803.0,3704008.0],[3374882.0,3704020.25],[3374958.5,3704032.5],[3374987.5,3704004.5],[3375031.25,3704066.5],[3375309.0,3704056.0],[3375467.0,3704261.5],[3375704.0,3704300.25],[3375862.0,3704601.0],[3376207.0,3704571.5],[3376500.0,3704588.25],[3376573.0,3704512.5],[3376609.0,3704496.75],[3376657.5,3704463.75],[3376671.25,3704484.25],[3376537.25,3704699.0],[3376508.25,3704945.25],[3376206.0,3705455.25],[3375739.75,3705978.75],[3375600.25,3706679.0],[3375565.25,3707253.75],[3375567.5,3707253.25]]",
+                "data": {
+                  "STATUS": "Current",
+                  "NAME": "South Arran",
+                  "LEAD": "SNH",
+                  "SITE_HA": "27987.11",
+                  "EUR_CODE": "555560474",
+                  "link": "http://gateway.snh.gov.uk/sitelink/siteinfo.jsp?pa_code=10423",
+                  "PA_CODE": "10423",
+                  "original_layer_name": "CR_Marine_Protected_Areas",
+                  "SEASONAL_CLOSURE": "{\"items\":[{\"fleets\":[2,1,0],\"months\":4095}],\"pressure\":0.0,\"policy_type\":\"seasonal_closure\"}"
+                },
+                "country": 3,
+                "type": "0",
+                "base_geometry_info": {
+                  "geometry_id": 1473,
+                  "geometry_mspid": 554,
+                  "geometry_persistent": 1463
+                },
+                "cable": null,
+                "energy_output": null
+              }
+            ],
+            "warnings": [],
+            "deleted": [
+              {
+                "geometry_id": 1464,
+                "geometry_mspid": 0,
+                "base_geometry_info": {
+                  "geometry_id": 1464,
+                  "geometry_mspid": 555,
+                  "geometry_persistent": 1464
+                }
+              }
+            ]
+          }
+        ],
+        "grids": [],
+        "fishing": [],
+        "messages": [
+          {
+            "country_id": 1,
+            "user_name": "M",
+            "text": "Changed the plans status to: Approved",
+            "time": 1737375483.168458
+          }
+        ],
         "restriction_settings": []
       }
     ],
@@ -333,7 +503,7 @@
               "name": "Disposal Sites",
               "id": 4,
               "multiline": false,
-              "link": "Dumping_areas"
+              "link": "Disposal_sites"
             },
             {
               "name": "Dredging Locations",
@@ -614,7 +784,7 @@
               "name": "Benthic",
               "id": 37,
               "multiline": false,
-              "link": "Benthic_invertebrates"
+              "link": "Benthic_Invertebrates"
             }
           ]
         }
@@ -5051,6 +5221,20 @@
       ],
       "restriction_layer_exceptions": [
         {
+          "layer_name": "CR_Wind_Farms",
+          "layer_types": [
+            "6MW"
+          ],
+          "allowed_ships": [
+            {
+              "ship_type_ids": [
+                5
+              ],
+              "cost_multiplier": 1.0
+            }
+          ]
+        },
+        {
           "layer_name": "CR_No_Shipping_Zones",
           "layer_types": [
             "Passenger"
@@ -5115,7 +5299,6 @@
           ]
         }
       ],
-      "layer_type_restriction_group_mapping": null,
       "output_configuration": {
         "pixels_per_mel_cell": 2,
         "simulation_area_cell_size": 750
@@ -5288,40 +5471,34 @@
         {
           "ship_type_id": 1,
           "ship_type_name": "Passenger",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.15
         },
         {
           "ship_type_id": 2,
           "ship_type_name": "Tanker",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.4
         },
         {
           "ship_type_id": 3,
           "ship_type_name": "Cargo",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.4
         },
         {
           "ship_type_id": 4,
           "ship_type_name": "Recreational",
-          "ship_restriction_group": null,
           "ship_routing_type": "RegularShipping",
           "ship_agility": 0.8
         },
         {
           "ship_type_id": 5,
           "ship_type_name": "Maintenance",
-          "ship_restriction_group": null,
           "ship_routing_type": "Maintenance",
           "ship_agility": 0.99
         }
       ],
-      "ship_restriction_groups": null,
       "layer_type_ship_type_mapping": [
         {
           "layer_type": "Passenger",
@@ -5413,6 +5590,172 @@
           "valueDefinitions": null
         }
       ]
+    },
+    "policy_settings": {
+      "fishing": {
+        "all_country_approval": true,
+        "stakeholder_pressure_cool_down": 0.1,
+        "fleet_info": {
+          "gear_types": [
+            "Demersal trawl",
+            "Scallop fleet",
+            "Nephrops fleet",
+            "Pots and creels",
+            "Seine"
+          ],
+          "fleets": [
+            {
+              "//comment": "0 Demersal trawl",
+              "gear_type": "0",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
+            },
+            {
+              "//comment": "1 Scallop fleet",
+              "gear_type": "1",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
+            },
+            {
+              "//comment": "2 Nephrops fleet",
+              "gear_type": "2",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
+            },
+            {
+              "//comment": "3 Pots and creels",
+              "gear_type": "3",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
+            },
+            {
+              "//comment": "4 Seine",
+              "gear_type": "4",
+              "country_id": "-1",
+              "initial_fishing_distribution": [
+                {
+                  "country_id": 3,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 4,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 5,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 6,
+                  "effort_weight": 5.0
+                },
+                {
+                  "country_id": 7,
+                  "effort_weight": 5.0
+                }
+              ]
+            }
+          ]
+        },
+        "policy_type": "fishing",
+        "enabled": true
+      },
+      "shipping": {
+        "policy_type": "shipping",
+        "enabled": true
+      },
+      "energy": {
+        "policy_type": "energy",
+        "enabled": true
+      },
+      "eco_gear": {
+        "policy_type": "eco_gear",
+        "enabled": false
+      }
     },
     "MEL": {
       "modelfile": "MELdata/Clyde model for MSP.eiixml",
@@ -5596,12 +5939,12 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|3",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "CR_Natura_2000|3",
+              "name": "CR_Natura_2000_jan_25|3",
               "influence": 1.0,
               "construction": false
             },
@@ -5630,7 +5973,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Protection Scallop fleet",
@@ -5651,12 +5999,12 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|2",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "CR_Natura_2000|2",
+              "name": "CR_Natura_2000_jan_25|2",
               "influence": 1.0,
               "construction": false
             },
@@ -5685,7 +6033,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         },
         {
           "name": "Protection Nephrops fleet",
@@ -5706,12 +6059,12 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|1",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "CR_Natura_2000|1",
+              "name": "CR_Natura_2000_jan_25|1",
               "influence": 1.0,
               "construction": false
             },
@@ -5740,18 +6093,23 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         },
         {
           "name": "Protection Pots and creels",
           "layers": [
             {
-              "name": "CR_Natura_2000|7",
+              "name": "CR_Natura_2000_jan_25|7",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|5",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
@@ -5775,7 +6133,12 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "3"
+            ]
+          }
         },
         {
           "name": "Protection Seine",
@@ -5796,12 +6159,12 @@
               "construction": false
             },
             {
-              "name": "CR_Marine_Protected_Areas|4",
+              "name": "CR_Marine_Protected_Areas",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "CR_Natura_2000|4",
+              "name": "CR_Natura_2000_jan_25|4",
               "influence": 1.0,
               "construction": false
             },
@@ -5830,137 +6193,54 @@
               "influence": 1.0,
               "construction": false
             }
-          ]
+          ],
+          "policy_filters": {
+            "fleets": [
+              "4"
+            ]
+          }
         }
       ],
-      "fishing_policy_settings": {
-        "all_country_approval": true
-      },
       "fishing": [
         {
           "name": "Fishing intensity Demersal trawl",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "0"
+            ]
+          }
         },
         {
           "name": "Fishing intensity Seine",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "4"
+            ]
+          }
         },
         {
           "name": "Fishing intensity Pots and creels",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "3"
+            ]
+          }
         },
         {
           "name": "Fishing intensity Nephrops fleet",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "2"
+            ]
+          }
         },
         {
           "name": "Fishing intensity Scallop fleet",
-          "initialFishingDistribution": [
-            {
-              "country_id": 3,
-              "weight": 5.0
-            },
-            {
-              "country_id": 4,
-              "weight": 5.0
-            },
-            {
-              "country_id": 5,
-              "weight": 5.0
-            },
-            {
-              "country_id": 6,
-              "weight": 5.0
-            },
-            {
-              "country_id": 7,
-              "weight": 5.0
-            }
-          ]
+          "policy_filters": {
+            "fleets": [
+              "1"
+            ]
+          }
         }
       ],
       "outcomes": [
@@ -6313,7 +6593,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Councils",
@@ -6403,7 +6684,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Populated_places",
@@ -6925,7 +7207,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Planning_Regions",
@@ -7141,7 +7424,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Harbours_area",
@@ -7201,7 +7485,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
-            "lineColor": "#1474A3FF",
+            "lineColor": "#1474A3C9",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -7229,7 +7513,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
-            "lineColor": "#1B9EDEFF",
+            "lineColor": "#1B9EDEC9",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -7257,7 +7541,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
-            "lineColor": "#62BFECFF",
+            "lineColor": "#62BFECC9",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -7371,7 +7655,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_topography",
@@ -7442,7 +7727,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "1": {
@@ -7470,7 +7755,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "2": {
@@ -7498,7 +7783,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "3": {
@@ -7526,7 +7811,7 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           },
           "4": {
@@ -7554,11 +7839,12 @@
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
-            "availability": 2010,
+            "availability": 0,
             "media": ""
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Water_Quality",
@@ -7844,7 +8130,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Bathymetry",
@@ -8087,7 +8374,8 @@
             "media": "wiki://Bathymetry"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Cables",
@@ -8303,7 +8591,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Disposal_Sites",
@@ -8328,7 +8617,7 @@
         "layer_green": 0,
         "layer_tooltip": "Places where sediments are disposed after dredging",
         "layer_information": "",
-        "layer_media": "wiki://Dumping_areas",
+        "layer_media": "wiki://Disposal_sites",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -8375,7 +8664,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Dumping_areas"
+            "media": "wiki://Disposal_sites"
           },
           "1": {
             "displayName": "Closed",
@@ -8403,7 +8692,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Dumping_areas"
+            "media": "wiki://Disposal_sites"
           },
           "2": {
             "displayName": "Disused",
@@ -8431,7 +8720,7 @@
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": "wiki://Dumping_areas"
+            "media": "wiki://Disposal_sites"
           }
         },
         "layer_info_properties": [
@@ -8533,7 +8822,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Dredging_Locations",
@@ -8623,7 +8913,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Marinas",
@@ -8811,7 +9102,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Yachting_Clubs",
@@ -8957,7 +9249,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Scuba_Diving",
@@ -9145,7 +9438,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Canoeing",
@@ -9333,7 +9627,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Rowing",
@@ -9521,7 +9816,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Wind_Surfing",
@@ -9709,7 +10005,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Walking",
@@ -9897,7 +10194,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Birds_Watching",
@@ -10085,7 +10383,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Sea_Angling_From_Shore",
@@ -10273,7 +10572,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Sea_Angling_From_Boats",
@@ -10475,7 +10775,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_General_Boating_Areas",
@@ -10593,7 +10894,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Recreational_Boats_Intensity_raster",
@@ -10724,7 +11026,8 @@
             "media": "wiki://Recreational_Boating_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Anchorages",
@@ -10771,7 +11074,7 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Small Craft Anchorage",
+            "displayName": "Default",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
@@ -10789,120 +11092,8 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#488C89FF",
-            "pointSize": 0.75,
-            "pointSpriteName": "Anchor",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Anchorages"
-          },
-          "1": {
-            "displayName": "Unrestricted Anchorage",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#488C89FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 0,
-            "lineColor": "#488C89FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#488C89FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Anchor",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Anchorages"
-          },
-          "2": {
-            "displayName": "Unclassified",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#9E63B1FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 0,
-            "lineColor": "#9E63B1FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#9E63B1FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Anchor",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Anchorages"
-          },
-          "3": {
-            "displayName": "Recreational",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#488C89FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 0,
-            "lineColor": "#488C89FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#488C89FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Anchor",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Anchorages"
-          },
-          "4": {
-            "displayName": "Commercial",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#488C89FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 0,
-            "lineColor": "#488C89FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#488C89FF",
-            "pointSize": 1.0,
+            "pointColor": "#1156A2FF",
+            "pointSize": 0.4,
             "pointSpriteName": "Anchor",
             "description": "",
             "capacity": 0,
@@ -10940,7 +11131,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_No_Shipping_Zones",
@@ -11114,7 +11306,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Ports",
@@ -11258,7 +11451,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Routes",
@@ -11319,7 +11513,7 @@
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
             "lineColor": "#FF2A47FF",
-            "lineWidth": 0.5,
+            "lineWidth": 0.3,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -11347,7 +11541,7 @@
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
             "lineColor": "#405AE8FF",
-            "lineWidth": 0.5,
+            "lineWidth": 0.3,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -11375,7 +11569,7 @@
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
             "lineColor": "#39FF63FF",
-            "lineWidth": 0.5,
+            "lineWidth": 0.3,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -11403,7 +11597,7 @@
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
             "lineColor": "#E8C844FF",
-            "lineWidth": 0.5,
+            "lineWidth": 0.3,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -11530,7 +11724,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Connection_Points",
@@ -11634,7 +11829,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Routes_Invisible",
@@ -11738,7 +11934,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Gates",
@@ -11856,7 +12053,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Intensity_Cargo_raster",
@@ -12043,7 +12241,8 @@
             "media": "wiki://Cargo_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Intensity_Tanker_raster",
@@ -12230,7 +12429,8 @@
             "media": "wiki://Tanker_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Intensity_Passenger_raster",
@@ -12417,7 +12617,8 @@
             "media": "wiki://Passenger_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Intensity_maintenance",
@@ -12604,7 +12805,8 @@
             "media": "wiki://Maintenance_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Intensity_Recreational_raster",
@@ -12791,7 +12993,8 @@
             "media": "wiki://Shipping_Recreation_Total"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Intensity_raster",
@@ -12978,7 +13181,8 @@
             "media": "wiki://Shipping_Intensity"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shipping_Risk_raster",
@@ -13193,7 +13397,8 @@
             "media": "wiki://Shipping_Risk"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Wreckages",
@@ -13311,7 +13516,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Shellfish_Farms",
@@ -13377,7 +13583,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#5181FFFF",
-            "pointSize": 1.0,
+            "pointSize": 0.4,
             "pointSpriteName": "Aquacultureshellfish",
             "description": "",
             "capacity": 0,
@@ -13457,7 +13663,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Fish_Farms",
@@ -13523,7 +13730,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#5181FFFF",
-            "pointSize": 1.0,
+            "pointSize": 0.4,
             "pointSpriteName": "Aquaculturefish",
             "description": "",
             "capacity": 0,
@@ -13589,10 +13796,11 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
-        "layer_name": "CR_Natura_2000",
+        "layer_name": "CR_Natura_2000_jan_25",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Natura 2000",
@@ -13636,25 +13844,25 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No protection against fishing",
+            "displayName": "Habitats Directive",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FF7272FF",
-            "polygonPatternName": "25",
+            "polygonColor": "#00590DFF",
+            "polygonPatternName": "18",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
-            "lineColor": "#FF7272FF",
+            "lineColor": "#00590DFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#FF7272FF",
+            "pointColor": "#00590DFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
@@ -13664,152 +13872,12 @@
             "media": "wiki://Natura_2000"
           },
           "1": {
-            "displayName": "No nephrops fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FFC773FF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFC773FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFC773FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "Catches: Sharks, Rays and Skates,|Cod,Flatfish, Mackerel, Herring & Cephalopods. ",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Natura_2000"
-          },
-          "2": {
-            "displayName": "No scallops fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#CEFF73FF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#CEFF73FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#CEFF73FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "Impact: Invertebrates",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Natura_2000"
-          },
-          "3": {
-            "displayName": "No demersal fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#73FFBCFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#73FFBCFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#73FFBCFF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Natura_2000"
-          },
-          "4": {
-            "displayName": "No seine fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#73D9FFFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#73D9FFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#73D9FFFF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "Impacts: Sharks, Rays & Skates, Cod,|Flatfish, Mackerel, Herring, Pelagic, Cephalopods.",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Natura_2000"
-          },
-          "5": {
-            "displayName": "Habitats Directive",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#737DFFFF",
-            "polygonPatternName": "39",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#737DFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#737DFFFF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Natura_2000"
-          },
-          "6": {
             "displayName": "Birds Directive",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#FF00ECFF",
+            "polygonColor": "#00590DFF",
             "polygonPatternName": "18",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -13817,43 +13885,15 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
-            "lineColor": "#FF00ECFF",
+            "lineColor": "#00590DFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#FF00ECFF",
+            "pointColor": "#00590DFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Natura_2000"
-          },
-          "7": {
-            "displayName": "No pots and creel fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF0079FF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FF0079FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FF0079FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "Impacts: Crabs, Lobsters, Nephrops",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
@@ -13973,7 +14013,8 @@
             "unit": null,
             "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Marine_Protected_Areas",
@@ -14017,15 +14058,15 @@
         "layer_editing_type": "protection",
         "layer_special_entity_type": "Default",
         "layer_depth": 3,
-        "layer_property_as_type": null,
+        "layer_property_as_type": "type",
         "layer_type": {
           "0": {
-            "displayName": "No protection against fishing",
+            "displayName": "default",
             "approval": "EEZ",
             "value": 0,
-            "map_type": null,
+            "map_type": "other",
             "displayPolygon": 1,
-            "polygonColor": "#FF7272FF",
+            "polygonColor": "#00590DFF",
             "polygonPatternName": "25",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14033,155 +14074,15 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.2,
             "displayLines": 1,
-            "lineColor": "#FF7272FF",
+            "lineColor": "#00590DFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#FF7272FF",
+            "pointColor": "#00590DFF",
             "pointSize": 1.0,
             "pointSpriteName": "None",
             "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "1": {
-            "displayName": "No nephrops fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#EDFF00FF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#EDFF00FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#EDFF00FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "Impacts: Sharks, Rays and Skates,| Cod,Flatfish, Mackerel, Herring, Cephalopods.",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "2": {
-            "displayName": "No scallops fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#38FFBDFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#38FFBDFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#38FFBDFF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "Impacts: Invertebrates",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "3": {
-            "displayName": "No demersal fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#4D89FFFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#4D89FFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#4D89FFFF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "4": {
-            "displayName": "No seine fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#C87BFFFF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 0,
-            "lineColor": "#C87BFFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#C87BFFFF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "Impacts: Sharks, Rays & Skates, Cod,| Flatfish, Mackerel, Herring, Pelagic, Cephalopods",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Marine_Protected_Areas"
-          },
-          "5": {
-            "displayName": "No pots and creel fishing",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF7BC3FF",
-            "polygonPatternName": "25",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FF7BC3FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FF7BC3FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "Impacts: Crabs, Lobsters, Nephrops",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
@@ -14286,8 +14187,39 @@
             "content_validation": 0,
             "unit": null,
             "default_value": null
+          },
+          {
+            "property_name": "POLICY_BUFFER_ZONE",
+            "policy_type": "buffer_zone",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Buffer zone policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "SEASONAL_CLOSURE",
+            "policy_type": "seasonal_closure",
+            "enabled": 1,
+            "editable": 1,
+            "display_name": "Seasonal closure policy",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
           }
-        ]
+        ],
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Artificial_habitat",
@@ -14474,7 +14406,8 @@
             "media": "wiki://Artificial_Substrate"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Surface_disturbance",
@@ -14661,7 +14594,8 @@
             "media": "wiki://Surface_Disturbance"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Bottom_disturbance",
@@ -14848,7 +14782,8 @@
             "media": "wiki://Bottom_Disturbance"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Noise",
@@ -15035,7 +14970,8 @@
             "media": "wiki://Noise"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Demersal_Trawl_Catch",
@@ -15222,7 +15158,8 @@
             "media": "wiki://Active_Demersal_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Seine_Catch",
@@ -15409,7 +15346,8 @@
             "media": "wiki://Seine_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Nephrops_Trawl_Catch",
@@ -15596,7 +15534,8 @@
             "media": "wiki://Nephrops_Trawl_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Scallop_Fleet_Catch",
@@ -15783,7 +15722,8 @@
             "media": "wiki://Scallop_Fleet_Catch"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Cetaceans_Biomass",
@@ -15970,7 +15910,8 @@
             "media": "wiki://Cetacean"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Birds_Biomass",
@@ -16157,7 +16098,8 @@
             "media": "wiki://Birds"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Cod_Biomass",
@@ -16344,7 +16286,8 @@
             "media": "wiki://Cod"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Flatfish_Biomass",
@@ -16531,7 +16474,8 @@
             "media": "wiki://Flatfish"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Herring_Biomass",
@@ -16718,7 +16662,8 @@
             "media": "wiki://Herring"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Mackerel_Biomass",
@@ -16905,7 +16850,8 @@
             "media": "wiki://Mackerel"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Rays_and_Skates_Biomass",
@@ -17064,7 +17010,7 @@
             "media": "wiki://Rays_and_Skates"
           },
           "4": {
-            "displayName": "Extra High",
+            "displayName": "Extremely High",
             "approval": "EEZ",
             "value": 1000,
             "map_type": null,
@@ -17092,7 +17038,8 @@
             "media": "wiki://Rays_and_Skates"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Seals_Biomass",
@@ -17279,7 +17226,8 @@
             "media": "wiki://Seal"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Sharks_Biomass",
@@ -17466,7 +17414,8 @@
             "media": "wiki://Sharks"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Sandeel_Biomass",
@@ -17653,7 +17602,8 @@
             "media": "wiki://Sandeel"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Whiting_Biomass",
@@ -17840,7 +17790,8 @@
             "media": "wiki://Whiting"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Benthic_Biomass",
@@ -17848,7 +17799,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Benthic Invertebrates (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "fish",
+        "layer_subcategory": "macrobenthos",
         "layer_download_from_geoserver": 0,
         "layer_width": 67,
         "layer_height": 93,
@@ -18027,7 +17978,8 @@
             "media": "wiki://Benthic_invertebrates"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Large_Fish_Indicator",
@@ -18214,7 +18166,8 @@
             "media": "wiki://Large_Fish_Indicator"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Shannon_Diversity_Indicator",
@@ -18401,7 +18354,8 @@
             "media": "wiki://Shannon_Diversity_Indicator"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Seine",
@@ -18588,7 +18542,8 @@
             "media": "wiki://Protection_Seine"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Demersal_trawl",
@@ -18775,7 +18730,8 @@
             "media": "wiki://Protection_Active_Demersal"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Nephrops_fleet",
@@ -18962,7 +18918,8 @@
             "media": "wiki://Protection_Nephrops_Fleet"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Scallop_fleet",
@@ -19149,7 +19106,8 @@
             "media": "wiki://Protection_Scallop_Fleet"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "mel_Protection_Pots_and_creels",
@@ -19336,7 +19294,8 @@
             "media": "wiki://Protection_Pots_and_Creels"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Cables_edit",
@@ -19423,7 +19382,8 @@
             "media": "wiki://Energy_Cables"
           }
         },
-        "layer_info_properties": []
+        "layer_info_properties": [],
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Wind_Farms",
@@ -19510,7 +19470,8 @@
             "media": "wiki://Wind_Farms"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Sockets",
@@ -19597,7 +19558,8 @@
             "media": "wiki://Landing_Stations"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       },
       {
         "layer_name": "CR_Transformers",
@@ -19684,7 +19646,8 @@
             "media": "wiki://Converter_Station"
           }
         },
-        "layer_info_properties": null
+        "layer_info_properties": null,
+        "layer_tags": []
       }
     ],
     "expertise_definitions": [],

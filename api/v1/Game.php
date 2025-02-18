@@ -159,7 +159,7 @@ class Game extends Base
      * @throws Exception
      * @todo: use https://github.com/karriereat/json-decoder "to convert your JSON data into an actual php class"
      * phpcs:ignore Generic.Files.LineLength.TooLong
-     * @return array{restrictions: array, plans: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min: int, x_max: int, y_min: int, y_max: int, cellsize: int, columns: int, rows: int, fishing_policy_settings: array}, meta: array, expertise_definitions: array, oceanview: array, objectives: array, region: string, projection: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}}
+     * @return array{restrictions: array, plans: array, policy_settings: array, stakeholder_pressure_settings: array, dependencies: array, CEL: ?array, REL: ?array, SEL: ?array{heatmap_settings: array, shipping_lane_point_merge_distance: int, shipping_lane_subdivide_distance: int, shipping_lane_implicit_distance_limit: int, maintenance_destinations: array, output_configuration: array}, MEL: ?array{x_min?: int, x_max?: int, y_min?: int, y_max?: int, cellsize: int, columns: int, rows: int, pressures: array{name: string, layers: array, policy_filters?: array{fleets: array}}, fishing: array}, meta: array{array{layer_name: string, layer_type: array{array{availability?: int, displayName: string, value: int}}, layer_info_properties: ?array{array{property_name: string, policy_type?: string}}}}, expertise_definitions: array, oceanview: array, objectives: array, region: string, projection: string, edition_name: string, edition_colour: string, edition_letter: string, start: int, end: int, era_total_months: int, era_planning_months: int, era_planning_realtime: int, countries: string, minzoom: int, maxzoom: int, user_admin_name: string, user_region_manager_name: string, user_admin_color: string, user_region_manager_color: string, team_info_base_url: string, region_base_url: string, restriction_point_size: int, wiki_base_url: string, windfarm_data_api_url: ?string}|array{application_versions: array{client_build_date_min: string, client_build_date_max: string}, restriction_point_size?: float, wiki_base_url: string}
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameConfigValues(string $overrideFileName = ''): array
@@ -169,6 +169,71 @@ class Game extends Base
             return $data["datamodel"];
         }
         return $data ?? [];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getFleetIndexByCountryAndGearType(int $countryId, int $gearTypeIndex): ?int
+    {
+        $gameConfigValues = $this->GetGameConfigValues();
+        if (false === $result = collect($gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'] ?? [])
+            ->search(
+                fn($f) => (
+                    // -1 is a wildcard for any country
+                    ($f['country_id'] == -1) || ($f['country_id'] == $countryId)
+                ) && $f['gear_type'] == $gearTypeIndex
+            )) {
+            return null;
+        }
+        return $result;
+    }
+
+    /**
+     * @return ?array{gear_type: int, country_id: int}
+     * @throws Exception
+     */
+    public function getFleetFromIndex(int $fleetIndex): ?array
+    {
+        $gameConfigValues = $this->GetGameConfigValues();
+        if (null === $fleet =
+            $gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'][$fleetIndex] ?? null) {
+            return null;
+        }
+        if (!array_key_exists('gear_type', $fleet) || !array_key_exists('country_id', $fleet)) {
+            return null;
+        }
+        return [
+            'gear_type' => (int) $fleet['gear_type'],
+            'country_id' => (int) $fleet['country_id']
+        ];
+    }
+
+    /**
+     * Returns an array of all layer properties that have a policy_type field.
+     *
+     * @return array{array{property_name: string, policy_type?: string}}
+     * @throws Exception
+     */
+    public function getPolicyLayerPropertiesFromConfig(?string $layerNameFilter = null): array
+    {
+        static $result = null;
+        if ($result !== null) {
+            return $result;
+        }
+        $result = [];
+        $dataModel = $this->GetGameConfigValues();
+        foreach ($dataModel['meta'] ?? [] as $layer) {
+            if ($layerNameFilter !== null && $layer['layer_name'] !== $layerNameFilter) {
+                continue;
+            }
+            foreach ($layer['layer_info_properties'] ?? [] as $layerProp) {
+                if (array_key_exists('policy_type', $layerProp)) {
+                    $result[] = $layerProp;
+                }
+            }
+        }
+        return $result;
     }
 
     /**
@@ -474,17 +539,17 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function PolicySimSettings(): array
     {
-        $policySettings = [
-            [ 'policy_type' => 'fishing' ], // key 0
-            [ 'policy_type' => 'shipping' ], // key 1
-            [ 'policy_type' => 'energy' ] // key 2
-        ];
+        $gameConfigValues = (new Game())->GetGameConfigValues();
+        $policySettings = collect(array_values($gameConfigValues['policy_settings'] ?? []))
+            ->filter(fn($ps) => $ps['enabled'] == true)->all();
+        array_walk($policySettings, function (&$ps) {
+            unset($ps['enabled']);
+        });
         $simulationSettings = [];
 
         $data = $this->GetGameConfigValues();
         if (isset($data['MEL'])) {
             $mel = new MEL();
-            $policySettings[0] += $mel->getFishingPolicySettings();
             $simulationSettings[] = [
                 'simulation_type' => 'MEL',
                 'content' => $mel->Config()

@@ -6,7 +6,10 @@ use App\Domain\API\v1\Database;
 use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Log;
 use App\Domain\API\v1\Security;
+use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Log\LogContainerInterface;
+use App\Domain\Log\LogContainerTrait;
 use Drift\DBAL\Connection;
 use Drift\DBAL\Result;
 use Exception;
@@ -17,8 +20,10 @@ use React\Promise\PromiseInterface;
 use function App\await;
 use function App\resolveOnFutureTick;
 
-abstract class CommonBase
+abstract class CommonBase implements LogContainerInterface
 {
+    use LogContainerTrait;
+
     private ?string $watchdog_address = null;
     const DEFAULT_WATCHDOG_PORT = 45000;
 
@@ -28,6 +33,7 @@ abstract class CommonBase
     private bool $async = false;
     private ?Log $logger = null;
 
+    private ?Stopwatch $stopwatch = null;
     protected function getDatabase(): Database
     {
         return Database::GetInstance($this->getGameSessionId());
@@ -57,9 +63,10 @@ abstract class CommonBase
         return $this->asyncDatabase;
     }
 
-    public function setAsyncDatabase(Connection $asyncDatabase): void
+    public function setAsyncDatabase(Connection $asyncDatabase): static
     {
         $this->asyncDatabase = $asyncDatabase;
+        return $this;
     }
 
     public function getGameSessionId(): int
@@ -72,9 +79,10 @@ abstract class CommonBase
         return GameSession::GetGameSessionIdForCurrentRequest();
     }
 
-    public function setGameSessionId(?int $gameSessionId): void
+    public function setGameSessionId(?int $gameSessionId): static
     {
         $this->gameSessionId = $gameSessionId;
+        return $this;
     }
 
     public function getToken(): ?string
@@ -97,9 +105,10 @@ abstract class CommonBase
         return $this->async;
     }
 
-    public function setAsync(bool $async): void
+    public function setAsync(bool $async): static
     {
         $this->async = $async;
+        return $this;
     }
 
     /**
@@ -111,6 +120,7 @@ abstract class CommonBase
         $other->setAsyncDatabase($this->getAsyncDatabase());
         $other->setToken($this->getToken());
         $other->setAsync($this->isAsync());
+        $other->setStopwatch($this->getStopwatch());
     }
 
     /**
@@ -123,6 +133,17 @@ abstract class CommonBase
             $this->asyncDataTransferTo($this->logger);
         }
         return $this->logger;
+    }
+
+    public function getStopwatch(): ?Stopwatch
+    {
+        return $this->stopwatch;
+    }
+
+    public function setStopwatch(?Stopwatch $stopwatch): static
+    {
+        $this->stopwatch = $stopwatch;
+        return $this;
     }
 
     /**

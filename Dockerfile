@@ -1,56 +1,59 @@
 #syntax=docker/dockerfile:1.4
 
-# Versions
-FROM php:8.2-fpm-alpine AS php_upstream
-FROM mlocati/php-extension-installer:2 AS php_extension_installer_upstream
-FROM composer/composer:2-bin AS composer_upstream
-FROM caddy:2-alpine AS caddy_upstream
-
+# Versions, use debian instead of alpine, see: https://github.com/dunglas/symfony-docker/issues/555
+FROM dunglas/frankenphp:latest-php8.2 AS frankenphp_upstream
 
 # The different stages of this Dockerfile are meant to be built into separate images
 # https://docs.docker.com/develop/develop-images/multistage-build/#stop-at-a-specific-build-stage
 # https://docs.docker.com/compose/compose-file/#target
 
+# Base FrankenPHP image
+FROM frankenphp_upstream AS frankenphp_base
 
-# Base PHP image
-FROM php_upstream AS php_base
-
-WORKDIR /srv/app
+WORKDIR /app
 
 # persistent / runtime deps
-# hadolint ignore=DL3018
-RUN apk add --no-cache \
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
 		acl \
-		fcgi \
 		file \
 		gettext \
 		git \
         libgdiplus \
         bash \
         supervisor \
-        mysql-client \
-    ;
+        default-mysql-client \
+        procps \
+        nano \
+	;
 
-# php extensions installer: https://github.com/mlocati/docker-php-extension-installer
-COPY --from=php_extension_installer_upstream --link /usr/bin/install-php-extensions /usr/local/bin/
-
-# gd is required by apc.php
 RUN set -eux; \
-    install-php-extensions \
+	install-php-extensions \
+        @composer \
 		apcu \
-    	intl \
+		intl \
 		opcache \
-    	zip \
+		zip \
         pcntl \
         imagick \
         gd \
-    ;
+	;
+
+# write command history to a history file
+RUN echo 'export HISTFILE=/root/.bash_history' >> /root/.bashrc
+# to force the command history to be written out, even if the shell is not exited properly
+RUN echo "export PROMPT_COMMAND='history -a'" >> /root/.bashrc
+
+# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # if you want to debug on prod, enable below lines:
-##   Also check ./docker/php/conf.d/app.prod.ini
+##   Also check ./frankenphp/conf.d/app.prod.ini
 #ENV XDEBUG_MODE=debug
 #RUN set -eux; \
-#	install-php-extensions xdebug
+#	install-php-extensions \
+#		xdebug \
+#	;
 
 ###> recipes ###
 ###> doctrine/doctrine-bundle ###
@@ -58,34 +61,22 @@ RUN docker-php-ext-install mysqli pdo pdo_mysql
 ###< doctrine/doctrine-bundle ###
 ###< recipes ###
 
-COPY --link docker/php/conf.d/app.ini $PHP_INI_DIR/conf.d/
-
-COPY --link docker/php/php-fpm.d/zz-docker.conf /usr/local/etc/php-fpm.d/zz-docker.conf
-RUN mkdir -p /var/run/php
-
-COPY --link docker/php/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
-RUN chmod +x /usr/local/bin/docker-healthcheck
-
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
+COPY --link frankenphp/conf.d/app.ini $PHP_INI_DIR/conf.d/
+COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
 
 # Supervisor
 RUN mkdir -p /var/log/supervisor/
 COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor.d/
-COPY --link docker/supervisor/supervisor.d/app-ws-server.ini /etc/supervisor.d/app-ws-server.ini
-COPY --link docker/supervisor/supervisor.d/msw.ini /etc/supervisor.d/msw.ini
-COPY --link docker/supervisor/supervisor.d/messenger-worker.ini /etc/supervisor.d/messenger-worker.ini
-
-COPY --link docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-RUN chmod +x /usr/local/bin/docker-entrypoint
+COPY --link docker/supervisor/supervisor.d/*.ini /etc/supervisor.d/
 
 ENTRYPOINT ["docker-entrypoint"]
-CMD ["php-fpm"]
 
 # Install Blackfire Probe
-RUN version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;") \
+RUN version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION.(PHP_ZTS ? '-zts' : '');") \
     && architecture=$(uname -m) \
-    && curl -A "Docker" -o /tmp/blackfire-probe.tar.gz -D - -L -s https://blackfire.io/api/v1/releases/probe/php/alpine/$architecture/$version \
+    && curl -A "Docker" -o /tmp/blackfire-probe.tar.gz -D - -L -s https://blackfire.io/api/v1/releases/probe/php/linux/$architecture/$version \
     && mkdir -p /tmp/blackfire \
     && tar zxpf /tmp/blackfire-probe.tar.gz -C /tmp/blackfire \
     && mv /tmp/blackfire/blackfire-*.so $(php -r "echo ini_get ('extension_dir');")/blackfire.so \
@@ -99,35 +90,38 @@ RUN mkdir -p /tmp/blackfire \
     && mv /tmp/blackfire/blackfire /usr/bin/blackfire \
     && rm -Rf /tmp/blackfire
 
-# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV PATH="${PATH}:/root/.composer/vendor/bin"
+HEALTHCHECK --start-period=60s CMD curl -f http://localhost:2019/metrics || exit 1
+CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 
-COPY --from=composer_upstream --link /composer /usr/bin/composer
-
-
-# Dev PHP image
-FROM php_base AS php_dev
+# Dev FrankenPHP image
+FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev XDEBUG_MODE=off
-VOLUME /srv/app/var/
+VOLUME /app/var/
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 RUN set -eux; \
 	install-php-extensions \
-    	xdebug-^3.2 \
+    	xdebug \
     ;
 
-COPY --link docker/php/conf.d/app.dev.ini $PHP_INI_DIR/conf.d/
+COPY --link frankenphp/conf.d/app.dev.ini $PHP_INI_DIR/conf.d/
 
-# Prod PHP image
-FROM php_base AS php_prod
+CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
+
+# Prod FrankenPHP image
+FROM frankenphp_base AS frankenphp_prod
 
 ENV APP_ENV=prod
+# this line enables the Blazing-fast performance thanks to the worker mode of FrankenPHP
+#   @todo however, disable for MSP, gives request issues in ServerManager
+# ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-COPY --link docker/php/conf.d/app.prod.ini $PHP_INI_DIR/conf.d/
+
+COPY --link frankenphp/conf.d/app.prod.ini $PHP_INI_DIR/conf.d/
+COPY --link frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
 
 # prevent the reinstallation of vendors at every changes in the source code
 COPY --link composer.* symfony.* ./
@@ -136,7 +130,7 @@ RUN set -eux; \
 
 # copy sources
 COPY --link . ./
-RUN rm -Rf docker/
+RUN rm -Rf frankenphp/
 
 RUN set -eux; \
 	mkdir -p var/cache var/log; \
@@ -145,30 +139,9 @@ RUN set -eux; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
 
-
-# Base Caddy image
-FROM caddy_upstream AS caddy_base
-
-ARG TARGETARCH
-
-WORKDIR /srv/app
-
-RUN rm -f .env.local.php
-
-# Download Caddy compiled with the Mercure and Vulcain modules
-ADD --chmod=500 https://caddyserver.com/api/download?os=linux&arch=$TARGETARCH&p=github.com/dunglas/mercure/caddy&p=github.com/dunglas/vulcain/caddy /usr/bin/caddy
-
-COPY --link docker/caddy/Caddyfile /etc/caddy/Caddyfile
-
-# Prod Caddy image
-FROM caddy_base AS caddy_prod
-
-COPY --from=php_prod --link /srv/app/public public/
-
 FROM mariadb:10.6.16 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
-FROM adminer AS adminer_base
-FROM mitmproxy/mitmproxy:9.0.1 as mitmproxy_base
+FROM shyim/adminerevo AS adminer_base
+FROM mitmproxy/mitmproxy:10.3.1 as mitmproxy_base
 FROM redis:7.2.4-alpine AS redis_base
 FROM erikdubbelboer/phpredisadmin as phpredisadmin_base
-

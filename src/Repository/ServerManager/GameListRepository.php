@@ -6,6 +6,7 @@ use App\Domain\API\v1\Game;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
+use App\Domain\Common\NormalizerContextBuilder;
 use App\Domain\WsServer\WsServer;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
@@ -14,10 +15,18 @@ use App\Entity\ServerManager\GameWatchdogServer;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use ReflectionException;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class GameListRepository extends EntityRepository
 {
+    private ?ObjectNormalizer $normalizer = null;
+    private ?Serializer $serializer = null; // to be created upon usage// to be created upon usage
+
+
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
         parent::__construct($em, $class);
@@ -121,11 +130,19 @@ class GameListRepository extends EntityRepository
             $sessionList[$key] = $session;
         }
     }
-    public function defaultDenormalizeContext(): array
+
+    /**
+     * @throws ReflectionException|ExceptionInterface
+     */
+    public function createGameListFromData(array $gameListData)
     {
-        // @todo (HW): member names via reflection
-        return [
-            AbstractNormalizer::CALLBACKS => [
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        $this->serializer ??= new Serializer([$this->normalizer]);
+        return $this->serializer->denormalize(
+            $gameListData,
+            GameList::class,
+            null,
+            (new NormalizerContextBuilder(GameList::class))->withCallbacks([
                 'id' => fn() => null,
                 'gameConfigVersion' => fn($innerObject) => (isset($innerObject['id'])) ?
                     $this->getEntityManager()->getRepository(GameConfigVersion::class)->find($innerObject['id']) :
@@ -139,19 +156,25 @@ class GameListRepository extends EntityRepository
                 'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
                 'gameState' => fn($innerObject) => new GameStateValue($innerObject),
                 'gameVisibility' => fn($innerObject) => new GameVisibilityValue($innerObject)
-            ],
-        ];
+            ])->toArray()
+        );
     }
 
-    public static function defaultNormalizeContext(): array
+    /**
+     * @throws ExceptionInterface|ReflectionException
+     */
+    public function createDataFromGameList(GameList $gameList): array
     {
-        // @todo (HW): member names via reflection
-        return [
-            AbstractNormalizer::CALLBACKS => [
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        $this->serializer ??= new Serializer([$this->normalizer]);
+        return $this->serializer->normalize(
+            $gameList,
+            null,
+            (new NormalizerContextBuilder(GameList::class))->withCallbacks([
                 'sessionState' => fn($innerObject) => ((string) $innerObject),
                 'gameState' => fn($innerObject) => ((string) $innerObject),
                 'gameVisibility' => fn($innerObject) => ((string) $innerObject)
-            ]
-        ];
+            ])->toArray()
+        );
     }
 }

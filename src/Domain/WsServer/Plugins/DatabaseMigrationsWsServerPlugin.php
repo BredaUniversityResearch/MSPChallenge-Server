@@ -2,6 +2,7 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\Context;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
@@ -28,11 +29,11 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
 
     protected function onCreatePromiseFunction(string $executionId): ToPromiseFunction
     {
-        return tpf(function () {
+        return tpf(function (?Context $context) {
             return $this->getServerManager()->getGameSessionIds()
                 ->then(function (Result $result) {
                     // collect
-                    $gameSessionIds = collect($result->fetchAllRows() ?? [])
+                    $gameSessionIds = collect(($result->fetchAllRows() ?? []) ?: [])
                         ->keyBy('id')
                         ->map(function ($row) {
                             return $row['id'];

@@ -80,7 +80,7 @@ function CallServerAPI(url, data = {}, session_id = 0, token = '')
 
 function updatecurrentToken()
 {
-    var url = "api/updateToken.php";
+    var url = "api/updateToken_php";
     var data = {
         token: currentToken
     }
@@ -177,8 +177,7 @@ function ShowLogToast(session_id)
 
 function UpdateLogToastContents(session_id)
 {
-    // read the log from getsessioninfo.php
-    var url = "api/readGameSession.php";
+    var url = "api/readGameSession_php";
     var data = {
         session_id: session_id
     }

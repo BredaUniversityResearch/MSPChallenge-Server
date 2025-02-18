@@ -289,11 +289,7 @@ class Security extends Base
 
     public static function findAuthenticationHeaderValue(): ?string
     {
-        $requestHeaders = [];
-        // is only available in the Apache, FastCGI, CLI, and FPM webservers.
-        if (function_exists('apache_request_headers')) {
-            $requestHeaders = apache_request_headers();
-        }
+        $requestHeaders = \getallheaders();
         if (isset($requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {
             return $requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN];
         }

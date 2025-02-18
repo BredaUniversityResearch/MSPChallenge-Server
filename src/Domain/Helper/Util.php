@@ -2,36 +2,56 @@
 
 namespace App\Domain\Helper;
 
+use Closure;
 use Exception;
+use ReflectionException;
+use ReflectionProperty;
 use ZipArchive;
 
 class Util
 {
     public static function getHumanReadableSize(int $bytes): string
     {
+        if ($bytes === 0) {
+            return '0 b';
+        }
         $unit=array('b','kb','mb','gb','tb','pb');
         return @round($bytes/pow(1024, ($i=floor(log($bytes, 1024)))), 2).' '.$unit[$i];
     }
 
-    public static function formatMilliseconds(float $milliseconds): string
+    public static function getHumanReadableDuration(float $milliseconds): string
     {
         $seconds = floor($milliseconds / 1000);
         $minutes = floor($seconds / 60);
+        $hours = floor($minutes / 60);
+        $days = floor($hours / 24);
+
+        $milliseconds = (int)$milliseconds % 1000;
+        $seconds = $seconds % 60;
+        $minutes = $minutes % 60;
+        $hours = $hours % 24;
 
         $format = '%ums';
-        $milliseconds = (int)$milliseconds % 1000;
         $args[] = $milliseconds;
 
-        $seconds = $seconds % 60;
         if ($seconds > 0) {
-            $format = '%us.' . $format;
+            $format = '%us ' . $format;
             $args[] = $seconds;
         }
 
-        $minutes = $minutes % 60;
         if ($minutes > 0) {
-            $format = '%um:' . $format;
+            $format = '%um ' . $format;
             $args[] = $minutes;
+        }
+
+        if ($hours > 0) {
+            $format = '%uh ' . $format;
+            $args[] = $hours;
+        }
+
+        if ($days > 0) {
+            $format = '%ud ' . $format;
+            $args[] = $days;
         }
 
         $args[] = $format;
@@ -154,6 +174,57 @@ class Util
                     $folderPath . $relativePath . $file,
                     basename($folderPath) . $relativePath . $file
                 );
+            }
+        }
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public static function getClassPropertyNames(
+        string $className,
+        ?int $reflectionPropertyFilter = null,
+        ?string $downToBaseClassName = null
+    ): array {
+        $propertyNames = [];
+        self::traverseClassProperties(
+            $className,
+            function (ReflectionProperty $p) use (&$propertyNames) {
+                $propertyNames[] = $p->getName();
+            },
+            $reflectionPropertyFilter,
+            $downToBaseClassName
+        );
+        return $propertyNames;
+    }
+
+    /**
+     * @param string $className
+     * @param Closure $callback
+     * @param int|null $reflectionPropertyFilter bitwise flags of ReflectionProperty constants
+     * @param string|null $downToBaseClassName stop traversing, but including this base class
+     * @throws ReflectionException
+     */
+    public static function traverseClassProperties(
+        string $className,
+        Closure $callback,
+        ?int $reflectionPropertyFilter = null,
+        ?string $downToBaseClassName = null
+    ): void {
+        $classes = [$className];
+        $currentClass = $className;
+        while (false !== $currentClass && $currentClass !== $downToBaseClassName) {
+            $currentClass = get_parent_class($currentClass);
+            $classes[] = $currentClass;
+        }
+        foreach ($classes as $currentClass) {
+            $currentClassReflection = new \ReflectionClass($currentClass);
+            $currentClassProperties = $currentClassReflection->getProperties($reflectionPropertyFilter);
+            foreach ($currentClassProperties as $property) {
+                if ($property->getDeclaringClass()->getName() !== $currentClass) {
+                    continue;
+                }
+                $callback($property);
             }
         }
     }

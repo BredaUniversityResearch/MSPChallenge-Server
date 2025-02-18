@@ -4,6 +4,10 @@ namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\EntityEnums\PlanState;
+use App\Domain\Common\EntityEnums\RestrictionSort;
+use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
 use App\Entity\Country;
@@ -39,6 +43,10 @@ use Psr\Cache\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
+use ReflectionException;
+use Swaggest\JsonSchema\Exception\Error;
+use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\Schema;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -138,21 +146,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         $this->notice('Creating a new session database, as this is a brand new session.');
         $this->createSessionDatabase();
     }
-
-    private function migrateSessionDatabase(): void
-    {
-        $this->phpBinary ??= (new PhpExecutableFinder)->find(false);
-        $process = new Process([
-            $this->phpBinary,
-            'bin/console',
-            'doctrine:migrations:migrate',
-            '--em='.$this->database,
-            '--no-interaction',
-            '--env='.$_ENV['APP_ENV']
-        ], $this->kernel->getProjectDir());
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
-    }
-
+    
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -278,6 +272,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws ReflectionException
      */
     private function importLayerData(SessionSetupContext $context): void
     {
@@ -287,11 +282,13 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             ->setUsername($this->gameSession->getGameGeoServer()->getUsername())
             ->setPassword($this->gameSession->getGameGeoServer()->getPassword());
 
+        /** @var LayerRepository $layerRepo */
+        $layerRepo = $this->entityManager->getRepository(Layer::class);
         foreach ($this->dataModel['meta'] as $layerMetaData) {
-            $layer = $this->normalizer->denormalize($layerMetaData, Layer::class);
+            $layer = $layerRepo->createLayerFromData($layerMetaData);
             $layer->setLayerGroup($this->dataModel['region']);
             $this->info("Starting import of layer {$layer->getLayerName()}...");
-            if ($layer->getLayerGeotype() == "raster") {
+            if ($layer->getLayerGeoType() == LayerGeoType::RASTER) {
                 $this->importLayerRasterData($layer, $geoServerCommunicator);
             } else {
                 $this->importLayerGeometryData($layer, $geoServerCommunicator, $context);
@@ -336,8 +333,8 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                 $restriction = new Restriction();
                 $restriction->setRestrictionStartLayerType($typeId);
                 $restriction->setRestrictionEndLayerType($typeId);
-                $restriction->setRestrictionSort('TYPE_UNAVAILABLE');
-                $restriction->setRestrictionType('ERROR');
+                $restriction->setRestrictionSort(RestrictionSort::TYPE_UNAVAILABLE);
+                $restriction->setRestrictionType(RestrictionType::ERROR);
                 $restriction->setRestrictionMessage('Type not yet available at the plan implementation time.');
                 $layer->addRestrictionStart($restriction);
                 $layer->addRestrictionEnd($restriction);
@@ -587,9 +584,9 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                 }
                 $restriction->setRestrictionStartLayer($startLayer)
                     ->setRestrictionEndLayer($endLayer)
-                    ->setRestrictionSort($restrictionItem['sort'])
+                    ->setRestrictionSort(RestrictionSort::from(strtoupper($restrictionItem['sort'])))
                     ->setRestrictionValue($restrictionItem['value'])
-                    ->setRestrictionType($restrictionItem['type'])
+                    ->setRestrictionType(RestrictionType::from(strtoupper($restrictionItem['type'])))
                     ->setRestrictionMessage($restrictionItem['message'])
                     ->setRestrictionStartLayerType($restrictionItem['starttype'])
                     ->setRestrictionEndLayerType($restrictionItem['endtype']);
@@ -664,10 +661,10 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                 fn(Country $country) => $country->getCountryIsManager() == 0
             );
             foreach ($config["fishing"] as $fleet) {
-                if (isset($fleet["initialFishingDistribution"])) {
+                if (isset($fleet["initial_fishing_distribution"])) {
                     foreach ($countries as $country) {
                         $foundCountry = false;
-                        foreach ($fleet["initialFishingDistribution"] as $distribution) {
+                        foreach ($fleet["initial_fishing_distribution"] as $distribution) {
                             if ($distribution["country_id"] == $country->getCountryId()) {
                                 $foundCountry = true;
                                 break;
@@ -676,7 +673,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                         if (!$foundCountry) {
                             $this->error(
                                 "Country with ID {$country->getCountryId()} is missing a distribution entry ".
-                                "in the initialFishingDistribution table for fleet {$fleet["name"]} for MEL."
+                                "in the initial_fishing_distribution table for fleet {$fleet["name"]} for MEL."
                             );
                         }
                     }
@@ -821,7 +818,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             ]);
             $this->info("Starting import of plan {$plan->getPlanName()}.");
             $plan->setCountry($context->getCountry($planConfig['plan_country_id'] ?? -1));
-            $plan->setPlanState('APPROVED');
+            $plan->setPlanState(PlanState::APPROVED);
             foreach ($planConfig['fishing'] as $fishingConfig) {
                 $fishing = $this->normalizer->denormalize($fishingConfig, Fishing::class);
                 $fishing->setCountry($context->getCountry($fishingConfig['fishing_country_id'] ?? -1));
@@ -1181,21 +1178,17 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     private function validateGameConfigComplete(): void
     {
         $gameConfigContents = json_decode($this->gameSession->getGameConfigVersion()->getGameConfigCompleteRaw());
-        $validator = new Validator();
-        $validator->validate(
-            $gameConfigContents,
-            json_decode(
-                file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
-            )
-        );
-        if (!$validator->isValid()) {
+        $schema = Schema::import(json_decode(
+            file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
+        ));
+        try {
+            $schema->in($gameConfigContents);
+        } catch (InvalidValue $e) {
             $this->error(
                 "Session config file {$this->gameSession->getGameConfigVersion()->getGameConfigFile()->getFilename()} ".
                 "v{$this->gameSession->getGameConfigVersion()->getVersion()} failed to pass validation:"
             );
-            foreach ($validator->getErrors() as $error) {
-                $this->error(sprintf("[%s] %s", $error['property'], $error['message']));
-            }
+            $this->error($e->getMessage());
             throw new \Exception('Session config file invalid, so not continuing.');
         }
         $this->info(

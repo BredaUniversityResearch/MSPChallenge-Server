@@ -5,6 +5,7 @@ namespace App\Repository\ServerManager;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
+use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameSave;
 use App\Entity\ServerManager\GameServer;
@@ -12,10 +13,17 @@ use App\Entity\ServerManager\GameWatchdogServer;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use ReflectionException;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class GameSaveRepository extends EntityRepository
 {
+    private ?ObjectNormalizer $normalizer = null; // to be created upon usage
+    private ?Serializer $serializer = null; // to be created upon usage
+
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
         parent::__construct($em, $class);
@@ -39,11 +47,18 @@ class GameSaveRepository extends EntityRepository
         }
     }
 
-    public function defaultDenormalizeContext(): array
+    /**
+     * @throws ExceptionInterface|ReflectionException
+     */
+    public function createGameSaveFromData(array $gameSaveData)
     {
-        // @todo (HW): member names via reflection
-        return [
-            AbstractNormalizer::CALLBACKS => [
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        $this->serializer ??= new Serializer([$this->normalizer]);
+        return $this->serializer->denormalize(
+            $gameSaveData,
+            GameSave::class,
+            null,
+            (new NormalizerContextBuilder(GameSave::class))->withCallbacks([
                 'gameConfigVersion' => fn($innerObject) => $this->getEntityManager()->getRepository(
                     GameConfigVersion::class
                 )->find($innerObject['id']),
@@ -56,19 +71,25 @@ class GameSaveRepository extends EntityRepository
                 'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
                 'gameState' => fn($innerObject) => new GameStateValue($innerObject),
                 'gameVisibility' => fn($innerObject) => new GameVisibilityValue($innerObject)
-            ],
-        ];
+            ])->toArray()
+        );
     }
 
-    public static function defaultNormalizeContext(): array
+    /**
+     * @throws ExceptionInterface|ReflectionException
+     */
+    public function createDataFromGameSave(GameSave $gameSave)
     {
-        // @todo (HW): member names via reflection
-        return [
-            AbstractNormalizer::CALLBACKS => [
+        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
+        $this->serializer ??= new Serializer([$this->normalizer]);
+        return $this->serializer->normalize(
+            $gameSave,
+            null,
+            (new NormalizerContextBuilder(GameSave::class))->withCallbacks([
                 'sessionState' => fn($innerObject) => ((string) $innerObject),
                 'gameState' => fn($innerObject) => ((string) $innerObject),
                 'gameVisibility' => fn($innerObject) => ((string) $innerObject)
-            ]
-        ];
+            ])->toArray()
+        );
     }
 }

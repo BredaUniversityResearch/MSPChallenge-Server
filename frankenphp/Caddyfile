@@ -1,0 +1,78 @@
+# see https://frankenphp.dev/docs/config/
+
+{
+	{$CADDY_GLOBAL_OPTIONS}
+
+	frankenphp {
+		{$FRANKENPHP_CONFIG}
+	}
+
+	# https://caddyserver.com/docs/caddyfile/directives#sorting-algorithm
+	order mercure after encode
+	order vulcain after reverse_proxy
+	order php_server before file_server
+}
+
+{$CADDY_EXTRA_CONFIG}
+
+http://php:80, {$SERVER_NAME:localhost} {
+    @blockApi {
+        path /api/getandaddpdutoList
+    }
+    respond @blockApi 403 {
+        close
+    }
+
+    @phpFile {
+        path /ServerManager/*.php*
+    }
+    error @phpFile "Not found" 404
+
+	log {
+		# Redact the authorization query parameter that can be set by Mercure
+		format filter {
+			wrap console
+			fields {
+				uri query {
+					replace authorization REDACTED
+				}
+			}
+		}
+	}
+
+	root * /app/public
+	# add Brotli compression support, see https://github.com/dunglas/symfony-docker/commit/f063b11fb8d3522e3811124f43b2145dad205199
+	encode zstd br gzip
+
+	mercure {
+		# Transport to use (default to Bolt)
+		transport_url {$MERCURE_TRANSPORT_URL:bolt:///data/mercure.db}
+		# Publisher JWT key
+		publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+		# Subscriber JWT key
+		subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+		# Allow anonymous subscribers (double-check that it's what you want)
+		anonymous
+		# Enable the subscription API (double-check that it's what you want)
+		subscriptions
+		# Extra directives
+		{$MERCURE_EXTRA_DIRECTIVES}
+	}
+
+	vulcain
+
+	{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+	# Disable Topics tracking if not enabled explicitly: https://github.com/jkarlin/topics
+	header ?Permissions-Policy "browsing-topics=()"
+
+	php_server
+
+    @websocket {
+        path /ws/*
+    }
+
+    reverse_proxy @websocket http://php:45001 {
+        # Additional reverse proxy options if needed
+    }
+}

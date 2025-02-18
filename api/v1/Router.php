@@ -3,12 +3,10 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\ObjectMethod;
-use App\Domain\Helper\Util;
 use App\Domain\WsServer\ClientDisconnectedException;
 use Closure;
 use Exception;
 use JetBrains\PhpStorm\ArrayShape;
-use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -18,7 +16,6 @@ use ReflectionNamedType;
 use ReflectionUnionType;
 use Throwable;
 use TypeError;
-use function App\resolveOnFutureTick;
 
 // Routes the HTTP request incl. its parameters to the correct class method, and wraps that method's results in a
 //   consistent response
@@ -123,17 +120,7 @@ class Router
         // everything ok, try to actually call the class method and catch any exceptions thrown
         $arguments = self::resolveArguments($classData, $methodData, $data);
 
-        try {
-            $promise = $class->$method(...$arguments);
-        } catch (Exception|TypeError $e) {
-            // execution failed, perhaps because of database connection failure or PHP warning, or because
-            //   endpoint threw exception
-            // PHP code parsing errors are caught in the shutdown function as defined in helpers.php
-            $message = Base::ErrorString($e);
-            $response = self::formatResponse(false, $message, null, $className, $method, $data);
-            return resolveOnFutureTick(new Deferred(), $response)->promise();
-        }
-
+        $promise = $class->$method(...$arguments);
         if (!($promise instanceof PromiseInterface)) {
             throw new Exception('This method is not asynchronous: ' . $className . ':' . $method);
         }
@@ -298,7 +285,10 @@ class Router
             }
         }
 
-        if (count($inValues) > 0) {
+        // to show error if more parameters are given than expected by the method
+        //  disabled for dev, since for development it is useful to be able to pass extra parameters like:
+        //  XDEBUG_TRIGGER=1, PHP_IDE_CONFIG="serverName=symfony"
+        if ((($_ENV['APP_ENV'] ?? 'prod') !== 'dev') && count($inValues) > 0) {
             throw new Exception(
                 "Call to " . $className . "::" . $methodData->getName() .
                 " was provided the following parameters that were not taken by any argument matching this name: \"" .
@@ -327,6 +317,16 @@ class Router
         string $method = '',
         array $data = []
     ): array {
+        $debugMessage = null;
+        // @marin debug feature: setting a debug-message through a payload field
+        if (is_array($payload) && isset($payload['debug-message'])) {
+            if (is_string($payload['debug-message'])) {
+                $debugMessage = $payload['debug-message'];
+            }
+            unset($payload['debug-message']);
+        }
+
+        $message .= $debugMessage;
         if (!$success) {
             $message .= PHP_EOL .
             "Request: " . $className . "/" . $method . PHP_EOL .

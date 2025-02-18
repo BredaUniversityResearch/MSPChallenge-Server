@@ -1,0 +1,23 @@
+services:
+  adminer:
+    build:
+      context: .
+      target: adminer_base
+    restart: always
+    environment:
+      ADMINER_DEFAULT_DRIVER: MySQL
+      ADMINER_DEFAULT_SERVER: database
+      ADMINER_PLUGINS: sql-log
+      ADMINER_DEFAULT_USER: ${DATABASE_USER:-}
+      ADMINER_DEFAULT_PASSWORD: ${DATABASE_PASSWORD:-}
+    ports:
+      # run Adminer on port 8082 since 8080 will be used by mitmproxy
+      - ${ADMINER_PORT:-8082}:8080
+    networks:
+      - database
+    volumes:
+      - ./docker/adminer/index.php:/var/www/html/index.php:ro
+      # see https://github.com/adminerevo/adminerevo/tree/main/designs
+      - ./docker/adminer/adminer.css:/var/www/html/adminer.css:ro
+    logging:
+      driver: "local"

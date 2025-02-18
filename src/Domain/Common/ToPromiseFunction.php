@@ -3,12 +3,12 @@
 namespace App\Domain\Common;
 
 use Closure;
-use React\Promise\FulfilledPromise;
-use React\Promise\Promise;
-use React\Promise\RejectedPromise;
+use React\Promise\CancellablePromiseInterface;
+use React\Promise\ExtendedPromiseInterface;
 
 class ToPromiseFunction
 {
+    private ?Context $context = null;
     private Closure $function;
 
     public function __construct(Closure $function)
@@ -16,8 +16,18 @@ class ToPromiseFunction
         $this->function = $function;
     }
 
-    public function __invoke(): Promise|FulfilledPromise|RejectedPromise
+    public function __invoke(): ExtendedPromiseInterface&CancellablePromiseInterface
     {
-        return ($this->function)();
+        return ($this->function)($this->getContext());
+    }
+
+    public function getContext(): ?Context
+    {
+        return $this->context;
+    }
+
+    public function setContext(Context $context): void
+    {
+        $this->context = $context;
     }
 }

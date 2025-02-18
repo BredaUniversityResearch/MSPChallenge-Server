@@ -2,9 +2,6 @@
 // phpcs:disable PSR1.Files.SideEffects
 use function ServerManager\checklanguage;
 
-if (1 === $return = require_once('bootstrap.php')) {
-    return;
-}
 defined('APP_RAN') or define('APP_RAN', true);
 
 // all the configurable variables

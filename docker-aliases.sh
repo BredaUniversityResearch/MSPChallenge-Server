@@ -13,33 +13,31 @@ fi
 if [ "${OS}" == "Windows_NT" ]; then
   alias php=php.exe
 fi
+COMPOSE_PROJECT_NAME_DEV="mspchallenge-dev"
+COMPOSE_PROJECT_NAME_STAGING="mspchallenge-staging"
+COMPOSE_PROJECT_NAME_PROD="mspchallenge"
 # ede = export (e) dotenv (d) environmental variables (e)
 alias ede='unset $(bash docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(bash docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
-PRE_DCU="bash set_symfony_version.sh"
-DCU_BASE="MSYS_NO_PATHCONV=1 BLACKFIRE_APM_ENABLED="${BLACKFIRE_APM_ENABLED:-0}" BLACKFIRE_SERVER_ID=${BLACKFIRE_SERVER_ID} BLACKFIRE_SERVER_TOKEN=${BLACKFIRE_SERVER_TOKEN} BLACKFIRE_CLIENT_ID=${BLACKFIRE_CLIENT_ID} BLACKFIRE_CLIENT_TOKEN=${BLACKFIRE_CLIENT_TOKEN} CADDY_MERCURE_JWT_SECRET=${CADDY_MERCURE_JWT_SECRET} docker compose"
-alias dcu="ede && $PRE_DCU && ${DCU_BASE} up -d --remove-orphans"
+PRE_DCU="bash set_symfony_version.sh && mkdir -p ./var/docker/ && touch ./var/docker/.bash_history"
+DCU_BASE="MSYS_NO_PATHCONV=1 docker compose"
+alias dcu="switch_project ${COMPOSE_PROJECT_NAME_DEV} && ede && $PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 # dcu + xdebug (x)
-alias dcux="ede && $PRE_DCU && XDEBUG_MODE=debug ${DCU_BASE} up -d --remove-orphans"
+alias dcux="XDEBUG_MODE=debug dcu"
 # dcu + production (p)}
-alias dcup='ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
+alias dcup="switch_project ${COMPOSE_PROJECT_NAME_PROD}"' && ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 # dcu + hybrid (h)}
-alias dcus='ede && '"$PRE_DCU && APP_ENV=prod ${DCU_BASE} -f docker-compose.yml -f docker-compose.staging.yml up -d --remove-orphans"
+alias dcus="switch_project ${COMPOSE_PROJECT_NAME_STAGING} && ede && $PRE_DCU && APP_ENV=prod ${DCU_BASE} -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 ALIAS_DL_BASE="docker logs"
-[[ -z "${COMPOSE_PROJECT_NAME}" ]] && COMPOSE_PROJECT_NAME="mspchallenge"
-[[ -z "${PHP_CONTAINER}" ]] && PHP_CONTAINER="${COMPOSE_PROJECT_NAME}-php-1"
-[[ -z "${DATABASE_CONTAINER}" ]] && DATABASE_CONTAINER="${COMPOSE_PROJECT_NAME}-database-1"
-# dl = docker(d) logs(l) with default container mspchallenge-server-php-1
-alias dl="${ALIAS_DL_BASE} ${PHP_CONTAINER}"
+# dl = docker(d) logs(l) with container php
+alias dl="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-php-1"
 # dl + blackfire (b)
-alias dlb="${ALIAS_DL_BASE} ${COMPOSE_PROJECT_NAME}-blackfire-1"
-# dl + caddy (c)
-alias dlc="${ALIAS_DL_BASE} ${COMPOSE_PROJECT_NAME}-caddy-1"
+alias dlb="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-blackfire-1"
 # dl + database (d)
-alias dld="${ALIAS_DL_BASE} ${DATABASE_CONTAINER}"
+alias dld="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-database-1"
 # de = docker(d) execute(e) with container php
 ALIAS_DE_BASE='MSYS_NO_PATHCONV=1 docker exec'
-alias de="${ALIAS_DE_BASE} ${PHP_CONTAINER}"
+alias de="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DE_BASE} \${COMPOSE_PROJECT_NAME}-php-1"
 # de + supervisor (s)
 alias des="de /usr/bin/supervisord -c /etc/supervisord.conf"
 # de + supervisorctl (sc)
@@ -54,21 +52,50 @@ alias detlw="detl app-ws-server.log"
 alias detlm="detl msw.log"
 # de + top (t)
 alias det='de top; de pkill -f top'
+# de + phpstan (p)
+alias dep='de php vendor/bin/phpstan analyse'
 # de + choose profile (cpf) to "Choose Blackfire profile on running websocket server process"
 alias decpf='de pkill -SIGUSR1 -f "php bin/console app:ws-server"'
 # de + choose profile (rpf) to "Run Blackfire profile on running websocket server process"
 alias derpf='de pkill -SIGUSR2 -f "php bin/console app:ws-server"'
 # de + Run websocket server manually (wss)
-ALIAS_WSS='php /srv/app/bin/console app:ws-server'
+ALIAS_WSS='php /app/bin/console app:ws-server'
 alias dewss="de ${ALIAS_WSS}"
-# dewss + xdebug (x)
-alias dewssx="${ALIAS_DE_BASE} -e XDEBUG_SESSION=1 -e PHP_IDE_CONFIG="serverName=symfony" ${PHP_CONTAINER} ${ALIAS_WSS}"
 # docker (d) run (r) grafana (g)
 if [ -z "${DATABASE_PASSWORD}" ]; then
     MYSQL_PARAMS=""
 else
     MYSQL_PARAMS="-p${DATABASE_PASSWORD}"
 fi
-MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec ${DATABASE_CONTAINER} bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
-alias drg="${MY2_SETUP} && docker stop grafana ; docker rm grafana ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana --label com.docker.compose.project=mspchallenge --network=mspchallenge_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
+MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec \${COMPOSE_PROJECT_NAME}-database-1 bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
+alias drg="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${MY2_SETUP} && docker stop grafana-1 ; docker rm grafana-1 ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana-1 --label com.docker.compose.project=\${COMPOSE_PROJECT_NAME} --network=\${COMPOSE_PROJECT_NAME}_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
+# docker (d) + stop (s) + all containers (a)
+alias dsa='docker stop $(docker ps -a -q)'
+# docker (d) + system (s) + prune (p)
+alias dsp='docker system prune -a -f'
+# docker (d) + clean
+alias dclean='dsa ; dsp'
 
+function switch_project() {
+  if [[ -n "$1" ]]; then
+    export COMPOSE_PROJECT_NAME="$1"
+    echo "Switched to project: ${COMPOSE_PROJECT_NAME}"
+    return 0
+  fi
+  case "$COMPOSE_PROJECT_NAME" in
+    "${COMPOSE_PROJECT_NAME_DEV}")
+      export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME_STAGING}"
+      ;;
+    "{$COMPOSE_PROJECT_NAME_STAGING}")
+      export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME_PROD}"
+      ;;
+    "{$COMPOSE_PROJECT_NAME_PROD}")
+      export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME_DEV}"
+      ;;
+    *)
+      export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME_DEV}"
+      ;;
+  esac
+  echo "Switched to project: ${COMPOSE_PROJECT_NAME}"
+  return 0
+}

@@ -183,7 +183,7 @@ class GameSession extends Base
                 'save_path' => $gamesave->getFullZipPath(),
                 'watchdog_address' => $watchdog->address,
                 'game_id' => $this->id,
-                'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php',
+                'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession_php',
                 'allow_recreate' => $allow_recreate,
             ]
         );
@@ -216,7 +216,7 @@ class GameSession extends Base
             'password_player' => base64_encode($this->password_player),
             'watchdog_address' => $watchdog->address,
             'allow_recreate' => $allow_recreate,
-            'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php',
+            'response_address' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession_php',
         ];
         $server_call = self::callServer(
             'GameSession/CreateGameSession',
@@ -629,15 +629,6 @@ class GameSession extends Base
         if ('simulation' == $this->game_state) {
             throw new ServerManagerAPIException('The session is simulating, so cannot archive it at this time.');
         }
-        /*$server_call = self::callServer(
-            'GameSession/ArchiveGameSession',
-            ['response_url' => ServerManager::getInstance()->getAbsoluteUrlBase().'api/editGameSession.php'],
-            $this->id,
-            $this->api_access_token
-        );
-        if (!$server_call['success']) {
-            throw new ServerManagerAPIException($server_call['message'] ?? 'unknown error');
-        }*/
         $this->session_state = 'archived';
         $this->edit();
 
@@ -661,6 +652,11 @@ class GameSession extends Base
         $gameconfig->get();
         $configFileDecoded = $gameconfig->getContents();
         if (isset($configFileDecoded['datamodel'])) {
+            // force an object from meta layer type array
+            $configFileDecoded['datamodel']['meta'] = array_map(function ($el) {
+                $el['layer_type'] = (object)$el['layer_type'];
+                return $el;
+            }, $configFileDecoded['datamodel']['meta']);
             $configFileDecoded['datamodel']['plans'] = $server_call['payload'];
         } else {
             $configFileDecoded['plans'] = $server_call['payload'];

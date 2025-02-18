@@ -9,13 +9,13 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: '8.2'
           coverage: none
       - uses: actions/checkout@v3
       - name: Install composer dependencies
         run: bash install.sh
       - name: Phpstan analyse
-        run: vendor/bin/phpstan analyse --memory-limit=1G
+        run: vendor/bin/phpstan
       - name: Run our own custom linter script
         run: bash test.sh
 

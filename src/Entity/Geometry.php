@@ -2,11 +2,13 @@
 
 namespace App\Entity;
 
+use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Repository\GeometryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 #[ORM\Entity(repositoryClass: GeometryRepository::class)]
 #[ORM\UniqueConstraint(name: 'uq_geometry_data', columns: ['geometry_geometry', 'geometry_data', 'geometry_layer_id'])]
@@ -32,6 +34,8 @@ class Geometry
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private ?string $geometryData;
+    private mixed $geometryDataJsonObj = null;
+    private mixed $geometryDataJsonArr = null;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'geometry')]
     #[ORM\JoinColumn(name: 'geometry_country_id', referencedColumnName: 'country_id')]
@@ -101,6 +105,11 @@ class Geometry
         $this->socketForGrid = new ArrayCollection();
     }
 
+    public function getName(): ?string
+    {
+        $data = $this->getGeometryDataAsJsonDecoded(true);
+        return ($data['name'] ?? '').($data['NAME'] ?? '').($data['Name'] ?? '') ?: null;
+    }
 
     public function getGeometryId(): ?int
     {
@@ -247,6 +256,19 @@ class Geometry
         return $this;
     }
 
+    public function getGeometryDataAsJsonDecoded(bool $associative = false): mixed
+    {
+        if (null === $this->geometryData) {
+            return null;
+        }
+        if ($associative) {
+            $this->geometryDataJsonArr ??= json_decode($this->geometryData, true); // cache
+            return $this->geometryDataJsonArr;
+        }
+        $this->geometryDataJsonObj ??= json_decode($this->geometryData); // cache
+        return $this->geometryDataJsonObj;
+    }
+
     public function getGeometryData(): ?string
     {
         return $this->geometryData;
@@ -254,14 +276,18 @@ class Geometry
 
     public function setGeometryData(array|string|null $geometryData): Geometry
     {
+        $this->geometryDataJsonArr = $this->geometryDataJsonObj = null; // reset the cached json
+        // data is passed that needs converting to a json string
         if (is_array($geometryData)) {
             // assume $geometryData is actually a downloaded feature properties array
             unset($geometryData['type']);
             unset($geometryData['mspid']);
             unset($geometryData['country_id']);
             unset($geometryData['country_object']);
-            $geometryData = json_encode($geometryData);
+            $this->geometryData = json_encode($geometryData);
+            return $this;
         }
+        // a json string is passed
         $this->geometryData = $geometryData;
         return $this;
     }
@@ -300,44 +326,52 @@ class Geometry
 
     public function setGeometryType(string|array|null $geometryType): Geometry
     {
-        if (is_array($geometryType)) {
-            // assume $geometryType is actually a downloaded feature properties array
-            $featureProperties = $geometryType;
-            if (!empty($this->getLayer()->getLayerPropertyAsType())) {
-                $type = '-1';
-                if (!empty($featureProperties[$this->getLayer()->getLayerPropertyAsType()])) {
-                    $featureTypeProperty = $featureProperties[$this->getLayer()->getLayerPropertyAsType()];
-                    foreach ($this->getLayer()->getLayerType() as $typeValue => $layerTypeMetaData) {
-                        if (!empty($layerTypeMetaData["map_type"])) {
-                            // identify the 'other' category
-                            if (strtolower($layerTypeMetaData["map_type"]) == "other") {
-                                $typeOther = $typeValue;
-                            }
-                            if (str_contains($layerTypeMetaData["map_type"], '-')) {
-                                // assumes a range of minimum to maximum (but not including) integer or float values
-                                $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
-                                if ((float) $featureTypeProperty >= (float) $typeValues[0]
-                                    && (float) $featureTypeProperty < (float) $typeValues[1]) {
-                                    $type = $typeValue;
-                                }
-                            } elseif ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
-                                // translate the found $featureProperties value to the type value (int, float, string)
-                                $type = $typeValue;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if ($type == '-1') {
-                    $type = $typeOther ?? 0;
-                }
-                $this->geometryType = $type;
-                return $this;
-            }
+        if (!is_array($geometryType)) {
+            $this->geometryType = $geometryType;
+            return $this;
+        }
+        // assume $geometryType is actually a downloaded feature properties array
+        $featureProperties = $geometryType;
+        if (empty($this->getLayer()->getLayerPropertyAsType())) {
             $this->geometryType = !empty($featureProperties['type']) ? $featureProperties['type'] : '0';
             return $this;
         }
-        $this->geometryType = $geometryType;
+        if (empty($featureProperties[$this->getLayer()->getLayerPropertyAsType()])) {
+            $this->geometryType = '0';
+            return $this;
+        }
+        $type = '-1';
+        $featureTypeProperty = $featureProperties[$this->getLayer()->getLayerPropertyAsType()];
+        foreach ($this->getLayer()->getLayerType() as $typeValue => $layerTypeMetaData) {
+            if (empty($layerTypeMetaData["map_type"])) {
+                continue;
+            }
+            // identify the 'other' category
+            if (strtolower($layerTypeMetaData["map_type"]) == "other") {
+                $typeOther = $typeValue;
+            }
+            // if the map_type is a range, check if the featureTypeProperty is within that range
+            if (str_contains($layerTypeMetaData["map_type"], '-')) {
+                // assumes a range of minimum to maximum (but not including) integer or float values
+                $typeValues = explode('-', $layerTypeMetaData["map_type"], 2);
+                if (is_numeric($typeValues[0]) && is_numeric($typeValues[1]) &&
+                    (float) $featureTypeProperty >= (float) $typeValues[0]
+                    && (float) $featureTypeProperty < (float) $typeValues[1]) {
+                    $type = $typeValue;
+                    break;
+                }
+            }
+            // check if the featureTypeProperty matches the map_type value
+            if ($layerTypeMetaData["map_type"] == $featureTypeProperty) {
+                // translate the found $featureProperties value to the type value (int, float, string)
+                $type = $typeValue;
+                break;
+            }
+        }
+        if ($type == '-1') {
+            $type = $typeOther ?? '0';
+        }
+        $this->geometryType = $type;
         return $this;
     }
 
@@ -366,7 +400,7 @@ class Geometry
         if (empty($geometryMspid)) {
             $algo = 'fnv1a64';
             $dataToHash = $this->getLayer()->getLayerName() . $this->getGeometryGeometry();
-            $dataArray = json_decode($this->getGeometryData(), true);
+            $dataArray = $this->getGeometryDataAsJsonDecoded(true);
             $dataToHash .= $dataArray['name'] ?? '';
             $this->geometryMspid = hash($algo, $dataToHash);
             $this->getLayer()->isGeometryWithGeneratedMspids();
@@ -386,12 +420,12 @@ class Geometry
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function calculateBounds(): array
     {
         if (empty($this->geometryGeometry)) {
-            throw new \Exception('No geometry coordinates retrieved, cannot calculate bounds.');
+            throw new Exception('No geometry coordinates retrieved, cannot calculate bounds.');
         }
         $result = ["x_min" => 1e25, "y_min" => 1e25, "x_max" => -1e25, "y_max" => -1e25];
         foreach (json_decode($this->geometryGeometry, true) as $g) {
@@ -615,7 +649,7 @@ class Geometry
         $g["the_geom"] = $this->exportGeometryToDecodedGeoJSON();
         $g["type"] = $this->getGeometryType();
         $g["mspid"] = $this->getGeometryMspid();
-        $g["data"] = json_decode($this->getGeometryData(), true);
+        $g["data"] = $this->getGeometryDataAsJsonDecoded(true);
         return $g;
     }
 
@@ -623,22 +657,26 @@ class Geometry
     {
         $jsonArray = [];
         $layer = $this->getLayer()->getOriginalLayer() ?? $this->getLayer();
-        switch ($layer->getLayerGeotype()) {
-            case 'polygon':
+        switch ($layer->getLayerGeoType()) {
+            case LayerGeoType::POLYGON:
                 $jsonArray['type'] = 'MultiPolygon';
                 $jsonArray['coordinates'][] = [$this->getGeometryGeometryAsArray()];
                 foreach ($this->getGeometrySubtractives() as $subtractiveGeometry) {
                     $jsonArray['coordinates'][] = [$subtractiveGeometry->getGeometryGeometryAsArray()];
                 }
                 break;
-            case 'line':
+            case LayerGeoType::LINE:
                 $jsonArray['type'] = 'MultiLineString';
                 $jsonArray['coordinates'][] = $this->getGeometryGeometryAsArray();
                 break;
-            case 'point':
+            case LayerGeoType::POINT:
                 $jsonArray['type'] = 'Point';
                 $jsonArray['coordinates'] = $this->getGeometryGeometryAsArray()[0]; // single point!
                 break;
+            default:
+                throw new \RuntimeException(
+                    'Encountered unexpected layer geo type: '.($layer->getLayerGeoType()?->value ?? 'empty')
+                );
         }
         return $jsonArray;
     }
