@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="turbo-cache-control" content="no-cache">
-        <title>{% block title %}Server Manager{% endblock %} - {% block subtitle %}Main page{% endblock %}</title>
+        <title>{% block title %}Server Manager{% endblock %}{% if block('subtitle') is not empty %} - {% block subtitle %}Main page{% endblock %}{% endif %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cabin">
         {% block stylesheets %}
@@ -19,6 +19,9 @@
                 <div id="logo-wrapper">
                     <div id="logo">
                         <img src="{{ asset('build/images/MSP_Challenge_Icon-037c7c.png') }}"  alt="MSP Challenge logo"/>
+                        {% if block('title') is defined %}
+                            {{ block('title') }}
+                        {% endif %}
                     </div>
                 </div>
                 <div id="menu">
@@ -48,16 +51,13 @@
         </div>
         <div id="content-wrapper">
             <div id="content" {{ stimulus_controller('modal-default')|stimulus_controller('list-default') }}>
-                <div id="menu-user">
-                    {{ knp_menu_render('subMenu') }}
-                </div>
-            {% if block('title') is defined %}
-                <h1>{{ block('title') }}</h1>
-            {% endif %}
-            {% if block('subtitle') is defined %}
-                <h2>{{ block('subtitle') }}</h2>
-            {% endif %}
-                {% block body %}{% endblock %}
+            {% block menuUser %}
+            <div id="menu-user">
+                {{ knp_menu_render('subMenu') }}
+            </div>
+            {% endblock %}
+            <h1>{{ block('subtitle') }}</h1>
+            {% block body %}{% endblock %}
             </div>
         </div>
         <div id="footer-wrapper">

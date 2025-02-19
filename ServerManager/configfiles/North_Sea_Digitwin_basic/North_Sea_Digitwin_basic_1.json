@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "date_modified": "1/21/2025",
+    "date_modified": "2/18/2025",
     "data_model_hash": "73ED9A9CA73DA2C1580C36DB3058A84B361243DA64DF6E54DB1B6393A46C5C16",
     "errors": 0,
     "editor_version": "2.0.0",
@@ -22378,23 +22378,7 @@
         {
           "layer_name": "NS_Separation_Zones_DT",
           "layer_types": [
-            "Areas to be Avoided"
-          ],
-          "allowed_ships": [
-            {
-              "ship_type_ids": [
-                1,
-                2,
-                5
-              ],
-              "cost_multiplier": 3.0
-            }
-          ]
-        },
-        {
-          "layer_name": "NS_Separation_Zones_DT",
-          "layer_types": [
-            "Special Zones"
+            "Inshore Traffic Zone"
           ],
           "allowed_ships": [
             {
@@ -22412,7 +22396,7 @@
         {
           "layer_name": "NS_Separation_Zones_DT",
           "layer_types": [
-            "Inshore Traffic Zone"
+            "Special Areas"
           ],
           "allowed_ships": [
             {
@@ -22421,6 +22405,20 @@
                 2,
                 3,
                 4,
+                5
+              ],
+              "cost_multiplier": 1.0
+            }
+          ]
+        },
+        {
+          "layer_name": "NS_Separation_Zones_DT",
+          "layer_types": [
+            "Areas to be Avoided"
+          ],
+          "allowed_ships": [
+            {
+              "ship_type_ids": [
                 5
               ],
               "cost_multiplier": 1.0
@@ -30625,10 +30623,22 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Departure and arrival points of ships",
         "layer_information": "",
         "layer_media": "wiki://Ports",
-        "layer_text_info": null,
+        "layer_text_info": {
+          "property_per_state": {
+            "Current": "name",
+            "View": "name",
+            "Edit": "name"
+          },
+		  "text_color": "#0504AAFF",
+          "text_size": "M",
+          "zoom_cutoff": 0.1,
+          "x": 0.0,
+          "y": -0.2,
+          "z": -0.05
+        },
         "layer_states": [
           {
             "state": "ASSEMBLY",
@@ -30648,237 +30658,13 @@
         "layer_depth": 2,
         "layer_property_as_type": null,
         "layer_type": {
-          "3": {
-            "displayName": "Team green ports",
-            "approval": "EEZ",
-            "value": 3,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#000000FF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#000000FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#000000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Ship",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "4": {
-            "displayName": "Team red ports",
-            "approval": "NotDependent",
-            "value": 4,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#00000000",
-            "polygonPatternName": null,
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#000000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Ship",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Team pink ports",
-            "approval": "NotDependent",
-            "value": 5,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#00000000",
-            "polygonPatternName": null,
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#000000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Ship",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": ""
-          },
-          "6": {
-            "displayName": "Team yellow ports",
-            "approval": "NotDependent",
-            "value": 6,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#00000000",
-            "polygonPatternName": null,
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#000000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Ship",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": ""
-          },
-          "7": {
-            "displayName": "Team orange ports",
-            "approval": "NotDependent",
-            "value": 7,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#00000000",
-            "polygonPatternName": null,
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#FBAE30FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Ship",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": ""
-          },
-          "8": {
-            "displayName": "Team lime ports",
-            "approval": "NotDependent",
-            "value": 8,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#00000000",
-            "polygonPatternName": null,
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#000000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Ship",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": ""
-          },
-          "9": {
-            "displayName": "Team blue ports",
-            "approval": "NotDependent",
-            "value": 9,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#00000000",
-            "polygonPatternName": null,
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#000000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Ship",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": ""
-          },
-          "10": {
-            "displayName": "Team purple ports",
-            "approval": "NotDependent",
-            "value": 10,
-            "map_type": null,
-            "displayPolygon": 0,
-            "polygonColor": "#00000000",
-            "polygonPatternName": null,
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 1,
-            "pointColor": "#000000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "Ship",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": ""
-          },
           "0": {
             "displayName": "Port",
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
             "displayPolygon": 0,
-            "polygonColor": "#00000000",
+            "polygonColor": "#124277FF",
             "polygonPatternName": null,
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -30891,14 +30677,14 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#000000FF",
-            "pointSize": 1.0,
+            "pointColor": "#1156A2FF",
+            "pointSize": 0.8,
             "pointSpriteName": "Ship",
             "description": null,
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": 0,
-            "media": ""
+            "media": "wiki://Ports"
           }
         },
         "layer_info_properties": [
@@ -30931,7 +30717,10 @@
             "default_value": null
           }
         ],
-        "layer_tags": []
+        "layer_tags": [
+          "Point",
+          "Port"
+        ]
       },
       {
         "layer_name": "NS_Separation_Zones_DT",
@@ -39935,7 +39724,7 @@
             "value": 0,
             "map_type": "",
             "displayPolygon": 1,
-            "polygonColor": "#6CFF1C",
+            "polygonColor": "#6CFF1CFF",
             "polygonPatternName": "1",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -39943,7 +39732,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 0,
-            "lineColor": "#7AC943",
+            "lineColor": "#7AC943FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",

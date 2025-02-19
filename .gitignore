@@ -119,3 +119,6 @@ yarn-error.log
 # to solve issues with GitHub: https://chipperci.com/docs/issues/composer-github-authentication/
 # which creates this file, which should be ignored
 auth.json
+
+# to ignore all the files in the public/downloads folder
+public/downloads/**
