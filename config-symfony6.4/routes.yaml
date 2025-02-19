@@ -79,6 +79,10 @@ legacy_api_test:
   requirements:
     anything: '.*'
 
+home:
+  path: '/'
+  controller: App\Controller\HomeController
+
 legacy_not_found:
   path: '/{anything}'
   controller: App\Controller\LegacyController::notFound
