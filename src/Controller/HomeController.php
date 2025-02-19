@@ -17,6 +17,9 @@ class HomeController extends AbstractController
         VersionsProvider $provider,
         ServerManager $serverManager
     ): Response {
+        if (!is_dir($projectDir.'/public/downloads/')) {
+            mkdir($projectDir.'/public/downloads/');
+        }
         $downloads = scandir($projectDir.'/public/downloads/');
         $downloads = array_diff($downloads, ['.', '..']);
         return $this->render('home.html.twig', [
