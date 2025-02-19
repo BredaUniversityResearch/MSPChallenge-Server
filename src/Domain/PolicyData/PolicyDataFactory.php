@@ -17,7 +17,8 @@ class PolicyDataFactory
             PolicyTypeName::ECO_GEAR => EcoGearPolicyData::schema(),
             PolicyTypeName::ENERGY_DISTRIBUTION => EnergyDistributionPolicyData::schema(),
             PolicyTypeName::SHIPPING_SAFETY_ZONES => ShippingSafetyZonesPolicyData::schema(),
-            PolicyTypeName::FISHING_EFFORT => FishingEffortPolicyData::schema()
+            PolicyTypeName::FISHING_EFFORT => FishingEffortPolicyData::schema(),
+            PolicyTypeName::SAND_EXTRACTION => SandExtractionPolicyData::schema()
         };
     }
 
@@ -29,7 +30,8 @@ class PolicyDataFactory
             PolicyTypeName::ECO_GEAR => new EcoGearPolicyData(),
             PolicyTypeName::ENERGY_DISTRIBUTION => new EnergyDistributionPolicyData(),
             PolicyTypeName::SHIPPING_SAFETY_ZONES => new ShippingSafetyZonesPolicyData(),
-            PolicyTypeName::FISHING_EFFORT => new FishingEffortPolicyData()
+            PolicyTypeName::FISHING_EFFORT => new FishingEffortPolicyData(),
+            PolicyTypeName::SAND_EXTRACTION => new SandExtractionPolicyData()
         };
     }
 
@@ -48,7 +50,8 @@ class PolicyDataFactory
             PolicyTypeName::ECO_GEAR => EcoGearPolicyData::import($json),
             PolicyTypeName::ENERGY_DISTRIBUTION => EnergyDistributionPolicyData::import($json),
             PolicyTypeName::SHIPPING_SAFETY_ZONES => ShippingSafetyZonesPolicyData::import($json),
-            PolicyTypeName::FISHING_EFFORT => FishingEffortPolicyData::import($json)
+            PolicyTypeName::FISHING_EFFORT => FishingEffortPolicyData::import($json),
+            PolicyTypeName::SAND_EXTRACTION => SandExtractionPolicyData::import($json)
         };
     }
 }
