@@ -29,7 +29,7 @@ If you want to change the ports used by the containers, you can do by defining e
 - in the [`.env`](.env) file in the root of the project
 - or by defining them in the command line when running `docker compose up` like so, e.g.:
   `WEB_SERVER_PORT=80 DATABASE_PORT=3306 WS_SERVER_PORT=45001 WATCHDOG_PORT=45000 ADMINER_PORT=8082 MITMPROXY_POR=8080 MITMPROXY_WEB_PORT=8081 docker compose up`
-- using a `.env.local` file and starting docker compose using aliases, see [Aliases for development](#aliases-for-development).
+- using a `.env.local` file and starting docker compose using aliases, see [Aliases for development and deployment](#aliases-for-development-and-deployment).
 
 ## Installation
 
@@ -41,8 +41,7 @@ If you want to change the ports used by the containers, you can do by defining e
 3. Run `docker compose build --pull --no-cache` to build fresh images
 
 4. Then, to create the server docker containers, and starting it up, run:
-   - for prod: `CADDY_MERCURE_JWT_SECRET=... APP_ENV=prod docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`
-     (replace `...` with a random string, e.g. `openssl rand -base64 32`)
+   - for prod: please read this [document](https://community.mspchallenge.info/wiki/Docker_server_installation)
    - for staging: `APP_ENV=prod  docker compose -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d`
    - for dev: `docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d`
 
@@ -79,12 +78,18 @@ To start/stop/restart supervisor services, see some examples here:<br/>
 To check their status:<br/>
 `docker exec CONTAINER supervisorctl status all`<br/>
 
-## Aliases for development
+## Aliases for development and deployment
 
 If the host machine, running Docker, is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you
 can create aliases to simplify docker container management and interaction.
 
-Simply run: `source docker-aliases.sh` in your terminal to create the aliases.
+It requires an installation of PHP on your host machine. This is because it uses a
+[PHP script](docker/export-dotenv-vars/app.php) to expose the env. vars in the `.env.local` file towards Docker compose.
+How to install PHP:
+- on Windows, I advise to use [PowerShell PHP manager](https://github.com/mlocati/powershell-phpmanager);
+- on Linux, you can install it using your package manager, e.g. `sudo apt-get install php-fpm`.
+
+Then simply run: `source docker-aliases.sh` in your terminal to create the aliases.
 Or if you want them to be available all the time, you can add this command in the `.bashrc` file in your home directory.
 Once you have created the `.bashrc` file, you need to log-out and -in, reboot the system, or restart the terminal once.
 
