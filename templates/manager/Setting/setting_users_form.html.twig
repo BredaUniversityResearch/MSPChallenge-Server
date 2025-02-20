@@ -1,0 +1,27 @@
+<turbo-frame id="settingForm">
+    <div data-modal-setting-target="modalSettingUsersForm">
+        {{ form_start(settingUsersForm) }}
+        <div class="modal-body">
+            <h1>Add additional users</h1>
+            <div class="row">
+                <div class="col-10">
+                    {{ form_label(settingUsersForm.username, 'Username or e-mail address', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(settingUsersForm.username, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger">{{ form_errors(settingUsersForm.username) }}</div>
+                    <div class="small text-muted">{{ form_help(settingUsersForm.username) }}</div>
+                </div>
+                <div class="col">
+                    {{ form_label(settingUsersForm.isAdmin, 'Administrator', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(settingUsersForm.isAdmin) }}
+                    <div class="text-danger">{{ form_errors(settingUsersForm.isAdmin) }}</div>
+                    <div class="small text-muted">{{ form_help(settingUsersForm.isAdmin) }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-setting#submitSettingUsersModalForm">Add</button>
+        </div>
+        {{ form_end(settingUsersForm) }}
+    </div>
+</turbo-frame>

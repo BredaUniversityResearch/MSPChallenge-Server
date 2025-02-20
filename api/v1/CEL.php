@@ -2,30 +2,15 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\InternalSimulationName;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\Simulation;
+use App\Repository\SimulationRepository;
 use Exception;
 use stdClass;
 
 class CEL extends Base
 {
-    private const ALLOWED = array(
-        "GetConnections",
-        "GetCELConfig",
-        "GetGrids",
-        "GetNodes",
-        "GetSources",
-        "SetGeomCapacity",
-        "SetGridCapacity",
-        "StartExe",
-        "ShouldUpdate",
-        "UpdateFinished"
-    );
-
-        
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     //CEL Input queries
     /**
      * @apiGroup Cel
@@ -108,11 +93,10 @@ class CEL extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateFinished(int $month): void
     {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query(
-            'UPDATE game SET game_cel_lastmonth=?, game_cel_lastupdate=UNIX_TIMESTAMP(NOW(6))',
-            [$month]
-        );
+        /** @var SimulationRepository $repo */
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(Simulation::class);
+        $repo->notifyMonthFinishedForInternal(InternalSimulationName::CEL, $month);
     }
 
     /**
@@ -168,7 +152,7 @@ class CEL extends Base
 
         foreach ($data as $d) {
             if ($d['grid_source_geometry_id'] != null) {
-                array_push($arr, $d['grid_source_geometry_id']);
+                $arr[] = $d['grid_source_geometry_id'];
             }
         }
 
@@ -218,7 +202,7 @@ class CEL extends Base
                 $obj[$id]["energy"][$country]['sockets'] = array();
             }
 
-            array_push($obj[$id]["energy"][$country]['sockets'], $d['geometry_id']);
+            $obj[$id]["energy"][$country]['sockets'][] = $d['geometry_id'];
         }
 
         //convert everything to arrays instead of objects

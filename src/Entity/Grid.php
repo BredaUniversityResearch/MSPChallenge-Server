@@ -24,7 +24,7 @@ class Grid
     #[ORM\Column(type: Types::SMALLINT, length: 4, nullable: true, options: ['default' => 1])]
     private ?int $gridActive = 1;
 
-    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'grid')]
+    #[ORM\ManyToOne(cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'grid_plan_id', referencedColumnName: 'plan_id')]
     private ?Plan $plan;
 

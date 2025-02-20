@@ -13,43 +13,6 @@ use function App\await;
 
 class Energy extends Base
 {
-    private const ALLOWED = array(
-        "Start",
-        "CreateConnection",
-        "UpdateConnection",
-        "DeleteConnection",
-        "GetConnections",
-        "Clear",
-        "SetOutput",
-        "UpdateMaxCapacity",
-        "GetUsedCapacity",
-        "DeleteOutput",
-        "UpdateGridName",
-        "DeleteGrid",
-        "AddGrid",
-        "UpdateGridEnergy",
-        "AddSocket",
-        "DeleteSocket",
-        "SetDeleted",
-        "UpdateGridSockets",
-        "UpdateGridSources",
-        "GetDependentEnergyPlans",
-        "GetOverlappingEnergyPlans",
-        "GetPreviousOverlappingPlans",
-        "VerifyEnergyCapacity",
-        "VerifyEnergyGrid"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Start()
-    {
-    }
-
     /**
      * @apiGroup Energy
      * @throws Exception

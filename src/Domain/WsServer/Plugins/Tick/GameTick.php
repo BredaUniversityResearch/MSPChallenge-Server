@@ -4,13 +4,15 @@ namespace App\Domain\WsServer\Plugins\Tick;
 
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
+use App\Domain\API\v1\Simulation;
 use App\Domain\Common\Context;
-use App\Domain\Common\MSPBrowserFactory;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\Watchdog;
+use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\SilentFailException;
 use Drift\DBAL\Result;
 use Exception;
-use Psr\Http\Message\ResponseInterface;
 use React\EventLoop\Loop;
 use React\Promise\Promise;
 use React\Promise\PromiseInterface;
@@ -25,7 +27,6 @@ class GameTick extends TickBase
      * @param bool $showDebug
      * @param Context|null $context
      * @return PromiseInterface
-     * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
     public function tick(bool $showDebug = false, ?Context $context = null): PromiseInterface
@@ -81,9 +82,6 @@ class GameTick extends TickBase
                     'game_currentmonth as month',
                     'game_planning_gametime as era_gametime',
                     'game_planning_realtime as era_realtime',
-                    'game_mel_lastmonth as mel_lastmonth',
-                    'game_cel_lastmonth as cel_lastmonth',
-                    'game_sel_lastmonth as sel_lastmonth',
                     'game_state as state'
                 )
                 ->from('game')
@@ -121,18 +119,23 @@ class GameTick extends TickBase
             wdo("Trying to tick the server", OutputInterface::VERBOSITY_VERY_VERBOSE);
         }
 
-        $game = new Game();
-        $this->asyncDataTransferTo($game);
-        if (!$game->areSimulationsUpToDate($tickData)) {
-            if ($showDebug) {
-                wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
-            }
-            return null;
-        }
-
-        return $this->serverTickInternal($showDebug, $context)
-            ->otherwise(function (SilentFailException $e) {
-                // Handle the rejection, and don't propagate. This is like catch without a rethrow
+        $simulation = new Simulation();
+        $this->asyncDataTransferTo($simulation);
+        $context = $context?->enter('getUnsynchronizedSimulations');
+        $this->getStopwatch()?->start($context?->getPath());
+        return $simulation->getUnsynchronizedSimulations($tickData['month'])
+            ->then(function (Result $result) use ($showDebug, $context) {
+                $this->getStopwatch()?->stop($context?->getPath());
+                if ($result->fetchCount() == 0) { // all simulations are up-to-date
+                    return $this->serverTickInternal($showDebug, $context)
+                        ->otherwise(function (SilentFailException $e) {
+                            // Handle the rejection, and don't propagate. This is like catch without a rethrow
+                            return null;
+                        });
+                }
+                if ($showDebug) {
+                    wdo('Waiting for simulations to update.', OutputInterface::VERBOSITY_VERY_VERBOSE);
+                }
                 return null;
             });
     }
@@ -214,37 +217,26 @@ class GameTick extends TickBase
                         });
                 })
                 ->then(function () use ($currentMonth, $contextUpdateLayerState) {
-                    $contextGetWatchdogToken = $contextUpdateLayerState?->enter('getWatchdogSessionUniqueToken');
-                    $this->getStopwatch()?->start($contextGetWatchdogToken?->getPath());
+                    $context = $contextUpdateLayerState?->enter('getWatchdogs');
+                    $this->getStopwatch()?->start($context?->getPath());
+                    $simulation = new Simulation();
+                    $this->asyncDataTransferTo($simulation);
                     // no return! so we don't wait for the response
-                    $this->getWatchdogSessionUniqueToken()->then(
-                        function (string $watchdogSessionUniqueToken) use ($currentMonth, $contextGetWatchdogToken) {
-                            $this->getStopwatch()?->stop($contextGetWatchdogToken?->getPath());
-                            // note(MH): GetWatchdogAddress is not async, but it is cached once it
-                            //   has been retrieved once, so that's "fine"
-                            $contextWatchdogSetMonth = $contextGetWatchdogToken?->enter('watchdogSetMonth');
-                            $this->getStopwatch()?->start($contextWatchdogSetMonth?->getPath());
-                            $url = $this->GetWatchdogAddress()."/Watchdog/SetMonth";
-                            MSPBrowserFactory::create($url)->post(
-                                $url,
-                                [
-                                    'Content-Type' => 'application/x-www-form-urlencoded'
-                                ],
-                                http_build_query([
-                                    'game_session_token' => $watchdogSessionUniqueToken,
-                                    'month' => $currentMonth
-                                ])
-                            )
-                            ->then(function (ResponseInterface $response) use ($url, $contextWatchdogSetMonth) {
-                                $this->getStopwatch()?->stop($contextWatchdogSetMonth?->getPath());
-                                $contextLogWatchdogResponse = $contextWatchdogSetMonth?->enter('logWatchdogResponse');
-                                $this->getStopwatch()?->start($contextLogWatchdogResponse?->getPath());
-                                return $this->logWatchdogResponse($url, $response)
-                                    ->then(function ($result) use ($contextLogWatchdogResponse) {
-                                        $this->getStopwatch()?->stop($contextLogWatchdogResponse?->getPath());
-                                        return $result;
-                                    });
-                            });
+                    $simulation->getWatchdogs()->then(
+                        /**
+                         * @throws Exception
+                         * @var Watchdog[] $watchdogs
+                         */
+                        function (array $watchdogs) use ($currentMonth, $context) {
+                            $this->getStopwatch()?->stop($context?->getPath());
+                            foreach ($watchdogs as $watchdog) {
+                                $message = new GameMonthChangedMessage();
+                                $message
+                                    ->setGameSessionId($this->getGameSessionId())
+                                    ->setWatchdogId($watchdog->getId())
+                                    ->setMonth($currentMonth);
+                                SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch($message);
+                            }
                         }
                     );
                 })
@@ -279,10 +271,10 @@ class GameTick extends TickBase
                 $qb
                     ->set('game_state', $qb->createPositionalParameter('END'))
             )
-            ->then(function (/*Result $result*/) {
-                $game = new Game();
-                $this->asyncDataTransferTo($game);
-                return $game->changeWatchdogState('END');
+            ->then(function (/*Result $result*/) use ($currentMonth) {
+                $simulation = new Simulation();
+                $this->asyncDataTransferTo($simulation);
+                return $simulation->changeWatchdogState('END', $currentMonth);
             });
         } elseif (($state == "PLAY" || $state == "FASTFORWARD") && $monthsDone >= $tick['era_gametime'] &&
             $tick['era_gametime'] < $tick['era_time']) {
@@ -292,10 +284,10 @@ class GameTick extends TickBase
                     ->set('game_planning_monthsdone', '0')
                     ->set('game_state', $qb->createPositionalParameter('SIMULATION'))
             )
-            ->then(function (/*Result $result*/) {
-                $game = new Game();
-                $this->asyncDataTransferTo($game);
-                return $game->changeWatchdogState('SIMULATION');
+            ->then(function (/*Result $result*/) use ($currentMonth) {
+                $simulation = new Simulation();
+                $this->asyncDataTransferTo($simulation);
+                return $simulation->changeWatchdogState('SIMULATION', $currentMonth);
             });
         } elseif (($state == "SIMULATION" && $monthsDone >= $tick['era_time'] - $tick['era_gametime']) ||
             $monthsDone >= $tick['era_time']) {
@@ -308,10 +300,10 @@ class GameTick extends TickBase
                     ->set('game_state', $qb->createPositionalParameter('PLAY'))
                     ->set('game_planning_realtime', $era_realtime[$era])
             )
-            ->then(function (Result $result) {
-                $game = new Game();
-                $this->asyncDataTransferTo($game);
-                return $game->changeWatchdogState('PLAY');
+            ->then(function (Result $result) use ($currentMonth) {
+                $simulation = new Simulation();
+                $this->asyncDataTransferTo($simulation);
+                return $simulation->changeWatchdogState('PLAY', $currentMonth);
             });
         } else {
             return $this->getAsyncDatabase()->query($qb);

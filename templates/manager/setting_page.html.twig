@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block subtitle %}Settings{% endblock %}
+
+{% block body %}
+<div {{ stimulus_controller('modal-setting')|stimulus_controller('modal-gamegeoserver')|stimulus_controller('modal-gamewatchdogserver') }}>
+    <div class="col-md-12 py-2">
+        Here you can change various settings of this MSP Challenge server.
+    </div>
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <turbo-frame id="settingsTable" src="{{ path('manager_setting_list') }}">
+                <h1>Loading... <i class="fa fa-spinner fa-pulse"></i></h1>
+            </turbo-frame>
+        </div>
+    </div>
+    {{ include('manager/Setting/setting_modal.html.twig') }}
+</div>
+{% endblock %}

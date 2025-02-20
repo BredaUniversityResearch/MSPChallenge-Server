@@ -4,14 +4,9 @@ namespace App\Tests\ServerManager;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
-use App\Domain\Common\EntityEnums\GameStateValue;
-use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Domain\Services\ConnectionManager;
-use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
-use App\Entity\ServerManager\GameServer;
-use App\Entity\ServerManager\GameWatchdogServer;
 use App\Message\GameList\GameListArchiveMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\MessageHandler\GameList\GameListArchiveMessageHandler;
@@ -24,10 +19,6 @@ use ReflectionException;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class GameListCreationSaveArchiveTest extends KernelTestCase
 {

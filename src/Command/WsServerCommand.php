@@ -32,7 +32,7 @@ class WsServerCommand extends Command
     const OPTION_ADDRESS = 'address';
     const OPTION_GAME_SESSION_ID = 'game-session-id';
     const OPTION_FIXED_TERMINAL_HEIGHT = 'fixed-terminal-height';
-    const OPTION_PROFILER = 'profiler-enabled';
+    const OPTION_PROFILER = 'profiler';
     const OPTION_MESSAGE_FILTER = 'message-filter';
     const OPTION_SERVER_ID = 'server-id';
 

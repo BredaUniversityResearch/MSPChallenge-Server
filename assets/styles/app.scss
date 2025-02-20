@@ -1,0 +1,292 @@
+// Bootstrap SCSS variables overrides:
+$light: #ffffff;
+$lightAlternate1: #f5f5f5;
+$lightAlternate2: #f7a02b;
+
+$dark: #037c7c;
+$darkAlternate1: #055d63;
+$darkAlternate2: #001a1f;
+
+$lightAlpha: #ffffffff;
+$darkAlpha: #037c7c77;
+$darkAlternateAlpha: #00000000;
+
+$input-border-radius: 3rem;
+$input-border-radius-sm: 3rem;
+$btn-border-radius: 3rem;
+$btn-border-radius-sm: 3rem;
+
+$modal-md: 750px;
+$toast-max-width: 700px;
+
+$body-bg: $light;
+$font-family-base: 'Cabin';
+$font-size-base: 1rem;
+$h1-font-size: 1.625rem;
+$h2-font-size: 1.3125rem;
+$h3-font-size: 1rem;
+$headings-margin-bottom: 10px;
+$badge-font-size: $font-size-base;
+
+$link-color: $darkAlternate1;
+$link-hover-color: $dark;
+$link-decoration: none;
+
+$table-bg: none;
+
+@import 'http://fonts.googleapis.com/css?family=Cabin';
+@import '~bootstrap';
+@import '~font-awesome';
+
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+body > * {
+    flex-shrink: 0;
+}
+
+h1 {
+    color: $darkAlternate1;
+}
+
+#header-wrapper {
+    padding: 25px 0 25px 0;
+    border: none;
+    background-image: url("../images/MSP_Challenge_Imagery-Darken.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 50.00% 23.67%;
+    background-color: $darkAlternate2;
+}
+
+#header {
+    background: -moz-linear-gradient(90deg, $darkAlternateAlpha 0%, $darkAlpha 30%, $lightAlpha 65%);
+    background: -webkit-linear-gradient(90deg, $darkAlternateAlpha 0%, $darkAlpha 30%, $lightAlpha 65%);
+    background: linear-gradient(90deg, $darkAlternateAlpha 0%, $darkAlpha 30%, $lightAlpha 65%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="$dark",endColorstr="$lightAlternate1",GradientType=1);
+    margin: auto;
+    height: 67px;
+    padding: 10px 40px 0 40px;
+}
+
+#logo-wrapper {
+    float: left;
+}
+
+#logo {
+    color: $light;
+    padding-top: 7px;
+}
+
+#logo img {
+    width: 35px;
+    height: 35px;
+    margin-right: 20px;
+}
+
+@media (max-width:770px){
+    #logo {
+        width: 110px;
+    }
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; // remove the gap so it doesn't close
+    width: 170px;
+    left: 0;
+    border: 0;
+}
+
+.dropdown-toggle::after {
+    content: none;
+}
+
+#menu {
+    float: right;
+    height: 46px;
+    margin: 0;
+    padding: 10px 0 0 0;
+}
+
+#menu-user {
+    float: right;
+    margin: 0;
+}
+
+#menu-user ul li.last {
+    padding-right: 0;
+}
+
+#menu li, #menu-user li {
+    display: inline-block;
+    padding: 0 20px;
+    font-weight: 700;
+}
+
+#menu li ul li {
+    display: block;
+    margin: 30px 0;
+}
+
+a:active {
+    color: $lightAlternate2;
+}
+
+.current a {
+    color: $lightAlternate2;
+}
+
+.state_fastforward {
+    color: darkorchid !important;
+    font-weight: bold;
+}
+
+.state_play {
+    color: green !important;
+    font-weight: bold;
+}
+.state_pause {
+    color: orange !important;
+    font-weight: bold;
+}
+.state_end {
+    color: navy !important;
+    font-weight: bold;
+}
+.state_archived {
+    color: grey !important;
+    font-weight: bold;
+}
+.state_healthy {
+    color: green !important;
+    font-weight: bold;
+}
+.state_failed {
+    color: red !important;
+    font-weight: bold;
+}
+.state_simulation {
+    color: deepskyblue !important;
+    font-weight: bold;
+}
+.state_request {
+    color: orchid !important;
+    font-weight: bold;
+}
+.state_initializing {
+    color: darkseagreen !important;
+    font-weight: bold;
+}
+
+.state_setup {
+    color: steelblue !important;
+    font-weight: bold;
+}
+
+.form-group {
+    padding: 10px 0px;
+}
+
+textarea.form-control {
+    padding: 20px;
+    min-height: 150px;
+}
+
+#alert-wrapper {
+    z-index: 10;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
+#radioFilter {
+    border: solid thin darkgrey;
+    border-radius: $input-border-radius;
+    padding: 5px 10px
+}
+
+.btn-primary {
+    @include button-variant(
+        $darkAlternate1, //background
+        $darkAlternate1, //border
+        $light, //color
+        $dark, //hover-background
+        $dark, //hover-border
+        $light, //hover-color
+        $lightAlternate2, //active-background
+        $lightAlternate2, //active-border
+        $light //active-color
+        //disabled-background
+        //disabled-border
+        //disabled-color
+    );
+}
+
+.btn-secondary {
+    @include button-variant(
+        $darkAlternate1, //background
+        $darkAlternate1, //border
+        $light, //color
+        $dark, //hover-background
+        $dark, //hover-border
+        $light, //hover-color
+        $lightAlternate2, //active-background
+        $lightAlternate2, //active-border
+        $light //active-color
+        //disabled-background
+        //disabled-border
+        //disabled-color
+    );
+}
+
+.btn-lg {
+    height: 32px;
+}
+
+#content-wrapper {
+    background-color: $lightAlternate1;
+    flex-grow: 1;
+}
+
+#content {
+    max-width: 1000px;
+    padding: 20px 30px 30px 30px;
+    margin: auto;
+}
+
+.country-label {
+    color: black;
+    font-weight: bolder;
+    opacity: 0.5;
+    text-align: center;
+}
+
+#sessionInfoLog {
+    height: 180px;
+    padding: 10px;
+    overflow-y: auto; 
+    resize: vertical;
+    display: none;
+}
+
+#footer-wrapper {
+    padding: 20px 0 30px 0;
+    font-size: 15px;
+    color: $light;
+    background-color: $darkAlternate1;
+}
+
+#footer, #footer-extra {
+    max-width: 1000px;
+    margin: auto;
+    padding: 10px 0px;
+    text-align: center;
+}
+
+#footer-extra img {
+    width: 40px;
+}

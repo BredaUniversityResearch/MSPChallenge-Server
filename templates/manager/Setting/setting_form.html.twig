@@ -1,0 +1,18 @@
+<turbo-frame id="modalDefaultBody">
+    <div data-modal-setting-target="modalSettingDescriptionForm">
+        {{ form_start(settingForm) }}
+        <div class="modal-body">
+            {{ form_label(settingForm.value, 'Server Description', {'label_attr': {'class': 'form-label'}}) }}
+            <div class="text-danger">
+                {{ form_errors(settingForm.value) }}
+            </div>
+            {{ form_widget(settingForm.value, {'attr': {'class': 'form-control'}}) }}
+            <div class="small text-muted">{{ form_help(settingForm.value) }}</div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-setting#submitSettingDescriptionModalForm">Save</button>
+        </div>
+        {{ form_end(settingForm) }}
+    </div>
+</turbo-frame>

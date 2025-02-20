@@ -46,6 +46,7 @@ class FleetFilterPolicyData extends FilterBasePolicyData
         $ownerSchema->addMeta(PolicyFilterTypeName::FLEET, PolicyDataSchemaMetaName::POLICY_TYPE_NAME->value);
         $fleetsSchema = Schema::arr()
             ->addMeta(function (int $gameSessionId) {
+                // todo: can't we use GameList::getGameConfig()->getGameConfigComplete()
                 $game = new Game();
                 $game->setGameSessionId($gameSessionId);
                 $dataModel = $game->getGameConfigValues();

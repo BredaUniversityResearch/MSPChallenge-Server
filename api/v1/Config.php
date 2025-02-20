@@ -25,10 +25,12 @@ class Config
         $this->LoadConfigFile();
     }
 
+    /**
+     * @throws \Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function LoadConfigFile(): void
     {
-        /** @noinspection PhpIncludeInspection */
         require_once(APIHelper::getInstance()->GetBaseFolder().'api_config.php');
         $this->configRoot = $GLOBALS['api_config'];
     }

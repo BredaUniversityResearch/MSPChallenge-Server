@@ -1,0 +1,49 @@
+<turbo-frame id="savesTable">
+    <table class="table table-hover table-striped">
+        <thead>
+        <tr>
+            <th>Created</th>
+            <th>Session Name</th>
+            <th>Month / Year</th>
+            <th>Configuration</th>
+            <th>Type</th>
+            <th class="text-center" style="width: 125px;">Quick Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if gameSaves is empty %}
+            <tr>
+                <td colspan="8">No saves (of this type) yet.</td>
+            </tr>
+        {% endif %}
+        {% for gameSave in gameSaves %}
+            <tr>
+                <td>{{ gameSave.saveTimestamp|date("Y-m-d H:i:s") }} </td>
+                <td>{{ gameSave.name }}</td>
+                <td>{{ gameSave.gameCurrentMonthPretty }}</td>
+                <td>{{ gameSave.gameConfigFilesFilename }}</td>
+                <td>{{ gameSave.saveType }}</td>
+                <td class="text-center">
+                    {% if gameSave.saveVisibility == 'active' %}
+                    <button class="btn btn-secondary btn-sm"
+                        data-save="{{ gameSave.id }}"
+                        data-action="modal-gamesave#openSaveLoadModal">
+                        <i class="fa fa-plus-circle"></i>
+                    </button>
+                    {% endif %}
+                    <button class="btn btn-secondary btn-sm"
+                        data-save="{{ gameSave.id }}"
+                        data-action="gamesave#saveDownload">
+                        <i class="fa fa-download"></i>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" 
+                        data-save="{{ gameSave.id }}" 
+                        data-action="modal-gamesave#openSaveDetailsModal">
+                        <i class="fa fa-info-circle" title= "Save details"></i>
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</turbo-frame>

@@ -4,6 +4,12 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.default_scheme: 'http'
+    app.default_host: 'localhost'
+    app.default_port: '80'
+    app.api_path_patterns:
+        - ^/api/(?!doc(\.json)?$) # Accepts routes under /api except /api/doc(.json)
+
     # URL to the MSP Challenge download page
     app.clients_url: 'https://community.mspchallenge.info/wiki/Download'
     # directory to store and from which to retrieve game session raster files
@@ -35,8 +41,8 @@ services:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         public: false       # Allows optimizing the container by removing unused services; this also means
-          # fetching services directly from the container via $container->get() won't work.
-        # The best practice is to be explicit about your dependencies anyway.
+                            # fetching services directly from the container via $container->get() won't work.
+                            # The best practice is to be explicit about your dependencies anyway.
         bind:
             string $projectDir: '%kernel.project_dir%'
 
@@ -57,6 +63,7 @@ services:
             - { name: messenger.message_handler, handles: App\Message\Analytics\UserLogOnOffSessionMessage }
 
     App\Domain\Services\SymfonyToLegacyHelper:
+        public: true
         arguments:
             $analyticsLogger: '@monolog.logger.analytics'
 
@@ -102,32 +109,88 @@ services:
     App\Entity\ServerManager\Listener\GameListListener:
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameList' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameList' }
+
+    App\Entity\ServerManager\Listener\GameSaveListener:
+        tags:
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameSave' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameSave' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameSave' }
 
     App\Entity\ServerManager\Listener\GameConfigVersionListener:
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameConfigVersion' }
 
     App\Entity\ServerManager\Listener\GameGeoServerListener:
         arguments:
             $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer' }
-            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameGeoServer' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameGeoServer' }
 
-    App\EventListener\SessionEntityListener:
+    App\Entity\Listener\WatchdogListener:
+    App\Entity\Listener\GameListener:
+        arguments:
+            $params: '@Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface'
+
+    # one session entity listener for all session entities
+    App\Entity\Listener\SessionEntityListener:
+        arguments:
+            $listeners: [
+                '@App\Entity\Listener\WatchdogListener',
+                '@App\Entity\Listener\GameListener'
+            ]
         tags:
             - { name: 'doctrine.event_listener', event: 'prePersist' }
             - { name: 'doctrine.event_listener', event: 'postLoad' }
 
     App\MessageHandler\GameList\GameListCreationMessageHandler:
-
     App\MessageHandler\GameList\GameListArchiveMessageHandler:
-
     App\MessageHandler\GameSave\GameSaveCreationMessageHandler:
-
     App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
-
     App\Domain\Communicator\WatchdogCommunicator:
+    App\Security\MSPAuth2Authenticator:
+    App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
+
+    App\Domain\Services\SimulationHelper:
+        public: true
+
+    app.menu_builder:
+        class: App\Menu\Builder
+        arguments: [ "@knp_menu.factory" ]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: mainMenu }
+            - { name: knp_menu.menu_builder, method: createSubMenu, alias: subMenu }
+
+    App\Twig\GameButtonDecider:
+        tags:
+            - 'twig.extension'
+
+    App\Twig\VersionsReturner:
+        tags:
+            - 'twig.extension'
+
+    App\EventListener\CheckApiSessionIdListener:
+        arguments:
+            $pathPatterns: '%app.api_path_patterns%'
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+
+    # https://symfony.com/doc/6.4/components/uid.html#generating-and-inspecting-uuids-ulids-in-the-console
+    Symfony\Component\Uid\Command\GenerateUlidCommand: ~
+    Symfony\Component\Uid\Command\GenerateUuidCommand: ~
+    Symfony\Component\Uid\Command\InspectUlidCommand: ~
+    Symfony\Component\Uid\Command\InspectUuidCommand: ~
+
+    App\MessageHandler\Retry\WatchdogMessageRetryStrategy:
+        tags:
+            - { name: messenger.retry_strategy }
+
+    App\EventListener\FailedMessageListener:
+        tags:
+            - { name: 'kernel.event_listener' }
 
 when@dev:
     parameters:

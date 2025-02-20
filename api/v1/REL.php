@@ -6,16 +6,6 @@ use Exception;
 
 class REL extends Base
 {
-    private const ALLOWED = array(
-        "GetRestrictionGeometry",
-        "GetConfiguration"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * @apiGroup REL
      * @throws Exception

@@ -1,0 +1,36 @@
+<turbo-frame id="modalDefaultBody">
+    <div data-modal-setting-target="modalReset">
+        <div class="modal-body">
+            {% if resetReturn is defined %}
+                <h2>Reset result</h2>
+                <div class="mb-2">
+                    {{ resetReturn|nl2br }}
+                </div>
+            {% endif %}
+            <div class="pull-right">
+                <button class="btn btn-sm btn-warning"
+                    data-action="modal-setting#doSoftReset">
+                    <i class="fa fa-warning"></i> Execute soft reset
+                </button>
+            </div>
+            <h2>Soft reset</h2>
+            <ul>
+                <li>Completely removes all created game sessions only.</li>
+                <li>Including their databases and raster filesets.</li>
+                <li>Irreversible! So you might want to save your sessions before doing this.</li>
+            </ul>
+            <div class="pull-right">
+                <button class="btn btn-sm btn-warning"
+                    data-action="modal-setting#doHardReset">
+                    <i class="fa fa-warning"></i> Execute hard reset
+                </button>
+            </div>
+            <h2>Hard reset</h2>
+            <ul>
+                <li>Completely removes all created game sessions with their databases and raster filesets.</li>
+                <li>Completely removes all game saves, added game configs, added GeoServers and added Watchdog servers.</li>
+                <li>Irreversible! So you might want to save and download everything before doing this.</li>
+            </ul>
+        </div>
+    </div>
+</turbo-frame>

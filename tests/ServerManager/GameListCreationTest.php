@@ -38,7 +38,7 @@ class GameListCreationTest extends KernelTestCase
                 $gameConfigVersion->setVisibility(new GameConfigVersionVisibilityValue('active'));
                 $gameConfigVersion->setUploadUser(1);
                 $gameConfigVersion->setUploadTime('temp');
-                $gameConfigVersion->setLastPlayedTime('test');
+                $gameConfigVersion->setLastPlayedTime(0);
                 $gameConfigVersion->setRegion('test');
                 $gameConfigVersion->setClientVersions('test');
                 $emServerManager->persist($gameConfigVersion);

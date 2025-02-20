@@ -9,10 +9,8 @@ class UnitTestSupport extends Base
     /**
      * @throws Exception
      */
-    public function __construct(string $method = '')
+    public function __construct()
     {
-        parent::__construct($method, []);
-
         Config::GetInstance()->GetUnitTestLoggerConfig();
         if (!self::ShouldLogApiCalls()) {
             throw new Exception("This should not be instantiated in non-development environments");

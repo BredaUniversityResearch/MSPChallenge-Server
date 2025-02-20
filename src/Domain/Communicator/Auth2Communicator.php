@@ -18,13 +18,34 @@ class Auth2Communicator extends AbstractCommunicator
         );
     }
 
-    public function getResource($endPoint): array
+    public function getResource(string $endPoint): array
     {
         $this->tokenCheck();
 
         return $this->call(
             'GET',
             $endPoint
+        );
+    }
+
+    public function delResource(string $endPoint): void
+    {
+        $this->tokenCheck();
+
+        $this->call(
+            'DELETE',
+            $endPoint
+        );
+    }
+
+    public function postResource(string $endPoint, array $data): array
+    {
+        $this->tokenCheck();
+
+        return $this->call(
+            'POST',
+            $endPoint,
+            $data
         );
     }
 
@@ -37,16 +58,5 @@ class Auth2Communicator extends AbstractCommunicator
                 ['username' => $this->username, 'password' => $this->password]
             )["token"] ?? '');
         }
-    }
-
-    public function postResource($endPoint, $data): array
-    {
-        $this->tokenCheck();
-
-        return $this->call(
-            'POST',
-            $endPoint,
-            $data
-        );
     }
 }

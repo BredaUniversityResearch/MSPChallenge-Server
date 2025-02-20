@@ -10,19 +10,22 @@ class GeoServer extends Base
     public string $username;
     public string $password;
 
-    public function __construct(string $baseurl = "", string $username = "", string $password = "")
+    public function setBaseurl(string $baseurl): self
     {
-        if (!empty($baseurl)) {
-            $this->baseurl = $baseurl;
-        }
-        if (!empty($username)) {
-            $this->username = $username;
-        }
-        if (!empty($password)) {
-            $this->password = $password;
-        }
+        $this->baseurl = $baseurl;
+        return $this;
+    }
 
-        parent::__construct();
+    public function setUsername(string $username): self
+    {
+        $this->username = $username;
+        return $this;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+        return $this;
     }
 
     //generic GET request

@@ -1,0 +1,14 @@
+<turbo-frame id="modalDefaultBody">
+    <div data-modal-gamesave-target="modalSaveUploadForm">
+        {{ form_start(gameSaveForm) }}
+        <div class="modal-body">
+            {{ form_errors(gameSaveForm.saveZip) }}
+            {{ form_widget(gameSaveForm.saveZip, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-gamesave#submitSaveUploadModalForm">Upload</button>
+        </div>
+        {{ form_end(gameSaveForm) }}
+    </div>
+</turbo-frame>

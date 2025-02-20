@@ -1,0 +1,53 @@
+<turbo-frame id="settingForm">
+    <div data-modal-gamewatchdogserver-target="modalGameWatchdogServerForm">
+        {{ form_start(gameWatchdogServerForm) }}
+        <div class="modal-body">
+            <h1>Add or edit Watchdog servers</h1>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.name, 'Watchdog server name', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.name) }}</div>
+                {{ form_widget(gameWatchdogServerForm.name, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.name) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.serverId, 'Watchdog server id', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.serverId) }}</div>
+                {{ form_widget(gameWatchdogServerForm.serverId, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.serverId) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.scheme, 'Scheme', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.scheme) }}</div>
+                {{ form_widget(gameWatchdogServerForm.scheme, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.scheme) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.address, '', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.address) }}</div>
+                {{ form_widget(gameWatchdogServerForm.address, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.address) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.port, '', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.port) }}</div>
+                {{ form_widget(gameWatchdogServerForm.port, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.port) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameWatchdogServerForm.simulationSettings, '', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameWatchdogServerForm.simulationSettings) }}</div>
+                {{ form_widget(gameWatchdogServerForm.simulationSettings, {
+                    'attr': {
+                        'class': 'form-control'
+                    }
+                }) }}
+                <div class="small text-muted">{{ form_help(gameWatchdogServerForm.simulationSettings) }}</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-gamewatchdogserver#submitGameWatchdogServerModalForm">Save</button>
+        </div>
+        {{ form_end(gameWatchdogServerForm) }}
+    </div>
+</turbo-frame>

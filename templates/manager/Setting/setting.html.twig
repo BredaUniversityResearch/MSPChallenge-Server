@@ -1,0 +1,64 @@
+<turbo-frame id="settingsTable">
+    <table class="table table-hover table-striped">
+        <thead>
+        <tr>
+            <th>Setting</th>
+            <th>Description</th>
+            <th class="text-center" style="width: 125px;">More details</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Server description</td>
+                <td>{{ setting.value|slice(0, 90) }}...
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm"
+                        data-setting="{{ setting.id }}"
+                        data-action="modal-setting#openSettingDescriptionModal">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>GeoServers</td>
+                <td>Currently {{ gameGeoServers[0] }} defined, of which {{ gameGeoServers[1] }} available for use.
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm"
+                        data-action="modal-gamegeoserver#openGameGeoServerModal">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>Watchdog servers</td>
+                <td>Currently {{ gameWatchdogServers[0] }} defined, of which {{ gameWatchdogServers[1] }} available for use.
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm"
+                        data-action="modal-gamewatchdogserver#openGameWatchdogServerModal">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>User access</td>
+                <td>Note that only this server's administrator(s) can change this.
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm"
+                        data-action="modal-setting#openSettingUsersModal">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td>Wipe the slate clean</td>
+                <td>Execute a soft or hard reset of this MSP Challenge server.
+                <td class="text-center" style="width: 125px;">
+                    <button class="btn btn-secondary btn-sm"
+                        data-action="modal-setting#openSettingResetModal">
+                        <i class="fa fa-info-circle" title= "More details"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</turbo-frame>

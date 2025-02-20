@@ -87,7 +87,7 @@ abstract class MSPMigration extends AbstractMigration
         });
     }
 
-    private function migrate(Schema $schema, Closure $migrationFunction)
+    private function migrate(Schema $schema, Closure $migrationFunction): void
     {
         $this->validateSchema($schema);
 
@@ -110,7 +110,7 @@ abstract class MSPMigration extends AbstractMigration
     /**
      * @throws IntlException
      */
-    private function writeDifferences(int $numTablesDiff, int $numColumnsDiff, int $numIndexesDiff)
+    private function writeDifferences(int $numTablesDiff, int $numColumnsDiff, int $numIndexesDiff): void
     {
         // see https://www.php.net/manual/en/messageformatter.formatmessage.php#112661
         if ($numTablesDiff != 0) {

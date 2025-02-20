@@ -2,11 +2,15 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\EventLogSeverity;
+use App\Entity\EventLog;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use DateTime;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function App\await;
+use function React\Promise\resolve;
 
 class Log extends Base
 {
@@ -14,19 +18,12 @@ class Log extends Base
     const ERROR = "Error";
     const FATAL = "Fatal";
 
-    private const ALLOWED = array("Event");
-
     public const LOG_ERROR = (1 << 0);
     public const LOG_WARNING = (1 << 1);
     public const LOG_INFO = (1 << 2);
     public const LOG_DEBUG = (1 << 3);
 
     private static int $logFilter = ~0;
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
 
     /**
      * called from SEL
@@ -42,32 +39,48 @@ class Log extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Event(string $source, string $severity, string $message, string $stack_trace = ""): void
     {
-        $this->postEvent($source, $severity, $message, $stack_trace);
+        $eventLog = new EventLog();
+        $eventLog->setSource($source);
+        $eventLog->setSeverity(EventLogSeverity::from($severity));
+        $eventLog->setMessage($message);
+        $eventLog->setStackTrace($stack_trace);
+        $this->postEvent($eventLog);
     }
 
     /**
      * @throws Exception
      */
-    public function postEvent(string $source, string $severity, string $message, string $stackTrace): ?PromiseInterface
+    public function postEvent(EventLog $eventLog): ?PromiseInterface
     {
+        if (null === $message = $eventLog->getMessage()) {
+            resolve(); // do not do anything.
+        }
+        $eventLog->setTime(new DateTime());
+        $data = [
+            'event_log_time' => $eventLog->getTime()->format('Y-m-d H:i:s'),
+            'event_log_source' => $eventLog->getSource() ?? 'source not set',
+            'event_log_severity' => $eventLog->getSeverity(),
+            'event_log_message' => $eventLog->getMessage()
+        ];
+        if ($eventLog->getStackTrace() !== null) {
+            $data['event_log_stack_trace'] = $eventLog->getStackTrace();
+        }
+        if ($eventLog->getReferenceObject() !== null) {
+            $data['event_log_reference_object'] = $eventLog->getReferenceObject();
+        }
+        if ($eventLog->getReferenceId() !== null) {
+            $data['event_log_reference_id'] = $eventLog->getReferenceId();
+        }
         $deferred = new Deferred();
-        $this->getAsyncDatabase()->insert(
-            'event_log',
-            [
-                'event_log_source' => $source,
-                'event_log_severity' => $severity,
-                'event_log_message' => $message,
-                'event_log_stack_trace' => $stackTrace
-            ]
-        )
-        ->done(
-            function () use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
-            },
-            function ($reason) use ($deferred) {
-                $deferred->reject($reason);
-            }
-        );
+        $this->getAsyncDatabase()->insert('event_log', $data)
+            ->done(
+                function () use ($deferred) {
+                    $deferred->resolve(); // we do not care about the result
+                },
+                function ($reason) use ($deferred) {
+                    $deferred->reject($reason);
+                }
+            );
         $promise = $deferred->promise();
         return $this->isAsync() ? $promise : await($promise);
     }
@@ -77,8 +90,13 @@ class Log extends Base
      */
     public function serverEvent(string $source, string $severity, string $message): void
     {
+        $eventLog = new EventLog();
+        $eventLog->setSource($source);
+        $eventLog->setSeverity(EventLogSeverity::from($severity));
+        $eventLog->setMessage($message);
         $e = new Exception();
-        $this->postEvent($source, $severity, $message, $e->getTraceAsString());
+        $eventLog->setStackTrace($e->getTraceAsString());
+        $this->postEvent($eventLog);
     }
 
     /**
@@ -102,9 +120,15 @@ class Log extends Base
     public static function SetupFileLogger(string $logPath): void
     {
         file_put_contents($logPath, "");
-        ob_start(function (string $message, int $phase) {
-            return self::RecreateLoggingHandler($message, $phase);
-        }, 16);
+        ob_start(
+            /**
+             * @throws Exception
+             */
+            function (string $message, int $phase) {
+                return self::recreateLoggingHandler($message, $phase);
+            },
+            16
+        );
         ob_implicit_flush(true);
     }
 
@@ -161,8 +185,10 @@ class Log extends Base
         print($dateNow . " [ ". $logCategory . ' ] - ' . $message);
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private static function RecreateLoggingHandler(string $message, int $phase): string
+    /**
+     * @throws Exception
+     */
+    private static function recreateLoggingHandler(string $message, int $phase): string
     {
         file_put_contents(self::getRecreateLogPath(), $message . PHP_EOL, FILE_APPEND);
         return ""; //Swallow all logging after this has been written to the log file.

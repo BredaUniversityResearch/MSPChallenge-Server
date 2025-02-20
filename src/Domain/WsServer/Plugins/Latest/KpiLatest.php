@@ -19,7 +19,7 @@ class KpiLatest extends CommonBase
         string $kpiType,
         bool $currentMonthOnly = true
     ): QueryBuilder {
-        assert(in_array($kpiType, ['ECOLOGY', 'SHIPPING'])); // so, not meant for energy
+        assert(in_array($kpiType, ['ECOLOGY', 'SHIPPING', 'EXTERNAL'])); // so, not meant for energy
 
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         // template query builder for both ecology and shipping
@@ -47,7 +47,6 @@ class KpiLatest extends CommonBase
                 'kpi_name as name',
                 'kpi_value as value',
                 'kpi_month as month',
-                'kpi_type as type',
                 'kpi_lastupdate as lastupdate',
                 'kpi_country_id as country',
             )
@@ -125,6 +124,7 @@ class KpiLatest extends CommonBase
         $toPromiseFunctions[] = $this->createPromiseFunctionKpi($time, $country, 'ECOLOGY');
         $toPromiseFunctions[] = $this->createPromiseFunctionKpi($time, $country, 'SHIPPING');
         $toPromiseFunctions[] = $this->createPromiseFunctionEnergyKpi($time);
+        $toPromiseFunctions[] = $this->createPromiseFunctionKpi($time, $country, 'EXTERNAL');
 
         $promise = parallel($toPromiseFunctions)
             /** @var Result[] $results */
@@ -133,6 +133,7 @@ class KpiLatest extends CommonBase
                 $data['ecology'] = $results[0]->fetchAllRows();
                 $data['shipping'] = $results[1]->fetchAllRows();
                 $data['energy'] = $results[2]->fetchAllRows();
+                $data['external'] = $results[3]->fetchAllRows();
                 return $data;
             });
 

@@ -13,16 +13,6 @@ use function App\await;
 
 class Warning extends Base
 {
-    private const ALLOWED = array(
-        "Post",
-        "SetShippingIssues"
-    );
-    
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     private function postHandleRemovals(array $removed): PromiseInterface
     {
         $removed = array_map(fn($x) => (string)$x, filter_var_array($removed, FILTER_VALIDATE_INT));

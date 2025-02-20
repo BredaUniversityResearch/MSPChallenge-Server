@@ -30,6 +30,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\JsonSchema;
 use Swaggest\JsonSchema\Schema;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,6 +39,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(
+    name: 'app:create-policy-plan',
+    description: 'Creates a new policy plan.'
+)]
 class CreatePolicyPlanCommand extends Command
 {
     const TEST_DATA_PREFIX = 'policy-plan-test';
@@ -88,7 +93,7 @@ class CreatePolicyPlanCommand extends Command
             $io->error('Game start year not set');
             return Command::FAILURE;
         }
-        $gameCurrentMonth = $game->getGameCurrentmonth();
+        $gameCurrentMonth = $game->getGameCurrentMonth();
         // show info to the user
         $io->note(
             'Press CTRL+C (+enter) to exit at any time'.PHP_EOL.

@@ -23,15 +23,6 @@ class Batch extends Base
 
     private array $cachedBatchResults = [];
 
-    private const ALLOWED = array(
-        "ExecuteBatch"
-    );
-    
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * @throws Exception
      */
@@ -105,6 +96,11 @@ class Batch extends Base
 
     /**
      * @apiGroup Batch
+     * @param int $country_id
+     * @param int $user_id
+     * @param string $batch_guid
+     * @param string $requests
+     * @return string
      * @throws Exception
      * @api {POST} /batch/executebatch ExecuteBatch
      * @apiDescription execute batch
@@ -120,8 +116,6 @@ class Batch extends Base
      *   (if non-empty) and payload which is the result of the call.
      * When failed this object contains failed_task_id which references the execution_task_id returned in the
      *   AddToBatch.
-     * @noinspection PhpUnused
-     * @return string
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function ExecuteBatch(

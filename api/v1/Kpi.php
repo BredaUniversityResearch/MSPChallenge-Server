@@ -3,19 +3,10 @@
 namespace App\Domain\API\v1;
 
 use Exception;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Kpi extends Base
 {
-    private const ALLOWED = array(
-        "Post",
-        "BatchPost",
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * called from MEL
      * @apiGroup KPI
@@ -73,6 +64,10 @@ class Kpi extends Base
         string $kpiUnit,
         int $kpiCountry = -1
     ): int {
+        if (!in_array($kpiType, array('ECOLOGY', 'ENERGY', 'SHIPPING', 'EXTERNAL'))) {
+            throw new BadRequestHttpException('Invalid KPI type: '.$kpiType.
+                '. Allowed values are ECOLOGY, ENERGY, SHIPPING.');
+        }
         return (int)$this->getDatabase()->query(
             "
             INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 

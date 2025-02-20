@@ -2,35 +2,21 @@
 
 namespace App\Domain\API\v1;
 
-use Drift\DBAL\Result;
+use App\Domain\Services\ConnectionManager;
 use Exception;
-use React\Promise\PromiseInterface;
-use function App\parallel;
-use function App\tpf;
 
 class Layer extends Base
 {
-    public GeoServer $geoserver;
+    private GeoServer $geoServer;
 
-    private const ALLOWED = array(
-        "Delete",
-        "Export",
-        "Get",
-        "GetRaster",
-        "GetRasterAtMonth",
-        "ImportMeta",
-        "List",
-        "Meta",
-        ["MetaByName", Security::ACCESS_LEVEL_FLAG_NONE],
-        "Post",
-        "UpdateMeta",
-        "UpdateRaster"
-    );
-
-    public function __construct(string $method = '')
+    public function __construct()
     {
-        parent::__construct($method, self::ALLOWED);
-        $this->geoserver = new GeoServer();
+        $this->geoServer = new GeoServer();
+    }
+
+    public function getGeoServer(): GeoServer
+    {
+        return $this->geoServer;
     }
 
     /**
@@ -73,7 +59,8 @@ class Layer extends Base
             LEFT JOIN plan ON plan_layer_plan_id=plan.plan_id
             WHERE geometry.geometry_active=? AND (
                 layer_id=? OR layer_original_id=?
-            ) AND geometry_subtractive=? AND (plan_state=? OR plan_state=? OR plan_state IS NULL)
+            ) AND (geometry_subtractive=? OR geometry_subtractive IS NULL)
+              AND (plan_state=? OR plan_state=? OR plan_state IS NULL)
             ",
             array(1, $layer_id, $layer_id, 0, "APPROVED", "IMPLEMENTED")
         ); // getting all active geometry, except those within plans that are not APPROVED or not IMPLEMENTED
@@ -296,8 +283,12 @@ class Layer extends Base
         $metaData = $data['meta'];
         $region = $data['region'];
 
-        $geoserver = new GeoServer($geoserver_url, $geoserver_username, $geoserver_password);
-        $allLayers = $geoserver->GetAllRemoteLayers($region);
+        $geoServer = new GeoServer();
+        $geoServer
+            ->setBaseurl($geoserver_url)
+            ->setUsername($geoserver_username)
+            ->setPassword($geoserver_password);
+        $allLayers = $geoServer->GetAllRemoteLayers($region);
 
         foreach ($metaData as $layerMetaData) {
             $dbLayerId = $this->VerifyLayerExists($layerMetaData["layer_name"], $allLayers);
@@ -374,6 +365,9 @@ class Layer extends Base
     private function metaValueValidation(string $key, $val)
     {
         // all key-based validation first
+        if ($key == 'layer_type') {
+            return json_encode($val, JSON_FORCE_OBJECT);
+        }
         $convertZeroToNull = [
             'layer_entity_value_max' // float - used to convert 0.0 to null
         ];
@@ -483,19 +477,25 @@ class Layer extends Base
      * @throws Exception
      * @api {POST} /layer/List
      * @apiDescription List Provides a list of raster layers and vector layers that have active geometry.
+     * @apiParam {array} layer_tags Optional array of tags to filter the layers by.
      * @apiSuccess Returns an array of layers, with layer_id, layer_name and layer_geotype objects defined per layer.
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function List(): array
+    public function List(?array $layer_tags = null): array
     {
-        return $this->getDatabase()->query("SELECT 
-									layer.layer_id,
-									layer.layer_name,
-									layer.layer_geotype
-								FROM layer 
-								LEFT JOIN geometry ON layer.layer_id = geometry.geometry_layer_id
-								WHERE layer.layer_name <> ''
-								GROUP BY layer.layer_name");
+        $db = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $qb = $db->createQueryBuilder()
+            ->select('l.layer_id', 'l.layer_name', 'l.layer_geotype')
+            ->from('layer', 'l')
+            ->leftJoin('l', 'geometry', 'g', 'l.layer_id = g.geometry_layer_id')
+            ->where('l.layer_name <> ""')
+            ->andWhere('g.geometry_active = 1')
+            ->groupBy('l.layer_name');
+        if (!empty($layer_tags)) {
+            $qb->andWhere('JSON_CONTAINS(l.layer_tags, :layer_tags)')
+                ->setParameter('layer_tags', json_encode($layer_tags));
+        }
+        return $db->executeQuery($qb->getSQL(), $qb->getParameters())->fetchAllAssociative();
     }
 
     /**
@@ -524,11 +524,10 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function MetaByName(string $name): array
     {
-        $result = array(); //"[]";
+        $result = [];
         $layerID = $this->getDatabase()->query("SELECT layer_id FROM layer where layer_name=?", array($name));
         if (count($layerID) > 0) {
-            //self::JSON($this->GetMetaForLayerById($layerID[0]["layer_id"])[0]);
-            $result = $this->GetMetaForLayerById($layerID[0]["layer_id"])[0];
+            $result = $this->GetMetaForLayerById($layerID[0]["layer_id"]);
         } else {
             self::Debug("Could not find layer with name ".$name);
         }
@@ -675,7 +674,7 @@ class Layer extends Base
         string $workspace,
         string $layer
     ): array {
-        $response = $this->geoserver->ows(
+        $response = $this->geoServer->ows(
             $workspace
             . "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers="
             . urlencode($workspace)
@@ -743,7 +742,7 @@ class Layer extends Base
         } else {
             throw new Exception("Incorrect format, use GML, CSV, JSON or PNG");
         }
-        return $this->geoserver->ows($url);
+        return $this->geoServer->ows($url);
     }
 
     /**
@@ -779,8 +778,11 @@ class Layer extends Base
     private function GetMetaForLayerById(int $layerId): array
     {
         $data = $this->getDatabase()->query("SELECT * FROM layer WHERE layer_id=?", array($layerId));
+        if (empty($data)) {
+            return [];
+        }
         Layer::FixupLayerMetaData($data[0]);
-        return $data;
+        return $data[0];
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

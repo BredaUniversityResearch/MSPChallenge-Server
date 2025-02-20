@@ -10,6 +10,7 @@ use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Repository\ServerManager\GameSaveRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use function App\isBase64Encoded;
 
 #[ORM\Table(name: 'game_saves')]
 #[ORM\Entity(repositoryClass: GameSaveRepository::class)]
@@ -99,6 +100,14 @@ class GameSave
     #[ORM\Column(length: 45)]
     private ?string $serverVersion = null;
 
+    /**
+     * @param int|null $id
+     */
+    public function __construct(?int $id = null)
+    {
+        $this->id = $id;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -133,7 +142,7 @@ class GameSave
         return $this->gameConfigFilesFilename;
     }
 
-    public function setGameConfigFilesFilename(string $gameConfigFilesFilename): self
+    public function setGameConfigFilesFilename(?string $gameConfigFilesFilename): self
     {
         $this->gameConfigFilesFilename = $gameConfigFilesFilename;
 
@@ -145,7 +154,7 @@ class GameSave
         return $this->gameConfigVersionsRegion;
     }
 
-    public function setGameConfigVersionsRegion(string $gameConfigVersionsRegion): self
+    public function setGameConfigVersionsRegion(?string $gameConfigVersionsRegion): self
     {
         $this->gameConfigVersionsRegion = $gameConfigVersionsRegion;
 
@@ -217,6 +226,18 @@ class GameSave
         return $this->gameCurrentMonth;
     }
 
+    public function getGameCurrentMonthPretty(): string
+    {
+        return $this->makeDatePretty($this->gameCurrentMonth);
+    }
+
+    private function makeDatePretty(int $month): string
+    {
+        return \DateTimeImmutable::createFromFormat('m Y', '1 '.$this->gameStartYear)
+            ->add(\DateInterval::createFromDateString($month.' month'))
+            ->format('M Y');
+    }
+
     public function setGameCurrentMonth(int $gameCurrentMonth): self
     {
         $this->gameCurrentMonth = $gameCurrentMonth;
@@ -257,6 +278,30 @@ class GameSave
     {
         $this->passwordPlayer = $passwordPlayer;
 
+        return $this;
+    }
+
+    public function encodePasswords(): self
+    {
+        if (!isBase64Encoded($this->passwordAdmin)) {
+            $this->passwordAdmin = base64_encode($this->passwordAdmin);
+        }
+        if (!isBase64Encoded($this->passwordPlayer)) {
+            $this->passwordPlayer = base64_encode($this->passwordPlayer);
+        }
+
+        return $this;
+    }
+    
+    public function decodePasswords(): self
+    {
+        if (isBase64Encoded($this->passwordAdmin)) {
+            $this->passwordAdmin = base64_decode($this->passwordAdmin);
+        }
+        if (isBase64Encoded($this->passwordPlayer)) {
+            $this->passwordPlayer = base64_decode($this->passwordPlayer);
+        }
+        
         return $this;
     }
 
@@ -400,6 +445,11 @@ class GameSave
         $this->saveVisibility = (string)$saveVisibility;
 
         return $this;
+    }
+
+    public function getSaveTimestampPretty(): ?string
+    {
+        return $this->getSaveTimestamp()?->format('j M Y G:i');
     }
 
     public function getSaveTimestamp(): ?\DateTimeInterface

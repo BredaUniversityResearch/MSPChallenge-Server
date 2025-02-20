@@ -242,10 +242,10 @@ require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/h
                             Simulation Servers
                         </div>
                         <div class="card-body">
-                            <p class="card-text">Any simulation servers additional to this one, if you would rather have the background simulations run on a different computer than this one.</p>
+                            <p class="card-text">Default simulation servers imported into game sessions on creation.</p>
                         </div>
                         <div class="card-footer">
-                            <button type="button" id="btnSimServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalNewSimServers">Change</button>
+                            <button type="button" id="btnSimServer" class="btn btn-primary  pull-left" data-toggle="modal" data-target="#modalSimServers">View</button>
                         </div>
                     </div>
                     <div class="card">
@@ -837,7 +837,7 @@ require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/h
         </div>
         
         <!-- Modal: New Simulation Servers -->
-        <div class="modal fade" id="modalNewSimServers" tabindex="-1" role="dialog" aria-labelledby="NewSimServersModalLabel">
+        <div class="modal fade" id="modalSimServers" tabindex="-1" role="dialog" aria-labelledby="NewSimServersModalLabel">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -858,24 +858,9 @@ require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/h
                             <tbody id="watchdogServerBody">
                             </tbody>
                         </table>
-                        <form class="form-horizontal" role="form" data-toggle="validator" id="formNewWatchdogServer" enctype="multipart/form-data">
-                            <input type="hidden" id="editWatchdogID">
-                            <h5 id="WatchdogFormTitle">Add additional simulation server</h5>
-                            <div class="row">
-                                <div class="col">
-                                    <label for="newWatchdogServerName">Simulation Server Name</label>
-                                    <input type="text" class="form-control" id="newWatchdogServerName" required="required" placeholder="required">
-                                </div>
-                                <div class="col">
-                                    <label for="newWatchdogServerAddress">IP Address</label>
-                                    <input type="text" class="form-control" id="newWatchdogServerAddress" required="required" placeholder="required">
-                                </div>
-                            </div>
-                        </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="WatchdogFormButton" onClick="submitNewWatchdogServer();">Add</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -1084,7 +1069,7 @@ require_once ServerManager::getInstance()->getServerManagerRoot() . 'templates/h
         });
 
         // when showing modalNewSimServer, update the list (browse)
-        $('#modalNewSimServers').on('show.bs.modal', function (event) {
+        $('#modalSimServers').on('show.bs.modal', function (event) {
             WatchdogServerList();
         });
 

@@ -1,0 +1,205 @@
+<turbo-frame id="modalDefaultBody">
+    <div class="modal-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-border-left">
+                <tr>
+                    <th scope="col">Name</th>
+                    <td class="text-right">
+                        {{ gameSession.name }}
+                        <button class="btn btn-secondary btn-sm"
+                            data-session="{{ gameSession.id }}"
+                            data-name="{{ gameSession.name }}"
+                            data-action="gamelist#sessionEditName">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                    </td>
+                    <th scope="col">Visibility</th>
+                    <td class="text-right">{{ gameSession.gameVisibility}}</td>
+                </tr>
+                <tr>
+                    <th scope="col">Simulation state</th>
+                    <td class="text-right">
+                    {% set gameState = gameSession.gameState %}
+                    {% if gameSession.sessionState == 'archived' %}
+                        {% set gameState = 'irrelevant' %}
+                    {% endif %}
+                        <span class="badge bg-primary">
+                        <i class="fa fa-info"></i>
+                        {{ gameState }}
+                        </span>
+                    </td>
+                    <th scope="col">Session state</th>
+                    <td class="text-right">
+                        <span class="badge bg-secondary">
+                    {% if gameSession.sessionState == 'healthy' %}
+                        <i class="fa fa-heartbeat"></i>
+                    {% else %}
+                        <i class="fa fa-clock-o"></i>
+                    {% endif %}
+                        {{ gameSession.sessionState }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="col">Current Month</th>
+                    <td class="text-right">{{ gameSession.gameCurrentMonthPretty }}</td>
+                    <th scope="col">Ending Month</th>
+                    <td class="text-right">{{ gameSession.gameEndMonthPretty }}</td>
+                </tr>
+                <tr>
+                    <th scope="col">Setup Time</th>
+                    <td class="text-right">{{ gameSession.gameCreationTimePretty }}</td>
+                    <th scope="col" >Time Until End</th>
+                    <td class="text-right">{{ gameSession.gameRunningTilTimePretty }}</td>
+                </tr>
+                <tr>
+                    <th scope="col">Config File</th>
+                    <td class="text-right">
+                    {% if gameSession.gameSave is not null %}
+                        {{ gameSession.gameSave.gameConfigFilesFilename }} (through a reloaded save)
+                    {% else %}
+                        {{ gameSession.gameConfigVersion.gameConfigFile.fileName }}
+                        version {{ gameSession.gameConfigVersion.version }}
+                    {% endif %}
+                    </td>
+                    <th scope="col">Simulation Server</th>
+                    <td class="text-right">
+                        {{ gameSession.gameWatchdogServer.name}} 
+                        ({{ gameSession.gameWatchdogServer.address }})
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="col">GeoServer</th>
+                    <td class="text-right">{{ gameSession.gameGeoServer.name }}</td>
+                    <th scop="col">Active Players</th>
+                    <td class="text-right">{{ gameSession.playersActive }}</td>
+                </tr>
+            </table>
+        </div>
+        {% if gameSession.sessionState != 'archived' %}
+        <div class="row py-1">
+            <div class="col">
+            {% if showGameButton('pause', gameSession) %}
+                <button class="btn btn-success btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-state="pause"
+                    data-action="gamelist#sessionState">
+                    <i class="fa fa-pause"></i> Pause
+                </button>
+            {% elseif showGameButton('play', gameSession) %}
+                <button class="btn btn-success btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-state="play"
+                    data-action="gamelist#sessionState">
+                    <i class="fa fa-play"></i> Play
+                </button>
+            {% else %}
+                <button class="btn btn-success btn-sm" disabled>
+                    <i class="fa fa-pause"></i> Pause
+                </button>
+            {% endif %}
+            {% if showGameButton('fastforward', gameSession) %}
+                <button class="btn btn-success btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-state="fastforward"
+                    data-action="gamelist#sessionState">
+                    <i class="fa fa-fast-forward"></i> Fast-forward
+                </button>
+            {% endif %}
+            {% if gameSession.demoSession == 1 %}
+                {% set demoText = 'Disable demo mode' %}
+            {% else %}
+                {% set demoText = 'Enable demo mode' %}
+            {% endif %}
+            {% if showGameButton('demo', gameSession) %}
+                <button class="btn btn-info btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-currentdemosetting="{{ gameSession.demoSession }}"
+                    data-action="gamelist#sessionDemo">
+                    <i class="fa fa-bookmark"></i> {{ demoText }}
+                </button>
+            {% else %}
+                <button class="btn btn-info btn-sm" disabled>
+                    <i class="fa fa-bookmark"></i> {{ demoText }}
+                </button>
+            {% endif %}
+            </div>
+            <div class="col">
+            {% if showGameButton('recreate', gameSession) %}
+                <button class="btn btn-warning btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-action="gamelist#sessionRecreate">
+                    <i class="fa fa-repeat"></i> Recreate Session
+                </button>
+            {% else %}
+                <button class="btn btn-warning btn-sm" disabled>
+                    <i class="fa fa-repeat"></i> Recreate Session
+                </button>
+            {% endif %}
+            {% if showGameButton('archive', gameSession) %}
+                <button class="btn btn-warning btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-action="gamelist#sessionArchive">
+                    <i class="fa fa-archive"></i> Archive Session
+                </button>
+            {% else %}
+                <button class="btn btn-warning btn-sm" disabled>
+                    <i class="fa fa-archive"></i> Archive Session
+                </button>
+            {% endif %}
+            </div>                
+        </div>
+        <div class="row py-1">
+            <div class="col">
+            {% if showGameButton('save', gameSession) %}
+                <button class="btn btn-secondary btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-type="full"
+                    data-action="gamelist#sessionSave">
+                    <i class="fa fa-save"></i> Save Session as File
+                </button>
+                <button class="btn btn-secondary btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-type="layers"
+                    data-action="gamelist#sessionSave">
+                    <i class="fa fa-save"></i> Save All Layers
+                </button>
+            {% else %}
+                <button class="btn btn-secondary btn-sm" disabled>
+                    <i class="fa fa-save"></i> Save Session as File
+                </button>
+                <button class="btn btn-secondary btn-sm" disabled>
+                    <i class="fa fa-save"></i> Save All Layers
+                </button>
+            {% endif %}
+            </div>
+            <div class="col">
+            {% if showGameButton('access', gameSession) %}
+                <button class="btn btn-secondary btn-sm"
+                    data-session="{{ gameSession.id }}" 
+                    data-action="modal-game#openSessionAccessModal">
+                    <i class="fa fa-user"></i> Set User Access
+                </button>
+            {% endif %}
+            {% if showGameButton('export', gameSession) %}
+                <button class="btn btn-secondary btn-sm"
+                    data-session="{{ gameSession.id }}"
+                    data-action="gamelist#sessionExport">
+                    <i class="fa fa-file-code-o"></i> Export with Current Plans
+                </button>
+            {% else %}
+                <button class="btn btn-secondary btn-sm" disabled>
+                    <i class="fa fa-file-code-o"></i> Export with Current Plans
+                </button>
+            {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        <button class="my-1 btn btn-secondary btn-sm" data-action="gamelist#toggleSessionInfoLog">
+            <i class="fa fa-bars" aria-hidden="true"></i> Show/Hide Session Creation Log
+        </button>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Close</button>
+    </div>
+</turbo-frame>

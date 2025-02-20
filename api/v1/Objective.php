@@ -3,23 +3,9 @@
 namespace App\Domain\API\v1;
 
 use Exception;
-use React\Promise\PromiseInterface;
 
 class Objective extends Base
 {
-    private const ALLOWED = array(
-        "Post",
-        "Delete",
-        "SetCompleted",
-        "Export",
-        "Import"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * @apiGroup Objective
      * @throws Exception

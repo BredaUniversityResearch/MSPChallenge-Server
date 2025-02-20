@@ -12,24 +12,17 @@ use function App\await;
 
 class Geometry extends Base
 {
-    private const ALLOWED = array(
-        "Post",
-        "PostSubtractive",
-        "Update",
-        "Data",
-        "Delete",
-        "MarkForDelete",
-        "UnmarkForDelete"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * @apiGroup Geometry
-     * @throws Exception
+     * @param int $layer
+     * @param string $geometry
+     * @param string $FID
+     * @param int|null $persistent
+     * @param string $data
+     * @param int|null $country
+     * @param int $plan
+     * @return int|PromiseInterface
+     * @throws \Doctrine\DBAL\Exception
      * @api {post} /geometry/post Post
      * @apiDescription Create a new geometry entry in a plan
      * @apiParam {int} layer id of layer to post in
@@ -40,7 +33,6 @@ class Geometry extends Base
      * @apiParam {string} data (optional) meta data string of geometry object
      * @apiParam {int} country (optional) The owning country id. NULL or -1 if no country is set.
      * @apiSuccess {int} id of the newly created geometry
-     * @return int|PromiseInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function Post(

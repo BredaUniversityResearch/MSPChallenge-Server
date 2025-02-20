@@ -4,23 +4,23 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
-use Generator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use stdClass;
-use Symfony\Component\Filesystem\Filesystem;
 use ZipArchive;
 use function App\rcopy;
 use function App\rrmdir;
 
 class Store extends Base
 {
-    public GeoServer $geoserver;
+    private GeoServer $geoServer;
 
-    public function __construct(string $method = '')
+    public function __construct()
     {
-        parent::__construct($method, []);
-        $this->geoserver = new GeoServer();
+        $this->geoServer = new GeoServer();
+    }
+
+    public function getGeoServer(): GeoServer
+    {
+        return $this->geoServer;
     }
 
     /**
@@ -37,7 +37,7 @@ class Store extends Base
         if ($name == "raster") {
             return null;
         }
-        $result = $this->geoserver->request('workspaces/' . $workspace . '/datastores', 'POST', '<dataStore>
+        $result = $this->geoServer->request('workspaces/' . $workspace . '/datastores', 'POST', '<dataStore>
             <name>' . $name . '</name>
             <type>' . $type . '</type>
             <enabled>true</enabled>
@@ -57,6 +57,9 @@ class Store extends Base
         return $result;
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function ClearRasterStoreFolder(int $gameSessionId): void
     {
@@ -94,24 +97,9 @@ class Store extends Base
         return $storeFolder;
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetRasterStoreFolderContents(int $gameSessionId): Generator
-    {
-        // this is a generator function - notice the use of yield to save up on memory use
-        try {
-            $dirIterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator(self::GetRasterStoreFolder($gameSessionId))
-            );
-        } catch (Exception $e) {
-            $dirIterator = array();
-        }
-        foreach ($dirIterator as $file) {
-            if ($file->getFilename() != "." && $file->getFilename() != "..") {
-                yield $file->getPathName();
-            }
-        }
-    }
-
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public static function GetRasterArchiveFolder(int $gameSessionId): string
     {
@@ -135,9 +123,10 @@ class Store extends Base
     {
         //download the geometry (or raster) data from GeoServer & create layers in the database based on the config file
         $layer = new Layer();
-        $layer->geoserver->baseurl = $this->geoserver->baseurl;
-        $layer->geoserver->username = $this->geoserver->username;
-        $layer->geoserver->password = $this->geoserver->password;
+        $layer->getGeoServer()
+            ->setBaseurl($this->geoServer->baseurl)
+            ->setUsername($this->geoServer->username)
+            ->setPassword($this->geoServer->password);
 
         $this->getDatabase()->DBStartTransaction();
 
@@ -234,7 +223,7 @@ class Store extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function CreateRasterMeta(string $workspace, string $layername): array
     {
-        $metaCheckType = $this->geoserver->request("workspaces/" . $workspace . "/layers/" . $layername);
+        $metaCheckType = $this->geoServer->request("workspaces/" . $workspace . "/layers/" . $layername);
         try {
             $returnMetaCheckType = json_decode($metaCheckType);
             if (!isset($returnMetaCheckType->layer->type)) {
@@ -252,7 +241,7 @@ class Store extends Base
         }
 
         if ($type == "RASTER") {
-            $meta = $this->geoserver->request("workspaces/" . $workspace . "/coverages/" . $layername . ".json");
+            $meta = $this->geoServer->request("workspaces/" . $workspace . "/coverages/" . $layername . ".json");
             try {
                 $data = json_decode($meta);
                 if (!isset($data->coverage)) {
@@ -269,7 +258,7 @@ class Store extends Base
                 );
             }
         } elseif ($type == "WMS") {
-            $meta = $this->geoserver->request("workspaces/" . $workspace . "/wmslayers/" . $layername);
+            $meta = $this->geoServer->request("workspaces/" . $workspace . "/wmslayers/" . $layername);
 
             try {
                 $data = json_decode($meta);

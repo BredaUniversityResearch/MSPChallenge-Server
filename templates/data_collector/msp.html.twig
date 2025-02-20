@@ -15,12 +15,8 @@
         <div class="sf-toolbar-info-piece">
             <b><label for="session_id">Session ID:</label> <input id="session_id" type="number" value="1" style="width: 60px" /></b>
             <button id="simulations_start" type="button" onClick="(function(){
-     $.ajax(
-        '/' + document.getElementById('session_id').value + '/_profiler/msp_start_simulations',
-        function(result){
-           console.log(result);
-        }
-     );
+     fetch('/' + document.getElementById('session_id').value + '/_profiler/msp_start_simulations')
+        .then(result => console.log(result));
      return false;
 })();return false;">Start simulations</button>
         </div>

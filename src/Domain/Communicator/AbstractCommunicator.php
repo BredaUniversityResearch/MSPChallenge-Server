@@ -32,8 +32,13 @@ abstract class AbstractCommunicator
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      */
-    protected function call($method, $endPoint, $data = [], $headers = [], $asArray = true): string|array
-    {
+    protected function call(
+        string $method,
+        string $endPoint,
+        array $data = [],
+        array $headers = [],
+        bool $asArray = true
+    ): string|array|null {
         if (!empty($this->getToken())) {
             $options['auth_bearer'] = $this->getToken();
         } elseif (!empty($this->getUsername() && !empty($this->getPassword()))) {
@@ -49,6 +54,9 @@ abstract class AbstractCommunicator
             $this->lastCompleteURLCalled,
             $options
         );
+        if ($method == 'DELETE') {
+            return null;
+        }
         if ($asArray) {
             return $response->toArray();
         }

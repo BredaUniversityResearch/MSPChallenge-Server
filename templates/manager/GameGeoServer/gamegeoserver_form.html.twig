@@ -1,0 +1,37 @@
+<turbo-frame id="settingForm">
+    <div data-modal-gamegeoserver-target="modalGameGeoServerForm">
+        {{ form_start(gameGeoServerForm) }}
+        <div class="modal-body">
+            <h1>Add or edit GeoServers</h1>
+            <div class="form-group">
+                {{ form_label(gameGeoServerForm.name, 'GeoServer name', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameGeoServerForm.name) }}</div>
+                {{ form_widget(gameGeoServerForm.name, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameGeoServerForm.name) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameGeoServerForm.address, 'Fully-qualified base URL', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameGeoServerForm.address) }}</div>
+                {{ form_widget(gameGeoServerForm.address, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameGeoServerForm.address) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameGeoServerForm.username, 'Username', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameGeoServerForm.username) }}</div>
+                {{ form_widget(gameGeoServerForm.username, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameGeoServerForm.username) }}</div>
+            </div>
+            <div class="form-group">
+                {{ form_label(gameGeoServerForm.password, 'Password', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="text-danger">{{ form_errors(gameGeoServerForm.password) }}</div>
+                {{ form_widget(gameGeoServerForm.password, {'attr': {'class': 'form-control'}}) }}
+                <div class="small text-muted">{{ form_help(gameGeoServerForm.password) }}</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-gamegeoserver#submitGameGeoServerModalForm">Save</button>
+        </div>
+        {{ form_end(gameGeoServerForm) }}
+    </div>
+</turbo-frame>
