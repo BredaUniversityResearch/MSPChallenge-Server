@@ -1,17 +1,35 @@
 services:
   node:
-    image: "node:22.6"
+    build:
+      context: .
+      target: node_base
     user: "node"
     working_dir: /home/node/app
     environment:
       NODE_ENV: ${APP_ENV:-dev}
     volumes:
-      - ./:/home/node/app
-    expose:
-      - "8081"
-    ports: # use if it is necessary to expose the container to the host machine
-      - "8008:8008"
-    command: bash -c "yarn install && yarn encore ${APP_ENV:-dev}"
+      - ./:/home/node/app:ro
+      - ./yarn.lock:/home/node/app/yarn.lock:rw
+      - ./package.json:/home/node/app/package.json:rw
+      - vendor_data:/home/node/app/vendor:ro
+      - node_modules_data:/home/node/app/node_modules:rw
+      - public_build_data:/home/node/app/public/build:rw
+    # wait for x sec before starting, see deploy.restart_policy.delay
+    command: bash -c "sleep 5 && yarn install && yarn encore ${APP_ENV:-dev}"
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        # we cannot use delay: x because it is only supported in swarm mode
+        #   see: https://github.com/docker/docs/issues/11777
+        # delay: 5s
+        max_attempts: 10
+    networks:
+      - php
+    depends_on:
+      - php
+    logging:
+        driver: "local"
 
   redis:
     build:
@@ -65,6 +83,11 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - ./var/docker/.bash_history:/root/.bash_history
+      - vendor_data:/app/vendor:rw
+      - node_modules_data:/app/node_modules:ro
+      - public_build_data:/app/public/build:ro
+      - /app/var/cache
+      - /app/var/log
     networks:
       - database
       - php
@@ -168,6 +191,9 @@ services:
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 
 volumes:
+  vendor_data:
+  node_modules_data:
+  public_build_data:
   caddy_data:
   caddy_config:
   mariadb_data:

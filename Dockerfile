@@ -139,10 +139,15 @@ RUN set -eux; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
 
+FROM node:22.6 as node_base
+
+RUN mkdir -p /home/node/app/node_modules /home/node/app/public/build \
+    && chown -R node:node /home/node/app/node_modules \
+    && chown -R node:node /home/node/app/public/build
+
 FROM mariadb:10.11.10 AS mariadb_base
 FROM blackfire/blackfire:2 AS blackfire_base
 FROM shyim/adminerevo AS adminer_base
 FROM mitmproxy/mitmproxy:10.3.1 as mitmproxy_base
 FROM redis:7.2.4-alpine AS redis_base
 FROM erikdubbelboer/phpredisadmin as phpredisadmin_base
-FROM node:22.6
