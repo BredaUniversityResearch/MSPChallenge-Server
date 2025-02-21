@@ -13,6 +13,7 @@ services:
       - ./ServerManager/session_archive/:/app/ServerManager/session_archive
       - ./ServerManager/saves/:/app/ServerManager/saves
       - ./ServerManager/log/:/app/ServerManager/log
+      - ./public/downloads/:/app/public/downloads
     environment:
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
