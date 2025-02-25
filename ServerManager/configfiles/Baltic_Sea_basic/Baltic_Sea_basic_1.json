@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "2/24/2025",
-    "data_model_hash": "1314785B40038907E99070FA41A624371788997C02964873C290C05364FE960D",
+    "date_modified": "2/25/2025",
+    "data_model_hash": "86681FF75D3F6FCDC0A5F489FF14CBE7816223D5222859CA2C2FCCC0BA41F1F4",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -21049,27 +21049,27 @@
       ],
       "outcomes": [
         {
-          "name": "Benthos Biomass",
+          "name": "Benthos",
           "subcategory": "Biomass"
         },
         {
-          "name": "Cod Biomass",
+          "name": "Cod",
           "subcategory": "Biomass"
         },
         {
-          "name": "Herring Biomass - Baltic Proper",
+          "name": "Herring - Baltic Proper",
           "subcategory": "Biomass"
         },
         {
-          "name": "Herring Biomass - Bothnian Sea",
+          "name": "Herring - Bothnian Sea",
           "subcategory": "Biomass"
         },
         {
-          "name": "Seals Biomass",
+          "name": "Seals",
           "subcategory": "Biomass"
         },
         {
-          "name": "Sprat Biomass",
+          "name": "Sprat",
           "subcategory": "Biomass"
         },
         {
@@ -21089,11 +21089,11 @@
           "subcategory": "Species Catch"
         },
         {
-          "name": "Herring Catch - Baltic Proper",
+          "name": "Herring - Baltic Proper Catch",
           "subcategory": "Species Catch"
         },
         {
-          "name": "Herring Catch - Bothnian Sea",
+          "name": "Herring - Baltic Proper Catch",
           "subcategory": "Species Catch"
         },
         {
@@ -21108,37 +21108,37 @@
           "unit": "t/km2",
           "valueDefinitions": [
             {
-              "valueName": "Benthos Biomass",
+              "valueName": "Benthos",
               "valueColor": "#3F2FDFFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Seals Biomass",
+              "valueName": "Seals",
               "valueColor": "#90CAF9FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Cod Biomass",
+              "valueName": "Cod",
               "valueColor": "#64B5F6FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Herring Biomass - Baltic Proper",
+              "valueName": "Herring - Baltic Proper",
               "valueColor": "#2196F3FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Herring Biomass - Bothnian Sea",
+              "valueName": "Herring - Bothnian Sea",
               "valueColor": "#2196F3FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Sprat Biomass",
+              "valueName": "Sprat",
               "valueColor": "#1E88E5FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -21171,61 +21171,6 @@
           ]
         },
         {
-          "categoryName": "Protected Areas",
-          "categoryColor": "#FFFFFFFF",
-          "unit": "km2",
-          "valueDefinitions": [
-            {
-              "valueName": "No protection",
-              "valueColor": "#FF7272FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No protection against fisheries",
-              "valueColor": "#73FFBCFF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No Active Demersal Fleets",
-              "valueColor": "#FFC773FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No Passive Demersal Fleets",
-              "valueColor": "#CEFF73FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No Pelagic Fleets",
-              "valueColor": "#CEFF73FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Birds directive",
-              "valueColor": "#CEFF73FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Habitats Directive",
-              "valueColor": "#CEFF73FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Habitat and Birds Directive",
-              "valueColor": "#CEFF73FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            }
-          ]
-        },
-        {
           "categoryName": "Species Catch",
           "categoryColor": "#FDAE61FF",
           "unit": "t/km2",
@@ -21237,13 +21182,13 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Herring Catch - Baltic Proper",
+              "valueName": "Herring - Baltic Proper Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Herring Catch - Bothnian Sea",
+              "valueName": "Herring - Bothnian Sea Catch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -33337,15 +33282,15 @@
         "layer_editing_type": "protection",
         "layer_special_entity_type": "Default",
         "layer_depth": 2,
-        "layer_property_as_type": null,
+        "layer_property_as_type": "",
         "layer_type": {
           "0": {
             "displayName": "default",
-            "approval": "NotDependent",
+            "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#00590DFF",
+            "polygonColor": "#004C12FF",
             "polygonPatternName": "25",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -33357,9 +33302,9 @@
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.4,
+            "displayPoints": 1,
+            "pointColor": "#004C12FF",
+            "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
@@ -35822,7 +35767,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Cod_Biomass",
+        "layer_name": "mel_Cod",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Cod (Simulated)",
@@ -36010,7 +35955,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Seals_Biomass",
+        "layer_name": "mel_Seals",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Seals (Simulated)",
@@ -36198,7 +36143,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Herring_Biomass_-_Baltic_Proper",
+        "layer_name": "mel_Herring_-_Baltic_Proper",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Herring - Baltic Proper (Simulated)",
@@ -36386,7 +36331,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Herring_Biomass_-_Bothnian_Sea",
+        "layer_name": "mel_Herring_-_Bothnian_Sea",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Herring - Bothnian Sea (Simulated)",
@@ -36574,7 +36519,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Benthos_Biomass",
+        "layer_name": "mel_Benthos",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Benthic Invertebrates (Simulated)",
@@ -36762,7 +36707,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Sprat_Biomass",
+        "layer_name": "mel_Sprat",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Sprat (Simulated)",
@@ -36772,7 +36717,7 @@
         "layer_width": 75,
         "layer_height": 91,
         "layer_raster_material": "RasterMELCustomizable",
-        "layer_raster_filter_mode": 1,
+        "layer_raster_filter_mode": 2,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
@@ -37702,10 +37647,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Herring_Catch_-_Baltic_Proper",
+        "layer_name": "mel_Herring_-_Baltic_Proper_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Herring Catch - Baltic Proper (Simulated)",
+        "layer_short": "Herring - Baltic Proper Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
@@ -37890,10 +37835,10 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Herring_Catch_-_Bothnian_Sea",
+        "layer_name": "mel_Herring_-_Bothnian_Sea_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
-        "layer_short": "Herring Catch - Bothnian Sea (Simulated)",
+        "layer_short": "Herring - Bothnian Sea Catch (Simulated)",
         "layer_category": "activities",
         "layer_subcategory": "fishing",
         "layer_download_from_geoserver": 0,
