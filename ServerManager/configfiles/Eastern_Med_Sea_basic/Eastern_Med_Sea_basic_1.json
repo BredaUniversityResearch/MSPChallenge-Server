@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "2/6/2025",
-    "data_model_hash": "EE86E817EE26F333950A9F4B1BDB8DFC93F8916B088C0EF9F0DDC0085B541389",
+    "date_modified": "2/25/2025",
+    "data_model_hash": "0F05B4E6FA71E0469B0527D29C8F23F7EF2EB5D8994E9CB951C1CA74C9779695",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -9491,7 +9491,7 @@
           "name": "Large Demersal Fish Catch",
           "subcategory": "Species Catch"
         },
-		{
+        {
           "name": "Small Demersal Fish Catch",
           "subcategory": "Species Catch"
         },
@@ -10745,7 +10745,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#3A8745FF",
+            "polygonColor": "#004C12FF",
             "polygonPatternName": "25",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -10753,12 +10753,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.0,
             "displayLines": 1,
-            "lineColor": "#3A8745FF",
+            "lineColor": "#004C12FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#3A8745FF",
+            "pointColor": "#004C12FF",
             "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": null,
@@ -30781,7 +30781,7 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable":1,
+        "layer_selectable": 1,
         "layer_editable": 0,
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
