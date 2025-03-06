@@ -282,7 +282,9 @@ class PlanLatest extends CommonBase
                 unset($plan['restriction_settings']);
                 break;
             default:
-                $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'], true));
+                if (!empty($plan[$policyType->value.'_data'])) {
+                    $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'], true));
+                }
                 break;
         }
 
