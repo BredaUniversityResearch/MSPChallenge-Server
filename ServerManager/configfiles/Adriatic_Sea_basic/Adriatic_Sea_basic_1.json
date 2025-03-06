@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "10/9/2024",
-    "data_model_hash": "C41EC3B3B990ABAFC19B2143106C62999E3C2D96F0ACCB79A69CA2ACC2EE7035",
+    "date_modified": "2/13/2025",
+    "data_model_hash": "9FBED07B8C18A9FF77F50BBD20222AE93DF26291F795C910F4A52EDAED00CA11",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -177,6 +177,244 @@
           "starttype": "4",
           "endlayer": "AS_IMO_Routes",
           "endtype": "4",
+          "sort": "Inclusion"
+        }
+      ],
+      "AS_IMO_Routes|AS_Wind_Farms": [
+        {
+          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "0",
+          "endlayer": "AS_Wind_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "1",
+          "endlayer": "AS_Wind_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "2",
+          "endlayer": "AS_Wind_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Wind farms physically obstruct the placement of shipping routes.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "3",
+          "endlayer": "AS_Wind_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "AS_IMO_Routes|AS_Military_Areas": [
+        {
+          "message": "There is a military area where shipping is restricted.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "0",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "0",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "2",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "0",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "3",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a military area where shipping is restricted.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "1",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a military area where shipping is restricted.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "2",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There is a military area where shipping is restricted.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "3",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "1",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "2",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "2",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "2",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "3",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "2",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "1",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "3",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "2",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "3",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_IMO_Routes",
+          "starttype": "3",
+          "endlayer": "AS_Military_Areas",
+          "endtype": "3",
+          "sort": "Inclusion"
+        }
+      ],
+      "AS_Bathing_Waters|AS_Military_Areas": [
+        {
+          "message": "Your plan overlaps with a Military Area where bathing is restricted.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_Bathing_Waters",
+          "starttype": null,
+          "endlayer": "AS_Military_Areas",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_Bathing_Waters",
+          "starttype": null,
+          "endlayer": "AS_Military_Areas",
+          "endtype": "1",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_Bathing_Waters",
+          "starttype": null,
+          "endlayer": "AS_Military_Areas",
+          "endtype": "2",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_Bathing_Waters",
+          "starttype": null,
+          "endlayer": "AS_Military_Areas",
+          "endtype": "3",
+          "sort": "Inclusion"
+        }
+      ],
+      "AS_Anchorages|AS_Military_Areas": [
+        {
+          "message": "Your plan overlaps with a Military Area where anchorages are restricted.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "AS_Anchorages",
+          "starttype": null,
+          "endlayer": "AS_Military_Areas",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_Anchorages",
+          "starttype": null,
+          "endlayer": "AS_Military_Areas",
+          "endtype": "2",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with a Military Area, check restrictions.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "AS_Anchorages",
+          "starttype": null,
+          "endlayer": "AS_Military_Areas",
+          "endtype": "3",
           "sort": "Inclusion"
         }
       ]
@@ -33055,6 +33293,27 @@
               "cost_multiplier": 10.0
             }
           ]
+        },
+        {
+          "layer_name": "AS_Military_Areas",
+          "layer_types": [
+            "Several Uses Prohibited",
+            "No Prohibition For Navigation",
+            "Caution While Navigating",
+            "Prohibitions By Alerts"
+          ],
+          "allowed_ships": [
+            {
+              "ship_type_ids": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "cost_multiplier": 1.0
+            }
+          ]
         }
       ],
       "output_configuration": {
@@ -33295,7 +33554,7 @@
     },
     "policy_settings": {
       "fishing": {
-        "all_country_approval": true,
+        "all_country_approval": false,
         "stakeholder_pressure_cool_down": 0.1,
         "fleet_info": {
           "gear_types": [
@@ -33310,7 +33569,7 @@
           ]
         },
         "policy_type": "fishing",
-        "enabled": true
+        "enabled": false
       },
       "shipping": {
         "policy_type": "shipping",
@@ -33586,7 +33845,7 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 0,
+        "layer_selectable": 1,
         "layer_editable": 0,
         "layer_toggleable": 0,
         "layer_active_on_start": 1,
@@ -39623,7 +39882,7 @@
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
         "layer_selectable": 1,
-        "layer_editable": 1,
+        "layer_editable": 0,
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
@@ -39645,7 +39904,7 @@
             "time": 0
           }
         ],
-        "layer_editing_type": "cable",
+        "layer_editing_type": "",
         "layer_special_entity_type": "Default",
         "layer_depth": 1,
         "layer_property_as_type": null,
@@ -41372,14 +41631,14 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#00000000",
-            "lineWidth": 0.0,
+            "displayLines": 1,
+            "lineColor": "#3A8745FF",
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00000000",
-            "pointSize": 0.0,
+            "displayPoints": 1,
+            "pointColor": "#3A8745FF",
+            "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": null,
             "capacity": 0,

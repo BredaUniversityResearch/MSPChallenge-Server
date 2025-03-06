@@ -2,9 +2,9 @@
 
 namespace App\Domain\WsServer\Plugins;
 
+use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
-use App\Domain\WsServer\MeasurementCollectionManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
 use React\EventLoop\LoopInterface;
@@ -35,11 +35,8 @@ interface PluginInterface
 
     public function getGameSessionIdFilter(): ?int;
     public function setGameSessionIdFilter(?int $gameSessionIdFilter): self;
-
-    public function getMeasurementCollectionManager(): MeasurementCollectionManagerInterface;
-    public function setMeasurementCollectionManager(
-        MeasurementCollectionManagerInterface $measurementCollectionManager
-    ): self;
+    public function getStopwatch(): ?Stopwatch;
+    public function setStopwatch(?Stopwatch $stopwatch): self;
     public function getClientConnectionResourceManager(): ClientConnectionResourceManagerInterface;
     public function setClientConnectionResourceManager(
         ClientConnectionResourceManagerInterface $clientConnectionResourceManager

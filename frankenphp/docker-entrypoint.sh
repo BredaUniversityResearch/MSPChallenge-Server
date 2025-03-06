@@ -2,6 +2,28 @@
 set -e
 
 if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
+  if [ -d "config" ]; then
+    setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX config
+    setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX config
+  fi
+  if [ -f "composer.json" ]; then
+    setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
+    setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
+  fi
+  if [ -f "composer.lock" ]; then
+    setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
+    setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
+  fi
+  if [ -f "symfony.lock" ]; then
+    setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
+    setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
+  fi
+
+    #if [ -z "$(ls -A 'vendor/' 2>/dev/null)" ]; then
+	#	composer install --prefer-dist --no-progress --no-interaction
+	#fi
+	bash install.sh
+
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX config
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX config
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX composer.json
@@ -10,11 +32,6 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX composer.lock
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX symfony.lock
-
-	#if [ -z "$(ls -A 'vendor/' 2>/dev/null)" ]; then
-	#	composer install --prefer-dist --no-progress --no-interaction
-	#fi
-	bash install.sh
 
 	if grep -q ^DATABASE_URL= .env; then
 		echo "Waiting for database to be ready..."

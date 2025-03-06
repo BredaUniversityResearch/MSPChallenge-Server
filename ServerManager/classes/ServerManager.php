@@ -35,7 +35,8 @@ class ServerManager extends Base
     public function __construct(
         private readonly string $projectDir,
         private readonly EntityManagerInterface $em,
-        private readonly UrlGeneratorInterface $urlGenerator
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
         self::$instance = $this;
         $this->serverVersions = [
