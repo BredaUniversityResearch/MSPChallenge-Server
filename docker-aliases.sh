@@ -25,7 +25,7 @@ PRE_DCU="bash set_symfony_version.sh && mkdir -p ./var/docker/ && touch ./var/do
 DCU_BASE="MSYS_NO_PATHCONV=1 docker compose"
 alias dcu="switch_project ${COMPOSE_PROJECT_NAME_DEV} && ede && $PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 # dcu + xdebug (x)
-alias dcux="XDEBUG_MODE=debug dcu"
+alias dcux="switch_project ${COMPOSE_PROJECT_NAME_DEV} && ede && $PRE_DCU && XDEBUG_MODE=debug ${DCU_BASE} -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans"
 # dcu + production (p)}
 alias dcup="switch_project ${COMPOSE_PROJECT_NAME_PROD}"' && ede && ([[ "${APP_ENV}" == "prod" ]] || (echo "Could not find APP_ENV=prod in dotenv" && exit 1)) && '"$PRE_DCU && ${DCU_BASE} -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans"
 # dcu + hybrid (h)}
