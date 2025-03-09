@@ -283,7 +283,7 @@ class PlanLatest extends CommonBase
                 break;
             default:
                 if (!empty($plan[$policyType->value.'_data'])) {
-                    $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'], true));
+                    $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'] ?? [], true));
                 }
                 break;
         }
@@ -323,8 +323,7 @@ class PlanLatest extends CommonBase
                         continue;
                     }
                     $typeValue = $generalPolicyTypes[$policyTypeNameToUpper];
-                    if ((($type & $typeValue) !== $typeValue) && // no plan.plan_type match
-                        empty($plan[$policyTypeName->value.'_data'])) { // no policy data record
+                    if (($type & $typeValue) !== $typeValue) {
                         continue;
                     }
                     $this->formatByPolicyType($plan, $policyTypeName);
