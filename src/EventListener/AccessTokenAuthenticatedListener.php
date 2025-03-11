@@ -9,6 +9,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTAuthenticatedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\InvalidTokenException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class AccessTokenAuthenticatedListener
 {
@@ -34,10 +35,10 @@ class AccessTokenAuthenticatedListener
     public function __invoke(JWTAuthenticatedEvent $event): void
     {
         $token = str_replace('Bearer ', '', $this->request->headers->get('Authorization'));
-        $gameSessionId = $this->request->get('sessionId');
+        $gameSessionId = $this->request->attributes->get('session');
         // temporary fallback while we continue migrating legacy code to Symfony...
         if (is_null($gameSessionId)) {
-            $gameSessionId = explode('/', ltrim($this->request->getPathInfo(), '/'))[0];
+            throw new BadRequestHttpException('Missing or invalid session ID');
         }
         $connection = $this->connectionManager->getCachedGameSessionDbConnection($gameSessionId);
         $query = $connection->createQueryBuilder();

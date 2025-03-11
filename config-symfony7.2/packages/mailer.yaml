@@ -1,0 +1,4 @@
+# Enabled in Symfony 7 by default:
+#framework:
+#    mailer:
+#        dsn: '%env(MAILER_DSN)%'

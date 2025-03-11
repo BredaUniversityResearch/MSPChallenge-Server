@@ -16,45 +16,6 @@ use function App\await;
 
 class Plan extends Base
 {
-    private const ALLOWED = array(
-        "Get",
-        "All",
-        "Post",
-        "Message",
-        "GetMessages",
-        "DeleteLayer",
-        "Lock",
-        "Unlock",
-        "SetState",
-        "Name",
-        "Description",
-        "Date",
-        "Layer",
-        "Restrictions",
-        "ImportRestrictions",
-        ["ExportPlansToJson",  Security::ACCESS_LEVEL_FLAG_SERVER_MANAGER],
-        "Export",
-        "Import",
-        "Fishing",
-        "GetInitialFishingValues",
-        "Type",
-        "SetRestrictionAreas",
-        "DeleteFishing",
-        "DeleteEnergy",
-        "SetEnergyError",
-        "AddApproval",
-        "Vote",
-        "DeleteApproval",
-        "SetEnergyDistribution",
-        "DeleteGeneralPolicy",
-        "SetGeneralPolicyData"
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     public static function convertToNewPlanType(string $planType): int
     {
         $newPlanType = (int)$planType; // assuming a correct db value, which is int of bit flags.
@@ -926,6 +887,12 @@ class Plan extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function PlanHasErrors(int $currentPlanId): bool
     {
+        // todo: refactor this so we don't use the legacy Database class anymore
+        // simply changing all of this with getAsyncDatabase() won't work (I tried)
+        // 'Unexpected protocol error, received malformed packet: Not enough data in buffer to read 15 bytes'
+        // probably as this function is embedded in several others (emanating from call to Game->State())
+        // that already work with lots of promises
+
         $energyError = $this->getDatabase()->query(
             "SELECT plan_energy_error FROM plan WHERE plan.plan_id = ?",
             array($currentPlanId)

@@ -25,16 +25,6 @@ class Security extends Base
 
     private static bool $debugSecurityCheckEnabled = true;
 
-    private const ALLOWED = array(
-        ["RequestToken", Security::ACCESS_LEVEL_FLAG_REQUEST_TOKEN],
-        ["CheckAccess", Security::ACCESS_LEVEL_FLAG_NONE]
-    );
-
-    public function __construct(string $method = '')
-    {
-        parent::__construct($method, self::ALLOWED);
-    }
-
     /**
      * @apiGroup Security
      * @throws Exception
@@ -216,7 +206,7 @@ class Security extends Base
      */
     private function getCurrentRequestTokenDetails(): ?array
     {
-        $token = $this->getToken();
+        $token = $this->getToken() ?? $this->findAuthenticationHeaderValue();
         if ($token == null) {
             return null;
         }
@@ -287,7 +277,10 @@ class Security extends Base
         return true;
     }
 
-    public static function findAuthenticationHeaderValue(): ?string
+    /**
+     * @throws Exception
+     */
+    public function findAuthenticationHeaderValue(): ?string
     {
         $requestHeaders = \getallheaders();
         if (isset($requestHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN])) {

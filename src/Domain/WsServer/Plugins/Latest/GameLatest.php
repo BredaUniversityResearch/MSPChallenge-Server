@@ -2,11 +2,10 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
-use App\Domain\API\v1\Game;
+use App\Domain\API\v1\Simulation;
 use App\Domain\Common\CommonBase;
+use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Common\ToPromiseFunction;
-use App\Domain\Services\ConnectionManager;
-use App\Entity\PlanPolicy;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
@@ -24,16 +23,6 @@ class GameLatest extends CommonBase
     private const CONTEXT_PARAM_USER = 'user';
 
     private bool $allowEnergyKpiUpdate = true;
-
-    private function newSimulationDataAvailable(array $tickData, float $lastUpdateTime): bool
-    {
-        if (($tickData['mel_lastupdate'] > $lastUpdateTime) ||
-            ($tickData['cel_lastupdate'] > $lastUpdateTime) ||
-            ($tickData['sel_lastupdate'] > $lastUpdateTime)) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * @param array $context
@@ -62,7 +51,8 @@ class GameLatest extends CommonBase
                 $data['simulation_updates'] = [
                     ['simulation_type' => 'CEL', 'kpi' => $results['energy']],
                     ['simulation_type' => 'MEL', 'kpi' => $results['ecology']],
-                    ['simulation_type' => 'SEL', 'kpi' => $results['shipping']]
+                    ['simulation_type' => 'SEL', 'kpi' => $results['shipping']],
+                    ['simulation_type' => 'External', 'kpi' => $results['external']]
                 ];
             });
         $latestWarning = $this->getLatestWarning($context)
@@ -103,6 +93,35 @@ class GameLatest extends CommonBase
     }
 
     /**
+     * @throws Exception
+     */
+    public function prepareLatest(
+        float $lastUpdateTime,
+        bool $showDebug = false
+    ): PromiseInterface {
+        return $this->calculateUpdatedTime(
+            $showDebug
+        )
+        ->then(function (array $tick) use ($lastUpdateTime) {
+            if ($lastUpdateTime < PHP_FLOAT_EPSILON) { // first client update
+                $this->allowEnergyKpiUpdate = true;
+                return $tick;
+            }
+            $simulation = new Simulation();
+            $this->asyncDataTransferTo($simulation);
+            return $simulation->getSimulations(
+                statusFilter: WatchdogStatus::READY,
+                lastMonthFilter: $tick['month'], // the last month was simulated, so up-to-date
+                afterUpdateTimestamp: $lastUpdateTime // new simulation data available
+            )
+            ->then(function (Result $result) use ($tick) {
+                $this->allowEnergyKpiUpdate = $result->fetchCount() > 0;
+                return $tick;
+            });
+        });
+    }
+
+    /**
      * Gets the latest plans & messages from the server
      *
      * @param int $teamId
@@ -114,18 +133,8 @@ class GameLatest extends CommonBase
      */
     public function latest(int $teamId, float $lastUpdateTime, int $user, bool $showDebug = false): ?PromiseInterface
     {
-        return $this->calculateUpdatedTime(
-            $showDebug
-        )
+        return $this->prepareLatest($lastUpdateTime, $showDebug)
         ->then(function (array $tick) use ($teamId, $lastUpdateTime, $user) {
-            $game = new Game();
-            $this->asyncDataTransferTo($game);
-            $this->allowEnergyKpiUpdate =
-                (
-                    $game->areSimulationsUpToDate($tick) &&
-                    $this->newSimulationDataAvailable($tick, $lastUpdateTime)
-                ) ||
-                $lastUpdateTime < PHP_FLOAT_EPSILON; // first client update
             $context = [
                 self::CONTEXT_PARAM_NEW_TIME => microtime(true),
                 self::CONTEXT_PARAM_LAST_UPDATE_TIME => $lastUpdateTime,
@@ -206,12 +215,6 @@ class GameLatest extends CommonBase
                     'game_planning_realtime as era_realtime',
                     'game_planning_era_realtime as planning_era_realtime',
                     'game_planning_monthsdone as era_monthsdone',
-                    'game_mel_lastmonth as mel_lastmonth',
-                    'game_cel_lastmonth as cel_lastmonth',
-                    'game_sel_lastmonth as sel_lastmonth',
-                    'game_mel_lastupdate as mel_lastupdate',
-                    'game_cel_lastupdate as cel_lastupdate',
-                    'game_sel_lastupdate as sel_lastupdate',
                     'game_eratime as era_time'
                 )
                 ->from('game')
@@ -282,7 +285,7 @@ class GameLatest extends CommonBase
                     }
 
                     if ($showDebug) {
-                        wdo('Tick: ' . PHP_EOL . json_encode($tick));
+                        wdo('Tick: ' . PHP_EOL . json_encode($tick), OutputInterface::VERBOSITY_DEBUG);
                     }
 
                     return $tick;
@@ -414,7 +417,8 @@ class GameLatest extends CommonBase
             resolveOnFutureTick($deferred, [
                 'ecology' => [],
                 'shipping' => [],
-                'energy' => []
+                'energy' => [],
+                'external' => []
             ]);
         return $deferred->promise()
             ->then(function (array $results) use ($context) {

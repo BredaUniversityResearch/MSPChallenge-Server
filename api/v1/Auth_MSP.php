@@ -5,7 +5,6 @@ namespace App\Domain\API\v1;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\Setting;
 use Exception;
-use stdClass;
 
 /**
  * when you create your own authentication provider subclass, make sure you define these methods:

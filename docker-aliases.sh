@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# generates a random 32 char long string
-if [ -z "${CADDY_MERCURE_JWT_SECRET}" ]; then
-  export CADDY_MERCURE_JWT_SECRET=$(echo $RANDOM | md5sum | head -c 32)
-fi
-
 if [[ "${DOCKER}" == "1" ]]; then
   echo "Docker detected, skipping aliases"
   exit 0
@@ -37,21 +32,29 @@ alias dl="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE
 alias dlb="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-blackfire-1"
 # dl + database (d)
 alias dld="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-database-1"
+# dl + simulations (s)
+alias dls="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-simulations-1"
 # de = docker(d) execute(e) with container php
 ALIAS_DE_BASE='MSYS_NO_PATHCONV=1 docker exec'
 alias de="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${ALIAS_DE_BASE} \${COMPOSE_PROJECT_NAME}-php-1"
 # de + supervisor (s)
 alias des="de /usr/bin/supervisord -c /etc/supervisord.conf"
 # de + supervisorctl (sc)
-alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw]\n'; de supervisorctl"
+alias desc="echo -e '[status|start|stop|restart] [all|app-ws-server|msw|messenger-consume|messenger-watchdog:*]\n'; de supervisorctl"
 # de + list (l) + log (l) + supervisor (s)
 alias dells="de ls -l /var/log/supervisor/"
+detl_finish() {
+  de sh -c "pgrep -af \"tail -f /var/log/supervisor/\" | grep -E '[0-9]+\\stail' | awk '{print \$1}' | xargs kill > /dev/null 2>&1"
+}
 # de + tail log (tl)
-alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files names:" && dells && exit 1)) && (echo "press Ctrl+C to exit tail log"; de tail -f /var/log/supervisor/$1 ; de pkill -f "tail -f /var/log/supervisor/$1"); unset -f f; } ; f'
+alias detl='f() { ([[ "$1" != "" ]] || (echo "Please specify one of these files names:" && dells && exit 1)) && (echo "press Ctrl+C to exit tail log"; de sh -c "tail -f /var/log/supervisor/$1" ; detl_finish); unset -f f; } ; f'
+# shellcheck disable=SC2142
 # de + tail log (tl) + websocket server (w)
 alias detlw="detl app-ws-server.log"
-# de + tail log (tl) + msw (m)
-alias detlm="detl msw.log"
+# de + tail log (tl) + messenger-consume (mc)
+alias detlmc="detl messenger-consume.log"
+# de + tail log (tl) + messenger watchdog (mw)
+alias detlmw='detl messenger-watchdog-*.log'
 # de + top (t)
 alias det='de top; de pkill -f top'
 # de + phpstan (p)
@@ -70,7 +73,7 @@ else
     MYSQL_PARAMS="-p${DATABASE_PASSWORD}"
 fi
 MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec \${COMPOSE_PROJECT_NAME}-database-1 bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
-alias drg="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${MY2_SETUP} && docker stop grafana-1 ; docker rm grafana-1 ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana-1 --label com.docker.compose.project=\${COMPOSE_PROJECT_NAME} --network=\${COMPOSE_PROJECT_NAME}_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
+alias drg="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${MY2_SETUP} && docker stop ${COMPOSE_PROJECT_NAME}-grafana-1 ; docker rm ${COMPOSE_PROJECT_NAME}-grafana-1 ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana-1 --label com.docker.compose.project=\${COMPOSE_PROJECT_NAME} --network=\${COMPOSE_PROJECT_NAME}_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
 # docker (d) + stop (s) + all containers (a)
 alias dsa='docker stop $(docker ps -a -q)'
 # docker (d) + system (s) + prune (p)
@@ -79,6 +82,10 @@ alias dsp='docker system prune -a -f'
 alias dclean='dsa ; dsp'
 
 function switch_project() {
+  # generates a random 32 char long string
+  if [ -z "${CADDY_MERCURE_JWT_SECRET}" ]; then
+    export CADDY_MERCURE_JWT_SECRET=$(echo $RANDOM | md5sum | head -c 32)
+  fi
   if [[ -n "$1" ]]; then
     export COMPOSE_PROJECT_NAME="$1"
     echo "Switched to project: ${COMPOSE_PROJECT_NAME}"
