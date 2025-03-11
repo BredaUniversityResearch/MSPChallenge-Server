@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "2/6/2025",
-    "data_model_hash": "EE86E817EE26F333950A9F4B1BDB8DFC93F8916B088C0EF9F0DDC0085B541389",
+    "date_modified": "2/25/2025",
+    "data_model_hash": "0F05B4E6FA71E0469B0527D29C8F23F7EF2EB5D8994E9CB951C1CA74C9779695",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -5773,7 +5773,7 @@
               ]
             },
             {
-              "//comment": "12 Cy- Artisanal",
+              "//comment": "8 Cy- Artisanal",
               "gear_type": "0",
               "country_id": "3",
               "initial_fishing_distribution": [
@@ -5784,7 +5784,7 @@
               ]
             },
             {
-              "//comment": "13 Cy- Industrial",
+              "//comment": "9 Cy- Industrial",
               "gear_type": "1",
               "country_id": "3",
               "initial_fishing_distribution": [
@@ -5795,7 +5795,7 @@
               ]
             },
             {
-              "//comment": "14 Cy- Recreational",
+              "//comment": "10 Cy- Recreational",
               "gear_type": "2",
               "country_id": "3",
               "initial_fishing_distribution": [
@@ -5806,7 +5806,7 @@
               ]
             },
             {
-              "//comment": "15 Cy- Subsistence",
+              "//comment": "11 Cy- Subsistence",
               "gear_type": "3",
               "country_id": "3",
               "initial_fishing_distribution": [
@@ -5817,7 +5817,7 @@
               ]
             },
             {
-              "//comment": "20 Sy- Artisanal",
+              "//comment": "12 Sy- Artisanal",
               "gear_type": "0",
               "country_id": "4",
               "initial_fishing_distribution": [
@@ -5828,7 +5828,7 @@
               ]
             },
             {
-              "//comment": "21 Sy- Industrial",
+              "//comment": "13 Sy- Industrial",
               "gear_type": "1",
               "country_id": "4",
               "initial_fishing_distribution": [
@@ -5839,7 +5839,7 @@
               ]
             },
             {
-              "//comment": "22 Sy-Recreational",
+              "//comment": "14 Sy-Recreational",
               "gear_type": "2",
               "country_id": "4",
               "initial_fishing_distribution": [
@@ -5850,7 +5850,7 @@
               ]
             },
             {
-              "//comment": "23 Sy-Subsistence",
+              "//comment": "15 Sy-Subsistence",
               "gear_type": "3",
               "country_id": "4",
               "initial_fishing_distribution": [
@@ -5861,7 +5861,7 @@
               ]
             },
             {
-              "//comment": "24 Le- Artisanal",
+              "//comment": "16 Le- Artisanal",
               "gear_type": "0",
               "country_id": "10",
               "initial_fishing_distribution": [
@@ -5872,7 +5872,7 @@
               ]
             },
             {
-              "//comment": "25 Le- Industrial",
+              "//comment": "17 Le- Industrial",
               "gear_type": "1",
               "country_id": "10",
               "initial_fishing_distribution": [
@@ -5883,7 +5883,7 @@
               ]
             },
             {
-              "//comment": "26 Le- Recreational",
+              "//comment": "18 Le- Recreational",
               "gear_type": "2",
               "country_id": "10",
               "initial_fishing_distribution": [
@@ -5894,7 +5894,7 @@
               ]
             },
             {
-              "//comment": "27 Le- Subsistence",
+              "//comment": "19 Le- Subsistence",
               "gear_type": "3",
               "country_id": "10",
               "initial_fishing_distribution": [
@@ -5905,7 +5905,7 @@
               ]
             },
             {
-              "//comment": "28 IL-Artisanal",
+              "//comment": "20 IL-Artisanal",
               "gear_type": "0",
               "country_id": "7",
               "initial_fishing_distribution": [
@@ -5916,7 +5916,7 @@
               ]
             },
             {
-              "//comment": "29 IL-Industrial",
+              "//comment": "21 IL-Industrial",
               "gear_type": "1",
               "country_id": "7",
               "initial_fishing_distribution": [
@@ -5927,7 +5927,7 @@
               ]
             },
             {
-              "//comment": "30 IL-Recreational",
+              "//comment": "22 IL-Recreational",
               "gear_type": "2",
               "country_id": "7",
               "initial_fishing_distribution": [
@@ -5938,7 +5938,7 @@
               ]
             },
             {
-              "//comment": "31 IL-Subsistence",
+              "//comment": "23 IL-Subsistence",
               "gear_type": "3",
               "country_id": "7",
               "initial_fishing_distribution": [
@@ -5949,7 +5949,7 @@
               ]
             },
             {
-              "//comment": "32 Eg-Artisanal",
+              "//comment": "24 Eg-Artisanal",
               "gear_type": "0",
               "country_id": "8",
               "initial_fishing_distribution": [
@@ -5960,7 +5960,7 @@
               ]
             },
             {
-              "//comment": "33 Eg-Industrial",
+              "//comment": "25 Eg-Industrial",
               "gear_type": "1",
               "country_id": "8",
               "initial_fishing_distribution": [
@@ -5971,7 +5971,7 @@
               ]
             },
             {
-              "//comment": "34 Eg-Recreational",
+              "//comment": "26 Eg-Recreational",
               "gear_type": "2",
               "country_id": "8",
               "initial_fishing_distribution": [
@@ -5982,7 +5982,7 @@
               ]
             },
             {
-              "//comment": "35 Eg-Subsistence",
+              "//comment": "27 Eg-Subsistence",
               "gear_type": "3",
               "country_id": "8",
               "initial_fishing_distribution": [
@@ -7186,7 +7186,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "13"
+              "9"
             ]
           }
         },
@@ -7281,7 +7281,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "12"
+              "8"
             ]
           }
         },
@@ -7376,7 +7376,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "15"
+              "11"
             ]
           }
         },
@@ -7471,7 +7471,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "14"
+              "10"
             ]
           }
         },
@@ -7586,7 +7586,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "21"
+              "13"
             ]
           }
         },
@@ -7681,7 +7681,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "20"
+              "12"
             ]
           }
         },
@@ -7776,7 +7776,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "22"
+              "14"
             ]
           }
         },
@@ -7871,7 +7871,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "23"
+              "15"
             ]
           }
         },
@@ -7966,7 +7966,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "24"
+              "16"
             ]
           }
         },
@@ -8081,7 +8081,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "25"
+              "17"
             ]
           }
         },
@@ -8176,7 +8176,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "26"
+              "18"
             ]
           }
         },
@@ -8271,7 +8271,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "27"
+              "19"
             ]
           }
         },
@@ -8386,7 +8386,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "29"
+              "21"
             ]
           }
         },
@@ -8481,7 +8481,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "28"
+              "20"
             ]
           }
         },
@@ -8576,7 +8576,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "30"
+              "22"
             ]
           }
         },
@@ -8671,7 +8671,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "31"
+              "23"
             ]
           }
         },
@@ -8786,7 +8786,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "33"
+              "25"
             ]
           }
         },
@@ -8881,7 +8881,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "32"
+              "24"
             ]
           }
         },
@@ -8976,7 +8976,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "34"
+              "26"
             ]
           }
         },
@@ -9071,7 +9071,7 @@
           ],
           "policy_filters": {
             "fleets": [
-              "35"
+              "27"
             ]
           }
         }
@@ -9145,7 +9145,7 @@
           "name": "Fishing Cy- Artisanal",
           "policy_filters": {
             "fleets": [
-              "12"
+              "8"
             ]
           }
         },
@@ -9153,7 +9153,7 @@
           "name": "Fishing Cy- Industrial",
           "policy_filters": {
             "fleets": [
-              "13"
+              "9"
             ]
           }
         },
@@ -9161,7 +9161,7 @@
           "name": "Fishing Cy- Recreational",
           "policy_filters": {
             "fleets": [
-              "14"
+              "10"
             ]
           }
         },
@@ -9169,7 +9169,7 @@
           "name": "Fishing Cy- Subsistence",
           "policy_filters": {
             "fleets": [
-              "15"
+              "11"
             ]
           }
         },
@@ -9177,7 +9177,7 @@
           "name": "Fishing Sy- Artisanal",
           "policy_filters": {
             "fleets": [
-              "20"
+              "12"
             ]
           }
         },
@@ -9185,7 +9185,7 @@
           "name": "Fishing Sy- Industrial",
           "policy_filters": {
             "fleets": [
-              "21"
+              "13"
             ]
           }
         },
@@ -9193,7 +9193,7 @@
           "name": "Fishing Sy-Recreational",
           "policy_filters": {
             "fleets": [
-              "22"
+              "14"
             ]
           }
         },
@@ -9201,7 +9201,7 @@
           "name": "Fishing Sy-Subsistence",
           "policy_filters": {
             "fleets": [
-              "23"
+              "15"
             ]
           }
         },
@@ -9209,7 +9209,7 @@
           "name": "Fishing Le- Artisanal",
           "policy_filters": {
             "fleets": [
-              "24"
+              "16"
             ]
           }
         },
@@ -9217,7 +9217,7 @@
           "name": "Fishing Le- Industrial",
           "policy_filters": {
             "fleets": [
-              "25"
+              "17"
             ]
           }
         },
@@ -9225,7 +9225,7 @@
           "name": "Fishing Le- Recreational",
           "policy_filters": {
             "fleets": [
-              "26"
+              "18"
             ]
           }
         },
@@ -9233,7 +9233,7 @@
           "name": "Fishing Le- Subsistence",
           "policy_filters": {
             "fleets": [
-              "27"
+              "19"
             ]
           }
         },
@@ -9241,7 +9241,7 @@
           "name": "Fishing IL-Artisanal",
           "policy_filters": {
             "fleets": [
-              "28"
+              "20"
             ]
           }
         },
@@ -9249,7 +9249,7 @@
           "name": "Fishing IL-Industrial",
           "policy_filters": {
             "fleets": [
-              "29"
+              "21"
             ]
           }
         },
@@ -9257,7 +9257,7 @@
           "name": "Fishing IL-Recreational",
           "policy_filters": {
             "fleets": [
-              "30"
+              "22"
             ]
           }
         },
@@ -9265,7 +9265,7 @@
           "name": "Fishing IL-Subsistence",
           "policy_filters": {
             "fleets": [
-              "31"
+              "23"
             ]
           }
         },
@@ -9273,7 +9273,7 @@
           "name": "Fishing Eg-Artisanal",
           "policy_filters": {
             "fleets": [
-              "32"
+              "24"
             ]
           }
         },
@@ -9281,7 +9281,7 @@
           "name": "Fishing Eg-Industrial",
           "policy_filters": {
             "fleets": [
-              "33"
+              "25"
             ]
           }
         },
@@ -9289,7 +9289,7 @@
           "name": "Fishing Eg-Recreational",
           "policy_filters": {
             "fleets": [
-              "34"
+              "26"
             ]
           }
         },
@@ -9297,7 +9297,7 @@
           "name": "Fishing Eg-Subsistence",
           "policy_filters": {
             "fleets": [
-              "35"
+              "27"
             ]
           }
         }
@@ -9491,7 +9491,7 @@
           "name": "Large Demersal Fish Catch",
           "subcategory": "Species Catch"
         },
-		{
+        {
           "name": "Small Demersal Fish Catch",
           "subcategory": "Species Catch"
         },
@@ -10745,7 +10745,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#3A8745FF",
+            "polygonColor": "#004C12FF",
             "polygonPatternName": "25",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -10753,12 +10753,12 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.0,
             "displayLines": 1,
-            "lineColor": "#3A8745FF",
+            "lineColor": "#004C12FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#3A8745FF",
+            "pointColor": "#004C12FF",
             "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": null,
@@ -30781,7 +30781,7 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable":1,
+        "layer_selectable": 1,
         "layer_editable": 0,
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
