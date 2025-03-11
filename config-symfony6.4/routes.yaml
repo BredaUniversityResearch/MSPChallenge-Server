@@ -1,7 +1,3 @@
-server_manager:
-  resource: 'ServerManager/routes.yaml'
-  prefix: '/ServerManager'
-
 when@dev:
   _tools:
     resource: 'routes/tools.yaml'

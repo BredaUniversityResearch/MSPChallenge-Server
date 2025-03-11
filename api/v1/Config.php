@@ -67,12 +67,6 @@ class Config
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetAuthWithProxy(): ?string
-    {
-        return $this->configRoot['msp_auth_with_proxy'] ?? null;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetGameAutosaveInterval(): int
     {
         return $this->configRoot['game_autosave_interval'] ?? self::DEFAULT_GAME_AUTOSAVE_INTERVAL;

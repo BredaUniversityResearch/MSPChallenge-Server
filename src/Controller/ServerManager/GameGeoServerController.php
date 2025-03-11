@@ -10,9 +10,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route(
+    '/{manager}/gamegeoserver',
+    requirements: ['manager' => 'manager|ServerManager'],
+    defaults: ['manager' => 'manager']
+)]
 class GameGeoServerController extends BaseController
 {
-    #[Route('manager/gamegeoserver/list', name: 'manager_gamegeoserver_list')]
+    #[Route('/list', name: 'manager_gamegeoserver_list')]
     public function gameGeoServerList(EntityManagerInterface $entityManager): Response
     {
         $gameGeoServers = $entityManager->getRepository(GameGeoServer::class)->findAll();
@@ -20,7 +25,7 @@ class GameGeoServerController extends BaseController
     }
 
     #[Route(
-        'manager/gamegeoserver/{geoserverId}/availability',
+        '/{geoserverId}/availability',
         name: 'manager_gamegeoserver_visibility',
         requirements: ['geoserverId' => '\d+']
     )]
@@ -37,7 +42,7 @@ class GameGeoServerController extends BaseController
     }
 
     #[Route(
-        'manager/gamegeoserver/{geoserverId}/form',
+        '/{geoserverId}/form',
         name: 'manager_gamegeoserver_form',
         requirements: ['geoserverId' => '\d+']
     )]

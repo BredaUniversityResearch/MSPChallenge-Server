@@ -22,6 +22,7 @@ use App\VersionsProvider;
 use DateTime;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use JsonException;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
@@ -128,6 +129,10 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         Watchdog $watchdog,
         EntityManagerInterface $em
     ): void {
+        if (null === $gameList = $this->getGameList($message->getGameSessionId())) {
+            $this->warning('Game list not found. Id: '.$message->getGameSessionId());
+            return;
+        }
         $tokens = $this->getTokensForWatchdog($message->getGameSessionId());
         $apiAccessToken = new Token($tokens['token'], new DateTime('+1 hour'));
         $apiAccessRenewToken = new Token(
@@ -138,7 +143,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             ->mapWithKeys(fn(SimulationEntity $sim) => [$sim->getName() => $sim->getVersion()])
             ->toArray();
         $postValues = [
-            'game_session_api' => await(GameSession::getSessionAPIBaseUrl($message->getGameSessionId())),
+            'game_session_api' => self::getSessionAPIBaseUrl($gameList),
             'game_session_token' => (string)$watchdog->getToken(),
             'game_state' => $message->getGameState()->__toString(),
             'required_simulations' => json_encode($requiredSimulations, JSON_FORCE_OBJECT),
@@ -156,7 +161,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             // only add game_info if not the internal watchdog. This is because the internal watchdog does not handle it
             $watchdog->getServerId() != Watchdog::getInternalServerId()
         ) {
-            $postValues['game_session_info'] = $this->getSessionInfo($message);
+            $postValues['game_session_info'] = $this->getSessionInfo($gameList);
         }
         $this->requestWatchdog($em, $watchdog, '/Watchdog/UpdateState', $postValues);
     }
@@ -313,18 +318,16 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
     }
 
     /**
-     * @param GameStateChangedMessage $message
-     * @return array
+     * @throws NonUniqueResultException
      * @throws Exception
      */
-    public function getSessionInfo(GameStateChangedMessage $message): array
+    public function getGameList(int $gameSessionId): ?GameList
     {
         $qb = ConnectionManager::getInstance()
             ->getServerManagerEntityManager()
             ->getRepository(GameList::class)
             ->createQueryBuilder('g');
-        /** @var GameList $gameList */
-        $gameList = $qb
+        return $qb
             ->innerJoin('g.gameServer', 'gse')
             ->innerJoin('g.gameWatchdogServer', 'gws')
             ->leftJoin('g.gameConfigVersion', 'gcv')
@@ -332,9 +335,17 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             ->leftJoin('g.gameGeoServer', 'ggs')
             ->leftJoin('g.gameSave', 'gsa')
             ->where($qb->expr()->eq('g.id', ':id'))
-            ->setParameter('id', $message->getGameSessionId())
+            ->setParameter('id', $gameSessionId)
             ->getQuery()
             ->getOneOrNullResult(AbstractQuery::HYDRATE_OBJECT);
+    }
+
+    /**
+     * @param GameList $gameList
+     * @return array
+     */
+    public function getSessionInfo(GameList $gameList): array
+    {
         $configMetadata = $gameList->getGameConfigVersion()->getGameConfigComplete()['metadata'];
         $gameSessionInfo['id'] = $gameList->getId();
         $gameSessionInfo['name'] = $gameList->getName();
@@ -350,5 +361,18 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         $gameSessionInfo['config_file_metadata_config_version'] = $configMetadata['config_version'];
         $gameSessionInfo['server_version'] = $this->provider->getVersion();
         return $gameSessionInfo;
+    }
+
+    /**
+     * used to communicate "game_session_api" URL to the watchdog
+     *
+     * @throws Exception
+     */
+    public static function getSessionAPIBaseUrl(GameList $gameList): string
+    {
+        $protocol = ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
+        $address = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $gameList->getGameServer()->getAddress() ?? gethostname();
+        $port = ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+        return $protocol.$address.':'.$port.'/'.$gameList->getId().'/';
     }
 }
