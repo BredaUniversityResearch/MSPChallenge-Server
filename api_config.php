@@ -11,7 +11,6 @@ $GLOBALS['feature_flags'] = array(
 
 $GLOBALS['api_config'] = array(
     "code_branch" => $codeBranch,
-    "msp_auth_with_proxy" => "",
     "game_autosave_interval" => 120,
     "long_request_timeout" => 840, // 420 originally, was doubled for Eastern Med Sea edition
     "unit_test_logger" => array(

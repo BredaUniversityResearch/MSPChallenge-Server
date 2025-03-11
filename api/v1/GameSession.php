@@ -44,39 +44,6 @@ class GameSession extends Base
         return intval($sessionId) < 1 ? self::INVALID_SESSION_ID : (int)$sessionId;
     }
 
-    /**
-     * used to communicate "game_session_api" URL to the watchdog
-     *
-     * @throws \Doctrine\DBAL\Exception
-     * @throws Exception
-     */
-    public static function getSessionAPIBaseUrl(int $sessionId): PromiseInterface
-    {
-        if (getenv('DOCKER') !== false) {
-            return resolve(
-                'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).'/'.$sessionId. '/'
-            );
-        }
-        $protocol = ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
-        $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
-        return $connection->query(
-            $connection->createQueryBuilder()
-                ->select('gs.address')
-                ->from('game_list', 'gl')
-                ->innerJoin('gl', 'game_servers', 'gs', 'gl.game_server_id = gs.id')
-                ->where('gl.id = :sessionId')
-                ->setParameter('sessionId', $sessionId)
-        )
-        ->then(
-            function (Result $result) use ($protocol, $sessionId) {
-                $row = $result->fetchFirstRow() ?? [];
-                $address = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $row['address'] ?? gethostname();
-                $port = ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
-                return $protocol.$address.':'.$port.'/'.$sessionId.'/';
-            }
-        );
-    }
-
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function GetConfigFilePathForSession(int $sessionId): string
     {

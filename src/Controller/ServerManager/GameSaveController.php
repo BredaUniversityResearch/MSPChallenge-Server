@@ -25,16 +25,21 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpKernel\KernelInterface;
 
+#[Route(
+    '/{manager}/gamesave',
+    requirements: ['manager' => 'manager|ServerManager'],
+    defaults: ['manager' => 'manager']
+)]
 class GameSaveController extends BaseController
 {
-    #[Route('/manager/gamesave', name: 'manager_gamesave')]
+    #[Route(name: 'manager_gamesave')]
     public function index(): Response
     {
         return $this->render('manager/gamesave_page.html.twig');
     }
 
     #[Route(
-        '/manager/gamesave/{saveVisibility}',
+        '/{saveVisibility}',
         name: 'manager_gamesave_list',
         requirements: ['saveVisibility' => '(active|archived)']
     )]
@@ -47,7 +52,7 @@ class GameSaveController extends BaseController
     }
 
     #[Route(
-        '/manager/gamesave/{saveId}/download',
+        '/{saveId}/download',
         name: 'manager_gamesave_download',
         requirements: ['saveId' => '\d+']
     )]
@@ -75,7 +80,7 @@ class GameSaveController extends BaseController
         return $response;
     }
 
-    #[Route('/manager/gamesave/{saveId}/form', name: 'manager_gamesave_form', requirements: ['saveId' => '\d+'])]
+    #[Route('/{saveId}/form', name: 'manager_gamesave_form', requirements: ['saveId' => '\d+'])]
     public function gameSaveForm(
         EntityManagerInterface $entityManager,
         Request $request,
@@ -109,7 +114,7 @@ class GameSaveController extends BaseController
         );
     }
 
-    #[Route('/manager/gamesave/{saveId}/details', name: 'manager_gamesave_details', requirements: ['saveId' => '\d+'])]
+    #[Route('/{saveId}/details', name: 'manager_gamesave_details', requirements: ['saveId' => '\d+'])]
     public function gameSaveDetails(
         EntityManagerInterface $entityManager,
         Request $request,
@@ -136,7 +141,7 @@ class GameSaveController extends BaseController
         );
     }
 
-    #[Route('/manager/gamesave/upload', name: 'manager_gamesave_upload')]
+    #[Route('/upload', name: 'manager_gamesave_upload')]
     public function gameSaveUpload(
         KernelInterface $kernel,
         EntityManagerInterface $entityManager,
@@ -170,7 +175,7 @@ class GameSaveController extends BaseController
         );
     }
 
-    #[Route('/manager/gamesave/{saveId}/archive', name: 'manager_gamesave_archive', requirements: ['saveId' => '\d+'])]
+    #[Route('/{saveId}/archive', name: 'manager_gamesave_archive', requirements: ['saveId' => '\d+'])]
     public function gameSaveArchive(
         EntityManagerInterface $entityManager,
         int $saveId

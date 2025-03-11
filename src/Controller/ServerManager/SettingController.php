@@ -24,15 +24,16 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Throwable;
 
+#[Route('/{manager}/setting', requirements: ['manager' => 'manager|ServerManager'], defaults: ['manager' => 'manager'])]
 class SettingController extends BaseController
 {
-    #[Route('/manager/setting', name: 'manager_setting')]
+    #[Route(name: 'manager_setting')]
     public function index(): Response
     {
         return $this->render('manager/setting_page.html.twig');
     }
 
-    #[Route('/manager/setting/reset/{type}', name: 'manager_setting_reset', requirements: ['type' => '\d+'])]
+    #[Route('/reset/{type}', name: 'manager_setting_reset', requirements: ['type' => '\d+'])]
     public function settingReset(
         KernelInterface $kernel,
         int $type = 0
@@ -54,7 +55,7 @@ class SettingController extends BaseController
         ]);
     }
 
-    #[Route('manager/setting/list', name: 'manager_setting_list')]
+    #[Route('/list', name: 'manager_setting_list')]
     public function settingList(EntityManagerInterface $entityManager): Response
     {
         $setting = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
@@ -78,7 +79,7 @@ class SettingController extends BaseController
         );
     }
 
-    #[Route('/manager/setting/{settingId}/form', name: 'manager_setting_form', requirements: ['settingId' => '\d+'])]
+    #[Route('/{settingId}/form', name: 'manager_setting_form', requirements: ['settingId' => '\d+'])]
     public function settingForm(EntityManagerInterface $entityManager, Request $request, int $settingId): Response
     {
         $setting = $entityManager->getRepository(Setting::class)->find($settingId);
@@ -99,7 +100,7 @@ class SettingController extends BaseController
         );
     }
 
-    #[Route('manager/setting/users/list', name: 'manager_setting_users')]
+    #[Route('/users/list', name: 'manager_setting_users')]
     public function settingUsers(
         EntityManagerInterface $entityManager,
         HttpClientInterface $client,
@@ -117,7 +118,7 @@ class SettingController extends BaseController
         );
     }
 
-    #[Route('manager/setting/users/delete', name: 'manager_setting_users_delete')]
+    #[Route('/users/delete', name: 'manager_setting_users_delete')]
     public function settingUsersDelete(
         HttpClientInterface $client,
         Security $security,
@@ -135,7 +136,7 @@ class SettingController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('manager/setting/users/form', name: 'manager_setting_users_form')]
+    #[Route('/users/form', name: 'manager_setting_users_form')]
     public function settingUsersForm(
         HttpClientInterface $client,
         EntityManagerInterface $entityManager,
