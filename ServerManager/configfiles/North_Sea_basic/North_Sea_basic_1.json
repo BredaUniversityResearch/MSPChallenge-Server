@@ -36025,7 +36025,7 @@
             "innerGlowIterations": 2,
             "innerGlowMultiplier": 2.5,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
+            "displayLines": 1,
             "lineColor": "#454545FF",
             "lineWidth": 1.0,
             "lineIcon": null,

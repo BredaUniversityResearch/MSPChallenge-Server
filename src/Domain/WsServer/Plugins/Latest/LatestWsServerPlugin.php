@@ -237,10 +237,11 @@ class LatestWsServerPlugin extends Plugin
         $gameSessionId = $clientHeaders[ClientHeaderKeys::HEADER_KEY_GAME_SESSION_ID];
         if (!array_key_exists($connResourceId, $this->gameLatestInstances)) {
             $gameLatest = new GameLatest();
-            $gameLatest->setAsync(true);
-            $gameLatest->setGameSessionId($gameSessionId);
-            $gameLatest->setAsyncDatabase($this->getServerManager()->getGameSessionDbConnection($gameSessionId));
-            $gameLatest->setToken($clientHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN]);
+            $gameLatest
+                ->setAsync(true)
+                ->setGameSessionId($gameSessionId)
+                ->setAsyncDatabase($this->getServerManager()->getGameSessionDbConnection($gameSessionId))
+                ->setToken($clientHeaders[ClientHeaderKeys::HEADER_KEY_MSP_API_TOKEN]);
 
             $this->gameLatestInstances[$connResourceId] = $gameLatest;
         }

@@ -2,11 +2,8 @@
 
 namespace ServerManager;
 
-use App\Domain\API\v1\Game;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Entity\ServerManager\GameConfigVersion;
 use App\Message\Analytics\SessionCreatedMessage;
-use App\Message\GameList\GameListCreationMessage;
 use DateInterval;
 use DateTime;
 use DateTimeImmutable;
@@ -755,7 +752,7 @@ class GameSession extends Base
         );
 
         try {
-            $legacyHelper->getAnalyticsMessageBus()->dispatch($analyticsMessage);
+            $legacyHelper->getMessageBus()->dispatch($analyticsMessage);
         } catch (Exception $e) {
             $analyticsLogger->error(
                 "Exception occurred while dispatching game session creation message: ".
