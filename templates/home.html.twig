@@ -12,6 +12,7 @@
             <hr>
             <ul>
                 <li><a href="{{ path('server_manager_index') }}">Go to the Server Manager</a></li>
+                <li><a href="http://{{ app.request.host }}:3000/dashboards">Go to Grafana dashboards</a></li>
             </ul>
         </section>
         {% if downloads is not empty %}
