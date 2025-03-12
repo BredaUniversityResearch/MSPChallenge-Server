@@ -10,9 +10,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route(
+    '/{manager}/gamewatchdogserver',
+    requirements: ['manager' => 'manager|ServerManager'],
+    defaults: ['manager' => 'manager']
+)]
 class GameWatchdogServerController extends BaseController
 {
-    #[Route('manager/gamewatchdogserver/list', name: 'manager_gamewatchdogserver_list')]
+    #[Route('/list', name: 'manager_gamewatchdogserver_list')]
     public function gameWatchdogServerList(EntityManagerInterface $entityManager): Response
     {
         $gameWatchdogServers = $entityManager->getRepository(GameWatchdogServer::class)->findAll();
@@ -23,7 +28,7 @@ class GameWatchdogServerController extends BaseController
     }
 
     #[Route(
-        'manager/gamewatchdogserver/{geoserverId}/availability',
+        '/{geoserverId}/availability',
         name: 'manager_gamewatchdogserver_visibility',
         requirements: ['geoserverId' => '\d+']
     )]
@@ -40,7 +45,7 @@ class GameWatchdogServerController extends BaseController
     }
 
     #[Route(
-        'manager/gamewatchdogserver/{geoserverId}/form',
+        '/{geoserverId}/form',
         name: 'manager_gamewatchdogserver_form',
         requirements: ['geoserverId' => '\d+']
     )]

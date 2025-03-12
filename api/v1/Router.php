@@ -37,7 +37,7 @@ class Router
         "rel",
         "security",
         "sel",
-        "simulations",
+        "simulation",
         "unittestsupport",
         "update",
         "user",

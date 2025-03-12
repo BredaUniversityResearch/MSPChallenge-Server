@@ -107,7 +107,8 @@ class ConnectionManager extends DatabaseDefaults
             'password' => $_ENV['DATABASE_PASSWORD'] ?? self::DEFAULT_DATABASE_PASSWORD,
             'server_version' => $_ENV['DATABASE_SERVER_VERSION'] ?? self::DEFAULT_DATABASE_SERVER_VERSION,
             'charset' => $_ENV['DATABASE_CHARSET'] ?? self::DEFAULT_DATABASE_CHARSET,
-            'mapping_types' => ['enum' => 'string']
+            'mapping_types' => ['enum' => 'string'],
+            'use_savepoints' => true
         ];
         if ($dbName !== null) {
             $config['dbname'] = $dbName;

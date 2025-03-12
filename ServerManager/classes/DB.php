@@ -131,7 +131,26 @@ class DB
             if ($this->query->execute()) {
                 if ($this->query->columnCount() > 0) {
                     $this->results = $this->query->fetchALL(PDO::FETCH_OBJ);
-                    $this->resultsArray = json_decode(json_encode($this->results), true);
+                    $this->results = array_map(function ($result) {
+                        foreach ($result as $key => $value) {
+                            // Checks if the string $value contains any non-printable characters. So binary data.
+                            // Any character that is not:
+                            // - A printable ASCII character (from space \x20 to tilde \x7E)
+                            // - A tab (\t)
+                            // - A carriage return (\r)
+                            // - A newline (\n)
+                            if (is_string($value) && preg_match('~[^\x20-\x7E\t\r\n]~', $value)) {
+                                $result->$key = base64_encode($value);
+                            }
+                        }
+                        return $result;
+                    }, $this->results);
+                    if (null === $arr = json_decode(json_encode($this->results), true)) {
+                        throw new Exception(
+                            "Could not convert db results to array: ".var_export($this->results, true)
+                        );
+                    }
+                    $this->resultsArray = $arr;
                 }
                 $this->count = $this->query->rowCount();
                 $this->lastId = $this->pdo->lastInsertId();

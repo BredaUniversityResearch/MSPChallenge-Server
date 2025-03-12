@@ -48,7 +48,7 @@ services:
     volumes:
       - ./:/app
       - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./frankenphp/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
+      - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
     networks:
       - mitmproxy
       - database
@@ -60,9 +60,10 @@ services:
       SERVER_NAME: :80
       MERCURE_EXTRA_DIRECTIVES: demo
       # force web(socket) server over 8080 (mitmproxy reverse proxy)
-      WEB_SERVER_HOST: mitmproxy
-      URL_WEB_SERVER_HOST: mitmproxy
-      URL_WS_SERVER_HOST: mitmproxy
+      WEB_SERVER_HOST: host.docker.internal
+      WS_SERVER_HOST: host.docker.internal
+      URL_WEB_SERVER_HOST: host.docker.internal
+      URL_WS_SERVER_HOST: host.docker.internal
       MITMPROXY_PORT: ${MITMPROXY_PORT:-8080}
       URL_WEB_SERVER_PORT: ${MITMPROXY_PORT:-8080}
       URL_WS_SERVER_PORT: ${MITMPROXY_PORT:-8080}

@@ -134,19 +134,6 @@ abstract class Base extends CommonBase
         array $customopt = array()
     ): false|string {
         $ch = curl_init($url);
-
-        // any proxy required for the external calls of any kind
-        //  (MSP Authorizer, BUas GeoServer, or any other GeoServer)
-        $proxy = Config::GetInstance()->GetAuthWithProxy();
-        $sessionApiBaseUrl = await(GameSession::getSessionAPIBaseUrl($this->getGameSessionId()));
-        if (!empty($proxy) && !str_contains($url, $sessionApiBaseUrl) &&
-            !str_contains($url, "localhost") && self::PHPCanProxy()
-        ) {
-            curl_setopt($ch, CURLOPT_PROXY, $proxy);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($ch, CURLOPT_MAXREDIRS, 1);
-        }
-
         curl_setopt($ch, CURLOPT_USERAGENT, "MSP Challenge Server API");
 
         if ($asjson) {

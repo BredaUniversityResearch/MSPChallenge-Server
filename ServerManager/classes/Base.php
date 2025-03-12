@@ -170,15 +170,7 @@ class Base
         if (!empty($headers) && is_array($headers)) {
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         }
-  
-        // any proxy required for the external calls to the MSP Authoriser? (which are the only kind of external calls
-        //   done by ServerManager)
-        $proxy = Config::get('msp_auth/with_proxy');
-        if (!empty($proxy) && str_contains($url, ServerManager::getInstance()->getMSPAuthAPI()) && PHPCanProxy()) {
-            curl_setopt($curl, CURLOPT_PROXY, $proxy);
-            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($curl, CURLOPT_MAXREDIRS, 1);
-        }
+
         curl_setopt($curl, CURLOPT_USERAGENT, "MSP Challenge Server Manager API");
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);

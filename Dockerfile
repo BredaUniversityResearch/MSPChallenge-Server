@@ -1,7 +1,6 @@
-#syntax=docker/dockerfile:1.4
+#syntax=docker/dockerfile:1
 
-# Versions, use debian instead of alpine, see: https://github.com/dunglas/symfony-docker/issues/555
-FROM dunglas/frankenphp:latest-php8.2 AS frankenphp_upstream
+FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
 
 # The different stages of this Dockerfile are meant to be built into separate images
 # https://docs.docker.com/develop/develop-images/multistage-build/#stop-at-a-specific-build-stage
@@ -11,6 +10,8 @@ FROM dunglas/frankenphp:latest-php8.2 AS frankenphp_upstream
 FROM frankenphp_upstream AS frankenphp_base
 
 WORKDIR /app
+
+VOLUME /app/var/
 
 # persistent / runtime deps
 # hadolint ignore=DL3008
@@ -25,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-mysql-client \
         procps \
         nano \
-	;
+        && rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
 	install-php-extensions \
@@ -39,14 +40,6 @@ RUN set -eux; \
         gd \
 	;
 
-# write command history to a history file
-RUN echo 'export HISTFILE=/root/.bash_history' >> /root/.bashrc
-# to force the command history to be written out, even if the shell is not exited properly
-RUN echo "export PROMPT_COMMAND='history -a'" >> /root/.bashrc
-
-# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
-ENV COMPOSER_ALLOW_SUPERUSER=1
-
 # if you want to debug on prod, enable below lines:
 ##   Also check ./frankenphp/conf.d/app.prod.ini
 #ENV XDEBUG_MODE=debug
@@ -55,15 +48,25 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 #		xdebug \
 #	;
 
+# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
+
 ###> recipes ###
 ###> doctrine/doctrine-bundle ###
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 ###< doctrine/doctrine-bundle ###
 ###< recipes ###
 
-COPY --link frankenphp/conf.d/app.ini $PHP_INI_DIR/conf.d/
+COPY --link frankenphp/conf.d/10-app.ini $PHP_INI_DIR/app.conf.d/
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
+
+# write command history to a history file
+RUN echo 'export HISTFILE=/root/.bash_history' >> /root/.bashrc
+# to force the command history to be written out, even if the shell is not exited properly
+RUN echo "export PROMPT_COMMAND='history -a'" >> /root/.bashrc
 
 # Supervisor
 RUN mkdir -p /var/log/supervisor/
@@ -97,7 +100,6 @@ CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev XDEBUG_MODE=off
-VOLUME /app/var/
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
@@ -106,7 +108,7 @@ RUN set -eux; \
     	xdebug \
     ;
 
-COPY --link frankenphp/conf.d/app.dev.ini $PHP_INI_DIR/conf.d/
+COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
 
@@ -120,7 +122,7 @@ ENV APP_ENV=prod
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-COPY --link frankenphp/conf.d/app.prod.ini $PHP_INI_DIR/conf.d/
+COPY --link frankenphp/conf.d/20-app.prod.ini $PHP_INI_DIR/app.conf.d/
 COPY --link frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
 
 # prevent the reinstallation of vendors at every changes in the source code

@@ -34,16 +34,15 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route(
+    '/{manager}/gamelist',
+    requirements: ['manager' => 'manager|ServerManager'],
+    defaults: ['manager' => 'manager']
+)]
 class GameListController extends BaseController
 {
-    #[Route('/manager', name: 'manager')]
-    public function index(): Response
-    {
-        return $this->render('manager/gamelist_page.html.twig');
-    }
-
     #[Route(
-        '/manager/gamelist/{sessionState}',
+        '/{sessionState}',
         name: 'manager_gamelist',
         requirements: ['sessionState' => '\w+']
     )]
@@ -104,7 +103,7 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/gamelist/{sessionId}/name',
+        '/{sessionId}/name',
         name: 'manager_gamelist_name',
         requirements: ['sessionId' => '\d+'],
         methods: ['POST']
@@ -125,7 +124,7 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/gamelist/{sessionId}/form', name: 'manager_gamelist_form')]
+    #[Route('/{sessionId}/form', name: 'manager_gamelist_form')]
     public function gameSessionForm(
         EntityManagerInterface $entityManager,
         Request $request,
@@ -166,7 +165,7 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/gamelist/{sessionId}/details',
+        '/{sessionId}/details',
         name: 'manager_gamelist_details',
         requirements: ['sessionId' => '\d+']
     )]
@@ -182,7 +181,7 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/gamelist/{sessionId}/log/{type}',
+        '/{sessionId}/log/{type}',
         name: 'manager_gamelist_log',
         requirements: ['sessionId' => '\d+']
     )]
@@ -220,7 +219,7 @@ class GameListController extends BaseController
      * @throws \Exception
      */
     #[Route(
-        '/manager/gamelist/{sessionId}/state/{state}',
+        '/{sessionId}/state/{state}',
         name: 'manager_gamelist_state',
         requirements: ['sessionId' => '\d+', 'state' => '\w+']
     )]
@@ -237,7 +236,7 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/gamelist/{sessionId}/recreate',
+        '/{sessionId}/recreate',
         name: 'manager_gamelist_recreate',
         requirements: ['sessionId' => '\d+']
     )]
@@ -252,7 +251,7 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/gamelist/{sessionId}/archive',
+        '/{sessionId}/archive',
         name: 'manager_gamelist_archive',
         requirements: ['sessionId' => '\d+']
     )]
@@ -268,7 +267,7 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/gamelist/{sessionId}/demo', name: 'manager_gamelist_demo', requirements: ['sessionId' => '\d+'])]
+    #[Route('/{sessionId}/demo', name: 'manager_gamelist_demo', requirements: ['sessionId' => '\d+'])]
     public function gameSessionDemo(
         EntityManagerInterface $entityManager,
         WatchdogCommunicator $watchdogCommunicator,
@@ -287,7 +286,7 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/gamelist/{sessionId}/save/{type}',
+        '/{sessionId}/save/{type}',
         name: 'manager_gamelist_save',
         requirements: ['sessionId' => '\d+', 'type' => '\w+']
     )]
@@ -330,7 +329,7 @@ class GameListController extends BaseController
     }
 
     #[Route(
-        '/manager/gamelist/{sessionId}/export',
+        '/{sessionId}/export',
         name: 'manager_gamelist_export',
         requirements: ['sessionId' => '\d+']
     )]

@@ -36,11 +36,12 @@ If you want to change the ports used by the containers, you can do by defining e
 1. Either clone the repository or download the zip file from the [release page](https://github.com/BredaUniversityResearch/MSPChallenge-Server/releases).
    If you want to contribute to the project, you also can fork the repository. Read more about contributing [here](https://community.mspchallenge.info/wiki/Community_Contribution).
 2. If not already done, install either:
-   - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended)
-   - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-3. Run `docker compose build --pull --no-cache` to build fresh images
+   - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended for dev)
+     !! Make sure to enable "Add the *.docker.internal names to the host's /etc/hosts file" in Docker Desktop settings, used by the dev environment.
+   - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)   
+4. Run `docker compose build --pull --no-cache` to build fresh images
 
-4. Then, to create the server docker containers, and starting it up, run:
+5. Then, to create the server docker containers, and starting it up, run:
    - for prod: please read this [document](https://community.mspchallenge.info/wiki/Docker_server_installation)
    - for staging: `APP_ENV=prod  docker compose -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d`
    - for dev: `docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d`
@@ -50,10 +51,10 @@ If you want to change the ports used by the containers, you can do by defining e
 
    In the table above you can see the differences between the environments.
 
-5. You can view the logs by running `docker logs mspchallenge-php-1`, or in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details"
-6. Wait for the logs to show "INFO    FrankenPHP started 🐘    {"php_version": "x.x.x"}"
-7. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
-8. Run `docker compose down --remove-orphans` to stop the Docker containers.
+6. You can view the logs by running `docker logs mspchallenge-php-1`, or in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details"
+7. Wait for the logs to show "INFO    FrankenPHP started 🐘    {"php_version": "x.x.x"}"
+8. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
+9. Run `docker compose down --remove-orphans` to stop the Docker containers.
 
 ## Blackfire
 

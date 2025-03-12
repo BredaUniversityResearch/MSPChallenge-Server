@@ -19,16 +19,21 @@ use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 
+#[Route(
+    '/{manager}/gameconfig',
+    requirements: ['manager' => 'manager|ServerManager'],
+    defaults: ['manager' => 'manager']
+)]
 class GameConfigVersionController extends BaseController
 {
-    #[Route('/manager/gameconfig', name: 'manager_gameconfig')]
+    #[Route(name: 'manager_gameconfig')]
     public function index(): Response
     {
         return $this->render('manager/gameconfigversion_page.html.twig');
     }
 
     #[Route(
-        '/manager/gameconfig/{visibility}',
+        '/{visibility}',
         name: 'manager_gameconfig_list',
         requirements: ['visibility' => '(active|archived)']
     )]
@@ -45,7 +50,7 @@ class GameConfigVersionController extends BaseController
     }
 
     #[Route(
-        '/manager/gameconfig/{configId}/details',
+        '/{configId}/details',
         name: 'manager_gameconfig_details',
         requirements: ['configId' => '\d+']
     )]
@@ -61,7 +66,7 @@ class GameConfigVersionController extends BaseController
     }
 
     #[Route(
-        '/manager/gameconfig/{configFileId}/file',
+        '/{configFileId}/file',
         name: 'manager_gameconfig_file',
         requirements: ['configFileId' => '\d+']
     )]
@@ -75,7 +80,7 @@ class GameConfigVersionController extends BaseController
     }
 
     #[Route(
-        '/manager/gameconfig/{configId}/download',
+        '/{configId}/download',
         name: 'manager_gameconfig_download',
         requirements: ['configId' => '\d+']
     )]
@@ -102,7 +107,7 @@ class GameConfigVersionController extends BaseController
     }
 
     #[Route(
-        '/manager/gameconfig/{configId}/archive',
+        '/{configId}/archive',
         name: 'manager_gameconfig_archive',
         requirements: ['configId' => '\d+']
     )]
@@ -116,7 +121,7 @@ class GameConfigVersionController extends BaseController
         return new Response(null, 204);
     }
 
-    #[Route('/manager/gameconfig/form', name: 'manager_gameconfig_form')]
+    #[Route('/form', name: 'manager_gameconfig_form')]
     public function gameConfigVersionForm(
         EntityManagerInterface $entityManager,
         Request $request,
