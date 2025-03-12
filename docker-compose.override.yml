@@ -60,6 +60,8 @@ services:
       SERVER_NAME: :80
       MERCURE_EXTRA_DIRECTIVES: demo
       # force web(socket) server over 8080 (mitmproxy reverse proxy)
+      WEB_SERVER_HOST: host.docker.internal
+      WS_SERVER_HOST: host.docker.internal
       URL_WEB_SERVER_HOST: host.docker.internal
       URL_WS_SERVER_HOST: host.docker.internal
       MITMPROXY_PORT: ${MITMPROXY_PORT:-8080}

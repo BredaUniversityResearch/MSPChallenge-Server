@@ -7,8 +7,7 @@ services:
       - ./:/app
     environment:
       SERVER_NAME: ${SERVER_NAME:-:80}
-      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-host.docker.internal}
-      URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-host.docker.internal}
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
@@ -17,6 +16,4 @@ services:
       - target: 80
         published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
         protocol: tcp
-    extra_hosts:
-      # Ensure that host.docker.internal is correctly defined on Linux
-      - host.docker.internal:host-gateway
+

@@ -292,7 +292,7 @@ class ServerManager extends Base
     {
         // e.g. http://localhost/1
         // use this one if you just want the full URL of a Server's session
-        $url = $forDocker ? // in-case of docker, use http://php:80/ or http://mitmproxy:8080/
+        $url = $forDocker ? // in-case of docker, use http://php:80/ or http://host.docker.internal:8080/
             'http://'.($_ENV['WEB_SERVER_HOST'] ?? 'php').':'.($_ENV['MITMPROXY_PORT'] ?? 80).
             Config::get('code_branch') :
             Config::get('msp_server_protocol').$this->getTranslatedServerURL().Config::get('code_branch');
