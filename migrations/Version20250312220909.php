@@ -6,9 +6,6 @@ namespace DoctrineMigrations;
 
 use Doctrine\DBAL\Schema\Schema;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20250312220909 extends MSPMigration
 {
     public function getDescription(): string
