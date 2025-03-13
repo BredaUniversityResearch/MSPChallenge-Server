@@ -8,7 +8,7 @@ services:
     environment:
       NODE_ENV: ${APP_ENV:-dev}
     volumes:
-      - ./:/home/node/app:ro
+      - ./:/home/node/app
       - ./yarn.lock:/home/node/app/yarn.lock:rw
       - ./package.json:/home/node/app/package.json:rw
       - vendor_data:/home/node/app/vendor:ro
