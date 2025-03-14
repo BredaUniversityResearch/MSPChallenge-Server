@@ -75,7 +75,7 @@ class GameListRepository extends EntityRepository
      */
     private function amendSessionList(array &$sessionList): void
     {
-        $scheme = ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
+        $scheme = str_replace('://', '', $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
         $port = $_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80;
         $host = $_ENV['URL_WEB_SERVER_HOST'] ?? null;
         if (is_null($host)) {

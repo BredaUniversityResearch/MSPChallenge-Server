@@ -15,6 +15,7 @@ class VersionsProvider implements ProviderInterface
     private Version $lowestClientVersion;
 
     public function __construct(
+        private readonly string $versionFile,
         private readonly KernelInterface $kernel,
         ?Version $override = null
     ) {

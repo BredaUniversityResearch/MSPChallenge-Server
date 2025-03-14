@@ -370,7 +370,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
      */
     public static function getSessionAPIBaseUrl(GameList $gameList): string
     {
-        $protocol = ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
+        $protocol = str_replace('://', '', $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
         $address = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $gameList->getGameServer()->getAddress() ?? gethostname();
         $port = ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
         return $protocol.$address.':'.$port.'/'.$gameList->getId().'/';

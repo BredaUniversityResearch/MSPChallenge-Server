@@ -11,8 +11,8 @@ class Auth2Communicator extends AbstractCommunicator
     ) {
         parent::__construct($client);
         $this->setBaseURL(
-            ($_ENV['AUTH_SERVER_SCHEME'] ?? 'https') . '://' .
-            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info') . ':' .
+            str_replace('://', '', $_ENV['AUTH_SERVER_SCHEME'] ?? 'https').'://'.
+            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info').':'.
             ($_ENV['AUTH_SERVER_PORT'] ?? 443).
             ($_ENV['AUTH_SERVER_API_BASE_PATH'] ?? '/api/')
         );

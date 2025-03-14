@@ -4,6 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.version_file: '%kernel.project_dir%/version.txt'
+    env(VERSION_FILE): '%app.version_file%'
     app.default_scheme: 'http'
     app.default_host: 'localhost'
     app.default_port: '80'
@@ -98,6 +100,8 @@ services:
             $clientConnectionResourceManager: '@App\Domain\WsServer\WsServer'
 
     App\VersionsProvider:
+        arguments:
+            $versionFile: '%app.version_file%'
         public: true
         tags:
             - { name: shivas_versioning.provider, alias: versions_provider, priority: 200 }

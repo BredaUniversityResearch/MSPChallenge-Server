@@ -24,8 +24,9 @@ class ExceptionListener
             return;
         }
         if ($e instanceof MSPAuth2RedirectException) {
-            $url = $_ENV['AUTH_SERVER_SCHEME'].'://'.$_ENV['AUTH_SERVER_HOST'];
-            $url .= '/sso?redirect='.urlencode($event->getRequest()->getUri());
+            $url = str_replace('://', '', $_ENV['AUTH_SERVER_SCHEME'] ?? 'https').'://'.
+                $_ENV['AUTH_SERVER_HOST'].
+                '/sso?redirect='.urlencode($event->getRequest()->getUri());
             $event->setResponse(new RedirectResponse($url));
             return;
         }
