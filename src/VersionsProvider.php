@@ -15,6 +15,7 @@ class VersionsProvider implements ProviderInterface
     private Version $lowestClientVersion;
 
     public function __construct(
+        private readonly string $versionFileName,
         private readonly KernelInterface $kernel,
         ?Version $override = null
     ) {
@@ -117,9 +118,9 @@ class VersionsProvider implements ProviderInterface
 
     private function getVersionTxtContents(string $path): string
     {
-        $result = file_get_contents($path . 'version.txt');
+        $result = file_get_contents($path . $this->versionFileName);
         if (false === $result) {
-            throw new \RuntimeException(sprintf('Reading "%s" failed', $path . 'version.txt'));
+            throw new \RuntimeException(sprintf('Reading "%s" failed', $path . $this->versionFileName));
         }
 
         return rtrim($result);

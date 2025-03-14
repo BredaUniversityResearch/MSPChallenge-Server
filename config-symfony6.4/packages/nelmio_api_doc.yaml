@@ -4,7 +4,7 @@ nelmio_api_doc:
         tags:
             - name: "User"
         servers:
-          - url: '%env(default:app.default_scheme:URL_WEB_SERVER_SCHEME)%://%env(default:app.default_host:URL_WEB_SERVER_HOST)%:%env(default:app.default_port:URL_WEB_SERVER_PORT)%/{sessionId}'
+          - url: '%env(default:app.default_scheme:scheme:URL_WEB_SERVER_SCHEME)%://%env(default:app.default_host:URL_WEB_SERVER_HOST)%:%env(default:app.default_port:URL_WEB_SERVER_PORT)%/{sessionId}'
             variables:
                 sessionId:
                     default: '1'
@@ -13,7 +13,7 @@ nelmio_api_doc:
         info:
             title: MSP Challenge API
             # description: This is an awesome app!
-            version: 5.0.0
+            version: '%env(file:VERSION_FILE)%'
         components:
             links: []
             securitySchemes:

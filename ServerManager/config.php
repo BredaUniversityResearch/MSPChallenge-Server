@@ -6,7 +6,6 @@ use App\Domain\Services\ConnectionManager;
 $connectionConfig = ConnectionManager::getInstance()->getConnectionConfig();
 $codeBranch = '/';
 
-/** @noinspection HttpUrlsUsage */
 $GLOBALS['config'] = array(
     'code_branch' => $codeBranch,
     'mysql' => array_merge($connectionConfig, [
@@ -27,7 +26,7 @@ $GLOBALS['config'] = array(
         'with_proxy' => ''
     ),
     // change to https to go secure with all background connections to your MSP Challenge servers
-    'msp_server_protocol'   => ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://',
+    'msp_server_protocol' => str_replace('://', '', $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://',
     // change to https to go secure with all background connections to your MSP Challenge Server Manager
-    'msp_servermanager_protocol' => ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://'
+    'msp_servermanager_protocol' => str_replace('://', '', $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://'
 );
