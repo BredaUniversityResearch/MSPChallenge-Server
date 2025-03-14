@@ -6,11 +6,15 @@ use Symfony\Component\DependencyInjection\EnvVarProcessorInterface;
 
 class SchemeEnvVarProcessor implements EnvVarProcessorInterface
 {
-    public function getEnv(string $prefix, string $name, \Closure $getEnv): string
+    public function getEnv(string $prefix, string $name, \Closure $getEnv): ?string
     {
         $env = $getEnv($name);
 
-        return str_replace('://', '', $env ?? 'http');
+        if ($env === null) {
+            return null;
+        }
+
+        return str_replace('://', '', $env);
     }
 
     public static function getProvidedTypes(): array
