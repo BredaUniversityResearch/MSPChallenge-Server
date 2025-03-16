@@ -9,6 +9,7 @@ use App\Domain\Services\SimulationHelper;
 use App\Entity\ServerManager\GameList;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListArchiveMessage;
+use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -32,6 +33,7 @@ class GameListArchiveMessageHandler extends CommonSessionHandlerBase
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
+        VersionsProvider $provider,
         SimulationHelper $simulationHelper
     ) {
         parent::__construct(...func_get_args());

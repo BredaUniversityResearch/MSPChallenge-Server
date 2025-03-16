@@ -13,6 +13,7 @@ use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
 use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\Message\GameSave\GameSaveCreationMessage;
+use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
@@ -42,6 +43,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
+        VersionsProvider $provider,
         SimulationHelper $simulationHelper
     ) {
         parent::__construct(...func_get_args());
