@@ -2,18 +2,12 @@
 
 namespace App\MessageHandler\GameList;
 
-use App\Domain\API\v1\Simulation;
-use App\Domain\Common\EntityEnums\EventLogSeverity;
-use App\Domain\Common\EntityEnums\WatchdogStatus;
-use App\Domain\Common\InternalSimulationName;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Log\LogContainerInterface;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
-use App\Entity\ServerManager\GameWatchdogServer;
-use App\Entity\Simulation as SimulationEntity;
 use App\Entity\Watchdog;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListArchiveMessage;
@@ -38,7 +32,6 @@ use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\Schema;
-use Symfony\Component\Uid\Uuid;
 
 abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
 {
