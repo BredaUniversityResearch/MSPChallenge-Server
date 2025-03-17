@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bash \
         procps \
         nano \
+        curl \
 	;	
 
 # Set the working directory in the container
