@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         bash \
         procps \
         nano \
-        curl \
+        ca-certificates \
 	;	
 
 # Set the working directory in the container
@@ -23,6 +23,10 @@ COPY ${source_dir} /app
 
 # Set executable permissions for the .NET app (if not already set)
 RUN chmod +x /app/MSW
+RUN chmod +x /app/CEL
+RUN chmod +x /app/SEL
+RUN chmod +x /app/REL
+RUN chmod +x /app/MEL
 
 # Define the entrypoint to run the .NET app
 ENTRYPOINT ["sh", "-c", "./MSW Port=$WATCHDOG_PORT"]
