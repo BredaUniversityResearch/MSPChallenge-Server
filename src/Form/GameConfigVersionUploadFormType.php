@@ -28,7 +28,7 @@ class GameConfigVersionUploadFormType extends AbstractType
                 'constraints' => [
                     new File([
                         'maxSize' => '30M',
-                        'mimeTypes' => ['text/plain'],
+                        'mimeTypes' => ['application/json'],
                         'mimeTypesMessage' => 'Please upload a valid JSON text file',
                     ]),
                     new NotBlank()
