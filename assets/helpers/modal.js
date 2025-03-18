@@ -24,6 +24,11 @@ export default class Modal {
         return frame;
     }
 
+    emptyTurboFrame(frameName = 'modalDefaultBody')
+    {
+        document.querySelector(`turbo-frame#${frameName}`).innerHTML = '';
+    }
+
     setModalDefaultTitle(title)
     {
         document.getElementById('modalDefaultTitle').innerHTML = title;
