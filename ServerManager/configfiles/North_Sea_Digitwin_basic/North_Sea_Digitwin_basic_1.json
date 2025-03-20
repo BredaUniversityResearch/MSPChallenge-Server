@@ -16609,7 +16609,7 @@
               "link": "Cod"
             },
             {
-              "name": "Demersal fish",
+              "name": "Demersal Fish",
               "id": 30,
               "multiline": false,
               "link": "Demersal_Fish"
@@ -23492,13 +23492,13 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Cetacean",
+              "valueName": "Cetaceans",
               "valueColor": "#FF00ECFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Seal",
+              "valueName": "Seals",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -36391,7 +36391,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Demersal_fish_Catch",
+        "layer_name": "mel_Demersal_Fish_Catch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Demersal Fish Catch (Simulated)",
