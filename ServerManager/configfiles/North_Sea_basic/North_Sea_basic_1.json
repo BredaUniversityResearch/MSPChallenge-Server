@@ -2,7 +2,7 @@
   "metadata": {
     "date_modified": "3/20/2025",
     "data_model_hash": "7AB0D971BFA3124095A3DBE9EF6F280CA57472059C128FE3007F8DD9EC0167E7",
-    "errors": 2,
+	"errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
   },
@@ -40398,7 +40398,8 @@
         "layer_info_properties": null,
         "layer_tags": [
           "ValueMap",
-          "Biomass"
+          "Biomass",
+		  "Birds"
         ]
       },
       {
