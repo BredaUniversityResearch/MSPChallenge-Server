@@ -1,5 +1,0 @@
-<?php
-?>
-<style>
-
-</style>

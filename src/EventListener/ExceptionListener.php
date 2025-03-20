@@ -2,27 +2,23 @@
 
 namespace App\EventListener;
 
+use App\Domain\API\v1\Config;
 use App\Exception\MSPAuth2RedirectException;
-use ServerManager\API;
 use ServerManager\MSPAuthException;
-use ServerManager\ServerManager;
-use ServerManager\ServerManagerAPIException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class ExceptionListener
+readonly class ExceptionListener
 {
-    public function onKernelException(ExceptionEvent $event)
+    public function __construct(private UrlGeneratorInterface $urlGenerator)
+    {
+    }
+
+    public function onKernelException(ExceptionEvent $event): void
     {
         $e = $event->getThrowable();
-        if ($e instanceof ServerManagerAPIException) {
-            $api = new API;
-            $api->setMessage($e->getMessage());
-            $payload = $api->prepareReturn();
-            $event->setResponse(new JsonResponse($payload));
-            return;
-        }
         if ($e instanceof MSPAuth2RedirectException) {
             $url = str_replace('://', '', $_ENV['AUTH_SERVER_SCHEME'] ?? 'https').'://'.
                 $_ENV['AUTH_SERVER_HOST'].
@@ -31,10 +27,15 @@ class ExceptionListener
             return;
         }
         if ($e instanceof MSPAuthException) {
-            $servermanager = ServerManager::getInstance();
+            $urlBase = $this->urlGenerator->generate(
+                'server_manager_index',
+                [],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
             $event->setResponse(new RedirectResponse(
-                $servermanager->GetMSPAuthBaseURL().'/sso?redirect='.
-                urlencode($servermanager->getAbsoluteUrlBase().'login_php')
+                Config::GetInstance()->getMSPAuthBaseURL()
+                .'/sso?redirect='.
+                urlencode($urlBase.'login_php')
             ));
         }
     }
