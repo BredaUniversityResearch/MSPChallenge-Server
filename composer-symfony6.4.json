@@ -116,8 +116,7 @@
         "files": [
             "src/helpers.php",
             "src/functions.php",
-            "src/Domain/WsServer/functions.php",
-            "ServerManager/helpers.php"
+            "src/Domain/WsServer/functions.php"
         ]
     },
     "autoload-dev": {
