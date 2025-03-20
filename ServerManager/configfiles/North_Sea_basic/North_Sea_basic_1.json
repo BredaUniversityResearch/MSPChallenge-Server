@@ -15759,7 +15759,7 @@
               "link": "Seals"
             },
             {
-              "name": "Windfarm avoiding seabirds",
+              "name": "Windfarm Avoiding Seabirds",
               "id": 37,
               "multiline": true,
               "link": "Windfarm_Avoiding_Seabirds"
@@ -22941,19 +22941,19 @@
           "subcategory": "Biomass"
         },
         {
-          "name": "Cetacean",
+          "name": "Cetaceans",
           "subcategory": "Biomass"
         },
         {
-          "name": "Seal",
+          "name": "Seals",
           "subcategory": "Biomass"
         },
         {
-          "name": "Windfarm Avoiding Seabird",
+          "name": "Windfarm Avoiding Seabirds",
           "subcategory": "Biomass"
         },
         {
-          "name": "Windfarm Indifferent Seabird",
+          "name": "Windfarm Indifferent Seabirds",
           "subcategory": "Biomass"
         },
         {
@@ -23058,25 +23058,25 @@
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Cetacean",
+              "valueName": "Cetaceans",
               "valueColor": "#FF00ECFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Seal",
+              "valueName": "Seals",
               "valueColor": "#FF7272FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Windfarm Avoiding Seabird",
+              "valueName": "Windfarm Avoiding Seabirds",
               "valueColor": "#FFC773FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
             },
             {
-              "valueName": "Windfarm Indifferent Seabird",
+              "valueName": "Windfarm Indifferent Seabirds",
               "valueColor": "#CEFF73FF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -36025,7 +36025,7 @@
             "innerGlowIterations": 2,
             "innerGlowMultiplier": 2.5,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#454545FF",
             "lineWidth": 1.0,
             "lineIcon": null,
@@ -39048,7 +39048,7 @@
         ]
       },
       {
-        "layer_name": "mel_Demersal_fish",
+        "layer_name": "mel_Demersal_Fish",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Demersal Fish (Simulated)",
@@ -40013,7 +40013,7 @@
         ]
       },
       {
-        "layer_name": "mel_Windfarm_indifferent_seabird",
+        "layer_name": "mel_Windfarm_Indifferent_Seabirds",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Windfarm Indifferent Seabirds (Simulated)",
@@ -40204,7 +40204,7 @@
         ]
       },
       {
-        "layer_name": "mel_Windfarm_avoiding_seabird",
+        "layer_name": "mel_Windfarm_Avoiding_Seabirds",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Windfarm Avoiding Seabirds (Simulated)",
@@ -40395,7 +40395,7 @@
         ]
       },
       {
-        "layer_name": "mel_Cetacean",
+        "layer_name": "mel_Cetaceans",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Cetaceans (Simulated)",
@@ -40588,7 +40588,7 @@
         ]
       },
       {
-        "layer_name": "mel_Seal",
+        "layer_name": "mel_Seals",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Seals (Simulated)",
