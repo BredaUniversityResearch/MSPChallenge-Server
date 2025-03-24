@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameConfigVersion;
+use App\Validator\ValidJson;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\PreSubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -27,11 +28,10 @@ class GameConfigVersionUploadFormType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new File([
-                        'maxSize' => '30M',
-                        'mimeTypes' => ['application/json'],
-                        'mimeTypesMessage' => 'Please upload a valid JSON text file',
+                        'maxSize' => '30M'
                     ]),
-                    new NotBlank()
+                    new NotBlank(),
+                    new ValidJson()
                 ],
             ])
             ->add('gameConfigFile', ChoiceType::class, [
