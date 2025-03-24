@@ -4,10 +4,8 @@ namespace App\Validator;
 
 use Symfony\Component\Validator\Constraint;
 
-/**
- * @Annotation
- */
+#[\Attribute]
 class ValidJson extends Constraint
 {
-    public $message = 'The file "{{ string }}" is not a valid JSON.';
+    public string $message = 'The file "{{ string }}" is not a valid JSON.';
 }

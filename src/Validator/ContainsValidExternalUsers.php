@@ -13,9 +13,4 @@ class ContainsValidExternalUsers extends Constraint
 
     public string $messageAlternate =
         'Please correct {{ userToCorrect }} to appropriate {{ provider }} username(s): {{ knownUsers }}.';
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
 }
