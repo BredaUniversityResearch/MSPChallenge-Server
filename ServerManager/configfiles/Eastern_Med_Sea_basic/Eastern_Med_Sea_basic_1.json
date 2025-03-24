@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "2/25/2025",
-    "data_model_hash": "0F05B4E6FA71E0469B0527D29C8F23F7EF2EB5D8994E9CB951C1CA74C9779695",
+    "date_modified": "3/24/2025",
+    "data_model_hash": "A828F91EF66D3436E87C618C06F64ED208711EEDBCFBB9EA7ED4F791A6530792",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -9361,6 +9361,10 @@
         },
         {
           "name": "Medium Demersal Fish",
+          "subcategory": "Biomass"
+        },
+        {
+          "name": "Small Demersal Fish",
           "subcategory": "Biomass"
         },
         {
