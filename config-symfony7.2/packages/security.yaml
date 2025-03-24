@@ -29,7 +29,7 @@ security:
             jwt: ~
             provider: jwt
         manager:
-            pattern: ^/manager
+            pattern: ^/(manager|ServerManager)
             provider: local_users
             lazy: true
             custom_authenticators:

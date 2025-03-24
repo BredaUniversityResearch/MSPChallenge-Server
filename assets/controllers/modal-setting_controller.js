@@ -1,6 +1,6 @@
 import { Controller } from 'stimulus';
 import { submitFormGeneric } from '../helpers/form';
-import { noticeNotification, successNotification, errorNotification } from '../helpers/notification';
+import { successNotification, errorNotification } from '../helpers/notification';
 import Modal from '../helpers/modal';
 
 export default class extends Controller {
@@ -17,9 +17,9 @@ export default class extends Controller {
     openSettingDescriptionModal(event)
     {
         this.modalHelper.setModalDefaultTitle('Edit Server Description');
-        document.querySelector(`turbo-frame#settingForm`).innerHTML = '';
         let frame = this.modalHelper.prepAndGetTurboFrame();
         frame.src = `/manager/setting/${event.currentTarget.dataset.setting}/form`;
+        this.modalHelper.emptyTurboFrame('settingForm');
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 
@@ -38,6 +38,7 @@ export default class extends Controller {
         this.modalHelper.setModalDefaultTitle('Wipe the slate clean');
         let frame = this.modalHelper.prepAndGetTurboFrame();
         frame.src = `/manager/setting/reset/0`;
+        this.modalHelper.emptyTurboFrame('settingForm');
         window.dispatchEvent(new CustomEvent("modal-opening"));
     }
 

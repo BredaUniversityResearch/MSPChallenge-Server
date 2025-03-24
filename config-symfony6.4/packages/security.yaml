@@ -21,17 +21,17 @@ security:
             pattern: ^/(api/doc(\.json)?|manager/gamelist|\d+/api/(User/RequestToken|User/RequestSession|Game/CreatePOVConfig))
             security: false
         api:
-            pattern: ^/\d+/api/\w+/\w+
+            pattern: ^/\/*\d+/\/*api/\/*\w+/\/*\w+
             stateless: true
             jwt: ~
             provider: jwt
         manager:
-            pattern: ^/manager
+            pattern: ^/(manager|ServerManager)
             provider: local_users
             lazy: true
             custom_authenticators:
                 - App\Security\MSPAuth2Authenticator
 
     access_control:
-        - { path: ^/\d+/api/(GameSession/\w+|Plan/ExportPlansToJson|Simulation/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
-        - { path: ^/\d+/api/.*, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/\/*\d+/\/*api/\/*(GameSession/\w+|Plan/ExportPlansToJson|Simulation/GetWatchdogTokenForServer|User/getProviders|User/checkExists|Game/StartWatchdog|Game/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
+        - { path: ^/\/*\d+/\/*api/\/*.*, roles: IS_AUTHENTICATED_FULLY }

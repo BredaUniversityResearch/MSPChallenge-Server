@@ -40,7 +40,7 @@ final class Version20250116085814 extends MSPMigration
         $watchdogServerId = Watchdog::getInternalServerId()->toBinary();
         $watchdogAddress = $_ENV['WATCHDOG_ADDRESS'] ?? WatchdogInterface::DEFAULT_ADDRESS;
         $watchdogPort = (int)($_ENV['WATCHDOG_PORT'] ?? 45000);
-        $watchdogScheme = $_ENV['WATCHDOG_SCHEME'] ?? 'http';
+        $watchdogScheme = str_replace('://', '', $_ENV['WATCHDOG_SCHEME'] ?? 'http');
         $this->addSql(<<<"SQL"
         UPDATE `game_watchdog_servers` SET
         `server_id` = '{$watchdogServerId}',

@@ -130,11 +130,11 @@ class GameWatchdogServer implements WatchdogInterface
 
     public function createUrl(): string
     {
-        $scheme = (
+        $scheme = str_replace('://', '', (
             $this->getServerId()->toRfc4122() == WatchdogInterface::INTERNAL_SERVER_ID_RFC4122 ?
                 $_ENV['WATCHDOG_SCHEME'] : null
             ) ??
-            $this->getScheme();
+            $this->getScheme());
         $port = (
             $this->getServerId()->toRfc4122() == WatchdogInterface::INTERNAL_SERVER_ID_RFC4122 ?
                 $_ENV['WATCHDOG_PORT'] : null
