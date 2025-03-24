@@ -20,7 +20,9 @@ class ValidJsonValidator extends ConstraintValidator
         }
         if (empty(trim($value))) {
             $this->context->buildViolation($constraint->message)
-                ->setParameter('{{ string }}', $value->getFilename())
+                ->setParameter('{{ string }}', $value instanceof UploadedFile ?
+                    $value->getClientOriginalName() : $value->getFilename())
+                ->setParameter('{{ error }}', 'Empty JSON data')
                 ->addViolation();
             return;
         }
@@ -32,6 +34,7 @@ class ValidJsonValidator extends ConstraintValidator
         $this->context->buildViolation($constraint->message)
             ->setParameter('{{ string }}', $value instanceof UploadedFile ?
                 $value->getClientOriginalName() : $value->getFilename())
+            ->setParameter('{{ error }}', json_last_error_msg())
             ->addViolation();
     }
 }
