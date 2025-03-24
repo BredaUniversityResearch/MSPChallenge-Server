@@ -38097,7 +38097,7 @@
         ]
       },
       {
-        "layer_name": "mel_Protection_industrial_trawl",
+        "layer_name": "mel_Protection_Industrial_Trawl",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Protection Industrial Trawl Fleet (Simulated)",
@@ -38288,7 +38288,7 @@
         ]
       },
       {
-        "layer_name": "mel_Protection_bottom_trawl",
+        "layer_name": "mel_Protection_Bottom_Trawl",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Protection Bottom Trawl Fleet (Simulated)",
@@ -38479,7 +38479,7 @@
         ]
       },
       {
-        "layer_name": "mel_Protection_nets",
+        "layer_name": "mel_Protection_Nets",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Protection Nets Fleets (Simulated)",
