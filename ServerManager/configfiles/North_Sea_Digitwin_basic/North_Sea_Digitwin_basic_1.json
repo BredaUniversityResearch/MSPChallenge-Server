@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "date_modified": "2/19/2025",
+    "date_modified": "3/24/2025",
     "data_model_hash": "96AE4AE61B1A605175ADDEB63D2DE86C30931F050D1C02EC631A7B23820ABADF",
     "errors": 0,
     "editor_version": "2.0.0",
@@ -22827,7 +22827,7 @@
     "policy_settings": {
       "fishing": {
         "all_country_approval": true,
-        "stakeholder_pressure_cool_down": 0.0,
+        "stakeholder_pressure_cool_down": 0.1,
         "fleet_info": {
           "gear_types": [
             "Bottom trawl (otter, beam, seine)",
@@ -23439,14 +23439,14 @@
           "subcategory": "Species Catch"
         },
         {
-          "name": "Cetacean Bycatch",
+          "name": "Cetaceans Bycatch",
           "subcategory": "Bycatch"
         }
       ],
       "ecologyCategories": [
         {
           "categoryName": "Biomass",
-          "categoryColor": "#FFFFFFFF",
+          "categoryColor": "#4575B4FF",
           "unit": "t/km2",
           "valueDefinitions": [
             {
@@ -23519,7 +23519,7 @@
         },
         {
           "categoryName": "Biodiversity",
-          "categoryColor": "#FFFFFFFF",
+          "categoryColor": "#5AAE61FF",
           "unit": "",
           "valueDefinitions": [
             {
@@ -23538,7 +23538,7 @@
         },
         {
           "categoryName": "Fleets Catch",
-          "categoryColor": "#FFFFFFFF",
+          "categoryColor": "#FDAE61FF",
           "unit": "t/km2",
           "valueDefinitions": [
             {
@@ -23561,19 +23561,13 @@
             }
           ]
         },
-		        {
+		{
           "categoryName": "Species Catch",
           "categoryColor": "#FDAE61FF",
           "unit": "t/km2",
           "valueDefinitions": [
             {
               "valueName": "Benthic Invertebrates Catch",
-              "valueColor": "#73FFBCFF",
-              "unit": "t/km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Cetacean Bycatch",
               "valueColor": "#73FFBCFF",
               "unit": "t/km2",
               "valueDependentCountry": -1
@@ -23618,7 +23612,7 @@
         },
         {
           "categoryName": "Protected Areas",
-          "categoryColor": "#FFFFFFFF",
+          "categoryColor": "#9970ABFF",
           "unit": "km2",
           "valueDefinitions": [
             {
@@ -23667,6 +23661,19 @@
               "valueName": "No Drift and Fixed Nets Fleets",
               "valueColor": "#737DFFFF",
               "unit": "km2",
+              "valueDependentCountry": -1
+            }
+          ]
+        },
+        {
+          "categoryName": "Bycatch",
+          "categoryColor": "#FDAE61FF",
+          "unit": "g/m2",
+          "valueDefinitions": [
+            {
+              "valueName": "Cetaceans Bycatch",
+              "valueColor": "#73FFBCFF",
+              "unit": "g/m2",
               "valueDependentCountry": -1
             }
           ]
@@ -25147,7 +25154,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Average wind speed at 10 m height",
         "layer_information": "",
         "layer_media": "wiki://Wind_Speed",
         "layer_text_info": null,
@@ -35827,7 +35834,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Cetacean_Bycatch",
+        "layer_name": "mel_Cetaceans_Bycatch",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Cetacean Bycatch (Simulated)",
@@ -37517,7 +37524,7 @@
         },
         "layer_info_properties": null,
         "layer_tags": []
-      }
+      },
       {
         "layer_name": "NS_Telecom_Cables_DT",
         "layer_geotype": "line",

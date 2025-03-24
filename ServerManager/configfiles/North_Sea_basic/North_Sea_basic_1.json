@@ -38671,7 +38671,7 @@
         ]
       },
       {
-        "layer_name": "mel_Benthic_invertebrates",
+        "layer_name": "mel_Benthic_Invertebrates",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
         "layer_short": "Benthic Invertebrates (Simulated)",
