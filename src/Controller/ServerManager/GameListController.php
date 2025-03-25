@@ -3,13 +3,22 @@
 namespace App\Controller\ServerManager;
 
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\EntityEnums\WatchdogStatus;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\Game;
 use App\Entity\ServerManager\GameList;
+use App\Entity\Watchdog;
 use App\Form\GameListAddFormType;
 use App\Form\GameListUserAccessFormType;
+use App\Message\Watchdog\Message\GameStateChangedMessage;
+use App\Repository\GameRepository;
+use App\Repository\WatchdogRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -124,6 +133,50 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
+    #[Route(
+        '/{sessionId}/connect_watchdog/{watchdogId}',
+        name: 'manager_gamelist_connect_watchdog',
+        requirements: ['sessionId' => '\d+', 'watchdogId' => '\d+']
+    )]
+    public function connectToWatchdog(
+        ConnectionManager $connectionManager,
+        int $sessionId,
+        int $watchdogId,
+        MessageBusInterface $messageBus
+    ): Response {
+        try {
+            $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
+            /** @var WatchdogRepository $watchdogRepo */
+            $watchdogRepo = $em->getRepository(Watchdog::class);
+            if (null === $watchdog = $watchdogRepo->find($watchdogId)) {
+                throw new NotFoundHttpException('Watchdog not found');
+            }
+            $watchdog
+                ->setDeletedAt(null)
+                ->setStatus(WatchdogStatus::READY);
+            $em->persist($watchdog);
+            $em->flush();
+
+            $gameListRepo = $connectionManager->getServerManagerEntityManager()
+                ->getRepository(GameList::class);
+            $gameList = $gameListRepo->find($sessionId);
+            /** @var GameRepository $gameRepo */
+            $gameRepo = $em->getRepository(Game::class);
+            $game = $gameRepo->retrieve();
+
+            $message = new GameStateChangedMessage();
+            $message
+                ->setGameSessionId($sessionId)
+                ->setWatchdogId($watchdogId)
+                ->setGameState(new GameStateValue($game->getGameState()))
+                ->setMonth($gameList->getGameCurrentMonth());
+            $messageBus->dispatch($message);
+        } catch (Exception $e) {
+            return new Response($e->getMessage(), 404);
+        }
+        return new Response(null, 204);
+    }
+
     #[Route('/{sessionId}/form', name: 'manager_gamelist_form')]
     public function gameSessionForm(
         EntityManagerInterface $entityManager,
@@ -164,6 +217,9 @@ class GameListController extends BaseController
         );
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route(
         '/{sessionId}/details',
         name: 'manager_gamelist_details',
@@ -171,12 +227,15 @@ class GameListController extends BaseController
     )]
     public function gameSessionDetails(
         EntityManagerInterface $entityManager,
+        ConnectionManager $connectionManager,
         int $sessionId = 1
     ): Response {
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
+        $watchdogs = $connectionManager->getGameSessionEntityManager($sessionId)->getRepository(Watchdog::class)->
+            findAll();
         return $this->render(
             'manager/GameList/gamelist_details.html.twig',
-            ['gameSession' => $gameSession]
+            ['gameSession' => $gameSession, 'watchdogs' => $watchdogs]
         );
     }
 
@@ -216,7 +275,7 @@ class GameListController extends BaseController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route(
         '/{sessionId}/state/{state}',

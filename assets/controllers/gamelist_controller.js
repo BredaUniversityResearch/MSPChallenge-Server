@@ -25,6 +25,19 @@ export default class extends Controller {
         document.querySelector('turbo-frame#modalDefaultBody').reload();
     }
 
+    async connectToWatchdog(event)
+    {
+        let sessionId = event.currentTarget.dataset.session;
+        let watchdogId = event.currentTarget.dataset.watchdog;
+        const response = await fetch(`/manager/gamelist/${sessionId}/connect_watchdog/${watchdogId}`);
+        if (response.status != 204) {
+            errorNotification('Could not connect to Watchdog.');
+            return;
+        }
+        successNotification('Connecting to Watchdog.');
+        this.reloadGameDetailsFrame();
+    }
+
     async sessionEditName(event)
     {
         let sessionId = event.currentTarget.dataset.session;
