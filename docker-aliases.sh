@@ -14,7 +14,7 @@ COMPOSE_PROJECT_NAME_DEV="mspchallenge-dev"
 COMPOSE_PROJECT_NAME_STAGING="mspchallenge-staging"
 COMPOSE_PROJECT_NAME_PROD="mspchallenge"
 # ede = export (e) dotenv (d) environmental variables (e)
-alias ede='unset $(bash docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(bash docker/dotenv-vars.sh) &> /dev/null)'
+alias ede='unset $(bash docker/dotenv-vars.sh) && export $(php docker/export-dotenv-vars/app.php $(bash docker/dotenv-vars.sh))'
 # dcu = docker(d) compose(c) up(u)
 PRE_DCU="bash set_symfony_version.sh && mkdir -p ./var/docker/ && touch ./var/docker/.bash_history"
 DCU_BASE="MSYS_NO_PATHCONV=1 docker compose"
