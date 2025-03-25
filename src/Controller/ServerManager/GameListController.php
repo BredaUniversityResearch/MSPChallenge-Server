@@ -145,7 +145,7 @@ class GameListController extends BaseController
         MessageBusInterface $messageBus
     ): Response {
         try {
-            $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
+            $em = $connectionManager->getGameSessionEntityManager($sessionId);
             /** @var WatchdogRepository $watchdogRepo */
             $watchdogRepo = $em->getRepository(Watchdog::class);
             if (null === $watchdog = $watchdogRepo->find($watchdogId)) {

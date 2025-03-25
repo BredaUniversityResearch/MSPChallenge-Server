@@ -96,6 +96,8 @@
                                             <button class="btn btn-warning btn-sm" data-session="{{ gameSession.id }}" data-watchdog="{{ watchdog.id }}" data-action="gamelist#connectToWatchdog">
                                                 <i class="fa fa-handshake-o"></i> Connect
                                             </button>
+                                            {% elseif simulations is empty %}
+                                            <i class="fa fa-spinner fa-pulse"></i> Connecting...
                                             {% else %}
                                             <i class="fa fa-exchange"></i> {{ simulations }}
                                             {% endif %}
