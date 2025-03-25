@@ -11,4 +11,5 @@ class GeneralPolicyType extends Enum
     public const FISHING = 2; // = ecology = fishing effort
     public const SHIPPING = 4;
     public const ECO_GEAR = 8;
+    public const SAND_EXTRACTION = 16;
 }
