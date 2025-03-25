@@ -52,14 +52,14 @@ class Log extends Base
      */
     public function postEvent(EventLog $eventLog): ?PromiseInterface
     {
-        if (null === $message = $eventLog->getMessage()) {
+        if (null === $eventLog->getMessage()) {
             resolve(); // do not do anything.
         }
         $eventLog->setTime(new DateTime());
         $data = [
             'event_log_time' => $eventLog->getTime()->format('Y-m-d H:i:s'),
             'event_log_source' => $eventLog->getSource() ?? 'source not set',
-            'event_log_severity' => $eventLog->getSeverity(),
+            'event_log_severity' => $eventLog->getSeverity()->value,
             'event_log_message' => $eventLog->getMessage()
         ];
         if ($eventLog->getStackTrace() !== null) {
