@@ -1,7 +1,7 @@
 {
   "metadata": {
     "date_modified": "3/26/2025",
-    "data_model_hash": "BD8AA5BA471386033182532F9D11DC0C98089DB9E505A9B29AE5C7C8318CCF30",
+    "data_model_hash": "2CD71090D060CD9B3A4698E8E2A28025C6314383ACA2C15BDA06F94D3A0BD0EF",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -6465,61 +6465,6 @@
               "valueName": "Seine Catch",
               "valueColor": "#73D9FFFF",
               "unit": "t/km2",
-              "valueDependentCountry": -1
-            }
-          ]
-        },
-        {
-          "categoryName": "Protected Areas",
-          "categoryColor": "#9970ABFF",
-          "unit": "km2",
-          "valueDefinitions": [
-            {
-              "valueName": "No protection against fishing",
-              "valueColor": "#FF7272FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No nephrops fishing",
-              "valueColor": "#FFC773FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No scallops fishing",
-              "valueColor": "#CEFF73FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No demersal fishing",
-              "valueColor": "#73FFBCFF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No seine fishing",
-              "valueColor": "#73D9FFFF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Habitats Directive",
-              "valueColor": "#FF0079FF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "Birds Directive",
-              "valueColor": "#737DFFFF",
-              "unit": "km2",
-              "valueDependentCountry": -1
-            },
-            {
-              "valueName": "No pots and creel fishing",
-              "valueColor": "#FF00ECFF",
-              "unit": "km2",
               "valueDependentCountry": -1
             }
           ]
