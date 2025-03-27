@@ -469,4 +469,37 @@ class GameController extends BaseController
             return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
         }
     }
+
+    #[Route(
+        path: '/IsOnline',
+        name: 'session_api_game_is_online',
+        methods: ['GET']
+    )]
+    #[OA\Get(
+        summary: 'Check if the session is online',
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Session is online',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(
+                                    property: 'payload',
+                                    type: 'string',
+                                    example: 'online'
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    public function isOnline(): JsonResponse
+    {
+        return new JsonResponse(self::wrapPayloadForResponse(true, 'online'));
+    }
 }

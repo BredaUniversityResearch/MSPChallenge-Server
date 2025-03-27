@@ -133,7 +133,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             $this->warning('Game list not found. Id: '.$message->getGameSessionId());
             return;
         }
-        $tokens = $this->getTokensForWatchdog($message->getGameSessionId());
+        $tokens = $this->getTokensForWatchdog($message->getGameSessionId(), $watchdog);
         $apiAccessToken = new Token($tokens['token'], new DateTime('+1 hour'));
         $apiAccessRenewToken = new Token(
             $tokens['api_refresh_token'],
@@ -169,12 +169,12 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
     /**
      * @throws Exception
      */
-    private function getTokensForWatchdog(int $sessionId): array
+    private function getTokensForWatchdog(int $sessionId, Watchdog $watchdog): array
     {
         $user = new User();
         $user->setGameSessionId($sessionId);
-        $user->setUserId(999999);
-        $user->setUsername('Watchdog_' . uniqid());
+        $user->setUserId((int)('999999'.$watchdog->getId()));
+        $user->setUsername('Watchdog_'.$watchdog->getGameWatchdogServer()->getServerId()->toRfc4122());
         $jsonResponse = $this->authenticationSuccessHandler->handleAuthenticationSuccess($user);
         return json_decode($jsonResponse->getContent(), true);
     }
