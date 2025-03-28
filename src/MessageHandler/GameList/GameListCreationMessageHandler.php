@@ -134,6 +134,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                     new GameStateValue('end'),
                     $this->gameSession->getGameCurrentMonth()
                 );
+                $this->logContainer($this->watchdogCommunicator);
             }
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
             $this->gameSession->setGameState(new GameStateValue('setup'));
