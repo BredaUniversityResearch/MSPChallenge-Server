@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
@@ -40,17 +42,20 @@ class SessionController extends AbstractController
     ): Response {
         try {
             $connectionManager->getCachedGameSessionDbConnection($session)->connect();
-        } catch (\Exception $e) {
-            throw $this->createNotFoundException('Session database does not exist.');
+        } catch (ConnectionException $e) {
+            if ($e->getCode() == 1049) { // MySQL Unknown database
+                throw new HttpException(410, 'Session is non-existing');
+            }
+            throw $e;
         }
         if (null === $gameList = $connectionManager->getServerManagerEntityManager()->find(
             GameList::class,
             $session
         )) {
-            throw $this->createNotFoundException('Session not found.');
+            throw new HttpException(410, 'Session is non-existing');
         }
         if ($gameList->getSessionState() != GameSessionStateValue::HEALTHY) {
-            throw $this->createNotFoundException('Unable to use session.');
+            throw new HttpException(503, 'Session cannot be used at the moment');
         }
 
         // Merge the route information into the attributes

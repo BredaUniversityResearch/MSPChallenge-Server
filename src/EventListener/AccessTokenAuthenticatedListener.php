@@ -4,12 +4,14 @@ namespace App\EventListener;
 
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\ConnectionException;
+use Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTAuthenticatedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\InvalidTokenException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AccessTokenAuthenticatedListener
 {
@@ -46,7 +48,14 @@ class AccessTokenAuthenticatedListener
             ->from('api_refresh_token', 'art')
             ->where('art.refresh_token = :rt')
             ->setParameter('rt', $token);
-        $result = $connection->executeQuery($query->getSQL(), $query->getParameters())->fetchAllAssociative();
+        try {
+            $result = $connection->executeQuery($query->getSQL(), $query->getParameters())->fetchAllAssociative();
+        } catch (ConnectionException $e) {
+            if ($e->getCode() == 1049) { // MySQL Unknown database
+                throw new HttpException(410, 'Session is non-existing');
+            }
+            throw $e;
+        }
         if (!empty($result)) {
             // this is actually a refresh token, which we shouldn't allow to be used as an access token
             throw new InvalidTokenException();
