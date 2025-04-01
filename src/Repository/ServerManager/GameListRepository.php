@@ -88,6 +88,8 @@ class GameListRepository extends EntityRepository
             }
         }
         foreach ($sessionList as $key => $session) {
+            $session['players_active'] ??= 0;
+            $session['players_past_hour'] ??= 0;
             // get session's config file contents and decode the json
             $game = new Game();
             $game->setGameSessionId($session['id']);
