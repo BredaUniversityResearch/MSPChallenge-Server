@@ -29,7 +29,7 @@ If you want to change the ports used by the containers, you can do by defining e
 - in the [`.env`](.env) file in the root of the project
 - or by defining them in the command line when running `docker compose up` like so, e.g.:
   `WEB_SERVER_PORT=80 DATABASE_PORT=3306 WS_SERVER_PORT=45001 WATCHDOG_PORT=45000 ADMINER_PORT=8082 MITMPROXY_POR=8080 MITMPROXY_WEB_PORT=8081 docker compose up`
-- using a `.env.local` file and starting docker compose using aliases, see [Aliases for development and deployment](#aliases-for-development-and-deployment).
+- using a `.env.local` file and starting docker compose using aliases, see [Aliases for development](#aliases-for-development).
 
 ## Installation
 
@@ -39,9 +39,9 @@ If you want to change the ports used by the containers, you can do by defining e
    - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended for dev)
      !! Make sure to enable "Add the *.docker.internal names to the host's /etc/hosts file" in Docker Desktop settings, used by the dev environment.
    - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)   
-4. Run `docker compose build --pull --no-cache` to build fresh images
+3. Run `docker compose build --pull --no-cache` to build fresh images
 
-5. Then, to create the server docker containers, and starting it up, run:
+4. Then, to create the server docker containers, and starting it up, run:
    - for prod: please read this [document](https://community.mspchallenge.info/wiki/Docker_server_installation)
    - for staging: `APP_ENV=prod  docker compose -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d`
    - for dev: `docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d`
@@ -51,10 +51,10 @@ If you want to change the ports used by the containers, you can do by defining e
 
    In the table above you can see the differences between the environments.
 
-6. You can view the logs by running `docker logs mspchallenge-php-1`, or in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details"
-7. Wait for the logs to show "INFO    FrankenPHP started 🐘    {"php_version": "x.x.x"}"
-8. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
-9. Run `docker compose down --remove-orphans` to stop the Docker containers.
+5. You can view the logs by running `docker logs mspchallenge-php-1`, or in Docker Desktop by opening "Containers" -> "php-1" -> "Actions" -> "View Details"
+6. Wait for the logs to show "INFO    FrankenPHP started 🐘    {"php_version": "x.x.x"}"
+7. Open `http://localhost/ServerManager` in your favorite web browser to open up the Server manager
+8. Run `docker compose down --remove-orphans` to stop the Docker containers.
 
 ## Blackfire
 
@@ -79,7 +79,7 @@ To start/stop/restart supervisor services, see some examples here:<br/>
 To check their status:<br/>
 `docker exec CONTAINER supervisorctl status all`<br/>
 
-## Aliases for development and deployment
+## Aliases for development
 
 If the host machine, running Docker, is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you
 can create aliases to simplify docker container management and interaction.
