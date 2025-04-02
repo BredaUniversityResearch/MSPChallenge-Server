@@ -37,7 +37,7 @@ class Router
         "rel",
         "security",
         "sel",
-        "simulations",
+        "simulation",
         "unittestsupport",
         "update",
         "user",
@@ -104,11 +104,6 @@ class Router
         $class = $objectMethod->getInstance();
         $className = (new ReflectionClass($class))->getShortName();
         $method = $objectMethod->getMethod();
-
-        /** @var Base $class */
-        if (!$class->isValid()) {
-            throw new ClientDisconnectedException('Access denied (Security)');
-        }
 
         if (null !== $preExecuteCallback) {
             $preExecuteCallback($data);
@@ -178,16 +173,12 @@ class Router
         try {
             $class = self::createObjectFrom($className, $method);
         } catch (Exception $e) {
-            $message = Base::ErrorString(new Exception('Invalid class.'));
+            $message = self::ErrorString(new Exception('Invalid class.'));
             return self::FormatResponse(false, $message, null, $className, $method, $data);
         }
         $message = null;
         $payload = null;
-        if (!$class->isValid()) {
-            // security check failed in this instance, so class method not allowed
-            $success = false;
-            $message = Base::ErrorString(new Exception("Access denied (Security)."));
-        } elseif (method_exists($class, $method)) {
+        if (method_exists($class, $method)) {
             $classData = new ReflectionClass($class);
             $methodData = $classData->getMethod($method);
 
@@ -217,7 +208,7 @@ class Router
                     Database::GetInstance($class->getGameSessionId())->DBRollbackTransaction();
                 }
 
-                $message = Base::ErrorString($e);
+                $message = self::ErrorString($e);
                 return self::formatResponse($success, $message, null, $className, $method, $data);
             }
             // execution worked, payload has been set, message can remain empty
@@ -225,9 +216,30 @@ class Router
         } else {
             // this can only mean that the class method doesn't exist, even though the class does
             $success = false;
-            $message = Base::ErrorString(new Exception("Invalid method."));
+            $message = self::ErrorString(new Exception("Invalid method."));
         }
         return self::formatResponse($success, $message, $payload, $className, $method, $data);
+    }
+
+    /**
+     * @param Exception|TypeError $errorException
+     * @return string
+     */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    private static function ErrorString($errorException): string
+    {
+        $errorException = self::getOriginalError($errorException);
+        return $errorException->getMessage() . PHP_EOL . "Of file " . $errorException->getFile() . " On line " .
+            $errorException->getLine() . PHP_EOL . "Stack trace: " . $errorException->getTraceAsString();
+    }
+
+    private static function getOriginalError(Throwable $errorException): Throwable
+    {
+        $e = $errorException;
+        while ((null !== $prev = $errorException->getPrevious()) && $e !== $prev) {
+            $e = $prev;
+        }
+        return $e;
     }
 
     /**
@@ -312,7 +324,7 @@ class Router
     public static function formatResponse(
         bool $success,
         ?string $message,
-        $payload = null,
+        mixed $payload = null,
         string $className = '',
         string $method = '',
         array $data = []
@@ -326,6 +338,18 @@ class Router
             unset($payload['debug-message']);
         }
 
+        if (($_ENV['APP_ENV'] ?? 'prod') !== 'dev') {
+            return [
+                // no need for header information from api, only needed for websocket server communication.
+                "header_type" => null,
+                "header_data" => null,
+                "success" => $success,
+                "message" => $message,
+                "payload" => $payload
+            ];
+        }
+
+        // everything for dev (debug) below
         $message .= $debugMessage;
         if (!$success) {
             $message .= PHP_EOL .
@@ -334,14 +358,14 @@ class Router
             "Request URI: " . $_SERVER['REQUEST_URI'];
         }
 
-        return array(
+        return [
             // no need for header information from api, only needed for websocket server communication.
             "header_type" => null,
             "header_data" => null,
             "success" => $success,
             "message" => $message,
             "payload" => $payload
-        );
+        ];
     }
 
     /**

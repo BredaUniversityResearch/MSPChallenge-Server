@@ -4,14 +4,18 @@ namespace App\MessageHandler\GameSave;
 
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\GameListAndSaveSerializer;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\SimulationHelper;
 use App\Entity\Layer;
 use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
-use App\MessageHandler\GameList\CommonSessionHandler;
+use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\Message\GameSave\GameSaveCreationMessage;
+use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
@@ -23,13 +27,10 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Serializer;
 use ZipArchive;
 
 #[AsMessageHandler]
-class GameSaveCreationMessageHandler extends CommonSessionHandler
+class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
 {
 
     private ?string $shapeFileTempStore = null;
@@ -41,7 +42,9 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
-        WatchdogCommunicator $watchdogCommunicator
+        WatchdogCommunicator $watchdogCommunicator,
+        VersionsProvider $provider,
+        SimulationHelper $simulationHelper
     ) {
         parent::__construct(...func_get_args());
     }
@@ -49,14 +52,14 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function __invoke(GameSaveCreationMessage $gameSave): void
     {
         $this->setGameSessionAndDatabase($gameSave);
         $this->gameSave = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->find(
             $gameSave->gameSaveId
-        ) ?? throw new \Exception('Game save not found, so cannot continue.');
+        ) ?? throw new Exception('Game save not found, so cannot continue.');
 
         $this->createSaveZip();
         if ($this->gameSave->getSaveType() == GameSaveTypeValue::LAYERS) {
@@ -75,7 +78,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function closeSaveZip(): void
     {
@@ -95,7 +98,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function deleteShapeFilesTempStore(): void
     {
@@ -109,7 +112,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
             sleep(1); // bit ugly, I know, but Zip file creation takes a bit of time...
             $counter = ($counter ?? 0) + 1;
             if ($counter > 9) {
-                throw new \Exception("Waited {$counter} seconds, but Zip file {$saveZipStore} still not there...");
+                throw new Exception("Waited {$counter} seconds, but Zip file {$saveZipStore} still not there...");
             }
         }
         $finder = new Finder();
@@ -121,7 +124,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function createLayerShapeFilesAndStore(string $layerName, array $geometryContent): void
     {
@@ -201,7 +204,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function addLayerShapeFilesExportsToZip(): void
     {
@@ -220,7 +223,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function addLayerRasterExportsToZip(): void
     {
@@ -233,30 +236,15 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
 
     private function addGameListRecordToZip(): void
     {
-        $encoder = new JsonEncoder();
-        $serializer = new Serializer([$this->normalizer], [$encoder]);
-        $normalizeContext = [
-            AbstractNormalizer::CALLBACKS => [
-                'id' => fn() => $this->gameSession->getId(),
-                'gameConfigVersion' => fn($innerObject) => (!is_null($innerObject)) ? $innerObject->getId() : null,
-                'gameServer' => fn($innerObject) => $innerObject->getId(),
-                'gameWatchdogServer' => fn($innerObject) => $innerObject->getId(),
-                'sessionState' => fn($innerObject) => ((string) $innerObject),
-                'gameState' => fn($innerObject) => ((string) $innerObject),
-                'gameVisibility' => fn($innerObject) => ((string) $innerObject),
-                'saveType' => fn() => null,
-                'saveVisibility' => fn() => null,
-                'saveTimestamp' => fn() => null
-            ]
-        ];
-        $gameList = $serializer->serialize($this->gameSave, 'json', $normalizeContext);
+        $serializer = new GameListAndSaveSerializer($this->mspServerManagerEntityManager);
+        $gameList = $serializer->createJsonFromGameSave($this->gameSave);
         $this->saveZip->addFromString('game_list.json', $gameList);
     }
 
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function addSessionRasterStoreToZip(): void
     {
@@ -283,7 +271,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function addSessionRunningConfigToZip(): void
     {
@@ -298,7 +286,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     private function createSaveZip(): void
     {
@@ -310,21 +298,21 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
         }
         $this->saveZip = new ZipArchive();
         if ($this->saveZip->open($saveZipStore, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            throw new \Exception("Wasn't able to create the ZIP file: {$saveZipStore}");
+            throw new Exception("Wasn't able to create the ZIP file: {$saveZipStore}");
         }
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function addFileToSaveZip(string $file, ?string $subFolder = null): void
     {
         $fileSystem = new Filesystem();
         if (!$fileSystem->exists($file)) {
-            throw new \Exception("Could not add {$file} to zip as it does not exist");
+            throw new Exception("Could not add {$file} to zip as it does not exist");
         }
         if (!$this->saveZip->addFile($file, $subFolder . pathinfo($file, PATHINFO_BASENAME))) {
-            throw new \Exception("Could not add {$file} to zip");
+            throw new Exception("Could not add {$file} to zip");
         }
     }
 }

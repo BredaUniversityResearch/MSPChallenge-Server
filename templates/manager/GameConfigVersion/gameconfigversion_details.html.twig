@@ -1,0 +1,56 @@
+<turbo-frame id="modalDefaultBody">
+    <div class="modal-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-border-left">
+                <tr>
+                    <td colspan="2"><h1>{{ gameConfigVersion.gameConfigFile.filename }} version {{ gameConfigVersion.version }}</h1></td>
+                </tr>
+                <tr>
+                    <th>Date Uploaded</th>
+                    <td class="text-right">{{ gameConfigVersion.uploadTime|date("Y-m-d H:i:s") }}</td>
+                </tr>
+                <tr>
+                    <th>Uploaded By</th>
+                    <td class="text-right">{{ gameConfigVersion.uploadUserName }}</td>
+                </tr>
+                <tr>
+                    <th>Last Used</th>
+                    <td class="text-right">{{ gameConfigVersion.lastPlayedTime == 0 ? "Never" : gameConfigVersion.lastPlayedTime|date("Y-m-d H:i") }}</td>
+                </tr>
+                <tr>
+                    <th>Filename</th>
+                    <td class="text-right">{{ gameConfigVersion.gameConfigFile.filename }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td class="text-right">{{ gameConfigVersion.gameConfigFile.description }}</td>
+                </tr>
+                <tr>
+                    <th>Version</th>
+                    <td class="text-right">{{ gameConfigVersion.version }}</td>
+                </tr>
+                <tr>
+                    <th>Change Message</th>
+                    <td class="text-right">{{ gameConfigVersion.versionMessage }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-secondary btn-sm"
+                data-config="{{ gameConfigVersion.id }}"
+                data-action="gameconfig#configDownload">
+                <i class="fa fa-download" title="Download config file"></i> Download
+            </button>
+            {% if gameConfigVersion.visibility == 'active' %}
+            <button class="btn btn-info btn-sm ms-auto"
+                data-config="{{ gameConfigVersion.id }}" 
+                data-action="gameconfig#configArchive">
+                <i class="fa fa-archive" title="Archive config file"></i> Archive
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Close</button>
+    </div>
+</turbo-frame>

@@ -21,4 +21,6 @@ enum PolicyTypeName: string
     case SEASONAL_CLOSURE = 'seasonal_closure';
     #[Description('Ecological fishing gear')]
     case ECO_GEAR = 'eco_gear';
+    #[Description('Sand extraction')]
+    case SAND_EXTRACTION = 'sand_extraction';
 }

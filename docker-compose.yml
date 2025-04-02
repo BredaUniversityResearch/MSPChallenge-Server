@@ -1,4 +1,36 @@
 services:
+  node:
+    build:
+      context: .
+      target: node_base
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      NODE_ENV: ${APP_ENV:-dev}
+    volumes:
+      - ./:/home/node/app
+      - ./yarn.lock:/home/node/app/yarn.lock:rw
+      - ./package.json:/home/node/app/package.json:rw
+      - vendor_data:/home/node/app/vendor:ro
+      - node_modules_data:/home/node/app/node_modules:rw
+      - public_build_data:/home/node/app/public/build:rw
+    # wait for x sec before starting, see deploy.restart_policy.delay
+    command: bash -c "sleep 5 && yarn install && yarn encore ${APP_ENV:-dev}"
+    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        # we cannot use delay: x because it is only supported in swarm mode
+        #   see: https://github.com/docker/docs/issues/11777
+        # delay: 5s
+        max_attempts: 10
+    networks:
+      - php
+    depends_on:
+      - php
+    logging:
+        driver: "local"
+
   redis:
     build:
       context: .
@@ -50,52 +82,57 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+      - ./var/docker/.bash_history:/root/.bash_history
+      - vendor_data:/app/vendor:rw
+      - node_modules_data:/app/node_modules:ro
+      - public_build_data:/app/public/build:ro
+      - /app/var/cache
+      - /app/var/log
     networks:
       - database
       - php
       - redis
+      - simulations
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
-      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
-      TRUSTED_HOSTS: ^${SERVER_NAME:-localhost}|php$$
       DOCKER: 1
       DATABASE_HOST: database
-
       # Run "composer require symfony/mercure-bundle" to install and configure the Mercure integration
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
-      MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
+      MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
+      # The two next lines can be removed after initial installation
+      SYMFONY_VERSION: ${SYMFONY_VERSION:-6.4}
+      STABILITY: ${STABILITY:-stable}
       # Exposes BLACKFIRE_CLIENT_* environment variables allowing the client to communicate with Blackfire's API:
       BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED:-0}
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
       BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
-      APP_ENV: ${APP_ENV:-dev}
-      SYMFONY_VERSION: ${SYMFONY_VERSION:-6.4}
-      FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
-
       # web server
       WEB_SERVER_HOST: ${WEB_SERVER_HOST:-php}
       WEB_SERVER_PORT: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
       # web socket server
-      WS_SERVER_HOST: ${WS_SERVER_HOST:-localhost}
+      WS_SERVER_HOST: ${WS_SERVER_HOST:-php}
       WS_SERVER_PORT: ${WS_SERVER_PORT:-45001}
       # URL settings
-      URL_WEB_SERVER_SCHEME: ${URL_WEB_SERVER_SCHEME:-http://}
-      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-}
+      URL_WEB_SERVER_SCHEME: ${URL_WEB_SERVER_SCHEME:-http}
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-host.docker.internal}
       URL_WEB_SERVER_PORT: ${URL_WEB_SERVER_PORT:-${WEB_SERVER_PORT:-${HTTP_PORT:-80}}}
-      URL_WS_SERVER_SCHEME: ${URL_WS_SERVER_SCHEME:-ws://}
-      URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-}
+      URL_WS_SERVER_SCHEME: ${URL_WS_SERVER_SCHEME:-ws}
+      URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-host.docker.internal}
       URL_WS_SERVER_PORT: ${URL_WS_SERVER_PORT:-${WS_SERVER_PORT:-45001}}
       URL_WS_SERVER_URI: ${URL_WS_SERVER_URI:-/ws/}
       URL_WS_SERVER_ADDRESS_MODIFICATION: ${URL_WS_SERVER_ADDRESS_MODIFICATION:-none}
       # watchdog
-      WATCHDOG_ADDRESS: ${WATCHDOG_ADDRESS:-localhost}
+      WATCHDOG_ADDRESS: ${WATCHDOG_ADDRESS:-simulations}
       WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
+      WATCHDOG_SCHEME: ${WATCHDOG_SCHEME:-http}
+      # other
+      APP_ENV: ${APP_ENV:-dev}
+      FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
     ports:
-      # Watchdog
-      - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
       # HTTP needs to be defined in the override/prod/staging/... yml files
@@ -109,6 +146,23 @@ services:
         protocol: udp
     logging:
       driver: "local"
+
+  simulations:
+    build:
+      context: .
+      dockerfile: simulations/debian.11-x64/Dockerfile
+      args:
+        source_dir: simulations/debian.11-x64
+    ports:
+      - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
+    restart: always
+    environment:
+      WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
+      MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
+    logging:
+      driver: "local"
+    networks:
+      - php
 
   blackfire:
     build:
@@ -138,9 +192,12 @@ services:
 ###< symfony/mercure-bundle ###
 
 volumes:
+  vendor_data:
+  node_modules_data:
+  public_build_data:
+  mariadb_data:
   caddy_data:
   caddy_config:
-  mariadb_data:
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
 
@@ -152,3 +209,4 @@ networks:
   database:
   php:
   redis:
+  simulations:

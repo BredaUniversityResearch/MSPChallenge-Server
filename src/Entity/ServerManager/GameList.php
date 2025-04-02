@@ -5,10 +5,13 @@ namespace App\Entity\ServerManager;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
+use App\Entity\Game;
 use App\Repository\ServerManager\GameListRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator as AcmeAssert;
+use function App\isBase64Encoded;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
 class GameList
@@ -22,7 +25,10 @@ class GameList
     #[ORM\Column(length: 128)]
     private ?string $name = null;
 
-    #[Assert\NotNull]
+    #[Assert\Expression(
+        "this.getGameConfigVersion() !== null or this.getGameSave() !== null",
+        "When creating a new session, a config file needs to be chosen."
+    )]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
     private ?GameConfigVersion $gameConfigVersion = null;
@@ -55,9 +61,11 @@ class GameList
     private ?int $gameRunningTilTime = null;
 
     #[Assert\NotBlank]
+    #[AcmeAssert\ContainsValidExternalUsers]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $passwordAdmin = null;
 
+    #[AcmeAssert\ContainsValidExternalUsers]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $passwordPlayer = null;
 
@@ -89,6 +97,8 @@ class GameList
     #[ORM\Column(length: 45, nullable: true)]
     private ?string $serverVersion = null;
 
+    private ?Game $runningGame = null;
+
     /**
      * @param int|null $id
      */
@@ -107,7 +117,7 @@ class GameList
         return $this->name;
     }
 
-    public function setName(string $name): self
+    public function setName(?string $name): self
     {
         $this->name = $name;
 
@@ -167,6 +177,11 @@ class GameList
         return $this->gameCreationTime;
     }
 
+    public function getGameCreationTimePretty(): string
+    {
+        return $this->makeTimePretty($this->gameCreationTime);
+    }
+
     public function setGameCreationTime(int $gameCreationTime): self
     {
         $this->gameCreationTime = $gameCreationTime;
@@ -217,11 +232,17 @@ class GameList
         return $this->makeDatePretty($this->gameCurrentMonth);
     }
 
-    private function makeDatePretty($month): string
+    private function makeDatePretty(int $month): string
     {
         return \DateTimeImmutable::createFromFormat('m Y', '1 '.$this->gameStartYear)
             ->add(\DateInterval::createFromDateString($month.' month'))
             ->format('M Y');
+    }
+
+    private function makeTimePretty(int $unixTimeStamp): string
+    {
+        return \DateTimeImmutable::createFromFormat('U', (string) $unixTimeStamp)
+            ->format('j M Y G:i');
     }
 
     public function setGameCurrentMonth(int $gameCurrentMonth): self
@@ -234,6 +255,11 @@ class GameList
     public function getGameRunningTilTime(): ?int
     {
         return $this->gameRunningTilTime;
+    }
+
+    public function getGameRunningTilTimePretty(): string
+    {
+        return $this->makeTimePretty($this->gameRunningTilTime);
     }
 
     public function setGameRunningTilTime(int $gameRunningTilTime): self
@@ -250,7 +276,7 @@ class GameList
 
     public function setPasswordAdmin(string $passwordAdmin): self
     {
-        $this->passwordAdmin = $passwordAdmin;
+        $this->passwordAdmin = $this->checkPasswordFormat('password_admin', $passwordAdmin);
 
         return $this;
     }
@@ -260,9 +286,34 @@ class GameList
         return $this->passwordPlayer;
     }
 
+    
+    public function encodePasswords(): self
+    {
+        if (!isBase64Encoded($this->passwordAdmin)) {
+            $this->passwordAdmin = base64_encode($this->passwordAdmin);
+        }
+        if (!isBase64Encoded($this->passwordPlayer)) {
+            $this->passwordPlayer = base64_encode($this->passwordPlayer);
+        }
+
+        return $this;
+    }
+    
+    public function decodePasswords(): self
+    {
+        if (isBase64Encoded($this->passwordAdmin)) {
+            $this->passwordAdmin = base64_decode($this->passwordAdmin);
+        }
+        if (isBase64Encoded($this->passwordPlayer)) {
+            $this->passwordPlayer = base64_decode($this->passwordPlayer);
+        }
+        
+        return $this;
+    }
+
     public function setPasswordPlayer(?string $passwordPlayer): self
     {
-        $this->passwordPlayer = $passwordPlayer;
+        $this->passwordPlayer = $this->checkPasswordFormat('password_player', $passwordPlayer);
 
         return $this;
     }
@@ -384,6 +435,26 @@ class GameList
         return $this;
     }
 
+    /**
+     * Get the value of runningGame
+     */
+    public function getRunningGame(): ?Game
+    {
+        return $this->runningGame;
+    }
+
+    /**
+     * Set the value of runningGame
+     *
+     * @return  self
+     */
+    public function setRunningGame($runningGame): self
+    {
+        $this->runningGame = $runningGame;
+
+        return $this;
+    }
+
     public function checkPasswordFormat(string $adminorplayer, string $string): bool|string
     {
         if (is_object(json_decode($string))) {
@@ -441,19 +512,16 @@ class GameList
         return json_encode($newArray);
     }
 
-    private function getCountries(): array
+    public function getCountries(): array
     {
-        if (!is_null($this->getGameSave())) { // session eminates from a save
-            $configData = []; // to do
-        } else { // session eminates from a config file, so from scratch
+        if (!is_null($this->getRunningGame())) {
+            $configData = $this->getRunningGame()->getRunningGameConfigFileContents();
+        } elseif (!is_null($this->getGameConfigVersion())) {
             $configData = $this->getGameConfigVersion()->getGameConfigComplete();
+        } else {
+            return [];
         }
-
         $countries = [];
-        if (!isset($configData['datamodel']) || !isset($configData['datamodel']['meta'])) {
-            return $countries;
-        }
-
         foreach ($configData['datamodel']['meta'] as $layerMeta) {
             if ($layerMeta['layer_name'] == $configData['datamodel']['countries']) {
                 foreach ($layerMeta['layer_type'] as $country) {
@@ -463,9 +531,9 @@ class GameList
                         'country_colour' => $country['polygonColor'],
                     ];
                 }
+                break;
             }
         }
-
         return $countries;
     }
 }

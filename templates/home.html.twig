@@ -1,17 +1,16 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}MSP Challenge Server{% endblock %}
-
+{% block subtitle %}{% endblock %}
+{% block menuUser %}{% endblock %}
 {% block body %}
-    <header>
-        <h1>MSP Challenge Server</h1>
-    </header>
     <main>
         <section>
             <h2>Links</h2>
             <hr>
             <ul>
-                <li><a href="{{ path('server_manager_index') }}">Go to the Server Manager</a></li>
+                <li><a href="{{ path('manager') }}">Go to the Server Manager</a></li>
+                <li><a href="http://{{ app.request.host }}:3000/dashboards">Go to Grafana dashboards</a></li>
             </ul>
         </section>
         {% if downloads is not empty %}
@@ -26,13 +25,4 @@
         </section>
         {% endif %}
     </main>
-    <footer>
-        <p>MSP Challenge is a community-based, open source and not for profit initiative, since 2011.</p>
-        <p>
-        <img src="/ServerManager/images/EU_flag_yellow_high.jpg" style="width: 40px;"/>
-        Co-funded by the European Union.
-        </p>
-        <p>MSP Challenge Server version {{ version }}</p>
-        <p>Server Address: {{ serverAddress }}</p>
-    </footer>
 {% endblock %}

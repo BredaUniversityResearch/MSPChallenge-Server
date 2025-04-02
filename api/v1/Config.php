@@ -25,18 +25,20 @@ class Config
         $this->LoadConfigFile();
     }
 
+    /**
+     * @throws \Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function LoadConfigFile(): void
     {
-        /** @noinspection PhpIncludeInspection */
         require_once(APIHelper::getInstance()->GetBaseFolder().'api_config.php');
         $this->configRoot = $GLOBALS['api_config'];
     }
 
     public function getMSPAuthBaseURL(): string
     {
-        return ($_ENV['AUTH_SERVER_SCHEME'] ?? 'https') . '://' .
-            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info') . ':' .
+        return str_replace('://', '', $_ENV['AUTH_SERVER_SCHEME'] ?? 'https').'://'.
+            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info').':'.
             ($_ENV['AUTH_SERVER_PORT'] ?? 443);
     }
 
@@ -62,12 +64,6 @@ class Config
     public function GetAuthJWTUserEmailCheck($username): string
     {
         return $this->GetAuth().'users/'.$username;
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetAuthWithProxy(): ?string
-    {
-        return $this->configRoot['msp_auth_with_proxy'] ?? null;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

@@ -11,20 +11,41 @@ class Auth2Communicator extends AbstractCommunicator
     ) {
         parent::__construct($client);
         $this->setBaseURL(
-            ($_ENV['AUTH_SERVER_SCHEME'] ?? 'https') . '://' .
-            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info') . ':' .
+            str_replace('://', '', $_ENV['AUTH_SERVER_SCHEME'] ?? 'https').'://'.
+            ($_ENV['AUTH_SERVER_HOST'] ?? 'auth2.mspchallenge.info').':'.
             ($_ENV['AUTH_SERVER_PORT'] ?? 443).
             ($_ENV['AUTH_SERVER_API_BASE_PATH'] ?? '/api/')
         );
     }
 
-    public function getResource($endPoint): array
+    public function getResource(string $endPoint): array
     {
         $this->tokenCheck();
 
         return $this->call(
             'GET',
             $endPoint
+        );
+    }
+
+    public function delResource(string $endPoint): void
+    {
+        $this->tokenCheck();
+
+        $this->call(
+            'DELETE',
+            $endPoint
+        );
+    }
+
+    public function postResource(string $endPoint, array $data): array
+    {
+        $this->tokenCheck();
+
+        return $this->call(
+            'POST',
+            $endPoint,
+            $data
         );
     }
 
@@ -37,16 +58,5 @@ class Auth2Communicator extends AbstractCommunicator
                 ['username' => $this->username, 'password' => $this->password]
             )["token"] ?? '');
         }
-    }
-
-    public function postResource($endPoint, $data): array
-    {
-        $this->tokenCheck();
-
-        return $this->call(
-            'POST',
-            $endPoint,
-            $data
-        );
     }
 }

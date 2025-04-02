@@ -57,7 +57,7 @@ class BearerTokenTest extends WebTestCase
         $this->requestMSPEndpoint('POST', 'Layer/Get', ['layer_id' => 2]);
         $this->assertMSPServerSuccessWithPayloadResponse();
         // this endpoint is required to make sure MSW/MEL/SEL/CEL/... can also communicate with the session API
-        $this->requestMSPEndpoint('POST', 'Simulations/GetWatchdogTokenForServer', [], false);
+        $this->requestMSPEndpoint('POST', 'Simulation/GetWatchdogTokenForServer', [], false);
         $this->assertMSPServerSuccessWithSpecificPayloadStringsResponse(['watchdog_token']);
         // sleep required because otherwise there's a risk that the newly created tokens are identical to the old ones
         sleep(1);

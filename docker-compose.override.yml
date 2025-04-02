@@ -48,29 +48,25 @@ services:
     volumes:
       - ./:/app
       - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./frankenphp/conf.d/app.dev.ini:/usr/local/etc/php/conf.d/app.dev.ini:ro
-      # If you develop on Mac or Windows you can remove the vendor/ directory
-      #  from the bind-mount for better performance by enabling the next line:
-      - /app/vendor
-      - /app/var/cache
-      - /app/var/log
+      - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
     networks:
       - mitmproxy
       - database
       - php
       - redis
+      - simulations
     environment:
       # this forces non-ssl
       SERVER_NAME: :80
       MERCURE_EXTRA_DIRECTIVES: demo
       # force web(socket) server over 8080 (mitmproxy reverse proxy)
-      WEB_SERVER_HOST: mitmproxy
-      URL_WEB_SERVER_HOST: mitmproxy
-      URL_WS_SERVER_HOST: mitmproxy
+      WEB_SERVER_HOST: host.docker.internal
+      WS_SERVER_HOST: host.docker.internal
+      URL_WEB_SERVER_HOST: host.docker.internal
+      URL_WS_SERVER_HOST: host.docker.internal
       MITMPROXY_PORT: ${MITMPROXY_PORT:-8080}
       URL_WEB_SERVER_PORT: ${MITMPROXY_PORT:-8080}
       URL_WS_SERVER_PORT: ${MITMPROXY_PORT:-8080}
-      MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
       WS_SERVER_PAYLOAD_DUMP: "${WS_SERVER_PAYLOAD_DUMP:-0}"
 
       # See https://xdebug.org/docs/all_settings#mode
@@ -85,9 +81,6 @@ services:
       - target: 80
         published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
         protocol: tcp
-
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
 
 networks:
   mitmproxy:

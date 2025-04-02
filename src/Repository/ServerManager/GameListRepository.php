@@ -4,34 +4,13 @@ namespace App\Repository\ServerManager;
 
 use App\Domain\API\v1\Game;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
-use App\Domain\Common\EntityEnums\GameStateValue;
-use App\Domain\Common\EntityEnums\GameVisibilityValue;
-use App\Domain\Common\NormalizerContextBuilder;
 use App\Domain\WsServer\WsServer;
-use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameServer;
-use App\Entity\ServerManager\GameWatchdogServer;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use ReflectionException;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class GameListRepository extends EntityRepository
 {
-    private ?ObjectNormalizer $normalizer = null;
-    private ?Serializer $serializer = null; // to be created upon usage// to be created upon usage
-
-
-    public function __construct(EntityManagerInterface $em, ClassMetadata $class)
-    {
-        parent::__construct($em, $class);
-    }
-
     public function save(GameList $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -62,7 +41,7 @@ class GameListRepository extends EntityRepository
                 'gcv.versionMessage as config_version_message', 'gcf.filename as config_file_name', 'gcv.region',
                 'gcf.description as config_file_description', 'gws.name as watchdog_name',
                 'gse.address as game_server_address', 'gws.address as watchdog_address', 'gsa.id as save_id',
-                'g.gameCreationTime as game_creation_time', 'ggs.name as geoserver_name',
+                'gsa.gameConfigFilesFilename', 'g.gameCreationTime as game_creation_time', 'ggs.name as geoserver_name',
                 'ggs.address as geoserver_address', 'g.gameStartYear as game_start_year',
                 'g.gameEndMonth as game_end_month', 'g.gameCurrentMonth as game_current_month',
                 'g.gameRunningTilTime as game_running_til_time', 'g.sessionState as session_state',
@@ -96,7 +75,7 @@ class GameListRepository extends EntityRepository
      */
     private function amendSessionList(array &$sessionList): void
     {
-        $scheme = $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http://';
+        $scheme = str_replace('://', '', $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
         $port = $_ENV['URL_WEB_SERVER_PORT'] ?? $_ENV['WEB_SERVER_PORT'] ?? 80;
         $host = $_ENV['URL_WEB_SERVER_HOST'] ?? null;
         if (is_null($host)) {
@@ -109,10 +88,12 @@ class GameListRepository extends EntityRepository
             }
         }
         foreach ($sessionList as $key => $session) {
+            $session['players_active'] ??= 0;
+            $session['players_past_hour'] ??= 0;
             // get session's config file contents and decode the json
             $game = new Game();
             $game->setGameSessionId($session['id']);
-            $configContents = $game->Config();
+            $configContents = $game->Config(); // todo: can't we use GameList::getGameConfig()->getGameConfigComplete()
             $session['edition_name'] = $configContents['edition_name'];
             $session['edition_colour'] = $configContents['edition_colour'];
             $session['edition_letter'] = $configContents['edition_letter'];
@@ -127,54 +108,11 @@ class GameListRepository extends EntityRepository
             $session['end_month_formatted'] = $gameList
                 ->setGameEndMonth($session['game_end_month'])
                 ->getGameEndMonthPretty();
+            if (empty($session['config_file_name'])) {
+                $session['config_file_name'] = $session['gameConfigFilesFilename'];
+            }
+            unset($session['gameConfigFilesFilename']);
             $sessionList[$key] = $session;
         }
-    }
-
-    /**
-     * @throws ReflectionException|ExceptionInterface
-     */
-    public function createGameListFromData(array $gameListData)
-    {
-        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        $this->serializer ??= new Serializer([$this->normalizer]);
-        return $this->serializer->denormalize(
-            $gameListData,
-            GameList::class,
-            null,
-            (new NormalizerContextBuilder(GameList::class))->withCallbacks([
-                'id' => fn() => null,
-                'gameConfigVersion' => fn($innerObject) => (isset($innerObject['id'])) ?
-                    $this->getEntityManager()->getRepository(GameConfigVersion::class)->find($innerObject['id']) :
-                    null,
-                'gameServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
-                    GameServer::class
-                )->find($innerObject['id']),
-                'gameWatchdogServer' => fn($innerObject) => $this->getEntityManager()->getRepository(
-                    GameWatchdogServer::class
-                )->find($innerObject['id']),
-                'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
-                'gameState' => fn($innerObject) => new GameStateValue($innerObject),
-                'gameVisibility' => fn($innerObject) => new GameVisibilityValue($innerObject)
-            ])->toArray()
-        );
-    }
-
-    /**
-     * @throws ExceptionInterface|ReflectionException
-     */
-    public function createDataFromGameList(GameList $gameList): array
-    {
-        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        $this->serializer ??= new Serializer([$this->normalizer]);
-        return $this->serializer->normalize(
-            $gameList,
-            null,
-            (new NormalizerContextBuilder(GameList::class))->withCallbacks([
-                'sessionState' => fn($innerObject) => ((string) $innerObject),
-                'gameState' => fn($innerObject) => ((string) $innerObject),
-                'gameVisibility' => fn($innerObject) => ((string) $innerObject)
-            ])->toArray()
-        );
     }
 }

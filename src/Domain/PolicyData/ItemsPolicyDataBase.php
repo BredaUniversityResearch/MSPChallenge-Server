@@ -39,6 +39,7 @@ abstract class ItemsPolicyDataBase extends PolicyDataBase
             return false; // no filters to match
         }
         foreach ($this->items as $item) {
+            $matches = [];
             foreach ($requiredFilterClassNames as $filterClassName) {
                 try {
                     /** @var FilterBasePolicyData $data */
@@ -56,12 +57,15 @@ abstract class ItemsPolicyDataBase extends PolicyDataBase
                     'match on: '.json_encode($otherItem).', with filter data: '.json_encode($item),
                     self::LOG_LEVEL_DEBUG
                 );
-                if ($match === false) {
-                    return false;
+                if ($match) {
+                    $matches[$filterClassName] = true;
                 }
             }
+            if (count($matches) === count($requiredFilterClassNames)) {
+                return true; // all filters matched
+            }
         }
-        return true;
+        return false;
     }
 
     /**

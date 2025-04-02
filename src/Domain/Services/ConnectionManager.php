@@ -107,7 +107,8 @@ class ConnectionManager extends DatabaseDefaults
             'password' => $_ENV['DATABASE_PASSWORD'] ?? self::DEFAULT_DATABASE_PASSWORD,
             'server_version' => $_ENV['DATABASE_SERVER_VERSION'] ?? self::DEFAULT_DATABASE_SERVER_VERSION,
             'charset' => $_ENV['DATABASE_CHARSET'] ?? self::DEFAULT_DATABASE_CHARSET,
-            'mapping_types' => ['enum' => 'string']
+            'mapping_types' => ['enum' => 'string'],
+            'use_savepoints' => true
         ];
         if ($dbName !== null) {
             $config['dbname'] = $dbName;
@@ -201,7 +202,7 @@ class ConnectionManager extends DatabaseDefaults
             $_ENV['DATABASE_PORT'] ?? self::DEFAULT_DATABASE_PORT,
             $_ENV['DATABASE_USER'] ?? self::DEFAULT_DATABASE_USER,
             $_ENV['DATABASE_PASSWORD'] ?? self::DEFAULT_DATABASE_PASSWORD,
-            $dbName
+            ($_ENV['APP_ENV'] !== 'test') ? $dbName : $dbName.'_test'
         );
 
         if ($options instanceof ConnectionPoolOptions) {
@@ -251,7 +252,9 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getGameSessionDbName(int $gameSessionId): string
     {
-        return ($_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX) . $gameSessionId;
+        $databaseName = ($_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX) . $gameSessionId;
+        //$databaseName .= ($_ENV['APP_ENV'] !== 'test') ? '' : '_test';
+        return $databaseName;
     }
 
     /**

@@ -29,15 +29,16 @@ If you want to change the ports used by the containers, you can do by defining e
 - in the [`.env`](.env) file in the root of the project
 - or by defining them in the command line when running `docker compose up` like so, e.g.:
   `WEB_SERVER_PORT=80 DATABASE_PORT=3306 WS_SERVER_PORT=45001 WATCHDOG_PORT=45000 ADMINER_PORT=8082 MITMPROXY_POR=8080 MITMPROXY_WEB_PORT=8081 docker compose up`
-- using a `.env.local` file and starting docker compose using aliases, see [Aliases for development and deployment](#aliases-for-development-and-deployment).
+- using a `.env.local` file and starting docker compose using aliases, see [Aliases for development](#aliases-for-development).
 
 ## Installation
 
 1. Either clone the repository or download the zip file from the [release page](https://github.com/BredaUniversityResearch/MSPChallenge-Server/releases).
    If you want to contribute to the project, you also can fork the repository. Read more about contributing [here](https://community.mspchallenge.info/wiki/Community_Contribution).
 2. If not already done, install either:
-   - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended)
-   - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
+   - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended for dev)
+     !! Make sure to enable "Add the *.docker.internal names to the host's /etc/hosts file" in Docker Desktop settings, used by the dev environment.
+   - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)   
 3. Run `docker compose build --pull --no-cache` to build fresh images
 
 4. Then, to create the server docker containers, and starting it up, run:
@@ -78,7 +79,7 @@ To start/stop/restart supervisor services, see some examples here:<br/>
 To check their status:<br/>
 `docker exec CONTAINER supervisorctl status all`<br/>
 
-## Aliases for development and deployment
+## Aliases for development
 
 If the host machine, running Docker, is Linux, or your have a Linux-based terminal like WSL or Git bash on Windows, you
 can create aliases to simplify docker container management and interaction.

@@ -2,19 +2,23 @@
 
 namespace App\DataCollector;
 
-use App\Domain\API\APIHelper;
-use App\Domain\API\v1\Game;
+use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
-use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Domain\Services\SimulationHelper;
+use App\Entity\Game;
+use App\Entity\ServerManager\GameList;
+use App\Entity\Watchdog;
+use App\Repository\GameRepository;
+use App\Repository\WatchdogRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use function App\await;
 
 class MSPDataCollector extends AbstractDataCollector
 {
-    public function collect(Request $request, Response $response, \Throwable $exception = null)
+    public function collect(Request $request, Response $response, \Throwable $exception = null): void
     {
         try {
             $serverManager = \ServerManager\ServerManager::getInstance();
@@ -39,23 +43,35 @@ class MSPDataCollector extends AbstractDataCollector
         return $this->data;
     }
 
+    /**
+     * @throws Exception
+     */
     public function startSimulations(
         int $session,
-        // below is required by legacy to be auto-wire, has its own ::getInstance()
-        SymfonyToLegacyHelper $helper
+        ConnectionManager $connectionManager,
+        WatchdogCommunicator $watchdogCommunicator,
+        SimulationHelper $simulationHelper
     ): Response {
-        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($session)->createQueryBuilder();
         try {
-            $gameState = $qb->select('game_state')->from('game')->fetchOne();
-        } catch (\Exception $e) {
+            $gameListRepo = $connectionManager->getServerManagerEntityManager()
+                ->getRepository(GameList::class);
+            $gameList = $gameListRepo->find($session);
+            $em = ConnectionManager::getInstance()->getGameSessionEntityManager($session);
+            /** @var GameRepository $gameRepo */
+            $gameRepo = $em->getRepository(Game::class);
+            $game = $gameRepo->retrieve();
+
+            if ($game->getGameState() == GameStateValue::SETUP) {
+                // re-register simulations
+                /** @var WatchdogRepository $watchdogRepo */
+                $watchdogRepo = $em->getRepository(Watchdog::class);
+                $watchdogRepo->registerSimulations($simulationHelper->getInternalSims($session));
+            }
+
+            $watchdogCommunicator->changeState($session, $game->getGameState(), $gameList->getGameCurrentMonth());
+        } catch (Exception $e) {
             return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        $game = new Game();
-        $game->setGameSessionId($session);
-        if (null === $promise = $game->changeWatchdogState($gameState)) {
-            return new Response('Could not change watchdog state', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-        $arrResult = await($promise);
-        return new Response(json_encode($arrResult));
+        return new Response('Simulations started requested', Response::HTTP_OK);
     }
 }
