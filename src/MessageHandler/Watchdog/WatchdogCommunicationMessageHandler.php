@@ -143,7 +143,10 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             ->mapWithKeys(fn(SimulationEntity $sim) => [$sim->getName() => $sim->getVersion()])
             ->toArray();
         $postValues = [
-            'game_session_api' => self::getSessionAPIBaseUrl($gameList),
+            'game_session_api' => self::getSessionAPIBaseUrl(
+                $gameList,
+                $watchdog->getServerId() == Watchdog::getInternalServerId() ? 'host.docker.internal' : null
+            ),
             'game_session_token' => (string)$watchdog->getToken(),
             'game_state' => $message->getGameState()->__toString(),
             'required_simulations' => json_encode($requiredSimulations, JSON_FORCE_OBJECT),
@@ -368,10 +371,11 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
      *
      * @throws Exception
      */
-    public static function getSessionAPIBaseUrl(GameList $gameList): string
+    public static function getSessionAPIBaseUrl(GameList $gameList, ?string $address = null): string
     {
         $protocol = str_replace('://', '', $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
-        $address = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $gameList->getGameServer()->getAddress() ?? gethostname();
+        $address ??= ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $gameList->getGameServer()->getAddress() ??
+            gethostname();
         $port = ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
         return $protocol.$address.':'.$port.'/'.$gameList->getId().'/';
     }
