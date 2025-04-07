@@ -487,9 +487,8 @@ class Layer extends Base
         $qb = $db->createQueryBuilder()
             ->select('l.layer_id', 'l.layer_name', 'l.layer_geotype')
             ->from('layer', 'l')
-            ->leftJoin('l', 'geometry', 'g', 'l.layer_id = g.geometry_layer_id')
+            ->leftJoin('l', 'geometry', 'g', 'l.layer_id = g.geometry_layer_id AND g.geometry_active = 1')
             ->where('l.layer_name <> ""')
-            ->andWhere('g.geometry_active = 1')
             ->groupBy('l.layer_name');
         if (!empty($layer_tags)) {
             $qb->andWhere('JSON_CONTAINS(l.layer_tags, :layer_tags)')
