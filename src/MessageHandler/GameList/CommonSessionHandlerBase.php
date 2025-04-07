@@ -163,6 +163,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
             '--no-interaction',
             '--env='.$_ENV['APP_ENV']
         ], $this->kernel->getProjectDir());
+        $process->setTimeout(null); // Disable the process timeout
         $process->mustRun(fn($type, $buffer) => $this->info($buffer));
     }
 
