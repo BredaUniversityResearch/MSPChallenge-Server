@@ -81,10 +81,18 @@ class UserController extends BaseController
                     examples: [
                         new OA\Examples(
                             example: 'result',
-                            summary: '400 bad request response',
+                            summary: 'Missing or invalid session ID',
                             value: [
                                 'success' => false,
                                 'message' => 'Missing or invalid session ID'
+                            ]
+                        ),
+                        new OA\Examples(
+                            example: 'result2',
+                            summary: 'Invalid country_id value. Must be an integer',
+                            value: [
+                                'success' => false,
+                                'message' => 'Invalid country_id value. Must be an integer'
                             ]
                         )
                     ],
@@ -98,7 +106,7 @@ class UserController extends BaseController
                     examples: [
                         new OA\Examples(
                             example: 'result1',
-                            summary: '500 internal server error response 1',
+                            summary: 'Could not authenticate you',
                             value: [
                                 'success' => false,
                                 'message' => 'Could not authenticate you. Your username and/or password could be '.
@@ -107,7 +115,7 @@ class UserController extends BaseController
                         ),
                         new OA\Examples(
                             example: 'result2',
-                            summary: '500 internal server error response 2',
+                            summary: 'That password is incorrect',
                             value: [
                                 'success' => false,
                                 'message' => 'That password is incorrect'
@@ -115,7 +123,7 @@ class UserController extends BaseController
                         ),
                         new OA\Examples(
                             example: 'result3',
-                            summary: '500 internal server error response 3',
+                            summary: 'You are not allowed to log on for that country',
                             value: [
                                 'success' => false,
                                 'message' => 'You are not allowed to log on for that country'
@@ -134,12 +142,20 @@ class UserController extends BaseController
         AuthenticationSuccessHandler $authenticationSuccessHandler
     ): Response {
         $sessionId = $this->getSessionIdFromRequest($request);
+        // check if country_id get parameter is an int
+        if (!ctype_digit($request->get('country_id'))) {
+            return new JsonResponse(
+                self::wrapPayloadForResponse(false, message: 'Invalid country_id value. Must be an integer'),
+                400
+            );
+        }
+
         try {
             $user = new User();
             $user->setGameSessionId($sessionId);
             $payload = $user->RequestSession(
                 $request->get('build_timestamp', ''),
-                $request->get('country_id'),
+                (int)$request->get('country_id'),
                 $request->get('user_name'),
                 $request->get('country_password', '')
             );
