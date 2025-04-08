@@ -122,3 +122,5 @@ auth.json
 
 # to ignore all the files in the public/downloads folder
 public/downloads/**
+
+composer.phar
