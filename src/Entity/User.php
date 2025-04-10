@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -22,22 +21,11 @@ class User
     private ?float $userLastupdate = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'user_country_id', referencedColumnName: 'countryId', nullable: false)]
     private ?Country $userCountry = null;
 
     #[ORM\Column(length: 1, nullable: true, options: ['default' => 0])]
     private ?int $userLoggedoff = null;
-
-    /**
-     * @var Collection<int, ViewingSession>
-     */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ViewingSession::class)]
-    private Collection $viewingSessions;
-
-    public function __construct()
-    {
-        $this->viewingSessions = new ArrayCollection();
-    }
 
     public function getUserId(): ?int
     {
@@ -88,36 +76,6 @@ class User
     public function setUserLoggedoff(int $userLoggedoff): static
     {
         $this->userLoggedoff = $userLoggedoff;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, ViewingSession>
-     */
-    public function getViewingSessions(): Collection
-    {
-        return $this->viewingSessions;
-    }
-
-    public function addViewingSession(ViewingSession $viewingSession): static
-    {
-        if (!$this->viewingSessions->contains($viewingSession)) {
-            $this->viewingSessions->add($viewingSession);
-            $viewingSession->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeViewingSession(ViewingSession $viewingSession): static
-    {
-        if ($this->viewingSessions->removeElement($viewingSession)) {
-            // set the owning side to null (unless already changed)
-            if ($viewingSession->getUser() === $this) {
-                $viewingSession->setUser(null);
-            }
-        }
 
         return $this;
     }

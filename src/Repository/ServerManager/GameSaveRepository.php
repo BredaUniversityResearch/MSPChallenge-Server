@@ -4,9 +4,17 @@ namespace App\Repository\ServerManager;
 
 use App\Entity\ServerManager\GameSave;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
-class GameSaveRepository extends EntityRepository
+class GameSaveRepository extends ServerEntityRepository
 {
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
     public function save(GameSave $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -16,6 +24,11 @@ class GameSaveRepository extends EntityRepository
         }
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
     public function remove(GameSave $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);

@@ -15,11 +15,6 @@ use Symfony\Component\Routing\Annotation\Route;
 #[OA\Tag(name: 'Layer', description: 'Operations related to layer management')]
 class LayerController extends BaseController
 {
-    public function __construct(SymfonyToLegacyHelper $symfonyToLegacyHelper)
-    {
-        // nothing to do. Just to autoload the SymfonyToLegacyHelper service
-    }
-
     /**
      * @throws Exception
      */

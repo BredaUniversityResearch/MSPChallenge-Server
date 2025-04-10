@@ -13,7 +13,6 @@ use App\Entity\ServerManager\Setting;
 use App\Entity\ServerManager\User;
 use App\Form\SettingEditFormType;
 use App\Form\SettingUsersFormType;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -55,9 +54,13 @@ class SettingController extends BaseController
         ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/list', name: 'manager_setting_list')]
-    public function settingList(EntityManagerInterface $entityManager): Response
+    public function settingList(): Response
     {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $setting = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         $gameServer = $entityManager->getRepository(GameServer::class)->find(1);
         $gameGeoServersAll = count($entityManager->getRepository(GameGeoServer::class)->findAll());
@@ -79,9 +82,13 @@ class SettingController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/{settingId}/form', name: 'manager_setting_form', requirements: ['settingId' => '\d+'])]
-    public function settingForm(EntityManagerInterface $entityManager, Request $request, int $settingId): Response
+    public function settingForm(Request $request, int $settingId): Response
     {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $setting = $entityManager->getRepository(Setting::class)->find($settingId);
         $form = $this->createForm(
             SettingEditFormType::class,
@@ -100,12 +107,15 @@ class SettingController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/users/list', name: 'manager_setting_users')]
     public function settingUsers(
-        EntityManagerInterface $entityManager,
         HttpClientInterface $client,
         Security $security
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $auth2Communicator = new Auth2Communicator($client);
         /** @var User $user */
         $user = $security->getUser();
@@ -136,13 +146,16 @@ class SettingController extends BaseController
         return new Response(null, 204);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/users/form', name: 'manager_setting_users_form')]
     public function settingUsersForm(
         HttpClientInterface $client,
-        EntityManagerInterface $entityManager,
         Security $security,
         Request $request
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
             SettingUsersFormType::class,
             null,

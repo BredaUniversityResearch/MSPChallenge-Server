@@ -8,9 +8,17 @@ use App\Domain\WsServer\WsServer;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameServer;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
-class GameListRepository extends EntityRepository
+class GameListRepository extends ServerEntityRepository
 {
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
     public function save(GameList $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -20,6 +28,11 @@ class GameListRepository extends EntityRepository
         }
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
     public function remove(GameList $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
@@ -31,7 +44,7 @@ class GameListRepository extends EntityRepository
 
     /**
      * @return GameList[] Returns an array of GameList objects by session state, archived or not archived (active)
-     * @throws \Exception
+     * @throws Exception
      */
     public function findBySessionState(string $value): array
     {
@@ -71,7 +84,7 @@ class GameListRepository extends EntityRepository
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function amendSessionList(array &$sessionList): void
     {

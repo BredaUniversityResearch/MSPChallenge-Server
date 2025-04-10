@@ -38,11 +38,6 @@ use function App\await;
 )]
 class GameController extends BaseController
 {
-    public function __construct(
-        private readonly string $projectDir
-    ) {
-    }
-
     // not a route yet, should replace /[sessionId]/api/Game/State one day
 
     /**
@@ -54,9 +49,7 @@ class GameController extends BaseController
     public function state(
         int $sessionId,
         string $state,
-        WatchdogCommunicator $watchdogCommunicator,
-        // below is required by legacy to be auto-wire, has its own ::getInstance()
-        SymfonyToLegacyHelper $symfonyToLegacyHelper
+        WatchdogCommunicator $watchdogCommunicator
     ): void {
         $state = new GameStateValue(strtolower($state));
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);

@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\ViewingDevice;
+use App\Entity\ImmersiveSessionRegion;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<ViewingDevice>
+ * @extends ServiceEntityRepository<ImmersiveSessionRegion>
  */
-class ViewingDeviceRepository extends ServiceEntityRepository
+class ImmersiveSessionRegionRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, ViewingDevice::class);
+        parent::__construct($registry, ImmersiveSessionRegion::class);
     }
 
     //    /**
-    //     * @return ViewingDevice[] Returns an array of ViewingDevice objects
+    //     * @return ViewingArea[] Returns an array of ViewingArea objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class ViewingDeviceRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?ViewingDevice
+    //    public function findOneBySomeField($value): ?ViewingArea
     //    {
     //        return $this->createQueryBuilder('v')
     //            ->andWhere('v.exampleField = :val')

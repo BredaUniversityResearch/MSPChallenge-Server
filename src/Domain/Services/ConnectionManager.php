@@ -121,15 +121,46 @@ class ConnectionManager extends DatabaseDefaults
         return $config;
     }
 
-    public function getEntityManagerConfig(string $dbName): array
+    public function getEntityManagerConfig(string $connectionName): array
     {
         $config['report_fields_where_declared'] = true;
         // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
-        $config['connection'] = $dbName;
+        $config['connection'] = $connectionName;
         $config['mappings']['App'] = [
             'is_bundle' => false,
             'dir' => '%kernel.project_dir%/src/Entity',
             'prefix' => 'App\Entity',
+            'alias' => 'App'
+        ];
+        $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';
+        $config['metadata_cache_driver'] = [
+            'type' => 'pool',
+            'pool' => 'doctrine.meta_cache_pool'
+        ];
+        if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
+            return $config;
+        }
+        return array_merge($config, [
+            'query_cache_driver' => [
+                'type' => 'pool',
+                'pool' => 'doctrine.system_cache_pool'
+            ],
+            'result_cache_driver' => [
+                'type' => 'pool',
+                'pool' => 'doctrine.result_cache_pool'
+            ]
+        ]);
+    }
+
+    public function getServerEntityManagerConfig(string $connectionName): array
+    {
+        $config['report_fields_where_declared'] = true;
+        // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
+        $config['connection'] = $connectionName;
+        $config['mappings']['App'] = [
+            'is_bundle' => false,
+            'dir' => '%kernel.project_dir%/src/Entity/ServerManager',
+            'prefix' => 'App\Entity\ServerManager',
             'alias' => 'App'
         ];
         $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';

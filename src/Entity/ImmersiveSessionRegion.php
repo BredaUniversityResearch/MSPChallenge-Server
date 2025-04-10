@@ -3,12 +3,14 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
-use App\Repository\ViewingAreaRepository;
+use App\Repository\ImmersiveSessionRegionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ViewingAreaRepository::class)]
-#[ApiResource]
-class ViewingArea
+#[ORM\Entity(repositoryClass: ImmersiveSessionRegionRepository::class)]
+#[ApiResource(
+    description: 'Region of the immersive session. The coordinates are in the EPSG:3035 coordinate system. Tip: use <A href="http://bboxfinder.com">bboxfinder.com</A> to retrieve the coordinates.',
+)]
+class ImmersiveSessionRegion
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -19,7 +21,7 @@ class ViewingArea
     private ?string $name = null;
 
     #[ORM\Column]
-    private ?float $buttomLeftX = null;
+    private ?float $bottomLeftX = null;
 
     #[ORM\Column]
     private ?float $bottomLeftY = null;
@@ -29,6 +31,9 @@ class ViewingArea
 
     #[ORM\Column]
     private ?float $topRightY = null;
+
+    #[ORM\OneToOne(mappedBy: 'region', cascade: ['persist', 'remove'])]
+    private ?ImmersiveSession $immersiveSession = null;
 
     public function getId(): ?int
     {
@@ -47,14 +52,14 @@ class ViewingArea
         return $this;
     }
 
-    public function getButtomLeftX(): ?float
+    public function getBottomLeftX(): ?float
     {
-        return $this->buttomLeftX;
+        return $this->bottomLeftX;
     }
 
-    public function setButtomLeftX(float $buttomLeftX): static
+    public function setBottomLeftX(float $bottomLeftX): static
     {
-        $this->buttomLeftX = $buttomLeftX;
+        $this->bottomLeftX = $bottomLeftX;
 
         return $this;
     }
@@ -91,6 +96,23 @@ class ViewingArea
     public function setTopRightY(float $topRightY): static
     {
         $this->topRightY = $topRightY;
+
+        return $this;
+    }
+
+    public function getImmersiveSession(): ?ImmersiveSession
+    {
+        return $this->immersiveSession;
+    }
+
+    public function setImmersiveSession(ImmersiveSession $immersiveSession): static
+    {
+        // set the owning side of the relation if necessary
+        if ($immersiveSession->getRegion() !== $this) {
+            $immersiveSession->setRegion($this);
+        }
+
+        $this->immersiveSession = $immersiveSession;
 
         return $this;
     }

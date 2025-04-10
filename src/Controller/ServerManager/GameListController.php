@@ -23,7 +23,6 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\VersionsProvider;
-use App\Domain\Services\SymfonyToLegacyHelper;
 use App\IncompatibleClientException;
 use App\Controller\BaseController;
 use App\Controller\SessionAPI\GameController;
@@ -33,6 +32,9 @@ use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\GameListAndSaveSerializer;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Version\Exception\InvalidVersionString;
 use App\Entity\ServerManager\Setting;
 use App\Message\GameList\GameListCreationMessage;
@@ -50,31 +52,36 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 )]
 class GameListController extends BaseController
 {
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{sessionState}',
         name: 'manager_gamelist',
         requirements: ['sessionState' => '\w+']
     )]
     public function gameList(
-        EntityManagerInterface $entityManager,
         VersionsProvider $provider,
         Request $request,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         string $sessionState = 'public'
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
         if (is_null($request->headers->get('Turbo-Frame'))) {
-            return $this->gameClientJson($entityManager, $provider, $request, $gameList);
+            return $this->gameClientJson($provider, $request, $gameList);
         }
         return $this->render('manager/GameList/gamelist.html.twig', ['sessionslist' => $gameList]);
     }
 
+    /**
+     * @throws \Exception
+     */
     private function gameClientJson(
-        EntityManagerInterface $entityManager,
         VersionsProvider $provider,
         Request $request,
         array $gameList
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         try {
             $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
         } catch (IncompatibleClientException $e) {
@@ -111,6 +118,9 @@ class GameListController extends BaseController
         ));
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{sessionId}/name',
         name: 'manager_gamelist_name',
@@ -119,10 +129,10 @@ class GameListController extends BaseController
     )]
     public function gameSessionName(
         Request $request,
-        EntityManagerInterface $entityManager,
         ValidatorInterface $validator,
         int $sessionId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $gameSession->setName($request->get('name'));
         $errors = $validator->validate($gameSession);
@@ -177,14 +187,16 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/{sessionId}/form', name: 'manager_gamelist_form')]
     public function gameSessionForm(
-        EntityManagerInterface $entityManager,
         Request $request,
         MessageBusInterface $messageBus,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         int $sessionId = 0
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $form = $this->createForm(
             ($sessionId == 0) ? GameListAddFormType::class : GameListUserAccessFormType::class,
@@ -226,10 +238,10 @@ class GameListController extends BaseController
         requirements: ['sessionId' => '\d+']
     )]
     public function gameSessionDetails(
-        EntityManagerInterface $entityManager,
         ConnectionManager $connectionManager,
         int $sessionId = 1
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $watchdogs = $connectionManager->getGameSessionEntityManager($sessionId)->getRepository(Watchdog::class)->
             findAll();
@@ -285,40 +297,45 @@ class GameListController extends BaseController
     public function gameSessionState(
         int $sessionId,
         string $state,
-        KernelInterface $kernel,
-        WatchdogCommunicator $watchdogCommunicator,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper
+        GameController $gameController,
+        WatchdogCommunicator $watchdogCommunicator
     ): Response {
-        (new GameController($kernel->getProjectDir()))
-            ->state($sessionId, $state, $watchdogCommunicator, $symfonyToLegacyHelper);
+        $gameController
+            ->state($sessionId, $state, $watchdogCommunicator);
         return new Response(null, 204);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{sessionId}/recreate',
         name: 'manager_gamelist_recreate',
         requirements: ['sessionId' => '\d+']
     )]
     public function gameSessionRecreate(
-        EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
         int $sessionId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $messageBus->dispatch(new GameListCreationMessage($gameSession->getId()));
         return new Response($gameSession->getId(), 200);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{sessionId}/archive',
         name: 'manager_gamelist_archive',
         requirements: ['sessionId' => '\d+']
     )]
     public function gameSessionArchive(
-        EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
         int $sessionId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $gameSession->setSessionState(new GameSessionStateValue('archived'));
         $entityManager->flush();
@@ -326,41 +343,49 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
+    /**
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws \Exception
+     */
     #[Route('/{sessionId}/demo', name: 'manager_gamelist_demo', requirements: ['sessionId' => '\d+'])]
     public function gameSessionDemo(
-        EntityManagerInterface $entityManager,
         WatchdogCommunicator $watchdogCommunicator,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper,
-        KernelInterface $kernel,
+        GameController $gameController,
         int $sessionId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         $gameSession->setDemoSession(($gameSession->getDemoSession() === 1) ? 0 : 1);
         $entityManager->flush();
         if ($gameSession->getDemoSession() == 1 && $gameSession->getGameState() != GameStateValue::PLAY) {
-            (new GameController($kernel->getProjectDir()))
-            ->state($sessionId, GameStateValue::PLAY, $watchdogCommunicator, $symfonyToLegacyHelper);
+            $gameController
+                ->state($sessionId, GameStateValue::PLAY, $watchdogCommunicator);
         }
         return new Response(null, 204);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{sessionId}/save/{type}',
         name: 'manager_gamelist_save',
         requirements: ['sessionId' => '\d+', 'type' => '\w+']
     )]
     public function gameSessionSave(
-        EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
         int $sessionId,
         string $type = GameSaveTypeValue::FULL
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         if ($gameSession->getSessionState() != GameSessionStateValue::HEALTHY
              || ($type != GameSaveTypeValue::FULL && $type != GameSaveTypeValue::LAYERS)) {
             return new Response(null, 422);
         }
-        $serializer = new GameListAndSaveSerializer($entityManager);
+        $serializer = new GameListAndSaveSerializer($this->connectionManager);
         $gameSave = $serializer->createGameSaveFromData(
             $serializer->createDataFromGameList($gameSession)
         );
@@ -387,16 +412,18 @@ class GameListController extends BaseController
         return new Response(null, 204);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{sessionId}/export',
         name: 'manager_gamelist_export',
         requirements: ['sessionId' => '\d+']
     )]
     public function gameSessionExport(
-        EntityManagerInterface $entityManager,
-        int $sessionId,
-        SymfonyToLegacyHelper $symfonyToLegacyHelper
+        int $sessionId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         if ($gameSession->getSessionState() != GameSessionStateValue::HEALTHY) {
             return new Response(null, 422);

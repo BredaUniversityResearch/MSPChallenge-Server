@@ -5,9 +5,17 @@ namespace App\Repository\ServerManager;
 use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameConfigVersion;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
-class GameConfigVersionRepository extends EntityRepository
+class GameConfigVersionRepository extends ServerEntityRepository
 {
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
     public function save(GameConfigVersion $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -17,6 +25,11 @@ class GameConfigVersionRepository extends EntityRepository
         }
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
     public function remove(GameConfigVersion $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);

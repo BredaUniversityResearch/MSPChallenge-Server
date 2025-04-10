@@ -11,8 +11,8 @@ use Exception;
 readonly class SimulationHelper
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private VersionsProvider       $provider
+        private ConnectionManager $connectionManager,
+        private VersionsProvider $provider
     ) {
     }
 
@@ -67,7 +67,8 @@ readonly class SimulationHelper
      */
     private function getDataModel(int $sessionId): array
     {
-        if (null === $gameList = $this->em->getRepository(GameList::class)->find($sessionId)) {
+        $em = $this->connectionManager->getServerManagerEntityManager();
+        if (null === $gameList = $em->getRepository(GameList::class)->find($sessionId)) {
             throw new Exception('Game list not found');
         }
         if (null === $config = $gameList->getGameConfigVersion()->getGameConfigComplete()) {

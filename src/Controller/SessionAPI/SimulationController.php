@@ -25,11 +25,6 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 class SimulationController extends BaseController
 {
-    public function __construct(
-        private readonly ConnectionManager $connectionManager
-    ) {
-    }
-
     /**
      * @throws Exception
      */

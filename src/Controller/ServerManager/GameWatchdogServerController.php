@@ -5,7 +5,6 @@ namespace App\Controller\ServerManager;
 use App\Controller\BaseController;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Form\GameWatchdogServerFormType;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,9 +16,13 @@ use Symfony\Component\Routing\Annotation\Route;
 )]
 class GameWatchdogServerController extends BaseController
 {
+    /**
+     * @throws \Exception
+     */
     #[Route('/list', name: 'manager_gamewatchdogserver_list')]
-    public function gameWatchdogServerList(EntityManagerInterface $entityManager): Response
+    public function gameWatchdogServerList(): Response
     {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameWatchdogServers = $entityManager->getRepository(GameWatchdogServer::class)->findAll();
         return $this->render(
             'manager/GameWatchdogServer/gamewatchdogserver.html.twig',
@@ -27,13 +30,17 @@ class GameWatchdogServerController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{geoserverId}/availability',
         name: 'manager_gamewatchdogserver_visibility',
         requirements: ['geoserverId' => '\d+']
     )]
-    public function gameWatchdogServerVisibility(EntityManagerInterface $entityManager, int $geoserverId): Response
+    public function gameWatchdogServerVisibility(int $geoserverId): Response
     {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameWatchdogServer = $entityManager->getRepository(GameWatchdogServer::class)->find($geoserverId);
         if ($gameWatchdogServer->getAvailable()) {
             $gameWatchdogServer->setAvailable(false);
@@ -44,16 +51,19 @@ class GameWatchdogServerController extends BaseController
         return new Response(null, 204);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{geoserverId}/form',
         name: 'manager_gamewatchdogserver_form',
         requirements: ['geoserverId' => '\d+']
     )]
     public function gameWatchdogServerForm(
-        EntityManagerInterface $entityManager,
         Request $request,
         int $geoserverId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
             GameWatchdogServerFormType::class,
             $geoserverId == 0 ?

@@ -2,39 +2,39 @@
 
 namespace App\Repository;
 
-use App\Entity\ViewingSession;
+use App\Entity\ImmersiveSession;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<ViewingSession>
+ * @extends ServiceEntityRepository<ImmersiveSession>
  */
-class ViewingSessionRepository extends ServiceEntityRepository
+class ImmersiveSessionRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, ViewingSession::class);
+        parent::__construct($registry, ImmersiveSession::class);
     }
 
     //    /**
-    //     * @return ViewingSession[] Returns an array of ViewingSession objects
+    //     * @return ImmersiveSession[] Returns an array of ImmersiveSession objects
     //     */
     //    public function findByExampleField($value): array
     //    {
-    //        return $this->createQueryBuilder('v')
-    //            ->andWhere('v.exampleField = :val')
+    //        return $this->createQueryBuilder('i')
+    //            ->andWhere('i.exampleField = :val')
     //            ->setParameter('val', $value)
-    //            ->orderBy('v.id', 'ASC')
+    //            ->orderBy('i.id', 'ASC')
     //            ->setMaxResults(10)
     //            ->getQuery()
     //            ->getResult()
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?ViewingSession
+    //    public function findOneBySomeField($value): ?ImmersiveSession
     //    {
-    //        return $this->createQueryBuilder('v')
-    //            ->andWhere('v.exampleField = :val')
+    //        return $this->createQueryBuilder('i')
+    //            ->andWhere('i.exampleField = :val')
     //            ->setParameter('val', $value)
     //            ->getQuery()
     //            ->getOneOrNullResult()

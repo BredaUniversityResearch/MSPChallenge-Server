@@ -3,10 +3,17 @@
 namespace App\Repository\ServerManager;
 
 use App\Entity\ServerManager\User;
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
-class UserRepository extends EntityRepository
+class UserRepository extends ServerEntityRepository
 {
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws Exception
+     */
     public function save(User $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
