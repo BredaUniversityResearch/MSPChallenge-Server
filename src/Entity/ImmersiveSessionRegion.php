@@ -8,7 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionRegionRepository::class)]
 #[ApiResource(
-    description: 'Region of the immersive session. The coordinates are in the EPSG:3035 coordinate system. Tip: use <A href="http://bboxfinder.com">bboxfinder.com</A> to retrieve the coordinates.',
+    description: 'Region of the immersive session. The coordinates are in the EPSG:3035 coordinate system.'.
+        ' Tip: use <A href="http://bboxfinder.com">bboxfinder.com</A> to retrieve the coordinates.'
 )]
 class ImmersiveSessionRegion
 {

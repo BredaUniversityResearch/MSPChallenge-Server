@@ -49,7 +49,8 @@ class CheckApiSessionIdListener
                 ));
             }
 
-            // since api platform uses the default entity manager, we need to set the connection to the msp_session_$sessionId
+            // since api platform uses the default entity manager,
+            //  we need to set the connection to the msp_session_$sessionId
             $connection = $this->em->getConnection();
             if ($connection->isConnected()) {
                 throw new \RuntimeException('Connection is already established.');

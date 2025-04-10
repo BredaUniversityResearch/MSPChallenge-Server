@@ -20,7 +20,10 @@ class DockerController extends AbstractController
         try {
             $this->dockerService->createAndStartAdminerContainer(8083);
         } catch (TransportExceptionInterface $e) {
-            return new Response('Error starting Adminer container: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new Response(
+                'Error starting Adminer container: ' . $e->getMessage(),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
         return new Response('Adminer container started successfully.');
     }
@@ -31,7 +34,10 @@ class DockerController extends AbstractController
         try {
             $this->dockerService->createHelloWorldContainer();
         } catch (TransportExceptionInterface $e) {
-            return new Response('Error starting Hello World container: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new Response(
+                'Error starting Hello World container: ' . $e->getMessage(),
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
         return new Response('Hello World container started successfully.');
     }

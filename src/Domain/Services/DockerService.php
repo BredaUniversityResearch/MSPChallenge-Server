@@ -28,7 +28,8 @@ readonly class DockerService
         $client->request('POST', '/build', [
             'query' => [
                 't' => 'unity-server-image',
-                'remote' => "https://{$githubToken}@github.com/BredaUniversityResearch/ImmersiveTwins-UnityServer-Docker.git",
+                'remote' =>
+                    "https://{$githubToken}@github.com/BredaUniversityResearch/ImmersiveTwins-UnityServer-Docker.git",
             ]
         ]);
 
