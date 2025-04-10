@@ -133,7 +133,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             $this->warning('Game list not found. Id: '.$message->getGameSessionId());
             return;
         }
-        $tokens = $this->getTokensForWatchdog($message->getGameSessionId());
+        $tokens = $this->getTokensForWatchdog($message->getGameSessionId(), $watchdog);
         $apiAccessToken = new Token($tokens['token'], new DateTime('+1 hour'));
         $apiAccessRenewToken = new Token(
             $tokens['api_refresh_token'],
@@ -143,7 +143,10 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             ->mapWithKeys(fn(SimulationEntity $sim) => [$sim->getName() => $sim->getVersion()])
             ->toArray();
         $postValues = [
-            'game_session_api' => self::getSessionAPIBaseUrl($gameList),
+            'game_session_api' => self::getSessionAPIBaseUrl(
+                $gameList,
+                $watchdog->getServerId() == Watchdog::getInternalServerId() ? 'host.docker.internal' : null
+            ),
             'game_session_token' => (string)$watchdog->getToken(),
             'game_state' => $message->getGameState()->__toString(),
             'required_simulations' => json_encode($requiredSimulations, JSON_FORCE_OBJECT),
@@ -169,12 +172,12 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
     /**
      * @throws Exception
      */
-    private function getTokensForWatchdog(int $sessionId): array
+    private function getTokensForWatchdog(int $sessionId, Watchdog $watchdog): array
     {
         $user = new User();
         $user->setGameSessionId($sessionId);
-        $user->setUserId(999999);
-        $user->setUsername('Watchdog_' . uniqid());
+        $user->setUserId((int)('999999'.$watchdog->getId()));
+        $user->setUsername('Watchdog_'.$watchdog->getGameWatchdogServer()->getServerId()->toRfc4122());
         $jsonResponse = $this->authenticationSuccessHandler->handleAuthenticationSuccess($user);
         return json_decode($jsonResponse->getContent(), true);
     }
@@ -368,10 +371,11 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
      *
      * @throws Exception
      */
-    public static function getSessionAPIBaseUrl(GameList $gameList): string
+    public static function getSessionAPIBaseUrl(GameList $gameList, ?string $address = null): string
     {
         $protocol = str_replace('://', '', $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
-        $address = ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $gameList->getGameServer()->getAddress() ?? gethostname();
+        $address ??= ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $gameList->getGameServer()->getAddress() ??
+            gethostname();
         $port = ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
         return $protocol.$address.':'.$port.'/'.$gameList->getId().'/';
     }

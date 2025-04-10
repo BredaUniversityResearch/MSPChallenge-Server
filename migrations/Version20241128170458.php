@@ -86,6 +86,9 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
         }
         // in-case there is no game record for the simulation, insert it with default values
         foreach ($simulations as $name => $sim) {
+            if (!isset($versions[$name])) {
+                continue; // eg. when key MEL/SEL is null
+            }
             $version = $versions[$name];
             $sql = <<<"SQL"
                 INSERT IGNORE INTO simulation (watchdog_id, name, version)

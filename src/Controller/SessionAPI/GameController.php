@@ -31,8 +31,11 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use function App\await;
 
-#[Route('/api/Game')]
-#[OA\Tag(name: 'Game', description: 'Operations related to game management')]
+#[Route('/api/{game}', requirements: ['game' => '[gG]ame'])]
+#[OA\Tag(
+    name: 'Game',
+    description: '<u>{game} being either Game or game</u>. Operations related to game management.'
+)]
 class GameController extends BaseController
 {
     public function __construct(
@@ -468,5 +471,61 @@ class GameController extends BaseController
         } catch (Exception $e) {
             return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
         }
+    }
+
+    #[Route(
+        path: '/IsOnline',
+        name: 'session_api_game_is_online',
+        methods: ['GET','POST']
+    )]
+    #[OA\Get(
+        summary: 'Check if the session is online',
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Session is online',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(
+                                    property: 'payload',
+                                    type: 'string',
+                                    example: 'online'
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    #[OA\Post(
+        summary: 'Check if the session is online',
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Session is online',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(
+                                    property: 'payload',
+                                    type: 'string',
+                                    example: 'online'
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    public function isOnline(): JsonResponse
+    {
+        return new JsonResponse(self::wrapPayloadForResponse(true, 'online'));
     }
 }

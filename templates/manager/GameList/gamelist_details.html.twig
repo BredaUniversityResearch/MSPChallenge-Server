@@ -62,18 +62,56 @@
                         version {{ gameSession.gameConfigVersion.version }}
                     {% endif %}
                     </td>
-                    <th scope="col">Simulation Server</th>
-                    <td class="text-right">
-                        {{ gameSession.gameWatchdogServer.name}} 
-                        ({{ gameSession.gameWatchdogServer.address }})
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="col">GeoServer</th>
-                    <td class="text-right">{{ gameSession.gameGeoServer.name }}</td>
                     <th scop="col">Active Players</th>
                     <td class="text-right">{{ gameSession.playersActive }}</td>
                 </tr>
+                <tr>
+                    <th scope="col">GeoServer</th>
+                    <td class="text-right" colspan="3">{{ gameSession.gameGeoServer.name }}</td>
+                </tr>
+                {% if watchdogs|length > 0 %}
+                <tr>
+                    <th scope="col" style="border-bottom-width: 0">Watchdog servers</th>
+                </tr>
+                <tr>
+                    <td colspan="100">
+                        <table class="table table-dark table-responsive-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">URL</th>
+                                    <th scope="col">Simulations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for watchdog in watchdogs %}
+                                <tr>
+                                    <td>{{ watchdog.getGameWatchdogServer().name }}</td>
+                                    <td>{{ watchdog.getGameWatchdogServer().createUrl() }}</td>
+                                    <td>
+                                        {% set simulations = watchdog.getSimulations()|map(s => s.name)|join(', ') %}
+                                        {# meaning we can still connect during setup , or re-connect if the simulations were setup correctly #}
+                                        {% if gameSession.gameState == 'setup' or simulations is not empty %}
+                                            {% if watchdog.getStatus().value == enum('App\\Domain\\Common\\EntityEnums\\WatchdogStatus').UNRESPONSIVE.value %}
+                                            <button class="btn btn-warning btn-sm" data-session="{{ gameSession.id }}" data-watchdog="{{ watchdog.id }}" data-action="gamelist#connectToWatchdog">
+                                                <i class="fa fa-handshake-o"></i> Connect
+                                            </button>
+                                            {% elseif simulations is empty %}
+                                            <i class="fa fa-spinner fa-pulse"></i> Connecting...
+                                            {% else %}
+                                            <i class="fa fa-exchange"></i> {{ simulations }}
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fa fa-ban"></i> Unregistered
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                {% endif %}
             </table>
         </div>
         {% if gameSession.sessionState != 'archived' %}

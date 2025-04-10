@@ -309,19 +309,6 @@ class Game extends Base
         );
     }
 
-    /**
-     * @apiGroup Game
-     * @api {POST} /game/IsOnline Is Online
-     * @apiDescription Check if the server is online
-     * @apiSuccess {string} online
-     * @noinspection PhpUnused
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function IsOnline(): string
-    {
-        return "online";
-    }
-
     //this should probably be moved to Layer instead
     /**
      * @apiGroup Game
