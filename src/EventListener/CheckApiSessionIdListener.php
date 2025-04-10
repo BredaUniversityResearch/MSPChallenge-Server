@@ -18,14 +18,15 @@ class CheckApiSessionIdListener
         array $pathPatterns,
         private readonly EntityManagerInterface $em,
         private readonly ConnectionManager $connectionManager
-    ){
+    ) {
         $this->pathPatterns = $pathPatterns;
     }
 
     /**
      * @throws Exception
      */
-    public function onKernelRequest(RequestEvent $event): void {
+    public function onKernelRequest(RequestEvent $event): void
+    {
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
