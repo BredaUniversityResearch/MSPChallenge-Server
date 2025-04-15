@@ -6,6 +6,7 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
 use Doctrine\DBAL\Exception\ConnectionException;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +38,7 @@ class SessionController extends AbstractController
         RouterInterface $router,
         ConnectionManager $connectionManager,
         Request $request,
+        EntityManagerInterface $em,
         int $session,
         string $query
     ): Response {
@@ -57,6 +59,20 @@ class SessionController extends AbstractController
         if ($gameList->getSessionState() != GameSessionStateValue::HEALTHY) {
             throw new HttpException(503, 'Session cannot be used at the moment');
         }
+
+        // since api platform uses the default entity manager,
+        //  we need to set the connection to the msp_session_$sessionId
+		$connection = $em->getConnection();
+        if ($connection->isConnected()) {
+            throw new \RuntimeException('Connection is already established.');
+        }
+
+        $otherConnection = $connectionManager->getCachedGameSessionDbConnection($session);
+        $connection->__construct(
+            $otherConnection->getParams(),
+            $otherConnection->getDriver(),
+            $otherConnection->getConfiguration()
+        );
 
         // Merge the route information into the attributes
         $routeInfo = $router->match('/api/'.$query);

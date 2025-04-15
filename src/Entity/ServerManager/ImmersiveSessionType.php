@@ -2,6 +2,7 @@
 
 namespace App\Entity\ServerManager;
 
+use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Repository\ServerManager\ImmersiveSessionTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,6 +13,9 @@ class ImmersiveSessionType
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\Column(unique: true, enumType: ImmersiveSessionTypeID::class)]
+    private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MIXED_REALITY;
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
@@ -25,6 +29,18 @@ class ImmersiveSessionType
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getType(): ImmersiveSessionTypeID
+    {
+        return $this->type;
+    }
+
+    public function setType(ImmersiveSessionTypeID $type): static
+    {
+        $this->type = $type;
+
+        return $this;
     }
 
     public function getName(): ?string

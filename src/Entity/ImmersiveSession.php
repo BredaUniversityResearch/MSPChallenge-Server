@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Repository\ImmersiveSessionRepository;
+use App\Validator\ImmersiveSessionTypeJsonSchema;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionRepository::class)]
@@ -18,20 +21,44 @@ class ImmersiveSession
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column]
-    private ?int $type = null;
+    #[ApiProperty(
+        openapiContext: [
+            'type' => 'string',
+            'enum' => ImmersiveSessionTypeID::ALL,
+            'description' => 'The type of the immersive session',
+            'example' => ImmersiveSessionTypeID::ALL[0]
+        ]
+    )]
+    #[ORM\Column(enumType: ImmersiveSessionTypeID::class)]
+    private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MIXED_REALITY;
 
     #[ORM\Column]
     private ?int $month = null;
 
+    #[ImmersiveSessionTypeJsonSchema]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '{
+                "key": "value"
+            }'
+        ]
+    )]
     #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $data = null;
 
-    #[ORM\OneToOne(inversedBy: 'immersiveSession', cascade: ['persist', 'remove'])]
+    #[ApiProperty(
+        openapiContext: [
+            'example' => '/api/immersive_session_regions/{regionId}',
+        ]
+    )]
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?ImmersiveSessionRegion $region = null;
 
-    #[ORM\OneToOne(mappedBy: 'immersiveSession', cascade: ['persist', 'remove'])]
+    #[ApiProperty(
+        writable: false
+    )]
+    #[ORM\OneToOne(mappedBy: 'session', cascade: ['persist', 'remove'])]
     private ?ImmersiveSessionConnection $connection = null;
 
     public function getId(): ?int
@@ -51,12 +78,12 @@ class ImmersiveSession
         return $this;
     }
 
-    public function getType(): ?int
+    public function getType(): ImmersiveSessionTypeID
     {
         return $this->type;
     }
 
-    public function setType(int $type): static
+    public function setType(ImmersiveSessionTypeID $type): static
     {
         $this->type = $type;
 

@@ -23,6 +23,9 @@ class ImmersiveSessionConnection
     #[ORM\Column]
     private ?int $port = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $dockerContainerID = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +63,18 @@ class ImmersiveSessionConnection
     public function setPort(int $port): static
     {
         $this->port = $port;
+
+        return $this;
+    }
+
+    public function getDockerContainerID(): ?string
+    {
+        return $this->dockerContainerID;
+    }
+
+    public function setDockerContainerID(?string $dockerContainerID): static
+    {
+        $this->dockerContainerID = $dockerContainerID;
 
         return $this;
     }

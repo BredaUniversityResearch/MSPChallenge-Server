@@ -26,8 +26,18 @@ final class Version20250410181235 extends MSPMigration
     {
         // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $this->addSql('CREATE TABLE immersive_session_docker_api (id INT AUTO_INCREMENT NOT NULL, address VARCHAR(255) NOT NULL, port INT NOT NULL, scheme VARCHAR(255) NOT NULL, available TINYINT(1) NOT NULL, last_ping DATETIME DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-        $this->addSql('CREATE TABLE immersive_session_type (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, data_schema JSON DEFAULT NULL COMMENT \'(DC2Type:json_document)\', data_default JSON DEFAULT NULL COMMENT \'(DC2Type:json_document)\', PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
-
+        $this->addSql(<<< 'SQL'
+            CREATE TABLE immersive_session_type (
+            id INT AUTO_INCREMENT NOT NULL, 
+            `type` enum('mixed-reality') NOT NULL DEFAULT 'mixed-reality', 
+            name VARCHAR(255) NOT NULL, 
+            data_schema JSON DEFAULT NULL COMMENT '(DC2Type:json_document)',
+            data_default JSON DEFAULT NULL COMMENT '(DC2Type:json_document)',
+            UNIQUE INDEX immersive_session_type_type (type), 
+            PRIMARY KEY(id)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+        SQL
+        );
     }
 
     protected function onDown(Schema $schema): void

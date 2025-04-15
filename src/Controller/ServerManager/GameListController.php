@@ -243,8 +243,12 @@ class GameListController extends BaseController
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
-        $watchdogs = $connectionManager->getGameSessionEntityManager($sessionId)->getRepository(Watchdog::class)->
-            findAll();
+        try {
+            $watchdogs = $connectionManager->getGameSessionEntityManager($sessionId)->getRepository(Watchdog::class)->
+                findAll();
+        } catch (Exception $e) {
+            $watchdogs = [];
+        }
         return $this->render(
             'manager/GameList/gamelist_details.html.twig',
             ['gameSession' => $gameSession, 'watchdogs' => $watchdogs]

@@ -33,9 +33,6 @@ class ImmersiveSessionRegion
     #[ORM\Column]
     private ?float $topRightY = null;
 
-    #[ORM\OneToOne(mappedBy: 'region', cascade: ['persist', 'remove'])]
-    private ?ImmersiveSession $immersiveSession = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -97,23 +94,6 @@ class ImmersiveSessionRegion
     public function setTopRightY(float $topRightY): static
     {
         $this->topRightY = $topRightY;
-
-        return $this;
-    }
-
-    public function getImmersiveSession(): ?ImmersiveSession
-    {
-        return $this->immersiveSession;
-    }
-
-    public function setImmersiveSession(ImmersiveSession $immersiveSession): static
-    {
-        // set the owning side of the relation if necessary
-        if ($immersiveSession->getRegion() !== $this) {
-            $immersiveSession->setRegion($this);
-        }
-
-        $this->immersiveSession = $immersiveSession;
 
         return $this;
     }

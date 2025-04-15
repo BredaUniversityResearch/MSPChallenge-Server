@@ -93,4 +93,11 @@ class ImmersiveSessionDockerApi
 
         return $this;
     }
+
+    public function createUrl(): string
+    {
+        $scheme = str_replace('://', '', $this->getScheme());
+        $port = $this->getPort();
+        return "{$scheme}://{$this->getAddress()}:{$port}";
+    }
 }
