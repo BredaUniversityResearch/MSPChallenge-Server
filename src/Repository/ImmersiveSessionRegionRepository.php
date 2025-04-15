@@ -2,20 +2,10 @@
 
 namespace App\Repository;
 
-use App\Entity\ImmersiveSessionRegion;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityRepository;
 
-/**
- * @extends ServiceEntityRepository<ImmersiveSessionRegion>
- */
-class ImmersiveSessionRegionRepository extends ServiceEntityRepository
+class ImmersiveSessionRegionRepository extends EntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, ImmersiveSessionRegion::class);
-    }
-
     //    /**
     //     * @return ViewingArea[] Returns an array of ViewingArea objects
     //     */

@@ -2,7 +2,9 @@
 
 namespace App\Repository\ServerManager;
 
-class ImmersiveSessionTypeRepository extends ServerEntityRepository
+use Doctrine\ORM\EntityRepository;
+
+class ImmersiveSessionTypeRepository extends EntityRepository
 {
     //    /**
     //     * @return ImmersiveSessionType[] Returns an array of ImmersiveSessionType objects

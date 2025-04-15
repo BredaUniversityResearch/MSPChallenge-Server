@@ -2,7 +2,9 @@
 
 namespace App\Repository\ServerManager;
 
-class ImmersiveSessionDockerApiRepository extends ServerEntityRepository
+use Doctrine\ORM\EntityRepository;
+
+class ImmersiveSessionDockerApiRepository extends EntityRepository
 {
     //    /**
     //     * @return ImmersiveSessionDockerApi[] Returns an array of ImmersiveSessionDockerApi objects

@@ -2,20 +2,10 @@
 
 namespace App\Repository;
 
-use App\Entity\ImmersiveSessionConnection;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityRepository;
 
-/**
- * @extends ServiceEntityRepository<ImmersiveSessionConnection>
- */
-class ImmersiveSessionConnectionRepository extends ServiceEntityRepository
+class ImmersiveSessionConnectionRepository extends EntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, ImmersiveSessionConnection::class);
-    }
-
     //    /**
     //     * @return ImmersiveSessionConnection[] Returns an array of ImmersiveSessionConnection objects
     //     */
