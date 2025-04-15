@@ -44,7 +44,7 @@ final class Version20250410181450 extends MSPMigration
             session_id INT NOT NULL,
             docker_api_id INT NOT NULL,
             port INT NOT NULL,
-            docker_container_id VARCHAR(255) DEFAULT NOT NULL,
+            docker_container_id VARCHAR(255) NOT NULL,
             INDEX immersive_session_connection_session_id (session_id),
             PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB;
@@ -52,7 +52,7 @@ final class Version20250410181450 extends MSPMigration
         );
         $this->addSql('CREATE TABLE immersive_session_region (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, bottom_left_x DOUBLE PRECISION NOT NULL, bottom_left_y DOUBLE PRECISION NOT NULL, top_right_x DOUBLE PRECISION NOT NULL, top_right_y DOUBLE PRECISION NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('ALTER TABLE immersive_session ADD CONSTRAINT immersive_session_region_id FOREIGN KEY (region_id) REFERENCES immersive_session_region (id)');
-        $this->addSql('ALTER TABLE immersive_session_connection ADD CONSTRAINT immersive_session_connection_session_id FOREIGN KEY (immersive_session_id) REFERENCES immersive_session (id)');
+        $this->addSql('ALTER TABLE immersive_session_connection ADD CONSTRAINT immersive_session_connection_session_id FOREIGN KEY (session_id) REFERENCES immersive_session (id)');
 
     }
 
