@@ -62,7 +62,7 @@ class SessionController extends AbstractController
 
         // since api platform uses the default entity manager,
         //  we need to set the connection to the msp_session_$sessionId
-		$connection = $em->getConnection();
+        $connection = $em->getConnection();
         if ($connection->isConnected()) {
             throw new \RuntimeException('Connection is already established.');
         }

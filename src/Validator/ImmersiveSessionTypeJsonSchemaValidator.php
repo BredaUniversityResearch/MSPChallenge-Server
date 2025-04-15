@@ -43,13 +43,18 @@ class ImmersiveSessionTypeJsonSchemaValidator extends ConstraintValidator
             $immersiveSessionType->getDataDefault(),
             $value
         );
-        $validator->validate($value, $immersiveSessionType->getDataSchema(), \JsonSchema\Constraints\Constraint::CHECK_MODE_TYPE_CAST);
+        $validator->validate(
+            $value,
+            $immersiveSessionType->getDataSchema(),
+            \JsonSchema\Constraints\Constraint::CHECK_MODE_TYPE_CAST
+        );
 
         if (!$validator->isValid()) {
             foreach ($validator->getErrors() as $error) {
                 $this->context->buildViolation($constraint->message)
                     ->setParameter(
-                        '{{ error }}', (empty($error['property'])?'':$error['property'].': ').$error['message']
+                        '{{ error }}',
+                        (empty($error['property'])?'':$error['property'].': ').$error['message']
                     )
                     ->addViolation();
             }

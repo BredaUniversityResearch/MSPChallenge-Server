@@ -103,7 +103,8 @@ class ImmersiveSessionService
                 ['dockerApiID' => $this->getDockerApi()->getId()]
             )
         )->reduce(
-            fn ($carry, ImmersiveSessionConnection $connection) => max($carry + $connection->getPort()), 0
+            fn ($carry, ImmersiveSessionConnection $connection) => max($carry + $connection->getPort()),
+            0
         ) + 1;
         $conn = new ImmersiveSessionConnection();
         $conn
