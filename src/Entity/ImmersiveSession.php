@@ -8,6 +8,7 @@ use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Repository\ImmersiveSessionRepository;
 use App\Validator\ImmersiveSessionTypeJsonSchema;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionRepository::class)]
 #[ApiResource]
@@ -19,6 +20,8 @@ class ImmersiveSession
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "The name field should not be blank.")]
+    #[Assert\NotNull(message: "The name field is required.")]
     private ?string $name = null;
 
     #[ApiProperty(
@@ -30,10 +33,17 @@ class ImmersiveSession
         ]
     )]
     #[ORM\Column(enumType: ImmersiveSessionTypeID::class)]
+    #[Assert\NotBlank(message: "The type field should not be blank.")]
+    #[Assert\NotNull(message: "The type field is required.")]
     private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MIXED_REALITY;
 
-    #[ORM\Column]
-    private ?int $month = null;
+    #[ORM\Column(options: ['default' => -1])]
+    #[Assert\NotBlank(message: "The month field should not be blank.")]
+    #[Assert\Range(
+        notInRangeMessage: "The month must be an integer greater than or equal to -1.",
+        min: -1
+    )]
+    private int $month = -1;
 
     #[ImmersiveSessionTypeJsonSchema]
     #[ApiProperty(
@@ -53,6 +63,8 @@ class ImmersiveSession
     )]
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank(message: "The region field should not be blank.")]
+    #[Assert\NotNull(message: "The region field is required.")]
     private ?ImmersiveSessionRegion $region = null;
 
     #[ApiProperty(
@@ -90,7 +102,7 @@ class ImmersiveSession
         return $this;
     }
 
-    public function getMonth(): ?int
+    public function getMonth(): int
     {
         return $this->month;
     }

@@ -31,8 +31,8 @@ final class Version20250410181450 extends MSPMigration
             region_id INT NOT NULL,
             name VARCHAR(255) NOT NULL,
             `type` enum('mixed-reality') NOT NULL DEFAULT 'mixed-reality',
-            MONTH INT NOT NULL,
-            DATA JSON DEFAULT NULL COMMENT '(DC2Type:json_document)',
+            `month` INT NOT NULL DEFAULT -1,
+            `data` JSON DEFAULT NULL COMMENT '(DC2Type:json_document)',
             INDEX immersive_session_region_id (region_id),
             PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB

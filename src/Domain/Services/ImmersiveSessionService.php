@@ -85,12 +85,8 @@ class ImmersiveSessionService
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    public function createImmersiveSessionContainer(ImmersiveSession $sess): void
+    public function createImmersiveSessionContainer(ImmersiveSession $sess, int $gameSessionId): void
     {
-        $githubToken = ($_ENV['GITHUB_PERSONAL_ACCESS_TOKEN'] ?? null) ?: null;
-        if ($githubToken === null) {
-            throw new Exception('GITHUB_PERSONAL_ACCESS_TOKEN is not set.');
-        }
         $immersiveSessionType = $this->getEntityManager()->getRepository(ImmersiveSessionType::class)
             ->findOneBy(['type' => $sess->getType()]);
         if ($immersiveSessionType === null) {
@@ -98,13 +94,15 @@ class ImmersiveSessionService
         }
 
         // find all connections for this docker api, get the max port and add 1
+        $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         $nextAvailablePort = collect(
-            $this->getEntityManager()->getRepository(ImmersiveSessionConnection::class)->findBy(
-                ['dockerApiID' => $this->getDockerApi()->getId()]
-            )
+            $em
+                ->getRepository(ImmersiveSessionConnection::class)->findBy(
+                    ['dockerApiID' => $this->getDockerApi()->getId()]
+                )
         )->reduce(
             fn ($carry, ImmersiveSessionConnection $connection) => max($carry, $connection->getPort()),
-            0
+            45000
         ) + 1;
         $conn = new ImmersiveSessionConnection();
         $conn
@@ -112,25 +110,20 @@ class ImmersiveSessionService
             ->setDockerApiID($this->getDockerApi()->getId())
             ->setPort($nextAvailablePort);
 
-        // Create the container
-        $client = HttpClient::create([
-            'base_uri' => $this->getDockerApi()->createUrl(),
-        ]);
-
         $branchName = ($_ENV['IMMERSIVE_TWINS_DOCKER_BRANCH'] ?? null) ?: 'main';
-        $client->request('POST', '/build', [
+        $this->dockerApiCall('POST', '/build', [
             'query' => [
                 't' => 'unity-server-image',
-                'remote' =>
-                    "https://{$githubToken}@github.com/BredaUniversityResearch/ImmersiveTwins-UnityServer-Docker.git".
-                        "#{$branchName}"
+                'remote' => 'https://github.com/BredaUniversityResearch/ImmersiveTwins-UnityServer-Docker.git#'.
+                    $branchName,
             ]
         ]);
+
         $data = array_merge(
             $immersiveSessionType->getDataDefault() ?? [],
             $sess->getData() ?? []
         );
-        $response = $client->request('POST', '/containers/create', [
+        $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
                 'Image' => 'unity-server-image', // Use the built image
                 'HostConfig' => [
@@ -151,43 +144,53 @@ class ImmersiveSessionService
             ],
         ]);
 
-        // Extract the container ID from the response
-        $containerId = json_decode($response->getContent(), true)['Id'];
-
         // Start the container
-        $client->request('POST', "/containers/{$containerId}/start");
-
+        $containerId = $responseContent['Id'];
+        $this->dockerApiCall('POST', "/containers/{$containerId}/start");
         $conn->setDockerContainerID($containerId);
-        $this->getEntityManager()->persist($conn);
-        $this->getEntityManager()->flush();
+        $em->persist($conn);
+        $em->flush();
     }
 
     /**
-     * @throws OptimisticLockException
      * @throws TransportExceptionInterface
-     * @throws ORMException
      * @throws Exception
      */
-    public function removeImmersiveSessionContainer(ImmersiveSession $sess): void
+    public function removeImmersiveSessionContainer(ImmersiveSession $sess, int $gameSessionId): void
     {
         $conn = $sess->getConnection();
         if ($conn === null) {
             throw new Exception('No connection found for this session.');
         }
+        $this->dockerApiCall('POST', "/containers/{$conn->getDockerContainerId()}/stop");
+        $this->dockerApiCall('DELETE', "/containers/{$conn->getDockerContainerId()}");
+        $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
+        $em->remove($conn);
+        $em->flush();
+    }
 
-        // Create the HTTP client
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     */
+    private function dockerApiCall(string $method, string $path, array $options = []): ?array
+    {
         $client = HttpClient::create([
             'base_uri' => $this->getDockerApi()->createUrl(),
         ]);
 
-        // Stop the container
-        $client->request('POST', "/containers/{$conn->getDockerContainerId()}/stop");
+        $response = $client->request($method, $path, $options);
 
-        // Remove the container
-        $client->request('DELETE', "/containers/{$conn->getDockerContainerId()}");
+        // Get the response content without throwing exceptions for HTTP errors
+        $responseContent = $response->getContent(false);
+        // Check the HTTP status code
+        if ($response->getStatusCode() >= 400) {
+            throw new \RuntimeException('Docker API error: '.$response->getStatusCode().': '.$responseContent);
+        }
 
-        // Remove the connection from the database
-        $this->getEntityManager()->remove($conn);
-        $this->getEntityManager()->flush();
+        return json_decode($responseContent, true);
     }
 }

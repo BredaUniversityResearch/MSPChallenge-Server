@@ -36,10 +36,6 @@ class ImmersiveSessionContainerController extends BaseController
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
      * @throws Exception
      */
     #[Route(
@@ -47,9 +43,18 @@ class ImmersiveSessionContainerController extends BaseController
         name: 'api_immersive_session_containers_create',
         methods: ['POST']
     )]
-    public function create(Request $request, $sessionId): Response
+    #[OA\Parameter(
+        name: 'sessionId',
+        description: 'The ID of the immersive session',
+        in: 'path',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    public function create(Request $request, int $sessionId): Response
     {
-        $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
+        $gameSessionId = $this->getSessionIdFromRequest($request);
+        $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
+        /** @var ImmersiveSession $session */
         $session = $em->getRepository(ImmersiveSession::class)->find($sessionId);
         if (!$session) {
             return new Response(
@@ -57,9 +62,15 @@ class ImmersiveSessionContainerController extends BaseController
                 Response::HTTP_NOT_FOUND
             );
         }
+        if ($session->getConnection() != null) {
+            return new Response(
+                'Immersive session already has a container: ' . $sessionId,
+                Response::HTTP_ALREADY_REPORTED
+            );
+        }
         try {
-            $this->service->createImmersiveSessionContainer($session);
-        } catch (Exception $e) {
+            $this->service->createImmersiveSessionContainer($session, $gameSessionId);
+        } catch (\Throwable $e) {
             return new Response(
                 'Error starting container: ' . $e->getMessage(),
                 Response::HTTP_INTERNAL_SERVER_ERROR
@@ -76,9 +87,17 @@ class ImmersiveSessionContainerController extends BaseController
         name: 'api_immersive_session_containers_remove',
         methods: ['POST']
     )]
-    public function remove(Request $request, string $sessionId): Response
+    #[OA\Parameter(
+        name: 'sessionId',
+        description: 'The ID of the immersive session',
+        in: 'path',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    public function remove(Request $request, int $sessionId): Response
     {
-        $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
+        $gameSessionId = $this->getSessionIdFromRequest($request);
+        $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         $session = $em->getRepository(ImmersiveSession::class)->find($sessionId);
         if (!$session) {
             return new Response(
@@ -86,9 +105,15 @@ class ImmersiveSessionContainerController extends BaseController
                 Response::HTTP_NOT_FOUND
             );
         }
+        if ($session->getConnection() == null) {
+            return new Response(
+                'Immersive session does not have container: ' . $sessionId,
+                Response::HTTP_ALREADY_REPORTED
+            );
+        }
         try {
-            $this->service->removeImmersiveSessionContainer($session);
-        } catch (Exception $e) {
+            $this->service->removeImmersiveSessionContainer($session, $gameSessionId);
+        } catch (\Throwable $e) {
             return new Response(
                 'Error removing container: ' . $e->getMessage(),
                 Response::HTTP_INTERNAL_SERVER_ERROR

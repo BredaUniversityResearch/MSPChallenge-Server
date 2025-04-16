@@ -37,12 +37,17 @@ class ImmersiveSessionTypeJsonSchemaValidator extends ConstraintValidator
             return;
         }
 
+        if (!$immersiveSessionType->getDataSchema()) {
+            return;
+        }
+
         // Validate the JSON data
         $validator = new Validator();
         $value = array_merge(
-            $immersiveSessionType->getDataDefault(),
-            $value
+            $immersiveSessionType->getDataDefault() ?? [],
+            $value ?? []
         );
+
         $validator->validate(
             $value,
             $immersiveSessionType->getDataSchema(),

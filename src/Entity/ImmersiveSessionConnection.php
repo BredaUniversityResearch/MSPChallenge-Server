@@ -13,7 +13,7 @@ class ImmersiveSessionConnection
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'connection', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'connection', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?ImmersiveSession $session = null;
 
