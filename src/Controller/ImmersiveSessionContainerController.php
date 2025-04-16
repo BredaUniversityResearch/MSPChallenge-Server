@@ -54,7 +54,7 @@ class ImmersiveSessionContainerController extends BaseController
     {
         $gameSessionId = $this->getSessionIdFromRequest($request);
         $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
-        /** @var ImmersiveSession $session */
+        /** @var ImmersiveSession|null $session */
         $session = $em->getRepository(ImmersiveSession::class)->find($sessionId);
         if (!$session) {
             return new Response(
