@@ -36,7 +36,6 @@ use App\Message\GameSave\GameSaveLoadMessage;
 use App\Repository\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Psr\Cache\InvalidArgumentException;
@@ -67,7 +66,6 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         // https://symfony.com/doc/6.4/logging/channels_handlers.html#how-to-autowire-logger-channels:
         //   $<camelCased channel name> + Logger
         LoggerInterface $gameSessionLogger,
-        EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,

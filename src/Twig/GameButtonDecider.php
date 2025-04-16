@@ -4,29 +4,35 @@ namespace App\Twig;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\GameListAndSaveSerializer;
+use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
-use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use ReflectionException;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class GameButtonDecider extends AbstractExtension
 {
     public function __construct(
-        private readonly EntityManagerInterface $mspServerManagerEntityManager
+        private readonly ConnectionManager $connectionManager
     ) {
     }
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('showGameButton', [$this, 'gameButtonDecide']),
         ];
     }
 
-    public function gameButtonDecide(string $buttonType, array|GameList $gameSession)
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function gameButtonDecide(string $buttonType, array|GameList $gameSession): bool
     {
         if (is_array($gameSession)) {
-            $serializer = new GameListAndSaveSerializer($this->mspServerManagerEntityManager);
+            $serializer = new GameListAndSaveSerializer($this->connectionManager);
             $gameSession = $serializer->createGameListFromData($gameSession);
         }
         switch ($buttonType) {

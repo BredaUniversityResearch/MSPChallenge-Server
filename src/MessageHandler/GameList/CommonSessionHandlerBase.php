@@ -64,10 +64,12 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
 
     protected readonly VersionsProvider $provider;
 
+    /**
+     * @throws Exception
+     */
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $gameSessionLogger,
-        EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
@@ -77,7 +79,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
     ) {
         parent::__construct($gameSessionLogger);
         $this->kernel = $kernel;
-        $this->mspServerManagerEntityManager = $mspServerManagerEntityManager;
+        $this->mspServerManagerEntityManager = $connectionManager->getServerManagerEntityManager();
         $this->connectionManager = $connectionManager;
         $this->params = $params;
         $this->gameSessionLogFileHandler = $gameSessionLogFileHandler;

@@ -3,9 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Objective;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
 
 class ObjectiveRepository extends EntityRepository
 {

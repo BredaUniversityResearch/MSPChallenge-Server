@@ -16,7 +16,6 @@ use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\Repository\GameRepository;
 use App\VersionsProvider;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
@@ -43,7 +42,6 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $gameSessionLogger,
-        EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
@@ -155,7 +153,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $this->validator = new GameSaveZipFileValidator(
             $saveZipStore,
             $this->kernel,
-            $this->mspServerManagerEntityManager
+            $this->connectionManager
         );
         if (!$this->validator->isValid()) {
             throw new Exception("ZIP file {$saveZipStore} is invalid: {$this->validator->getErrorsAsString()}.");

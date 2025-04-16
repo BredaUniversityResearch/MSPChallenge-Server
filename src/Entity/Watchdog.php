@@ -44,7 +44,7 @@ class Watchdog implements WatchdogInterface
     private ?Uuid $serverId = null;
 
     #[ORM\Column(enumType: WatchdogStatus::class, options: ['default' => WatchdogStatus::REGISTERED])]
-    private ?WatchdogStatus $status = WatchdogStatus::REGISTERED;
+    private WatchdogStatus $status = WatchdogStatus::REGISTERED;
 
     #[ORM\Column(type: Types::BIGINT)]
     private ?int $token = null;

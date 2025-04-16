@@ -9,7 +9,6 @@ use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
 use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Form\GameConfigVersionUploadFormType;
-use Doctrine\ORM\EntityManagerInterface;
 use JsonSchema\Validator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
@@ -32,15 +31,18 @@ class GameConfigVersionController extends BaseController
         return $this->render('manager/gameconfigversion_page.html.twig');
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{visibility}',
         name: 'manager_gameconfig_list',
         requirements: ['visibility' => '(active|archived)']
     )]
     public function gameConfigVersion(
-        EntityManagerInterface $entityManager,
         string $visibility
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameConfigVersions = $entityManager->getRepository(GameConfigVersion::class)
             ->orderedList(['visibility' => $visibility]);
         return $this->render(
@@ -49,15 +51,18 @@ class GameConfigVersionController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{configId}/details',
         name: 'manager_gameconfig_details',
         requirements: ['configId' => '\d+']
     )]
     public function gameConfigVersionDetails(
-        EntityManagerInterface $entityManager,
         int $configId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameConfigVersion = $entityManager->getRepository(GameConfigVersion::class)->find($configId);
         return $this->render(
             'manager/GameConfigVersion/gameconfigversion_details.html.twig',
@@ -65,29 +70,35 @@ class GameConfigVersionController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{configFileId}/file',
         name: 'manager_gameconfig_file',
         requirements: ['configFileId' => '\d+']
     )]
     public function gameConfigFileDetails(
-        EntityManagerInterface $entityManager,
         int $configFileId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         return $this->json(
             $entityManager->getRepository(GameConfigFile::class)->findAllSimple($configFileId)
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{configId}/download',
         name: 'manager_gameconfig_download',
         requirements: ['configId' => '\d+']
     )]
     public function gameConfigVersionDownload(
-        EntityManagerInterface $entityManager,
         int $configId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameConfigVersion = $entityManager->getRepository(GameConfigVersion::class)->find($configId);
         if (is_null($gameConfigVersion)) {
             return new Response(null, 422);
@@ -106,27 +117,33 @@ class GameConfigVersionController extends BaseController
         return $response;
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{configId}/archive',
         name: 'manager_gameconfig_archive',
         requirements: ['configId' => '\d+']
     )]
     public function gameSaveArchive(
-        EntityManagerInterface $entityManager,
         int $configId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameConfigVersion = $entityManager->getRepository(GameConfigVersion::class)->find($configId);
         $gameConfigVersion->setVisibility(new GameConfigVersionVisibilityValue('archived'));
         $entityManager->flush();
         return new Response(null, 204);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/form', name: 'manager_gameconfig_form')]
     public function gameConfigVersionForm(
-        EntityManagerInterface $entityManager,
         Request $request,
         KernelInterface $kernel
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
             GameConfigVersionUploadFormType::class,
             new GameConfigVersion,
