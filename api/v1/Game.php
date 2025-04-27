@@ -72,7 +72,10 @@ class Game extends Base
             $data['edition_letter'] = $_ENV['DEFAULT_EDITION_LETTER'];
         }
 
-        return (new User())->CheckGameSessionPasswords();
+        $passwordchecks = (new User())
+            ->setGameSessionId($this->getGameSessionId())
+            ->CheckGameSessionPasswords();
+        return array_merge($data, $passwordchecks);
     }
 
     /**
