@@ -45,14 +45,15 @@ class User extends Base implements JWTUserInterface
         string $country_password = ""
     ): array {
         $response = array();
-        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $connection = ConnectionManager::getInstance()->getCachedServerManagerDbConnection();
         $this->CheckVersion($build_timestamp);
-        $qb = $connection->createQueryBuilder()
-            ->select('game_session_password_admin', 'game_session_password_player')
-            ->from('game_session');
+        $qb = $connection->createQueryBuilder();
+        $qb->select('password_admin', 'password_player')
+            ->from('game_list')
+            ->where($qb->expr()->eq('id', $this->getGameSessionId()));
         $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
-        $password_admin = $passwords[0]["game_session_password_admin"];
-        $password_player = $passwords[0]["game_session_password_player"];
+        $password_admin = $passwords[0]["password_admin"];
+        $password_player = $passwords[0]["password_player"];
         if (!parent::isNewPasswordFormat($password_admin) || !parent::isNewPasswordFormat($password_player)) {
             return $this->RequestSessionLegacy($country_id, $country_password, $user_name);
         } else {
