@@ -28,6 +28,43 @@ class User extends Base implements JWTUserInterface
     {
     }
 
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function CheckGameSessionPasswords(): array
+    {
+        $adminHasPassword = true;
+        $playerHasPassword = true;
+        $connection = ConnectionManager::getInstance()->getCachedServerManagerDbConnection();
+        $qb = $connection->createQueryBuilder();
+        $qb->select('password_admin', 'password_player')
+            ->from('game_list')
+            ->where($qb->expr()->eq('id', $this->getGameSessionId()));
+        $passwordData = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
+        
+        if (!parent::isNewPasswordFormat($passwordData[0]["password_admin"])
+            || !parent::isNewPasswordFormat($passwordData[0]["password_player"])
+        ) {
+            $adminHasPassword = !empty($passwordData[0]["password_admin"]);
+            $playerHasPassword = !empty($passwordData[0]["password_player"]);
+        } else {
+            $password_admin = json_decode(base64_decode($passwordData[0]["password_admin"]), true);
+            $password_player = json_decode(base64_decode($passwordData[0]["password_player"]), true);
+            if ($password_admin["admin"]["provider"] == "local") {
+                $adminHasPassword = !empty($password_admin["admin"]["value"]);
+            }
+            if ($password_player["provider"] == "local") {
+                foreach ($password_player["value"] as $password) {
+                    if (!empty($password)) {
+                        $playerHasPassword = true;
+                        break;
+                    } else {
+                        $playerHasPassword = false;
+                    }
+                }
+            }
+        }
+        return ["user_admin_has_password" => $adminHasPassword, "user_common_has_password" => $playerHasPassword];
+    }
+
     /**
      * @apiGroup User
      * @apiDescription Creates a new session for the desired country id.
