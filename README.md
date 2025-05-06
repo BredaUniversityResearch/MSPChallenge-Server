@@ -116,6 +116,13 @@ The most important aliases being:
 | dsp     | docker (d) system (s) prune (p)                                  |
 | dclean  | dsa + dsp. Stop all containers and prune the system              | 
 
+### API documentation
+
+All supported API calls are documented, and can be viewed and tested on the OpenAPI (Swagger) page, running on your own server, by going to `http://localhost/api/doc`.
+It is also available online on our [demo server](https://server.mspchallenge.info/api/doc).
+
+You can also download the json Openapi format by typing an additional `.json` to the URL. You will be able to import it into supporting software like [Postman](https://www.postman.com/).
+
 ## Sponsors and credits
 
 Thanks to all of them for their great support:
