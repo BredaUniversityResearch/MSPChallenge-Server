@@ -33,13 +33,13 @@ If you want to change the ports used by the containers, you can do by defining e
 
 ## Installation
 
-1. Either clone the repository or download the zip file from the [release page](https://github.com/BredaUniversityResearch/MSPChallenge-Server/releases).
+1. Either clone the repository or download and extract the zip file from the [release page](https://github.com/BredaUniversityResearch/MSPChallenge-Server/releases).
    If you want to contribute to the project, you also can fork the repository. Read more about contributing [here](https://community.mspchallenge.info/wiki/Community_Contribution).
 2. If not already done, install either:
    - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (recommended for dev)
      !! Make sure to enable "Add the *.docker.internal names to the host's /etc/hosts file" in Docker Desktop settings, used by the dev environment.
    - or: [Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)   
-3. Run `docker compose build --pull --no-cache` to build fresh images
+3. From the server folder, run `docker compose build --pull --no-cache` to build fresh images
 
 4. Then, to create the server docker containers, and starting it up, run:
    - for prod: please read this [document](https://community.mspchallenge.info/wiki/Docker_server_installation)
@@ -90,8 +90,8 @@ How to install PHP:
 - on Windows, I advise to use [PowerShell PHP manager](https://github.com/mlocati/powershell-phpmanager);
 - on Linux, you can install it using your package manager, e.g. `sudo apt-get install php-fpm`.
 
-Then simply run: `source docker-aliases.sh` in your terminal to create the aliases.
-Or if you want them to be available all the time, you can add this command in the `.bashrc` file in your home directory.
+From the server folder, simply run: `source docker-aliases.sh` in your terminal to create the aliases.
+Or if you want them to be available all the time, you can add this command in the `.bashrc` file in your home directory. Make sure to change to the server folder directory using `cd` first.
 Once you have created the `.bashrc` file, you need to log-out and -in, reboot the system, or restart the terminal once.
 
 You can type `alias` to see a list of all defined aliases. Or check the [docker-aliases.sh](docker-aliases.sh) file.
@@ -115,6 +115,13 @@ The most important aliases being:
 | dsa     | docker (d) stop (s) all containers (a)                           |
 | dsp     | docker (d) system (s) prune (p)                                  |
 | dclean  | dsa + dsp. Stop all containers and prune the system              | 
+
+### API documentation
+
+All supported API calls are documented, and can be viewed and tested on the OpenAPI (Swagger) page, running on your own server, by going to `http://localhost/api/doc`.
+It is also available online on our [demo server](https://server.mspchallenge.info/api/doc).
+
+You can also download the json Openapi format by typing an additional `.json` to the URL. You will be able to import it into supporting software like [Postman](https://www.postman.com/).
 
 ## Sponsors and credits
 
