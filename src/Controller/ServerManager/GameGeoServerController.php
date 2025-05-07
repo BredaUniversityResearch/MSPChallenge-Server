@@ -3,9 +3,10 @@
 namespace App\Controller\ServerManager;
 
 use App\Controller\BaseController;
+use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameGeoServer;
 use App\Form\GameGeoServerFormType;
-use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,20 +18,28 @@ use Symfony\Component\Routing\Annotation\Route;
 )]
 class GameGeoServerController extends BaseController
 {
+    /**
+     * @throws Exception
+     */
     #[Route('/list', name: 'manager_gamegeoserver_list')]
-    public function gameGeoServerList(EntityManagerInterface $entityManager): Response
+    public function gameGeoServerList(): Response
     {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameGeoServers = $entityManager->getRepository(GameGeoServer::class)->findAll();
         return $this->render('manager/GameGeoServer/gamegeoserver.html.twig', ['gameGeoServers' => $gameGeoServers]);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route(
         '/{geoserverId}/availability',
         name: 'manager_gamegeoserver_visibility',
         requirements: ['geoserverId' => '\d+']
     )]
-    public function gameGeoServerVisibility(EntityManagerInterface $entityManager, int $geoserverId): Response
+    public function gameGeoServerVisibility(int $geoserverId): Response
     {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameGeoServer = $entityManager->getRepository(GameGeoServer::class)->find($geoserverId);
         if ($gameGeoServer->getAvailable()) {
             $gameGeoServer->setAvailable(false);
@@ -41,16 +50,19 @@ class GameGeoServerController extends BaseController
         return new Response(null, 204);
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route(
         '/{geoserverId}/form',
         name: 'manager_gamegeoserver_form',
         requirements: ['geoserverId' => '\d+']
     )]
     public function gameGeoServerForm(
-        EntityManagerInterface $entityManager,
         Request $request,
         int $geoserverId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
             GameGeoServerFormType::class,
             $geoserverId == 0 ?

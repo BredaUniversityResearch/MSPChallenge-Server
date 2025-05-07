@@ -46,6 +46,12 @@ class Country
     #[ORM\OneToMany(mappedBy: 'country', targetEntity: GridEnergy::class, cascade: ['persist'])]
     private Collection $gridEnergy;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\OneToMany(mappedBy: 'country', targetEntity: User::class, orphanRemoval: true)]
+    private Collection $users;
+
     public function __construct()
     {
         $this->objective = new ArrayCollection();
@@ -55,6 +61,7 @@ class Country
         $this->planRestrictionArea = new ArrayCollection();
         $this->geometry = new ArrayCollection();
         $this->gridEnergy = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getCountryId(): ?int
@@ -302,6 +309,36 @@ class Country
             // set the owning side to null (unless already changed)
             if ($gridEnergy->getCountry() === $this) {
                 $gridEnergy->setCountry(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->setUserCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getUserCountry() === $this) {
+                $user->setUserCountry(null);
             }
         }
 
