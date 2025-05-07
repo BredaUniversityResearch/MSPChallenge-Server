@@ -12,7 +12,7 @@ parameters:
     app.default_port: '80'
     app.api_path_patterns:
         - ^/api/(?!doc?(\.json)?$) # Accepts routes under /api except /api/doc(.json)
-
+    app.firewall_api_pattern: ^/\/*\d+/\/*api/\/*.*
     # URL to the MSP Challenge download page
     app.clients_url: 'https://community.mspchallenge.info/wiki/Download'
     # directory to store and from which to retrieve game session raster files
