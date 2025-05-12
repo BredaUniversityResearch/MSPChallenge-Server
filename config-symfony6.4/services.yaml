@@ -203,6 +203,10 @@ services:
 
     App\Validator\ImmersiveSessionTypeJsonSchemaValidator:
 
+    App\Domain\Services\ImmersiveSessionService:
+        arguments:
+            $dockerApiLogger: '@monolog.logger.docker_api'
+
 when@dev:
     parameters:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'

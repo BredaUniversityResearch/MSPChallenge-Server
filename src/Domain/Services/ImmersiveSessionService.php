@@ -7,14 +7,8 @@ use App\Entity\ImmersiveSessionConnection;
 use App\Entity\ServerManager\ImmersiveSessionDockerApi;
 use App\Entity\ServerManager\ImmersiveSessionType;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 use Exception;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Psr\Log\LoggerInterface;
 
 class ImmersiveSessionService
 {
@@ -22,7 +16,8 @@ class ImmersiveSessionService
 
     public function __construct(
         private readonly ConnectionManager $connectionManager,
-        private readonly \Predis\Client $redisClient
+        private readonly \Predis\Client $redisClient,
+        private readonly LoggerInterface $dockerApiLogger
     ) {
         $this->currentDockerApi = null;
     }
@@ -79,10 +74,6 @@ class ImmersiveSessionService
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
      * @throws Exception
      */
     public function createImmersiveSessionContainer(ImmersiveSession $sess, int $gameSessionId): void
@@ -114,8 +105,16 @@ class ImmersiveSessionService
         $this->dockerApiCall('POST', '/build', [
             'query' => [
                 't' => 'unity-server-image',
+                'nocache' => true,
                 'remote' => 'https://github.com/BredaUniversityResearch/ImmersiveTwins-UnityServer-Docker.git#'.
                     $branchName,
+                'buildargs' => json_encode(
+                    [
+                        'NEXUS_CREDENTIALS' => $_ENV['NEXUS_CREDENTIALS'],
+                        'NEXUS_ANTI_CSRF_TOKEN' => $_ENV['NEXUS_ANTI_CSRF_TOKEN']
+                    ],
+                    JSON_UNESCAPED_SLASHES
+                )
             ]
         ]);
 
@@ -153,7 +152,6 @@ class ImmersiveSessionService
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws Exception
      */
     public function removeImmersiveSessionContainer(ImmersiveSession $sess, int $gameSessionId): void
@@ -162,33 +160,64 @@ class ImmersiveSessionService
         if ($conn === null) {
             throw new Exception('No connection found for this session.');
         }
-        $this->dockerApiCall('POST', "/containers/{$conn->getDockerContainerId()}/stop");
-        $this->dockerApiCall('DELETE', "/containers/{$conn->getDockerContainerId()}");
+
+        $dockerContainerId = $conn->getDockerContainerId();
         $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         $em->remove($conn);
         $em->flush();
+
+        $this->dockerApiCall('POST', "/containers/{$dockerContainerId}/stop");
+        $this->dockerApiCall('DELETE', "/containers/{$dockerContainerId}");
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
      * @throws Exception
      */
     private function dockerApiCall(string $method, string $path, array $options = []): ?array
     {
-        $client = HttpClient::create([
-            'base_uri' => $this->getDockerApi()->createUrl(),
-        ]);
+        // Build the query string
+        $queryString = http_build_query($options['query'] ?? []);
+        $fullUrl = $this->getDockerApi()->createUrl() . $path . ($queryString ? '?' . $queryString : '');
 
-        $response = $client->request($method, $path, $options);
+        // Initialize cURL
+        $ch = curl_init();
 
-        // Get the response content without throwing exceptions for HTTP errors
-        $responseContent = $response->getContent(false);
-        // Check the HTTP status code
-        if ($response->getStatusCode() >= 400) {
-            throw new \RuntimeException('Docker API error: '.$response->getStatusCode().': '.$responseContent);
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_URL, $fullUrl);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false); // Stream the response directly
+        $responseContent = '';
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use (&$responseContent) {
+            $this->dockerApiLogger->info($data);
+            $responseContent .= $data;
+            return strlen($data);
+        });
+
+        // Set the POST fields if there is json data
+        if (!empty($options['json'] ?? [])) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($options['json']));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        }
+
+        // Execute the request
+        curl_exec($ch);
+
+        // Check for errors
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            throw new \RuntimeException('curl error: ' . $error);
+        }
+
+        // Get the HTTP status code
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        // Close the cURL handle
+        curl_close($ch);
+
+        // Check for HTTP errors
+        if ($httpCode >= 400) {
+            throw new \RuntimeException('Docker API error: ' . $httpCode . ': ' . $responseContent);
         }
 
         return json_decode($responseContent, true);
