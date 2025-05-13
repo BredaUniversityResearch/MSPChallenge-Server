@@ -221,28 +221,34 @@ class Layer extends Base
             throw new Exception("Could not find layer with name " . $layer_name . " to request the raster image for");
         }
 
-        $filePath = $rasterDataOriginal = null;
+        $filePath = null;
         if (null !== $rasterData = json_decode($layerData[0]['layer_raster'], true)) {
-            $rasterDataOriginal = $rasterData;
             $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
         }
+
+        $path_parts = pathinfo($rasterData['url']);
+        $fileExt = $path_parts['extension'];
+        $filename = $path_parts['filename'];
+        $archivedRasterDataUrlFormat = "archive/%s_%d.%s";
         if ($month >= 0) {
-            $path_parts = pathinfo($rasterData['url']);
-            $fileext = $path_parts['extension'];
-            $filename = $path_parts['filename'];
-            $rasterData['url'] = "archive/".$filename."_".$month.".".$fileext;
-            $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
+            $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
+                sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
             while (!file_exists($filePath) && $month > 0) {
                 $month--;
-                $rasterData['url'] = "archive/".$filename."_".$month.".".$fileext;
-                $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
+                $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
+                    sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
             }
         }
             
         if ($filePath === null || !file_exists($filePath)) {
             // final try.... if $month = 0 and you couldn't find the file so far, just return the very original
+            //  (which is either the original path when nothing is archived or the archived one of the setup phase)
             if ($month == 0) {
-                $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterDataOriginal['url'];
+                $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
+                    sprintf($archivedRasterDataUrlFormat, $filename, -1, $fileExt);
+                if (!file_exists($filePath)) {
+                    $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
+                }
                 if (!file_exists($filePath)) {
                     throw new Exception(
                         "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
