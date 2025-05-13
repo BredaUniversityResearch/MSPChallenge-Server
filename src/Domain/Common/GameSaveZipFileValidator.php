@@ -172,7 +172,7 @@ class GameSaveZipFileValidator
     private function gameListValid(): bool
     {
         try {
-            $this->gameSave =(new GameListAndSaveSerializer($this->connectionManager))
+            $this->gameSave =(new GameListAndSaveSerializer($this->connectionManager->getServerManagerEntityManager()))
                 ->createGameSaveFromJson($this->getGameListJsonContents());
         } catch (\Throwable $e) {
             $this->setError('Unable to work with game_list.json contents from ZIP. '.$e->getMessage());

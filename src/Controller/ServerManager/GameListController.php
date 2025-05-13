@@ -32,6 +32,7 @@ use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\GameListAndSaveSerializer;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -53,7 +54,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class GameListController extends BaseController
 {
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route(
         '/{sessionState}',
@@ -74,7 +75,7 @@ class GameListController extends BaseController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function gameClientJson(
         VersionsProvider $provider,
@@ -119,7 +120,7 @@ class GameListController extends BaseController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route(
         '/{sessionId}/name',
@@ -188,7 +189,7 @@ class GameListController extends BaseController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route('/{sessionId}/form', name: 'manager_gamelist_form')]
     public function gameSessionForm(
@@ -310,7 +311,7 @@ class GameListController extends BaseController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route(
         '/{sessionId}/recreate',
@@ -328,7 +329,7 @@ class GameListController extends BaseController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route(
         '/{sessionId}/archive',
@@ -351,7 +352,7 @@ class GameListController extends BaseController
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route('/{sessionId}/demo', name: 'manager_gamelist_demo', requirements: ['sessionId' => '\d+'])]
     public function gameSessionDemo(
@@ -371,7 +372,8 @@ class GameListController extends BaseController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
+     * @throws ExceptionInterface
      */
     #[Route(
         '/{sessionId}/save/{type}',
@@ -389,7 +391,7 @@ class GameListController extends BaseController
              || ($type != GameSaveTypeValue::FULL && $type != GameSaveTypeValue::LAYERS)) {
             return new Response(null, 422);
         }
-        $serializer = new GameListAndSaveSerializer($this->connectionManager);
+        $serializer = new GameListAndSaveSerializer($entityManager);
         $gameSave = $serializer->createGameSaveFromData(
             $serializer->createDataFromGameList($gameSession)
         );
@@ -417,7 +419,7 @@ class GameListController extends BaseController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route(
         '/{sessionId}/export',

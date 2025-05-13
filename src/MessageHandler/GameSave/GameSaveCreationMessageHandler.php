@@ -239,7 +239,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
      */
     private function addGameListRecordToZip(): void
     {
-        $serializer = new GameListAndSaveSerializer($this->connectionManager);
+        $serializer = new GameListAndSaveSerializer($this->connectionManager->getServerManagerEntityManager());
         $gameList = $serializer->createJsonFromGameSave($this->gameSave);
         $this->saveZip->addFromString('game_list.json', $gameList);
     }

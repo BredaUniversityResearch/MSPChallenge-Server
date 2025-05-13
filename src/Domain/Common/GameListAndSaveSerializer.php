@@ -5,10 +5,10 @@ namespace App\Domain\Common;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
-use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use ReflectionException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -22,10 +22,7 @@ class GameListAndSaveSerializer
     private ?ObjectNormalizer $normalizer = null;
     private ?Serializer $serializer = null;
 
-    /**
-     * @throws Exception
-     */
-    public function __construct(private readonly ConnectionManager $connectionManager)
+    public function __construct(private readonly EntityManagerInterface $em)
     {
         $this->normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
         $this->serializer = new Serializer([$this->normalizer], [new JsonEncoder()]);
@@ -160,9 +157,8 @@ class GameListAndSaveSerializer
      */
     private function getGenericDenormalizeCallbacks(): array
     {
-        $em = $this->connectionManager->getServerManagerEntityManager();
         return [
-            'gameConfigVersion' => fn($innerObject) => (!is_null($innerObject)) ? $em->getRepository(
+            'gameConfigVersion' => fn($innerObject) => (!is_null($innerObject)) ? $this->em->getRepository(
                 GameConfigVersion::class
             )->find($innerObject) : null,
             'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
@@ -176,9 +172,8 @@ class GameListAndSaveSerializer
      */
     private function getGameListDenormalizeCallbacks(): array
     {
-        $em = $this->connectionManager->getServerManagerEntityManager();
         $callbacks = $this->getGenericDenormalizeCallbacks();
-        $callbacks['gameSave'] = fn($innerObject) => (!is_null($innerObject)) ? $em->getRepository(
+        $callbacks['gameSave'] = fn($innerObject) => (!is_null($innerObject)) ? $this->em->getRepository(
             GameSave::class
         )->find($innerObject) : null;
         return $callbacks;

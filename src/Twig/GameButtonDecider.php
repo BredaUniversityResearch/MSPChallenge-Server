@@ -32,7 +32,7 @@ class GameButtonDecider extends AbstractExtension
     public function gameButtonDecide(string $buttonType, array|GameList $gameSession): bool
     {
         if (is_array($gameSession)) {
-            $serializer = new GameListAndSaveSerializer($this->connectionManager);
+            $serializer = new GameListAndSaveSerializer($this->connectionManager->getServerManagerEntityManager());
             $gameSession = $serializer->createGameListFromData($gameSession);
         }
         switch ($buttonType) {
