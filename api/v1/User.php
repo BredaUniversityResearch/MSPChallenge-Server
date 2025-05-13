@@ -28,43 +28,6 @@ class User extends Base implements JWTUserInterface
     {
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function CheckGameSessionPasswords(): array
-    {
-        $adminHasPassword = true;
-        $playerHasPassword = true;
-        $connection = ConnectionManager::getInstance()->getCachedServerManagerDbConnection();
-        $qb = $connection->createQueryBuilder();
-        $qb->select('password_admin', 'password_player')
-            ->from('game_list')
-            ->where($qb->expr()->eq('id', $this->getGameSessionId()));
-        $passwordData = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
-        
-        if (!parent::isNewPasswordFormat($passwordData[0]["password_admin"])
-            || !parent::isNewPasswordFormat($passwordData[0]["password_player"])
-        ) {
-            $adminHasPassword = !empty($passwordData[0]["password_admin"]);
-            $playerHasPassword = !empty($passwordData[0]["password_player"]);
-        } else {
-            $password_admin = json_decode(base64_decode($passwordData[0]["password_admin"]), true);
-            $password_player = json_decode(base64_decode($passwordData[0]["password_player"]), true);
-            if ($password_admin["admin"]["provider"] == "local") {
-                $adminHasPassword = !empty($password_admin["admin"]["value"]);
-            }
-            if ($password_player["provider"] == "local") {
-                foreach ($password_player["value"] as $password) {
-                    if (!empty($password)) {
-                        $playerHasPassword = true;
-                        break;
-                    } else {
-                        $playerHasPassword = false;
-                    }
-                }
-            }
-        }
-        return ["user_admin_has_password" => $adminHasPassword, "user_common_has_password" => $playerHasPassword];
-    }
-
     /**
      * @apiGroup User
      * @apiDescription Creates a new session for the desired country id.
@@ -82,15 +45,14 @@ class User extends Base implements JWTUserInterface
         string $country_password = ""
     ): array {
         $response = array();
-        $connection = ConnectionManager::getInstance()->getCachedServerManagerDbConnection();
+        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
         $this->CheckVersion($build_timestamp);
-        $qb = $connection->createQueryBuilder();
-        $qb->select('password_admin', 'password_player')
-            ->from('game_list')
-            ->where($qb->expr()->eq('id', $this->getGameSessionId()));
+        $qb = $connection->createQueryBuilder()
+            ->select('game_session_password_admin', 'game_session_password_player')
+            ->from('game_session');
         $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
-        $password_admin = $passwords[0]["password_admin"];
-        $password_player = $passwords[0]["password_player"];
+        $password_admin = $passwords[0]["game_session_password_admin"];
+        $password_player = $passwords[0]["game_session_password_player"];
         if (!parent::isNewPasswordFormat($password_admin) || !parent::isNewPasswordFormat($password_player)) {
             return $this->RequestSessionLegacy($country_id, $country_password, $user_name);
         } else {
