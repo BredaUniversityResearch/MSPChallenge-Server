@@ -93,7 +93,7 @@ class ImmersiveSessionService
                 )
         )->reduce(
             fn ($carry, ImmersiveSessionConnection $connection) => max($carry, $connection->getPort()),
-            45000
+            45100
         ) + 1;
         $conn = new ImmersiveSessionConnection();
         $conn
