@@ -127,7 +127,7 @@ class ImmersiveSessionService
                 'Image' => 'unity-server-image', // Use the built image
                 'HostConfig' => [
                     'PortBindings' => [
-                        '50123/tcp' => [
+                        '50123/udp' => [
                             ['HostPort' => (string)$conn->getPort()]
                         ]
                     ],
