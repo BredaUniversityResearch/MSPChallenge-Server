@@ -988,10 +988,10 @@
     schema-utils "^3.0.0"
 
 "@symfony/stimulus-bundle@file:vendor/symfony/stimulus-bundle/assets":
-  version "1.0.0"
+  version "2.23.0"
 
 "@symfony/ux-turbo@file:vendor/symfony/ux-turbo/assets":
-  version "0.1.0"
+  version "2.23.0"
 
 "@symfony/webpack-encore@^4.0.0":
   version "4.7.0"
