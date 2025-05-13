@@ -6,7 +6,7 @@
         "@hotwired/turbo": "^8.0.0",
         "@symfony/stimulus-bridge": "^3.2.0",
         "@symfony/stimulus-bundle": "file:vendor/symfony/stimulus-bundle/assets",
-        "@symfony/ux-turbo": "file:../MSPCHallenge-Server/vendor/symfony/ux-turbo/assets",
+        "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
         "@symfony/webpack-encore": "^4.0.0",
         "core-js": "^3.23.0",
         "regenerator-runtime": "^0.13.9",
