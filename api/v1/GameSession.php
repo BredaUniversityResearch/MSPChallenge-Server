@@ -584,44 +584,6 @@ class GameSession extends Base
         );
     }
 
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function CheckGameSessionPasswords(): array
-    {
-        $adminHasPassword = true;
-        $playerHasPassword = true;
-        $passwordData = $this->getDatabase()->query(
-            "SELECT game_session_password_admin, game_session_password_player FROM game_session"
-        );
-        if (count($passwordData) > 0) {
-            if (!parent::isNewPasswordFormat($passwordData[0]["game_session_password_admin"])
-                || !parent::isNewPasswordFormat($passwordData[0]["game_session_password_player"])
-            ) {
-                $adminHasPassword = !empty($passwordData[0]["game_session_password_admin"]);
-                $playerHasPassword = !empty($passwordData[0]["game_session_password_player"]);
-            } else {
-                $password_admin = json_decode(base64_decode($passwordData[0]["game_session_password_admin"]), true);
-                $password_player = json_decode(base64_decode($passwordData[0]["game_session_password_player"]), true);
-                if ($password_admin["admin"]["provider"] == "local") {
-                    $adminHasPassword = !empty($password_admin["admin"]["value"]);
-                }
-                if ($password_player["provider"] == "local") {
-                    foreach ($password_player["value"] as $password) {
-                        if (!empty($password)) {
-                            $playerHasPassword = true;
-                            break;
-                        } else {
-                            $playerHasPassword = false;
-                        }
-                    }
-                }
-            }
-        }
-        return array("adminhaspassword" => $adminHasPassword, "playerhaspassword" => $playerHasPassword);
-    }
-
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private static function RemoveDirectory(string $dir): void
     {
