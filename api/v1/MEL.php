@@ -6,15 +6,15 @@ use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanLayerState;
 use App\Domain\Common\InternalSimulationName;
 use App\Domain\PolicyData\BufferZonePolicyData;
-use App\Domain\PolicyData\PolicyDataBase;
 use App\Domain\PolicyData\ItemsPolicyDataBase;
+use App\Domain\PolicyData\PolicyDataBase;
 use App\Domain\PolicyData\PolicyDataFactory;
 use App\Domain\PolicyData\ScheduleFilterPolicyData;
 use App\Domain\PolicyData\SeasonalClosurePolicyData;
 use App\Domain\Services\ConnectionManager;
-use App\Entity\Geometry;
-use App\Entity\Simulation;
-use App\Repository\SimulationRepository;
+use App\src\Entity\SessionAPI\Geometry;
+use App\src\Entity\SessionAPI\Simulation;
+use App\src\Repository\SessionAPI\SimulationRepository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -703,7 +703,7 @@ SUBQUERY,
     ): ?array {
         $conn = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId());
         $qb = $conn->createQueryBuilder();
-        /** @var ?\App\Entity\Layer $layer */
+        /** @var ?\App\src\Entity\SessionAPI\Layer $layer */
         $layer = $qb
             ->from('App:Layer', 'l')
             ->select('l')
@@ -757,7 +757,7 @@ SUBQUERY,
         }
 
         $q = $qb->getQuery();
-        /** @var \App\Entity\Layer[] $layers */
+        /** @var \App\src\Entity\SessionAPI\Layer[] $layers */
         $layers = $q->getResult();
         $result["geotype"] = $layerGeoType ?->value ?? ''; // enum to string;
         $result["geometry"] = [];

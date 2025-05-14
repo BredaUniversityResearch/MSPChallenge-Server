@@ -5,12 +5,12 @@ namespace App\Entity\ServerManager;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
-use App\Entity\Game;
 use App\Repository\ServerManager\GameListRepository;
+use App\src\Entity\SessionAPI\Game;
+use App\Validator as AcmeAssert;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator as AcmeAssert;
 use function App\isBase64Encoded;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]

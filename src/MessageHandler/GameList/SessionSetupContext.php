@@ -2,10 +2,10 @@
 
 namespace App\MessageHandler\GameList;
 
-use App\Entity\Country;
-use App\Entity\Geometry;
-use App\Entity\Grid;
-use App\Entity\Layer;
+use App\src\Entity\SessionAPI\Country;
+use App\src\Entity\SessionAPI\Geometry;
+use App\src\Entity\SessionAPI\Grid;
+use App\src\Entity\SessionAPI\Layer;
 
 class SessionSetupContext
 {

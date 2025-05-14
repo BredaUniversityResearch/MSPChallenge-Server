@@ -7,14 +7,14 @@ use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Kpi;
 use App\Domain\API\v1\Router;
 use App\Domain\Services\ConnectionManager;
-use App\Entity\Simulation;
-use App\Entity\Watchdog;
-use App\Repository\SimulationRepository;
+use App\src\Entity\SessionAPI\Simulation;
+use App\src\Entity\SessionAPI\Watchdog;
+use App\src\Repository\SessionAPI\SimulationRepository;
 use Exception;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/kpi')]

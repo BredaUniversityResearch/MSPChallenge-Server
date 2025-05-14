@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DoctrineMigrations;
 
 use App\Entity\Interface\WatchdogInterface;
-use App\Entity\Watchdog;
+use App\src\Entity\SessionAPI\Watchdog;
 use Doctrine\DBAL\Schema\Schema;
 
 /**

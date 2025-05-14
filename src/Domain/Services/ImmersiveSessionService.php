@@ -2,17 +2,17 @@
 
 namespace App\Domain\Services;
 
-use App\Entity\ImmersiveSession;
-use App\Entity\ImmersiveSessionConnection;
-use App\Entity\ServerManager\ImmersiveSessionDockerApi;
+use App\Entity\ServerManager\DockerApi;
 use App\Entity\ServerManager\ImmersiveSessionType;
+use App\src\Entity\SessionAPI\ImmersiveSession;
+use App\src\Entity\SessionAPI\ImmersiveSessionConnection;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Psr\Log\LoggerInterface;
 
 class ImmersiveSessionService
 {
-    private ?ImmersiveSessionDockerApi $currentDockerApi;
+    private ?DockerApi $currentDockerApi;
 
     public function __construct(
         private readonly ConnectionManager $connectionManager,
@@ -35,16 +35,16 @@ class ImmersiveSessionService
     /**
      * @throws Exception
      */
-    private function getDockerApi(): ImmersiveSessionDockerApi
+    private function getDockerApi(): DockerApi
     {
         if ($this->currentDockerApi !== null) {
             // Return the cached API for this request
             return $this->currentDockerApi;
         }
 
-        /** @var ImmersiveSessionDockerApi[] $dockerApis */
+        /** @var DockerApi[] $dockerApis */
         $dockerApis = $this->getEntityManager()
-            ->getRepository(ImmersiveSessionDockerApi::class)->findAll();
+            ->getRepository(DockerApi::class)->findAll();
         if (empty($dockerApis)) {
             throw new Exception('No Docker APIs found in the database.');
         }

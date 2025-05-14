@@ -8,19 +8,21 @@ use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
-use App\Entity\Watchdog;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListArchiveMessage;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
-use App\Repository\WatchdogRepository;
+use App\src\Entity\SessionAPI\Watchdog;
+use App\src\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
+use Swaggest\JsonSchema\InvalidValue;
+use Swaggest\JsonSchema\Schema;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -30,8 +32,6 @@ use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Swaggest\JsonSchema\InvalidValue;
-use Swaggest\JsonSchema\Schema;
 
 abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
 {

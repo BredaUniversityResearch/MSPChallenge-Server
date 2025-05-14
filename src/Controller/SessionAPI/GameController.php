@@ -2,30 +2,29 @@
 
 namespace App\Controller\SessionAPI;
 
-use App\Domain\Services\ConnectionManager;
 use App\Controller\BaseController;
 use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Router;
+use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
+use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Entity\Game as GameEntity;
+use App\src\Entity\SessionAPI\Game as GameEntity;
 use Exception;
 use OpenApi\Attributes as OA;
-use App\Domain\Common\EntityEnums\GameStateValue;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Domain\Communicator\WatchdogCommunicator;
-
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;

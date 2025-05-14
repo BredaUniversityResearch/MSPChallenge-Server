@@ -126,11 +126,16 @@ class ConnectionManager extends DatabaseDefaults
         $config['report_fields_where_declared'] = true;
         // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
         $config['connection'] = $connectionName;
-        $config['mappings']['App'] = [
+        $alias = preg_replace_callback(
+            '/msp_session_(\d+)/',
+            fn($matches) => 'SessionAPI'.$matches[1],
+            $connectionName
+        );
+        $config['mappings'][$alias] = [
             'is_bundle' => false,
-            'dir' => '%kernel.project_dir%/src/Entity',
-            'prefix' => 'App\Entity',
-            'alias' => 'App'
+            'dir' => '%kernel.project_dir%/src/Entity/SessionAPI',
+            'prefix' => 'App\Entity\SessionAPI',
+            'alias' => $alias
         ];
         $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';
         $config['metadata_cache_driver'] = [
@@ -157,11 +162,11 @@ class ConnectionManager extends DatabaseDefaults
         $config['report_fields_where_declared'] = true;
         // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
         $config['connection'] = $connectionName;
-        $config['mappings']['App'] = [
+        $config['mappings']['ServerManager'] = [
             'is_bundle' => false,
             'dir' => '%kernel.project_dir%/src/Entity/ServerManager',
             'prefix' => 'App\Entity\ServerManager',
-            'alias' => 'App'
+            'alias' => 'ServerManager'
         ];
         $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';
         $config['metadata_cache_driver'] = [
