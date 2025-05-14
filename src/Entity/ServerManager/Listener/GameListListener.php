@@ -11,6 +11,7 @@ use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\src\Entity\SessionAPI\Game;
+use App\src\Repository\SessionAPI\GameRepository;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
@@ -34,10 +35,10 @@ class GameListListener
     {
         $gameSession->decodePasswords();
         try {
-            $gameSession->setRunningGame(
-                $this->connectionManager->getGameSessionEntityManager($gameSession->getId())
-                    ->getRepository(Game::class)->retrieve()
-            );
+            /** @var GameRepository $repo */
+            $repo = $this->connectionManager->getGameSessionEntityManager($gameSession->getId())
+                ->getRepository(Game::class);
+            $gameSession->setRunningGame($repo->retrieve());
         } catch (\Throwable) {
             // This could happen when session DB is still being created or has gotten corrupted.
             $gameSession->setRunningGame(null);

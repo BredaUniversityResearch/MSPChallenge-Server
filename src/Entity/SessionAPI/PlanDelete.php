@@ -5,12 +5,13 @@ namespace App\src\Entity\SessionAPI;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity()]
+#[ORM\Entity]
 class PlanDelete
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, length: 11)]
+    // @phpstan-ignore-next-line (ignore unused)
     private ?int $planDeleteId;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'planDelete')]

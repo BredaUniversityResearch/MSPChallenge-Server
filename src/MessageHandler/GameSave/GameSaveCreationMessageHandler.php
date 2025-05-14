@@ -13,6 +13,7 @@ use App\Logger\GameSessionLogger;
 use App\Message\GameSave\GameSaveCreationMessage;
 use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\src\Entity\SessionAPI\Layer;
+use App\src\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
@@ -201,14 +202,14 @@ class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
     }
 
     /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      * @throws Exception
      */
     private function addLayerShapeFilesExportsToZip(): void
     {
         $this->createShapeFilesTempStore();
-        $layerGeometry = $this->entityManager->getRepository(Layer::class)->getAllGeometryDecodedGeoJSON();
+        /** @var LayerRepository $repo */
+        $repo = $this->entityManager->getRepository(Layer::class);
+        $layerGeometry = $repo->getAllGeometryDecodedGeoJSON();
         foreach ($layerGeometry as $layerName => $geometryContent) {
             $this->createLayerShapeFilesAndStore($layerName, $geometryContent);
         }

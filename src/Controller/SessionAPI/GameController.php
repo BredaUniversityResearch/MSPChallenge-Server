@@ -15,6 +15,7 @@ use App\Domain\POV\Region;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\src\Entity\SessionAPI\Game as GameEntity;
+use App\src\Repository\SessionAPI\GameRepository;
 use Exception;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
@@ -52,8 +53,9 @@ class GameController extends BaseController
     ): void {
         $state = new GameStateValue(strtolower($state));
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
-        /** @var GameEntity $game */
-        $game = $em->getRepository(GameEntity::class)->retrieve();
+        /** @var GameRepository $repo */
+        $repo = $em->getRepository(GameEntity::class);
+        $game = $repo->retrieve();
         $currentState = $game->getGameState();
         if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
             throw new Exception("Invalid current state of ".$currentState);
