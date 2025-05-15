@@ -93,7 +93,9 @@ class ImmersiveSessionService
                 )
         )->reduce(
             fn ($carry, ImmersiveSessionConnection $connection) => max($carry, $connection->getPort()),
-            45100
+            (
+                min(1, (int)($_ENV['IMMERSIVE_SESSION_CONNECTION_PORT_START'] ?? 45100))
+            ) - 1
         ) + 1;
         $conn = new ImmersiveSessionConnection();
         $conn
@@ -124,21 +126,20 @@ class ImmersiveSessionService
         );
         $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
-                'Image' => 'unity-server-image', // Use the built image
+               'Image' => 'unity-server-image', // Use the built image
+               'ExposedPorts' => [
+                    '50123/udp' => new \stdClass() // Explicitly expose the port
+                ],
                 'HostConfig' => [
                     'PortBindings' => [
                         '50123/udp' => [
                             ['HostPort' => (string)$conn->getPort()]
                         ]
-                    ],
-                    'LogConfig' => [
-                        'Type' => 'local',
                     ]
                 ],
                 'Env' => [
                     'IMMERSIVE_SESSION_MONTH='.$conn->getSession()->getMonth(),
                     'IMMERSIVE_SESSION_DATA='.json_encode($data)
-                    //'MSPXRClientPort=50123', // Pass the environment variable
                 ],
             ],
         ]);
