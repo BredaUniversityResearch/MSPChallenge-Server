@@ -110,6 +110,8 @@ class ImmersiveSessionService
                 'nocache' => true,
                 'remote' => 'https://github.com/BredaUniversityResearch/ImmersiveTwins-UnityServer-Docker.git#'.
                     $branchName,
+                'rm' => true,
+                'forcerm' => true, // Always remove intermediate containers, even upon failure.
                 'buildargs' => json_encode(
                     [
                         'NEXUS_CREDENTIALS' => $_ENV['NEXUS_CREDENTIALS'],
