@@ -7,7 +7,7 @@ use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
 use App\Entity\SessionAPI\Simulation;
 use App\Entity\SessionAPI\Watchdog;
-use App\src\Repository\SessionAPI\SimulationRepository;
+use App\Repository\SessionAPI\SimulationRepository;
 use Doctrine\ORM\EntityNotFoundException;
 use Exception;
 use OpenApi\Attributes as OA;

@@ -3,7 +3,7 @@
 namespace App\Entity\SessionAPI;
 
 use App\Domain\Common\EntityEnums\EventLogSeverity;
-use App\src\Repository\SessionAPI\EventLogRepository;
+use App\Repository\SessionAPI\EventLogRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;

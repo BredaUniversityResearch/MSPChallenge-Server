@@ -4,7 +4,7 @@ namespace App\Entity\SessionAPI;
 
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\PolicyTypeValue;
-use App\src\Repository\SessionAPI\PlanRepository;
+use App\Repository\SessionAPI\PlanRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

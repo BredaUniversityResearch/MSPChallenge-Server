@@ -2,7 +2,7 @@
 
 namespace App\Entity\SessionAPI;
 
-use App\src\Repository\SessionAPI\CountryRepository;
+use App\Repository\SessionAPI\CountryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

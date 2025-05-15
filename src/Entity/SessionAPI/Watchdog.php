@@ -8,7 +8,7 @@ use App\Entity\Listener\WatchdogListener;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\Trait\LazyLoadersTrait;
 use App\Entity\Trait\WatchdogTrait;
-use App\src\Repository\SessionAPI\WatchdogRepository;
+use App\Repository\SessionAPI\WatchdogRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

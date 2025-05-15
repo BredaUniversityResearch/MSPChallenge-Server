@@ -5,7 +5,7 @@ namespace App\EventListener;
 use App\Domain\Services\ConnectionManager;
 use App\Message\Watchdog\Message\WatchdogMessageBase;
 use App\Entity\SessionAPI\Watchdog;
-use App\src\Repository\SessionAPI\WatchdogRepository;
+use App\Repository\SessionAPI\WatchdogRepository;
 use Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;

@@ -3,7 +3,7 @@
 namespace App\Entity\SessionAPI;
 
 use App\Domain\Common\EntityEnums\LayerGeoType;
-use App\src\Repository\SessionAPI\GeometryRepository;
+use App\Repository\SessionAPI\GeometryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

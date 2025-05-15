@@ -14,7 +14,7 @@ use App\Domain\PolicyData\SeasonalClosurePolicyData;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\SessionAPI\Geometry;
 use App\Entity\SessionAPI\Simulation;
-use App\src\Repository\SessionAPI\SimulationRepository;
+use App\Repository\SessionAPI\SimulationRepository;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;

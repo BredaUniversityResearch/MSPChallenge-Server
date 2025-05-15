@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Repository\SessionAPI;
+namespace App\Repository\SessionAPI;
 
 use App\Entity\SessionAPI\EventLog;
 use Doctrine\ORM\EntityRepository;

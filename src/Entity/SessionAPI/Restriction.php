@@ -4,7 +4,7 @@ namespace App\Entity\SessionAPI;
 
 use App\Domain\Common\EntityEnums\RestrictionSort;
 use App\Domain\Common\EntityEnums\RestrictionType;
-use App\src\Repository\SessionAPI\RestrictionRepository;
+use App\Repository\SessionAPI\RestrictionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;

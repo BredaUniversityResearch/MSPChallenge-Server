@@ -3,7 +3,7 @@
 namespace App\Entity\SessionAPI;
 
 use App\Domain\Common\EntityEnums\GameStateValue;
-use App\src\Repository\SessionAPI\GameRepository;
+use App\Repository\SessionAPI\GameRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 

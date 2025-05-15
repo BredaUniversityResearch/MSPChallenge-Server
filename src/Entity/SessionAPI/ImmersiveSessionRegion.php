@@ -3,7 +3,7 @@
 namespace App\Entity\SessionAPI;
 
 use ApiPlatform\Metadata\ApiResource;
-use App\src\Repository\SessionAPI\ImmersiveSessionRegionRepository;
+use App\Repository\SessionAPI\ImmersiveSessionRegionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionRegionRepository::class)]

@@ -2,7 +2,7 @@
 
 namespace App\Entity\SessionAPI;
 
-use App\src\Repository\SessionAPI\ImmersiveSessionConnectionRepository;
+use App\Repository\SessionAPI\ImmersiveSessionConnectionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionConnectionRepository::class)]

@@ -2,7 +2,7 @@
 
 namespace App\Entity\SessionAPI;
 
-use App\src\Repository\SessionAPI\PlanPolicyRepository;
+use App\Repository\SessionAPI\PlanPolicyRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PlanPolicyRepository::class)]

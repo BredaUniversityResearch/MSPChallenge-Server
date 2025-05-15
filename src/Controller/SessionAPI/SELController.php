@@ -5,7 +5,7 @@ namespace App\Controller\SessionAPI;
 use App\Controller\BaseController;
 use App\Entity\SessionAPI\Geometry;
 use App\Entity\SessionAPI\Layer;
-use App\src\Repository\SessionAPI\LayerRepository;
+use App\Repository\SessionAPI\LayerRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

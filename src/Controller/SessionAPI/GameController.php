@@ -15,7 +15,7 @@ use App\Domain\POV\Region;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\SessionAPI\Game as GameEntity;
-use App\src\Repository\SessionAPI\GameRepository;
+use App\Repository\SessionAPI\GameRepository;
 use Exception;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;

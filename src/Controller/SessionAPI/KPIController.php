@@ -9,7 +9,7 @@ use App\Domain\API\v1\Router;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\SessionAPI\Simulation;
 use App\Entity\SessionAPI\Watchdog;
-use App\src\Repository\SessionAPI\SimulationRepository;
+use App\Repository\SessionAPI\SimulationRepository;
 use Exception;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;

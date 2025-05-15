@@ -3,7 +3,7 @@
 namespace App\Entity\SessionAPI;
 
 use App\Domain\Common\EntityEnums\PolicyTypeName;
-use App\src\Repository\SessionAPI\PolicyRepository;
+use App\Repository\SessionAPI\PolicyRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;

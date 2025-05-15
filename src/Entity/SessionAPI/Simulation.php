@@ -2,7 +2,7 @@
 
 namespace App\Entity\SessionAPI;
 
-use App\src\Repository\SessionAPI\SimulationRepository;
+use App\Repository\SessionAPI\SimulationRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 

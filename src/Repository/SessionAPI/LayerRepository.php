@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Repository\SessionAPI;
+namespace App\Repository\SessionAPI;
 
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\NormalizerContextBuilder;

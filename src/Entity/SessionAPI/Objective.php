@@ -2,7 +2,7 @@
 
 namespace App\Entity\SessionAPI;
 
-use App\src\Repository\SessionAPI\ObjectiveRepository;
+use App\Repository\SessionAPI\ObjectiveRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;

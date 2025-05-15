@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Repository\SessionAPI;
+namespace App\Repository\SessionAPI;
 
 use Doctrine\ORM\EntityRepository;
 

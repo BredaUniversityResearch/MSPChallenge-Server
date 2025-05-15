@@ -5,7 +5,7 @@ namespace App\Entity\SessionAPI;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
-use App\src\Repository\SessionAPI\ImmersiveSessionRepository;
+use App\Repository\SessionAPI\ImmersiveSessionRepository;
 use App\Validator\ImmersiveSessionTypeJsonSchema;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
