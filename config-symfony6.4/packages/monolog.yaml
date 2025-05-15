@@ -3,6 +3,13 @@ monolog:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
         - game_session # file-based game session creation and loading log
         - analytics
+        - docker_api
+    handlers:
+        docker_api:
+            type: stream
+            path: '%kernel.logs_dir%/docker-api.log'
+            level: debug
+            channels: ['docker_api']
 
 when@dev:
     monolog:

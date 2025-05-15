@@ -5,9 +5,9 @@ namespace App\Controller\SessionAPI;
 use App\Controller\BaseController;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
-use App\Entity\Simulation;
-use App\Entity\Watchdog;
-use App\Repository\SimulationRepository;
+use App\Entity\SessionAPI\Simulation;
+use App\Entity\SessionAPI\Watchdog;
+use App\Repository\SessionAPI\SimulationRepository;
 use Doctrine\ORM\EntityNotFoundException;
 use Exception;
 use OpenApi\Attributes as OA;
@@ -25,11 +25,6 @@ use Symfony\Component\Routing\Attribute\Route;
 )]
 class SimulationController extends BaseController
 {
-    public function __construct(
-        private readonly ConnectionManager $connectionManager
-    ) {
-    }
-
     /**
      * @throws Exception
      */

@@ -2,8 +2,6 @@
 
 namespace App\Message\Watchdog\Message;
 
-use App\Entity\Watchdog;
-
 abstract class WatchdogMessageBase
 {
     private int $gameSessionId;

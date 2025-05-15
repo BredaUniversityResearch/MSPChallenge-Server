@@ -7,6 +7,7 @@ use App\Domain\Common\GameListAndSaveSerializer;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
 use App\Entity\ServerManager\GameWatchdogServer;
+use ReflectionException;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\SubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -14,6 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class GameListAddBySaveLoadFormType extends AbstractType
 {
@@ -47,6 +49,10 @@ class GameListAddBySaveLoadFormType extends AbstractType
         ;
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws ExceptionInterface
+     */
     public function onSubmit(SubmitEvent $event): void
     {
         $em = $event->getForm()->getConfig()->getOptions()['entity_manager'];

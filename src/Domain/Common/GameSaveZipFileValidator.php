@@ -2,6 +2,7 @@
 
 namespace App\Domain\Common;
 
+use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameSave;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonSchema\Validator;
@@ -10,7 +11,6 @@ use \ZipArchive;
 
 class GameSaveZipFileValidator
 {
-
     private string $filePath;
     private ZipArchive $saveZip;
     private bool $valid = true;
@@ -19,15 +19,16 @@ class GameSaveZipFileValidator
     private ?string $dbDumpFileName;
     private GameSave $gameSave;
     private KernelInterface $kernel;
-    private EntityManagerInterface $em;
 
+    /**
+     * @throws \Exception
+     */
     public function __construct(
         string $filePath,
         KernelInterface $kernel,
-        EntityManagerInterface $em
+        private readonly ConnectionManager $connectionManager
     ) {
         $this->kernel = $kernel;
-        $this->em = $em;
         $this->filePath = $filePath;
         $this->validate();
     }
@@ -171,7 +172,7 @@ class GameSaveZipFileValidator
     private function gameListValid(): bool
     {
         try {
-            $this->gameSave =(new GameListAndSaveSerializer($this->em))
+            $this->gameSave =(new GameListAndSaveSerializer($this->connectionManager->getServerManagerEntityManager()))
                 ->createGameSaveFromJson($this->getGameListJsonContents());
         } catch (\Throwable $e) {
             $this->setError('Unable to work with game_list.json contents from ZIP. '.$e->getMessage());
