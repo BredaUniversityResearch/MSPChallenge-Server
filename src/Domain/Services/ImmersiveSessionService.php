@@ -80,8 +80,10 @@ class ImmersiveSessionService
      */
     public function createImmersiveSessionContainer(ImmersiveSession $sess, int $gameSessionId): void
     {
-        if (null == $gameList = $this->connectionManager->getServerManagerEntityManager()->getRepository(GameList::class)
-            ->find($gameSessionId)) {
+        if (null == $gameList = $this->connectionManager->getServerManagerEntityManager()
+            ->getRepository(GameList::class)
+            ->find($gameSessionId)
+        ) {
             throw new Exception('Game list not found. Id: '.$gameSessionId);
         }
 
