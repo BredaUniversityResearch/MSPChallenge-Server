@@ -9,8 +9,8 @@ use App\Domain\Log\LogContainerInterface;
 use App\Domain\Log\LogContainerTrait;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameWatchdogServer;
-use App\src\Entity\SessionAPI\Simulation as SimulationEntity;
-use App\src\Entity\SessionAPI\Watchdog;
+use App\Entity\SessionAPI\Simulation as SimulationEntity;
+use App\Entity\SessionAPI\Watchdog;
 use Exception;
 use Symfony\Component\Uid\Uuid;
 

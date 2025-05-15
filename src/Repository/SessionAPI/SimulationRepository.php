@@ -3,7 +3,7 @@
 namespace App\src\Repository\SessionAPI;
 
 use App\Domain\Common\InternalSimulationName;
-use App\src\Entity\SessionAPI\Watchdog;
+use App\Entity\SessionAPI\Watchdog;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\EntityRepository;
 use Exception;

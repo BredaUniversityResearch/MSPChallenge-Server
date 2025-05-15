@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Entity\SessionAPI;
+namespace App\Entity\SessionAPI;
 
 use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\src\Repository\SessionAPI\EventLogRepository;

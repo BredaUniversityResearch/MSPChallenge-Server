@@ -5,7 +5,7 @@ namespace App\Domain\API\v1;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
-use App\src\Entity\SessionAPI\Watchdog;
+use App\Entity\SessionAPI\Watchdog;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;

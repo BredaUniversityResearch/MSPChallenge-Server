@@ -5,7 +5,7 @@ namespace App\Entity\Listener;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Repository\ServerManager\GameWatchdogServerRepository;
-use App\src\Entity\SessionAPI\Watchdog;
+use App\Entity\SessionAPI\Watchdog;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 
 class WatchdogListener implements SubEntityListenerInterface, PostLoadEventListenerInterface

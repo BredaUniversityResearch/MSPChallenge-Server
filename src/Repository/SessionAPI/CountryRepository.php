@@ -2,7 +2,7 @@
 
 namespace App\src\Repository\SessionAPI;
 
-use App\src\Entity\SessionAPI\Country;
+use App\Entity\SessionAPI\Country;
 use Doctrine\ORM\EntityRepository;
 
 class CountryRepository extends EntityRepository

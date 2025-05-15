@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Entity\SessionAPI;
+namespace App\Entity\SessionAPI;
 
 use App\src\Repository\SessionAPI\CountryRepository;
 use Doctrine\Common\Collections\ArrayCollection;

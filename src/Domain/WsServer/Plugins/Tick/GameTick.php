@@ -10,7 +10,7 @@ use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\SilentFailException;
-use App\src\Entity\SessionAPI\Watchdog;
+use App\Entity\SessionAPI\Watchdog;
 use Drift\DBAL\Result;
 use Exception;
 use React\EventLoop\Loop;

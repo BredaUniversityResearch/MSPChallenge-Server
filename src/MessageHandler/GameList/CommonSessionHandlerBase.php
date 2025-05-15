@@ -13,7 +13,7 @@ use App\Message\GameList\GameListArchiveMessage;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
-use App\src\Entity\SessionAPI\Watchdog;
+use App\Entity\SessionAPI\Watchdog;
 use App\src\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;

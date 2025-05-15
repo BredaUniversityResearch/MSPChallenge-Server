@@ -4,7 +4,7 @@ namespace App\src\Repository\SessionAPI;
 
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\NormalizerContextBuilder;
-use App\src\Entity\SessionAPI\Layer;
+use App\Entity\SessionAPI\Layer;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use ReflectionException;

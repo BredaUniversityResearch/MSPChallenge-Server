@@ -2,7 +2,7 @@
 
 namespace App\src\Repository\SessionAPI;
 
-use App\src\Entity\SessionAPI\Game;
+use App\Entity\SessionAPI\Game;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

@@ -3,7 +3,7 @@
 namespace App\Domain\Communicator;
 
 use App\Domain\Common\CacheItemConfig;
-use App\src\Entity\SessionAPI\Layer;
+use App\Entity\SessionAPI\Layer;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;

@@ -2,7 +2,7 @@
 
 namespace App\src\Repository\SessionAPI;
 
-use App\src\Entity\SessionAPI\Restriction;
+use App\Entity\SessionAPI\Restriction;
 use Doctrine\ORM\EntityRepository;
 
 class RestrictionRepository extends EntityRepository

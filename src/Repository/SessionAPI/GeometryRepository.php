@@ -2,7 +2,7 @@
 
 namespace App\src\Repository\SessionAPI;
 
-use App\src\Entity\SessionAPI\Geometry;
+use App\Entity\SessionAPI\Geometry;
 use Doctrine\ORM\EntityRepository;
 
 class GeometryRepository extends EntityRepository

@@ -14,7 +14,7 @@ use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\src\Entity\SessionAPI\Game as GameEntity;
+use App\Entity\SessionAPI\Game as GameEntity;
 use App\src\Repository\SessionAPI\GameRepository;
 use Exception;
 use OpenApi\Attributes as OA;

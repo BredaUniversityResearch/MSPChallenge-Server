@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\ImmersiveSessionService;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\src\Entity\SessionAPI\ImmersiveSession;
+use App\Entity\SessionAPI\ImmersiveSession;
 use Exception;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;

@@ -12,7 +12,7 @@ use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
 use App\Message\GameSave\GameSaveCreationMessage;
 use App\MessageHandler\GameList\CommonSessionHandlerBase;
-use App\src\Entity\SessionAPI\Layer;
+use App\Entity\SessionAPI\Layer;
 use App\src\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
 use Exception;

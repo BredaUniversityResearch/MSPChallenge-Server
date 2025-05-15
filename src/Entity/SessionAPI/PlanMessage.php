@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Entity\SessionAPI;
+namespace App\Entity\SessionAPI;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;

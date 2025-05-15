@@ -13,7 +13,7 @@ use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\MessageHandler\GameList\CommonSessionHandlerBase;
-use App\src\Entity\SessionAPI\Game;
+use App\Entity\SessionAPI\Game;
 use App\src\Repository\SessionAPI\GameRepository;
 use App\VersionsProvider;
 use Doctrine\ORM\NonUniqueResultException;

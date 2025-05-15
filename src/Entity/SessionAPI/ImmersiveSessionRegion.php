@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Entity\SessionAPI;
+namespace App\Entity\SessionAPI;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\src\Repository\SessionAPI\ImmersiveSessionRegionRepository;

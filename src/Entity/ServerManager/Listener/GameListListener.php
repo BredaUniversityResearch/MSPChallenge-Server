@@ -10,7 +10,7 @@ use App\Entity\ServerManager\GameGeoServer;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\GameWatchdogServer;
-use App\src\Entity\SessionAPI\Game;
+use App\Entity\SessionAPI\Game;
 use App\src\Repository\SessionAPI\GameRepository;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;

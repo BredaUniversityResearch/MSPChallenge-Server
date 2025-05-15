@@ -2,7 +2,7 @@
 
 namespace App\src\Repository\SessionAPI;
 
-use App\src\Entity\SessionAPI\Grid;
+use App\Entity\SessionAPI\Grid;
 use Doctrine\ORM\EntityRepository;
 
 class GridRepository extends EntityRepository

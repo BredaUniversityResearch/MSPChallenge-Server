@@ -2,7 +2,7 @@
 
 namespace App\src\Repository\SessionAPI;
 
-use App\src\Entity\SessionAPI\EventLog;
+use App\Entity\SessionAPI\EventLog;
 use Doctrine\ORM\EntityRepository;
 
 class LoggableEntityRepository extends EntityRepository

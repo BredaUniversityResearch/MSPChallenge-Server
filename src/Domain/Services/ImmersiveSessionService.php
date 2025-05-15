@@ -4,8 +4,8 @@ namespace App\Domain\Services;
 
 use App\Entity\ServerManager\DockerApi;
 use App\Entity\ServerManager\ImmersiveSessionType;
-use App\src\Entity\SessionAPI\ImmersiveSession;
-use App\src\Entity\SessionAPI\ImmersiveSessionConnection;
+use App\Entity\SessionAPI\ImmersiveSession;
+use App\Entity\SessionAPI\ImmersiveSessionConnection;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Psr\Log\LoggerInterface;

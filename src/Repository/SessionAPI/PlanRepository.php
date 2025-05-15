@@ -2,7 +2,7 @@
 
 namespace App\src\Repository\SessionAPI;
 
-use App\src\Entity\SessionAPI\Plan;
+use App\Entity\SessionAPI\Plan;
 use Doctrine\ORM\EntityRepository;
 
 class PlanRepository extends EntityRepository

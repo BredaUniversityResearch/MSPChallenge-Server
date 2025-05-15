@@ -2,7 +2,7 @@
 
 namespace App\src\Repository\SessionAPI;
 
-use App\src\Entity\SessionAPI\Objective;
+use App\Entity\SessionAPI\Objective;
 use Doctrine\ORM\EntityRepository;
 
 class ObjectiveRepository extends EntityRepository
