@@ -3,11 +3,20 @@
 namespace App\Domain\PolicyData;
 
 use ReflectionException;
+use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\Schema;
 
 abstract class PressuredPolicyDataBase extends ItemsPolicyDataBase
 {
-    public float $pressure = 0.0;
+    const DEFAULT_VALUE_PRESSURE = 0.0;
+
+    public float $pressure = self::DEFAULT_VALUE_PRESSURE;
+
+    public static function import($data, Context $options = null)
+    {
+        $data->pressure ??= self::DEFAULT_VALUE_PRESSURE;
+        return parent::import($data, $options);
+    }
 
     /**
      * @inheritdoc
@@ -17,6 +26,7 @@ abstract class PressuredPolicyDataBase extends ItemsPolicyDataBase
     {
         parent::setUpProperties($properties, $ownerSchema);
         $properties->pressure = Schema::number();
+        $properties->pressure->default = self::DEFAULT_VALUE_PRESSURE;
         $properties->pressure->minimum = 0;
         $properties->pressure->maximum = 1;
     }
