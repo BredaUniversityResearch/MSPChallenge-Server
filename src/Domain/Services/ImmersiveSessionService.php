@@ -3,9 +3,11 @@
 namespace App\Domain\Services;
 
 use App\Entity\ServerManager\DockerApi;
+use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\ImmersiveSessionType;
 use App\Entity\SessionAPI\ImmersiveSession;
 use App\Entity\SessionAPI\ImmersiveSessionConnection;
+use App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -78,6 +80,11 @@ class ImmersiveSessionService
      */
     public function createImmersiveSessionContainer(ImmersiveSession $sess, int $gameSessionId): void
     {
+        if (null == $gameList = $this->connectionManager->getServerManagerEntityManager()->getRepository(GameList::class)
+            ->find($gameSessionId)) {
+            throw new Exception('Game list not found. Id: '.$gameSessionId);
+        }
+
         $immersiveSessionType = $this->getEntityManager()->getRepository(ImmersiveSessionType::class)
             ->findOneBy(['type' => $sess->getType()]);
         if ($immersiveSessionType === null) {
@@ -94,7 +101,7 @@ class ImmersiveSessionService
         )->reduce(
             fn ($carry, ImmersiveSessionConnection $connection) => max($carry, $connection->getPort()),
             (
-                min(1, (int)($_ENV['IMMERSIVE_SESSION_CONNECTION_PORT_START'] ?? 45100))
+                max(1, (int)($_ENV['IMMERSIVE_SESSION_CONNECTION_PORT_START'] ?? 45100))
             ) - 1
         ) + 1;
         $conn = new ImmersiveSessionConnection();
@@ -140,8 +147,16 @@ class ImmersiveSessionService
                     ]
                 ],
                 'Env' => [
+                    'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
+                    'MSP_CHALLENGE_API_BASE_URL='.WatchdogCommunicationMessageHandler::getSessionAPIBaseUrl($gameList),
+                    'IMMERSIVE_SESSION_REGION_COORDS='.json_encode([
+                        'region_bottom_left_x' => $sess->getRegion()->getBottomLeftX(),
+                        'region_bottom_left_y' => $sess->getRegion()->getBottomLeftY(),
+                        'region_top_right_x' => $sess->getRegion()->getTopRightX(),
+                        'region_top_right_y' => $sess->getRegion()->getTopRightY()
+                    ]),
                     'IMMERSIVE_SESSION_MONTH='.$conn->getSession()->getMonth(),
-                    'IMMERSIVE_SESSION_DATA='.json_encode($data)
+                    'IMMERSIVE_SESSION_DATA='.json_encode($data) // like require_username, require_team, gamemaster_pick
                 ],
             ],
         ]);
