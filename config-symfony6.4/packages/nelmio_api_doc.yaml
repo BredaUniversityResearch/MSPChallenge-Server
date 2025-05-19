@@ -54,6 +54,60 @@ nelmio_api_doc:
                                           - type: string
                                 - type: string
                                 - type: object
+                ResponseGeometry:
+                    allOf:
+                            - $ref: '#/components/schemas/ResponseStructure'
+                            - type: object
+                              properties:
+                                payload:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: integer
+                                        example: 1586
+                                      geometry:
+                                        type: array
+                                        items:
+                                          type: array
+                                          items:
+                                            type: number
+                                            maxItems: 2
+                                            minItems: 2
+                                            example: [3674414.2806077, 3346465.4397283]
+                                      subtractive:
+                                        type: array
+                                        items:
+                                          type: integer
+                                        example: []
+                                      persistent:
+                                        type: integer
+                                        example: 1586
+                                      mspid:
+                                        type: integer
+                                        example: 14109
+                                      type:
+                                        type: integer
+                                        example: 1
+                                      country:
+                                        type: integer
+                                        example: -1
+                                      active:
+                                        type: integer
+                                        enum: [0, 1]
+                                        example: 1
+                                      data:
+                                        type: object
+                                        example:
+                                          Status: "Open"
+                                          Area_cal: "2695738"
+                                          Dist_coast: "2610.41"
+                                          Updateyea_: "2014"
+                                          Country: "England"
+                                          Depth_m_: ""
+                                          Name: "WEST STONES"
+                                          original_layer_name: "NS_Dredging_Deposit_Areas"
             responses:
                 LayerMetaResponse:
                     description: 'Layer meta'
