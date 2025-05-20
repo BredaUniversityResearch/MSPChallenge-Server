@@ -34,6 +34,7 @@ class DynamicEntityFormType extends AbstractType
             if (null !== Util::getPropertyAttribute($property, ORM\Id::class)) {
                 continue; // Skip ID properties
             }
+            $formFieldTypeLabel = null;
             if (null !== $attribute =
                 Util::getPropertyAttribute($property, AppMappings\Property\TableColumn::class)) {
                 /** @var AppMappings\Property\TableColumn $attribute */
@@ -41,13 +42,16 @@ class DynamicEntityFormType extends AbstractType
                     continue; // Skip action properties
                 }
                 // set the name of the field to the label of the column if it is not set
-                $formFieldTypeOptions['label'] ??= $attribute->label;
+                $formFieldTypeLabel = $attribute->label;
             }
             if (null !== $attribute =
                 Util::getPropertyAttribute($property, AppMappings\Property\FormFieldType::class)) {
                 /** @var AppMappings\Property\FormFieldType $attribute */
                 $formFieldType = $attribute->type;
                 $formFieldTypeOptions = $attribute->options;
+                if ($formFieldTypeLabel) {
+                    $formFieldTypeOptions['label'] ??= $formFieldTypeLabel;
+                }
                 if ($formFieldType == ChoiceType::class &&
                     (null !== $attribute = Util::getPropertyAttribute($property, ORM\Column::class)) &&
                     /** @var ORM\Column $attribute */
@@ -61,6 +65,7 @@ class DynamicEntityFormType extends AbstractType
                         fn($enum) => $enum?->value; // Use the value
                 }
             }
+            /** @var ?\ReflectionNamedType $propertyType */
             $formFieldType ??= $this->defaultTypeToFormFieldTypeMapping($propertyType?->getName());
             if (null === $formFieldType) {
                 continue;

@@ -115,6 +115,7 @@ class EntityController extends BaseController
         $property = $reflection->getProperty($propertyName);
         // Check if the property is a boolean
         $propertyType = $property->getType();
+        /** @var ?\ReflectionNamedType $propertyType */
         if (!$propertyType || $propertyType->getName() !== 'bool') {
             throw new \InvalidArgumentException("Property '$propertyName' is not declared as a boolean.");
         }
@@ -139,7 +140,6 @@ class EntityController extends BaseController
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $entityClass = $this->getEntityClass($entityName);
-        /** @var EntityBase $entity */
         if ($entityId != 0) {
             $entity = $entityManager->getRepository($entityClass)->find($entityId);
             if (null === $entity) {
@@ -148,7 +148,6 @@ class EntityController extends BaseController
         } else {
             $entity = new $entityClass();
         }
-
         $form = $this->createForm(
             DynamicEntityFormType::class,
             $entity,
