@@ -41,7 +41,7 @@ final class Version20250410181450 extends MSPMigration
           `id` int unsigned NOT NULL AUTO_INCREMENT,
           `region_id` int unsigned NOT NULL,
           `name` varchar(255) NOT NULL,
-          `type` enum('mixed-reality') NOT NULL DEFAULT 'mixed-reality',
+          `type` enum('ar','mr','vr','xr') NOT NULL DEFAULT 'mr',
           `month` int NOT NULL DEFAULT -1,
           `data` JSON DEFAULT NULL COMMENT '(DC2Type:json_document)',
           PRIMARY KEY (`id`),
