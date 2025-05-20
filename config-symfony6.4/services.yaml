@@ -158,6 +158,9 @@ services:
     App\Domain\Communicator\WatchdogCommunicator:
     App\Security\MSPAuth2Authenticator:
     App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
+    App\MessageHandler\Docker\DockerCommunicationMessageHandler:
+        arguments:
+            $dockerLogger: '@monolog.logger.docker'
 
     App\Domain\Services\SimulationHelper:
         public: true
@@ -205,7 +208,7 @@ services:
 
     App\Domain\Services\ImmersiveSessionService:
         arguments:
-            $dockerApiLogger: '@monolog.logger.docker_api'
+            $dockerLogger: '@monolog.logger.docker'
 
 when@dev:
     parameters:

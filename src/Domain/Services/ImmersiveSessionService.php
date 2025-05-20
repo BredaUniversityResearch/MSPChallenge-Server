@@ -19,7 +19,7 @@ class ImmersiveSessionService
     public function __construct(
         private readonly ConnectionManager $connectionManager,
         private readonly \Predis\Client $redisClient,
-        private readonly LoggerInterface $dockerApiLogger
+        private readonly LoggerInterface $dockerLogger
     ) {
         $this->currentDockerApi = null;
     }
@@ -208,7 +208,7 @@ class ImmersiveSessionService
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false); // Stream the response directly
         $responseContent = '';
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use (&$responseContent) {
-            $this->dockerApiLogger->info($data);
+            $this->dockerLogger->info($data);
             $responseContent .= $data;
             return strlen($data);
         });

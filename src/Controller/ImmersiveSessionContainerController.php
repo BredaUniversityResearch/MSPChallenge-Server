@@ -3,13 +3,15 @@
 namespace App\Controller;
 
 use App\Domain\Services\ConnectionManager;
-use App\Domain\Services\ImmersiveSessionService;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\SessionAPI\ImmersiveSession;
+use App\Message\Docker\CreateImmersiveSessionContainerMessage;
+use App\Message\Docker\RemoveImmersiveSessionContainerMessage;
 use Exception;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/immersive_session_containers')]
@@ -25,7 +27,7 @@ class ImmersiveSessionContainerController extends BaseController
         ConnectionManager $connectionManager,
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
         // required by this controller
-        private readonly ImmersiveSessionService $service
+        private readonly MessageBusInterface $messageBus
     ) {
         parent::__construct(...func_get_args());
     }
@@ -63,15 +65,12 @@ class ImmersiveSessionContainerController extends BaseController
                 Response::HTTP_ALREADY_REPORTED
             );
         }
-        try {
-            $this->service->createImmersiveSessionContainer($session, $gameSessionId);
-        } catch (\Throwable $e) {
-            return new Response(
-                'Error starting container: ' . $e->getMessage(),
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
-        return new Response('Container started successfully.');
+        $message = new CreateImmersiveSessionContainerMessage();
+        $message
+            ->setImmersiveSessionId($sessionId)
+            ->setGameSessionId($gameSessionId);
+        $this->messageBus->dispatch($message);
+        return new Response('Start of container successfully requested.');
     }
 
     /**
@@ -106,14 +105,11 @@ class ImmersiveSessionContainerController extends BaseController
                 Response::HTTP_ALREADY_REPORTED
             );
         }
-        try {
-            $this->service->removeImmersiveSessionContainer($session, $gameSessionId);
-        } catch (\Throwable $e) {
-            return new Response(
-                'Error removing container: ' . $e->getMessage(),
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
-        return new Response('Container removed successfully.');
+        $message = new RemoveImmersiveSessionContainerMessage();
+        $message
+            ->setImmersiveSessionId($sessionId)
+            ->setGameSessionId($gameSessionId);
+        $this->messageBus->dispatch($message);
+        return new Response('Removal of container successfully requested.');
     }
 }
