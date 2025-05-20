@@ -2,20 +2,25 @@
 
 namespace App\Entity\ServerManager;
 
+use App\Entity\EntityBase;
+use App\Entity\Mapping as AppMappings;
 use App\Repository\ServerManager\ImmersiveSessionDockerApiRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+#[AppMappings\Plurals('Docker API', 'Docker APIs')]
 #[ORM\Entity(repositoryClass: ImmersiveSessionDockerApiRepository::class)]
-class DockerApi
+class DockerApi extends EntityBase
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[AppMappings\Property\TableColumn]
     #[ORM\Column(length: 255)]
     private ?string $address = null;
 
+    #[AppMappings\Property\TableColumn]
     #[ORM\Column]
     private ?int $port = null;
 

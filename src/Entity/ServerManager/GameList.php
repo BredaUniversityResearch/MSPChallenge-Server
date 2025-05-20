@@ -5,6 +5,7 @@ namespace App\Entity\ServerManager;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
+use App\Entity\EntityBase;
 use App\Repository\ServerManager\GameListRepository;
 use App\Entity\SessionAPI\Game;
 use App\Validator as AcmeAssert;
@@ -14,7 +15,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use function App\isBase64Encoded;
 
 #[ORM\Entity(repositoryClass: GameListRepository::class)]
-class GameList
+class GameList extends EntityBase
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

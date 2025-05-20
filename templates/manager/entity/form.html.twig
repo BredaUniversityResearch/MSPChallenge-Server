@@ -1,0 +1,23 @@
+<turbo-frame id="settingForm">
+    <div data-modal-entity-target="modalEntityForm">
+        {{ form_start(entityForm) }}
+        <div class="modal-body">
+            <h1>Add or edit {{ entityPlurals.value(1) }}</h1>
+            {% for name, field in entityForm %}
+                {% if name != '_token' %}
+                <div class="form-group">
+                    {{ form_label(field, null, {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="text-danger">{{ form_errors(field) }}</div>
+                    {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
+                    <div class="small text-muted">{{ form_help(field) }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            <button type="submit" class="btn btn-primary" data-action="modal-entity#submitEntityModalForm" data-modal-entity-entity-name-param="{{ entityName }}" data-modal-entity-entity-desc-param="{{ entityPlurals.value(1) }}">Save</button>
+        </div>
+        {{ form_end(entityForm) }}
+    </div>
+</turbo-frame>

@@ -35,7 +35,7 @@ class ImmersiveSession
     #[ORM\Column(enumType: ImmersiveSessionTypeID::class)]
     #[Assert\NotBlank(message: "The type field should not be blank.")]
     #[Assert\NotNull(message: "The type field is required.")]
-    private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MIXED_REALITY;
+    private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MR;
 
     #[ORM\Column(options: ['default' => -1])]
     #[Assert\NotBlank(message: "The month field should not be blank.")]

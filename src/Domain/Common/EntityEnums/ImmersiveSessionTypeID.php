@@ -10,9 +10,21 @@ enum ImmersiveSessionTypeID: string
     use GetAttributesTrait;
 
     public const ALL = [
-        self::MIXED_REALITY->value,
+        self::AR->value,
+        self::MR->value,
+        self::VR->value,
+        self::XR->value
     ];
 
+    #[Description('Augmented Reality')]
+    case AR = 'ar';
+
     #[Description('Mixed Reality')]
-    case MIXED_REALITY = 'mixed-reality';
+    case MR = 'mr';
+
+    #[Description('Virtual Reality')]
+    case VR = 'vr';
+
+    #[Description('Extended Reality')]
+    case XR = 'xr';
 }

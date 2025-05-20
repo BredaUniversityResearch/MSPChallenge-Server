@@ -2,12 +2,13 @@
 
 namespace App\Entity\ServerManager;
 
+use App\Entity\EntityBase;
 use App\Repository\ServerManager\GameServerRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(name: 'game_servers')]
 #[ORM\Entity(repositoryClass: GameServerRepository::class)]
-class GameServer
+class GameServer extends EntityBase
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

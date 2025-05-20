@@ -36,7 +36,7 @@ final class Version20250410181235 extends MSPMigration
         $this->addSql(<<< 'SQL'
             CREATE TABLE immersive_session_type (
             id INT unsigned AUTO_INCREMENT NOT NULL, 
-            `type` enum('mixed-reality') NOT NULL DEFAULT 'mixed-reality', 
+            `type` enum('ar','mr','vr','xr') NOT NULL DEFAULT 'ar', 
             name VARCHAR(255) NOT NULL, 
             data_schema JSON DEFAULT NULL COMMENT '(DC2Type:json_document)',
             data_default JSON DEFAULT NULL COMMENT '(DC2Type:json_document)',

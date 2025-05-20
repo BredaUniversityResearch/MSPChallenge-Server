@@ -86,7 +86,6 @@ services:
       - vendor_data:/app/vendor:rw
       - node_modules_data:/app/node_modules:ro
       - public_build_data:/app/public/build:ro
-      - /app/var/cache
       - /app/var/log
     networks:
       - database

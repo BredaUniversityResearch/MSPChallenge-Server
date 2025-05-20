@@ -3,11 +3,15 @@
 namespace App\Entity\ServerManager;
 
 use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
+use App\Entity\EntityBase;
+use App\Entity\Mapping as AppMappings;
 use App\Repository\ServerManager\ImmersiveSessionTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
 
+#[AppMappings\Plurals('Immersive session type', 'Immersive session types')]
 #[ORM\Entity(repositoryClass: ImmersiveSessionTypeRepository::class)]
-class ImmersiveSessionType
+class ImmersiveSessionType extends EntityBase
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -15,15 +19,35 @@ class ImmersiveSessionType
     private ?int $id = null;
 
     #[ORM\Column(unique: true, enumType: ImmersiveSessionTypeID::class)]
-    private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MIXED_REALITY;
+    #[AppMappings\Property\FormFieldType(type: SymfonyFormType\ChoiceType::class)]
+    private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MR;
 
+    #[AppMappings\Property\TableColumn(label: "Name")]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
     #[ORM\Column(type: 'json_document', nullable: true)]
+    #[AppMappings\Property\FormFieldType(
+        type: SymfonyFormType\TextareaType::class,
+        options: [
+            'attr' => [
+                'class' => 'form-control',
+                'rows' => 10
+            ]
+        ]
+    )]
     private mixed $dataSchema = null;
 
     #[ORM\Column(type: 'json_document', nullable: true)]
+    #[AppMappings\Property\FormFieldType(
+        type: SymfonyFormType\TextareaType::class,
+        options: [
+            'attr' => [
+                'class' => 'form-control',
+                'rows' => 10
+            ]
+        ]
+    )]
     private mixed $dataDefault = null;
 
     public function getId(): ?int

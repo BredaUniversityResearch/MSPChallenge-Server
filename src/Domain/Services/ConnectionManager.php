@@ -20,6 +20,7 @@ use React\EventLoop\LoopInterface;
 
 class ConnectionManager extends DatabaseDefaults
 {
+    public const SERVER_MANAGER_ENTITY_MAPPING_ALIAS = 'ServerManager';
     const ERROR_CODE_SET_DOCTRINE_NOT_CALLED = 1;
 
     private static ?ConnectionManager $instance = null;
@@ -166,7 +167,7 @@ class ConnectionManager extends DatabaseDefaults
             'is_bundle' => false,
             'dir' => '%kernel.project_dir%/src/Entity/ServerManager',
             'prefix' => 'App\Entity\ServerManager',
-            'alias' => 'ServerManager'
+            'alias' => self::SERVER_MANAGER_ENTITY_MAPPING_ALIAS
         ];
         $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';
         $config['metadata_cache_driver'] = [

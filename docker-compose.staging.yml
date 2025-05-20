@@ -5,6 +5,7 @@ services:
       target: frankenphp_prod
     volumes:
       - ./:/app
+      - /app/var/cache
     environment:
       SERVER_NAME: ${SERVER_NAME:-:80}
       APP_SECRET: ${APP_SECRET}
