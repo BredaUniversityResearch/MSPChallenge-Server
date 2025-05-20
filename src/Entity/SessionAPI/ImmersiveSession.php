@@ -29,7 +29,7 @@ class ImmersiveSession
             'type' => 'string',
             'enum' => ImmersiveSessionTypeID::ALL,
             'description' => 'The type of the immersive session',
-            'example' => ImmersiveSessionTypeID::ALL[0]
+            'example' => ImmersiveSessionTypeID::MR->value
         ]
     )]
     #[ORM\Column(enumType: ImmersiveSessionTypeID::class)]
