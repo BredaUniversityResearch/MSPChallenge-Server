@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Entity\Mapping;
+
 #[\Attribute]
 class Plurals
 {
