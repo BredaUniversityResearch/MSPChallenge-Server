@@ -28,6 +28,43 @@ class User extends Base implements JWTUserInterface
     {
     }
 
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function CheckGameSessionPasswords(): array
+    {
+        $adminHasPassword = true;
+        $playerHasPassword = true;
+        $connection = ConnectionManager::getInstance()->getCachedServerManagerDbConnection();
+        $qb = $connection->createQueryBuilder();
+        $qb->select('password_admin', 'password_player')
+            ->from('game_list')
+            ->where($qb->expr()->eq('id', $this->getGameSessionId()));
+        $passwordData = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
+        
+        if (!parent::isNewPasswordFormat($passwordData[0]["password_admin"])
+            || !parent::isNewPasswordFormat($passwordData[0]["password_player"])
+        ) {
+            $adminHasPassword = !empty($passwordData[0]["password_admin"]);
+            $playerHasPassword = !empty($passwordData[0]["password_player"]);
+        } else {
+            $password_admin = json_decode(base64_decode($passwordData[0]["password_admin"]), true);
+            $password_player = json_decode(base64_decode($passwordData[0]["password_player"]), true);
+            if ($password_admin["admin"]["provider"] == "local") {
+                $adminHasPassword = !empty($password_admin["admin"]["value"]);
+            }
+            if ($password_player["provider"] == "local") {
+                foreach ($password_player["value"] as $password) {
+                    if (!empty($password)) {
+                        $playerHasPassword = true;
+                        break;
+                    } else {
+                        $playerHasPassword = false;
+                    }
+                }
+            }
+        }
+        return ["user_admin_has_password" => $adminHasPassword, "user_common_has_password" => $playerHasPassword];
+    }
+
     /**
      * @apiGroup User
      * @apiDescription Creates a new session for the desired country id.
@@ -45,142 +82,79 @@ class User extends Base implements JWTUserInterface
         string $country_password = ""
     ): array {
         $response = array();
-        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $connection = ConnectionManager::getInstance()->getCachedServerManagerDbConnection();
         $this->CheckVersion($build_timestamp);
-        $qb = $connection->createQueryBuilder()
-            ->select('game_session_password_admin', 'game_session_password_player')
-            ->from('game_session');
+        $qb = $connection->createQueryBuilder();
+        $qb->select('password_admin', 'password_player')
+            ->from('game_list')
+            ->where($qb->expr()->eq('id', $this->getGameSessionId()));
         $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
-        $password_admin = $passwords[0]["game_session_password_admin"];
-        $password_player = $passwords[0]["game_session_password_player"];
-        if (!parent::isNewPasswordFormat($password_admin) || !parent::isNewPasswordFormat($password_player)) {
-            return $this->RequestSessionLegacy($country_id, $country_password, $user_name);
+        $password_admin = json_decode(base64_decode($passwords[0]["password_admin"]), true);
+        $password_player = json_decode(base64_decode($passwords[0]["password_player"]), true);
+
+        // check whether this is an admin, region manager, or player requesting entrance and get the authentication
+        //   provider accordingly
+        if ($country_id == 1) {
+            $provider = $password_admin["admin"]["provider"];
+        } elseif ($country_id == 2) {
+            $provider = $password_admin["region"]["provider"];
         } else {
-            $password_admin = json_decode(base64_decode($password_admin), true);
-            $password_player = json_decode(base64_decode($password_player), true);
-
-            // check whether this is an admin, region manager, or player requesting entrance and get the authentication
-            //   provider accordingly
+            $provider = $password_player["provider"];
+        }
+        // request authentication
+        if ($provider == "local") {
+            // simple locally stored password authentication
             if ($country_id == 1) {
-                $provider = $password_admin["admin"]["provider"];
+                $authenticated = $country_password == $password_admin["admin"]["value"];
             } elseif ($country_id == 2) {
-                $provider = $password_admin["region"]["provider"];
+                $authenticated = $country_password == $password_admin["region"]["value"];
             } else {
-                $provider = $password_player["provider"];
+                $authenticated = $country_password == $password_player["value"][$country_id];
             }
-            // request authentication
-            if ($provider == "local") {
-                // simple locally stored password authentication
+
+            if (!$authenticated) {
+                throw new Exception("That password is incorrect.");
+            }
+        } else {
+            // an external username/password authentication provider should be used
+            if ($this->callProvidersAuthentication($provider, $user_name, $country_password)) {
+                // now do authorization
                 if ($country_id == 1) {
-                    $authenticated = $country_password == $password_admin["admin"]["value"];
+                    $userlist = $password_admin["admin"]["value"];
                 } elseif ($country_id == 2) {
-                    $authenticated = $country_password == $password_admin["region"]["value"];
+                    $userlist = $password_admin["region"]["value"];
                 } else {
-                    $authenticated = $country_password == $password_player["value"][$country_id];
+                    $userlist = $password_player["value"][$country_id];
                 }
-
-                if (!$authenticated) {
-                    throw new Exception("That password is incorrect.");
+                $userarray = explode("|", $userlist);
+                if (!in_array($user_name, $userarray)) {
+                    throw new Exception("You are not allowed to log on for that country.");
                 }
             } else {
-                // an external username/password authentication provider should be used
-                if ($this->callProvidersAuthentication($provider, $user_name, $country_password)) {
-                    // now do authorization
-                    if ($country_id == 1) {
-                        $userlist = $password_admin["admin"]["value"];
-                    } elseif ($country_id == 2) {
-                        $userlist = $password_admin["region"]["value"];
-                    } else {
-                        $userlist = $password_player["value"][$country_id];
-                    }
-                    $userarray = explode("|", $userlist);
-                    if (!in_array($user_name, $userarray)) {
-                        throw new Exception("You are not allowed to log on for that country.");
-                    }
-                } else {
-                    throw new Exception(
-                        "Could not authenticate you. Your username and/or password could be incorrect."
-                    );
-                }
-            }
-            // all is well!
-            $qb = $connection->createQueryBuilder()
-                ->insert('user')
-                ->values([
-                    'user_name' => '?',
-                    'user_lastupdate' => 0,
-                    'user_country_id' => '?'
-                ])
-                ->setParameter(0, $user_name)
-                ->setParameter(1, $country_id);
-            $connection->executeQuery($qb->getSQL(), $qb->getParameters());
-            $response['session_id'] = $connection->lastInsertId();
-        }
-
-        $sessionId = $response['session_id'];
-        $this->logUserLogOnOrOff(
-            true,
-            $sessionId,
-            $this->getGameSessionId(),
-            $country_id
-        );
-        return $response;
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function RequestSessionLegacy(
-        int $countryId,
-        string $countryPassword = "",
-        string $userName = ""
-    ): array {
-        $response = array();
-        $connection = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
-        $qb = $connection->createQueryBuilder()
-            ->select('game_session_password_admin', 'game_session_password_player')
-            ->from('game_session');
-        $passwords = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
-        $hasCorrectPassword = true;
-        if (count($passwords) > 0) {
-            $password = ($countryId < 3) ?
-                $passwords[0]["game_session_password_admin"] : $passwords[0]["game_session_password_player"];
-            $hasCorrectPassword = $password == $countryPassword;
-        }
-
-        if ($hasCorrectPassword) {
-            try {
-                $qb = $connection->createQueryBuilder()
-                    ->insert('user')
-                    ->values([
-                        'user_name' => '?',
-                        'user_lastupdate' => 0,
-                        'user_country_id' => '?'
-                    ])
-                    ->setParameter(0, $userName)
-                    ->setParameter(1, $countryId);
-                $connection->executeQuery($qb->getSQL(), $qb->getParameters());
-                $response['session_id'] = $connection->lastInsertId();
-                $security = new Security();
-                $response["api_access_token"] = $security->generateToken()["token"];
-                $response["api_access_recovery_token"] = $security->getRecoveryToken();
-            } catch (Exception $e) {
                 throw new Exception(
-                    "Could not log you in. Please check with your session administrator." .
-                    " This session might need upgrading." . $e->getMessage()
+                    "Could not authenticate you. Your username and/or password could be incorrect."
                 );
             }
-        } else {
-            throw new Exception("Incorrect password.");
         }
+        // all is well!
+        $connection2 = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId());
+        $qb = $connection2->createQueryBuilder()
+            ->insert('user')
+            ->values([
+                'user_name' => '?',
+                'user_lastupdate' => 0,
+                'user_country_id' => '?'
+            ])
+            ->setParameter(0, $user_name)
+            ->setParameter(1, $country_id);
+        $connection2->executeQuery($qb->getSQL(), $qb->getParameters());
+        $response['session_id'] = $connection2->lastInsertId();
 
-        $sessionId = $response['session_id'];
         $this->logUserLogOnOrOff(
             true,
-            $sessionId,
+            $response['session_id'],
             $this->getGameSessionId(),
-            $countryId
+            $country_id
         );
         return $response;
     }
