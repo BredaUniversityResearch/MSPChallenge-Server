@@ -38,3 +38,9 @@ vendor/
 .env.local.php
 .env.test
 node_modules/
+
+# composer/symfony symlinks
+config/
+composer.json
+composer.lock
+symfony.lock

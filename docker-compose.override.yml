@@ -1,9 +1,7 @@
 # Development environment override
 services:
   phpredisadmin:
-    build:
-      context: .
-      target: phpredisadmin_base
+    image: erikdubbelboer/phpredisadmin
     environment:
       - ADMIN_USER=admin
       - ADMIN_PASS=admin
@@ -24,9 +22,7 @@ services:
       - "${DATABASE_PORT:-3306}:${DATABASE_PORT:-3306}"
 
   mitmproxy:
-    build:
-      context: .
-      target: mitmproxy_base
+    image: mitmproxy/mitmproxy:10.3.1
     entrypoint: "mitmweb --web-host 0.0.0.0 --listen-port ${MITMPROXY_PORT:-8080} --web-port ${MITMPROXY_WEB_PORT:-8081} --mode reverse:http://php --set websocket=true"
     networks:
       - php
@@ -42,9 +38,7 @@ services:
       driver: "local"
 
   php:
-    build:
-      context: .
-      target: frankenphp_dev
+    image: cradlewebmaster/msp-challenge-server:latest-dev
     volumes:
       - ./:/app
       - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro

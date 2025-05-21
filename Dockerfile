@@ -1,5 +1,11 @@
 #syntax=docker/dockerfile:1
 
+# build a local image using the following command:
+#   * for Dev, e.g:
+#     docker build -t cradlewebmaster/msp-challenge-server:5.2.0-alpha-dev -t cradlewebmaster/msp-challenge-server:latest-dev -f Dockerfile --target frankenphp_dev .
+#   * for Prod, e.g:
+#     docker build -t cradlewebmaster/msp-challenge-server:5.2.0-alpha -t cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+
 FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
 
 # The different stages of this Dockerfile are meant to be built into separate images
@@ -15,6 +21,7 @@ VOLUME /app/var/
 
 # persistent / runtime deps
 # hadolint ignore=DL3008
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		acl \
 		file \
@@ -26,7 +33,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-mysql-client \
         procps \
         nano \
+        gnupg \
         && rm -rf /var/lib/apt/lists/*
+
+# Add Yarn APT repository and install Yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    apt-get update && \
+    apt-get install -y yarn
 
 RUN set -eux; \
 	install-php-extensions \
@@ -101,6 +115,9 @@ FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev XDEBUG_MODE=off
 
+# dev-only supervisor config
+COPY --link docker/supervisor/supervisor.d/dev/*.ini /etc/supervisor.d/
+
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 RUN set -eux; \
@@ -125,10 +142,15 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --link frankenphp/conf.d/20-app.prod.ini $PHP_INI_DIR/app.conf.d/
 COPY --link frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
 
-# prevent the reinstallation of vendors at every changes in the source code
-COPY --link composer.* symfony.* ./
+# Replace symbolic links with COPY --link
+COPY --link config-symfony6.4 config
+COPY --link composer-symfony6.4.json composer.json
+COPY --link composer-symfony6.4.lock composer.lock
+COPY --link symfony6.4.lock symfony.lock
+
+# Install dependencies
 RUN set -eux; \
-	composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
+  composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
 
 # copy sources
 COPY --link . ./
@@ -141,15 +163,3 @@ RUN set -eux; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
 
-FROM node:22.6 as node_base
-
-RUN mkdir -p /home/node/app/node_modules /home/node/app/public/build \
-    && chown -R node:node /home/node/app/node_modules \
-    && chown -R node:node /home/node/app/public/build
-
-FROM mariadb:10.11.10 AS mariadb_base
-FROM blackfire/blackfire:2 AS blackfire_base
-FROM shyim/adminerevo AS adminer_base
-FROM mitmproxy/mitmproxy:10.3.1 as mitmproxy_base
-FROM redis:7.2.4-alpine AS redis_base
-FROM erikdubbelboer/phpredisadmin as phpredisadmin_base

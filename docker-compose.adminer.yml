@@ -1,8 +1,6 @@
 services:
   adminer:
-    build:
-      context: .
-      target: adminer_base
+    image: shyim/adminerevo
     restart: always
     environment:
       ADMINER_DEFAULT_DRIVER: MySQL

@@ -1,8 +1,6 @@
 services:
   php:
-    build:
-      context: .
-      target: frankenphp_prod
+    image: cradlewebmaster/msp-challenge-server:latest
     volumes:
       - ./running_session_config/:/app/running_session_config
       - ./raster/:/app/raster
