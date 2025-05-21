@@ -214,7 +214,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             '--user='.$_ENV['DATABASE_USER'],
             '--password='.$_ENV['DATABASE_PASSWORD'],
             ($_ENV['APP_ENV'] == 'test') ? $this->database.'_test' : $this->database
-        ], $this->kernel->getProjectDir(), null, "source {$tempDumpFile}");
+        ], $this->kernel->getProjectDir(), null, "source {$tempDumpFile}", 300);
         $process->mustRun(fn($type, $buffer) => $this->info($buffer));
         // as usually nothing comes out of the buffer...
         $this->debug('Session database dump import attempt completed.');
