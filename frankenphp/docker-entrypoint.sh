@@ -87,9 +87,6 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 
   echo 'PHP app ready!'
 
-  echo "Building assets with Encore..."
-  yarn encore "${APP_ENV:-dev}"
-
   echo "Starting supervisor..."
   rm -f /run/supervisord.sock ; /usr/bin/supervisord -c /etc/supervisord.conf
 fi

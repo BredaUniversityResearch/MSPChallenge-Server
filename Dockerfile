@@ -40,19 +40,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
     apt-get update && \
-    apt-get install -y yarn
+    apt-get install -y yarn && \
+    rm -rf /var/lib/apt/lists/*
 
+# Install PHP extensions
 RUN set -eux; \
-	install-php-extensions \
-        @composer \
-		apcu \
-		intl \
-		opcache \
-		zip \
-        pcntl \
-        imagick \
-        gd \
-	;
+    install-php-extensions @composer apcu intl opcache zip pcntl imagick gd; \
+    rm -rf /tmp/*
 
 # if you want to debug on prod, enable below lines:
 ##   Also check ./frankenphp/conf.d/app.prod.ini
@@ -147,6 +141,7 @@ COPY --link config-symfony6.4 config
 COPY --link composer-symfony6.4.json composer.json
 COPY --link composer-symfony6.4.lock composer.lock
 COPY --link symfony6.4.lock symfony.lock
+COPY --link package.json package.json
 
 # Install dependencies
 RUN set -eux; \
@@ -154,12 +149,21 @@ RUN set -eux; \
 
 # copy sources
 COPY --link . ./
-RUN rm -Rf frankenphp/
 
+# Install dependencies and build assets
 RUN set -eux; \
-	mkdir -p var/cache var/log; \
-	composer dump-autoload --classmap-authoritative --no-dev; \
-	composer dump-env prod; \
-	composer run-script --no-dev post-install-cmd; \
-	chmod +x bin/console; sync;
+    yarn install --frozen-lockfile; \
+    yarn encore production; \
+    rm -rf node_modules; \
+    rm -rf /tmp/*
 
+# Install PHP dependencies
+RUN set -eux; \
+    composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress; \
+    composer dump-autoload --classmap-authoritative --no-dev; \
+    composer dump-env prod; \
+    composer run-script --no-dev post-install-cmd; \
+    chmod +x bin/console; sync;
+
+# Clean up unnecessary files
+RUN rm -rf frankenphp/
