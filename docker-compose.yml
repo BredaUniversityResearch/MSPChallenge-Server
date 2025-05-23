@@ -113,11 +113,7 @@ services:
       driver: "local"
 
   simulations:
-    build:
-      context: .
-      dockerfile: simulations/debian.11-x64/Dockerfile
-      args:
-        source_dir: simulations/debian.11-x64
+    image: cradlewebmaster/msp-challenge-simulations:latest
     ports:
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
     restart: always

@@ -142,13 +142,11 @@ COPY --link composer-symfony6.4.json composer.json
 COPY --link composer-symfony6.4.lock composer.lock
 COPY --link symfony6.4.lock symfony.lock
 COPY --link package.json package.json
+COPY --link . ./
 
 # Install dependencies
 RUN set -eux; \
   composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
-
-# copy sources
-COPY --link . ./
 
 # Install dependencies and build assets
 RUN set -eux; \
